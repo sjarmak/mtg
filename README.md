@@ -1,20 +1,121 @@
-# mtg-lab
+# Magic: The Gathering Set Generation and Playing Lab
 
-A Magic-like **set generator** and **playing lab**, in strict TypeScript.
+A Magic: The Gathering **set generator** and **playing lab**, in strict TypeScript.
 
 A model designs cards; a typed mechanics DSL is the only thing it is allowed to
 emit; an event-sourced rules kernel runs them; a bot plays tens of thousands of
 seeded games; a metrics gate decides whether the format is healthy; and a
 browser lab lets a person play the result. The load-bearing invariant is that
-the generator's output space stays **inside** the engine's enforceable space —
+the generator's output space stays **inside** the engine's enforceable space:
 cards are emitted in the DSL, never free text the engine cannot run.
+
+## Play in the browser
+
+The browser UI ships in `packages/ui`. It supports sealed-deck play,
+drafting, bot games, replay inspection, card rendering and format analysis. The
+committed Tideglass Reach set works immediately without an API key or network
+connection:
 
 ```bash
 npm ci
-npm run play          # open the lab and play a sealed game; no API key, no network
+npm run play
+```
+
+To run the generation and balance pipeline:
+
+```bash
 npm run slice         # the whole loop: set-gen, deck build, mass sim, metrics verdict
 npm run test:balance  # the seeded 10,035-game format-health gate
 ```
+
+![Landscape phone gameplay in the browser lab](docs/screenshots/mobile-play.png)
+
+_Landscape phone gameplay. Tideglass Reach intentionally ships without bundled
+art, so its cards identify their art as pending._
+
+![The deck lab showing Magic 2011 and Magic 2013 cards](docs/screenshots/deck-lab-m11-m13.png)
+
+_The desktop Deck view with M11 and M13 illustrations delivered by Scryfall.
+The interface keeps each artist and set credit beside the image._
+
+## What works today
+
+### UI
+
+- Six browser routes ship now: Play, Draft, Deck, Analysis, Replay and Cards.
+- Play deals a sealed pool or opens committed preconstructed decks, then runs a
+  two-player game against a bot through the same kernel used by simulation.
+- The gameplay surface has dedicated portrait and landscape phone layouts,
+  coarse-pointer controls, touch-safe card inspection and a full-screen
+  landscape table. Desktop and tablet layouts use the same components.
+- Draft supports collated packs and bot seats. Deck renders generated pools and
+  real-card builds. Replay steps through recorded kernel decisions. Analysis
+  reads simulation and calibration artifacts rather than recomputing them in
+  the browser.
+- Missing data is explicit. An unstaged replay, an invalid deck and a card with
+  no art are different visible states, never blank screens.
+
+### Mechanics and rules engine
+
+- The strict DSL and event-sourced two-player kernel cover zones, mana and
+  casting, priority and the stack, targeting, combat, tokens, counters,
+  attachments and Equipment, continuous effects, replacement effects, and
+  static, triggered, activated and loyalty abilities.
+- Implemented keyword behavior includes flying, vigilance, haste, trample,
+  deathtouch, lifelink, menace, reach, first strike, double strike, defender,
+  landwalk, hexproof, indestructible, protection and exalted.
+- The executable effect vocabulary includes damage, destruction, temporary power/toughness
+  changes, card draw, life gain, counterspells, tokens, tapping, bounce,
+  milling, counters, exile, scry and graveyard return.
+- This is deliberately not all of Magic. A real printing is executable only
+  when it has an exact DSL representation that the kernel reaches. Unsupported
+  cards are refused instead of approximated, and the generator is narrower
+  than the hand-authorable engine vocabulary.
+- M11 and M13 are the primary reference sets for measuring that exact subset;
+  additional core sets and expansions are retained as secondary or stress
+  references.
+
+## What is planned
+
+### UI
+
+- Finish real-device mobile review across Draft, Deck, Analysis, Replay and
+  Cards. Gameplay has the deepest phone-specific coverage today.
+- Broaden human draft and deckbuilding journeys, connect Replay to Analysis as
+  a per-game drill-down, and make multi-seat play a first-class surface.
+- Keep desktop and phone screenshots reproducible from accessible-name browser
+  journeys so the README always depicts the code that ships.
+
+### Mechanics and rules engine
+
+- Expand the exact executable slice of M11 and M13 card by card, using each
+  refusal as a named missing capability rather than adding a permissive text
+  interpreter.
+- Extend targeting, zone changes, continuous layers and replacement ordering
+  for the complex cards that remain outside the DSL.
+- Widen generation only after the corresponding schema, kernel behavior,
+  simulator policy and regression scenario all exist.
+- Continue Forge subprocess parity checks while keeping GPL code outside this
+  repository.
+
+## Real card data and images
+
+The public repository includes the complete on-demand path used by the Deck
+view:
+
+1. `@mtg/data` streams Scryfall bulk metadata into a gitignored local SQLite
+   store with a descriptive user agent, rate limiting and resumable checkpoints.
+2. `@mtg/decklab` chooses a printing and carries its Scryfall `art_crop` URL,
+   artist and set code in the deck artifact.
+3. `@mtg/image-cache` fetches each URL once into a gitignored cache.
+4. `npm run lab` stages only the illustrations that deck uses onto the UI's
+   origin, preserving visible artist and set credit. It never mirrors the image
+   corpus.
+
+Scryfall supplies the card metadata and image delivery service; it does not own
+or license the underlying Magic artwork. Wizards of the Coast owns the cards
+and artwork. Their use here is governed by the Fan Content terms below, and the
+project remains free and unofficial.
 
 ## Fan Content
 
