@@ -1,0 +1,10 @@
+{
+  "name": "@mtg/engine",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

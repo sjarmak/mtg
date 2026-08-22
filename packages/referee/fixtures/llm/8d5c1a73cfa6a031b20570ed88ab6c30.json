@@ -1,0 +1,47 @@
+{
+  "key": "8d5c1a73cfa6a031b20570ed88ab6c30",
+  "recordedAt": "2026-08-11T06:51:53.365Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You are a rules referee for a Magic: The Gathering engine.\n\nThe engine owns the game. It has already worked out every legal move from the\ncurrent position and numbered them. Your only job is to choose one of those\nnumbers and say why in one sentence.\n\nYou never describe what happens next, never invent or amend an action, and\nnever assume information the position does not state. Hidden zones are shown\nas counts because they are hidden from the player you are ruling for; ruling\nas if you knew their contents is cheating.\n\nAnswer with the index of exactly one listed option.",
+    "prompt": "<task>\nTurn 2, declareBlockers step. Active player: 0. Priority: nobody.\n\nPlayer 0: 20 life, 30 cards in library (hidden), 0 cards in hand (hidden).\n  Battlefield:\n    - Ironclad Golem [o0], 3/3, tapped\n    - Thornhide Guardian [o1], 3/5, tapped, \"Trample, reach\"\n  Graveyard: empty.\nPlayer 1 (you): 12 life, 30 cards in library (hidden), 1 cards in hand.\n  Hand:\n    - Lightning Lash [o34] {1}{R} — Lightning Lash deals 3 damage to any target.\n  Battlefield:\n    - Emberflow Raider [o2], 2/1, \"Haste\"\n    - Skywatch Sentinel [o3], 2/1, \"Flying, vigilance\"\n  Graveyard: empty.\n\nCombat:\n  - Ironclad Golem [o0], 3/3, tapped is attacking player 1\n  - Thornhide Guardian [o1], 3/5, tapped, \"Trample, reach\" is attacking player 1\n\nYou are declaring blockers against 2 attacker(s). Which blocks do you declare?\n\nOptions:\n  0: block with nothing\n  1: Skywatch Sentinel [o3] blocks Ironclad Golem [o0]\n  2: Skywatch Sentinel [o3] blocks Thornhide Guardian [o1]\n  3: Emberflow Raider [o2] blocks Ironclad Golem [o0]\n  4: Emberflow Raider [o2] blocks Ironclad Golem [o0]; Skywatch Sentinel [o3] blocks Ironclad Golem [o0]\n  5: Emberflow Raider [o2] blocks Ironclad Golem [o0]; Skywatch Sentinel [o3] blocks Thornhide Guardian [o1]\n  6: Emberflow Raider [o2] blocks Thornhide Guardian [o1]\n  7: Emberflow Raider [o2] blocks Thornhide Guardian [o1]; Skywatch Sentinel [o3] blocks Ironclad Golem [o0]\n  8: Emberflow Raider [o2] blocks Thornhide Guardian [o1]; Skywatch Sentinel [o3] blocks Thornhide Guardian [o1]\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"optionIndex\":{\"description\":\"The index of the option you choose, from the list.\",\"maximum\":9007199254740991,\"minimum\":0,\"type\":\"integer\"},\"rationale\":{\"description\":\"One sentence on why that option, in terms of the position.\",\"maxLength\":400,\"minLength\":1,\"type\":\"string\"}},\"required\":[\"optionIndex\",\"rationale\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "optionIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The index of the option you choose, from the list."
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400,
+          "description": "One sentence on why that option, in terms of the position."
+        }
+      },
+      "required": [
+        "optionIndex",
+        "rationale"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"optionIndex\":4,\"rationale\":\"Double-blocking kills the 3/3 Golem (4 damage), halving the opponent's clock to the lone Guardian; at 12 life we cannot race 6 power per turn, and chumping the trampler or single-blocking trades worse without removing any threat.\"}",
+    "structured": {
+      "optionIndex": 4,
+      "rationale": "Double-blocking kills the 3/3 Golem (4 damage), halving the opponent's clock to the lone Guardian; at 12 life we cannot race 6 power per turn, and chumping the trampler or single-blocking trades worse without removing any threat."
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 3265,
+      "cacheCreationInputTokens": 46156,
+      "cacheReadInputTokens": 0
+    },
+    "costUsd": 1.08639,
+    "costSource": "reported"
+  }
+}

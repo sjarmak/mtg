@@ -1,0 +1,63 @@
+{
+  "name": "mtg-lab",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "MTG set-generation and playing lab: rules kernel, mechanics DSL, set generation, playtesting",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:balance": "vitest run --project balance",
+    "generate:live": "vitest run --config packages/setgen/tools/vitest.live.config.ts",
+    "lint": "eslint packages --max-warnings=0",
+    "format": "prettier --check \"packages/**/*.{ts,json}\"",
+    "format:fix": "prettier --write \"packages/**/*.{ts,json}\"",
+    "vocabulary:refresh": "tsx packages/dsl/tools/vocabulary-snapshot.ts",
+    "slice": "tsx packages/slice/src/cli.ts",
+    "play": "tsx packages/ui/tools/play.ts",
+    "netplay": "tsx packages/ui/tools/netplay.ts",
+    "table": "tsx packages/ui/tools/table.ts",
+    "lab": "tsx packages/ui/tools/lab.ts",
+    "analyze": "tsx packages/ui/tools/analyze.ts",
+    "review:design": "tsx packages/ui/tools/design-review.ts",
+    "reference:import": "tsx packages/data/tools/import-reference-sets.ts",
+    "reference:profiles": "tsx packages/data/tools/build-reference-profiles.ts",
+    "reference:diff": "tsx packages/setgen/tools/reference-profile-diff.ts",
+    "calibrate:draft": "tsx packages/metrics/tools/draft-calibration.ts",
+    "calibrate:draft-campaign": "tsx packages/metrics/tools/draft-campaign.ts",
+    "calibrate:sealed": "tsx packages/metrics/tools/sealed-calibration.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.3",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^5.2.0",
+    "eslint": "^9.39.1",
+    "jsdom": "^30.0.1",
+    "prettier": "^3.6.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vite": "^7.3.6",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.0",
+    "better-sqlite3": "^12.4.1",
+    "zod": "^4.1.12"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

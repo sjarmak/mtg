@@ -1,0 +1,33 @@
+{
+  "setCode": "HRT",
+  "setName": "Hearthglass Vigil",
+  "theme": "A watch-fort of lamp-lit glass on a cold northern moor, held through a winter that will not end. Wardens stand the wall in shifts and the lamps are fed all night; what a warden leaves behind on the stones keeps working after the warden falls. Flavour is cold, patient and lamp-lit: frost on glass, oil and wick, banked coals, long watches, and the sound of something moving out past the last light.",
+  "seed": "hearthglass-1",
+  "targetSize": 20,
+  "mechanics": [
+    {
+      "name": "Vigil",
+      "description": "A warden keeps its post. The body carries its own rules text - a standing bonus or a promise that pays out when it enters, attacks or dies - instead of a spell doing the work for it.",
+      "abilityKinds": ["static", "triggered"],
+      "colors": ["W", "G"]
+    },
+    {
+      "name": "Emberwork",
+      "description": "Lamp-glass is spent, never hoarded. A permanent pays itself away, or taps its own heat, for a burst of fire.",
+      "abilityKinds": ["activated"],
+      "effectKinds": ["dealDamage"],
+      "colors": ["R"]
+    },
+    {
+      "name": "Deepwatch",
+      "description": "The night shift reads the dark, thins what is coming and keeps its own hand full.",
+      "effectKinds": ["millCards", "drawCards"],
+      "colors": ["U", "B"]
+    }
+  ],
+  "archetypeNotes": [
+    "WG wants wardens that are worth the mana on the turn they land and still worth it three turns later.",
+    "UB wants card flow and a mill clock as an alternate finish.",
+    "WR wants cheap bodies that convert into damage before the wall gives."
+  ]
+}

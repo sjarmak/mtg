@@ -1,0 +1,21 @@
+{
+  "name": "@mtg/setgen",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mtg/card-geometry": "*",
+    "@mtg/data": "*",
+    "@mtg/deckbuild": "*",
+    "@mtg/design-data": "*",
+    "@mtg/dsl": "*",
+    "@mtg/llm": "*"
+  },
+  "devDependencies": {
+    "@mtg/kernel": "*"
+  }
+}

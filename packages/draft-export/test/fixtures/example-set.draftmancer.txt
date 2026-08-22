@@ -1,0 +1,321 @@
+[CustomCards]
+[
+  {
+    "name": "Skywatch Sentinel",
+    "mana_cost": "{1}{W}",
+    "type": "Creature — Bird Soldier",
+    "subtypes": [
+      "Bird",
+      "Soldier"
+    ],
+    "rarity": "common",
+    "colors": [
+      "W"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "oracle_text": "Flying, vigilance",
+    "rating": 4.396
+  },
+  {
+    "name": "Radiant Charge",
+    "mana_cost": "{1}{W}",
+    "type": "Instant",
+    "rarity": "common",
+    "colors": [
+      "W"
+    ],
+    "oracle_text": "Target creature gets +2/+2 until end of turn. You gain 2 life.",
+    "rating": 2.33
+  },
+  {
+    "name": "Lifebound Cleric",
+    "mana_cost": "{2}{W}",
+    "type": "Creature — Human Cleric",
+    "subtypes": [
+      "Human",
+      "Cleric"
+    ],
+    "rarity": "uncommon",
+    "colors": [
+      "W"
+    ],
+    "power": 2,
+    "toughness": 3,
+    "oracle_text": "Lifelink, first strike",
+    "rating": 3.495
+  },
+  {
+    "name": "Windrider Drake",
+    "mana_cost": "{2}{U}",
+    "type": "Creature — Drake",
+    "subtypes": [
+      "Drake"
+    ],
+    "rarity": "common",
+    "colors": [
+      "U"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "oracle_text": "Flying",
+    "rating": 2.637
+  },
+  {
+    "name": "Dissolving Word",
+    "mana_cost": "{1}{U}",
+    "type": "Instant",
+    "rarity": "uncommon",
+    "colors": [
+      "U"
+    ],
+    "oracle_text": "Counter target spell. Draw a card.",
+    "rating": 3.626
+  },
+  {
+    "name": "Frostbind Current",
+    "mana_cost": "{U}",
+    "type": "Instant",
+    "rarity": "common",
+    "colors": [
+      "U"
+    ],
+    "oracle_text": "Tap target creature.",
+    "rating": 2.363
+  },
+  {
+    "name": "Undertow Snare",
+    "mana_cost": "{1}{U}",
+    "type": "Instant",
+    "rarity": "common",
+    "colors": [
+      "U"
+    ],
+    "oracle_text": "Return target creature to its owner's hand.",
+    "rating": 2.198
+  },
+  {
+    "name": "Graveblade Stalker",
+    "mana_cost": "{2}{B}",
+    "type": "Creature — Human Assassin",
+    "subtypes": [
+      "Human",
+      "Assassin"
+    ],
+    "rarity": "uncommon",
+    "colors": [
+      "B"
+    ],
+    "power": 2,
+    "toughness": 2,
+    "oracle_text": "Deathtouch, menace",
+    "rating": 2.593
+  },
+  {
+    "name": "Mortal Verdict",
+    "mana_cost": "{2}{B}",
+    "type": "Sorcery",
+    "rarity": "common",
+    "colors": [
+      "B"
+    ],
+    "oracle_text": "Destroy target creature.",
+    "rating": 5
+  },
+  {
+    "name": "Grasping Mire",
+    "mana_cost": "{1}{B}",
+    "type": "Sorcery",
+    "rarity": "common",
+    "colors": [
+      "B"
+    ],
+    "oracle_text": "Target player mills four cards.",
+    "rating": 1.187
+  },
+  {
+    "name": "Emberflow Raider",
+    "mana_cost": "{1}{R}",
+    "type": "Creature — Goblin Warrior",
+    "subtypes": [
+      "Goblin",
+      "Warrior"
+    ],
+    "rarity": "common",
+    "colors": [
+      "R"
+    ],
+    "power": 2,
+    "toughness": 1,
+    "oracle_text": "Haste",
+    "rating": 2.967
+  },
+  {
+    "name": "Lightning Lash",
+    "mana_cost": "{1}{R}",
+    "type": "Instant",
+    "rarity": "common",
+    "colors": [
+      "R"
+    ],
+    "oracle_text": "Lightning Lash deals 3 damage to any target.",
+    "rating": 5
+  },
+  {
+    "name": "Thornhide Guardian",
+    "mana_cost": "{3}{G}",
+    "type": "Creature — Beast",
+    "subtypes": [
+      "Beast"
+    ],
+    "rarity": "common",
+    "colors": [
+      "G"
+    ],
+    "power": 3,
+    "toughness": 5,
+    "oracle_text": "Trample, reach",
+    "rating": 4.077
+  },
+  {
+    "name": "Wild Summons",
+    "mana_cost": "{3}{G}",
+    "type": "Sorcery",
+    "rarity": "rare",
+    "colors": [
+      "G"
+    ],
+    "oracle_text": "Create two 2/2 green Bear creature tokens.",
+    "rating": 4.066
+  },
+  {
+    "name": "Ironclad Golem",
+    "mana_cost": "{4}",
+    "type": "Artifact Creature — Golem",
+    "subtypes": [
+      "Golem"
+    ],
+    "rarity": "common",
+    "colors": [],
+    "power": 3,
+    "toughness": 3,
+    "rating": 0.989
+  },
+  {
+    "name": "Bronze Monument",
+    "mana_cost": "{2}",
+    "type": "Artifact",
+    "rarity": "common",
+    "colors": [],
+    "rating": 0
+  },
+  {
+    "name": "Heartwood Graft",
+    "mana_cost": "{3}{G}",
+    "type": "Sorcery",
+    "rarity": "common",
+    "colors": [
+      "G"
+    ],
+    "oracle_text": "Put two +1/+1 counters on target creature.",
+    "rating": 2.418
+  },
+  {
+    "name": "Plains",
+    "mana_cost": "",
+    "type": "Basic Land — Plains",
+    "subtypes": [
+      "Plains"
+    ],
+    "rarity": "common",
+    "colors": [],
+    "oracle_text": "{T}: Add {W}.",
+    "rating": 0
+  },
+  {
+    "name": "Island",
+    "mana_cost": "",
+    "type": "Basic Land — Island",
+    "subtypes": [
+      "Island"
+    ],
+    "rarity": "common",
+    "colors": [],
+    "oracle_text": "{T}: Add {U}.",
+    "rating": 0
+  },
+  {
+    "name": "Swamp",
+    "mana_cost": "",
+    "type": "Basic Land — Swamp",
+    "subtypes": [
+      "Swamp"
+    ],
+    "rarity": "common",
+    "colors": [],
+    "oracle_text": "{T}: Add {B}.",
+    "rating": 0
+  },
+  {
+    "name": "Mountain",
+    "mana_cost": "",
+    "type": "Basic Land — Mountain",
+    "subtypes": [
+      "Mountain"
+    ],
+    "rarity": "common",
+    "colors": [],
+    "oracle_text": "{T}: Add {R}.",
+    "rating": 0
+  },
+  {
+    "name": "Forest",
+    "mana_cost": "",
+    "type": "Basic Land — Forest",
+    "subtypes": [
+      "Forest"
+    ],
+    "rarity": "common",
+    "colors": [],
+    "oracle_text": "{T}: Add {G}.",
+    "rating": 0
+  }
+]
+[Settings]
+{
+  "layouts": {
+    "Default": {
+      "weight": 1,
+      "slots": {
+        "Common": 9,
+        "Uncommon": 3,
+        "Rare": 1
+      }
+    }
+  }
+}
+[Common]
+Skywatch Sentinel
+Radiant Charge
+Windrider Drake
+Frostbind Current
+Undertow Snare
+Mortal Verdict
+Grasping Mire
+Emberflow Raider
+Lightning Lash
+Thornhide Guardian
+Ironclad Golem
+Bronze Monument
+Heartwood Graft
+Plains
+Island
+Swamp
+Mountain
+Forest
+[Uncommon]
+Lifebound Cleric
+Dissolving Word
+Graveblade Stalker
+[Rare]
+Wild Summons

@@ -1,0 +1,26 @@
+{
+  "name": "@mtg/ui",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@mtg/card-geometry": "*",
+    "@mtg/deckbuild": "*",
+    "@mtg/design-data": "*",
+    "@mtg/draft-export": "*",
+    "@mtg/dsl": "*",
+    "@mtg/image-cache": "*",
+    "@mtg/kernel": "*",
+    "@mtg/metrics": "*",
+    "@mtg/netplay": "*",
+    "@mtg/sim": "*"
+  }
+}

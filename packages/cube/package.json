@@ -1,0 +1,20 @@
+{
+  "name": "@mtg/cube",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mtg/data": "*",
+    "@mtg/deckbuild": "*",
+    "@mtg/decklab": "*",
+    "@mtg/draft-export": "*",
+    "@mtg/dsl": "*",
+    "@mtg/llm": "*",
+    "@mtg/setgen": "*",
+    "zod": "*"
+  }
+}

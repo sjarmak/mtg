@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@mtg/sim/bot": ["packages/sim/src/greedy-bot.ts"],
+      "@mtg/*": ["packages/*/src/index.ts"]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/test/**/*.ts",
+    "packages/*/tools/**/*.ts",
+    "packages/*/*.config.ts"
+  ],
+  "exclude": ["node_modules", "**/dist", "**/node_modules"]
+}

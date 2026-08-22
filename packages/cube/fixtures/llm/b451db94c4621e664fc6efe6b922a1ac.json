@@ -1,0 +1,234 @@
+{
+  "key": "b451db94c4621e664fc6efe6b922a1ac",
+  "recordedAt": "2026-08-16T19:08:57.757Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You are a Magic: the Gathering cube designer. You choose which cards belong in a cube and which archetypes each one serves. You never compute the colour split, the curve or the size; those are calculated from your picks, and anything you say about them is discarded. Propose only real cards whose exact printed names you are certain of. Every card must be tagged with at least one of the stated archetype names, verbatim.",
+    "prompt": "<task>\nThe designer asked for: a two-archetype practice cube: boros aggro against dimir control, cards a Modern player would know\n\nA 45-card singleton cube, legal in modern,\ndrafted by 3 players taking 15 cards each (45 cards in a pod).\nChoose 18 more cards.\n\nArchetypes. Tag every card with the names it serves, verbatim:\n  boros aggro ({WR}) — needs at least 9 playable cards\n  dimir control ({UB}) — needs at least 9 playable cards\nA card may serve more than one. Its colour identity must fit inside every archetype you tag it with.\n\nColour balance is measured afterwards: each colour should hold about an even share (25.0%) of the slots in the archetypes' colours {WUBR}, within 5.0 points.\nEvery card in the pool already costs at most $60.\n\nStructural filters already applied to the legal card pool:\n  legal in modern\n  no card over $60\nThe pool holds 39 legal cards. A card outside it will be rejected.\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"archetypes\":{\"description\":\"names of the stated archetypes this card serves; use the names given, verbatim\",\"items\":{\"minLength\":1,\"type\":\"string\"},\"minItems\":1,\"type\":\"array\"},\"count\":{\"default\":1,\"description\":\"copies; 1 in a singleton cube\",\"maximum\":4,\"minimum\":1,\"type\":\"integer\"},\"name\":{\"description\":\"exact printed card name\",\"minLength\":1,\"type\":\"string\"},\"reason\":{\"description\":\"one sentence on why this card serves those archetypes\",\"minLength\":1,\"type\":\"string\"}},\"required\":[\"name\",\"count\",\"archetypes\",\"reason\"],\"type\":\"object\"},\"minItems\":1,\"type\":\"array\"},\"plan\":{\"description\":\"two or three sentences on what this cube is for\",\"minLength\":1,\"type\":\"string\"}},\"required\":[\"cards\",\"plan\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "description": "exact printed card name"
+              },
+              "count": {
+                "default": 1,
+                "description": "copies; 1 in a singleton cube",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4
+              },
+              "archetypes": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": "names of the stated archetypes this card serves; use the names given, verbatim"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "description": "one sentence on why this card serves those archetypes"
+              }
+            },
+            "required": [
+              "name",
+              "count",
+              "archetypes",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "plan": {
+          "type": "string",
+          "minLength": 1,
+          "description": "two or three sentences on what this cube is for"
+        }
+      },
+      "required": [
+        "cards",
+        "plan"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"name\":\"Skyclave Apparition\",\"count\":1,\"archetypes\":[\"boros aggro\"],\"reason\":\"A premium white aggressive creature that removes a blocker while adding to the board.\"},{\"name\":\"Thalia, Guardian of Thraben\",\"count\":1,\"archetypes\":[\"boros aggro\"],\"reason\":\"Taxes the control player's spells while attacking, a classic aggro hatebear every Modern player knows.\"},{\"name\":\"Adeline, Resplendent Cathar\",\"count\":1,\"archetypes\":[\"boros aggro\"],\"reason\":\"Multiplies attackers every combat, closing games before control stabilizes.\"},{\"name\":\"Adanto Vanguard\",\"count\":1,\"archetypes\":[\"boros aggro\"],\"reason\":\"An indestructible-on-demand two-drop that punishes spot removal decks.\"},{\"name\":\"Lightning Bolt\",\"count\":1,\"archetypes\":[\"boros aggro\"],\"reason\":\"The defining Modern burn spell, clearing blockers or finishing the game.\"},{\"name\":\"Goblin Guide\",\"count\":1,\"archetypes\":[\"boros aggro\"],\"reason\":\"The archetypal turn-one aggro creature, maximizing early damage.\"},{\"name\":\"Monastery Swiftspear\",\"count\":1,\"archetypes\":[\"boros aggro\"],\"reason\":\"A one-drop that grows with every burn spell the aggro deck casts.\"},{\"name\":\"Bonecrusher Giant\",\"count\":1,\"archetypes\":[\"boros aggro\"],\"reason\":\"Removal stapled to an aggressive body, a Modern staple with two-for-one value.\"},{\"name\":\"Boros Charm\",\"count\":1,\"archetypes\":[\"boros aggro\"],\"reason\":\"Four damage to the face or indestructibility through a wrath, the signature Boros gold card.\"},{\"name\":\"Counterspell\",\"count\":1,\"archetypes\":[\"dimir control\"],\"reason\":\"The cleanest permission spell in Modern, the backbone of any control draft.\"},{\"name\":\"Snapcaster Mage\",\"count\":1,\"archetypes\":[\"dimir control\"],\"reason\":\"Rebuys removal and counters for value, the iconic Modern control creature.\"},{\"name\":\"Archmage's Charm\",\"count\":1,\"archetypes\":[\"dimir control\"],\"reason\":\"Modal counter, card draw, or theft of a one-drop, all lines a control deck wants.\"},{\"name\":\"Murktide Regent\",\"count\":1,\"archetypes\":[\"dimir control\"],\"reason\":\"A cheap, huge flying finisher fueled by the control deck's full graveyard.\"},{\"name\":\"Fatal Push\",\"count\":1,\"archetypes\":[\"dimir control\"],\"reason\":\"The premier one-mana removal spell against aggressive creatures.\"},{\"name\":\"Thoughtseize\",\"count\":1,\"archetypes\":[\"dimir control\"],\"reason\":\"Proactive disruption that strips the opponent's best threat before it lands.\"},{\"name\":\"Damnation\",\"count\":1,\"archetypes\":[\"dimir control\"],\"reason\":\"The black board wipe that resets an aggro board in one card.\"},{\"name\":\"Liliana of the Veil\",\"count\":1,\"archetypes\":[\"dimir control\"],\"reason\":\"A grinding planeswalker that strips hands and edicts threats, a Modern control icon.\"},{\"name\":\"Drown in the Loch\",\"count\":1,\"archetypes\":[\"dimir control\"],\"reason\":\"The signature Dimir gold card, scaling into a counter or kill spell as the game goes long.\"}],\"plan\":\"A two-archetype practice cube pitting boros aggro against dimir control, built entirely from Modern staples a format regular will recognize on sight. Each archetype gets nine playable cards split evenly across its two colors, with one gold signpost apiece, so a three-player pod can reliably assemble both decks and rehearse the aggro-versus-control matchup.\"}",
+    "structured": {
+      "cards": [
+        {
+          "name": "Skyclave Apparition",
+          "count": 1,
+          "archetypes": [
+            "boros aggro"
+          ],
+          "reason": "A premium white aggressive creature that removes a blocker while adding to the board."
+        },
+        {
+          "name": "Thalia, Guardian of Thraben",
+          "count": 1,
+          "archetypes": [
+            "boros aggro"
+          ],
+          "reason": "Taxes the control player's spells while attacking, a classic aggro hatebear every Modern player knows."
+        },
+        {
+          "name": "Adeline, Resplendent Cathar",
+          "count": 1,
+          "archetypes": [
+            "boros aggro"
+          ],
+          "reason": "Multiplies attackers every combat, closing games before control stabilizes."
+        },
+        {
+          "name": "Adanto Vanguard",
+          "count": 1,
+          "archetypes": [
+            "boros aggro"
+          ],
+          "reason": "An indestructible-on-demand two-drop that punishes spot removal decks."
+        },
+        {
+          "name": "Lightning Bolt",
+          "count": 1,
+          "archetypes": [
+            "boros aggro"
+          ],
+          "reason": "The defining Modern burn spell, clearing blockers or finishing the game."
+        },
+        {
+          "name": "Goblin Guide",
+          "count": 1,
+          "archetypes": [
+            "boros aggro"
+          ],
+          "reason": "The archetypal turn-one aggro creature, maximizing early damage."
+        },
+        {
+          "name": "Monastery Swiftspear",
+          "count": 1,
+          "archetypes": [
+            "boros aggro"
+          ],
+          "reason": "A one-drop that grows with every burn spell the aggro deck casts."
+        },
+        {
+          "name": "Bonecrusher Giant",
+          "count": 1,
+          "archetypes": [
+            "boros aggro"
+          ],
+          "reason": "Removal stapled to an aggressive body, a Modern staple with two-for-one value."
+        },
+        {
+          "name": "Boros Charm",
+          "count": 1,
+          "archetypes": [
+            "boros aggro"
+          ],
+          "reason": "Four damage to the face or indestructibility through a wrath, the signature Boros gold card."
+        },
+        {
+          "name": "Counterspell",
+          "count": 1,
+          "archetypes": [
+            "dimir control"
+          ],
+          "reason": "The cleanest permission spell in Modern, the backbone of any control draft."
+        },
+        {
+          "name": "Snapcaster Mage",
+          "count": 1,
+          "archetypes": [
+            "dimir control"
+          ],
+          "reason": "Rebuys removal and counters for value, the iconic Modern control creature."
+        },
+        {
+          "name": "Archmage's Charm",
+          "count": 1,
+          "archetypes": [
+            "dimir control"
+          ],
+          "reason": "Modal counter, card draw, or theft of a one-drop, all lines a control deck wants."
+        },
+        {
+          "name": "Murktide Regent",
+          "count": 1,
+          "archetypes": [
+            "dimir control"
+          ],
+          "reason": "A cheap, huge flying finisher fueled by the control deck's full graveyard."
+        },
+        {
+          "name": "Fatal Push",
+          "count": 1,
+          "archetypes": [
+            "dimir control"
+          ],
+          "reason": "The premier one-mana removal spell against aggressive creatures."
+        },
+        {
+          "name": "Thoughtseize",
+          "count": 1,
+          "archetypes": [
+            "dimir control"
+          ],
+          "reason": "Proactive disruption that strips the opponent's best threat before it lands."
+        },
+        {
+          "name": "Damnation",
+          "count": 1,
+          "archetypes": [
+            "dimir control"
+          ],
+          "reason": "The black board wipe that resets an aggro board in one card."
+        },
+        {
+          "name": "Liliana of the Veil",
+          "count": 1,
+          "archetypes": [
+            "dimir control"
+          ],
+          "reason": "A grinding planeswalker that strips hands and edicts threats, a Modern control icon."
+        },
+        {
+          "name": "Drown in the Loch",
+          "count": 1,
+          "archetypes": [
+            "dimir control"
+          ],
+          "reason": "The signature Dimir gold card, scaling into a counter or kill spell as the game goes long."
+        }
+      ],
+      "plan": "A two-archetype practice cube pitting boros aggro against dimir control, built entirely from Modern staples a format regular will recognize on sight. Each archetype gets nine playable cards split evenly across its two colors, with one gold signpost apiece, so a three-player pod can reliably assemble both decks and rehearse the aggro-versus-control matchup."
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 2607,
+      "cacheCreationInputTokens": 17046,
+      "cacheReadInputTokens": 0
+    },
+    "costUsd": 0.47129,
+    "costSource": "reported",
+    "costCheck": {
+      "reportedUsd": 0.47129,
+      "pricedUsd": 0.47129,
+      "usageMeasured": true,
+      "agreement": "corroborated",
+      "detail": "the backend billed $0.47129 and its own usage prices at $0.47129"
+    }
+  }
+}

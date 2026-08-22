@@ -1,0 +1,1411 @@
+{
+  "key": "c796eac258676033319d455e7582339c",
+  "recordedAt": "2026-08-09T22:10:18.857Z",
+  "provider": "claude-cli",
+  "model": "claude-fable-5",
+  "request": {
+    "system": "You are a Magic: The Gathering set designer filling slots in a design skeleton.\n\nYou emit structured card data, never rules text. The rules text is rendered from\nthe structure you emit, so anything you cannot express in the given schema does\nnot exist in this set. Design inside the schema rather than around it.\n\nHard rules:\n- Fill exactly the slots you are given, one card each, echoing each slotId verbatim.\n- Respect every constraint on a slot: card kind, mana value window, colour, allowed effects.\n- A card in a coloured slot must have at least one coloured mana pip of that colour and no other colour.\n- Colourless slots take a mana cost of generic mana only.\n- Never invent keywords, effects, costs, or card types. The schema is the whole vocabulary.\n- Names must be evocative, unique across the set, and 40 characters or fewer.\n- Power and toughness must be normal for the mana value; a two-mana 5/5 is a bug, not a design.",
+    "prompt": "<task>\n<set_brief>\nSet: Tideglass Reach (TGR), 90 cards.\nTheme: A drowned archipelago where volcanic glass grows out of the tide like coral. Storm-priests read the weather in its facets, reef-clans harvest it for blades, and something older is waking under the deepest shelf. Flavour is coastal, weathered and elemental: salt, obsidian, kelp, thunderheads, and creatures shaped by pressure and current.\nMechanics:\n- Skywake: Storm-riders and glass-winged scouts hold the air; white and blue press the advantage while the board stalls. (keywords: flying, vigilance; colours: WU)\n- Glasscut: Obsidian weaponry: small bodies that trade up, and burn that finishes what the blades start. (keywords: firstStrike, deathtouch; effects: dealDamage; colours: BR)\n- Rootbound: Kelp-forest giants that grow into the late game; green and white build the biggest body and swing. (keywords: trample, reach; effects: pumpUntilEndOfTurn; colours: GW)\n- Undertow: The deep shelf pulls things down: blue and black grind the opponent's library and refill their own hand. (effects: millCards, drawCards; colours: UB)\n\nArchetype intent:\n- WU wants cheap evasive bodies and ways to keep the ground stalled.\n- BR wants efficient trades: deathtouch and first strike blockers plus reach damage.\n- GW wants a curve topping out at genuinely large creatures with trample.\n- UB wants card flow and a mill clock as an alternate finish.\n- RG wants aggressive bodies with haste and pump rather than card advantage.\n</set_brief>\n\n<slots>\nCR01: common R creature, role creature, MV 1-2\n  keywords: none - print a vanilla body with a strong name and creature types\nCR02: common R creature, role creature, MV 2, keywords: menace\n  keywords: exactly [menace], applied by the skeleton; design the body around them\nCR03: common R creature, role creature, MV 2, keywords: reach\n  keywords: exactly [reach], applied by the skeleton; design the body around them\nCR04: common R creature, role creature, MV 3\n  keywords: none - print a vanilla body with a strong name and creature types\nCR05: common R creature, role creature, MV 3-4\n  keywords: none - print a vanilla body with a strong name and creature types\nCR06: common R creature, role creature, MV 4-5, keywords: firstStrike, supports: Glasscut\n  keywords: exactly [firstStrike], applied by the skeleton; design the body around them\nCR07: common R creature, role creature, MV 5, keywords: haste\n  keywords: exactly [haste], applied by the skeleton; design the body around them\nCR08: common R creature, role creature, MV 6, keywords: trample\n  keywords: exactly [trample], applied by the skeleton; design the body around them\nCR09: common R instant, role burnTwo, MV 1-2, effects: dealDamage, supports: Glasscut\n  effects: 1-2 entries, each of kind dealDamage\nCR10: common R instant, role combatTrick, MV 2, effects: pumpUntilEndOfTurn\n  effects: 1-2 entries, each of kind pumpUntilEndOfTurn\n</slots>\n\n<effect_vocabulary>\n- dealDamage: amount 1-12; target.kind: anyTarget | targetCreature | targetPlayer\n- pumpUntilEndOfTurn: power and toughness deltas -8..+8, not both zero; target.kind: targetCreature\n</effect_vocabulary>\n\n<already_printed>\nNames already used (do not repeat, do not echo): Saltshrine Acolyte, Reefclan Harpooner, Stormglass Sentinel, Tidewall Shieldbearer, Kelp-Bound Charger, Glasswing Scout, Breakwater Vanguard, Thunderhead Roc, Cliffshrine Giant, Spiretide Guardian, Dashed Against the Reef, Sealed in Stormglass, Kelproot Groundswell, Saltspray Tern, Shardwing Darter, Kelpshell Snapper, Undershelf Diver, Facetreader Drake, Shardshell Crab, Tidewatch Augur, Shearwind Drake, Galecrown Elemental, Shelfquake Serpent, Slip Beneath the Swell, Read the Facets, Pulled Beneath the Breakers, Wrecklight Angler, Drowned Clan-Blade, Glassbarb Skulker, Duskbrine Lamprey, Glasspoint Assassin, Carrion Stormgull, Trenchrisen Hulk, Reefgrave Specter, Harrower of the Deep Shelf, Salt in the Wound, Barbed with Obsidian, Whispers from the Trench, Fed to the Trench\n</already_printed>\n\n<task>Design 10 card(s), one per slot listed above, in slot order.</task>\n</task>\n\n<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n{\"additionalProperties\":false,\"properties\":{\"cards\":{\"items\":{\"oneOf\":[{\"additionalProperties\":false,\"properties\":{\"designNote\":{\"maxLength\":200,\"minLength\":1,\"type\":\"string\"},\"kind\":{\"const\":\"creature\",\"type\":\"string\"},\"manaCost\":{\"additionalProperties\":false,\"properties\":{\"B\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"G\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"R\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"U\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"W\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"generic\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"}},\"required\":[\"generic\",\"W\",\"U\",\"B\",\"R\",\"G\"],\"type\":\"object\"},\"name\":{\"maxLength\":40,\"minLength\":1,\"type\":\"string\"},\"power\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"slotId\":{\"minLength\":1,\"type\":\"string\"},\"subtypes\":{\"default\":[],\"items\":{\"maxLength\":20,\"minLength\":1,\"type\":\"string\"},\"maxItems\":2,\"type\":\"array\"},\"toughness\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"}},\"required\":[\"slotId\",\"kind\",\"name\",\"subtypes\",\"manaCost\",\"power\",\"toughness\",\"designNote\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"designNote\":{\"maxLength\":200,\"minLength\":1,\"type\":\"string\"},\"effects\":{\"items\":{\"oneOf\":[{\"additionalProperties\":false,\"properties\":{\"amount\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"kind\":{\"const\":\"dealDamage\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"amount\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"kind\":{\"const\":\"destroyPermanent\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"kind\":{\"const\":\"pumpUntilEndOfTurn\",\"type\":\"string\"},\"power\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"},\"toughness\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"}},\"required\":[\"kind\",\"power\",\"toughness\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"count\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"kind\":{\"const\":\"drawCards\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"count\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"amount\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"kind\":{\"const\":\"gainLife\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"amount\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"kind\":{\"const\":\"counterSpell\",\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"count\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"kind\":{\"const\":\"createToken\",\"type\":\"string\"},\"token\":{\"additionalProperties\":false,\"properties\":{\"colors\":{\"default\":[],\"items\":{\"enum\":[\"W\",\"U\",\"B\",\"R\",\"G\"],\"type\":\"string\"},\"type\":\"array\"},\"keywords\":{\"default\":[],\"items\":{\"enum\":[\"flying\",\"vigilance\",\"haste\",\"trample\",\"deathtouch\",\"lifelink\",\"menace\",\"reach\",\"firstStrike\"],\"type\":\"string\"},\"type\":\"array\"},\"name\":{\"maxLength\":80,\"minLength\":1,\"type\":\"string\"},\"power\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"subtypes\":{\"default\":[],\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"toughness\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"}},\"required\":[\"name\",\"power\",\"toughness\",\"colors\",\"subtypes\",\"keywords\"],\"type\":\"object\"}},\"required\":[\"kind\",\"count\",\"token\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"kind\":{\"const\":\"tapPermanent\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"kind\":{\"const\":\"returnToHand\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"count\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"kind\":{\"const\":\"millCards\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"count\",\"target\"],\"type\":\"object\"}]},\"maxItems\":2,\"minItems\":1,\"type\":\"array\"},\"kind\":{\"const\":\"instant\",\"type\":\"string\"},\"manaCost\":{\"additionalProperties\":false,\"properties\":{\"B\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"G\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"R\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"U\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"W\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"generic\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"}},\"required\":[\"generic\",\"W\",\"U\",\"B\",\"R\",\"G\"],\"type\":\"object\"},\"name\":{\"maxLength\":40,\"minLength\":1,\"type\":\"string\"},\"slotId\":{\"minLength\":1,\"type\":\"string\"}},\"required\":[\"slotId\",\"kind\",\"name\",\"manaCost\",\"effects\",\"designNote\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"designNote\":{\"maxLength\":200,\"minLength\":1,\"type\":\"string\"},\"effects\":{\"items\":{\"oneOf\":[{\"additionalProperties\":false,\"properties\":{\"amount\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"kind\":{\"const\":\"dealDamage\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"amount\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"kind\":{\"const\":\"destroyPermanent\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"kind\":{\"const\":\"pumpUntilEndOfTurn\",\"type\":\"string\"},\"power\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"},\"toughness\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"}},\"required\":[\"kind\",\"power\",\"toughness\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"count\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"kind\":{\"const\":\"drawCards\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"count\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"amount\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"kind\":{\"const\":\"gainLife\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"amount\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"kind\":{\"const\":\"counterSpell\",\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"count\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"kind\":{\"const\":\"createToken\",\"type\":\"string\"},\"token\":{\"additionalProperties\":false,\"properties\":{\"colors\":{\"default\":[],\"items\":{\"enum\":[\"W\",\"U\",\"B\",\"R\",\"G\"],\"type\":\"string\"},\"type\":\"array\"},\"keywords\":{\"default\":[],\"items\":{\"enum\":[\"flying\",\"vigilance\",\"haste\",\"trample\",\"deathtouch\",\"lifelink\",\"menace\",\"reach\",\"firstStrike\"],\"type\":\"string\"},\"type\":\"array\"},\"name\":{\"maxLength\":80,\"minLength\":1,\"type\":\"string\"},\"power\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"subtypes\":{\"default\":[],\"items\":{\"type\":\"string\"},\"type\":\"array\"},\"toughness\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"}},\"required\":[\"name\",\"power\",\"toughness\",\"colors\",\"subtypes\",\"keywords\"],\"type\":\"object\"}},\"required\":[\"kind\",\"count\",\"token\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"kind\":{\"const\":\"tapPermanent\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"kind\":{\"const\":\"returnToHand\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"target\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"count\":{\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"kind\":{\"const\":\"millCards\",\"type\":\"string\"},\"target\":{\"additionalProperties\":false,\"properties\":{\"kind\":{\"enum\":[\"anyTarget\",\"targetCreature\",\"targetPlayer\",\"noTarget\"],\"type\":\"string\"}},\"required\":[\"kind\"],\"type\":\"object\"}},\"required\":[\"kind\",\"count\",\"target\"],\"type\":\"object\"}]},\"maxItems\":2,\"minItems\":1,\"type\":\"array\"},\"kind\":{\"const\":\"sorcery\",\"type\":\"string\"},\"manaCost\":{\"additionalProperties\":false,\"properties\":{\"B\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"G\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"R\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"U\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"W\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"generic\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"}},\"required\":[\"generic\",\"W\",\"U\",\"B\",\"R\",\"G\"],\"type\":\"object\"},\"name\":{\"maxLength\":40,\"minLength\":1,\"type\":\"string\"},\"slotId\":{\"minLength\":1,\"type\":\"string\"}},\"required\":[\"slotId\",\"kind\",\"name\",\"manaCost\",\"effects\",\"designNote\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"designNote\":{\"maxLength\":200,\"minLength\":1,\"type\":\"string\"},\"kind\":{\"const\":\"artifact\",\"type\":\"string\"},\"manaCost\":{\"additionalProperties\":false,\"properties\":{\"B\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"G\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"R\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"U\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"W\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"},\"generic\":{\"default\":0,\"maximum\":9007199254740991,\"minimum\":-9007199254740991,\"type\":\"integer\"}},\"required\":[\"generic\",\"W\",\"U\",\"B\",\"R\",\"G\"],\"type\":\"object\"},\"name\":{\"maxLength\":40,\"minLength\":1,\"type\":\"string\"},\"slotId\":{\"minLength\":1,\"type\":\"string\"},\"subtypes\":{\"default\":[],\"items\":{\"maxLength\":20,\"minLength\":1,\"type\":\"string\"},\"maxItems\":2,\"type\":\"array\"}},\"required\":[\"slotId\",\"kind\",\"name\",\"subtypes\",\"manaCost\",\"designNote\"],\"type\":\"object\"}]},\"maxItems\":16,\"minItems\":1,\"type\":\"array\"}},\"required\":[\"cards\"],\"type\":\"object\"}\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "minItems": 1,
+          "maxItems": 16,
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "slotId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "creature"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "subtypes": {
+                    "default": [],
+                    "maxItems": 2,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 20
+                    }
+                  },
+                  "manaCost": {
+                    "type": "object",
+                    "properties": {
+                      "generic": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "W": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "U": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "B": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "R": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "G": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "generic",
+                      "W",
+                      "U",
+                      "B",
+                      "R",
+                      "G"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "power": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "toughness": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "designNote": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "slotId",
+                  "kind",
+                  "name",
+                  "subtypes",
+                  "manaCost",
+                  "power",
+                  "toughness",
+                  "designNote"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "slotId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "instant"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "manaCost": {
+                    "type": "object",
+                    "properties": {
+                      "generic": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "W": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "U": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "B": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "R": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "G": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "generic",
+                      "W",
+                      "U",
+                      "B",
+                      "R",
+                      "G"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "effects": {
+                    "minItems": 1,
+                    "maxItems": 2,
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "dealDamage"
+                            },
+                            "amount": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "amount",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "destroyPermanent"
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "pumpUntilEndOfTurn"
+                            },
+                            "power": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "toughness": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "power",
+                            "toughness",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "drawCards"
+                            },
+                            "count": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "count",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "gainLife"
+                            },
+                            "amount": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "amount",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "counterSpell"
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "createToken"
+                            },
+                            "count": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "token": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 80
+                                },
+                                "power": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "toughness": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "colors": {
+                                  "default": [],
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "enum": [
+                                      "W",
+                                      "U",
+                                      "B",
+                                      "R",
+                                      "G"
+                                    ]
+                                  }
+                                },
+                                "subtypes": {
+                                  "default": [],
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "keywords": {
+                                  "default": [],
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "enum": [
+                                      "flying",
+                                      "vigilance",
+                                      "haste",
+                                      "trample",
+                                      "deathtouch",
+                                      "lifelink",
+                                      "menace",
+                                      "reach",
+                                      "firstStrike"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "power",
+                                "toughness",
+                                "colors",
+                                "subtypes",
+                                "keywords"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "count",
+                            "token"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "tapPermanent"
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "returnToHand"
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "millCards"
+                            },
+                            "count": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "count",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  "designNote": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "slotId",
+                  "kind",
+                  "name",
+                  "manaCost",
+                  "effects",
+                  "designNote"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "slotId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "sorcery"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "manaCost": {
+                    "type": "object",
+                    "properties": {
+                      "generic": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "W": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "U": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "B": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "R": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "G": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "generic",
+                      "W",
+                      "U",
+                      "B",
+                      "R",
+                      "G"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "effects": {
+                    "minItems": 1,
+                    "maxItems": 2,
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "dealDamage"
+                            },
+                            "amount": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "amount",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "destroyPermanent"
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "pumpUntilEndOfTurn"
+                            },
+                            "power": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "toughness": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "power",
+                            "toughness",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "drawCards"
+                            },
+                            "count": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "count",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "gainLife"
+                            },
+                            "amount": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "amount",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "counterSpell"
+                            }
+                          },
+                          "required": [
+                            "kind"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "createToken"
+                            },
+                            "count": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "token": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 80
+                                },
+                                "power": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "toughness": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "colors": {
+                                  "default": [],
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "enum": [
+                                      "W",
+                                      "U",
+                                      "B",
+                                      "R",
+                                      "G"
+                                    ]
+                                  }
+                                },
+                                "subtypes": {
+                                  "default": [],
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "keywords": {
+                                  "default": [],
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "enum": [
+                                      "flying",
+                                      "vigilance",
+                                      "haste",
+                                      "trample",
+                                      "deathtouch",
+                                      "lifelink",
+                                      "menace",
+                                      "reach",
+                                      "firstStrike"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "power",
+                                "toughness",
+                                "colors",
+                                "subtypes",
+                                "keywords"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "count",
+                            "token"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "tapPermanent"
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "returnToHand"
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "millCards"
+                            },
+                            "count": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "target": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anyTarget",
+                                    "targetCreature",
+                                    "targetPlayer",
+                                    "noTarget"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "count",
+                            "target"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  "designNote": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "slotId",
+                  "kind",
+                  "name",
+                  "manaCost",
+                  "effects",
+                  "designNote"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "slotId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "artifact"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "subtypes": {
+                    "default": [],
+                    "maxItems": 2,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 20
+                    }
+                  },
+                  "manaCost": {
+                    "type": "object",
+                    "properties": {
+                      "generic": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "W": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "U": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "B": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "R": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "G": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "generic",
+                      "W",
+                      "U",
+                      "B",
+                      "R",
+                      "G"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "designNote": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "slotId",
+                  "kind",
+                  "name",
+                  "subtypes",
+                  "manaCost",
+                  "designNote"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "cards"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "response": {
+    "text": "{\"cards\":[{\"slotId\":\"CR01\",\"kind\":\"creature\",\"name\":\"Saltcliff Brawler\",\"subtypes\":[\"Human\",\"Warrior\"],\"manaCost\":{\"generic\":1,\"W\":0,\"U\":0,\"B\":0,\"R\":1,\"G\":0},\"power\":3,\"toughness\":2,\"designNote\":\"Aggressive vanilla two-drop; 3/2 for 1R is the red baseline body that pressures early while WU sets up the air. Reef-clan scrapper flavour.\"},{\"slotId\":\"CR02\",\"kind\":\"creature\",\"name\":\"Wreckwater Reaver\",\"subtypes\":[\"Human\",\"Pirate\"],\"manaCost\":{\"generic\":1,\"W\":0,\"U\":0,\"B\":0,\"R\":1,\"G\":0},\"power\":2,\"toughness\":1,\"designNote\":\"2/1 body under skeleton menace: a fragile raider that keeps hitting through stalled boards. Salvage-pirate flavour for the drowned archipelago.\"},{\"slotId\":\"CR03\",\"kind\":\"creature\",\"name\":\"Shardsling Lookout\",\"subtypes\":[\"Goblin\",\"Archer\"],\"manaCost\":{\"generic\":1,\"W\":0,\"U\":0,\"B\":0,\"R\":1,\"G\":0},\"power\":1,\"toughness\":3,\"designNote\":\"1/3 under skeleton reach: hurls obsidian shards at Skywake fliers. Cheap defensive answer so red decks aren't run over by WU air.\"},{\"slotId\":\"CR04\",\"kind\":\"creature\",\"name\":\"Cindershelf Ogre\",\"subtypes\":[\"Ogre\",\"Warrior\"],\"manaCost\":{\"generic\":2,\"W\":0,\"U\":0,\"B\":0,\"R\":1,\"G\":0},\"power\":4,\"toughness\":2,\"designNote\":\"Red-slanted vanilla three-drop: 4/2 hits hard and trades away, matching RG's aggressive-body intent. Lives on the steaming shelf where lava meets tide.\"},{\"slotId\":\"CR05\",\"kind\":\"creature\",\"name\":\"Brinescorch Elemental\",\"subtypes\":[\"Elemental\"],\"manaCost\":{\"generic\":3,\"W\":0,\"U\":0,\"B\":0,\"R\":1,\"G\":0},\"power\":4,\"toughness\":3,\"designNote\":\"Standard common vanilla four-drop, 4/3 for 3R; curve filler that keeps red boards attacking. Steam-and-salt elemental born where surf hits magma.\"},{\"slotId\":\"CR06\",\"kind\":\"creature\",\"name\":\"Obsidian-Edge Duelist\",\"subtypes\":[\"Human\",\"Warrior\"],\"manaCost\":{\"generic\":3,\"W\":0,\"U\":0,\"B\":0,\"R\":1,\"G\":0},\"power\":3,\"toughness\":3,\"designNote\":\"Glasscut support: 3/3 under skeleton first strike blanks most common attackers and trades up, then pairs with burn to finish what the blade starts.\"},{\"slotId\":\"CR07\",\"kind\":\"creature\",\"name\":\"Surfbreak Rampager\",\"subtypes\":[\"Elemental\"],\"manaCost\":{\"generic\":4,\"W\":0,\"U\":0,\"B\":0,\"R\":1,\"G\":0},\"power\":4,\"toughness\":4,\"designNote\":\"4/4 under skeleton haste: a top-of-curve surprise attacker for the RG aggro lane, arriving on the crest of a breaking wave.\"},{\"slotId\":\"CR08\",\"kind\":\"creature\",\"name\":\"Magmatide Behemoth\",\"subtypes\":[\"Elemental\"],\"manaCost\":{\"generic\":5,\"W\":0,\"U\":0,\"B\":0,\"R\":1,\"G\":0},\"power\":6,\"toughness\":5,\"designNote\":\"Common finisher: 6/5 under skeleton trample closes stalled boards. A tide of molten glass given legs; splashes into GW Rootbound decks too.\"},{\"slotId\":\"CR09\",\"kind\":\"instant\",\"name\":\"Shatterglass Volley\",\"manaCost\":{\"generic\":0,\"W\":0,\"U\":0,\"B\":0,\"R\":1,\"G\":0},\"effects\":[{\"kind\":\"dealDamage\",\"amount\":2,\"target\":{\"kind\":\"anyTarget\"}}],\"designNote\":\"Shock at one mana: the Glasscut reach spell that finishes what deathtouch blades start. Clean, flexible, always playable at common.\"},{\"slotId\":\"CR10\",\"kind\":\"instant\",\"name\":\"Tempered in Brine\",\"manaCost\":{\"generic\":1,\"W\":0,\"U\":0,\"B\":0,\"R\":1,\"G\":0},\"effects\":[{\"kind\":\"pumpUntilEndOfTurn\",\"power\":3,\"toughness\":1,\"target\":{\"kind\":\"targetCreature\"}}],\"designNote\":\"Red combat trick, +3/+1 for 1R: offense-slanted quench-the-blade flavour. Turns any Glasscut body into a trade-up or extra reach damage.\"}]}",
+    "structured": {
+      "cards": [
+        {
+          "slotId": "CR01",
+          "kind": "creature",
+          "name": "Saltcliff Brawler",
+          "subtypes": [
+            "Human",
+            "Warrior"
+          ],
+          "manaCost": {
+            "generic": 1,
+            "W": 0,
+            "U": 0,
+            "B": 0,
+            "R": 1,
+            "G": 0
+          },
+          "power": 3,
+          "toughness": 2,
+          "designNote": "Aggressive vanilla two-drop; 3/2 for 1R is the red baseline body that pressures early while WU sets up the air. Reef-clan scrapper flavour."
+        },
+        {
+          "slotId": "CR02",
+          "kind": "creature",
+          "name": "Wreckwater Reaver",
+          "subtypes": [
+            "Human",
+            "Pirate"
+          ],
+          "manaCost": {
+            "generic": 1,
+            "W": 0,
+            "U": 0,
+            "B": 0,
+            "R": 1,
+            "G": 0
+          },
+          "power": 2,
+          "toughness": 1,
+          "designNote": "2/1 body under skeleton menace: a fragile raider that keeps hitting through stalled boards. Salvage-pirate flavour for the drowned archipelago."
+        },
+        {
+          "slotId": "CR03",
+          "kind": "creature",
+          "name": "Shardsling Lookout",
+          "subtypes": [
+            "Goblin",
+            "Archer"
+          ],
+          "manaCost": {
+            "generic": 1,
+            "W": 0,
+            "U": 0,
+            "B": 0,
+            "R": 1,
+            "G": 0
+          },
+          "power": 1,
+          "toughness": 3,
+          "designNote": "1/3 under skeleton reach: hurls obsidian shards at Skywake fliers. Cheap defensive answer so red decks aren't run over by WU air."
+        },
+        {
+          "slotId": "CR04",
+          "kind": "creature",
+          "name": "Cindershelf Ogre",
+          "subtypes": [
+            "Ogre",
+            "Warrior"
+          ],
+          "manaCost": {
+            "generic": 2,
+            "W": 0,
+            "U": 0,
+            "B": 0,
+            "R": 1,
+            "G": 0
+          },
+          "power": 4,
+          "toughness": 2,
+          "designNote": "Red-slanted vanilla three-drop: 4/2 hits hard and trades away, matching RG's aggressive-body intent. Lives on the steaming shelf where lava meets tide."
+        },
+        {
+          "slotId": "CR05",
+          "kind": "creature",
+          "name": "Brinescorch Elemental",
+          "subtypes": [
+            "Elemental"
+          ],
+          "manaCost": {
+            "generic": 3,
+            "W": 0,
+            "U": 0,
+            "B": 0,
+            "R": 1,
+            "G": 0
+          },
+          "power": 4,
+          "toughness": 3,
+          "designNote": "Standard common vanilla four-drop, 4/3 for 3R; curve filler that keeps red boards attacking. Steam-and-salt elemental born where surf hits magma."
+        },
+        {
+          "slotId": "CR06",
+          "kind": "creature",
+          "name": "Obsidian-Edge Duelist",
+          "subtypes": [
+            "Human",
+            "Warrior"
+          ],
+          "manaCost": {
+            "generic": 3,
+            "W": 0,
+            "U": 0,
+            "B": 0,
+            "R": 1,
+            "G": 0
+          },
+          "power": 3,
+          "toughness": 3,
+          "designNote": "Glasscut support: 3/3 under skeleton first strike blanks most common attackers and trades up, then pairs with burn to finish what the blade starts."
+        },
+        {
+          "slotId": "CR07",
+          "kind": "creature",
+          "name": "Surfbreak Rampager",
+          "subtypes": [
+            "Elemental"
+          ],
+          "manaCost": {
+            "generic": 4,
+            "W": 0,
+            "U": 0,
+            "B": 0,
+            "R": 1,
+            "G": 0
+          },
+          "power": 4,
+          "toughness": 4,
+          "designNote": "4/4 under skeleton haste: a top-of-curve surprise attacker for the RG aggro lane, arriving on the crest of a breaking wave."
+        },
+        {
+          "slotId": "CR08",
+          "kind": "creature",
+          "name": "Magmatide Behemoth",
+          "subtypes": [
+            "Elemental"
+          ],
+          "manaCost": {
+            "generic": 5,
+            "W": 0,
+            "U": 0,
+            "B": 0,
+            "R": 1,
+            "G": 0
+          },
+          "power": 6,
+          "toughness": 5,
+          "designNote": "Common finisher: 6/5 under skeleton trample closes stalled boards. A tide of molten glass given legs; splashes into GW Rootbound decks too."
+        },
+        {
+          "slotId": "CR09",
+          "kind": "instant",
+          "name": "Shatterglass Volley",
+          "manaCost": {
+            "generic": 0,
+            "W": 0,
+            "U": 0,
+            "B": 0,
+            "R": 1,
+            "G": 0
+          },
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": 2,
+              "target": {
+                "kind": "anyTarget"
+              }
+            }
+          ],
+          "designNote": "Shock at one mana: the Glasscut reach spell that finishes what deathtouch blades start. Clean, flexible, always playable at common."
+        },
+        {
+          "slotId": "CR10",
+          "kind": "instant",
+          "name": "Tempered in Brine",
+          "manaCost": {
+            "generic": 1,
+            "W": 0,
+            "U": 0,
+            "B": 0,
+            "R": 1,
+            "G": 0
+          },
+          "effects": [
+            {
+              "kind": "pumpUntilEndOfTurn",
+              "power": 3,
+              "toughness": 1,
+              "target": {
+                "kind": "targetCreature"
+              }
+            }
+          ],
+          "designNote": "Red combat trick, +3/+1 for 1R: offense-slanted quench-the-blade flavour. Turns any Glasscut body into a trade-up or extra reach damage."
+        }
+      ]
+    },
+    "usage": {
+      "inputTokens": 2,
+      "outputTokens": 5987,
+      "cacheCreationInputTokens": 0,
+      "cacheReadInputTokens": 56078
+    },
+    "costUsd": 0.35544800000000004,
+    "costSource": "reported"
+  }
+}

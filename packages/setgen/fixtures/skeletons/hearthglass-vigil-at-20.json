@@ -1,0 +1,1037 @@
+{
+  "version": 1,
+  "profile": "skeleton-lite",
+  "derivedFrom": {
+    "profile": "play-booster-2024",
+    "version": 1,
+    "verifiedOn": "2026-08-09"
+  },
+  "setSize": 20,
+  "rarityTotals": {
+    "common": 15,
+    "uncommon": 5,
+    "rare": 0
+  },
+  "perColorCards": {
+    "common": 3,
+    "uncommon": 1,
+    "rare": 0
+  },
+  "colors": {
+    "W": {
+      "common": {
+        "cards": 3,
+        "creatures": 2,
+        "spells": 1,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 1,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 1
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "flying",
+            "count": 1
+          },
+          {
+            "keyword": "vigilance",
+            "count": 0
+          },
+          {
+            "keyword": "lifelink",
+            "count": 0
+          },
+          {
+            "keyword": "firstStrike",
+            "count": 0
+          }
+        ],
+        "spellRoles": [
+          "removalCombatConditional"
+        ]
+      },
+      "uncommon": {
+        "cards": 1,
+        "creatures": 1,
+        "spells": 0,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 1,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "flying",
+            "count": 1
+          },
+          {
+            "keyword": "vigilance",
+            "count": 0
+          },
+          {
+            "keyword": "lifelink",
+            "count": 0
+          },
+          {
+            "keyword": "firstStrike",
+            "count": 0
+          }
+        ],
+        "spellRoles": []
+      },
+      "rare": {
+        "cards": 0,
+        "creatures": 0,
+        "spells": 0,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 1,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "flying",
+            "count": 0
+          },
+          {
+            "keyword": "vigilance",
+            "count": 0
+          },
+          {
+            "keyword": "lifelink",
+            "count": 0
+          },
+          {
+            "keyword": "firstStrike",
+            "count": 0
+          }
+        ],
+        "spellRoles": []
+      }
+    },
+    "U": {
+      "common": {
+        "cards": 3,
+        "creatures": 2,
+        "spells": 1,
+        "creatureCurve": [
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 1
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "flying",
+            "count": 1
+          },
+          {
+            "keyword": "vigilance",
+            "count": 0
+          }
+        ],
+        "spellRoles": [
+          "protectiveInstant"
+        ]
+      },
+      "uncommon": {
+        "cards": 1,
+        "creatures": 0,
+        "spells": 1,
+        "creatureCurve": [
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "flying",
+            "count": 0
+          },
+          {
+            "keyword": "vigilance",
+            "count": 0
+          }
+        ],
+        "spellRoles": [
+          "protectiveInstant"
+        ]
+      },
+      "rare": {
+        "cards": 0,
+        "creatures": 0,
+        "spells": 0,
+        "creatureCurve": [
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "flying",
+            "count": 0
+          },
+          {
+            "keyword": "vigilance",
+            "count": 0
+          }
+        ],
+        "spellRoles": []
+      }
+    },
+    "B": {
+      "common": {
+        "cards": 3,
+        "creatures": 2,
+        "spells": 1,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 1
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "flying",
+            "count": 1
+          },
+          {
+            "keyword": "deathtouch",
+            "count": 0
+          },
+          {
+            "keyword": "lifelink",
+            "count": 0
+          },
+          {
+            "keyword": "menace",
+            "count": 0
+          }
+        ],
+        "spellRoles": [
+          "removalSmallConditional"
+        ]
+      },
+      "uncommon": {
+        "cards": 1,
+        "creatures": 1,
+        "spells": 0,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "flying",
+            "count": 1
+          },
+          {
+            "keyword": "deathtouch",
+            "count": 0
+          },
+          {
+            "keyword": "lifelink",
+            "count": 0
+          },
+          {
+            "keyword": "menace",
+            "count": 0
+          }
+        ],
+        "spellRoles": []
+      },
+      "rare": {
+        "cards": 0,
+        "creatures": 0,
+        "spells": 0,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "flying",
+            "count": 0
+          },
+          {
+            "keyword": "deathtouch",
+            "count": 0
+          },
+          {
+            "keyword": "lifelink",
+            "count": 0
+          },
+          {
+            "keyword": "menace",
+            "count": 0
+          }
+        ],
+        "spellRoles": []
+      }
+    },
+    "R": {
+      "common": {
+        "cards": 3,
+        "creatures": 2,
+        "spells": 1,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 6,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "haste",
+            "count": 1
+          },
+          {
+            "keyword": "trample",
+            "count": 0
+          },
+          {
+            "keyword": "menace",
+            "count": 0
+          },
+          {
+            "keyword": "reach",
+            "count": 0
+          },
+          {
+            "keyword": "firstStrike",
+            "count": 0
+          }
+        ],
+        "spellRoles": [
+          "burnTwo"
+        ]
+      },
+      "uncommon": {
+        "cards": 1,
+        "creatures": 1,
+        "spells": 0,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 0
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 6,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "haste",
+            "count": 1
+          },
+          {
+            "keyword": "trample",
+            "count": 0
+          },
+          {
+            "keyword": "menace",
+            "count": 0
+          },
+          {
+            "keyword": "reach",
+            "count": 0
+          },
+          {
+            "keyword": "firstStrike",
+            "count": 0
+          }
+        ],
+        "spellRoles": []
+      },
+      "rare": {
+        "cards": 0,
+        "creatures": 0,
+        "spells": 0,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 0
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 6,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "haste",
+            "count": 0
+          },
+          {
+            "keyword": "trample",
+            "count": 0
+          },
+          {
+            "keyword": "menace",
+            "count": 0
+          },
+          {
+            "keyword": "reach",
+            "count": 0
+          },
+          {
+            "keyword": "firstStrike",
+            "count": 0
+          }
+        ],
+        "spellRoles": []
+      }
+    },
+    "G": {
+      "common": {
+        "cards": 3,
+        "creatures": 2,
+        "spells": 1,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "vigilance",
+            "count": 1
+          },
+          {
+            "keyword": "haste",
+            "count": 0
+          },
+          {
+            "keyword": "trample",
+            "count": 0
+          },
+          {
+            "keyword": "deathtouch",
+            "count": 0
+          },
+          {
+            "keyword": "reach",
+            "count": 0
+          }
+        ],
+        "spellRoles": [
+          "fight"
+        ]
+      },
+      "uncommon": {
+        "cards": 1,
+        "creatures": 1,
+        "spells": 0,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 1
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 0
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "vigilance",
+            "count": 1
+          },
+          {
+            "keyword": "haste",
+            "count": 0
+          },
+          {
+            "keyword": "trample",
+            "count": 0
+          },
+          {
+            "keyword": "deathtouch",
+            "count": 0
+          },
+          {
+            "keyword": "reach",
+            "count": 0
+          }
+        ],
+        "spellRoles": []
+      },
+      "rare": {
+        "cards": 0,
+        "creatures": 0,
+        "spells": 0,
+        "creatureCurve": [
+          {
+            "mvMin": 1,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 2,
+            "mvMax": 2,
+            "count": 0
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 3,
+            "count": 0
+          },
+          {
+            "mvMin": 3,
+            "mvMax": 4,
+            "count": 0
+          },
+          {
+            "mvMin": 4,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 5,
+            "mvMax": 5,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 6,
+            "count": 0
+          },
+          {
+            "mvMin": 6,
+            "mvMax": 7,
+            "count": 0
+          }
+        ],
+        "keywords": [
+          {
+            "keyword": "vigilance",
+            "count": 0
+          },
+          {
+            "keyword": "haste",
+            "count": 0
+          },
+          {
+            "keyword": "trample",
+            "count": 0
+          },
+          {
+            "keyword": "deathtouch",
+            "count": 0
+          },
+          {
+            "keyword": "reach",
+            "count": 0
+          }
+        ],
+        "spellRoles": []
+      }
+    }
+  },
+  "colorless": {
+    "common": {
+      "cards": 0,
+      "creatures": 0,
+      "spells": 0,
+      "creatureCurve": [
+        {
+          "mvMin": 2,
+          "mvMax": 2,
+          "count": 0
+        },
+        {
+          "mvMin": 3,
+          "mvMax": 3,
+          "count": 0
+        },
+        {
+          "mvMin": 4,
+          "mvMax": 4,
+          "count": 0
+        }
+      ],
+      "keywords": [],
+      "spellRoles": []
+    },
+    "uncommon": {
+      "cards": 0,
+      "creatures": 0,
+      "spells": 0,
+      "creatureCurve": [
+        {
+          "mvMin": 2,
+          "mvMax": 2,
+          "count": 0
+        },
+        {
+          "mvMin": 3,
+          "mvMax": 3,
+          "count": 0
+        },
+        {
+          "mvMin": 4,
+          "mvMax": 4,
+          "count": 0
+        }
+      ],
+      "keywords": [],
+      "spellRoles": []
+    },
+    "rare": {
+      "cards": 0,
+      "creatures": 0,
+      "spells": 0,
+      "creatureCurve": [
+        {
+          "mvMin": 2,
+          "mvMax": 2,
+          "count": 0
+        },
+        {
+          "mvMin": 3,
+          "mvMax": 3,
+          "count": 0
+        },
+        {
+          "mvMin": 4,
+          "mvMax": 4,
+          "count": 0
+        }
+      ],
+      "keywords": [],
+      "spellRoles": []
+    }
+  },
+  "rarityRules": {
+    "bombsMinRarity": "rare",
+    "maxComplexityRarity": "rare"
+  },
+  "archetypePairs": [
+    "WU",
+    "WB",
+    "WR",
+    "WG",
+    "UB",
+    "UR",
+    "UG",
+    "BR",
+    "BG",
+    "RG"
+  ],
+  "nwoRedFlagBudget": 0.2,
+  "derivation": [
+    "Rarity split follows the profile booster slots (9 commons : 3 uncommons : 1 rare-or-mythic), not the profile card counts, because the slice is drafted and played rather than collected: what a player sees per pack is the weighting a pool that gets opened deserves.",
+    "Colors are held exactly equal at each rarity; the indivisible remainder goes to the colorless (artifact) pool so no color is advantaged in the balance sim.",
+    "Creature/spell splits use the share DERIVED from the profile slot tables, not the article-stated percentage. For black, red and green the article states a percentage over a denominator of 14 while its own slot tables give 15 — see the DISCREPANCY citation notes on colors.*.common.creatureShare.",
+    "INFERRED: uncommon creature curves reuse the color common curve shape. No published play-booster skeleton gives an uncommon curve.",
+    "INFERRED: uncommon keyword budgets reuse the color common keyword table, rescaled by uncommon creature count. No published uncommon keyword table exists.",
+    "INFERRED: uncommon spell roles reuse the color common spell-slot list. No published uncommon role list exists.",
+    "INFERRED: rare groups reuse the uncommon shape entirely - the uncommon creature share, the color common curve, the color common keyword table and its spell-slot list. The profile publishes no rare slot table, so there is nothing closer to copy.",
+    "The copied shape is where the tiers agree, and rarityRules is where they no longer do: bombsMinRarity and maxComplexityRarity are carried onto this profile, so a tier at or above the first is the tier a set may print a card that wins the game on its own at, and consumers read that rather than testing for the word rare.",
+    "A group at or above bombsMinRarity with fewer creatures than its curve has buckets is seated from the expensive end down instead of by largest remainder. Apportionment has to drop buckets there and it drops the smallest counts, which are the ends of the curve: at 250 cards the whole rare tier came out at the mode of its color common curve, seventeen of nineteen rares at mana value four or below. No bucket, mana value or count ceiling is invented - it is the same published curve walked from the other end. Every other tier, and any bomb tier large enough to seat one card per bucket, apportions exactly as before.",
+    "Keyword budgets are restricted to the pinned slice vocabulary; profile keywords the slice engine cannot run (double strike, ward, defender, flash) are dropped, not remapped.",
+    "Fractional profile keyword counts encode rotating slots across sets. The slice prints one set, so budgets are apportioned to integers by largest remainder.",
+    "Nonbasic land slots are excluded from the colorless uncommon share: the slice pool is five colors plus artifact, with basic lands supplied by the deck builder.",
+    "No multicolor slots are derived. The ten color pairs survive only as the balance sim matchup list; the slice prints no gold cards and therefore no signpost uncommons.",
+    "Rare tier: none. The 9:3:1 booster slot split gives 1 rares, 0 per color, under the profile's rareCyclesMin of 2; the whole target is spent on commons and uncommons instead.",
+    "Dropped keywords, outside the pinned slice vocabulary: defender, doubleStrike, flash, ward."
+  ]
+}

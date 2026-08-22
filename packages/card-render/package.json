@@ -1,0 +1,15 @@
+{
+  "name": "@mtg/card-render",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mtg/card-geometry": "*",
+    "@mtg/dsl": "*",
+    "@mtg/ui": "*"
+  }
+}

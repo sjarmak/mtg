@@ -1,0 +1,93 @@
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+*.gate.lock*
+
+# Node. `node_modules` is listed without a trailing slash as well, for the same
+# reason data/store is below: a git worktree has no node_modules of its own, so
+# an agent working in one symlinks the primary checkout's. A trailing slash
+# matches only real directories, so the symlink stays untracked-visible — one
+# `git add -A` commits an absolute path that resolves on exactly one machine,
+# and `git worktree remove` refuses on it without --force.
+node_modules
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Secrets and local config
+.env
+.env.local
+
+# Large local data: Scryfall/MTGJSON bulk downloads and generated stores.
+# Listed without a trailing slash as well: a worktree may symlink data/store at
+# the primary checkout's database, and a trailing slash matches only real
+# directories, so the symlink would otherwise be committed as an absolute path
+# that resolves on exactly one machine.
+data/cache
+data/cache/
+data/images
+data/images/
+data/store
+data/store/
+*.sqlite
+*.sqlite-journal
+
+# Third-party engines used as oracles (never vendored into the tree)
+tools/forge/dist/
+tools/forge/*.tar.bz2
+tools/forge/*.jar
+
+# Simulation output
+out/
+
+# Staged by `npm run play`; the set being played is a copy, not a source.
+packages/ui/public/set.json
+packages/ui/public/deck.json
+packages/ui/public/art.json
+packages/ui/public/art/
+# One directory per set the launcher found, each holding that set's own
+# set.json, art manifest, rasters and decks, plus the index the picker reads.
+# Every byte of it is a copy of something under out/ or packages/setgen/.
+packages/ui/public/sets/
+# The preconstructed decks for the set being played, copied out of the fixture
+# that matched it. A copy, like the set beside it; the source is under
+# packages/setgen/fixtures/decks/.
+packages/ui/public/precons.json
+# Recorded by `npm run play` from pinned seeds (packages/ui/tools/stage-replay.ts).
+# A recorded game is about a megabyte and it is a pure function of the seeds and
+# the kernel, so it is replayed on demand rather than kept and left to go stale.
+packages/ui/public/replay.events.jsonl
+# The statistics log the Analysis tab summarizes, staged by `npm run play` only
+# when a log on disk is about the set being played (tools/stage-run-log.ts). It
+# used to be a committed hand-cut slice of a *different* set's run, served on
+# every launch; the reader's fixture copy now lives in packages/ui/test/fixtures/.
+packages/ui/public/replay.slice.jsonl
+# Written by `npm run analyze`: one measured sweep per document, accumulating by
+# id. Recorded rather than committed for the reason above it, and because the
+# numbers in it are true about one set at one revision and nothing else.
+packages/ui/public/analysis.json
+# Checked calibration evidence staged beside the exact playable set, plus the
+# optional measured before/after proposal. Both are revision-specific outputs.
+packages/ui/public/calibration.json
+packages/ui/public/retune.json
+# Staged by `npm run curate`: one 260px thumbnail per distinct illustration under
+# out/art/, plus the index naming them. Both are derived from the paid renders
+# and cost nothing to remake, and 46 MB of contact sheet has no place in git.
+packages/ui/public/curation/
+packages/ui/public/curation.json
+# Fetched by the launchers through @mtg/image-cache, never vendored: the glyph
+# designs are Wizards' copyright whatever the file's license says, so this tree
+# references them and holds no copy in git.
+packages/ui/public/symbols/
+
+# Python bytecode from the art pipeline scripts
+__pycache__/
+*.pyc
+
+# Verification artifacts staged into the lab, like the manifests beside them.
+packages/ui/public/token-board.html
+
+# Finder writes these into any directory it has ever displayed, including the
+# reference folders screenshots are dropped into from a Mac.
+.DS_Store

@@ -1,0 +1,629 @@
+{
+  "version": 1,
+  "profile": "play-booster-2024",
+  "era": "play-booster",
+  "verifiedOn": "2026-08-09",
+  "rights": "Numbers below are facts restated from copyrighted Wizards of the Coast articles under the WotC Fan Content Policy (https://company.wizards.com/en/legal/fancontentpolicy). Quotes are short excerpts retained only to make each number auditable. No article text is redistributed.",
+  "sources": {
+    "nb16": {
+      "title": "Nuts & Bolts #16: Play Boosters",
+      "author": "Mark Rosewater",
+      "publisher": "Wizards of the Coast, Making Magic",
+      "url": "https://magic.wizards.com/en/news/making-magic/nuts-and-bolts-16-play-boosters",
+      "year": 2024,
+      "kind": "first-party"
+    },
+    "mtgscribeFactSheet": {
+      "title": "Play Booster Design Skeleton Fact Sheet",
+      "author": "mtgscribe",
+      "publisher": "mtgscribe.com",
+      "url": "https://mtgscribe.com/2024/03/06/play-booster-design-skeleton-fact-sheet/",
+      "year": 2024,
+      "kind": "community"
+    },
+    "nb15": {
+      "title": "Nuts & Bolts #15: Structural Support",
+      "author": "Mark Rosewater",
+      "publisher": "Wizards of the Coast, Making Magic",
+      "url": "https://magic.wizards.com/en/news/making-magic/nuts-and-bolts-15-structural-support",
+      "year": 2023,
+      "kind": "first-party"
+    },
+    "nb17p2": {
+      "title": "Nuts & Bolts #17: Finding Your Mechanics, Part 2",
+      "author": "Mark Rosewater",
+      "publisher": "Wizards of the Coast, Making Magic",
+      "url": "https://magic.wizards.com/en/news/making-magic/nuts-and-bolts-17-finding-your-mechanics-part-2",
+      "year": 2025,
+      "kind": "first-party"
+    },
+    "nb18": {
+      "title": "Nuts & Bolts #18: Layering Your Mechanics",
+      "author": "Mark Rosewater",
+      "publisher": "Wizards of the Coast, Making Magic",
+      "url": "https://magic.wizards.com/en/news/making-magic/nuts-and-bolts-18-layering-your-mechanics",
+      "year": 2025,
+      "kind": "first-party"
+    },
+    "nb4": {
+      "title": "Nuts & Bolts #4: Higher Rarities",
+      "author": "Mark Rosewater",
+      "publisher": "Wizards of the Coast, Making Magic",
+      "url": "https://magic.wizards.com/en/news/making-magic/nuts-bolts-higher-rarities-2012-02-27",
+      "year": 2012,
+      "kind": "first-party"
+    },
+    "nwo": {
+      "title": "New World Order",
+      "author": "Mark Rosewater",
+      "publisher": "Wizards of the Coast, Making Magic",
+      "url": "https://magic.wizards.com/en/news/making-magic/new-world-order-2011-12-05",
+      "year": 2011,
+      "kind": "first-party"
+    },
+    "nwoPrimer": {
+      "title": "[PRIMER] New World Order + Redflagging",
+      "author": "MTG Salvation custom-card community",
+      "publisher": "mtgsalvation.com",
+      "url": "https://www.mtgsalvation.com/forums/magic-fundamentals/custom-card-creation/578926-primer-nwo-redflagging",
+      "year": 2014,
+      "kind": "community"
+    },
+    "riptideRemoval": {
+      "title": "Removal by the Numbers",
+      "author": "Riptide Lab forum (discussing the Ars Arcanum 'History of Removal' analysis)",
+      "publisher": "riptidelab.com",
+      "url": "https://riptidelab.com/forum/threads/removal-by-the-numbers.830/",
+      "year": 2015,
+      "kind": "community"
+    },
+    "mtgWikiAsFan": {
+      "title": "As-fan",
+      "author": "MTG Wiki contributors",
+      "publisher": "mtg.wiki (CC BY-NC-SA 4.0)",
+      "url": "https://mtg.wiki/page/As-fan",
+      "year": 2024,
+      "kind": "community"
+    }
+  },
+  "data": {
+    "setSize": { "common": 81, "uncommon": 100, "rare": 60, "mythic": 20, "total": 261 },
+    "booster": { "land": 1, "common": 9, "uncommon": 3, "rareOrMythic": 1, "mythicOneInN": 7 },
+    "colors": {
+      "W": {
+        "common": {
+          "creatures": 11,
+          "creatureCurve": [
+            { "mvMin": 1, "mvMax": 1, "count": 1 },
+            { "mvMin": 2, "mvMax": 2, "count": 3 },
+            { "mvMin": 3, "mvMax": 3, "count": 3 },
+            { "mvMin": 4, "mvMax": 4, "count": 2 },
+            { "mvMin": 5, "mvMax": 6, "count": 1 },
+            { "mvMin": 6, "mvMax": 7, "count": 1 }
+          ],
+          "creatureShare": {
+            "stated": 0.73,
+            "statedNumerator": 11,
+            "statedDenominator": 15,
+            "previousStated": 0.63,
+            "previousNumerator": 12,
+            "previousDenominator": 19
+          },
+          "avgPower": { "current": 3.28, "previous": 2.95 },
+          "keywords": {
+            "flying": 3,
+            "vigilance": 2,
+            "lifelink": 1,
+            "firstStrike": 0.25,
+            "doubleStrike": 0.2
+          },
+          "spellSlots": [
+            "removalCombatConditional",
+            "removalExile",
+            "combatTrick",
+            "removalArtifactEnchantment"
+          ]
+        },
+        "uncommon": { "creaturesMin": 10, "creaturesMax": 10, "noncreaturesMin": 4, "noncreaturesMax": 4 }
+      },
+      "U": {
+        "common": {
+          "creatures": 8,
+          "creatureCurve": [
+            { "mvMin": 2, "mvMax": 2, "count": 2 },
+            { "mvMin": 3, "mvMax": 3, "count": 3 },
+            { "mvMin": 4, "mvMax": 4, "count": 1 },
+            { "mvMin": 5, "mvMax": 6, "count": 1 },
+            { "mvMin": 6, "mvMax": 7, "count": 1 }
+          ],
+          "creatureShare": {
+            "stated": 0.53,
+            "statedNumerator": 8,
+            "statedDenominator": 15,
+            "previousStated": 0.47,
+            "previousNumerator": 9,
+            "previousDenominator": 19
+          },
+          "avgPower": { "current": 3.62, "previous": 3.39 },
+          "keywords": { "flying": 3, "vigilance": 1.5, "ward": 0.5, "defender": 0.5, "flash": 0.5 },
+          "spellSlots": [
+            "protectiveInstant",
+            "counterspell",
+            "cantrip",
+            "drawTwoOrThree",
+            "auraOverwrite",
+            "libraryTopBottom",
+            "modalSpell"
+          ]
+        },
+        "uncommon": { "creaturesMin": 6, "creaturesMax": 7, "noncreaturesMin": 7, "noncreaturesMax": 8 }
+      },
+      "B": {
+        "common": {
+          "creatures": 9,
+          "creatureCurve": [
+            { "mvMin": 1, "mvMax": 2, "count": 1 },
+            { "mvMin": 2, "mvMax": 2, "count": 2 },
+            { "mvMin": 3, "mvMax": 3, "count": 2 },
+            { "mvMin": 4, "mvMax": 4, "count": 1 },
+            { "mvMin": 4, "mvMax": 5, "count": 1 },
+            { "mvMin": 5, "mvMax": 6, "count": 1 },
+            { "mvMin": 6, "mvMax": 7, "count": 1 }
+          ],
+          "creatureShare": {
+            "stated": 0.62,
+            "statedNumerator": 9,
+            "statedDenominator": 14,
+            "previousStated": 0.52,
+            "previousNumerator": 10,
+            "previousDenominator": 19
+          },
+          "avgPower": { "current": 3.56, "previous": 3.25 },
+          "keywords": { "flying": 2, "menace": 1.5, "deathtouch": 1.25, "lifelink": 1 },
+          "spellSlots": [
+            "removalSmallConditional",
+            "combatTrick",
+            "cardDrawAtCost",
+            "discard",
+            "removalUnconditional",
+            "removalOvercosted"
+          ]
+        },
+        "uncommon": { "creaturesMin": 7, "creaturesMax": 8, "noncreaturesMin": 7, "noncreaturesMax": 8 }
+      },
+      "R": {
+        "common": {
+          "creatures": 9,
+          "creatureCurve": [
+            { "mvMin": 1, "mvMax": 2, "count": 1 },
+            { "mvMin": 2, "mvMax": 2, "count": 2 },
+            { "mvMin": 3, "mvMax": 3, "count": 2 },
+            { "mvMin": 3, "mvMax": 4, "count": 1 },
+            { "mvMin": 4, "mvMax": 5, "count": 1 },
+            { "mvMin": 5, "mvMax": 5, "count": 1 },
+            { "mvMin": 6, "mvMax": 6, "count": 1 }
+          ],
+          "creatureShare": {
+            "stated": 0.64,
+            "statedNumerator": 9,
+            "statedDenominator": 14,
+            "previousStated": 0.53,
+            "previousNumerator": 10,
+            "previousDenominator": 19
+          },
+          "avgPower": { "current": 3.39, "previous": 3.15 },
+          "keywords": {
+            "trample": 1.5,
+            "menace": 1.5,
+            "haste": 1.5,
+            "reach": 1,
+            "firstStrike": 0.25,
+            "doubleStrike": 0.2
+          },
+          "spellSlots": [
+            "burnTwo",
+            "combatTrick",
+            "cardDrawImpulsive",
+            "artifactDestructionModal",
+            "burnFour",
+            "burnSixForFive"
+          ]
+        },
+        "uncommon": { "creaturesMin": 7, "creaturesMax": 8, "noncreaturesMin": 7, "noncreaturesMax": 8 }
+      },
+      "G": {
+        "common": {
+          "creatures": 10,
+          "creatureCurve": [
+            { "mvMin": 1, "mvMax": 2, "count": 1 },
+            { "mvMin": 2, "mvMax": 2, "count": 2 },
+            { "mvMin": 3, "mvMax": 3, "count": 2 },
+            { "mvMin": 3, "mvMax": 4, "count": 1 },
+            { "mvMin": 4, "mvMax": 5, "count": 1 },
+            { "mvMin": 5, "mvMax": 5, "count": 1 },
+            { "mvMin": 6, "mvMax": 6, "count": 1 },
+            { "mvMin": 6, "mvMax": 7, "count": 1 }
+          ],
+          "creatureShare": {
+            "stated": 0.71,
+            "statedNumerator": 10,
+            "statedDenominator": 14,
+            "previousStated": 0.58,
+            "previousNumerator": 11,
+            "previousDenominator": 19
+          },
+          "avgPower": { "current": 3.7, "previous": 3.59 },
+          "keywords": {
+            "vigilance": 1.5,
+            "trample": 1.5,
+            "reach": 1.5,
+            "deathtouch": 1,
+            "ward": 0.5,
+            "haste": 0.2
+          },
+          "spellSlots": ["fight", "bite", "combatTrickPump", "manaAcceleration", "dig"]
+        },
+        "uncommon": { "creaturesMin": 9, "creaturesMax": 9, "noncreaturesMin": 5, "noncreaturesMax": 5 }
+      }
+    },
+    "colorless": {
+      "common": {
+        "creatures": 3,
+        "creatureCurve": [
+          { "mvMin": 2, "mvMax": 2, "count": 1 },
+          { "mvMin": 3, "mvMax": 3, "count": 1 },
+          { "mvMin": 4, "mvMax": 4, "count": 1 }
+        ],
+        "spells": 3,
+        "spellSlots": ["removalExpensive", "manaArtifact", "landFixing"]
+      },
+      "uncommon": {
+        "creatures": 4,
+        "noncreaturesMin": 3,
+        "noncreaturesMax": 4,
+        "landsMin": 2,
+        "landsMax": 3
+      }
+    },
+    "multicolorUncommon": { "total": 20, "perPair": 2, "roles": ["enabler", "payoff"] },
+    "archetypes": {
+      "pairs": ["WU", "WB", "WR", "WG", "UB", "UR", "UG", "BR", "BG", "RG"],
+      "speedMix": { "fast": 3, "medium": 3, "slow": 3, "flex": 1 },
+      "noveltyMix": { "novel": 2, "twist": 4, "traditional": 4 }
+    },
+    "mechanics": { "min": 3, "max": 6 },
+    "complexity": { "nwoRedFlagBudget": 0.2 },
+    "asFanTargets": {
+      "removal": 3,
+      "removalShareOfPack": 0.2,
+      "mainMechanicMin": 1,
+      "goldInMulticolorSet": 2
+    },
+    "rarityRules": {
+      "bombsMinRarity": "rare",
+      "maxComplexityRarity": "rare",
+      "rareCyclesMin": 2,
+      "uncommonDesignSpaceShareSmallSet": 0.66,
+      "uncommonDesignSpaceShareLargeSet": 0.6
+    }
+  },
+  "citations": {
+    "setSize": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "The sets have the same number of unique cards (261), but 20 cards have shifted from common to uncommon.",
+      "note": "The 81/100/60/20 split is tabulated from the same article by the mtgscribe fact sheet; 81+100+60+20 = 261 matches the article's stated total."
+    },
+    "booster": {
+      "source": "nb17p2",
+      "confidence": "sourced",
+      "quote": "one of those cards is a land, nine are commons, three are uncommons, and one is a rare or mythic rare",
+      "note": "mythicOneInN=7 from the same article's 'six over seven, as every seventh booster could have a mythic rare'. This is the article's own simplified Play Booster model, not the full retail collation."
+    },
+    "colors.W.common.creatures": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "the default for Play Boosters is 73% (11 out of 15)"
+    },
+    "colors.W.common.creatureCurve": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "White common creature slots: 1 at MV 1, 3 at MV 2, 3 at MV 3, 2 at MV 4, 1 at MV 5-6, 1 at MV 6-7 (total 11)",
+      "note": "Curve buckets are tabulated by mtgscribe from the article's slot list; bucket counts sum to the article's stated 11 creatures."
+    },
+    "colors.W.common.creatureShare": {
+      "source": "nb16",
+      "confidence": "sourced",
+      "quote": "The default for Draft Boosters was 63% (12 out of 19) while the default for Play Boosters is 73% (11 out of 15).",
+      "note": "Stated numerator/denominator are the article's own; 11/15 = 0.733 is consistent with the published slot tables (11 creatures + 4 spells = 15 white commons)."
+    },
+    "colors.W.common.avgPower": {
+      "source": "nb16",
+      "confidence": "sourced",
+      "quote": "In Draft Boosters, white's default average power was 2.95. In Play Boosters, that goes up to 3.28."
+    },
+    "colors.W.common.keywords": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "3 Flying (different powers); 2 Vigilance; 1 Lifelink (low power); 0.25 First strike; 0.20 Double strike",
+      "note": "Fractional counts encode rotating slots shared across sets; enforce as set-level sums, never per card."
+    },
+    "colors.W.common.spellSlots": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "Combat removal 1; Exiling removal 1; Combat trick 1; Enchantment/Artifact removal 1 (total 4)"
+    },
+    "colors.W.uncommon": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "White uncommon: 10 creatures, 4 noncreatures"
+    },
+    "colors.U.common.creatures": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "Blue creature percentages have gone up, but not as much as white, from 47% (9 out of 19) to 53% (8 out of 15)."
+    },
+    "colors.U.common.creatureCurve": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "Blue common creature slots: 2 at MV 2, 3 at MV 3, 1 at MV 4, 1 at MV 5-6, 1 at MV 6-7 (total 8)",
+      "note": "Blue has no one-drop creature slot in this skeleton."
+    },
+    "colors.U.common.creatureShare": {
+      "source": "nb16",
+      "confidence": "sourced",
+      "quote": "from 47% (9 out of 19) to 53% (8 out of 15)",
+      "note": "8/15 = 0.533, consistent with the published slot tables (8 creatures + 7 spells = 15 blue commons)."
+    },
+    "colors.U.common.avgPower": {
+      "source": "nb16",
+      "confidence": "sourced",
+      "quote": "The average power has gone up from 3.39 to 3.62."
+    },
+    "colors.U.common.keywords": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "3 Flying (different powers); 1.5 Vigilance; 0.5 Ward N; 0.5 Defender; 0.5 Flash"
+    },
+    "colors.U.common.spellSlots": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "Protective Instant; Counterspell; Cantrip; Draw (2-3 cards); Overwriting Aura removal; Top/Bottom spell; Modal spell (total 7)"
+    },
+    "colors.U.uncommon": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "Blue uncommon: 6-7 creatures, 7-8 noncreatures"
+    },
+    "colors.B.common.creatures": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "Black's creature percentages have jumped from 52% (10 out of 19) to 62% (9 out of 14)"
+    },
+    "colors.B.common.creatureCurve": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "Black common creature slots: 1 at MV 1-2, 2 at MV 2, 2 at MV 3, 1 at MV 4, 1 at MV 4-5, 1 at MV 5-6, 1 at MV 6-7 (total 9)"
+    },
+    "colors.B.common.creatureShare": {
+      "source": "nb16",
+      "confidence": "sourced",
+      "quote": "Black's creature percentages have jumped from 52% (10 out of 19) to 62% (9 out of 14)",
+      "note": "DISCREPANCY, verified 2026-08-09: the article's own fraction 9/14 evaluates to 0.643, not the stated 0.62, and the published slot tables give black 15 commons (9 creatures + 6 spells), i.e. 0.60. The slot tables are self-consistent (5 colors x 15 + 6 colorless = 81 commons, the article's stated total), so consumers should prefer the derived share over the stated one."
+    },
+    "colors.B.common.avgPower": {
+      "source": "nb16",
+      "confidence": "sourced",
+      "quote": "its average power has jumped from 3.25 to 3.56."
+    },
+    "colors.B.common.keywords": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "2 Flying (different powers); 1.5 Menace; 1.25 Deathtouch; 1 Lifelink"
+    },
+    "colors.B.common.spellSlots": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "Small conditional removal; Combat trick; Card draw (additional cost); Discard (you choose); Unconditional removal; Slightly overcosted removal (total 6)"
+    },
+    "colors.B.uncommon": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "Black uncommon: 7-8 creatures, 7-8 noncreatures"
+    },
+    "colors.R.common.creatures": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "Red has the second-largest increase in creature percentages at common, jumping from 53% (10 out of 19) to 64% (9 out of 14)."
+    },
+    "colors.R.common.creatureCurve": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "Red common creature slots: 1 at MV 1-2, 2 at MV 2, 2 at MV 3, 1 at MV 3-4, 1 at MV 4-5, 1 at MV 5, 1 at MV 6 (total 9)"
+    },
+    "colors.R.common.creatureShare": {
+      "source": "nb16",
+      "confidence": "sourced",
+      "quote": "jumping from 53% (10 out of 19) to 64% (9 out of 14)",
+      "note": "DISCREPANCY, verified 2026-08-09: 9/14 = 0.643 matches the stated 0.64, but the published slot tables give red 15 commons (9 creatures + 6 spells), i.e. 0.60. Prefer the derived share."
+    },
+    "colors.R.common.avgPower": {
+      "source": "nb16",
+      "confidence": "sourced",
+      "quote": "Its power has jumped from an average of 3.15 to 3.39."
+    },
+    "colors.R.common.keywords": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "1.5 Trample; 1.5 Menace; 1.5 Haste; 1 Reach; 0.25 First strike; 0.20 Double strike"
+    },
+    "colors.R.common.spellSlots": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "Direct damage (2); Combat trick; Card draw (discard/exile); Modal artifact destruction; Direct damage (~4); Direct damage (6 for 5 mana) (total 6)"
+    },
+    "colors.R.uncommon": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "Red uncommon: 7-8 creatures, 7-8 noncreatures"
+    },
+    "colors.G.common.creatures": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "Green has the largest creature percentage increase, going from 58% (11 out of 19) to 71% (10 out of 14)."
+    },
+    "colors.G.common.creatureCurve": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "Green common creature slots: 1 at MV 1-2, 2 at MV 2, 2 at MV 3, 1 at MV 3-4, 1 at MV 4-5, 1 at MV 5, 1 at MV 6, 1 at MV 6-7 (total 10)"
+    },
+    "colors.G.common.creatureShare": {
+      "source": "nb16",
+      "confidence": "sourced",
+      "quote": "going from 58% (11 out of 19) to 71% (10 out of 14)",
+      "note": "DISCREPANCY, verified 2026-08-09: 10/14 = 0.714 matches the stated 0.71, but the published slot tables give green 15 commons (10 creatures + 5 spells), i.e. 0.667. Prefer the derived share."
+    },
+    "colors.G.common.avgPower": {
+      "source": "nb16",
+      "confidence": "sourced",
+      "quote": "Its average power rose slightly from 3.59 to 3.7."
+    },
+    "colors.G.common.keywords": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "1.5 Vigilance; 1.5 Trample; 1.5 Reach; 1 Deathtouch; 0.5 Ward N; 0.20 Haste"
+    },
+    "colors.G.common.spellSlots": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "Fight; Bite; Combat trick (pump power); Mana acceleration; Dig (lands/creatures) (total 5)"
+    },
+    "colors.G.uncommon": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "Green uncommon: 9 creatures, 5 noncreatures"
+    },
+    "colorless.common": {
+      "source": "mtgscribeFactSheet",
+      "crossCheck": ["nb16"],
+      "confidence": "community",
+      "quote": "Colorless common creatures: variance buster (2 mana), three-mana creature, four-mana creature (total 3). Colorless common spells: removal (expensive), mana-producing artifact, land fixing (total 3)."
+    },
+    "colorless.uncommon": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "4 Creatures; 3 or 4 Noncreatures; 2 or 3 Lands"
+    },
+    "multicolorUncommon": {
+      "source": "nb16",
+      "crossCheck": ["mtgscribeFactSheet"],
+      "confidence": "sourced",
+      "quote": "One of the biggest changes from Draft Boosters to Play Boosters was the decision to increase from one multicolor card per two-color combination to two.",
+      "note": "20 total uncommon multicolor slots, 2 per pair, conventionally split enabler + payoff."
+    },
+    "archetypes.pairs": {
+      "source": "nb15",
+      "confidence": "sourced",
+      "quote": "If you're just starting out, I would focus on the ten two-color pairs."
+    },
+    "archetypes.speedMix": {
+      "source": "nb15",
+      "confidence": "sourced",
+      "quote": "We divide into three speeds: fast, medium, and slow. You want at least three of each speed, with one getting a fourth.",
+      "note": "flex=1 encodes 'one getting a fourth'; the fourth may land on any of the three speeds."
+    },
+    "archetypes.noveltyMix": {
+      "source": "nb15",
+      "confidence": "sourced",
+      "quote": "you usually have about two archetypes that are doing something novel, four archetypes that are riffing off something they normally do but in a way that's a little different, and four archetypes that are doing something pretty familiar"
+    },
+    "mechanics": {
+      "source": "nb18",
+      "confidence": "sourced",
+      "quote": "This usually happens with at least three mechanics, and normally no more than six."
+    },
+    "complexity.nwoRedFlagBudget": {
+      "source": "nwoPrimer",
+      "crossCheck": ["nwo"],
+      "confidence": "community",
+      "quote": "no more than ~20% of commons red-flagged",
+      "note": "VERIFIED 2026-08-09: Rosewater's primary New World Order article defines the three complexity types ('Comprehension complexity and board complexity are a problem for beginners. Strategic complexity is not.') but states NO numeric budget. The 20% figure is the MTG Salvation community codification only, and Play Boosters deliberately raised common complexity again, so treat this as a tunable parameter rather than canon."
+    },
+    "asFanTargets.removal": {
+      "source": "riptideRemoval",
+      "confidence": "community",
+      "quote": "The amount of removal per pack has stayed essentially the same since Invasion, at roughly 20% of the pack, an as-fan of about 3",
+      "note": "Cube designers in the same thread measured their own lists at 19.3% and 19.67% (as-fan ~2.95), so ~3.0 is a defensible center with a +/-0.5 band. ERA MISMATCH, verified 2026-08-09: 20% and an as-fan of 3 are simultaneously true only for a 15-card DRAFT booster. Under this profile's simplified Play Booster (1 land + 9 commons + 3 uncommons + 1 rare/mythic = 13 nonland slots) the same 20% share is 2.6. Treat removal (3.0) as the density target and removalShareOfPack (0.2) as the era-legacy share; do not derive one from the other."
+    },
+    "asFanTargets.removalShareOfPack": {
+      "source": "riptideRemoval",
+      "confidence": "community",
+      "quote": "roughly 20% of the pack",
+      "note": "Measured on 15-card draft boosters. See the era-mismatch note on asFanTargets.removal before combining this with the Play Booster slot model."
+    },
+    "asFanTargets.mainMechanicMin": {
+      "source": "nb17p2",
+      "confidence": "inferred",
+      "quote": "That gives you 0.111. Now multiply that by the number of slots you have for that rarity. There are nine common slots. That gets you 0.999, which rounds to one.",
+      "note": "INFERRED: the article gives the as-fan formula and a worked example landing at 1.252 for a headline mechanic, but states no explicit floor. We adopt 1.0 (one copy per booster on average) as the working floor for a set's main mechanic. Also noted during verification: the worked example says 'seven commons' yet computes 7/81 as 0.111 (that is 9/81); the arithmetic implies nine commons. The formula weights, not the example, are what we encode."
+    },
+    "asFanTargets.goldInMulticolorSet": {
+      "source": "mtgWikiAsFan",
+      "confidence": "community",
+      "quote": "multicolor-themed sets replace 4-6 colored common slots with gold/fixing, yielding about 20 gold commons per 100 and a gold as-fan of about 2"
+    },
+    "rarityRules.bombsMinRarity": {
+      "source": "nb4",
+      "confidence": "sourced",
+      "quote": "Magic needs its bombs, and to keep from ruining Limited these bombs are kept to rare and mythic rare."
+    },
+    "rarityRules.maxComplexityRarity": {
+      "source": "nb4",
+      "confidence": "sourced",
+      "quote": "we tend not to put the super complex cards at mythic rare because we like mythic rares to be a little more straightforward. That means rare is the sole home for the uber-complicated cards."
+    },
+    "rarityRules.rareCyclesMin": {
+      "source": "nb4",
+      "confidence": "inferred",
+      "quote": "You will probably have at least two rare cycles",
+      "note": "INFERRED: the article states this as a likelihood, not a requirement. We adopt it as a generator floor."
+    },
+    "rarityRules.uncommonDesignSpaceShareSmallSet": {
+      "source": "nb4",
+      "confidence": "sourced",
+      "quote": "Uncommons do just as much work as commons but in 66% the space (60% in large sets)."
+    },
+    "rarityRules.uncommonDesignSpaceShareLargeSet": {
+      "source": "nb4",
+      "confidence": "sourced",
+      "quote": "Uncommons do just as much work as commons but in 66% the space (60% in large sets)."
+    }
+  }
+}

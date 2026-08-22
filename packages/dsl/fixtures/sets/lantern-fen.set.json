@@ -1,0 +1,446 @@
+{
+  "formatVersion": 1,
+  "set": {
+    "code": "LNF",
+    "name": "Lantern Fen",
+    "theme": "A hand-authored shape corpus rather than a generated set: a lantern-lit fen of causeways and toll roads, written only so a pool exists that prints every printed ability kind.",
+    "seed": "lantern-fen/shapes",
+    "profile": "hand-authored"
+  },
+  "cards": [
+    {
+      "id": "lnf-fen-warden",
+      "name": "Fen Warden",
+      "rarity": "uncommon",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 1
+      },
+      "colors": ["W"],
+      "supertypes": [],
+      "subtypes": ["Human", "Soldier"],
+      "keywords": [],
+      "effects": [],
+      "abilities": [
+        {
+          "kind": "static",
+          "scope": "otherCreaturesYouControl",
+          "subtype": null,
+          "modification": {
+            "kind": "statBonus",
+            "power": 1,
+            "toughness": 0
+          }
+        }
+      ],
+      "costReduction": null,
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0,
+        "hasX": false
+      },
+      "artifact": false
+    },
+    {
+      "id": "lnf-lamplighter",
+      "name": "Marsh Lamplighter",
+      "rarity": "common",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 2
+      },
+      "colors": ["W"],
+      "supertypes": [],
+      "subtypes": ["Human"],
+      "keywords": [],
+      "effects": [],
+      "abilities": [
+        {
+          "kind": "triggered",
+          "condition": "selfEnters",
+          "effects": [
+            {
+              "kind": "gainLife",
+              "amount": 2,
+              "target": {
+                "kind": "noTarget"
+              }
+            }
+          ]
+        }
+      ],
+      "costReduction": null,
+      "power": 2,
+      "toughness": 1,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0,
+        "hasX": false
+      },
+      "artifact": false
+    },
+    {
+      "id": "lnf-tollkeeper",
+      "name": "Causeway Tollkeeper",
+      "rarity": "common",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 3
+      },
+      "colors": ["W"],
+      "supertypes": [],
+      "subtypes": ["Human", "Soldier"],
+      "keywords": [],
+      "keywordAbilities": [
+        {
+          "kind": "defender"
+        }
+      ],
+      "effects": [],
+      "abilities": [],
+      "costReduction": null,
+      "power": 1,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0,
+        "hasX": false
+      },
+      "artifact": false
+    },
+    {
+      "id": "lnf-stilt-walker",
+      "name": "Stiltmarsh Walker",
+      "rarity": "common",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 4
+      },
+      "colors": ["W"],
+      "supertypes": [],
+      "subtypes": ["Bird", "Soldier"],
+      "keywords": ["flying"],
+      "effects": [],
+      "abilities": [],
+      "costReduction": null,
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0,
+        "hasX": false
+      },
+      "artifact": false
+    },
+    {
+      "id": "lnf-ember-adept",
+      "name": "Ember Adept",
+      "rarity": "uncommon",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 5
+      },
+      "colors": ["R"],
+      "supertypes": [],
+      "subtypes": ["Human", "Shaman"],
+      "keywords": [],
+      "effects": [],
+      "abilities": [
+        {
+          "kind": "activated",
+          "cost": {
+            "mana": {
+              "generic": 0,
+              "W": 0,
+              "U": 0,
+              "B": 0,
+              "R": 0,
+              "G": 0,
+              "hasX": false
+            },
+            "tapSelf": true,
+            "sacrificeSelf": false
+          },
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": 1,
+              "target": {
+                "kind": "anyTarget"
+              }
+            }
+          ]
+        }
+      ],
+      "costReduction": null,
+      "power": 1,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0,
+        "hasX": false
+      },
+      "artifact": false
+    },
+    {
+      "id": "lnf-peat-runner",
+      "name": "Peat Runner",
+      "rarity": "common",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 6
+      },
+      "colors": ["R"],
+      "supertypes": [],
+      "subtypes": ["Human", "Warrior"],
+      "keywords": ["haste"],
+      "effects": [],
+      "abilities": [],
+      "costReduction": null,
+      "power": 3,
+      "toughness": 1,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0,
+        "hasX": false
+      },
+      "artifact": false
+    },
+    {
+      "id": "lnf-kindling-rite",
+      "name": "Kindling Rite",
+      "rarity": "common",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 7
+      },
+      "colors": ["R"],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "dealDamage",
+          "amount": 2,
+          "target": {
+            "kind": "anyTarget"
+          }
+        }
+      ],
+      "may": "you",
+      "abilities": [],
+      "costReduction": null,
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0,
+        "hasX": false
+      }
+    },
+    {
+      "id": "lnf-toll-of-passage",
+      "name": "Toll of Passage",
+      "rarity": "uncommon",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 8
+      },
+      "colors": ["W"],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "tapPermanent",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "unless": {
+        "payer": "targetController",
+        "cost": {
+          "generic": 2,
+          "W": 0,
+          "U": 0,
+          "B": 0,
+          "R": 0,
+          "G": 0,
+          "hasX": false
+        }
+      },
+      "abilities": [],
+      "costReduction": null,
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0,
+        "hasX": false
+      }
+    },
+    {
+      "id": "lnf-wayfarers-ledger",
+      "name": "Wayfarer's Ledger",
+      "rarity": "uncommon",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 9
+      },
+      "colors": [],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [],
+      "abilities": [],
+      "costReduction": {
+        "amount": 1,
+        "cardType": "creature"
+      },
+      "kind": "artifact",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0,
+        "hasX": false
+      },
+      "entryReplacement": {
+        "kind": "entersTapped"
+      }
+    },
+    {
+      "id": "lnf-fen-causeway",
+      "name": "Lantern Causeway",
+      "rarity": "uncommon",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 10
+      },
+      "colors": [],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [],
+      "abilities": [],
+      "costReduction": null,
+      "kind": "land",
+      "producesMana": ["W", "R"],
+      "entryReplacement": {
+        "kind": "entersTapped"
+      }
+    },
+    {
+      "id": "lnf-toll-of-ruin",
+      "name": "Toll of Ruin",
+      "rarity": "uncommon",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 11
+      },
+      "colors": ["B"],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "sacrificePermanent",
+          "target": {
+            "kind": "targetOpponent"
+          }
+        }
+      ],
+      "abilities": [],
+      "costReduction": null,
+      "kind": "sorcery",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0,
+        "hasX": false
+      }
+    },
+    {
+      "id": "lnf-plains",
+      "name": "Plains",
+      "rarity": "common",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 12
+      },
+      "colors": [],
+      "supertypes": ["basic"],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [],
+      "abilities": [],
+      "costReduction": null,
+      "kind": "land",
+      "basicLandType": "Plains",
+      "producesMana": ["W"]
+    },
+    {
+      "id": "lnf-mountain",
+      "name": "Mountain",
+      "rarity": "common",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 13
+      },
+      "colors": [],
+      "supertypes": ["basic"],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [],
+      "abilities": [],
+      "costReduction": null,
+      "kind": "land",
+      "basicLandType": "Mountain",
+      "producesMana": ["R"]
+    }
+  ]
+}

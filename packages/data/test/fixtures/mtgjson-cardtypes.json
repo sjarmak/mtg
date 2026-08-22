@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "date": "2026-08-09",
+    "version": "5.3.0+20260809"
+  },
+  "data": {
+    "creature": {
+      "subTypes": [
+        "Advisor",
+        "Aetherborn",
+        "Alien",
+        "Ally",
+        "Andorian",
+        "Angel",
+        "Antelope",
+        "Ape",
+        "Archer",
+        "Archon",
+        "Armadillo",
+        "Army",
+        "Artificer",
+        "Assassin",
+        "Assembly-Worker",
+        "Astartes",
+        "Atog",
+        "Aurochs",
+        "Automaton",
+        "Avatar",
+        "Azra",
+        "Badger",
+        "Balloon",
+        "Barbarian",
+        "Bard"
+      ],
+      "superTypes": ["Basic", "Legendary", "Ongoing", "Snow", "World"]
+    },
+    "instant": {
+      "subTypes": ["Adventure", "Arcane", "Chorus", "Lesson", "Omen", "Trap"],
+      "superTypes": ["Basic", "Legendary", "Ongoing", "Snow", "World"]
+    },
+    "sorcery": {
+      "subTypes": ["Adventure", "Arcane", "Chorus", "Lesson", "Omen", "Trap"],
+      "superTypes": ["Basic", "Legendary", "Ongoing", "Snow", "World"]
+    },
+    "artifact": {
+      "subTypes": [
+        "Attraction",
+        "Blood",
+        "Bobblehead",
+        "Book",
+        "Clue",
+        "Contraption",
+        "Equipment",
+        "Food",
+        "Fortification",
+        "Gold",
+        "Incubator",
+        "Infinity",
+        "Junk",
+        "Map",
+        "Powerstone",
+        "Spacecraft",
+        "Stone",
+        "Terminus",
+        "Treasure",
+        "Vehicle"
+      ],
+      "superTypes": ["Basic", "Legendary", "Ongoing", "Snow", "World"]
+    },
+    "land": {
+      "subTypes": [
+        "Cave",
+        "Cloud",
+        "Desert",
+        "Forest",
+        "Gate",
+        "Island",
+        "Lair",
+        "Locus",
+        "Mine",
+        "Mountain",
+        "Plains",
+        "Planet",
+        "Power-Plant",
+        "Sphere",
+        "Swamp",
+        "Tower",
+        "Town",
+        "Urza's"
+      ],
+      "superTypes": ["Basic", "Legendary", "Ongoing", "Snow", "World"]
+    }
+  }
+}

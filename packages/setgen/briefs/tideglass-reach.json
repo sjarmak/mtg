@@ -1,0 +1,44 @@
+{
+  "setCode": "TGR",
+  "setName": "Tideglass Reach",
+  "theme": "A drowned archipelago where volcanic glass grows out of the tide like coral. Storm-priests read the weather in its facets, reef-clans harvest it for blades, and something older is waking under the deepest shelf. Flavour is coastal, weathered and elemental: salt, obsidian, kelp, thunderheads, and creatures shaped by pressure and current.",
+  "seed": "tideglass-1",
+  "targetSize": 90,
+  "mechanics": [
+    {
+      "name": "Skywake",
+      "description": "Storm-riders and glass-winged scouts hold the air; white and blue press the advantage while the board stalls.",
+      "keywords": ["flying", "vigilance"],
+      "effectKinds": [],
+      "colors": ["W", "U"]
+    },
+    {
+      "name": "Glasscut",
+      "description": "Obsidian weaponry: small bodies that trade up, and burn that finishes what the blades start.",
+      "keywords": ["firstStrike", "deathtouch"],
+      "effectKinds": ["dealDamage"],
+      "colors": ["B", "R"]
+    },
+    {
+      "name": "Rootbound",
+      "description": "Kelp-forest giants that grow into the late game; green and white build the biggest body and swing.",
+      "keywords": ["trample", "reach"],
+      "effectKinds": ["pumpUntilEndOfTurn"],
+      "colors": ["G", "W"]
+    },
+    {
+      "name": "Undertow",
+      "description": "The deep shelf pulls things down: blue and black grind the opponent's library and refill their own hand.",
+      "keywords": [],
+      "effectKinds": ["millCards", "drawCards"],
+      "colors": ["U", "B"]
+    }
+  ],
+  "archetypeNotes": [
+    "WU wants cheap evasive bodies and ways to keep the ground stalled.",
+    "BR wants efficient trades: deathtouch and first strike blockers plus reach damage.",
+    "GW wants a curve topping out at genuinely large creatures with trample.",
+    "UB wants card flow and a mill clock as an alternate finish.",
+    "RG wants aggressive bodies with haste and pump rather than card advantage."
+  ]
+}

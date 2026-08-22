@@ -1,0 +1,347 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Belt and braces on top of the CLI flags: even a stray direct call into
+  # `@mtg/llm` from a test can only reach recorded responses. No key is ever
+  # exported to a CI job, so a live provider would fail loudly rather than spend.
+  MTG_LLM_PROVIDER: fixture
+
+jobs:
+  checks:
+    name: typecheck, lint, format, unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        # `npm ci` rather than `npm install`: it installs exactly the lockfile
+        # and fails instead of silently resolving a drifted tree, which is the
+        # only way a CI install is evidence about the committed dependencies.
+        # This step was `npm install` until 2026-08-09 because the lockfile
+        # predated every workspace package and `npm ci` aborted with
+        # "Missing: @mtg/slice@0.0.0 from lock file"; the set-generation run
+        # regenerated it, and `npm ci --dry-run` now exits 0.
+        run: npm ci --no-audit --no-fund
+
+      - name: License guard — no GPL or AGPL source in the tree
+        # Forge is GPL-3.0 and may only ever exist as a downloaded artifact under
+        # the gitignored `tools/forge/dist/`, driven as a subprocess. A tracked
+        # `.java`/`.jar`/`.class` file means somebody vendored it, which
+        # contaminates the whole repository (decision-synthesis.md §2.6).
+        #
+        # All four checks ADR-0001 §5.4 makes mandatory, which calls them "not
+        # optional" and forbids skipping them with an inline suppression. The
+        # first two existed from the start; the path-fragment and license-header
+        # scans were added 2026-08-09 after an audit found the guard would have
+        # passed a vendoring event of exactly the kind the ADR names.
+        run: |
+          fail=0
+
+          vendored=$(git ls-files -- '*.java' '*.jar' '*.class' || true)
+          if [ -n "$vendored" ]; then
+            echo "::error::GPL engine source appears to be vendored:"
+            echo "$vendored"
+            fail=1
+          fi
+
+          # `tools/forge/README.md` is ours and describes the download; anything
+          # else under that directory is the distribution and must stay ignored.
+          tracked_forge=$(git ls-files -- 'tools/forge' | grep -v '^tools/forge/README\.md$' || true)
+          if [ -n "$tracked_forge" ]; then
+            echo "::error::the Forge distribution must stay gitignored, but these are tracked:"
+            echo "$tracked_forge"
+            fail=1
+          fi
+
+          # Upstream source trees carry their directory names with them, so a
+          # partial copy shows up as a path even when the file extension does not.
+          fragments=$(git ls-files | grep -Ei 'forge-game/|forge-gui/|Mage\.Sets/|magarena/|manabrew/' || true)
+          if [ -n "$fragments" ]; then
+            echo "::error::these paths look like a vendored engine tree:"
+            echo "$fragments"
+            fail=1
+          fi
+
+          # License *headers*, not mentions: our own docs discuss Forge's GPL-3.0
+          # license constantly and must not trip this. This file is excluded
+          # because it necessarily contains the patterns it searches for.
+          headers=$(git grep -Iln \
+            -e 'GNU General Public License' \
+            -e 'GNU Affero General Public License' \
+            -e 'SPDX-License-Identifier: *A\?GPL' \
+            -- . ':!.github/workflows/ci.yml' || true)
+          if [ -n "$headers" ]; then
+            echo "::error::GPL/AGPL license headers found in our own tree:"
+            echo "$headers"
+            fail=1
+          fi
+
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::license guard failed; see ADR-0001 §5.4"
+            exit 1
+          fi
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format
+
+      - name: Unit tests
+        # `--project unit` rather than `npm test`: the root `test` script is a
+        # bare `vitest run`, which also picks up the `balance` project. That
+        # suite is minutes long and asserts format health, not code
+        # correctness, so it runs as its own job below.
+        run: npx vitest run --project unit
+
+  slice:
+    name: thin slice (fixed seed, fixture provider, real Forge boot gate)
+    runs-on: ubuntu-latest
+    # 20 was enough for the loop alone; the Forge provisioning below adds a
+    # ~300 MB download on a cold cache plus a bzip2 extraction.
+    timeout-minutes: 30
+    env:
+      FORGE_VERSION: 2.0.14
+      # The extracted distribution. `tools/forge/dist/` is gitignored and the
+      # license guard above fails the build if it ever becomes tracked, so this
+      # stays a downloaded artifact driven as a subprocess — never vendored.
+      FORGE_HOME: ${{ github.workspace }}/tools/forge/dist
+      # Forge writes decks, the custom set, preferences and logs under its user
+      # directory. Keeping that outside FORGE_HOME means the extracted tree
+      # stays exactly what the release shipped, and no run inherits an earlier
+      # run's card scripts — a stale script could mask a card that stopped
+      # transpiling.
+      FORGE_USER_DIR: ${{ github.workspace }}/out/forge-userdata
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        # `npm ci` rather than `npm install`: it installs exactly the lockfile
+        # and fails instead of silently resolving a drifted tree, which is the
+        # only way a CI install is evidence about the committed dependencies.
+        # This step was `npm install` until 2026-08-09 because the lockfile
+        # predated every workspace package and `npm ci` aborted with
+        # "Missing: @mtg/slice@0.0.0 from lock file"; the set-generation run
+        # regenerated it, and `npm ci --dry-run` now exits 0.
+        run: npm ci --no-audit --no-fund
+
+      - name: Java 21 for Forge
+        # Forge 2.0.14 is built for 21; spike A measured it on 21.0.11.
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache the Forge release archive
+        id: forge-archive
+        uses: actions/cache@v4
+        with:
+          # The archive only, never the extracted tree: extraction is cheap and
+          # the tree acquires run state (forge.profile.properties), which has no
+          # business being restored into a later job.
+          path: tools/forge/forge-installer-${{ env.FORGE_VERSION }}.tar.bz2
+          key: forge-installer-${{ env.FORGE_VERSION }}
+
+      - name: Download Forge
+        if: steps.forge-archive.outputs.cache-hit != 'true'
+        # Forge is GPL-3.0. It is fetched at job time from the upstream release
+        # and invoked as a subprocess; no source, jar or card script of Forge's
+        # is ever committed to this repository (ADR-0001 §5).
+        run: |
+          mkdir -p tools/forge
+          curl -fL --retry 3 --retry-delay 5 --retry-all-errors \
+            -o "tools/forge/forge-installer-${FORGE_VERSION}.tar.bz2" \
+            "https://github.com/Card-Forge/forge/releases/download/forge-${FORGE_VERSION}/forge-installer-${FORGE_VERSION}.tar.bz2"
+
+      - name: Extract Forge
+        # Always from the archive, so a cache hit and a cold run produce the
+        # same tree. `ls` doubles as the assertion: no jar, no job.
+        run: |
+          mkdir -p "${FORGE_HOME}"
+          tar -xjf "tools/forge/forge-installer-${FORGE_VERSION}.tar.bz2" -C "${FORGE_HOME}"
+          jar=$(ls "${FORGE_HOME}"/forge-gui-desktop-*-jar-with-dependencies.jar)
+          echo "Forge jar: ${jar}"
+
+      - name: Start an X server for Forge
+        # Forge's desktop entry point constructs its Swing GUI before it
+        # dispatches to `sim`, so with no DISPLAY it exits 1 printing nothing at
+        # all (docs/research/spike-a-forge-throughput.md §1.1). Xvfb is enough.
+        # nohup + redirection keeps the server off this step's stdout pipe, and
+        # the socket check means a server that never came up fails the job here
+        # rather than surfacing later as an unattributable Forge exit.
+        run: |
+          if ! command -v Xvfb > /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends xvfb
+          fi
+          nohup Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp > /tmp/xvfb.log 2>&1 &
+          for _ in $(seq 1 30); do
+            if [ -S /tmp/.X11-unix/X99 ]; then break; fi
+            sleep 1
+          done
+          if [ ! -S /tmp/.X11-unix/X99 ]; then
+            echo "::error::Xvfb never opened a socket on :99"
+            cat /tmp/xvfb.log
+            exit 1
+          fi
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+
+      - name: Run the unattended loop
+        # No LLM spend: the fixture provider replays recorded responses from
+        # disk. The one thing this job does reach the network for is the Forge
+        # release above, and that is the point — the slice's exit criterion
+        # (decision-synthesis.md §5) includes "every card boots headlessly, one
+        # scripted smoke game runs", which is not met by a gate that skips.
+        #
+        # `--metrics-gate advisory` is deliberate and is not a way of hiding a
+        # red band. This job's contract is the *pipeline*: every stage completes
+        # or the run exits 2 and the job fails. Format health is asserted by the
+        # `balance` job below, which is BLOCKING, sized for the question, and
+        # measures the same content against an explicit known-red baseline.
+        # Asserting it twice would only mean one content problem failing two
+        # jobs. The verdict is printed here either way and lands in summary.json.
+        run: |
+          npm run slice -- \
+            --seed ci/thin-slice/v0 \
+            --games 60 \
+            --provider fixture \
+            --metrics-gate advisory \
+            --out "${GITHUB_WORKSPACE}/out/slice"
+
+      - name: Assert the Forge boot gate actually ran
+        # The ratchet for mtg-bc2.31. `bootGate` degrades to `skipped` whenever
+        # the engine is missing or dies before playing, and a skip is a silent
+        # hole in the exit criterion: the loop stays green while conformance
+        # goes unproven. This step reads the verdict the run wrote and fails the
+        # job on anything short of a real pass, so the gate cannot quietly stop
+        # executing again.
+        run: |
+          summary="${GITHUB_WORKSPACE}/out/slice/summary.json"
+          if [ ! -f "$summary" ]; then
+            echo "::error::the run wrote no summary.json; the Forge verdict is unknown"
+            exit 1
+          fi
+          status=$(jq -r '.forge.status' "$summary")
+          reason=$(jq -r '.forge.reason' "$summary")
+          version=$(jq -r '.forge.forgeVersion' "$summary")
+          games=$(jq -r '.forge.gamesPlayed' "$summary")
+          cards=$(jq -r '.forge.cardCount' "$summary")
+          problems=$(jq -r '.forge.problemCards | length' "$summary")
+          {
+            echo '## Forge conformance gate'
+            echo ''
+            echo "- status: \`${status}\`"
+            echo "- Forge version: \`${version}\`"
+            echo "- cards transpiled and booted: ${cards}"
+            echo "- smoke games completed: ${games}"
+            echo "- cards Forge could not load: ${problems}"
+            if [ -n "$reason" ]; then echo "- reason: ${reason}"; fi
+            echo ''
+            echo 'Commands, verbatim:'
+            echo ''
+            echo '```'
+            jq -r '.forge.commands[]' "$summary"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$status" != "passed" ]; then
+            echo "::error::the Forge boot gate reported ${status}, not passed: ${reason}"
+            exit 1
+          fi
+          if [ "$games" -lt 1 ]; then
+            echo "::error::the gate passed without completing a game, which cannot be a pass"
+            exit 1
+          fi
+          if [ "$version" = "null" ]; then
+            echo "::error::the gate passed without naming a Forge version, so no engine ran"
+            exit 1
+          fi
+
+      - name: Publish the go/no-go memo
+        if: always()
+        run: |
+          {
+            echo '## Thin-slice memo'
+            echo ''
+            echo '```'
+            cat "${GITHUB_WORKSPACE}/out/slice/memo.txt" 2>/dev/null || echo 'the run produced no memo; see the step log for the failing stage'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload run artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slice-run
+          path: |
+            out/slice/summary.json
+            out/slice/memo.txt
+            out/slice/metrics/
+            out/slice/set/
+            out/slice/decks/
+          if-no-files-found: warn
+          retention-days: 14
+
+  balance:
+    name: balance gate (seeded mass sim)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Separate job because a balance run is a mass simulation rather than a unit
+    # test, and it
+    # asserts a different thing from the rest of CI: format health of the v0
+    # content, not correctness of the code.
+    #
+    # BLOCKING. The suite plays decks built by `@mtg/deckbuild` from a frozen
+    # generated set, so a red gate here is a real statement about content or
+    # bots. Gates that are already red for known reasons are listed one by one
+    # in `packages/metrics/test/balance/baseline.ts`, each with the value
+    # measured when it was waived and the bead tracking it; anything failing
+    # outside that list fails this job. The baseline is a ratchet, not an
+    # amnesty: a waived gate that starts passing, or drifts more than two
+    # points, also fails the job so the list cannot rot.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        # `npm ci` rather than `npm install`: it installs exactly the lockfile
+        # and fails instead of silently resolving a drifted tree, which is the
+        # only way a CI install is evidence about the committed dependencies.
+        # This step was `npm install` until 2026-08-09 because the lockfile
+        # predated every workspace package and `npm ci` aborted with
+        # "Missing: @mtg/slice@0.0.0 from lock file"; the set-generation run
+        # regenerated it, and `npm ci --dry-run` now exits 0.
+        run: npm ci --no-audit --no-fund
+
+      - name: Balance gate
+        run: npm run test:balance

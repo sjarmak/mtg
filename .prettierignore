@@ -1,0 +1,18 @@
+# Recorded artifacts, kept byte-for-byte as the provider emitted them.
+#
+# These are captured transport payloads, not source: `@mtg/llm`'s claude-cli
+# fixtures came from real probe runs, `@mtg/setgen`'s came from one live
+# generation, and `@mtg/referee`'s is the one live ruling that package replays.
+# Reformatting them would break the claim that what is on disk is what the
+# provider actually returned, and `npm run format` was failing on three of them.
+packages/llm/test/fixtures/
+packages/setgen/fixtures/
+packages/referee/fixtures/
+packages/cube/fixtures/
+
+# Written by `decklab --artifact`, byte-for-byte as the tool emits it. Formatting
+# it here would put `npm run format` and every rebuild of the deck in a loop.
+packages/decklab/fixtures/
+
+# Run outputs.
+out/

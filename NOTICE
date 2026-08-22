@@ -1,0 +1,48 @@
+mtg-lab notice
+--------------
+
+A Magic-like set generator and playing lab: a typed mechanics DSL, an
+event-sourced rules kernel, a deck builder, a simulator, a format-health
+metrics gate, and a browser lab to play the result.
+
+Attribution
+-----------
+
+Portions of the materials used are property of Wizards of the Coast.
+(C)Wizards of the Coast LLC.
+
+This lab is unofficial Fan Content permitted under the Fan Content Policy.
+Not approved/endorsed by Wizards.
+
+Card data from Scryfall (https://scryfall.com), used under their API
+guidelines. Nothing is mirrored: `@mtg/image-cache` fetches an image once, on
+demand, keyed by URL, and keeps it in a gitignored local cache.
+
+Vocabulary data from MTGJSON (https://mtgjson.com), MIT licensed.
+
+Human draft and play data from 17Lands (https://www.17lands.com), CC BY 4.0.
+The simulator's replay logs emit a superset of the 17Lands replay schema under
+identical column names so that calibration against that data is a join.
+
+Ported and referenced engines
+-----------------------------
+
+XMage (https://github.com/magefree/mage) and Argentum
+(https://github.com/argentum-mtg/argentum), both MIT licensed, were mined as
+reference designs for the continuous-effects and replacement-effect
+subsystems. Where a file is a port rather than an independent implementation,
+its header names the upstream file and its license, and those headers are
+required by this project's engine-strategy decision record rather than
+optional courtesy.
+
+Forge (https://github.com/Card-Forge/forge) is GPL-3.0 and is never vendored,
+linked or copied. It is downloaded at run time into a gitignored directory and
+driven as a subprocess, as a conformance oracle only. A continuous-integration
+guard fails the build if any Forge source, jar, class file or upstream path
+fragment ever becomes tracked in this repository.
+
+Draftmancer (https://github.com/Draftmancer/Draftmancer, MIT) is the draft
+surface `@mtg/draft-export` writes a custom-set file for. Nothing of it is
+copied here either; the exporter writes a file that tool can open.
+
+Third-party npm dependencies are listed in THIRD-PARTY-NOTICES.md.

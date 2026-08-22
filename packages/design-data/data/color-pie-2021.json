@@ -1,0 +1,401 @@
+{
+  "version": 1,
+  "table": "mechanical-color-pie-2021-slice-subset",
+  "verifiedOn": "2026-08-09",
+  "rights": "Classifications below are facts restated from a copyrighted Wizards of the Coast article under the WotC Fan Content Policy (https://company.wizards.com/en/legal/fancontentpolicy). Quotes are the short designation lines retained so each row is auditable. No article text is redistributed.",
+  "conventions": [
+    "The source lists, per ability, the colors that are Primary, Secondary and/or Tertiary. A color that appears under none of those designations for an ability is recorded here as offPie: absence from the designation lines IS the source's way of saying the color does not get the ability.",
+    "Every row records an explicit level for all five colors so that completeness is checkable rather than implied.",
+    "The pinned slice vocabulary is coarser than the source's ability catalog (e.g. the source distinguishes 'Destroy target creature.' from 'Artifact destruction'). Where a slice primitive spans several source entries, the row is marked confidence: inferred and the rationale names the entries it was composed from and which reading was chosen.",
+    "A tertiary classification is a budgeted warning, not an error: the source treats tertiary abilities as rare-but-legal. Off-pie is the failure case; a deliberate off-pie card is a bend or a break and needs an explicit design note (see the bend-vs-break sources)."
+  ],
+  "sources": {
+    "mcp2021": {
+      "title": "Mechanical Color Pie 2021",
+      "author": "Mark Rosewater",
+      "publisher": "Wizards of the Coast, Making Magic",
+      "url": "https://magic.wizards.com/en/news/making-magic/mechanical-color-pie-2021",
+      "year": 2021,
+      "kind": "first-party"
+    },
+    "mcp2021changes": {
+      "title": "Mechanical Color Pie 2021 Changes",
+      "author": "Mark Rosewater",
+      "publisher": "Wizards of the Coast, Making Magic",
+      "url": "https://magic.wizards.com/en/news/making-magic/mechanical-color-pie-2021-changes",
+      "year": 2021,
+      "kind": "first-party"
+    },
+    "bendVsBreak": {
+      "title": "Blogatog: what differentiates a color pie bend from a break",
+      "author": "Mark Rosewater",
+      "publisher": "markrosewater.tumblr.com",
+      "url": "https://markrosewater.tumblr.com/post/823974806354575360/can-you-explain-what-differentiates-a-color-pie",
+      "year": 2023,
+      "kind": "first-party"
+    }
+  },
+  "rows": [
+    {
+      "subject": "flying",
+      "subjectKind": "keyword",
+      "canonEntry": "Flying",
+      "levels": {
+        "W": "primary",
+        "U": "primary",
+        "B": "secondary",
+        "R": "secondary",
+        "G": "tertiary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: White and blue / Secondary: Black and red / Tertiary: Green",
+      "note": "Red's share is restricted in practice to Dragons, Phoenixes and occasional small weak fliers; green's tertiary is close to a quaternary."
+    },
+    {
+      "subject": "vigilance",
+      "subjectKind": "keyword",
+      "canonEntry": "Vigilance",
+      "levels": {
+        "W": "primary",
+        "U": "secondary",
+        "B": "offPie",
+        "R": "offPie",
+        "G": "secondary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: White / Secondary: Blue and green"
+    },
+    {
+      "subject": "haste",
+      "subjectKind": "keyword",
+      "canonEntry": "Haste",
+      "levels": {
+        "W": "offPie",
+        "U": "offPie",
+        "B": "secondary",
+        "R": "primary",
+        "G": "secondary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: Red / Secondary: Black and green"
+    },
+    {
+      "subject": "trample",
+      "subjectKind": "keyword",
+      "canonEntry": "Trample",
+      "levels": {
+        "W": "tertiary",
+        "U": "tertiary",
+        "B": "tertiary",
+        "R": "secondary",
+        "G": "primary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: Green / Secondary: Red / Tertiary: White, blue, and black"
+    },
+    {
+      "subject": "deathtouch",
+      "subjectKind": "keyword",
+      "canonEntry": "Deathtouch",
+      "levels": {
+        "W": "offPie",
+        "U": "offPie",
+        "B": "primary",
+        "R": "offPie",
+        "G": "secondary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: Black / Secondary: Green"
+    },
+    {
+      "subject": "lifelink",
+      "subjectKind": "keyword",
+      "canonEntry": "Lifelink",
+      "levels": {
+        "W": "primary",
+        "U": "offPie",
+        "B": "primary",
+        "R": "offPie",
+        "G": "offPie"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: White and black"
+    },
+    {
+      "subject": "menace",
+      "subjectKind": "keyword",
+      "canonEntry": "Menace",
+      "levels": {
+        "W": "offPie",
+        "U": "offPie",
+        "B": "primary",
+        "R": "primary",
+        "G": "offPie"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: Black and red"
+    },
+    {
+      "subject": "reach",
+      "subjectKind": "keyword",
+      "canonEntry": "Reach",
+      "levels": {
+        "W": "tertiary",
+        "U": "offPie",
+        "B": "offPie",
+        "R": "secondary",
+        "G": "primary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: Green / Secondary: Red / Tertiary: White",
+      "note": "White's tertiary comes mostly on archers."
+    },
+    {
+      "subject": "firstStrike",
+      "subjectKind": "keyword",
+      "canonEntry": "First strike",
+      "levels": {
+        "W": "primary",
+        "U": "offPie",
+        "B": "tertiary",
+        "R": "primary",
+        "G": "offPie"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: White and red / Tertiary: Black",
+      "note": "Black's tertiary use is these days almost exclusively on Knights. The related Double strike entry is Primary white and red only, and the source states black does not get double strike despite being tertiary in first strike."
+    },
+    {
+      "subject": "dealDamage",
+      "subjectKind": "effect",
+      "canonEntry": "Deal N damage to creature, planeswalker, and/or player.",
+      "levels": {
+        "W": "secondary",
+        "U": "offPie",
+        "B": "secondary",
+        "R": "primary",
+        "G": "offPie"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: Red / Secondary: White and black",
+      "note": "This is the generic any-target damage row, which is what the slice's dealDamage primitive expresses. Narrower source entries exist and are NOT covered here: 'Deal N damage to target attacking or blocking creature.' is Primary white, and 'Deal N damage to a creature with flying.' is Primary green / Tertiary red. A generator wanting green damage must express one of those narrower shapes, which the slice vocabulary cannot yet encode."
+    },
+    {
+      "subject": "destroyPermanent",
+      "subjectKind": "effect",
+      "canonEntry": "Destroy target creature. / Artifact destruction / Enchantment destruction",
+      "levels": {
+        "W": "secondary",
+        "U": "offPie",
+        "B": "primary",
+        "R": "offPie",
+        "G": "offPie"
+      },
+      "confidence": "inferred",
+      "source": "mcp2021",
+      "quote": "Destroy target creature. Primary: Black / Secondary: White",
+      "note": "INFERRED: the source has no generic 'destroy target permanent' entry. The slice's destroyPermanent primitive is coarser than the canon and, with targetCreature or anyTarget, its strongest legal reading is unconditional creature removal. We therefore classify it by the 'Destroy target creature.' row, which is the strictest correct gate. Red and green are recorded off-pie DESPITE being Primary for 'Artifact destruction' (Primary: Red and green / Secondary: White) and green being Primary for 'Enchantment destruction' (Primary: White and green / Secondary: Black), because the slice vocabulary cannot restrict the destroy target by permanent type; letting red or green pass here would license unconditional creature kill, a color-pie break. Revisit this row the moment the DSL gains type-restricted destruction."
+    },
+    {
+      "subject": "pumpUntilEndOfTurn",
+      "subjectKind": "effect",
+      "canonEntry": "+N/+N (on spells)",
+      "levels": {
+        "W": "primary",
+        "U": "offPie",
+        "B": "secondary",
+        "R": "secondary",
+        "G": "primary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: White and green / Secondary: Black and red",
+      "note": "The related '+N/+0' entry is Primary red / Secondary white and green, so a red pump that adds power only is stronger on-pie than this row suggests. Blue's pump entry is '+N/-N', a different effect; the slice's pumpUntilEndOfTurn accepts negative values and so can also express -N/-N (black and blue territory), which this row does not cover."
+    },
+    {
+      "subject": "putCounters",
+      "subjectKind": "effect",
+      "canonEntry": "+N/+N (on spells)",
+      "levels": {
+        "W": "primary",
+        "U": "offPie",
+        "B": "secondary",
+        "R": "secondary",
+        "G": "primary"
+      },
+      "confidence": "inferred",
+      "source": "mcp2021",
+      "quote": "Primary: White and green / Secondary: Black and red",
+      "note": "INFERRED: the source has no entry for the slice primitive, which places a named counter rather than naming an effect. A counter kind declares its effect once (@mtg/dsl COUNTER_DECLARATIONS) and the two stock kinds declare a stat change, so the strictest correct gate for placing one is the same \"+N/+N (on spells)\" row pumpUntilEndOfTurn is classified by, read as permanent rather than until end of turn. the flagship set's part counters declare keywords as well, and a part whose keyword is off-pie for the card placing it would pass this row; revisit it when a part counter grants something this row does not cover."
+    },
+    {
+      "subject": "drawCards",
+      "subjectKind": "effect",
+      "canonEntry": "Card draw",
+      "levels": {
+        "W": "tertiary",
+        "U": "primary",
+        "B": "secondary",
+        "R": "tertiary",
+        "G": "secondary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: Blue / Secondary: Black and green / Tertiary: White and red",
+      "note": "Black's secondary draw is priced with an additional cost, green's is creature-tied, white's is over-time with once-per-turn limits, and red's is impulsive-only. The slice primitive expresses none of those restrictions, so non-blue draw should stay small."
+    },
+    {
+      "subject": "gainLife",
+      "subjectKind": "effect",
+      "canonEntry": "Life gain",
+      "levels": {
+        "W": "primary",
+        "U": "offPie",
+        "B": "secondary",
+        "R": "offPie",
+        "G": "primary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: White and green / Secondary: Black",
+      "note": "Black's secondary status is tied to sacrificing, lifelink or drain rather than plain life gain."
+    },
+    {
+      "subject": "counterSpell",
+      "subjectKind": "effect",
+      "canonEntry": "Counterspell",
+      "levels": {
+        "W": "tertiary",
+        "U": "primary",
+        "B": "offPie",
+        "R": "offPie",
+        "G": "offPie"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: Blue / Tertiary: White",
+      "note": "White's tertiary is taxing and delay-style counters, not hard counters."
+    },
+    {
+      "subject": "createToken",
+      "subjectKind": "effect",
+      "canonEntry": "Token generation",
+      "levels": {
+        "W": "primary",
+        "U": "secondary",
+        "B": "secondary",
+        "R": "secondary",
+        "G": "primary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: White and green / Secondary: Blue, black, and red",
+      "note": "All five colors make creature tokens; the token's own characteristics still have to sit inside the creating color's pie."
+    },
+    {
+      "subject": "tapPermanent",
+      "subjectKind": "effect",
+      "canonEntry": "Tapping creatures",
+      "levels": {
+        "W": "primary",
+        "U": "secondary",
+        "B": "offPie",
+        "R": "offPie",
+        "G": "offPie"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: White / Secondary: Blue",
+      "note": "The canon entry is scoped to creatures while the slice primitive taps any permanent. Unlike destroyPermanent, the wider scope does not change the color assignment: tapping noncreature permanents is rare in every color, so the creature row is a faithful proxy."
+    },
+    {
+      "subject": "returnToHand",
+      "subjectKind": "effect",
+      "canonEntry": "Return to hand (Return target creature/permanent to its owner's hand.)",
+      "levels": {
+        "W": "secondary",
+        "U": "primary",
+        "B": "offPie",
+        "R": "offPie",
+        "G": "tertiary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: Blue / Secondary: White / Tertiary: Green"
+    },
+    {
+      "subject": "millCards",
+      "subjectKind": "effect",
+      "canonEntry": "Milling (You/target player puts the top N cards from his or her library into his or her graveyard.)",
+      "levels": {
+        "W": "offPie",
+        "U": "primary",
+        "B": "secondary",
+        "R": "offPie",
+        "G": "offPie"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "quote": "Primary: Blue / Secondary: Black",
+      "note": "Milling was blue-only for many years before black was added; treat black mill as a real but younger part of the pie."
+    },
+    {
+      "subject": "exileTarget",
+      "subjectKind": "effect",
+      "canonEntry": "Banisher Priest-like effect (When this card enters the battlefield, exile target creature/permanent until this card leaves play.) / Exiling cards from graveyard",
+      "quote": "Banisher Priest-like effect Primary: White. Exiling cards from graveyard Primary: Black / Secondary: White and green",
+      "levels": {
+        "W": "primary",
+        "U": "offPie",
+        "B": "offPie",
+        "R": "offPie",
+        "G": "offPie"
+      },
+      "confidence": "inferred",
+      "source": "mcp2021",
+      "note": "INFERRED: the source has no entry for unconditional, permanent exile of a permanent on the battlefield. The closest is the Banisher Priest effect, which is white and gives the permanent back when the exiling card leaves play; the slice primitive keeps it, so it is strictly stronger than the entry it is classified by, and white primary is the most permissive reading that is still correct. The other named exile entry, 'Exiling cards from graveyard' (Primary: Black / Secondary: White and green), reaches a different zone: the generatable form of this primitive drops its scope entirely (ZoneReachingModelEffectSchema), so nothing the generator can print exiles a graveyard, and licensing black off that entry would license black to exile a creature off the battlefield, which is a break. A hand-authored black card that scopes this primitive at a graveyard IS what the source licenses and this row still fails it; revisit when a scope-carrying exile is distinguishable here from an unscoped one."
+    },
+    {
+      "subject": "scry",
+      "subjectKind": "effect",
+      "canonEntry": "Scry",
+      "quote": "Primary: Blue / Secondary: White, black, red, and green",
+      "levels": {
+        "W": "secondary",
+        "U": "primary",
+        "B": "secondary",
+        "R": "secondary",
+        "G": "secondary"
+      },
+      "confidence": "sourced",
+      "source": "mcp2021",
+      "note": "The only row in the table with no off-pie color, and that is the source's designation rather than a gap in it: scry is the one piece of card selection every color was given. So the pie is never what stops a scry card. What a scry card costs is a question for the rarity budget and the effect ranges, and this row deliberately says nothing about it."
+    },
+    {
+      "subject": "returnFromGraveyard",
+      "subjectKind": "effect",
+      "canonEntry": "\"Reanimation\" (Return a creature card from a graveyard to the battlefield.)",
+      "quote": "Primary: White and black / Secondary: Red and green",
+      "levels": {
+        "W": "primary",
+        "U": "offPie",
+        "B": "primary",
+        "R": "secondary",
+        "G": "secondary"
+      },
+      "confidence": "inferred",
+      "source": "mcp2021",
+      "note": "INFERRED: the source's entry returns one creature card and the slice primitive returns every creature card in a graveyard, because its scope is creatureCardsInPlayerGraveyard and it has no single-card form at all - no TargetKind names a card in a graveyard, so the choice a singular reanimation spell asks for is a decision this vocabulary cannot pose. The count is a power question, which the rarity budget and the fill prompt's ranges answer; the color question is which colors return creatures from graveyards, and that is the entry quoted. The adjacent '\"Reanimate\" permanent' entry (Primary: White) is narrower in colors and wider in card types and is not used, because this primitive returns creature cards and nothing else. Blue is off-pie by the first convention: it appears under neither designation line."
+    }
+  ]
+}

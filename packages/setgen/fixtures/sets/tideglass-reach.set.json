@@ -1,0 +1,3001 @@
+{
+  "formatVersion": 1,
+  "set": {
+    "code": "TGR",
+    "name": "Tideglass Reach",
+    "theme": "A drowned archipelago where volcanic glass grows out of the tide like coral. Storm-priests read the weather in its facets, reef-clans harvest it for blades, and something older is waking under the deepest shelf. Flavour is coastal, weathered and elemental: salt, obsidian, kelp, thunderheads, and creatures shaped by pressure and current.",
+    "seed": "tideglass-1",
+    "profile": "skeleton-lite v1"
+  },
+  "cards": [
+    {
+      "id": "tgr-saltshrine-acolyte",
+      "name": "Saltshrine Acolyte",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 1
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Cleric"
+      ],
+      "keywords": [
+        "lifelink"
+      ],
+      "effects": [],
+      "power": 1,
+      "toughness": 1,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 0,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Lifelink"
+    },
+    {
+      "id": "tgr-reefclan-harpooner",
+      "name": "Reefclan Harpooner",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 2
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Merfolk",
+        "Soldier"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "",
+      "flavorText": "The reef teaches patience before it teaches anything else. A harpoon thrown in haste feeds nothing but the current."
+    },
+    {
+      "id": "tgr-stormglass-sentinel",
+      "name": "Stormglass Sentinel",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 3
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Cleric"
+      ],
+      "keywords": [
+        "vigilance"
+      ],
+      "effects": [],
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Vigilance"
+    },
+    {
+      "id": "tgr-tidewall-shieldbearer",
+      "name": "Tidewall Shieldbearer",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 4
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Soldier"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 1,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-kelp-bound-charger",
+      "name": "Kelp-Bound Charger",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 5
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Beast"
+      ],
+      "keywords": [
+        "trample"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Trample"
+    },
+    {
+      "id": "tgr-glasswing-scout",
+      "name": "Glasswing Scout",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 6
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Bird",
+        "Scout"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying",
+      "flavorText": "Nothing crosses the Reach in a straight line. The glass throws the wind back at itself."
+    },
+    {
+      "id": "tgr-breakwater-vanguard",
+      "name": "Breakwater Vanguard",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 7
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Knight"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 3,
+      "toughness": 4,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 3,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-thunderhead-roc",
+      "name": "Thunderhead Roc",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 8
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Bird"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 3,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-cliffshrine-giant",
+      "name": "Cliffshrine Giant",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 9
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Giant"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 4,
+      "toughness": 5,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 4,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-spiretide-guardian",
+      "name": "Spiretide Guardian",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 10
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Elemental"
+      ],
+      "keywords": [
+        "vigilance"
+      ],
+      "effects": [],
+      "power": 5,
+      "toughness": 6,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 4,
+        "W": 2,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Vigilance"
+    },
+    {
+      "id": "tgr-becalmed-in-the-shallows",
+      "name": "Becalmed in the Shallows",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 11
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "tapPermanent",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Tap target creature."
+    },
+    {
+      "id": "tgr-sealed-in-stormglass",
+      "name": "Sealed in Stormglass",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 12
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "destroyPermanent",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "sorcery",
+      "manaCost": {
+        "generic": 2,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Destroy target creature."
+    },
+    {
+      "id": "tgr-kelproot-groundswell",
+      "name": "Kelproot Groundswell",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 13
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "pumpUntilEndOfTurn",
+          "power": 5,
+          "toughness": 5,
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 3,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Target creature gets +5/+5 until end of turn."
+    },
+    {
+      "id": "tgr-saltspray-tern",
+      "name": "Saltspray Tern",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 14
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Bird"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 1,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-shardwing-darter",
+      "name": "Shardwing Darter",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 15
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Drake"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 2,
+      "toughness": 1,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-kelpshell-snapper",
+      "name": "Kelpshell Snapper",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 16
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Turtle"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 1,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-undershelf-diver",
+      "name": "Undershelf Diver",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 17
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Merfolk",
+        "Scout"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 2,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-facetreader-drake",
+      "name": "Facetreader Drake",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 18
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Drake"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-shardshell-crab",
+      "name": "Shardshell Crab",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 19
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Crab"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 1,
+      "toughness": 4,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-tidewatch-augur",
+      "name": "Tidewatch Augur",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 20
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Cleric"
+      ],
+      "keywords": [
+        "vigilance"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 4,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 3,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Vigilance"
+    },
+    {
+      "id": "tgr-shearwind-drake",
+      "name": "Shearwind Drake",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 21
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Drake"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 3,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-galecrown-elemental",
+      "name": "Galecrown Elemental",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 22
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Elemental"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 4,
+      "toughness": 4,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 4,
+        "W": 0,
+        "U": 2,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-shelfquake-serpent",
+      "name": "Shelfquake Serpent",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 23
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Serpent"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 6,
+      "toughness": 7,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 5,
+        "W": 0,
+        "U": 2,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-slip-beneath-the-swell",
+      "name": "Slip Beneath the Swell",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 24
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "returnToHand",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Return target creature to its owner's hand."
+    },
+    {
+      "id": "tgr-trawl-the-undertow",
+      "name": "Trawl the Undertow",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 25
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "drawCards",
+          "count": 2,
+          "target": {
+            "kind": "noTarget"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Draw two cards."
+    },
+    {
+      "id": "tgr-pulled-beneath-the-breakers",
+      "name": "Pulled Beneath the Breakers",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 26
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "returnToHand",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "sorcery",
+      "manaCost": {
+        "generic": 3,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Return target creature to its owner's hand."
+    },
+    {
+      "id": "tgr-wrecklight-angler",
+      "name": "Wrecklight Angler",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 27
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Fish",
+        "Horror"
+      ],
+      "keywords": [
+        "menace"
+      ],
+      "effects": [],
+      "power": 2,
+      "toughness": 1,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Menace"
+    },
+    {
+      "id": "tgr-drowned-clan-blade",
+      "name": "Drowned Clan-Blade",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 28
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Zombie",
+        "Warrior"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-glassbarb-skulker",
+      "name": "Glassbarb Skulker",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 29
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Rogue"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 3,
+      "toughness": 1,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-duskbrine-lamprey",
+      "name": "Duskbrine Lamprey",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 30
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Leech"
+      ],
+      "keywords": [
+        "lifelink"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Lifelink"
+    },
+    {
+      "id": "tgr-glasspoint-assassin",
+      "name": "Glasspoint Assassin",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 31
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Assassin"
+      ],
+      "keywords": [
+        "deathtouch"
+      ],
+      "effects": [],
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Deathtouch"
+    },
+    {
+      "id": "tgr-carrion-stormgull",
+      "name": "Carrion Stormgull",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 32
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Bird"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 3,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-trenchrisen-hulk",
+      "name": "Trenchrisen Hulk",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 33
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Zombie",
+        "Giant"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 5,
+      "toughness": 4,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 4,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-reefgrave-specter",
+      "name": "Reefgrave Specter",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 34
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Specter"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 4,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 4,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-harrower-of-the-deep-shelf",
+      "name": "Harrower of the Deep Shelf",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 35
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Nightmare",
+        "Horror"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 6,
+      "toughness": 5,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 5,
+        "W": 0,
+        "U": 0,
+        "B": 2,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-salt-in-the-wound",
+      "name": "Salt in the Wound",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 36
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "destroyPermanent",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 0,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Destroy target creature."
+    },
+    {
+      "id": "tgr-barbed-with-obsidian",
+      "name": "Barbed with Obsidian",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 37
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "pumpUntilEndOfTurn",
+          "power": 3,
+          "toughness": 1,
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Target creature gets +3/+1 until end of turn."
+    },
+    {
+      "id": "tgr-communion-with-the-drowned",
+      "name": "Communion with the Drowned",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 38
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "drawCards",
+          "count": 3,
+          "target": {
+            "kind": "noTarget"
+          }
+        }
+      ],
+      "kind": "sorcery",
+      "manaCost": {
+        "generic": 0,
+        "W": 0,
+        "U": 0,
+        "B": 3,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Draw three cards."
+    },
+    {
+      "id": "tgr-fed-to-the-trench",
+      "name": "Fed to the Trench",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 39
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "destroyPermanent",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "sorcery",
+      "manaCost": {
+        "generic": 3,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Destroy target creature."
+    },
+    {
+      "id": "tgr-saltcliff-brawler",
+      "name": "Saltcliff Brawler",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 40
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Warrior"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 3,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-wreckwater-reaver",
+      "name": "Wreckwater Reaver",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 41
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Pirate"
+      ],
+      "keywords": [
+        "menace"
+      ],
+      "effects": [],
+      "power": 2,
+      "toughness": 1,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Menace"
+    },
+    {
+      "id": "tgr-shardsling-lookout",
+      "name": "Shardsling Lookout",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 42
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Goblin",
+        "Archer"
+      ],
+      "keywords": [
+        "reach"
+      ],
+      "effects": [],
+      "power": 1,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Reach"
+    },
+    {
+      "id": "tgr-cindershelf-ogre",
+      "name": "Cindershelf Ogre",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 43
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Ogre",
+        "Warrior"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 4,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-brinescorch-elemental",
+      "name": "Brinescorch Elemental",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 44
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Elemental"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 4,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 3,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-obsidian-edge-duelist",
+      "name": "Obsidian-Edge Duelist",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 45
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Warrior"
+      ],
+      "keywords": [
+        "firstStrike"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 3,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "First strike"
+    },
+    {
+      "id": "tgr-surfbreak-rampager",
+      "name": "Surfbreak Rampager",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 46
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Elemental"
+      ],
+      "keywords": [
+        "haste"
+      ],
+      "effects": [],
+      "power": 4,
+      "toughness": 4,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 4,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Haste"
+    },
+    {
+      "id": "tgr-magmatide-behemoth",
+      "name": "Magmatide Behemoth",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 47
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Elemental"
+      ],
+      "keywords": [
+        "trample"
+      ],
+      "effects": [],
+      "power": 6,
+      "toughness": 5,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 5,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Trample"
+    },
+    {
+      "id": "tgr-shatterglass-volley",
+      "name": "Shatterglass Volley",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 48
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "dealDamage",
+          "amount": 2,
+          "target": {
+            "kind": "anyTarget"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 0,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "oracleText": "Shatterglass Volley deals 2 damage to any target."
+    },
+    {
+      "id": "tgr-tempered-in-brine",
+      "name": "Tempered in Brine",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 49
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "pumpUntilEndOfTurn",
+          "power": 3,
+          "toughness": 1,
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "oracleText": "Target creature gets +3/+1 until end of turn."
+    },
+    {
+      "id": "tgr-plunder-the-tideline",
+      "name": "Plunder the Tideline",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 50
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "drawCards",
+          "count": 2,
+          "target": {
+            "kind": "noTarget"
+          }
+        }
+      ],
+      "kind": "sorcery",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "oracleText": "Draw two cards."
+    },
+    {
+      "id": "tgr-shardfall-ricochet",
+      "name": "Shardfall Ricochet",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 51
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "dealDamage",
+          "amount": 3,
+          "target": {
+            "kind": "anyTarget"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "oracleText": "Shardfall Ricochet deals 3 damage to any target."
+    },
+    {
+      "id": "tgr-cindershelf-eruption",
+      "name": "Cindershelf Eruption",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 52
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "dealDamage",
+          "amount": 4,
+          "target": {
+            "kind": "anyTarget"
+          }
+        }
+      ],
+      "kind": "sorcery",
+      "manaCost": {
+        "generic": 3,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "oracleText": "Cindershelf Eruption deals 4 damage to any target."
+    },
+    {
+      "id": "tgr-tidegrove-boar",
+      "name": "Tidegrove Boar",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 53
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Boar"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-tanglekelp-yearling",
+      "name": "Tanglekelp Yearling",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 54
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Beast"
+      ],
+      "keywords": [
+        "trample"
+      ],
+      "effects": [],
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "artifact": false,
+      "oracleText": "Trample"
+    },
+    {
+      "id": "tgr-brinehide-elk",
+      "name": "Brinehide Elk",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 55
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Elk"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 3,
+      "toughness": 1,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-kelpstrand-spider",
+      "name": "Kelpstrand Spider",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 56
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Spider"
+      ],
+      "keywords": [
+        "reach"
+      ],
+      "effects": [],
+      "power": 2,
+      "toughness": 4,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "artifact": false,
+      "oracleText": "Reach",
+      "flavorText": "It does not chase what flies. It waits where the flying has to come down."
+    },
+    {
+      "id": "tgr-saltcrag-ibex",
+      "name": "Saltcrag Ibex",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 57
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Goat"
+      ],
+      "keywords": [
+        "vigilance"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "artifact": false,
+      "oracleText": "Vigilance"
+    },
+    {
+      "id": "tgr-reefspine-stonefish",
+      "name": "Reefspine Stonefish",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 58
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Fish"
+      ],
+      "keywords": [
+        "deathtouch"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 3,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "artifact": false,
+      "oracleText": "Deathtouch"
+    },
+    {
+      "id": "tgr-kelpwood-warden",
+      "name": "Kelpwood Warden",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 59
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Elemental"
+      ],
+      "keywords": [
+        "vigilance"
+      ],
+      "effects": [],
+      "power": 4,
+      "toughness": 5,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 4,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "artifact": false,
+      "oracleText": "Vigilance"
+    },
+    {
+      "id": "tgr-deepshelf-wurm",
+      "name": "Deepshelf Wurm",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 60
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Wurm"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 5,
+      "toughness": 6,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 5,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-shelfbreaker-ancient",
+      "name": "Shelfbreaker Ancient",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 61
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Elemental"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 7,
+      "toughness": 7,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 6,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-tidal-rootsurge",
+      "name": "Tidal Rootsurge",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 62
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "pumpUntilEndOfTurn",
+          "power": 3,
+          "toughness": 3,
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 0,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "oracleText": "Target creature gets +3/+3 until end of turn."
+    },
+    {
+      "id": "tgr-ambush-from-the-shallows",
+      "name": "Ambush from the Shallows",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 63
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "pumpUntilEndOfTurn",
+          "power": 4,
+          "toughness": 2,
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "oracleText": "Target creature gets +4/+2 until end of turn."
+    },
+    {
+      "id": "tgr-grow-past-the-breakers",
+      "name": "Grow Past the Breakers",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 64
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "pumpUntilEndOfTurn",
+          "power": 5,
+          "toughness": 5,
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "oracleText": "Target creature gets +5/+5 until end of turn."
+    },
+    {
+      "id": "tgr-wake-the-kelpwood",
+      "name": "Wake the Kelpwood",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 65
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "createToken",
+          "count": 1,
+          "token": {
+            "name": "Kelpwood Colossus",
+            "power": 5,
+            "toughness": 5,
+            "colors": [
+              "G"
+            ],
+            "subtypes": [
+              "Elemental"
+            ],
+            "keywords": [
+              "trample"
+            ]
+          }
+        }
+      ],
+      "kind": "sorcery",
+      "manaCost": {
+        "generic": 4,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "oracleText": "Create a 5/5 green Elemental creature token with trample."
+    },
+    {
+      "id": "tgr-driftglass-automaton",
+      "name": "Driftglass Automaton",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 66
+      },
+      "colors": [],
+      "supertypes": [],
+      "subtypes": [
+        "Construct"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 2,
+      "toughness": 1,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": true,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-saltcarved-sentry",
+      "name": "Saltcarved Sentry",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 67
+      },
+      "colors": [],
+      "supertypes": [],
+      "subtypes": [
+        "Golem"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 2,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 3,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": true,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-ground-to-beach-glass",
+      "name": "Ground to Beach Glass",
+      "rarity": "common",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 68
+      },
+      "colors": [],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "destroyPermanent",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "sorcery",
+      "manaCost": {
+        "generic": 5,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Destroy target creature."
+    },
+    {
+      "id": "tgr-squall-sworn-skyknight",
+      "name": "Squall-Sworn Skyknight",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 69
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Knight"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-tidegrave-warden",
+      "name": "Tidegrave Warden",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 70
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Spirit",
+        "Cleric"
+      ],
+      "keywords": [
+        "vigilance"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Vigilance"
+    },
+    {
+      "id": "tgr-herald-of-the-high-swell",
+      "name": "Herald of the High Swell",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 71
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Knight"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 4,
+      "toughness": 4,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 3,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-shattered-by-the-surge",
+      "name": "Shattered by the Surge",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 72
+      },
+      "colors": [
+        "W"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "destroyPermanent",
+          "target": {
+            "kind": "targetCreature"
+          }
+        },
+        {
+          "kind": "tapPermanent",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 2,
+        "W": 1,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Destroy target creature. Tap target creature."
+    },
+    {
+      "id": "tgr-riptide-skirmisher",
+      "name": "Riptide Skirmisher",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 73
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Merfolk",
+        "Warrior"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 2,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-squallblade-adept",
+      "name": "Squallblade Adept",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 74
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Wizard"
+      ],
+      "keywords": [
+        "vigilance"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Vigilance"
+    },
+    {
+      "id": "tgr-trenchveil-haunt",
+      "name": "Trenchveil Haunt",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 75
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Specter"
+      ],
+      "keywords": [
+        "flying"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Flying"
+    },
+    {
+      "id": "tgr-swept-out-to-sea",
+      "name": "Swept Out to Sea",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 76
+      },
+      "colors": [
+        "U"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "returnToHand",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 1,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Return target creature to its owner's hand."
+    },
+    {
+      "id": "tgr-trenchmaw-moray",
+      "name": "Trenchmaw Moray",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 77
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Eel",
+        "Horror"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 3,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-shardtide-executioner",
+      "name": "Shardtide Executioner",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 78
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Warrior"
+      ],
+      "keywords": [
+        "deathtouch"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "Deathtouch"
+    },
+    {
+      "id": "tgr-bled-out-on-the-tide",
+      "name": "Bled Out on the Tide",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 79
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "destroyPermanent",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Destroy target creature."
+    },
+    {
+      "id": "tgr-rot-feeds-the-root",
+      "name": "Rot Feeds the Root",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 80
+      },
+      "colors": [
+        "B"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "pumpUntilEndOfTurn",
+          "power": 3,
+          "toughness": 3,
+          "target": {
+            "kind": "targetCreature"
+          }
+        },
+        {
+          "kind": "pumpUntilEndOfTurn",
+          "power": -3,
+          "toughness": -3,
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 1,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Target creature gets +3/+3 until end of turn. Target creature gets -3/-3 until end of turn."
+    },
+    {
+      "id": "tgr-tidefire-lancer",
+      "name": "Tidefire Lancer",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 81
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Human",
+        "Knight"
+      ],
+      "keywords": [
+        "firstStrike"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": "First strike"
+    },
+    {
+      "id": "tgr-ventmaw-salamander",
+      "name": "Ventmaw Salamander",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 82
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Salamander"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 4,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-obsidian-crossfire",
+      "name": "Obsidian Crossfire",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 83
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "dealDamage",
+          "amount": 2,
+          "target": {
+            "kind": "anyTarget"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "oracleText": "Obsidian Crossfire deals 2 damage to any target."
+    },
+    {
+      "id": "tgr-blades-at-high-tide",
+      "name": "Blades at High Tide",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 84
+      },
+      "colors": [
+        "R"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "pumpUntilEndOfTurn",
+          "power": 3,
+          "toughness": 1,
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0
+      },
+      "oracleText": "Target creature gets +3/+1 until end of turn."
+    },
+    {
+      "id": "tgr-tidebreak-bellower",
+      "name": "Tidebreak Bellower",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 85
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Ox"
+      ],
+      "keywords": [
+        "trample"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 0,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 2
+      },
+      "artifact": false,
+      "oracleText": "Trample"
+    },
+    {
+      "id": "tgr-trenchmist-weaver",
+      "name": "Trenchmist Weaver",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 86
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Spider"
+      ],
+      "keywords": [
+        "reach"
+      ],
+      "effects": [],
+      "power": 3,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "artifact": false,
+      "oracleText": "Reach"
+    },
+    {
+      "id": "tgr-tidegorge-crocodile",
+      "name": "Tidegorge Crocodile",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 87
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [
+        "Crocodile"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 4,
+      "toughness": 3,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 2
+      },
+      "artifact": false,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-break-as-one",
+      "name": "Break as One",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 88
+      },
+      "colors": [
+        "G"
+      ],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "pumpUntilEndOfTurn",
+          "power": 2,
+          "toughness": 2,
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "instant",
+      "manaCost": {
+        "generic": 1,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 1
+      },
+      "oracleText": "Target creature gets +2/+2 until end of turn."
+    },
+    {
+      "id": "tgr-tideworn-effigy",
+      "name": "Tideworn Effigy",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 89
+      },
+      "colors": [],
+      "supertypes": [],
+      "subtypes": [
+        "Golem"
+      ],
+      "keywords": [],
+      "effects": [],
+      "power": 2,
+      "toughness": 2,
+      "kind": "creature",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "artifact": true,
+      "oracleText": ""
+    },
+    {
+      "id": "tgr-reclaimed-by-the-reach",
+      "name": "Reclaimed by the Reach",
+      "rarity": "uncommon",
+      "set": {
+        "code": "TGR",
+        "collectorNumber": 90
+      },
+      "colors": [],
+      "supertypes": [],
+      "subtypes": [],
+      "keywords": [],
+      "effects": [
+        {
+          "kind": "destroyPermanent",
+          "target": {
+            "kind": "targetCreature"
+          }
+        }
+      ],
+      "kind": "sorcery",
+      "manaCost": {
+        "generic": 6,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 0,
+        "G": 0
+      },
+      "oracleText": "Destroy target creature."
+    }
+  ]
+}

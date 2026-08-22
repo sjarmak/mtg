@@ -1,0 +1,21 @@
+{
+  "name": "@mtg/slice",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mtg/data": "*",
+    "@mtg/deckbuild": "*",
+    "@mtg/dsl": "*",
+    "@mtg/forge-export": "*",
+    "@mtg/kernel": "*",
+    "@mtg/llm": "*",
+    "@mtg/metrics": "*",
+    "@mtg/setgen": "*",
+    "@mtg/sim": "*"
+  }
+}

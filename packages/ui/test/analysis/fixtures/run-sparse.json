@@ -1,0 +1,1788 @@
+{
+  "id": "tgr-probe",
+  "label": "TGR probe",
+  "seed": "mtg-ui/analysis/sparse",
+  "set": {
+    "code": "TGR",
+    "name": "Tideglass Reach"
+  },
+  "producedBy": "packages/ui/test/analysis/fixtures/make-fixtures.ts (10 pairs x 2 games/matchup)",
+  "health": {
+    "label": "TGR probe — 90 games",
+    "games": 90,
+    "distinctGames": 90,
+    "duplicateShare": 0,
+    "gameLength": {
+      "value": null,
+      "samples": 90,
+      "distinctSamples": 90,
+      "floor": 100,
+      "underSampled": true
+    },
+    "onPlay": {
+      "value": null,
+      "samples": 90,
+      "distinctSamples": 90,
+      "floor": 200,
+      "underSampled": true
+    },
+    "mana": [
+      {
+        "checkpoint": {
+          "kind": "screw",
+          "ordinal": 4,
+          "lands": 3
+        },
+        "observedSides": 180,
+        "eligibleSides": 180,
+        "hits": 2,
+        "observed": {
+          "value": null,
+          "samples": 180,
+          "distinctSamples": 180,
+          "floor": 200,
+          "underSampled": true
+        },
+        "prior": 0.07673864931929472,
+        "delta": null
+      },
+      {
+        "checkpoint": {
+          "kind": "screw",
+          "ordinal": 6,
+          "lands": 4
+        },
+        "observedSides": 179,
+        "eligibleSides": 180,
+        "hits": 13,
+        "observed": {
+          "value": null,
+          "samples": 179,
+          "distinctSamples": 179,
+          "floor": 200,
+          "underSampled": true
+        },
+        "prior": 0.1069427333960857,
+        "delta": null
+      },
+      {
+        "checkpoint": {
+          "kind": "flood",
+          "ordinal": 6,
+          "lands": 6
+        },
+        "observedSides": 179,
+        "eligibleSides": 180,
+        "hits": 81,
+        "observed": {
+          "value": null,
+          "samples": 179,
+          "distinctSamples": 179,
+          "floor": 200,
+          "underSampled": true
+        },
+        "prior": 0.44578172233916535,
+        "delta": null
+      }
+    ],
+    "decisiveness": {
+      "value": null,
+      "samples": 90,
+      "distinctSamples": 90,
+      "floor": 100,
+      "underSampled": true
+    },
+    "colorPairs": {
+      "records": [
+        {
+          "pair": "BG",
+          "games": 18,
+          "wins": 9,
+          "losses": 9,
+          "draws": 0,
+          "winRate": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "interval": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "medianRounds": 9,
+          "medianWinRounds": 8,
+          "fastWinShare": 0.3333333333333333
+        },
+        {
+          "pair": "BR",
+          "games": 18,
+          "wins": 11,
+          "losses": 7,
+          "draws": 0,
+          "winRate": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "interval": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "medianRounds": 9.5,
+          "medianWinRounds": 9,
+          "fastWinShare": 0.18181818181818182
+        },
+        {
+          "pair": "RG",
+          "games": 18,
+          "wins": 15,
+          "losses": 3,
+          "draws": 0,
+          "winRate": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "interval": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "medianRounds": 9,
+          "medianWinRounds": 9,
+          "fastWinShare": 0.2
+        },
+        {
+          "pair": "UB",
+          "games": 18,
+          "wins": 9,
+          "losses": 9,
+          "draws": 0,
+          "winRate": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "interval": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "medianRounds": 9,
+          "medianWinRounds": 9,
+          "fastWinShare": 0.3333333333333333
+        },
+        {
+          "pair": "UG",
+          "games": 18,
+          "wins": 9,
+          "losses": 9,
+          "draws": 0,
+          "winRate": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "interval": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "medianRounds": 9,
+          "medianWinRounds": 9,
+          "fastWinShare": 0.1111111111111111
+        },
+        {
+          "pair": "UR",
+          "games": 18,
+          "wins": 9,
+          "losses": 9,
+          "draws": 0,
+          "winRate": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "interval": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "medianRounds": 9,
+          "medianWinRounds": 9,
+          "fastWinShare": 0.1111111111111111
+        },
+        {
+          "pair": "WB",
+          "games": 18,
+          "wins": 6,
+          "losses": 12,
+          "draws": 0,
+          "winRate": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "interval": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "medianRounds": 10.5,
+          "medianWinRounds": 12.5,
+          "fastWinShare": 0.16666666666666666
+        },
+        {
+          "pair": "WG",
+          "games": 18,
+          "wins": 11,
+          "losses": 7,
+          "draws": 0,
+          "winRate": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "interval": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "medianRounds": 9,
+          "medianWinRounds": 11,
+          "fastWinShare": 0.2727272727272727
+        },
+        {
+          "pair": "WR",
+          "games": 18,
+          "wins": 5,
+          "losses": 13,
+          "draws": 0,
+          "winRate": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "interval": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "medianRounds": 10.5,
+          "medianWinRounds": 11,
+          "fastWinShare": 0
+        },
+        {
+          "pair": "WU",
+          "games": 18,
+          "wins": 6,
+          "losses": 12,
+          "draws": 0,
+          "winRate": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "interval": {
+            "value": null,
+            "samples": 18,
+            "distinctSamples": 18,
+            "floor": 200,
+            "underSampled": true
+          },
+          "medianRounds": 9,
+          "medianWinRounds": 12,
+          "fastWinShare": 0
+        }
+      ],
+      "mirrorGames": 0,
+      "spread": null
+    },
+    "matchups": [],
+    "dominance": {
+      "evaluated": [],
+      "underSampled": ["BG", "BR", "RG", "UB", "UG", "UR", "WB", "WG", "WR", "WU"],
+      "spread": null,
+      "outOfBand": [],
+      "dominant": []
+    },
+    "abilityUsage": {
+      "pool": {
+        "cards": 90,
+        "withActivatedAbility": 0,
+        "withTriggeredAbility": 0
+      },
+      "poolShare": 0,
+      "triggeredPoolShare": 0,
+      "floorPerCardDrawn": null,
+      "floorTriggersPerCardDrawn": null,
+      "usage": {
+        "value": null,
+        "samples": 90,
+        "distinctSamples": 90,
+        "floor": 100,
+        "underSampled": true
+      }
+    },
+    "gates": [
+      {
+        "id": "length.median",
+        "label": "median game length",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "6-13 rounds",
+        "band": {
+          "min": 6,
+          "max": 13
+        },
+        "detail": "90 distinct games, floor 100",
+        "source": "metrics report §2.5, §4.1 (17lands play_draw; Sierkovitz format speed)"
+      },
+      {
+        "id": "length.longTail",
+        "label": "long-game tail",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "<= 15.0%",
+        "band": {
+          "min": null,
+          "max": 0.15
+        },
+        "detail": "90 distinct games, floor 100",
+        "source": "metrics report §2.5, §4.1 (17lands play_draw; Sierkovitz format speed)"
+      },
+      {
+        "id": "length.spread",
+        "label": "game-length IQR",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "<= 8 rounds",
+        "band": {
+          "min": null,
+          "max": 8
+        },
+        "detail": "90 distinct games, floor 100",
+        "source": "metrics report §2.5, §4.1 (17lands play_draw; Sierkovitz format speed)"
+      },
+      {
+        "id": "onPlay.winRate",
+        "label": "on-the-play win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "48.0%-60.0%",
+        "band": {
+          "min": 0.48,
+          "max": 0.6
+        },
+        "detail": "90 distinct games, floor 200",
+        "source": "metrics report §2.5, §3.3 item 7 (17lands win_rate_on_play; mtgds +4.0pp)"
+      },
+      {
+        "id": "mana.screw.t4.l3",
+        "label": "screw: <3 lands by own turn 4",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "within 15.0% of the Karsten prior",
+        "band": {
+          "min": null,
+          "max": 0.15
+        },
+        "detail": "180 distinct games, floor 200",
+        "source": "metrics report §4.4, §7 A4 (Karsten hypergeometric priors)"
+      },
+      {
+        "id": "mana.screw.t6.l4",
+        "label": "screw: <4 lands by own turn 6",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "within 15.0% of the Karsten prior",
+        "band": {
+          "min": null,
+          "max": 0.15
+        },
+        "detail": "179 distinct games, floor 200",
+        "source": "metrics report §4.4, §7 A4 (Karsten hypergeometric priors)"
+      },
+      {
+        "id": "mana.flood.t6.l6",
+        "label": "flood: >=6 lands by own turn 6",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "within 15.0% of the Karsten prior",
+        "band": {
+          "min": null,
+          "max": 0.15
+        },
+        "detail": "179 distinct games, floor 200",
+        "source": "metrics report §4.4, §7 A4 (Karsten hypergeometric priors)"
+      },
+      {
+        "id": "decisiveness.stall",
+        "label": "turn-cap stall rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "<= 5.0%",
+        "band": {
+          "min": null,
+          "max": 0.05
+        },
+        "detail": "90 distinct games, floor 100",
+        "source": "metrics report §4.5, §6.1 (Browne decisiveness; Forge draw clock)"
+      },
+      {
+        "id": "decisiveness.deckOut",
+        "label": "deck-out rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "<= 10.0%",
+        "band": {
+          "min": null,
+          "max": 0.1
+        },
+        "detail": "90 distinct games, floor 100",
+        "source": "metrics report §4.5, §6.1 (Browne decisiveness; Forge draw clock)"
+      },
+      {
+        "id": "decisiveness.decided",
+        "label": "decided by round 15",
+        "status": "underSampled",
+        "observed": null,
+        "bound": ">= 90.0%",
+        "band": {
+          "min": 0.9,
+          "max": null
+        },
+        "detail": "90 distinct games, floor 100",
+        "source": "metrics report §4.5, §6.1 (Browne decisiveness; Forge draw clock)"
+      },
+      {
+        "id": "decisiveness.inertTurns",
+        "label": "inert-turn rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "<= 35.0%",
+        "band": {
+          "min": null,
+          "max": 0.35
+        },
+        "detail": "90 distinct games, floor 100",
+        "source": "metrics report §4.5, §6.1 (Browne decisiveness; Forge draw clock)"
+      },
+      {
+        "id": "balance.pair.BG",
+        "label": "BG win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "40.0%-70.0%",
+        "band": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "detail": "18 distinct games, floor 200",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.pair.BR",
+        "label": "BR win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "40.0%-70.0%",
+        "band": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "detail": "18 distinct games, floor 200",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.pair.RG",
+        "label": "RG win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "40.0%-70.0%",
+        "band": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "detail": "18 distinct games, floor 200",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.pair.UB",
+        "label": "UB win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "40.0%-70.0%",
+        "band": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "detail": "18 distinct games, floor 200",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.pair.UG",
+        "label": "UG win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "40.0%-70.0%",
+        "band": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "detail": "18 distinct games, floor 200",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.pair.UR",
+        "label": "UR win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "40.0%-70.0%",
+        "band": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "detail": "18 distinct games, floor 200",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.pair.WB",
+        "label": "WB win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "40.0%-70.0%",
+        "band": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "detail": "18 distinct games, floor 200",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.pair.WG",
+        "label": "WG win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "40.0%-70.0%",
+        "band": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "detail": "18 distinct games, floor 200",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.pair.WR",
+        "label": "WR win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "40.0%-70.0%",
+        "band": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "detail": "18 distinct games, floor 200",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.pair.WU",
+        "label": "WU win rate",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "40.0%-70.0%",
+        "band": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "detail": "18 distinct games, floor 200",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.spread",
+        "label": "win-rate spread across pairs",
+        "status": "underSampled",
+        "observed": null,
+        "bound": "<= 30.0%",
+        "band": {
+          "min": null,
+          "max": 0.3
+        },
+        "detail": "0 pairs cleared their sample floor; two are needed",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "balance.noDominantStrategy",
+        "label": "no dominant strategy",
+        "status": "underSampled",
+        "observed": 0,
+        "bound": "no pair above 60.0% winning more than 50.0% of its games by round 7",
+        "band": {
+          "min": null,
+          "max": 0
+        },
+        "detail": "0 pairs judged, none dominant",
+        "source": "metrics report §6.2; the prior-project reuse audit item 5 (40-70% band, no-dominant-strategy)"
+      },
+      {
+        "id": "abilities.usage",
+        "label": "activated-ability usage floor",
+        "status": "notApplicable",
+        "observed": null,
+        "bound": ">= 5.0% of such cards drawn, once the pool has one",
+        "band": {
+          "min": null,
+          "max": null
+        },
+        "detail": "nothing in the pool to produce activations, so nothing to measure: 0 of 90 pool cards carry an activated ability (0 carry a triggered one)",
+        "source": "docs/design/dsl-v1-ability-model.md §9 risk 3 (usage floor over the seeded logs)"
+      },
+      {
+        "id": "abilities.triggers",
+        "label": "triggered-ability usage floor",
+        "status": "notApplicable",
+        "observed": null,
+        "bound": ">= 5.0% of such cards drawn, once the pool has one",
+        "band": {
+          "min": null,
+          "max": null
+        },
+        "detail": "nothing in the pool to produce triggers, so nothing to measure: 0 of 90 pool cards carry an activated ability (0 carry a triggered one)",
+        "source": "docs/design/dsl-v1-ability-model.md §9 risk 3 (usage floor over the seeded logs)"
+      }
+    ],
+    "config": {
+      "floors": {
+        "gameLength": 100,
+        "onPlay": 200,
+        "manaCheckpoint": 200,
+        "decisiveness": 100,
+        "colorPair": 200,
+        "matchup": 50,
+        "abilityUsage": 100
+      },
+      "length": {
+        "medianRounds": {
+          "min": 6,
+          "max": 13
+        },
+        "longGameRound": 15,
+        "maxLongGameShare": 0.15,
+        "maxIqrRounds": 8
+      },
+      "onPlay": {
+        "min": 0.48,
+        "max": 0.6
+      },
+      "balance": {
+        "colorPairWinRate": {
+          "min": 0.4,
+          "max": 0.7
+        },
+        "maxWinRateSpread": 0.3,
+        "dominantWinRate": 0.6,
+        "fastWinRound": 7,
+        "maxFastWinShare": 0.5
+      },
+      "decisiveness": {
+        "maxStallRate": 0.05,
+        "maxDeckOutRate": 0.1,
+        "decisiveRound": 15,
+        "minDecidedByRound": 0.9,
+        "maxInertTurnRate": 0.35
+      },
+      "mana": {
+        "checkpoints": [
+          {
+            "kind": "screw",
+            "ordinal": 4,
+            "lands": 3
+          },
+          {
+            "kind": "screw",
+            "ordinal": 6,
+            "lands": 4
+          },
+          {
+            "kind": "flood",
+            "ordinal": 6,
+            "lands": 6
+          }
+        ],
+        "shape": {
+          "size": 40,
+          "lands": 17
+        },
+        "tolerance": 0.15
+      },
+      "abilityUsage": {
+        "minActivationsPerAbilityCardDrawn": 0.05,
+        "minTriggersPerTriggerCardDrawn": 0.05
+      }
+    }
+  },
+  "fairness": {
+    "verdict": "unjudged",
+    "readings": [
+      {
+        "question": "balance",
+        "asks": "Does any color pair beat the others?",
+        "verdict": "unjudged",
+        "gates": [
+          "balance.pair.BG",
+          "balance.pair.BR",
+          "balance.pair.RG",
+          "balance.pair.UB",
+          "balance.pair.UG",
+          "balance.pair.UR",
+          "balance.pair.WB",
+          "balance.pair.WG",
+          "balance.pair.WR",
+          "balance.pair.WU",
+          "balance.spread",
+          "balance.noDominantStrategy"
+        ],
+        "passed": 0,
+        "findings": [],
+        "unjudged": [
+          {
+            "gate": "balance.pair.BG",
+            "label": "BG win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 18 distinct games, floor 200"
+          },
+          {
+            "gate": "balance.pair.BR",
+            "label": "BR win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 18 distinct games, floor 200"
+          },
+          {
+            "gate": "balance.pair.RG",
+            "label": "RG win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 18 distinct games, floor 200"
+          },
+          {
+            "gate": "balance.pair.UB",
+            "label": "UB win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 18 distinct games, floor 200"
+          },
+          {
+            "gate": "balance.pair.UG",
+            "label": "UG win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 18 distinct games, floor 200"
+          },
+          {
+            "gate": "balance.pair.UR",
+            "label": "UR win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 18 distinct games, floor 200"
+          },
+          {
+            "gate": "balance.pair.WB",
+            "label": "WB win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 18 distinct games, floor 200"
+          },
+          {
+            "gate": "balance.pair.WG",
+            "label": "WG win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 18 distinct games, floor 200"
+          },
+          {
+            "gate": "balance.pair.WR",
+            "label": "WR win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 18 distinct games, floor 200"
+          },
+          {
+            "gate": "balance.pair.WU",
+            "label": "WU win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 18 distinct games, floor 200"
+          },
+          {
+            "gate": "balance.spread",
+            "label": "win-rate spread across pairs",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 0 pairs cleared their sample floor; two are needed"
+          },
+          {
+            "gate": "balance.noDominantStrategy",
+            "label": "no dominant strategy",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 0 pairs judged, none dominant"
+          }
+        ]
+      },
+      {
+        "question": "luck",
+        "asks": "Do the dice decide the game?",
+        "verdict": "unjudged",
+        "gates": ["onPlay.winRate", "mana.screw.t4.l3", "mana.screw.t6.l4", "mana.flood.t6.l6"],
+        "passed": 0,
+        "findings": [],
+        "unjudged": [
+          {
+            "gate": "onPlay.winRate",
+            "label": "on-the-play win rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 90 distinct games, floor 200"
+          },
+          {
+            "gate": "mana.screw.t4.l3",
+            "label": "screw: <3 lands by own turn 4",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 180 distinct games, floor 200"
+          },
+          {
+            "gate": "mana.screw.t6.l4",
+            "label": "screw: <4 lands by own turn 6",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 179 distinct games, floor 200"
+          },
+          {
+            "gate": "mana.flood.t6.l6",
+            "label": "flood: >=6 lands by own turn 6",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 179 distinct games, floor 200"
+          }
+        ]
+      },
+      {
+        "question": "shape",
+        "asks": "Do games end by being played?",
+        "verdict": "unjudged",
+        "gates": [
+          "length.median",
+          "length.longTail",
+          "length.spread",
+          "decisiveness.stall",
+          "decisiveness.deckOut",
+          "decisiveness.decided",
+          "decisiveness.inertTurns"
+        ],
+        "passed": 0,
+        "findings": [],
+        "unjudged": [
+          {
+            "gate": "length.median",
+            "label": "median game length",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 90 distinct games, floor 100"
+          },
+          {
+            "gate": "length.longTail",
+            "label": "long-game tail",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 90 distinct games, floor 100"
+          },
+          {
+            "gate": "length.spread",
+            "label": "game-length IQR",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 90 distinct games, floor 100"
+          },
+          {
+            "gate": "decisiveness.stall",
+            "label": "turn-cap stall rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 90 distinct games, floor 100"
+          },
+          {
+            "gate": "decisiveness.deckOut",
+            "label": "deck-out rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 90 distinct games, floor 100"
+          },
+          {
+            "gate": "decisiveness.decided",
+            "label": "decided by round 15",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 90 distinct games, floor 100"
+          },
+          {
+            "gate": "decisiveness.inertTurns",
+            "label": "inert-turn rate",
+            "status": "underSampled",
+            "reason": "this run did not buy enough evidence to judge it: 90 distinct games, floor 100"
+          }
+        ]
+      },
+      {
+        "question": "cards",
+        "asks": "Do the cards get used?",
+        "verdict": "unjudged",
+        "gates": ["abilities.usage", "abilities.triggers"],
+        "passed": 0,
+        "findings": [],
+        "unjudged": [
+          {
+            "gate": "abilities.usage",
+            "label": "activated-ability usage floor",
+            "status": "notApplicable",
+            "reason": "there is nothing in this set for it to measure: nothing in the pool to produce activations, so nothing to measure: 0 of 90 pool cards carry an activated ability (0 carry a triggered one)"
+          },
+          {
+            "gate": "abilities.triggers",
+            "label": "triggered-ability usage floor",
+            "status": "notApplicable",
+            "reason": "there is nothing in this set for it to measure: nothing in the pool to produce triggers, so nothing to measure: 0 of 90 pool cards carry an activated ability (0 carry a triggered one)"
+          }
+        ]
+      }
+    ],
+    "findings": [],
+    "unattributed": []
+  },
+  "targets": {
+    "profile": "skeleton-lite v1",
+    "setSize": 90,
+    "creatureShare": 0.6333333333333333,
+    "rarities": [
+      {
+        "rarity": "common",
+        "cards": 68
+      },
+      {
+        "rarity": "uncommon",
+        "cards": 22
+      }
+    ],
+    "colors": [
+      {
+        "identity": "w",
+        "cards": 17
+      },
+      {
+        "identity": "u",
+        "cards": 17
+      },
+      {
+        "identity": "b",
+        "cards": 17
+      },
+      {
+        "identity": "r",
+        "cards": 17
+      },
+      {
+        "identity": "g",
+        "cards": 17
+      },
+      {
+        "identity": "c",
+        "cards": 5
+      }
+    ],
+    "curve": [
+      {
+        "label": "1",
+        "mvMin": 1,
+        "mvMax": 1,
+        "cards": 1
+      },
+      {
+        "label": "1-2",
+        "mvMin": 1,
+        "mvMax": 2,
+        "cards": 4
+      },
+      {
+        "label": "2",
+        "mvMin": 2,
+        "mvMax": 2,
+        "cards": 18
+      },
+      {
+        "label": "3",
+        "mvMin": 3,
+        "mvMax": 3,
+        "cards": 13
+      },
+      {
+        "label": "3-4",
+        "mvMin": 3,
+        "mvMax": 4,
+        "cards": 2
+      },
+      {
+        "label": "4",
+        "mvMin": 4,
+        "mvMax": 4,
+        "cards": 5
+      },
+      {
+        "label": "4-5",
+        "mvMin": 4,
+        "mvMax": 5,
+        "cards": 3
+      },
+      {
+        "label": "5",
+        "mvMin": 5,
+        "mvMax": 5,
+        "cards": 2
+      },
+      {
+        "label": "5-6",
+        "mvMin": 5,
+        "mvMax": 6,
+        "cards": 3
+      },
+      {
+        "label": "6",
+        "mvMin": 6,
+        "mvMax": 6,
+        "cards": 2
+      },
+      {
+        "label": "6-7",
+        "mvMin": 6,
+        "mvMax": 7,
+        "cards": 4
+      }
+    ]
+  },
+  "cards": {
+    "statistic": "GP WR (self-play)",
+    "definition": "Win rate over decided side-games in which the card was in the played deck. 17lands’ GIH WR needs card-instance columns the sim replay schema does not record, so this is its coarsest honest stand-in: games played, not games in hand.",
+    "floor": 200,
+    "entries": [
+      {
+        "cardId": "tgr-bled-out-on-the-tide",
+        "name": "Bled Out on the Tide",
+        "rarity": "uncommon",
+        "identity": "b",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-brinehide-elk",
+        "name": "Brinehide Elk",
+        "rarity": "common",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-brinescorch-elemental",
+        "name": "Brinescorch Elemental",
+        "rarity": "common",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-carrion-stormgull",
+        "name": "Carrion Stormgull",
+        "rarity": "common",
+        "identity": "b",
+        "games": 36,
+        "distinctGames": 36,
+        "wins": 18,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-cindershelf-eruption",
+        "name": "Cindershelf Eruption",
+        "rarity": "common",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-cindershelf-ogre",
+        "name": "Cindershelf Ogre",
+        "rarity": "common",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-cliffshrine-giant",
+        "name": "Cliffshrine Giant",
+        "rarity": "common",
+        "identity": "w",
+        "games": 18,
+        "distinctGames": 18,
+        "wins": 6,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-communion-with-the-drowned",
+        "name": "Communion with the Drowned",
+        "rarity": "common",
+        "identity": "b",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-drowned-clan-blade",
+        "name": "Drowned Clan-Blade",
+        "rarity": "common",
+        "identity": "b",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-duskbrine-lamprey",
+        "name": "Duskbrine Lamprey",
+        "rarity": "common",
+        "identity": "b",
+        "games": 54,
+        "distinctGames": 54,
+        "wins": 29,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-facetreader-drake",
+        "name": "Facetreader Drake",
+        "rarity": "common",
+        "identity": "u",
+        "games": 36,
+        "distinctGames": 36,
+        "wins": 18,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-fed-to-the-trench",
+        "name": "Fed to the Trench",
+        "rarity": "common",
+        "identity": "b",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-forest",
+        "name": "Forest",
+        "rarity": "common",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-glassbarb-skulker",
+        "name": "Glassbarb Skulker",
+        "rarity": "common",
+        "identity": "b",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-ground-to-beach-glass",
+        "name": "Ground to Beach Glass",
+        "rarity": "common",
+        "identity": "c",
+        "games": 180,
+        "distinctGames": 180,
+        "wins": 90,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-grow-past-the-breakers",
+        "name": "Grow Past the Breakers",
+        "rarity": "common",
+        "identity": "g",
+        "games": 18,
+        "distinctGames": 18,
+        "wins": 9,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-herald-of-the-high-swell",
+        "name": "Herald of the High Swell",
+        "rarity": "uncommon",
+        "identity": "w",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 28,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-island",
+        "name": "Island",
+        "rarity": "common",
+        "identity": "u",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 33,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-kelp-bound-charger",
+        "name": "Kelp-Bound Charger",
+        "rarity": "common",
+        "identity": "w",
+        "games": 36,
+        "distinctGames": 36,
+        "wins": 12,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-kelproot-groundswell",
+        "name": "Kelproot Groundswell",
+        "rarity": "common",
+        "identity": "w",
+        "games": 54,
+        "distinctGames": 54,
+        "wins": 23,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-kelpstrand-spider",
+        "name": "Kelpstrand Spider",
+        "rarity": "common",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-kelpwood-warden",
+        "name": "Kelpwood Warden",
+        "rarity": "common",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-magmatide-behemoth",
+        "name": "Magmatide Behemoth",
+        "rarity": "common",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-mountain",
+        "name": "Mountain",
+        "rarity": "common",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-obsidian-crossfire",
+        "name": "Obsidian Crossfire",
+        "rarity": "uncommon",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-obsidian-edge-duelist",
+        "name": "Obsidian-Edge Duelist",
+        "rarity": "common",
+        "identity": "r",
+        "games": 54,
+        "distinctGames": 54,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-plains",
+        "name": "Plains",
+        "rarity": "common",
+        "identity": "w",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 28,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-pulled-beneath-the-breakers",
+        "name": "Pulled Beneath the Breakers",
+        "rarity": "common",
+        "identity": "u",
+        "games": 18,
+        "distinctGames": 18,
+        "wins": 9,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-reclaimed-by-the-reach",
+        "name": "Reclaimed by the Reach",
+        "rarity": "uncommon",
+        "identity": "c",
+        "games": 90,
+        "distinctGames": 90,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-reefclan-harpooner",
+        "name": "Reefclan Harpooner",
+        "rarity": "common",
+        "identity": "w",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 28,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-reefspine-stonefish",
+        "name": "Reefspine Stonefish",
+        "rarity": "common",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-riptide-skirmisher",
+        "name": "Riptide Skirmisher",
+        "rarity": "uncommon",
+        "identity": "u",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 33,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-salt-in-the-wound",
+        "name": "Salt in the Wound",
+        "rarity": "common",
+        "identity": "b",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-saltcliff-brawler",
+        "name": "Saltcliff Brawler",
+        "rarity": "common",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-saltcrag-ibex",
+        "name": "Saltcrag Ibex",
+        "rarity": "common",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-saltshrine-acolyte",
+        "name": "Saltshrine Acolyte",
+        "rarity": "common",
+        "identity": "w",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 28,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-saltspray-tern",
+        "name": "Saltspray Tern",
+        "rarity": "common",
+        "identity": "u",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 33,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-sealed-in-stormglass",
+        "name": "Sealed in Stormglass",
+        "rarity": "common",
+        "identity": "w",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 28,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-shardfall-ricochet",
+        "name": "Shardfall Ricochet",
+        "rarity": "common",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-shardsling-lookout",
+        "name": "Shardsling Lookout",
+        "rarity": "common",
+        "identity": "r",
+        "games": 18,
+        "distinctGames": 18,
+        "wins": 9,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-shardtide-executioner",
+        "name": "Shardtide Executioner",
+        "rarity": "uncommon",
+        "identity": "b",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-shardwing-darter",
+        "name": "Shardwing Darter",
+        "rarity": "common",
+        "identity": "u",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 33,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-shattered-by-the-surge",
+        "name": "Shattered by the Surge",
+        "rarity": "uncommon",
+        "identity": "w",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 28,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-shatterglass-volley",
+        "name": "Shatterglass Volley",
+        "rarity": "common",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-shearwind-drake",
+        "name": "Shearwind Drake",
+        "rarity": "common",
+        "identity": "u",
+        "games": 36,
+        "distinctGames": 36,
+        "wins": 18,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-shelfbreaker-ancient",
+        "name": "Shelfbreaker Ancient",
+        "rarity": "common",
+        "identity": "g",
+        "games": 54,
+        "distinctGames": 54,
+        "wins": 29,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-squall-sworn-skyknight",
+        "name": "Squall-Sworn Skyknight",
+        "rarity": "uncommon",
+        "identity": "w",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 28,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-squallblade-adept",
+        "name": "Squallblade Adept",
+        "rarity": "uncommon",
+        "identity": "u",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 33,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-stormglass-sentinel",
+        "name": "Stormglass Sentinel",
+        "rarity": "common",
+        "identity": "w",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 28,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-surfbreak-rampager",
+        "name": "Surfbreak Rampager",
+        "rarity": "common",
+        "identity": "r",
+        "games": 36,
+        "distinctGames": 36,
+        "wins": 14,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-swamp",
+        "name": "Swamp",
+        "rarity": "common",
+        "identity": "b",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-tanglekelp-yearling",
+        "name": "Tanglekelp Yearling",
+        "rarity": "common",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-thunderhead-roc",
+        "name": "Thunderhead Roc",
+        "rarity": "common",
+        "identity": "w",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 28,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-tidal-rootsurge",
+        "name": "Tidal Rootsurge",
+        "rarity": "common",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-tidebreak-bellower",
+        "name": "Tidebreak Bellower",
+        "rarity": "uncommon",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-tidefire-lancer",
+        "name": "Tidefire Lancer",
+        "rarity": "uncommon",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-tidegorge-crocodile",
+        "name": "Tidegorge Crocodile",
+        "rarity": "uncommon",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-tidegrave-warden",
+        "name": "Tidegrave Warden",
+        "rarity": "uncommon",
+        "identity": "w",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 28,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-tidegrove-boar",
+        "name": "Tidegrove Boar",
+        "rarity": "common",
+        "identity": "g",
+        "games": 18,
+        "distinctGames": 18,
+        "wins": 9,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-tidewall-shieldbearer",
+        "name": "Tidewall Shieldbearer",
+        "rarity": "common",
+        "identity": "w",
+        "games": 18,
+        "distinctGames": 18,
+        "wins": 6,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-tidewatch-augur",
+        "name": "Tidewatch Augur",
+        "rarity": "common",
+        "identity": "u",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 33,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-tideworn-effigy",
+        "name": "Tideworn Effigy",
+        "rarity": "uncommon",
+        "identity": "c",
+        "games": 108,
+        "distinctGames": 108,
+        "wins": 46,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-trawl-the-undertow",
+        "name": "Trawl the Undertow",
+        "rarity": "common",
+        "identity": "u",
+        "games": 36,
+        "distinctGames": 36,
+        "wins": 15,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-trenchmaw-moray",
+        "name": "Trenchmaw Moray",
+        "rarity": "uncommon",
+        "identity": "b",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 35,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-trenchmist-weaver",
+        "name": "Trenchmist Weaver",
+        "rarity": "uncommon",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-trenchrisen-hulk",
+        "name": "Trenchrisen Hulk",
+        "rarity": "common",
+        "identity": "b",
+        "games": 54,
+        "distinctGames": 54,
+        "wins": 26,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-trenchveil-haunt",
+        "name": "Trenchveil Haunt",
+        "rarity": "uncommon",
+        "identity": "u",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 33,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-ventmaw-salamander",
+        "name": "Ventmaw Salamander",
+        "rarity": "uncommon",
+        "identity": "r",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 40,
+        "winRate": null
+      },
+      {
+        "cardId": "tgr-wake-the-kelpwood",
+        "name": "Wake the Kelpwood",
+        "rarity": "common",
+        "identity": "g",
+        "games": 72,
+        "distinctGames": 72,
+        "wins": 44,
+        "winRate": null
+      }
+    ]
+  }
+}

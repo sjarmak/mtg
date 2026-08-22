@@ -1,0 +1,579 @@
+{
+  "setCode": "TGR",
+  "setName": "Tideglass Reach",
+  "seed": "tideglass-1",
+  "targetSize": 90,
+  "profile": {
+    "name": "skeleton-lite",
+    "version": 1,
+    "derivedFrom": "play-booster-2024 v1"
+  },
+  "slots": 90,
+  "cardsPrinted": 90,
+  "legalCards": 90,
+  "attemptsPerSlot": {
+    "CA01": 1,
+    "CA02": 1,
+    "CA03": 1,
+    "CB01": 1,
+    "CB02": 1,
+    "CB03": 1,
+    "CB04": 1,
+    "CB05": 1,
+    "CB06": 1,
+    "CB07": 1,
+    "CB08": 1,
+    "CB09": 1,
+    "CB10": 2,
+    "CB11": 1,
+    "CB12": 2,
+    "CB13": 1,
+    "CG01": 1,
+    "CG02": 1,
+    "CG03": 1,
+    "CG04": 1,
+    "CG05": 1,
+    "CG06": 1,
+    "CG07": 1,
+    "CG08": 1,
+    "CG09": 1,
+    "CG10": 1,
+    "CG11": 1,
+    "CG12": 1,
+    "CG13": 1,
+    "CR01": 1,
+    "CR02": 1,
+    "CR03": 1,
+    "CR04": 1,
+    "CR05": 1,
+    "CR06": 1,
+    "CR07": 1,
+    "CR08": 1,
+    "CR09": 1,
+    "CR10": 1,
+    "CR11": 3,
+    "CR12": 2,
+    "CR13": 2,
+    "CU01": 1,
+    "CU02": 1,
+    "CU03": 1,
+    "CU04": 1,
+    "CU05": 1,
+    "CU06": 1,
+    "CU07": 1,
+    "CU08": 1,
+    "CU09": 1,
+    "CU10": 1,
+    "CU11": 1,
+    "CU12": 3,
+    "CU13": 1,
+    "CW01": 1,
+    "CW02": 1,
+    "CW03": 1,
+    "CW04": 1,
+    "CW05": 1,
+    "CW06": 1,
+    "CW07": 1,
+    "CW08": 1,
+    "CW09": 1,
+    "CW10": 1,
+    "CW11": 2,
+    "CW12": 1,
+    "CW13": 1,
+    "UA01": 1,
+    "UA02": 1,
+    "UB01": 1,
+    "UB02": 1,
+    "UB03": 1,
+    "UB04": 1,
+    "UG01": 1,
+    "UG02": 1,
+    "UG03": 1,
+    "UG04": 1,
+    "UR01": 1,
+    "UR02": 1,
+    "UR03": 1,
+    "UR04": 1,
+    "UU01": 1,
+    "UU02": 1,
+    "UU03": 1,
+    "UU04": 1,
+    "UW01": 1,
+    "UW02": 1,
+    "UW03": 1,
+    "UW04": 1
+  },
+  "slotsNeedingRetry": [
+    "CW11",
+    "CU12",
+    "CB10",
+    "CB12",
+    "CR11",
+    "CR12",
+    "CR13"
+  ],
+  "duplicateEffectsDropped": 7,
+  "retryRounds": [
+    {
+      "round": 1,
+      "slotIds": [
+        "CR11",
+        "CR12",
+        "CR13",
+        "CU12",
+        "CB12"
+      ],
+      "causes": [
+        "SLOT_COLOR_MISMATCH",
+        "SLOT_MANA_VALUE_MISS",
+        "OFF_PIE",
+        "ARCHETYPE_INERT_GLUT"
+      ],
+      "slotsRepaired": 5
+    }
+  ],
+  "critique": {
+    "ran": true,
+    "critique": {
+      "cohesion": "Three of the four mechanics live in the card fabric: Skywake's flying/vigilance saturates WU, Glasscut's first strike/deathtouch/burn defines BR, and Rootbound's trample/reach/pump plus real top-end sits across GW. Undertow does not exist as printed — the set has draw effects but not a single mill card, so the fourth pillar is a name with no mechanical body. The removal suite is the other seam: five unconditional 'destroy target creature' spells at common/uncommon express no mechanic and read as imported from a generic set, while the on-theme answers (burn, bounce, pump tricks) do all the identity work.",
+      "archetypeSupport": "WU: well fed — nine fliers plus vigilance bodies and 1/3–1/4 walls to hold the ground. BR: solid — first strike (CR06, UR01), deathtouch (CB05, UB02), four burn spells, cheap trade-up bodies. GW: solid — pump at every cost, trample/reach, and a genuine top (CG08, CG09, CW10, CG13). UB: starved — card flow exists (CU12, CB12) but no card mills, so the promised alternate clock cannot be drafted. RG: thin — exactly one haste card (CR07); pump is there but the aggressive-haste identity isn't, and CR11 hands red the card advantage the brief excludes. Unnamed pairs (WB, WR, UR, UG, BG) function as good-stuff decks; BG gets an incidental deathtouch cluster (CB05, UB02, CG06).",
+      "flavorConsistency": "Strongly consistent. Salt/brine/kelp/tide/glass/trench/storm vocabulary runs through every colour, and flavour maps to mechanics: obsidian and shard names cluster in BR (Glasscut), kelp and root in GW (Rootbound), squall and sky in WU (Skywake), trench and shelf in UB. Terrestrial fauna are coastalised (Brinehide Elk, Saltcrag Ibex, Tidegrove Boar) and the colourless slots read as glass constructs (Driftglass Automaton, Saltcarved Sentry, Tideworn Effigy), fitting the grown-glass premise. Two nits, neither worth a revision alone: 'Break as One' (UG04) is a generic name that could sit in any set, and 'Rot Feeds the Root' (UB04) leans woodland rather than kelp-forest.",
+      "powerOutliers": "Over: CB10 (unconditional destroy at {B} common — the worst offender), CW11 ({1}{W} unconditional destroy at common), CW12 ({2}{W}, same problem), UW04 (destroy plus tap for 3), CU12 (draw two for {1}{U} at common), CR11 (clean draw-two in red), and UU04, which is the same card as common CU13 for one mana less at uncommon. Pushed but acceptable at uncommon: UR02 (2R 4/3), UG03 (1GG 4/3), UB03 (2-mana unconditional destroy). Under: UU01, a vanilla 2/3 spending an uncommon slot. CW02/CU04 are deliberate vanilla filler and fine; top-end commons (CB07, CU10, CG09, CB09) are correctly costed.",
+      "revisions": [
+        {
+          "slotId": "CB10",
+          "category": "powerLevel",
+          "severity": "major",
+          "observation": "1-mana unconditional 'Destroy target creature' at common is far above any Limited removal rate and makes black the default colour in every deck.",
+          "instruction": "Recost to at least {2}{B} and add a restriction (e.g. 'Destroy target attacking or blocking creature'), or move the unconditional version out of common."
+        },
+        {
+          "slotId": "CW11",
+          "category": "powerLevel",
+          "severity": "major",
+          "observation": "2-mana unconditional destroy at white common; white common removal should be conditional, and this outclasses every creature answer in the set.",
+          "instruction": "Add a condition that fits Skywake's stall plan, e.g. 'Destroy target tapped creature' at {1}{W}."
+        },
+        {
+          "slotId": "CU12",
+          "category": "archetype",
+          "severity": "major",
+          "observation": "The set contains zero mill cards despite Undertow promising millCards + drawCards, so UB has no alternate clock. This card carries the mechanic's name yet only draws, and 2-mana draw-two is above common rate.",
+          "instruction": "Change to 'Draw a card. Each opponent mills three cards' (or draw two at {2}{U} with a mill rider) so the Undertow deck exists."
+        },
+        {
+          "slotId": "CR11",
+          "category": "archetype",
+          "severity": "major",
+          "observation": "Clean draw-two in red contradicts the stated RG intent ('pump rather than card advantage') and poaches Undertow's reward, while RG's actual need — haste bodies — has only one card (CR07).",
+          "instruction": "Replace with an aggressive haste creature, e.g. {2}{R} 3/2 with haste, giving RG a second haste threat."
+        },
+        {
+          "slotId": "CW12",
+          "category": "duplication",
+          "severity": "minor",
+          "observation": "Second unconditional white common destroy alongside CW11; the two slots are functionally the same card and both above white's removal rate.",
+          "instruction": "Differentiate as conditional removal, e.g. 'Destroy target creature with power 4 or greater' at {2}{W}, so it answers opposing Rootbound top-end instead of everything."
+        },
+        {
+          "slotId": "UU01",
+          "category": "archetype",
+          "severity": "minor",
+          "observation": "A vanilla 2/3 wastes an uncommon slot in the colour that most needs Undertow support; the mill theme has no creature carriers at all.",
+          "instruction": "Add an Undertow hook, e.g. 'When this creature enters, each opponent mills two cards,' or a mill trigger when it attacks."
+        },
+        {
+          "slotId": "CU13",
+          "category": "duplication",
+          "severity": "minor",
+          "observation": "Identical text to UU04 (return two creatures) but costs one more mana at a lower rarity — a strict cost/rarity inversion.",
+          "instruction": "Rework to a single bounce with a mill rider, e.g. 'Return target creature to its owner's hand. Its controller mills three cards,' which also feeds Undertow."
+        },
+        {
+          "slotId": "UW04",
+          "category": "powerLevel",
+          "severity": "minor",
+          "observation": "Unconditional destroy plus a tap rider at 3 mana is above uncommon removal rate and stacks onto an already dense white removal suite.",
+          "instruction": "Make the destroy conditional: 'Destroy target tapped creature. Tap target creature.' — it then plays into Skywake's stall instead of over the top of it."
+        }
+      ]
+    },
+    "revisions": [
+      {
+        "slotId": "CB10",
+        "category": "powerLevel",
+        "observation": "1-mana unconditional 'Destroy target creature' at common is far above any Limited removal rate and makes black the default colour in every deck.",
+        "instruction": "Recost to at least {2}{B} and add a restriction (e.g. 'Destroy target attacking or blocking creature'), or move the unconditional version out of common.",
+        "outcome": "reverted",
+        "reason": "SLOT_MANA_VALUE_MISS: CB10 needs mana value 1-1 to keep the colour's curve; \"Dashed on the Glass Reef\" costs 3"
+      },
+      {
+        "slotId": "CW11",
+        "category": "powerLevel",
+        "observation": "2-mana unconditional destroy at white common; white common removal should be conditional, and this outclasses every creature answer in the set.",
+        "instruction": "Add a condition that fits Skywake's stall plan, e.g. 'Destroy target tapped creature' at {1}{W}.",
+        "outcome": "applied"
+      },
+      {
+        "slotId": "CU12",
+        "category": "archetype",
+        "observation": "The set contains zero mill cards despite Undertow promising millCards + drawCards, so UB has no alternate clock. This card carries the mechanic's name yet only draws, and 2-mana draw-two is above common rate.",
+        "instruction": "Change to 'Draw a card. Each opponent mills three cards' (or draw two at {2}{U} with a mill rider) so the Undertow deck exists.",
+        "outcome": "reverted",
+        "reason": "ARCHETYPE_INERT_GLUT: archetype UB: 3 playables resolve without touching the battlefield (CU12, CB12, CR11); DSL v0 gives this archetype nothing to convert them into"
+      },
+      {
+        "slotId": "CR11",
+        "category": "archetype",
+        "observation": "Clean draw-two in red contradicts the stated RG intent ('pump rather than card advantage') and poaches Undertow's reward, while RG's actual need — haste bodies — has only one card (CR07).",
+        "instruction": "Replace with an aggressive haste creature, e.g. {2}{R} 3/2 with haste, giving RG a second haste threat.",
+        "outcome": "reverted",
+        "reason": "SLOT_COLOR_MISMATCH: CR11 is the R pool but \"Flashes in the Facets\" costs colourless; adjust the mana cost's coloured pips; SLOT_MANA_VALUE_MISS: CR11 needs mana value 3-3 to keep the colour's curve; \"Flashes in the Facets\" costs 2; OFF_PIE: CR11 \"Flashes in the Facets\" is colourless and prints drawCards, which the mechanical colour pie places off-pie there; ARCHETYPE_INERT_GLUT: archetype UB: 3 playables resolve without touching the battlefield (CU12, CB12, CR11); DSL v0 gives this archetype nothing to convert them into"
+      }
+    ]
+  },
+  "archetypes": [
+    {
+      "pair": "WU",
+      "identity": "WU: flying/vigilance/trample/reach plus pumpUntilEndOfTurn/millCards/drawCards (Skywake, Rootbound, Undertow)",
+      "signpostSlotIds": [
+        "UW01"
+      ],
+      "playables": 39,
+      "creatures": 29,
+      "removal": 4,
+      "inert": 1,
+      "ok": true,
+      "shortfalls": [
+        "mana value 1: 1 playable(s) for 3 deck slot(s)"
+      ]
+    },
+    {
+      "pair": "WB",
+      "identity": "WB: flying/vigilance/firstStrike/deathtouch/trample/reach plus pumpUntilEndOfTurn/dealDamage/millCards/drawCards (Skywake, Glasscut, Rootbound, Undertow)",
+      "signpostSlotIds": [
+        "UW02"
+      ],
+      "playables": 39,
+      "creatures": 27,
+      "removal": 7,
+      "inert": 1,
+      "ok": true,
+      "shortfalls": [
+        "mana value 1: 2 playable(s) for 3 deck slot(s)"
+      ]
+    },
+    {
+      "pair": "WR",
+      "identity": "WR: flying/vigilance/firstStrike/trample/reach plus dealDamage/pumpUntilEndOfTurn (Skywake, Glasscut, Rootbound)",
+      "signpostSlotIds": [
+        "UR01"
+      ],
+      "playables": 39,
+      "creatures": 26,
+      "removal": 8,
+      "inert": 1,
+      "ok": true,
+      "shortfalls": [
+        "mana value 1: 2 playable(s) for 3 deck slot(s)"
+      ]
+    },
+    {
+      "pair": "WG",
+      "identity": "WG: flying/vigilance/trample/reach plus pumpUntilEndOfTurn (Skywake, Rootbound)",
+      "signpostSlotIds": [
+        "UG01"
+      ],
+      "playables": 39,
+      "creatures": 28,
+      "removal": 4,
+      "inert": 0,
+      "ok": true,
+      "shortfalls": [
+        "mana value 1: 2 playable(s) for 3 deck slot(s)"
+      ]
+    },
+    {
+      "pair": "UB",
+      "identity": "UB: flying/deathtouch/vigilance/firstStrike plus millCards/drawCards/dealDamage (Skywake, Glasscut, Undertow)",
+      "signpostSlotIds": [
+        "UU03"
+      ],
+      "playables": 39,
+      "creatures": 27,
+      "removal": 5,
+      "inert": 2,
+      "ok": true,
+      "shortfalls": [
+        "mana value 1: 1 playable(s) for 3 deck slot(s)"
+      ]
+    },
+    {
+      "pair": "UR",
+      "identity": "UR: flying/firstStrike/vigilance plus dealDamage/millCards/drawCards (Skywake, Glasscut, Undertow)",
+      "signpostSlotIds": [
+        "UU02"
+      ],
+      "playables": 39,
+      "creatures": 26,
+      "removal": 6,
+      "inert": 2,
+      "ok": true,
+      "shortfalls": [
+        "mana value 1: 1 playable(s) for 3 deck slot(s)"
+      ]
+    },
+    {
+      "pair": "UG",
+      "identity": "UG: flying/trample/reach/vigilance plus pumpUntilEndOfTurn/millCards/drawCards (Skywake, Rootbound, Undertow)",
+      "signpostSlotIds": [
+        "UG02"
+      ],
+      "playables": 39,
+      "creatures": 28,
+      "removal": 2,
+      "inert": 1,
+      "ok": true,
+      "shortfalls": [
+        "2 way(s) to answer a creature; Limited canon calls under 3 a weakness",
+        "mana value 1: 1 playable(s) for 3 deck slot(s)"
+      ]
+    },
+    {
+      "pair": "BR",
+      "identity": "BR: firstStrike/deathtouch plus dealDamage/millCards/drawCards (Glasscut, Undertow)",
+      "signpostSlotIds": [
+        "UB02"
+      ],
+      "playables": 39,
+      "creatures": 24,
+      "removal": 9,
+      "inert": 2,
+      "ok": true,
+      "shortfalls": [
+        "mana value 1: 2 playable(s) for 3 deck slot(s)"
+      ]
+    },
+    {
+      "pair": "BG",
+      "identity": "BG: deathtouch/trample/reach/firstStrike plus pumpUntilEndOfTurn/dealDamage/millCards/drawCards (Glasscut, Rootbound, Undertow)",
+      "signpostSlotIds": [
+        "UB04"
+      ],
+      "playables": 39,
+      "creatures": 26,
+      "removal": 5,
+      "inert": 1,
+      "ok": true,
+      "shortfalls": [
+        "mana value 1: 2 playable(s) for 3 deck slot(s)",
+        "mana value 4: 3 playable(s) for 4 deck slot(s)"
+      ]
+    },
+    {
+      "pair": "RG",
+      "identity": "RG: firstStrike/trample/reach/deathtouch plus dealDamage/pumpUntilEndOfTurn (Glasscut, Rootbound)",
+      "signpostSlotIds": [
+        "UR03"
+      ],
+      "playables": 39,
+      "creatures": 25,
+      "removal": 6,
+      "inert": 1,
+      "ok": true,
+      "shortfalls": [
+        "mana value 1: 2 playable(s) for 3 deck slot(s)"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype WU: mana value 1: 1 playable(s) for 3 deck slot(s)",
+      "slotIds": [
+        "CW01",
+        "CU12"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype WB: mana value 1: 2 playable(s) for 3 deck slot(s)",
+      "slotIds": [
+        "CW01",
+        "CB01",
+        "CB10"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype WR: mana value 1: 2 playable(s) for 3 deck slot(s)",
+      "slotIds": [
+        "CW01",
+        "CR01",
+        "CR09",
+        "UR03"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype WG: mana value 1: 2 playable(s) for 3 deck slot(s)",
+      "slotIds": [
+        "CW01",
+        "CG01",
+        "CG10",
+        "UG01"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype UB: mana value 1: 1 playable(s) for 3 deck slot(s)",
+      "slotIds": [
+        "CU12",
+        "CB01",
+        "CB10"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype UR: mana value 1: 1 playable(s) for 3 deck slot(s)",
+      "slotIds": [
+        "CU12",
+        "CR01",
+        "CR09",
+        "UR03"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_THIN_ANSWERS",
+      "severity": "warning",
+      "message": "archetype UG: 2 way(s) to answer a creature; Limited canon calls under 3 a weakness",
+      "slotIds": [
+        "CA03",
+        "UA02"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype UG: mana value 1: 1 playable(s) for 3 deck slot(s)",
+      "slotIds": [
+        "CU12",
+        "CG01",
+        "CG10",
+        "UG01"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype BR: mana value 1: 2 playable(s) for 3 deck slot(s)",
+      "slotIds": [
+        "CB01",
+        "CB10",
+        "CR01",
+        "CR09",
+        "UR03"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype BG: mana value 1: 2 playable(s) for 3 deck slot(s)",
+      "slotIds": [
+        "CB01",
+        "CB10",
+        "CG01",
+        "CG10",
+        "UG01"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype BG: mana value 4: 3 playable(s) for 4 deck slot(s)",
+      "slotIds": [
+        "CB06",
+        "CB07",
+        "CB13",
+        "CG05",
+        "CG06",
+        "CG13",
+        "CA03"
+      ]
+    },
+    {
+      "code": "ARCHETYPE_CURVE_GAP",
+      "severity": "warning",
+      "message": "archetype RG: mana value 1: 2 playable(s) for 3 deck slot(s)",
+      "slotIds": [
+        "CR01",
+        "CR09",
+        "CG01",
+        "CG10",
+        "UR03",
+        "UG01"
+      ]
+    }
+  ],
+  "enforceable": true,
+  "usage": {
+    "calls": 25,
+    "failedCalls": 0,
+    "usage": {
+      "inputTokens": 54,
+      "outputTokens": 120346,
+      "cacheCreationInputTokens": 899589,
+      "cacheReadInputTokens": 626439
+    },
+    "costUsd": 24.636059000000003,
+    "costSource": "reported",
+    "durationMs": 1274595
+  },
+  "notes": [
+    "common U: the \"libraryTopBottom\" slot at MV 4 became a creature at MV 4-4; its effects cannot touch the battlefield in DSL v0, and U may contribute at most 1 such card(s) before its archetypes play blanks.",
+    "common U: the \"drawTwoOrThree\" slot at MV 3 became a creature at MV 3-3; its effects cannot touch the battlefield in DSL v0, and U may contribute at most 1 such card(s) before its archetypes play blanks.",
+    "uncommon U: the \"counterspell\" slot at MV 3 became a creature at MV 3-3; its effects cannot touch the battlefield in DSL v0, and U may contribute at most 1 such card(s) before its archetypes play blanks.",
+    "common U: the \"counterspell\" slot at MV 2 became a creature at MV 2-2; its effects cannot touch the battlefield in DSL v0, and U may contribute at most 1 such card(s) before its archetypes play blanks.",
+    "common B: the \"discard\" slot at MV 3 became a creature at MV 3-3; its effects cannot touch the battlefield in DSL v0, and B may contribute at most 1 such card(s) before its archetypes play blanks.",
+    "common W: moved one keyword slot from flying to trample so mechanic \"Rootbound\" is printed in W.",
+    "common R: moved one keyword slot from haste to firstStrike so mechanic \"Glasscut\" is printed in R.",
+    "uncommon W: moved one keyword slot from flying to trample so mechanic \"Rootbound\" is printed in W.",
+    "uncommon B: moved one keyword slot from flying to deathtouch so mechanic \"Glasscut\" is printed in B.",
+    "uncommon R: moved one keyword slot from haste to firstStrike so mechanic \"Glasscut\" is printed in R.",
+    "UW04: cost window moved to 3-3; another W slot already prints destroyPermanent/tapPermanent at 2-2, and DSL v0 leaves nothing else to vary.",
+    "UU04: cost window moved to 3-3; another U slot already prints returnToHand at 2-2, and DSL v0 leaves nothing else to vary.",
+    "UA02: cost window moved to 5-6; another colourless slot already prints destroyPermanent at 4-5, and DSL v0 leaves nothing else to vary.",
+    "UW01: stamped with flying in place of vigilance to carry its archetype's payoff.",
+    "UW01: reserved as the WU signpost (WU: flying/vigilance/trample/reach plus pumpUntilEndOfTurn/millCards/drawCards (Skywake, Rootbound, Undertow)).",
+    "UW02: stamped with vigilance in place of trample to carry its archetype's payoff.",
+    "UW02: reserved as the WB signpost (WB: flying/vigilance/firstStrike/deathtouch/trample/reach plus pumpUntilEndOfTurn/dealDamage/millCards/drawCards (Skywake, Glasscut, Rootbound, Undertow)).",
+    "UU03: reserved as the UB signpost (UB: flying/deathtouch/vigilance/firstStrike plus millCards/drawCards/dealDamage (Skywake, Glasscut, Undertow)).",
+    "UU02: stamped with vigilance in place of flying to carry its archetype's payoff.",
+    "UU02: reserved as the UR signpost (UR: flying/firstStrike/vigilance plus dealDamage/millCards/drawCards (Skywake, Glasscut, Undertow)).",
+    "UB02: reserved as the BR signpost (BR: firstStrike/deathtouch plus dealDamage/millCards/drawCards (Glasscut, Undertow)).",
+    "UB04: reserved as the BG signpost (BG: deathtouch/trample/reach/firstStrike plus pumpUntilEndOfTurn/dealDamage/millCards/drawCards (Glasscut, Rootbound, Undertow)).",
+    "UR01: reserved as the WR signpost (WR: flying/vigilance/firstStrike/trample/reach plus dealDamage/pumpUntilEndOfTurn (Skywake, Glasscut, Rootbound)).",
+    "UR03: reserved as the RG signpost (RG: firstStrike/trample/reach/deathtouch plus dealDamage/pumpUntilEndOfTurn (Glasscut, Rootbound)).",
+    "UG01: reserved as the WG signpost (WG: flying/vigilance/trample/reach plus pumpUntilEndOfTurn (Skywake, Rootbound)).",
+    "UG02: stamped with reach in place of vigilance to carry its archetype's payoff.",
+    "UG02: reserved as the UG signpost (UG: flying/trample/reach/vigilance plus pumpUntilEndOfTurn/millCards/drawCards (Skywake, Rootbound, Undertow)).",
+    "artifactDestructionModal: DSL v0 cannot target artifacts; the modal answer collapses to direct damage.",
+    "auraOverwrite: DSL v0 has no auras; the slot prints a one-shot tempo effect instead.",
+    "bite: DSL v0 has no one-sided fight; the slot prints a pump trick instead.",
+    "cardDrawAtCost: DSL v0 has no life payment; the drawback is priced into the mana cost instead.",
+    "cardDrawImpulsive: DSL v0 has no exile-and-play-this-turn; the slot prints plain draw, a tertiary red effect.",
+    "fight: DSL v0 has no fight; the slot prints the pump half of the trick.",
+    "manaAcceleration: DSL v0 has no mana abilities; the ramp slot prints a body instead.",
+    "protectiveInstant: DSL v0 has no protection or hexproof; the slot saves a creature by bouncing it.",
+    "removalCombatConditional: DSL v0 has no attack/block conditions; the slot prints unconditional removal or a tap.",
+    "removalExile: DSL v0 has no exile zone; the slot prints destruction instead.",
+    "removalExpensive: DSL v0 has no activated or triggered abilities, so the colourless removal slot cannot be an artifact that removes on arrival; it prints an expensive colourless sorcery instead.",
+    "removalSmallConditional: DSL v0 has no power/toughness conditions on removal; the slot prints it unconditional."
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "version": "native-draft-collation-v1",
+  "recipe": [
+    { "rarity": "common", "count": 10 },
+    { "rarity": "uncommon", "count": 3 },
+    {
+      "rarity": "rare",
+      "count": 1,
+      "rarityWeights": [
+        { "rarity": "rare", "weight": 2 },
+        { "rarity": "mythic", "weight": 1 }
+      ]
+    }
+  ]
+}
