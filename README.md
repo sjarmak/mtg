@@ -30,8 +30,9 @@ npm run test:balance  # the seeded 10,035-game format-health gate
 
 ![Magic 2011 gameplay on a landscape phone](docs/screenshots/gameplay-m11-mobile.png)
 
-_Current mobile UI work with Scryfall-backed M11 art. This is a real sealed game
-running the reduced, exactly executable Magic 2011 reference set._
+_Current mobile UI work in a developed mid-game position with
+Scryfall-backed M11 art. This is a real sealed game running the reduced,
+exactly executable Magic 2011 reference set._
 
 ![Drafting Magic 2013 in the browser lab](docs/screenshots/draft-m13.png)
 
