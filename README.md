@@ -28,15 +28,15 @@ npm run slice         # the whole loop: set-gen, deck build, mass sim, metrics v
 npm run test:balance  # the seeded 10,035-game format-health gate
 ```
 
-![Landscape phone gameplay in the browser lab](docs/screenshots/mobile-play.png)
+![Magic 2011 gameplay on a landscape phone](docs/screenshots/gameplay-m11-mobile.png)
 
-_Landscape phone gameplay. Tideglass Reach intentionally ships without bundled
-art, so its cards identify their art as pending._
+_Current mobile UI work with Scryfall-backed M11 art. This is a real sealed game
+running the reduced, exactly executable Magic 2011 reference set._
 
-![The deck lab showing Magic 2011 and Magic 2013 cards](docs/screenshots/deck-lab-m11-m13.png)
+![Drafting Magic 2013 in the browser lab](docs/screenshots/draft-m13.png)
 
-_The desktop Deck view with M11 and M13 illustrations delivered by Scryfall.
-The interface keeps each artist and set credit beside the image._
+_Current Draft UI work with Scryfall-backed M13 art. The pack, selected-card rail
+and pick action all read from the same executable Magic 2013 reference set._
 
 ## What works today
 
@@ -79,8 +79,10 @@ The interface keeps each artist and set credit beside the image._
 
 ### UI
 
-- Finish real-device mobile review across Draft, Deck, Analysis, Replay and
-  Cards. Gameplay has the deepest phone-specific coverage today.
+- Land the navigation and responsive-panel work shown above, including the
+  five-destination mobile bar, compact Draft pack and contextual card rail.
+- Finish real-device mobile review across Deck, Analysis, Replay and Cards.
+  Gameplay has the deepest phone-specific coverage today.
 - Broaden human draft and deckbuilding journeys, connect Replay to Analysis as
   a per-game drill-down, and make multi-seat play a first-class surface.
 - Keep desktop and phone screenshots reproducible from accessible-name browser
