@@ -131,6 +131,19 @@ function permanentProps(
   };
 }
 
+/**
+ * The row that displays a recorded permanent. Attachments follow their host so
+ * a replay preserves the same table hierarchy as live play, while the snapshot
+ * remains the authority for who controls each object.
+ */
+function displaySeatOf(snapshot: LogSnapshot, permanent: LogBoardPermanent): LogPlayerId {
+  if (permanent.attachedTo === null) return permanent.controller;
+  return (
+    snapshot.battlefield.find((candidate) => candidate.oid === permanent.attachedTo)?.controller ??
+    permanent.controller
+  );
+}
+
 function seatSide(
   game: ReplayGameLog,
   snapshot: LogSnapshot,
@@ -153,9 +166,15 @@ function seatSide(
     priority: priority === seat,
     mana: pool,
   };
+  const controlledCount = snapshot.battlefield.filter((permanent) => permanent.controller === seat).length;
   const permanents = snapshot.battlefield
-    .filter((permanent) => permanent.controller === seat)
-    .map((permanent) => permanentProps(game, snapshot, permanent, names, artOf))
+    .filter((permanent) => displaySeatOf(snapshot, permanent) === seat)
+    .map((permanent) => {
+      const projected = permanentProps(game, snapshot, permanent, names, artOf);
+      return projected === null || permanent.controller === seat
+        ? projected
+        : { ...projected, controlledBy: names.player(permanent.controller) };
+    })
     .filter((permanent): permanent is BoardPermanent => permanent !== null);
   const hand: readonly HandCard[] = keyedCards(game, state.hand, `hand${seat}`, artOf);
   const graveyard: readonly GraveyardCard[] = keyedCards(game, state.graveyard, `gy${seat}`, artOf);
@@ -175,7 +194,7 @@ function seatSide(
   const owns = seatPossessive(label);
   return {
     status,
-    battlefield: { label: `${owns} battlefield`, permanents },
+    battlefield: { label: `${owns} battlefield`, permanents, count: controlledCount },
     hand: { label: `${owns} hand`, cards: hand },
     graveyard: { label: `${owns} graveyard`, cards: graveyard },
     ...(exile.length === 0 ? {} : { exile: { label: `${owns} exile`, cards: exile } }),

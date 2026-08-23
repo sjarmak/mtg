@@ -236,6 +236,15 @@ export interface BoardPermanent {
    */
   readonly attachedToKey?: string;
   /**
+   * Who controls this attachment when it is displayed in another seat's row.
+   *
+   * Attachments travel visually with their host, even when the two permanents
+   * have different controllers. Absent means the row already communicates the
+   * controller. Present keeps that rules fact in both the visible foot line and
+   * the attachment group's accessible name.
+   */
+  readonly controlledBy?: string;
+  /**
    * What is attached to this permanent, by name. Read as the source of a
    * derived value: it is what the `derived` and `granted` marks name when they
    * say where a number that is not the printed one came from.
@@ -670,7 +679,10 @@ export function permanentMarks(permanent: BoardPermanent): readonly BoardMark[] 
  */
 function attachmentFootnote(permanent: BoardPermanent): string | undefined {
   if (permanent.attachedTo === undefined) return undefined;
-  return `${isAuraCard(permanent.card) ? 'Enchanting' : 'Equipping'} ${permanent.attachedTo}`;
+  const relation = `${isAuraCard(permanent.card) ? 'Enchanting' : 'Equipping'} ${permanent.attachedTo}`;
+  return permanent.controlledBy === undefined
+    ? relation
+    : `${relation} · controlled by ${permanent.controlledBy}`;
 }
 
 export function permanentNode(
@@ -740,10 +752,9 @@ export interface PermanentGroup {
  * can be drawn as attached while the two are not neighbors.
  *
  * A permanent whose host this row does not hold stays a host of its own with an
- * empty `held`. That is not a defensive branch: an Equipment stays attached
- * through a control change (`@mtg/kernel`, `illegalAttachments`), and the two
- * seats are drawn as two rows, so the weapon and its creature are genuinely in
- * different rows and the weapon's own foot line is what says so.
+ * empty `held`. Live and replay projections normally file an attachment with
+ * its host, including across controllers, but this component also accepts
+ * stated positions and must remain honest when a caller supplies only one end.
  */
 export function groupAttachments(permanents: readonly BoardPermanent[]): readonly PermanentGroup[] {
   const held = new Map<string, BoardPermanent[]>();
@@ -786,12 +797,12 @@ export function groupAttachments(permanents: readonly BoardPermanent[]): readonl
  * two cards are read in.
  */
 function attachedGroup(props: BattlefieldProps, group: PermanentGroup): ReactElement {
-  const equipment = group.held
-    .filter((permanent) => !isAuraCard(permanent.card))
-    .map((permanent) => permanent.card.name);
-  const auras = group.held
-    .filter((permanent) => isAuraCard(permanent.card))
-    .map((permanent) => permanent.card.name);
+  const relationName = (permanent: BoardPermanent): string =>
+    permanent.controlledBy === undefined
+      ? permanent.card.name
+      : `${permanent.card.name}, controlled by ${permanent.controlledBy}`;
+  const equipment = group.held.filter((permanent) => !isAuraCard(permanent.card)).map(relationName);
+  const auras = group.held.filter((permanent) => isAuraCard(permanent.card)).map(relationName);
   const relations = [
     ...(equipment.length === 0 ? [] : [`equipped with ${equipment.join(', ')}`]),
     ...(auras.length === 0 ? [] : [`enchanted by ${auras.join(', ')}`]),

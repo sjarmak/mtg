@@ -19,7 +19,7 @@ import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { EXAMPLE_CARDS, exampleCard } from '@mtg/dsl';
+import { EXAMPLE_CARDS, basicLand, exampleCard, parseCard } from '@mtg/dsl';
 import type { Choice, Decision, GameSession, GameState, PlayerId } from '@mtg/kernel';
 import {
   botSeat,
@@ -34,6 +34,7 @@ import {
   scenario,
   simpleAgent,
 } from '@mtg/kernel';
+import { Board } from '../../src/board/Board';
 import { seatPossessive } from '../../src/seat';
 import { PlayRoute } from '../../src/routes/PlayRoute';
 import { dealMirrorGame } from '../../src/routes/play/deal';
@@ -278,6 +279,61 @@ describe('the opening hand', () => {
 });
 
 describe('the position drawn from live state', () => {
+  it('lays a cross-controlled Aura with the opposing creature it enchants', () => {
+    const pacifism = parseCard({
+      kind: 'enchantment',
+      id: 'm11-pacifism',
+      name: 'Pacifism',
+      rarity: 'common',
+      set: { code: 'M11', collectorNumber: 24 },
+      manaCost: { generic: 1, W: 1 },
+      colors: ['W'],
+      subtypes: ['Aura'],
+      aura: {
+        enchant: 'creature',
+        modifications: [{ kind: 'cantAttack' }, { kind: 'cantBlock' }],
+      },
+    });
+    const lion = exampleCard('slc-thornhide-guardian');
+    const plains = basicLand('Plains', 'M11', 231);
+    const start = scenario({
+      battlefield: [
+        { card: lion, controller: 1 },
+        { card: plains, controller: 0 },
+        { card: plains, controller: 0 },
+      ],
+      hands: [[pacifism], []],
+    }).state;
+    const host = start.battlefield.find((oid) => start.objects[oid]?.card.id === lion.id);
+    const aura = start.players[0].hand[0];
+    if (host === undefined || aura === undefined) throw new Error('the fixture omitted its Aura or host');
+    const attached = reduceAll(start, [
+      {
+        type: 'castSpell',
+        player: 0,
+        oid: aura,
+        targets: [{ kind: 'permanent', oid: host }],
+      },
+      { type: 'passPriority', player: 0 },
+      { type: 'passPriority', player: 1 },
+    ]).state;
+
+    const position = boardPosition(attached, 0, NAMES);
+    expect(position.you.battlefield.permanents.map((permanent) => permanent.card.name)).not.toContain(
+      'Pacifism',
+    );
+    expect(position.opponent.battlefield.permanents.map((permanent) => permanent.card.name)).toEqual([
+      lion.name,
+      'Pacifism',
+    ]);
+    expect(position.opponent.battlefield.count).toBe(1);
+
+    render(h(Board, position));
+    expect(
+      screen.getByRole('group', { name: `${lion.name}, enchanted by Pacifism, controlled by you` }),
+    ).toBeTruthy();
+  });
+
   it('never draws a duplicate opponent-hand rail when the seat pod already carries its count', () => {
     const session = freshSession();
     const position = boardPosition(session.state, 0, NAMES);

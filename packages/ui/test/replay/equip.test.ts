@@ -217,6 +217,37 @@ describe('a replay log carrying an equip', () => {
     expect(screen.queryByText('Equipping Merfolk Sentry')).toBeNull();
   });
 
+  it('keeps a cross-controlled Aura beside its recorded host', () => {
+    const game = auraGame(gameOf(recordedLog()));
+    const step = firstEquip(game);
+    const attached = step.state.battlefield.find((permanent) => permanent.attachedTo !== null);
+    if (attached === undefined || attached.attachedTo === null) throw new Error('no recorded attachment');
+    const host = step.state.battlefield.find((permanent) => permanent.oid === attached.attachedTo);
+    if (host === undefined) throw new Error('the recorded attachment has no host');
+    const controller: 0 | 1 = host.controller === 0 ? 1 : 0;
+    const snapshot = {
+      ...step.state,
+      battlefield: step.state.battlefield.map((permanent) =>
+        permanent.oid === attached.oid ? { ...permanent, controller } : permanent,
+      ),
+    };
+    const names = namesFor(game, step.seq);
+    const frame = boardFrame(game, snapshot, step.active, null, names);
+    const hostSide = host.controller === 0 ? frame.you : frame.opponent;
+    const otherSide = host.controller === 0 ? frame.opponent : frame.you;
+
+    expect(hostSide.battlefield.permanents.map((permanent) => permanent.card.name)).toEqual(
+      expect.arrayContaining(['Merfolk Sentry', 'Pacifism']),
+    );
+    expect(otherSide.battlefield.permanents.map((permanent) => permanent.key)).not.toContain(attached.oid);
+    render(h(Battlefield, hostSide.battlefield));
+    expect(
+      screen.getByRole('group', {
+        name: `Merfolk Sentry, enchanted by Pacifism, controlled by ${names.player(controller)}`,
+      }),
+    ).toBeTruthy();
+  });
+
   it('narrates the ability by the weapon it came off, not by its raw id', () => {
     const game = gameOf(recordedLog());
     const sentences = game.steps.flatMap((step) =>

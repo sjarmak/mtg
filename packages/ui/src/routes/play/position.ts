@@ -311,6 +311,27 @@ function manaView(state: GameState, player: PlayerId): ManaPoolView {
 }
 
 /**
+ * The seat whose row physically holds a permanent.
+ *
+ * A battlefield is one shared zone, but the table divides it into two visual
+ * rows. Ordinary permanents follow their controller. An attachment follows its
+ * host instead, because putting the two cards together is the only unambiguous
+ * picture of the relationship; `controlledBy` preserves the exceptional case
+ * where the card beside the host belongs to the other seat.
+ */
+function displaySeatOf(state: GameState, oid: ObjectId): PlayerId | undefined {
+  const object = state.objects[oid];
+  if (object === undefined) return undefined;
+  const host = attachmentOf(state, oid);
+  return host === undefined ? object.controller : (state.objects[host]?.controller ?? object.controller);
+}
+
+/** The controller as a phrase that follows "controlled by". */
+function controllerVoice(names: SeatNames, player: PlayerId): string {
+  return names[player] === 'You' ? 'you' : names[player];
+}
+
+/**
  * One seat. `reveal` is false for the opponent in a live game, which replaces
  * their hand with a face-down count and their graveyard stays public because it
  * always is.
@@ -350,9 +371,16 @@ function seatSide(
     priority: !over && state.turn.priority === seat,
     mana: manaView(state, seat),
   };
+  const controlledCount = state.battlefield.filter((oid) => state.objects[oid]?.controller === seat).length;
   const permanents = state.battlefield
-    .filter((oid) => state.objects[oid]?.controller === seat)
-    .map((oid) => permanentProps(state, oid, names, artOf, aims))
+    .filter((oid) => displaySeatOf(state, oid) === seat)
+    .map((oid) => {
+      const permanent = permanentProps(state, oid, names, artOf, aims);
+      const controller = state.objects[oid]?.controller;
+      return permanent === null || controller === undefined || controller === seat
+        ? permanent
+        : { ...permanent, controlledBy: controllerVoice(names, controller) };
+    })
     .filter((permanent): permanent is BoardPermanent => permanent !== null);
   // Keys are the object id itself. Object ids are unique for the life of a
   // game, so this is both a stable React key and the handle a caller needs to
@@ -392,7 +420,7 @@ function seatSide(
 
   return {
     status,
-    battlefield: { label: `${owns} battlefield`, permanents },
+    battlefield: { label: `${owns} battlefield`, permanents, count: controlledCount },
     // Only the revealed hand gets a rail. The opposing count already lives in
     // the seat pod, so drawing it again as hatched rectangles spends board space
     // without revealing another fact.
