@@ -28,16 +28,28 @@ npm run slice         # the whole loop: set-gen, deck build, mass sim, metrics v
 npm run test:balance  # the seeded 10,035-game format-health gate
 ```
 
-![Magic 2011 gameplay on a landscape phone](docs/screenshots/gameplay-m11-mobile.png)
+![A full sealed game of The Hidden Kingdom, opening hand through combat](docs/screenshots/gameplay-thk.gif)
 
-_Current mobile UI work in a developed mid-game position with
-Scryfall-backed M11 art. This is a real sealed game running the reduced,
-exactly executable Magic 2011 reference set._
+_A real sealed game of The Hidden Kingdom, the generated flagship set, running
+end to end through the browser lab._
 
-![Drafting Magic 2013 in the browser lab](docs/screenshots/draft-m13.png)
+![Combat in The Hidden Kingdom, with flying attackers and a block declared](docs/screenshots/gameplay-thk-combat.png)
 
-_Current Draft UI work with Scryfall-backed M13 art. The pack, selected-card rail
-and pick action all read from the same executable Magic 2013 reference set._
+_Mid-combat: the stack, the phase bar and both players' boards in one view._
+
+![Drafting The Hidden Kingdom in the browser lab](docs/screenshots/draft-thk.png)
+
+_Pack, selected-card rail and pick action, all reading from the same
+executable generated set._
+
+![The Hidden Kingdom's card gallery](docs/screenshots/cards-thk.png)
+
+_The full card gallery, filterable by color, type, rarity and mana value._
+
+![Set-level balance analysis: color-pair win rates with 95% confidence intervals](docs/screenshots/analysis-thk.png)
+
+_Balance is a CI assertion, not a vibe: the same win-rate bands checked by
+`npm run test:balance` are inspectable in the browser._
 
 ## What works today
 
