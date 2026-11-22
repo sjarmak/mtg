@@ -1514,8 +1514,25 @@ function createTokenCard(trace: Trace, controller: PlayerId, card: Card): Trace 
   // registers, and `permanentEntered`, which is what a triggered ability reads
   // to know the token arrived.
   const arrival = arrivalOf(declared, oid, controller);
-  const arrived: GameObject = { ...object, tapped: arrival.tapped, counters: arrival.counters };
-  const placed: GameState = addToZone(putObject(arrival.state, arrived), arrived, 'battlefield');
+  // Most tokens arrive exactly as minted, and then the record already in
+  // `arrival.state` is the one to place: copying the whole object table again
+  // to write an identical record is what made a batch of board-scaled tokens
+  // cost the batch times the table (#307). `arrivalOf` builds a fresh counter
+  // record every time, so "unchanged" is read off its contents: no counters,
+  // and no key beyond the two zeroed ones `NO_COUNTERS` carries.
+  const unchanged =
+    arrival.tapped === object.tapped &&
+    !hasCounters(arrival.counters) &&
+    Object.keys(arrival.counters).length === Object.keys(NO_COUNTERS).length &&
+    arrival.state.objects[oid] === object;
+  const arrived: GameObject = unchanged
+    ? object
+    : { ...object, tapped: arrival.tapped, counters: arrival.counters };
+  const placed: GameState = addToZone(
+    unchanged ? arrival.state : putObject(arrival.state, arrived),
+    arrived,
+    'battlefield',
+  );
 
   let next = withState(trace, placed);
   next = emit(next, { type: 'tokenCreated', oid, controller, name: card.name });

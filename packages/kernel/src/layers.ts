@@ -182,6 +182,32 @@ function canSkipLayerWalk(state: GameState): boolean {
   return computed;
 }
 
+const TRIGGER_BEARING = new WeakMap<GameState, readonly ObjectId[]>();
+
+/**
+ * The battlefield permanents that could hold a triggered ability right now, in
+ * battlefield order: every permanent, unless the walk can be skipped.
+ *
+ * A trigger scan names candidates off the battlefield for each event, and one
+ * arrival names every permanent its controller has (`conditionsFrom`). When the
+ * walk can be skipped no effect grants or removes an ability, so a permanent's
+ * abilities are its copiable card's, and one without a triggered ability there
+ * can match nothing. Leaving those out is what keeps a batch of board-scaled
+ * tokens from costing the batch times the board (#307). When the walk cannot
+ * be skipped an aura or anthem may be granting one, and the whole battlefield is
+ * the honest answer.
+ */
+export function triggerBearingPermanents(state: GameState): readonly ObjectId[] {
+  if (!canSkipLayerWalk(state)) return state.battlefield;
+  const cached = TRIGGER_BEARING.get(state);
+  if (cached !== undefined) return cached;
+  const found = state.battlefield.filter((oid) =>
+    copiableCardOf(objectAt(state, oid)).abilities.some((ability) => ability.kind === 'triggered'),
+  );
+  TRIGGER_BEARING.set(state, found);
+  return found;
+}
+
 function computeAll(state: GameState): LayerDerivation {
   const battlefield = state.battlefield;
   let map: CharacteristicMap = printedMap(state);

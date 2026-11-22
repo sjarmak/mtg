@@ -123,8 +123,8 @@ function constructedPage(density: 'compact' | 'full' = 'compact'): string {
  */
 type Chosen = 'empty' | 'suggested' | 'whole pool';
 
-function sealedPage(chosen: Chosen = 'suggested'): string {
-  stubStorage();
+function sealedPage(chosen: Chosen = 'suggested', density: 'compact' | 'full' = 'compact'): string {
+  stubStorage(density);
   const opened = openSealed(loadSet(), 'lab/test/sealed-workbench');
   const build =
     chosen === 'suggested'
@@ -176,6 +176,14 @@ const MEASURE = `(() => {
     inlineStyle: panes === null ? null : panes.getAttribute('style'),
     poolScroll: box('.mtg-deck__pane[data-pane="pool"] .mtg-deck__pane-scroll'),
     poolFace: box('.mtg-deck__pane[data-pane="pool"] .mtg-card'),
+    poolSideways: (() => {
+      const el = document.querySelector('.mtg-deck__pane[data-pane="pool"] .mtg-deck__pane-scroll');
+      return el === null ? null : round(el.scrollWidth - el.clientWidth);
+    })(),
+    poolInnerScrollers: [...document.querySelectorAll('.mtg-deck__pane[data-pane="pool"] .mtg-deck__pane-scroll *')]
+      .filter((el) => el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)
+      .filter((el) => /(auto|scroll)/.test(getComputedStyle(el).overflowX + getComputedStyle(el).overflowY))
+      .map((el) => el.className).slice(0, 5),
     deckScroll: box('.mtg-deck__pane[data-pane="deck"] .mtg-deck__pane-scroll'),
     deckContent: content('.mtg-deck__pane[data-pane="deck"] .mtg-deck__pane-scroll'),
     deck: box('.mtg-deck__pane[data-pane="deck"]'),
@@ -201,6 +209,8 @@ interface Reading {
   readonly inlineStyle: string | null;
   readonly poolScroll: Box | null;
   readonly poolFace: Box | null;
+  readonly poolSideways: number | null;
+  readonly poolInnerScrollers: readonly string[];
   readonly deckScroll: Box | null;
   readonly deckContent: number | null;
   readonly deck: Box | null;
@@ -535,6 +545,47 @@ describe('a framed deckbuilder is a workbench', () => {
     120_000,
   );
 
+  /**
+   * `mtg-0j5aw4`. The pool of whole cards scrolls one way, at every framed size.
+   *
+   * Measured on the generated Sealed at 1440x900, the state the screen opens in:
+   * six mana values of 244px faces drawn as side-by-side columns came to a
+   * 1524px row in a 1383px scrollport, so the pool scrolled sideways and 4979px
+   * down at once, inside a 193px pane. The faces now wrap under each group's
+   * head (`CurveColumns`' rows flow, which the Constructed collection already
+   * used): the same pool reads 0px sideways at all three sizes.
+   *
+   * Read off the live lab's generated Sealed at Full cards, the pool scrollport:
+   *
+   *               sideways overflow   client height
+   *   1440x900      141 -> 0            193 -> 208
+   *   1280x800      557 -> 0            153 -> 168
+   *   1024x768      813 -> 0            140 -> 155
+   *
+   * The height gained is the sideways scrollbar that is no longer drawn. The
+   * pane itself is not taller: at Full cards on both panes the deck's piles ask
+   * for more than their three fifths, so `expectShare`'s floor is what the pool
+   * gets, and with the deck at Compact or cleared it gets the rest.
+   *
+   * The second half is that nothing inside the pane scrolls either -- a column
+   * carrying its own scrollbar is the nested pair the issue reported.
+   */
+  browserIt(
+    'scrolls the sealed pool of whole cards on one axis only',
+    async () => {
+      for (const size of [FRAMED[0], { width: 1280, height: 800 }, FRAMED[2]] as const) {
+        const at = `${String(size.width)}x${String(size.height)} sealed, full cards`;
+        const seen = await read(size.width, size.height, sealedPage('suggested', 'full'));
+        const { poolSideways, poolFace } = seen;
+        if (poolSideways === null || poolFace === null) throw new Error(`${at}: the pool drew no cards`);
+        expect(poolSideways, `${at}: the pool scrolls sideways as well as down`).toBeLessThanOrEqual(
+          SLACK_PX,
+        );
+        expect(seen.poolInnerScrollers, `${at}: something inside the pool scrolls on its own`).toEqual([]);
+      }
+    },
+    360_000,
+  );
   browserIt(
     'opens a new deck with room in the pool for a whole card',
     async () => {

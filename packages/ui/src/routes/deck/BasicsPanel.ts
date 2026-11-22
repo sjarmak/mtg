@@ -26,7 +26,7 @@
  * Distinct from `./ManaBasePanel`, which reports a finished artifact's mana base
  * and edits nothing.
  */
-import { createElement } from 'react';
+import { createElement, useId } from 'react';
 import type { ReactElement } from 'react';
 import type { BasicLandType, Color } from '@mtg/dsl';
 import { BASIC_LAND_COLOR, BASIC_LAND_TYPES, COLORS } from '@mtg/dsl';
@@ -39,6 +39,18 @@ export const MANA_BASE_LABEL = 'Mana base';
 
 /** The mana base's own suggest affordance, the twin of "Suggest a build". */
 export const SUGGEST_BASICS_LABEL = 'Suggest a mana base';
+
+/**
+ * The caption beside the counts, which is also why Suggest is or is not live.
+ *
+ * `mtg-0j5aw4`. The caption used to be the single word `suggested`, next to a
+ * Suggest button that was disabled with nothing saying why: a control that
+ * refuses a press owes the reason, and here the reason is that the counts on
+ * screen already are the suggestion, so there is nothing for it to restore.
+ * The disabled button names this caption as its accessible description, so a
+ * screen reader hears the same reason a sighted reader sees.
+ */
+export const BASICS_CAPTION = { chosen: 'your count', suggested: 'already the suggestion' } as const;
 
 /** Accessible names for the per-color controls, so a test can click one by name. */
 export function addBasicLabel(type: BasicLandType): string {
@@ -113,6 +125,7 @@ function basicControl(
 export function BasicsPanel(props: BasicsPanelProps): ReactElement {
   const { chosen, deck } = props;
   const symbols = props.symbols ?? DEFAULT_SYMBOL_SET;
+  const noteId = useId();
   return createElement(
     'div',
     { className: 'mtg-manabar', role: 'group', 'aria-label': MANA_BASE_LABEL },
@@ -129,7 +142,11 @@ export function BasicsPanel(props: BasicsPanelProps): ReactElement {
     ...COLORS.map((color) =>
       basicControl(color, deck.manaBase.landsByColor[color], props.onAdjustBasics, symbols),
     ),
-    createElement('span', { className: 'mtg-manabar__note' }, chosen ? 'your count' : 'suggested'),
+    createElement(
+      'span',
+      { id: noteId, className: 'mtg-manabar__note' },
+      chosen ? BASICS_CAPTION.chosen : BASICS_CAPTION.suggested,
+    ),
     createElement('span', { className: 'mtg-toolbar__spacer' }),
     createElement(
       'button',
@@ -138,6 +155,7 @@ export function BasicsPanel(props: BasicsPanelProps): ReactElement {
         className: 'mtg-btn',
         disabled: !chosen,
         'aria-label': SUGGEST_BASICS_LABEL,
+        ...(chosen ? {} : { 'aria-describedby': noteId }),
         onClick: props.onSuggestBasics,
       },
       'Suggest',

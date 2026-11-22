@@ -32,6 +32,8 @@ export interface ZoneProps {
   readonly tone?: ZoneTone;
   readonly layout?: ZoneLayout;
   readonly emptyText?: string;
+  /** Receives the body element, for a caller that has to move its scroll (`./Hand.ts`). */
+  readonly bodyRef?: (node: unknown) => void;
 }
 
 export function Zone(props: ZoneProps): ReactElement {
@@ -57,7 +59,11 @@ export function Zone(props: ZoneProps): ReactElement {
       ? createElement('span', { className: 'mtg-zone__empty' }, emptyText)
       : createElement(
           'div',
-          { className: 'mtg-zone__body', 'data-layout': props.layout ?? 'wrap' },
+          {
+            className: 'mtg-zone__body',
+            'data-layout': props.layout ?? 'wrap',
+            ...(props.bodyRef === undefined ? {} : { ref: props.bodyRef }),
+          },
           ...props.items,
         );
   return createElement(

@@ -13,7 +13,7 @@
  * padding a face-down count out to seven would be inventing cards the opponent
  * does not hold.
  */
-import { createElement } from 'react';
+import { createElement, useEffect, useRef } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { Card as DslCard } from '@mtg/dsl';
 import type { CardArt } from '../card/ArtSlot';
@@ -136,7 +136,85 @@ function revealed(props: HandProps, entry: HandCard): ReactElement {
   });
 }
 
+/** The two boxes the scroll reads, structurally: the workspace has no `lib: dom`. */
+interface Box {
+  readonly left: number;
+  readonly right: number;
+}
+
+interface HandSlotNode {
+  getAttribute(name: string): string | null;
+  getBoundingClientRect(): Box;
+}
+
+interface HandRowNode {
+  readonly children: ArrayLike<HandSlotNode>;
+  readonly clientWidth: number;
+  scrollLeft: number;
+  getBoundingClientRect(): Box;
+}
+
+function isHandRow(node: unknown): node is HandRowNode {
+  if (typeof node !== 'object' || node === null) return false;
+  const row = node as Partial<HandRowNode>;
+  return typeof row.scrollLeft === 'number' && typeof row.getBoundingClientRect === 'function';
+}
+
+/**
+ * Brings the slot holding `key` inside the row's visible width, moving the
+ * row's own scroll and nothing else.
+ *
+ * Not `scrollIntoView`: that also scrolls every ancestor, and on the played
+ * table one of them is the page, so a draw would jolt the whole table to put
+ * the hand at the bottom of the window. A card already in view moves nothing.
+ */
+export function revealInRow(row: HandRowNode, key: string): void {
+  const slot = Array.from(row.children).find((child) => child.getAttribute('data-permanent-key') === key);
+  if (slot === undefined) return;
+  const frame = row.getBoundingClientRect();
+  const box = slot.getBoundingClientRect();
+  const start = box.left - frame.left + row.scrollLeft;
+  const end = box.right - frame.left + row.scrollLeft;
+  if (end > row.scrollLeft + row.clientWidth) row.scrollLeft = end - row.clientWidth;
+  else if (start < row.scrollLeft) row.scrollLeft = start;
+}
+
+/**
+ * Keeps a card that just arrived in hand in view.
+ *
+ * Found on the live lab on the draw: the drawn card is appended at the end of
+ * the row, and where the row overflows (an eight-card hand at 1024x768, where
+ * even seven need 664px against a 556px row) the end is exactly the part out of
+ * sight. So the row scrolls to the newest arrival.
+ *
+ * A new hand is not a draw, and starts at its first card: the first render, and
+ * any render where more cards arrived than stayed. That second case is the
+ * mulligan, which shuffles the hand away and deals seven more under mostly new
+ * ids, and the two-human table, where the row changes hands with the turn.
+ * Scrolling either of those to its last card would hide the first ones.
+ */
+function useRevealArrivals(keys: readonly string[]): (node: unknown) => void {
+  const row = useRef<HandRowNode | null>(null);
+  const seen = useRef<ReadonlySet<string> | null>(null);
+  useEffect(() => {
+    const before = seen.current;
+    seen.current = new Set(keys);
+    if (before === null || row.current === null) return;
+    const arrived = keys.filter((key) => !before.has(key));
+    if (arrived.length > keys.length - arrived.length) {
+      row.current.scrollLeft = 0;
+      return;
+    }
+    const newest = arrived[arrived.length - 1];
+    if (newest !== undefined) revealInRow(row.current, newest);
+  }, [keys.join(' ')]);
+  return (node: unknown): void => {
+    row.current = isHandRow(node) ? node : null;
+  };
+}
+
 export function Hand(props: HandProps): ReactElement {
+  const bodyRef = useRevealArrivals(props.cards.map((entry) => entry.key));
   const hidden = props.hiddenCount ?? 0;
   // A hand with anything hidden in it is somebody else's, and its face-down
   // count is already the whole truth about how many cards it holds.
@@ -164,5 +242,6 @@ export function Hand(props: HandProps): ReactElement {
     // left. Everywhere else the rail keeps the fixed compact width it had.
     layout: 'rail',
     emptyText: 'no cards in hand',
+    bodyRef,
   });
 }

@@ -66,6 +66,14 @@ const GALLERY = `
 .mtg-builder-curve[data-flow='rows'][data-view='full'] .mtg-deck__column {
   grid-template-columns: repeat(auto-fill, minmax(min(${cssNumber(FULL_FACE_WIDTH_REM)}rem, 100%), 1fr));
 }
+/* The Limited pool keeps the face at the one width, without the 1fr ceiling.
+   Its deck pane draws columns of that width beside it, and the playtester asked for
+   the pool's cards to be the deck's size (mtg-84703); stretched to fill the row
+   they came out 270 to 317px against the deck's 244. The ragged gutter the
+   ceiling avoids is less than one face wide. */
+.mtg-builder:not([data-builder='constructed']) .mtg-builder-curve[data-flow='rows'][data-view='full'] .mtg-deck__column {
+  grid-template-columns: repeat(auto-fill, min(${cssNumber(FULL_FACE_WIDTH_REM)}rem, 100%));
+}
 /* The head names the whole row rather than sitting in the first cell of it, and
    stays put while the faces under it scroll past. */
 .mtg-builder-curve[data-flow='rows'] .mtg-deck__column-head {

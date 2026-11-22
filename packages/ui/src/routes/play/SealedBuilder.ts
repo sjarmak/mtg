@@ -466,6 +466,12 @@ function cardPane(props: {
   return createElement(CurveColumns<number>, {
     groups: sealedGroups(props.build, props.indexes, props.grouping),
     view: props.mode,
+    // Stacked rows rather than side-by-side columns, for the reason the
+    // Constructed collection gave (`mtg-xiso`): six mana values of whole faces
+    // are wider than the pane, so the columns scrolled sideways and down at
+    // once inside a pane one card tall (`mtg-0j5aw4`). Rows wrap the faces to
+    // the pane's width and the pool scrolls one way.
+    flow: 'rows',
     label: props.label,
     faces: (group) =>
       byCard(props.build, group.members, props.foils).map((copies) =>
@@ -677,6 +683,8 @@ function physicalCards<CardType>(props: {
   return createElement(CurveColumns<PreparedPoolCard<CardType>>, {
     groups: physicalGroups(props.cards, props.presentation, props.grouping),
     view: props.mode,
+    // One axis of scroll, as in `cardPane` above.
+    flow: 'rows',
     label: props.label,
     faces: (group) =>
       group.members.map((card) =>

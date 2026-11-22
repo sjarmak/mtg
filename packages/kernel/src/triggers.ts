@@ -37,6 +37,7 @@ import type { GameEvent } from './events';
 import type { ObjectId, PlayerId } from './ids';
 import { abilityObjectId } from './ids';
 import {
+  abilitiesOf,
   characteristicsOf,
   conditionHolds,
   controllerOf,
@@ -45,6 +46,7 @@ import {
   hasCardType,
   isCreatureObject,
   toughnessOf,
+  triggerBearingPermanents,
 } from './layers';
 import type {
   Attack,
@@ -522,6 +524,9 @@ function conditionsFrom(
       const enteredPower = enteredIsCreature ? combatPower(state, event.oid) : null;
       const enteredToughness = enteredIsCreature ? toughnessOf(state, event.oid) : null;
       const enteredIsBig = enteredPower !== null && enteredPower >= TRIGGER_POWER_THRESHOLD;
+      // Only a permanent that can hold a triggered ability can answer an
+      // arrival, and one arrival used to name the whole board (#307).
+      const bearers = triggerBearingPermanents(state);
       const enteredLandSubtypes = hasCardType(state, event.oid, 'land')
         ? characteristicsOf(state, event.oid).subtypes
         : [];
@@ -529,7 +534,7 @@ function conditionsFrom(
         enteredLandSubtypes.length === 0
           ? []
           : [
-              ...state.battlefield.filter((oid) => controllerOf(state, oid) === event.controller),
+              ...bearers.filter((oid) => controllerOf(state, oid) === event.controller),
               ...state.players[event.controller].graveyard,
             ].map((oid): ConditionMatch => ({
               oid,
@@ -537,11 +542,11 @@ function conditionsFrom(
               enteredLandSubtypes,
             }));
       const controlledCreatureSources = enteredIsCreature
-        ? state.battlefield
+        ? bearers
             .filter((oid) => controllerOf(state, oid) === event.controller)
             .map((oid): ConditionMatch => ({ oid, condition: 'controlledCreatureEnters' }))
         : [];
-      const others = state.battlefield
+      const others = bearers
         .filter((oid) => oid !== event.oid && controllerOf(state, oid) === event.controller)
         .flatMap((oid): ConditionMatch[] => [
           { oid, condition: 'anotherControlledPermanentEnters' },
@@ -562,7 +567,7 @@ function conditionsFrom(
       const allOtherCreatureSources =
         enteredPower === null
           ? []
-          : state.battlefield
+          : bearers
               .filter((oid) => oid !== event.oid)
               .map((oid): ConditionMatch => ({
                 oid,
@@ -1128,6 +1133,23 @@ export function collectTriggers(trace: Trace, from: number): readonly PendingTri
           ? (object?.owner ?? null)
           : controllerAsTriggered(state, match.oid);
       if (object === undefined || controller === null) continue;
+      // Most candidates print no trigger for this condition at all: an arrival
+      // names every permanent on its controller's side (`conditionsFrom`), and
+      // a battlefield of Goblin tokens has nothing to say about it. On the
+      // battlefield the abilities read below are `characteristicsOf`'s, which
+      // `abilitiesOf` returns too (plus emblem mana abilities, never
+      // triggered), so this skips exactly the candidates the loop would skip —
+      // before the layer lookups that made each arrival cost the whole board
+      // (#307).
+      if (
+        object.zone === 'battlefield' &&
+        !graveyardSourceTrigger &&
+        !abilitiesOf(state, match.oid).some(
+          (ability) => ability.kind === 'triggered' && ability.condition === match.condition,
+        )
+      ) {
+        continue;
+      }
       const current =
         object.zone === 'battlefield' || destinationZoneTrigger
           ? characteristicsOf(state, match.oid)
