@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-play-probe-receipt",
+  "subject": {
+    "formatId": "wwk",
+    "formatSha256": "87d0e8fe14c021df08b5381f1886930ce3d975b9f7c20f3658886c37cb9b9eb7",
+    "catalogs": {
+      "WWK": "2e12f15c19c867e5508b276f5565eaa734cd2ed93be9c2fd42542d8a44691eab",
+      "ZEN": "a83df5125b9e8f026ed19876cfae14ac7089451fa07237b27d9c1f549942f37d"
+    },
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "0aaf7b8e7d8d69aa5405d84e7621ebb08b6dc77deabd170d08c12a5c7c15cbff",
+    "adapterSha256": "aab3ecbae2bb4c88184569158cf76fc6dd5a33f26afc6040d9bc0fe2072d07e2",
+    "protocolVersion": 2
+  },
+  "result": {
+    "id": "wwk-match-starting-player-engine",
+    "scope": "match",
+    "controller": "engine",
+    "cardIds": [],
+    "decisionFamilies": [
+      "starting-player"
+    ],
+    "status": "passed",
+    "assertions": [
+      "WWK engine-controlled starting choice reaches its first turn without a local starting move"
+    ]
+  }
+}

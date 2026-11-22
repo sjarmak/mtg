@@ -61,7 +61,7 @@ describe('Dissension printed format sources', () => {
   }, 180_000);
 
   it('re-verifies the installed play admission against the staged format and catalogs', () => {
-    const root = fileURLToPath(new URL('play-admission-v7/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v8/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))
@@ -108,7 +108,7 @@ describe('Dissension printed format sources', () => {
     const printings = new Map(
       [...dis.cards, ...gpt.cards, ...rav.cards].map((card) => [card.physicalId, card]),
     );
-    const admission = JSON.parse(readData('play-admission-v7/admission.json')) as {
+    const admission = JSON.parse(readData('play-admission-v8/admission.json')) as {
       readonly cards: readonly { readonly id: string; readonly review: string }[];
     };
     const admitted = new Set(

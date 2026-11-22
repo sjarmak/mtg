@@ -58,7 +58,7 @@ it('withholds a format whose evidence was measured against a different Forge run
     catalogs: [],
     outputParent,
     evidence: {
-      body: readFileSync('packages/data/data/akh-hou/play-admission-v67/admission.json', 'utf8'),
+      body: readFileSync('packages/data/data/akh-hou/play-admission-v68/admission.json', 'utf8'),
       read: () => {
         throw new Error('the mocked verifier must not read evidence');
       },

@@ -4,15 +4,11 @@
  * the tax on its second cast, the zone-change replacement when it dies, and
  * commander damage in the projection, with the engine seat casting its own.
  *
- * These run whole games rather than scenarios. The scenario route
- * (`snapshotForgeScenarioBackend`) accepts a commander table and opens it at
- * forty life, but Forge's puzzle `GameState.setupPlayerState` empties every
- * zone including Command and clears `Player.getCommanders()` before it deals
- * the fixture, and the bridge's `ScenarioState` writes only hand, library,
- * battlefield and graveyard, so the opened scenario shows `commandZone: []`
- * for both seats and no general to cast (measured 2026-09-15, seed
- * `scd-scenario-scratch-v1`). Until a scenario can name a command zone, a
- * commander witness is a whole game.
+ * These are whole games, kept beside the scenario probes in
+ * `observed-scd-command-zone-scenario.integration.test.ts`: the scenario seats
+ * a commander directly (a seat's `command` list), and these show the same
+ * contracts arising from a real opening, the engine seat casting its own
+ * general and commander damage landing in combat.
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { ObservedSession, SessionSpec } from '@mtg/engine';
@@ -129,7 +125,7 @@ describe.skipIf(!required)('SCD commander witnesses', () => {
       let stage = 'cast' as Stage;
       const casts: { option: string; firstPayment: string; castsBefore: number | undefined }[] = [];
       let pendingCast = false;
-      const replacements: { prompt: string; answer: string }[] = [];
+      const replacements: { prompt: string; answer: string; options: string[] }[] = [];
       let commanderDamageOnEngine = 0;
       try {
         expect(session.view.seats.map((seat) => seat.life)).toEqual([40, 40]);
@@ -216,12 +212,18 @@ describe.skipIf(!required)('SCD commander witnesses', () => {
                     option.id.startsWith(`combat-attack-add-${general.oid.replace('forge-card-', '')}-`),
                   )?.id ?? decision.options.find((option) => option.id === 'combat-attackers-commit')?.id)
                 : decision.options.find((option) => option.id === 'combat-attackers-commit')?.id;
-          } else if (decision.kind === 'confirm-action' && decision.prompt.startsWith(`${EMMARA}:`)) {
-            // Forge asks the command-zone return as a state-based "may" (a Yes/No
-            // confirm-action), not as a replacement effect.
+          } else if (decision.kind === 'confirm-replacement' && decision.prompt.startsWith(`${EMMARA}:`)) {
+            // Forge asks CR 903.9a's command-zone return as a state-based "may"; the
+            // bridge surfaces it as the commander's zone-change replacement (#209).
             const answer = stage === 'kill-to-graveyard' ? 'No' : 'Yes';
-            replacements.push({ prompt: decision.prompt, answer });
-            move = decision.options.find((option) => option.text === answer)?.id;
+            replacements.push({
+              prompt: decision.prompt,
+              answer,
+              options: decision.options.map((option) => option.text),
+            });
+            move = decision.options.find(
+              (option) => option.id === `confirm-replacement-${answer.toLowerCase()}`,
+            )?.id;
           } else move = routineMove(decision);
           if (move === undefined)
             throw new Error(
@@ -247,8 +249,13 @@ describe.skipIf(!required)('SCD commander witnesses', () => {
           replacements.map((entry) => entry.answer),
           evidence,
         ).toEqual(['Yes', 'No']);
-        for (const entry of replacements)
+        for (const entry of replacements) {
           expect(entry.prompt, evidence).toContain('may put it into the command zone');
+          expect(entry.options, evidence).toEqual([
+            `Put ${EMMARA} into the command zone`,
+            `Leave ${EMMARA} in the graveyard`,
+          ]);
+        }
         expect(inZone(session.view.seats[0], 'graveyard', EMMARA), evidence).toBeDefined();
         expect(inZone(session.view.seats[0], 'commandZone', EMMARA), evidence).toBeUndefined();
         // (4) commander damage is projected on the seat that took it.

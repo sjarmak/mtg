@@ -84,8 +84,14 @@ export function checkedScenarioUsage(
     )
       throw new Error('Scenario runtime or source controller mismatch');
     const seat = row.scenario.state.seats[claim.sourceSeat];
-    if (![...seat.hand, ...seat.library, ...seat.battlefield, ...seat.graveyard].includes(claim.sourceName))
-      throw new Error('Scenario source absent from claimed seat');
+    const zones = [
+      ...seat.hand,
+      ...seat.library,
+      ...seat.battlefield,
+      ...seat.graveyard,
+      ...(seat.command ?? []),
+    ];
+    if (!zones.includes(claim.sourceName)) throw new Error('Scenario source absent from claimed seat');
     const digest = createHash('sha256').update(JSON.stringify(row.scenario.state)).digest('hex');
     if (digest !== row.scenario.sha256) throw new Error('Scenario state checksum mismatch');
   }

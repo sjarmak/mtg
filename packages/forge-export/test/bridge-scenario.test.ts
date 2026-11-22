@@ -31,6 +31,11 @@ describe('verification-only Forge state', () => {
       { seats: [seat, { ...seat, graveyard: ['Island'] }] },
       'OPENING_HAND seat may not declare graveyard',
     ],
+    [
+      'a commander',
+      { seats: [{ ...seat, command: ['Isperia, Supreme Judge'] }, seat] },
+      'OPENING_HAND seat may not declare command',
+    ],
   ])('refuses OPENING_HAND with %s, for the reason the bridge gives', (_label, change, reason) => {
     const result = ForgeScenarioStateSchema.safeParse({ ...state, phase: 'OPENING_HAND', ...change });
     expect(result.success).toBe(false);
@@ -42,15 +47,22 @@ describe('verification-only Forge state', () => {
     expect(ForgeScenarioStateSchema.parse(main)).toEqual(main);
   });
 
+  it('parses a commander per seat in MAIN1', () => {
+    const commander = { ...state, seats: [{ ...seat, command: ['Isperia, Supreme Judge'] }, seat] };
+    expect(ForgeScenarioStateSchema.parse(commander)).toEqual(commander);
+  });
+
   it.each(['Island;Mountain', 'Island\nailife=0', 'Island|Tapped', 'Island=1', ''])(
     'rejects Forge state syntax in a card name: %j',
     (name) => {
-      expect(() =>
-        ForgeScenarioStateSchema.parse({
-          ...state,
-          seats: [{ ...seat, hand: [name] }, seat],
-        }),
-      ).toThrow();
+      for (const zone of ['hand', 'command'] as const) {
+        expect(() =>
+          ForgeScenarioStateSchema.parse({
+            ...state,
+            seats: [{ ...seat, [zone]: [name] }, seat],
+          }),
+        ).toThrow();
+      }
     },
   );
 
@@ -60,6 +72,7 @@ describe('verification-only Forge state', () => {
     { seats: [seat] },
     { qualification: 'supported' },
     { seats: [{ ...seat, life: 0 }, seat] },
+    { seats: [{ ...seat, command: [] }, seat] },
   ])('rejects invalid or undeclared scenario fields: %j', (change) => {
     expect(() => ForgeScenarioStateSchema.parse({ ...state, ...change })).toThrow();
   });

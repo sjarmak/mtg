@@ -53,7 +53,7 @@ const ktkSource = () => {
   return {
     id: 'ktk',
     directory,
-    admissionDirectory: join(data, 'play-admission-v23'),
+    admissionDirectory: join(data, 'play-admission-v24'),
     formatFile: 'ktk-limited-format-v1.json',
     constructedFormatFile: 'ktk-constructed-format-v1.json',
     availability: {

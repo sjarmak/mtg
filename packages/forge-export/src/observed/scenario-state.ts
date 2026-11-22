@@ -15,6 +15,8 @@ const Seat = z
     library: Zone,
     battlefield: Zone,
     graveyard: Zone,
+    /** Commanders dealt into the Command zone as the seat's own; absent means none. */
+    command: z.array(Name).min(1).max(2).optional(),
   })
   .strict();
 
@@ -39,8 +41,8 @@ export const ForgeScenarioStateSchema = z
       });
     }
     state.seats.forEach((seat, index) => {
-      for (const zone of ['battlefield', 'graveyard'] as const) {
-        if (seat[zone].length === 0) continue;
+      for (const zone of ['battlefield', 'graveyard', 'command'] as const) {
+        if ((seat[zone]?.length ?? 0) === 0) continue;
         context.addIssue({
           code: 'custom',
           path: ['seats', index, zone],

@@ -366,6 +366,20 @@ public final class ForgeBridge {
                     }
                     lines.add(prefix + zone + "=" + String.join(";", names));
                 }
+                // A commander is dealt into the Command zone marked as one; Forge's
+                // setupPlayerState then registers it and creates its commander effect,
+                // so tax, damage and the zone-change choice all run as in a real game.
+                List<String> commanders = commanders(seat);
+                if (openingHand && !commanders.isEmpty())
+                    throw new IllegalArgumentException("OPENING_HAND seat may not declare command");
+                for (String name : commanders) {
+                    if (name.isBlank() || name.matches("(?s).*[;|=\\r\\n].*")
+                            || FModel.getMagicDb().getCommonCards().getCard(name) == null)
+                        throw new IllegalArgumentException("Invalid scenario card: " + name);
+                }
+                if (!commanders.isEmpty())
+                    lines.add(prefix + "command=" + String.join(";",
+                            commanders.stream().map(name -> name + "|IsCommander").toList()));
             }
             // MAIN1/COMBAT_BEGIN apply via the devMode phase jump below (applyAndVerify); that
             // jump fires only after runOpeningHandActions already ran, so OPENING_HAND seeds the
@@ -413,6 +427,11 @@ public final class ForgeBridge {
             return list(seat, zone).stream().map(value -> (String) value).toList();
         }
 
+        /** The seat's declared commanders; a fixture without the key declares none. */
+        private List<String> commanders(Map<String, Object> seat) {
+            return seat.containsKey("command") ? names(seat, "command") : List.of();
+        }
+
         void applyAndVerify(Game game) {
             applyGameOnThread(game);
             for (int index = 0; index < 2; index++) {
@@ -426,6 +445,11 @@ public final class ForgeBridge {
                         throw new IllegalStateException("Scenario zone mismatch: seat=" + index
                                 + " zone=" + zone.getKey() + " actual=" + actual);
                 }
+                List<String> commanders = player.getCommanders().stream().map(Card::getName).toList();
+                if (!commanders.equals(commanders(seat))
+                        || !player.getCommanders().stream().allMatch(card -> card.isInZone(ZoneType.Command)))
+                    throw new IllegalStateException("Scenario command zone mismatch: seat=" + index
+                            + " actual=" + commanders);
                 if (player.getCardsIn(ZoneType.Battlefield).stream().anyMatch(Card::isTapped))
                     throw new IllegalStateException("Scenario battlefield must start untapped");
             }
@@ -2255,6 +2279,17 @@ public final class ForgeBridge {
                 Card cardToShow,
                 Map<String, Object> params) {
             Card source = cardToShow != null ? cardToShow : ability == null ? null : ability.getHostCard();
+            ZoneType commanderZone = commanderReturnZone(player, mode, source);
+            if (commanderZone != null) {
+                return confirm(
+                        player,
+                        "confirm-replacement",
+                        about(source, message),
+                        "Put " + source.getName() + " into the command zone",
+                        "Leave " + source.getName() + " in "
+                                + (commanderZone == ZoneType.Exile ? "exile" : "the graveyard"),
+                        sourceTargets(source));
+            }
             boolean named = options != null && options.size() == 2;
             boolean freeCast = isReviewedSourceLinkedFreeCastConfirmation(
                     player, ability, mode, options, cardToShow, params);
@@ -2285,6 +2320,30 @@ public final class ForgeBridge {
                     named ? options.get(0) : "Yes",
                     named ? options.get(1) : "No",
                     targets);
+        }
+
+        /**
+         * The zone a commander is leaving when Forge asks its owner the CR 903.9a
+         * question, or null for any other confirmation.
+         *
+         * Forge answers 903.9a as the rule states it, a state-based action:
+         * `GameAction.stateBasedAction_Commander` has already moved the card to
+         * the graveyard or exile when it calls `confirmAction` with
+         * `ChangeZoneToAltDestination` and the commander's first ability. So the
+         * projection showing the card there while the question is pending is the
+         * true board. Only the kind is ours: the seat is asked it as the
+         * commander's zone-change replacement, the same kind 903.9b's
+         * hand-or-library replacement already arrives as.
+         */
+        private static ZoneType commanderReturnZone(
+                Player player, PlayerActionConfirmMode mode, Card source) {
+            if (mode != PlayerActionConfirmMode.ChangeZoneToAltDestination
+                    || source == null
+                    || !source.isRealCommander()
+                    || !player.equals(source.getOwner())) return null;
+            if (source.isInZone(ZoneType.Graveyard)) return ZoneType.Graveyard;
+            if (source.isInZone(ZoneType.Exile)) return ZoneType.Exile;
+            return null;
         }
 
         private static boolean isReviewedExploreGraveyardConfirmation(
@@ -16916,6 +16975,10 @@ public final class ForgeBridge {
          * Forge reads null here as "the player did not pay", and its own client
          * returns exactly that both when the selection is cancelled and when it
          * comes back the wrong size, so the cost is not half-paid.
+         *
+         * Forge's prompt is a format string its own client fills with the count
+         * still to choose ("Select %d Swamp or Mountain card(s) to reveal"), so
+         * the count is written in here before the prompt leaves the bridge.
          */
         @Override
         public CardCollectionView chooseCardsForCost(
@@ -16925,10 +16988,14 @@ public final class ForgeBridge {
                 int num,
                 boolean isOptional,
                 String prompt) {
+            String counted = prompt == null
+                    ? null
+                    : prompt.replace("%d", Integer.toString(num))
+                            .replace("card(s)", num == 1 ? "card" : "cards");
             List<Card> chosen = session.chooseEntities(
                     getPlayer(),
                     "cost-card-selection",
-                    question(ability, prompt, "Pay CARDNAME's cost"),
+                    question(ability, counted, "Pay CARDNAME's cost"),
                     valid,
                     isOptional ? 0 : num,
                     num);

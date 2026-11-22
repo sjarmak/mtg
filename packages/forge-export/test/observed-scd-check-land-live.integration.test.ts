@@ -128,6 +128,8 @@ describe.skipIf(!required)('check-land reveal cost on the live (unscoped) route'
             option.id.startsWith('cost-card-selection-card-'),
           );
           if (!revealed) {
+            // Forge's format string reaches the seat with its count written in (#211).
+            expect(decision.prompt).toContain('Select 1 Forest or Plains card to reveal');
             expect(cards.map((option) => option.targets[0]?.oid)).toEqual([forest]);
             move = cards[0]?.id;
             revealed = move !== undefined;

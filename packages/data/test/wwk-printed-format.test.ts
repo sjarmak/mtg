@@ -65,7 +65,7 @@ describe('Worldwake printed format sources', () => {
   }, 180_000);
 
   it('re-verifies the installed play admission against the staged format and catalogs', () => {
-    const root = fileURLToPath(new URL('play-admission-v10/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v11/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))
@@ -107,7 +107,7 @@ describe('Worldwake printed format sources', () => {
 
     const constructed = parsePrintedConstructedFormat(JSON.parse(readData('wwk-constructed-format-v1.json')));
     const printings = new Map([...wwk.cards, ...zen.cards].map((card) => [card.physicalId, card]));
-    const admission = JSON.parse(readData('play-admission-v10/admission.json')) as {
+    const admission = JSON.parse(readData('play-admission-v11/admission.json')) as {
       readonly cards: readonly { readonly id: string; readonly review: string }[];
     };
     const admitted = new Set(

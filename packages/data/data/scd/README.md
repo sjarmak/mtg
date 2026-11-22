@@ -199,16 +199,27 @@ is the four whole-game probes
 fixture states `rules.commander` and a commander per seat, and the probe
 support forwards both to the bridge's open request.
 
-The command zone itself is witnessed outside the chain, in whole games:
+The command zone has two scenario probes of its own,
+`emmara-local-command-zone-return-v1` and `emmara-local-command-zone-decline-v1`
+(`packages/forge-export/test/observed-scd-command-zone-scenario.integration.test.ts`).
+A scenario seat's `command` list is dealt as Forge's `command=<name>|IsCommander`,
+which registers the commander and its commander effect. The probes cast Emmara,
+Soul of the Accord from the command zone, pay the commander tax on the recast
+(`Pay for Emmara, Soul of the Accord: {2}{W}{G}`), and give both answers to the
+zone-change choice. Their receipts ship in the admission's `probes/` beside the
+contract witnesses; no coverage obligation consumes them, since the commander
+rules belong to the format rather than to any one script. The commanders'
+ordinary casts are qualified through the contracts like every other printing.
+
+Forge asks CR 903.9a as the rule states it, a state-based action: the card is
+already in the graveyard or exile when its owner is asked, so the board shows
+it there while the question is pending. The bridge surfaces that question as a
+`confirm-replacement` naming the commander (`Put Emmara, Soul of the Accord into
+the command zone` / `Leave Emmara, Soul of the Accord in the graveyard`), the
+kind CR 903.9b's hand-or-library replacement already arrives as.
 `packages/forge-export/test/observed-scd-commander-witness.integration.test.ts`
-casts Emmara, Soul of the Accord from the command zone, pays the commander tax
-on the second cast (`Pay for Emmara, Soul of the Accord: {2}{W}{G}`), and
-answers the zone-change replacement, which Forge surfaces as a `confirm-action`
-Yes/No prompt rather than a `confirm-replacement`. Those witnesses are not
-scenario probes because the scenario route cannot seat a commander (Forge's
-scenario state setup clears the Command zone), so they carry no receipt and
-count toward no script's qualification; the commanders' ordinary casts are
-qualified through the contracts like every other printing.
+witnesses the same contracts in whole games, including the engine seat casting
+its own general and commander damage.
 
 The play board draws the zone (`packages/ui/src/board/CommandZone.ts`): a
 panel on the right-hand side of the seat's battlefield holding the commander,
@@ -243,6 +254,13 @@ Re-bound for every registered format at once with
 `packages/data/tools/printed-admission-rebind-all.mjs`, which runs the six-step recipe in
 `packages/data/data/isd/README.md` (Play admission); to re-bind after a further adapter or bridge
 change, use output `play-admission-v17/`.
+
+`play-admission-v33/` replaces v32 (deleted) for the Commander bridge fixes (#211, #209, #208), with
+bridge `0aaf7b8e...` and adapter `aab3ecba...`. Unlike a plain re-bind it adds the
+two command-zone scenario probes above to `probes/`, so it was built by the recipe with those two
+appended to the generated scenario config rather than by `printed-admission-rebind-all.mjs` (whose
+drift check refuses a new probe). Cards, decisions and match probes are unchanged, at 337 qualified
+scripts and 0 residual. The next re-bind reads all four probes from this directory's `probes/`.
 
 ## Registration
 

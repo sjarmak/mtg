@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "0aaf7b8e7d8d69aa5405d84e7621ebb08b6dc77deabd170d08c12a5c7c15cbff",
+    "adapterSha256": "aab3ecbae2bb4c88184569158cf76fc6dd5a33f26afc6040d9bc0fe2072d07e2",
+    "protocolVersion": 2
+  },
+  "sourceScript": {
+    "path": "o/obelisk_of_jund.txt",
+    "sha256": "3232cf2d8fda8fc77466c4140453fda673c012edcd3b098fe51fd8e8f76d99c6"
+  },
+  "decisionFamilies": [
+    "mana-x",
+    "naming-text-numbers",
+    "priority",
+    "replacement-trigger-choices"
+  ],
+  "obligations": [
+    "controller-contract-mana-x",
+    "controller-contract-naming-text-numbers",
+    "controller-contract-priority",
+    "controller-contract-replacement-trigger-choices",
+    "exact-source-declarations"
+  ],
+  "residualObligations": [],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "decisionFamilies": [
+        "mana-x",
+        "naming-text-numbers",
+        "priority",
+        "replacement-trigger-choices"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "mana-x-v1",
+        "naming-text-numbers-v1",
+        "priority-v1",
+        "replacement-trigger-choices-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "decisionFamilies": [
+        "mana-x",
+        "naming-text-numbers",
+        "priority",
+        "replacement-trigger-choices"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "mana-x-v1",
+        "naming-text-numbers-v1",
+        "priority-v1",
+        "replacement-trigger-choices-v1"
+      ]
+    }
+  ],
+  "dependencies": [],
+  "evidence": {
+    "coveragePlan": {
+      "path": "coverage-plan.json",
+      "sha256": "86990bbad2b269c2952a83bfd2fd74b8fbc21bf0dd2022ea2f4e3f2ff64927b5"
+    },
+    "coverageReport": {
+      "path": "script-coverage.json",
+      "sha256": "4819797b87dcbe8556daa46b364a4b386b0ab73f976d0ef31e0c6bd2d0d93360"
+    },
+    "scenarioReceipts": [],
+    "controllerContracts": [
+      {
+        "contractId": "mana-x-v1",
+        "file": {
+          "path": "contracts/mana-x-v1.json",
+          "sha256": "c006cacdf576b0d6ea64cde8f930ef387734ddf68fdf9ec7f5a1d621c278b54e"
+        }
+      },
+      {
+        "contractId": "naming-text-numbers-v1",
+        "file": {
+          "path": "contracts/naming-text-numbers-v1.json",
+          "sha256": "51c62c8093f996df3da2f6197d99a99a064af9b1ae824d5fed12179666bd8476"
+        }
+      },
+      {
+        "contractId": "priority-v1",
+        "file": {
+          "path": "contracts/priority-v1.json",
+          "sha256": "9ac7643d6c7251aca5a930ab85abb686fbfae6bbfdfdc35b61b9ed9aaf858977"
+        }
+      },
+      {
+        "contractId": "replacement-trigger-choices-v1",
+        "file": {
+          "path": "contracts/replacement-trigger-choices-v1.json",
+          "sha256": "c3c57c1f5737cf99ec295625ef85e1580d42e14631609c96022abd1d6bee20ea"
+        }
+      }
+    ]
+  }
+}

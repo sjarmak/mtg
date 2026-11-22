@@ -1,9 +1,8 @@
 /**
  * Real-Forge witness that a Starter Commander Decks script reaches the
  * reusable controller contracts on the scenario route at forty life. The
- * command-zone contracts are witnessed in whole games instead
- * (`observed-scd-commander-witness.integration.test.ts`), because the puzzle
- * route empties the command zone before it deals the fixture.
+ * command-zone contracts have their own scenario probes, in
+ * `observed-scd-command-zone-scenario.integration.test.ts`.
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { ObservedSession, SessionSpec } from '@mtg/engine';
