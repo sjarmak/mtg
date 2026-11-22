@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { basename, delimiter, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { ObservedBackend } from '@mtg/engine';
-import { findForgeInstall, materializeForgeProfile } from '../install';
+import { findForgeInstall, forgeJvmCommand, materializeForgeProfile } from '../install';
 import type { ForgeInstall } from '../install';
 import {
   forgeObservedAdmittedBackend,
@@ -261,24 +261,22 @@ function createInstalledForgeBackend(
   const install = runtimeInstall(located, resolve(options.runtimeParent ?? tmpdir()));
   const scenarioPath = join(install.home, 'verification-state.json');
   const profileMutex = mutexFor(install.userDir);
+  const jvm = forgeJvmCommand([
+    'java',
+    '-Xmx4096m',
+    '-Dio.netty.tryReflectionSetAccessible=true',
+    '-Dfile.encoding=UTF-8',
+    ...(scenario === undefined ? [] : [`-Dmtg.forge.test.scenario=${scenarioPath}`]),
+    ...(options.forceLegacyCombatOrderingForTest === true
+      ? ['-Dmtg.forge.test.forceLegacyCombatOrdering=true']
+      : []),
+    '--class-path',
+    compiledBridgeClasses === undefined ? install.jar : `${install.jar}${delimiter}${compiledBridgeClasses}`,
+    bridgeEntrypoint,
+  ]);
   const delegateOptions: ForgeObservedBackendOptions = {
-    command: 'xvfb-run',
-    args: [
-      '-a',
-      'java',
-      '-Xmx4096m',
-      '-Dio.netty.tryReflectionSetAccessible=true',
-      '-Dfile.encoding=UTF-8',
-      ...(scenario === undefined ? [] : [`-Dmtg.forge.test.scenario=${scenarioPath}`]),
-      ...(options.forceLegacyCombatOrderingForTest === true
-        ? ['-Dmtg.forge.test.forceLegacyCombatOrdering=true']
-        : []),
-      '--class-path',
-      compiledBridgeClasses === undefined
-        ? install.jar
-        : `${install.jar}${delimiter}${compiledBridgeClasses}`,
-      bridgeEntrypoint,
-    ],
+    command: jvm.command,
+    args: [...jvm.args],
     cwd: install.home,
     timeoutMs: options.timeoutMs ?? 60_000,
     backendId: `forge-${install.version}${

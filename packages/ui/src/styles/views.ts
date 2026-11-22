@@ -317,6 +317,17 @@ const PLAY = `
   border-radius: var(--mtg-radius-sm);
 }
 
+/* The board-size warning (issue 302, routes/play/board-cap.ts). A caution rather
+   than a failure, so it borrows the warning's box with the pending keyline and
+   full-strength ink instead of the negative color: nothing went wrong yet, the
+   game is only told it is near the size where it stops. */
+.mtg-board-cap-note {
+  margin: 0 0 var(--mtg-space-2); padding: var(--mtg-space-1) var(--mtg-space-3);
+  font-size: var(--mtg-text-sm); color: var(--mtg-ink);
+  background: var(--mtg-surface-inset); border: 1px solid var(--mtg-pending);
+  border-radius: var(--mtg-radius-sm);
+}
+
 /* One column of groups, because the move list is a rail again — see the note on
    COMMAND_RAIL below for why it moved back. auto-fit still, so a wider
    window (or a future surface that gives the list more room) gets two columns
@@ -732,9 +743,10 @@ const PHASE_NODE_MIN_WIDTH_REM = 1.75;
  * lifted band and the pod's Active badge (`board/band.ts`, `mtg-1nc`), and the
  * whole sentence, step included, is in the control's accessible name.
  *
- * A phone re-values this, and `./mobile.ts` holds the number and the reason: at
- * 390px the bar's row is short enough that 5rem buys a whole extra line of steps
- * out of a lane budget that is fixed there. **A desktop re-values it in the
+ * A phone re-values this, and `./mobile.ts` holds the number and the reason: a
+ * tall phone wraps the turn with the steps as one row, so the head's width comes
+ * off one line rather than all of them and the turn can be read whole there
+ * (mtg-lab issue 186). **A desktop re-values it in the
  * other direction, and the block directly below holds that number**: this one is
  * the narrow window's answer, not every window's.
  */

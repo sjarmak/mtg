@@ -207,3 +207,39 @@ describe('the finished game, for a recorder', () => {
     expect(drafted.capture()?.format).toBe('draft');
   });
 });
+
+describe('the board-size cap (#302)', () => {
+  it('stops the game as a draw past the cap, offering no seat a move and spending no request', () => {
+    const live = createTable({
+      id: 'capped',
+      setup: SETUP,
+      boardCap: 6,
+      seats: [humanSeat('One'), humanSeat('Two')],
+      seating: [
+        { name: 'One', token: 'token-one' },
+        { name: 'Two', token: 'token-two' },
+      ],
+    });
+    // Lands and passes, so the board grows without a fight. The loop ends by
+    // itself once no seat is owed a decision, which is the stop this asserts.
+    for (let guard = 0; guard < 4000; guard += 1) {
+      const owed = live.snapshotFor(0).awaiting;
+      if (owed === null) break;
+      const owing = live.snapshotFor(owed);
+      const options = owing.pending?.options ?? [];
+      const land = options.findIndex((option) => option.type === 'playLand');
+      const pass = options.findIndex((option) => option.type === 'passPriority');
+      live.apply(owed, { kind: 'choose', index: land >= 0 ? land : Math.max(pass, 0), at: owing.decisions });
+    }
+    const seen = live.snapshotFor(0);
+    expect(seen.state.battlefield.length).toBeGreaterThan(6);
+    expect(seen.result).toBeNull();
+    expect(seen.awaiting).toBeNull();
+    expect(seen.pending).toBeNull();
+    expect(live.snapshotFor(1).pending).toBeNull();
+
+    const refusal = live.apply(0, { kind: 'choose', index: 0, at: seen.decisions });
+    expect(refusal?.refused).toMatch(/stopped as a draw: the battlefield passed 6 permanents/);
+    expect(live.snapshotFor(0).decisions).toBe(seen.decisions);
+  });
+});

@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "552129e5a061b1d5e39d20b071313ed8516e59d003ecc13f733bdc8efa498de8",
+    "adapterSha256": "416b01896d7a8bd432797592361767988efdb1208e056bede5c39cf82097ba50",
+    "protocolVersion": 2
+  },
+  "sourceScript": {
+    "path": "p/precinct_captain.txt",
+    "sha256": "8ca897043d0584d31e0ef359f679bf05255bdf188d3b73e32be8a8bc53c21dbf"
+  },
+  "decisionFamilies": [
+    "combat",
+    "priority"
+  ],
+  "obligations": [
+    "controller-contract-combat",
+    "controller-contract-priority",
+    "exact-source-declarations"
+  ],
+  "residualObligations": [],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "decisionFamilies": [
+        "combat",
+        "priority"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "priority-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "decisionFamilies": [
+        "combat",
+        "priority"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "priority-v1"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "tokenscripts/w_1_1_soldier.txt",
+      "sha256": "d13df0e1344ed4b856636f3d7f61453db9bf8931f0578821c539413e8fd10c95"
+    }
+  ],
+  "evidence": {
+    "coveragePlan": {
+      "path": "coverage-plan.json",
+      "sha256": "0c5d431019a64b59ea25aeae58d68e01935ddcb08391b852f264216dd316338d"
+    },
+    "coverageReport": {
+      "path": "script-coverage.json",
+      "sha256": "0955ca89e84847ccd5428e6b406d959b528d88cc97ff10d8f569ca3a615fa8e8"
+    },
+    "scenarioReceipts": [],
+    "controllerContracts": [
+      {
+        "contractId": "combat-v1",
+        "file": {
+          "path": "contracts/combat-v1.json",
+          "sha256": "53e0f3a3e60ec331c074c4f927e0b16a3490d51414d7295fe8a0186e52fea762"
+        }
+      },
+      {
+        "contractId": "priority-v1",
+        "file": {
+          "path": "contracts/priority-v1.json",
+          "sha256": "9ac7643d6c7251aca5a930ab85abb686fbfae6bbfdfdc35b61b9ed9aaf858977"
+        }
+      }
+    ]
+  }
+}

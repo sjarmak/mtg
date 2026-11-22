@@ -54,7 +54,21 @@ describe('aggregation', () => {
       spellOrAbility: 0,
       concede: 0,
       turnLimit: 1,
+      boardCap: 0,
     });
+  });
+
+  it('counts a board-capped game as a draw that no decided win rate sees', () => {
+    const capped = aggregateOutcomes('run', [
+      outcome(0, 0, 0, 8),
+      outcome(1, 1, 1, 10),
+      outcome(2, 0, 1, 12),
+      { ...outcome(3, null, 0, 14), reason: 'boardCap' },
+    ]);
+    expect(capped.draws).toBe(1);
+    expect(capped.endReasons.boardCap).toBe(1);
+    expect(capped.endReasons.turnLimit).toBe(0);
+    expect(decidedWinRate(capped, 0)).toBeCloseTo(2 / 3);
   });
 
   it('measures on-play win rate over decided games only', () => {

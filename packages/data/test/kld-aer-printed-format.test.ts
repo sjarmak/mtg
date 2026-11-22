@@ -103,7 +103,7 @@ describe('Kaladesh / Aether Revolt printed format sources', () => {
   }, 180_000);
 
   it('re-verifies the installed play admission against the staged format and catalogs', () => {
-    const root = fileURLToPath(new URL('play-admission-v17/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v18/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

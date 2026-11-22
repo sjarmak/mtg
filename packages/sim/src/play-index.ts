@@ -40,6 +40,7 @@ export function playIndex(
     ...(spec.rolloutPool === undefined ? {} : { rolloutPool: spec.rolloutPool }),
     startingPlayer: startingPlayerFor(index, spec.alternatePlayFirst),
     maximumTurns: spec.maximumTurns,
+    boardCap: spec.boardCap,
     ...(spec.budget === undefined ? {} : { budget: spec.budget }),
     ...(spec.caps === undefined ? {} : { caps: spec.caps }),
     log,

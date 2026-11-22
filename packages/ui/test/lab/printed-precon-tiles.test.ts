@@ -25,7 +25,7 @@ import { printedCountsLine, printedPreconFacts } from '../../src/routes/printed/
 
 const ktkData = 'packages/data/data/ktk';
 const fixture = 'packages/ui/test/fixtures/ktk-constructed-format-v1.json';
-const admission = JSON.parse(readFileSync(`${ktkData}/play-admission-v22/admission.json`, 'utf8')) as {
+const admission = JSON.parse(readFileSync(`${ktkData}/play-admission-v23/admission.json`, 'utf8')) as {
   cards: { id: string; review: string }[];
   subject: { formatId: string };
 };

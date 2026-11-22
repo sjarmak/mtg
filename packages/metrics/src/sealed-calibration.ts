@@ -42,7 +42,7 @@ import {
 import type { GameEvent } from '@mtg/kernel';
 import { objectId } from '@mtg/kernel';
 import type { MatchRun, MatchSpec } from '@mtg/sim';
-import { greedySpec, SimGameLogSchema, withSimPool } from '@mtg/sim';
+import { greedySpec, SIM_END_REASONS, SimGameLogSchema, withSimPool } from '@mtg/sim';
 import { DRAFT_COLLATION_VERSION, DraftCollationSchema } from './draft-calibration';
 import { gameFingerprint } from './sample';
 import { wilsonInterval } from './stats';
@@ -276,7 +276,7 @@ const GameEvidenceSchema = z
     sealedSeats: z.tuple([sealedSeat, sealedSeat]),
     startingPlayer: gameSeat,
     winnerSealedSeat: sealedSeat.nullable(),
-    reason: z.enum(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']),
+    reason: z.enum(SIM_END_REASONS),
     turns: positive,
     decisions: nonnegative,
     trajectoryFingerprint: z.string().min(1).max(MAX_TRAJECTORY_LENGTH),

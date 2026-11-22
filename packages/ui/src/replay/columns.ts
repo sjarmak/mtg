@@ -88,7 +88,19 @@ export const EXTRA_STRING_FIELDS = [
   'sim_oppo_bot',
 ] as const;
 
-export const END_REASONS = ['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit'] as const;
+/**
+ * `@mtg/sim`'s `SIM_END_REASONS`, restated because this package may name
+ * `@mtg/sim` only as a type. `boardCap` is a draw the sim driver stopped at its
+ * battlefield ceiling rather than one the rules reached.
+ */
+export const END_REASONS = [
+  'lifeZero',
+  'emptyLibrary',
+  'spellOrAbility',
+  'concede',
+  'turnLimit',
+  'boardCap',
+] as const;
 export type EndReason = (typeof END_REASONS)[number];
 
 export type TurnOwnerField = (typeof TURN_OWNER_FIELDS)[number];

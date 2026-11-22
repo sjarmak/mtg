@@ -9,8 +9,8 @@
  */
 import type { Card, Color } from '@mtg/dsl';
 import { COLORS } from '@mtg/dsl';
-import type { DeckList, GameEndReason, GameResult, PlayerId } from '@mtg/kernel';
-import type { GameMetadata, SimExtras } from './schema';
+import type { DeckList, GameResult, PlayerId } from '@mtg/kernel';
+import type { GameMetadata, SimEndReason, SimExtras } from './schema';
 import { SIM_LOG_SCHEMA_VERSION } from './schema';
 
 /** WUBRG-ordered color string for a deck, e.g. `"WU"`. 17lands' `main_colors` format. */
@@ -37,7 +37,8 @@ export interface MetadataInputs {
   readonly decks: readonly [DeckList, DeckList];
   readonly botNames: readonly [string, string];
   readonly startingPlayer: PlayerId;
-  readonly result: GameResult;
+  /** The winner and the last turn; a board-capped game has no kernel result to read them off. */
+  readonly result: Pick<GameResult, 'winner' | 'endedOnTurn'>;
   readonly decisions: number;
   /** London mulligans taken per seat, seat 0 first; read off the finished game. */
   readonly mulligans: readonly [number, number];
@@ -71,7 +72,7 @@ export function buildMetadata(inputs: MetadataInputs): GameMetadata {
   };
 }
 
-export function buildExtras(inputs: MetadataInputs, reason: GameEndReason): SimExtras {
+export function buildExtras(inputs: MetadataInputs, reason: SimEndReason): SimExtras {
   return {
     sim_schema_version: SIM_LOG_SCHEMA_VERSION,
     sim_run_seed: inputs.runSeed,

@@ -984,7 +984,7 @@ export const EffectKindSchema = z.enum(EFFECT_KINDS);
  * so appending leaves the bytes every recorded fixture was keyed against
  * untouched, and inserting would rename all of them.
  *
- * The fifth member is Fuse's printed text. the set design document
+ * The fifth member is Fuse's printed text. The set design document
  * carried it as an owed row for as long as the vocabulary had no word for a
  * controller: a part that reads "target creature you control" and enforces
  * "target creature" says one thing and does another, in the kernel and in the
@@ -1146,8 +1146,8 @@ export const TARGET_KINDS = [
    * word taken out of the phrase and out of the permission.
    *
    * The fourteenth, appended for the reason the fifth through thirteenth were.
-   * It arrives with the flagship set's Trisigil cycle (`mtg-rji`): three
-   * `Legendary Artifact — Trisigil` cards, each of which puts a counter on
+   * It arrives with the flagship set's legendary artifact cycle (`mtg-rji`):
+   * three cards, each of which puts a counter on
    * itself every upkeep until the third one lands. Before this member the
    * vocabulary could not print any of the three, and the gap was two
    * independent walls — `putCounters` named no kind that reaches the source at
@@ -2003,7 +2003,7 @@ export const TRIGGER_CONDITIONS = [
    * not carry `triggeringCreature` — so a condition it could print would be a
    * trigger it could not aim.
    *
-   * the flagship set's Gloom N is the ability word on it (`gloomAbility`),
+   * The flagship set's Gloom N is the ability word on it (`gloomAbility`),
    * Toxic's shape with the counters landing on the creature rather than on a
    * player. The condition stays shared rather than reserved, the way Flurry
    * rush's below is: the set's white-green legend grows himself off the same
@@ -2015,7 +2015,7 @@ export const TRIGGER_CONDITIONS = [
    * source blocked a creature with greater power, or a creature with greater
    * power blocked it.
    *
-   * the flagship set's Flurry rush is the mechanic that asked for it, and the
+   * The flagship set's Flurry rush is the mechanic that asked for it, and the
    * design intent is the whole reason the two halves are one condition rather
    * than two: the ability word rewards winning a combat through timing rather
    * than through raw size, so it has to read the *pairing* — this creature and

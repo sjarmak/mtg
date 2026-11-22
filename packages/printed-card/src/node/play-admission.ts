@@ -17,6 +17,7 @@ import {
   scriptQualificationProbeResult,
   verifyPrintedScriptQualificationReceipt,
 } from './script-qualification';
+import { digestOf, memoizedReader } from './evidence-memo';
 
 /**
  * A script-qualification receipt was measured against a Forge runtime other
@@ -58,6 +59,7 @@ export function verifyPrintedPlayAdmission(
   verifyAlternativeEvidence?: AlternativeEvidenceVerifier,
 ) {
   const artifact = PrintedPlayAdmissionSchema.parse(JSON.parse(body));
+  const read = memoizedReader(readEvidence);
   // Validate every reference before touching any evidence; never partially trust a manifest.
   const references = artifact.probes.flatMap((probe) =>
     probe.evidence === null
@@ -65,8 +67,8 @@ export function verifyPrintedPlayAdmission(
       : [{ probe, ...probe.evidence, path: checkedEvidencePath(probe.evidence.path) }],
   );
   for (const reference of references) {
-    const bytes = readEvidence(reference.path);
-    const digest = createHash('sha256').update(bytes).digest('hex');
+    const bytes = read(reference.path);
+    const digest = digestOf(bytes);
     if (digest !== reference.sha256) {
       throw new Error(`Printed admission evidence checksum mismatch: ${reference.path}`);
     }
@@ -74,7 +76,7 @@ export function verifyPrintedPlayAdmission(
       if (verifyAlternativeEvidence === undefined) {
         throw new Error(`Unsupported printed admission evidence kind: ${reference.path}`);
       }
-      verifyAlternativeEvidence({ artifact, probe: reference.probe, bytes, readEvidence });
+      verifyAlternativeEvidence({ artifact, probe: reference.probe, bytes, readEvidence: read });
       continue;
     }
     let receipt;

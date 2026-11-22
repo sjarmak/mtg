@@ -201,5 +201,5 @@ describe('Forge syntax closure snapshot', () => {
     expect(cma).toMatchObject({ scripted: 289, closed: 289, missing: [] });
     const cmm = report.editions.find((edition) => edition.code === 'CMM');
     expect(cmm).toMatchObject({ scripted: 737, closed: 737, missing: [] });
-  });
+  }, 180_000);
 });

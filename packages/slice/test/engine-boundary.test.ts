@@ -220,6 +220,8 @@ describe('the third-party engine boundary', () => {
   });
 
   it('keeps the Forge distribution untracked', () => {
+    // install.sh downloads the upstream release and checks its sha256; it holds
+    // no Forge source, so tracking it keeps Forge itself a downloaded artifact.
     const inside = tracked.filter(
       (path) =>
         path.startsWith('tools/forge/') &&

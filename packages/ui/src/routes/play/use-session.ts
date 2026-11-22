@@ -66,6 +66,7 @@ import {
   undo as undoToBoundary,
   yieldPriority,
 } from '@mtg/kernel';
+import { boardCapStanding, DEFAULT_BOARD_CAP } from '@mtg/engine';
 import type { OpeningRoll } from './opening-roll';
 import type { SeatNames } from './position';
 import type { TriggerYield, TriggerYields } from './trigger-yields';
@@ -107,6 +108,11 @@ export interface PlayConfig {
    */
   readonly watchBeats?: BeatSet | undefined;
   readonly openingRoll?: OpeningRoll | undefined;
+  /**
+   * Permanents the battlefield may hold before the game stops as a draw
+   * (`./board-cap.ts`, issue 302). `DEFAULT_BOARD_CAP` when absent.
+   */
+  readonly boardCap?: number | undefined;
 }
 
 export interface PlaySessionHandle {
@@ -199,6 +205,10 @@ export interface PlaySessionHandle {
  * viewer is a caller that could disagree with the session about whose hand to
  * show, which is the one bug this whole file exists to make unavailable.
  */
+function boardCapped(session: GameSession, cap: number): boolean {
+  return session.result === null && boardCapStanding(session.state.battlefield.length, cap) === 'passed';
+}
+
 interface HeldGame {
   readonly session: GameSession;
   readonly viewer: PlayerId;
@@ -243,6 +253,7 @@ export function usePlaySession(config: PlayConfig): PlaySessionHandle {
    */
   const opened = useRef(config);
   const dealt = opened.current;
+  const cap = dealt.boardCap ?? DEFAULT_BOARD_CAP;
   const [autoPass, setSettings] = useState<AutoPassSettings>(dealt.autoPass ?? DEFAULT_AUTO_PASS);
   const [watchBeats, setBeats] = useState<BeatSet>(dealt.watchBeats ?? DEFAULT_BEATS);
   const [triggerYields, setTriggerYields] = useState<TriggerYields>(NO_TRIGGER_YIELDS);
@@ -278,6 +289,10 @@ export function usePlaySession(config: PlayConfig): PlaySessionHandle {
     (move: (current: GameSession) => GameSession, settleWith: TriggerYields | null): void => {
       setError(null);
       setGame((current) => {
+        // Past the board cap the game is stopped (`./board-cap.ts`, issue 302), and
+        // the next `advance` is the one that would freeze the tab, so nothing
+        // moves it but a restart.
+        if (boardCapped(current.session, cap)) return current;
         try {
           const moved = move(current.session);
           return held(
@@ -290,7 +305,7 @@ export function usePlaySession(config: PlayConfig): PlaySessionHandle {
         }
       });
     },
-    [options],
+    [options, cap],
   );
 
   const choose = useCallback(

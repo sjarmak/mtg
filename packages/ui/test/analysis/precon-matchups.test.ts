@@ -42,7 +42,14 @@ function aggregate(runSeed: string, games: number, wins: readonly [number, numbe
     minTurns: 8,
     maxTurns: 12,
     turnHistogram: [],
-    endReasons: { lifeZero: games, emptyLibrary: 0, spellOrAbility: 0, concede: 0, turnLimit: 0 },
+    endReasons: {
+      lifeZero: games,
+      emptyLibrary: 0,
+      spellOrAbility: 0,
+      concede: 0,
+      turnLimit: 0,
+      boardCap: 0,
+    },
     meanDecisions: 20,
     totalDecisions: games * 20,
   };

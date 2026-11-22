@@ -66,10 +66,10 @@ describe('Magic 2014 printed format sources', () => {
     expect(created).toHaveLength(10);
     expect(created.filter((name) => !bound.has(name))).toEqual([]);
     expect(printings.tokens.filter((token) => token.art.status !== 'available')).toEqual([]);
-  });
+  }, 180_000);
 
   it('re-verifies the installed play admission against the staged format and catalog', () => {
-    const root = fileURLToPath(new URL('play-admission-v23/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v24/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

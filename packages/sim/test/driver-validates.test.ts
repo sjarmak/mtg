@@ -54,4 +54,24 @@ describe('the sim driver', () => {
       }),
     ).toThrow(/cannot attack/);
   });
+
+  it('stops a game whose battlefield passes the board cap as a boardCap draw', () => {
+    const game = (boardCap: number | null) =>
+      playSimGame({
+        index: 0,
+        seed: 'driver-board-cap',
+        decks: [FIXTURE_DECK_RW, FIXTURE_DECK_RW],
+        startingPlayer: 0,
+        agents: [greedyBot('a'), greedyBot('b')],
+        boardCap,
+      });
+    const uncapped = game(null);
+    expect(uncapped.reason).not.toBe('boardCap');
+    // Four permanents arrive within each seat's first few land drops, long
+    // before the uncapped game ends.
+    const capped = game(3);
+    expect(capped.reason).toBe('boardCap');
+    expect(capped.winner).toBeNull();
+    expect(capped.turns).toBeLessThan(uncapped.turns);
+  });
 });

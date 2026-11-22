@@ -87,8 +87,11 @@ import {
   readDeckWinRates,
   readHeadToHead,
 } from './stage-deck-win-rates';
-import { installedPrintedAdmissions, stageableFormats } from './printed-format-registry';
-import type { loadPrintedAdmissionSource } from './printed-format-registry';
+import {
+  installedPrintedAdmissions,
+  loadPrintedAdmissionSource,
+  stageableFormats,
+} from './printed-format-registry';
 import {
   describeLegacyCubeStage,
   LEGACY_CUBE_CATALOG_FILENAME,
@@ -385,13 +388,18 @@ async function main(): Promise<void> {
   const candidates = named === undefined ? flagshipOnly(SET_CANDIDATES) : SET_CANDIDATES;
   const result = resolveSet(candidates, named);
   if (!result.ok) fail(result.message);
-  const { formats: installedFormats, admissions: printedAdmissions } = installedPrintedAdmissions(REPO_ROOT);
+  const { formats: installedFormats } = installedPrintedAdmissions(REPO_ROOT);
   const printedReleaseDates = storeReleaseDates(
     REPO_ROOT,
     installedFormats.flatMap((format) => format.catalogs.map((catalog) => catalog.code)),
   );
   const stageable = stageableFormats(installedFormats, printedReleaseDates.storePresent);
   const printedFormats = stageable.kept;
+  // The backend admits only what the page stages: a format skipped above has no
+  // seat page, and the LAN dealer refuses a backend format it cannot seat.
+  const printedAdmissions = printedFormats
+    .map(loadPrintedAdmissionSource)
+    .filter((admission) => admission !== undefined);
   const printedDraftRatings = await buildInstalledPrintedDraftRatings(printedFormats);
   const deckWinRates = readDeckWinRates(deckWinRatesPath(REPO_ROOT));
   const headToHead = readHeadToHead(headToHeadPath(REPO_ROOT));

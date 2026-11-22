@@ -29,14 +29,14 @@ import { apply, oidOf } from './helpers';
 const UPKEEP_ACCRUAL: AbilityInput = {
   kind: 'triggered',
   condition: 'beginningOfYourUpkeep',
-  effects: [{ kind: 'putCounters', counter: 'trisigil', count: 1, target: { kind: 'selfPermanent' } }],
+  effects: [{ kind: 'putCounters', counter: 'charge', count: 1, target: { kind: 'selfPermanent' } }],
 };
 
 /** "{2}: Put a Trisigil counter on this permanent." — the same referent, activated. */
 const ACTIVATED_ACCRUAL: AbilityInput = {
   kind: 'activated',
   cost: { mana: { generic: 2 }, tapSelf: false },
-  effects: [{ kind: 'putCounters', counter: 'trisigil', count: 1, target: { kind: 'selfPermanent' } }],
+  effects: [{ kind: 'putCounters', counter: 'charge', count: 1, target: { kind: 'selfPermanent' } }],
 };
 
 /** Passes priority with whoever holds it until the stack is empty or a real decision is owed. */
@@ -55,7 +55,7 @@ function settlePriority(start: ReduceResult, limit = 20): ReduceResult {
 function trisigilOn(state: GameState, oid: string): number {
   const object = state.objects[oid];
   if (object === undefined) throw new Error(`no object ${oid}`);
-  return counterCount(object.counters, 'trisigil');
+  return counterCount(object.counters, 'charge');
 }
 
 /**

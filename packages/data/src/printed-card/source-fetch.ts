@@ -105,6 +105,21 @@ export async function fetchScryfallTokenPrintingsNamed(name: string, client: Htt
   );
 }
 
+/** The English printing at one set's collector number: the printing a stated token alias names. */
+export async function fetchScryfallPrinting(code: string, collectorNumber: string, client: HttpClient) {
+  const set = code.toLowerCase();
+  return fetchScryfallSearch(
+    `set:${set} cn:"${collectorNumber}" lang:en`,
+    { order: 'set' },
+    client,
+    (card) => {
+      if (card.set !== set || card.collector_number !== collectorNumber || card.lang !== 'en') {
+        invalid(`printing source drift: ${card.id}`);
+      }
+    },
+  );
+}
+
 /** Does not mutate the global Oracle store or the calibration reference corpus. */
 export async function fetchPrintedSetSources(code: string, client: HttpClient) {
   if (!/^[A-Z0-9]{2,8}$/.test(code)) invalid(`invalid set code: ${code}`);

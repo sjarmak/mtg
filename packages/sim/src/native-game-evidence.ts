@@ -1,6 +1,7 @@
 import type { BotEvidenceEpisode, JsonValue } from '@mtg/bot-evidence';
 import { BotEvidenceEpisodeSchema } from '@mtg/bot-evidence';
-import type { GameEndReason, PlayerId } from '@mtg/kernel';
+import type { PlayerId } from '@mtg/kernel';
+import type { SimEndReason } from './log/schema';
 import type { NativeGameplayDecisionEvidence } from './native-evidence';
 
 type EvidenceIdentity = BotEvidenceEpisode['episode'];
@@ -30,7 +31,7 @@ export function nativeGameplayEvidenceIdentity(
 
 interface CompletedNativeGame {
   readonly winner: PlayerId | null;
-  readonly reason: GameEndReason;
+  readonly reason: SimEndReason;
   readonly turns: number;
   readonly decisions: number;
   readonly startingPlayer: PlayerId;

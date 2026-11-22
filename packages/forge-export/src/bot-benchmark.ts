@@ -4,7 +4,7 @@ import { basename, join, resolve } from 'node:path';
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { ensureForgeProfile, findForgeInstall } from './install';
+import { ensureForgeProfile, findForgeInstall, forgeJvmCommand } from './install';
 import type { ForgeInstall } from './install';
 import { fingerprintBotFiles } from './bot-fingerprint';
 import { killProcessGroup, trackProcessGroup } from './process-group';
@@ -80,20 +80,16 @@ function runProcess(
   botFingerprint: string,
 ): Promise<InstalledBotResult> {
   return new Promise((resolveResult) => {
-    const child = spawn(
-      'xvfb-run',
-      [
-        '-a',
-        'java',
-        `-Dmtg.bot.probes=${join(classes, 'probes.json')}`,
-        ...botCommandArgs(install.jar, classes, run),
-      ],
-      {
-        cwd: install.home,
-        detached: true,
-        stdio: ['ignore', 'pipe', 'pipe'],
-      },
-    );
+    const jvm = forgeJvmCommand([
+      'java',
+      `-Dmtg.bot.probes=${join(classes, 'probes.json')}`,
+      ...botCommandArgs(install.jar, classes, run),
+    ]);
+    const child = spawn(jvm.command, jvm.args, {
+      cwd: install.home,
+      detached: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
     trackProcessGroup(child.pid);
     let stdout = '';
     let stderr = '';

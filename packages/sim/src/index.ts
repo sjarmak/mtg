@@ -138,6 +138,7 @@ export { agentSeed, gameSeed, startingPlayerFor } from './seeds';
 
 export type { EnumerationCaps, GameBudget, GameOutcome, LogRequest, PlayGameOptions } from './driver';
 export {
+  DEFAULT_BOARD_CAP,
   DEFAULT_BUDGET,
   DEFAULT_CAPS,
   DEFAULT_MAXIMUM_TURNS,
@@ -221,6 +222,7 @@ export type {
   Side,
   SideTotals,
   SideTurnStats,
+  SimEndReason,
   SimExtras,
   SimGameLog,
   TurnRecord,
@@ -239,6 +241,7 @@ export {
   REPLAY_TOTAL_FIELDS,
   SIDES,
   sideColumn,
+  SIM_END_REASONS,
   SIM_LOG_SCHEMA_VERSION,
   SimGameLogSchema,
   totalColumn,

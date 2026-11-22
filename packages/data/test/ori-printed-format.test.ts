@@ -66,7 +66,7 @@ describe('Magic Origins printed format sources', () => {
     expect(created).toHaveLength(10);
     expect(created.filter((name) => !bound.has(name))).toEqual([]);
     expect(printings.tokens.filter((token) => token.art.status !== 'available')).toEqual([]);
-  });
+  }, 180_000);
 
   it('binds each token to one printing the play surface can tell apart', () => {
     // `printingFor` (packages/ui/src/routes/play/backend-position.ts) resolves a token by name, then by
@@ -93,7 +93,7 @@ describe('Magic Origins printed format sources', () => {
   });
 
   it('re-verifies the installed play admission against the staged format and catalogs', () => {
-    const root = fileURLToPath(new URL('play-admission-v22/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v23/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

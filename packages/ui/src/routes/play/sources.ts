@@ -85,22 +85,29 @@ function canBePlayed(row: PrintedFormatRow): boolean {
   return row.availability.play.status !== 'unavailable';
 }
 
+/** Whether a printed row is Momir Basic, which is a section of its own (issue 308). */
+function isMomir(row: PrintedFormatRow): boolean {
+  return printedKind(row) === 'constructed' && row.variant === 'momir';
+}
+
+/** Playable rows first, then the ones that can only be read, each newest first. */
+function playableFirst(rows: readonly PrintedFormatRow[]): readonly PlaySource[] {
+  const ordered = orderPrintedFormats(rows);
+  return [...ordered.filter(canBePlayed), ...ordered.filter((row) => !canBePlayed(row))].map((row) =>
+    printedSource(row),
+  );
+}
+
 export function playSources(sub: PlayFormat, staged: StagedSources): readonly PlaySource[] {
   if (sub === 'commander') {
-    const commander = orderPrintedFormats(
-      staged.printed.filter((row) => printedKind(row) === 'constructed' && row.variant !== 'momir'),
-    );
-    return [...commander.filter(canBePlayed), ...commander.filter((row) => !canBePlayed(row))].map((row) =>
-      printedSource(row),
-    );
+    return playableFirst(staged.printed.filter((row) => printedKind(row) === 'constructed' && !isMomir(row)));
   }
+  if (sub === 'momir') return playableFirst(staged.printed.filter(isMomir));
   const kernel = kernelSources(staged);
   if (sub === 'constructed') {
     const printed = orderPrintedFormats(
       staged.printed.filter(
-        (row) =>
-          (printedKind(row) === 'limited' && row.constructedFormatUrl !== undefined) ||
-          (printedKind(row) === 'constructed' && row.variant === 'momir'),
+        (row) => printedKind(row) === 'limited' && row.constructedFormatUrl !== undefined,
       ),
     ).map((row) => printedSource(row));
     return [...kernel, ...printed];
@@ -173,13 +180,25 @@ export function resolvePlaySource(
   return preferred ?? sources[0] ?? null;
 }
 
-export function movedCommanderSource(
+/**
+ * Where a link that names Momir Basic under another section now belongs.
+ *
+ * Momir Basic was listed under Commander until 2026-10-10 and under
+ * Constructed until issue 308 gave it a section of its own, so a link kept from
+ * either names it under a section that no longer lists it. Only the address a
+ * page was opened at is read this way (`../../dev/LabApp.ts`): a section link
+ * carries `source` across, and following one from Momir to Constructed is a
+ * choice to leave, not an old link.
+ */
+export function movedPlaySource(
+  sub: PlayFormat,
   params: Readonly<Record<string, string>>,
   printed: readonly PrintedFormatRow[],
 ): PlayFormat | null {
+  if (sub !== 'constructed' && sub !== 'commander') return null;
   const asked = params['source'];
   if (asked === undefined || !asked.startsWith(PRINTED_PREFIX)) return null;
   const id = asked.slice(PRINTED_PREFIX.length).split(':')[0];
   const row = printed.find((candidate) => candidate.id === id);
-  return row?.variant === 'momir' ? 'constructed' : null;
+  return row !== undefined && isMomir(row) ? 'momir' : null;
 }

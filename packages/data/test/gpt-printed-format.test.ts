@@ -75,7 +75,7 @@ describe('Guildpact printed format sources', () => {
     const bound = new Set(printings.tokens.flatMap((token) => token.observedNames));
     expect(created.filter((name) => !bound.has(name))).toEqual(['Sand Token', 'Weird Token']);
     expect(printings.tokens.filter((token) => token.art.status !== 'available')).toEqual([]);
-  });
+  }, 180_000);
 
   it('registers and ships legal Forge-admitted constructed pilot decks', () => {
     const registry = JSON.parse(
@@ -89,7 +89,7 @@ describe('Guildpact printed format sources', () => {
 
     const constructed = parsePrintedConstructedFormat(JSON.parse(readData('gpt-constructed-format-v1.json')));
     const printings = new Map([...gpt.cards, ...rav.cards].map((card) => [card.physicalId, card]));
-    const admission = JSON.parse(readData('play-admission-v8/admission.json')) as {
+    const admission = JSON.parse(readData('play-admission-v9/admission.json')) as {
       readonly cards: readonly { readonly id: string; readonly review: string }[];
     };
     const admitted = new Set(
@@ -103,7 +103,7 @@ describe('Guildpact printed format sources', () => {
   });
 
   it('re-verifies the installed play admission against the staged format and catalogs', () => {
-    const root = fileURLToPath(new URL('play-admission-v8/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v9/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

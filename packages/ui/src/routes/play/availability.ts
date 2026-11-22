@@ -48,6 +48,7 @@ export interface AvailabilityFacts {
 export const READY: Availability = { status: 'ready' };
 
 export const COMMANDER_UNAVAILABLE_REASON = 'Commander is not dealt yet.';
+export const MOMIR_UNAVAILABLE_REASON = 'Momir Basic is a printed format; a generated set does not deal it.';
 export const PRINTED_DRAFT_UNAVAILABLE_REASON = 'Draft is not available for this printed format.';
 export const PRINTED_SEALED_UNAVAILABLE_REASON = 'Sealed is not available for this printed format.';
 export const PRINTED_UNLOADED_REASON = 'This printed format has not been read yet.';
@@ -112,7 +113,7 @@ function cubeAvailability(format: PlayFormat, opponent: Opponent, facts: Availab
 
 /**
  * The one answer every Play section reads. Kernel sets deal every format but
- * Commander against a bot, and over the network whatever the page can seat;
+ * Commander and Momir Basic against a bot, and over the network whatever the page can seat;
  * printed formats say for themselves what they open against a bot, and over
  * the network the page answers for them too; the cube is drafted and nothing
  * else.
@@ -126,5 +127,6 @@ export function availability(
   if (setKind === 'printed') return printedAvailability(format, opponent, facts);
   if (setKind === 'cube') return cubeAvailability(format, opponent, facts);
   if (format === 'commander') return unavailable(COMMANDER_UNAVAILABLE_REASON);
+  if (format === 'momir') return unavailable(MOMIR_UNAVAILABLE_REASON);
   return opponent === 'lan' ? facts.lan : READY;
 }

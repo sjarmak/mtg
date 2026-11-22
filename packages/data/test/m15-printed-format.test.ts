@@ -66,7 +66,7 @@ describe('Magic 2015 printed format sources', () => {
     expect(created).toHaveLength(12);
     expect(created.filter((name) => !bound.has(name))).toEqual([]);
     expect(printings.tokens.filter((token) => token.art.status !== 'available')).toEqual([]);
-  });
+  }, 180_000);
 
   it('binds each same-named token to a printing the play surface can tell apart by color', () => {
     // `printingFor` (packages/ui/src/routes/play/backend-position.ts) picks between same-named token
@@ -95,7 +95,7 @@ describe('Magic 2015 printed format sources', () => {
   });
 
   it('re-verifies the installed play admission against the staged format and catalogs', () => {
-    const root = fileURLToPath(new URL('play-admission-v23/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v24/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

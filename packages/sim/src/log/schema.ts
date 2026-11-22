@@ -247,6 +247,30 @@ export const GameMetadataSchema = z.object({
 export type GameMetadata = z.infer<typeof GameMetadataSchema>;
 
 /** Our own columns, all `sim_`-prefixed so they can never collide with 17lands'. */
+/**
+ * How a simulated game ended: the kernel's own reasons, plus `boardCap`.
+ *
+ * `boardCap` is the driver's, not the rules': a game whose battlefield passed
+ * the cap (`DEFAULT_BOARD_CAP` in `driver.ts`) was stopped as a draw rather
+ * than played out, because a board that size costs seconds per action and a
+ * runaway would otherwise end the whole run. It is a member here so a capped
+ * game is reported as one rather than disguised as a turn-limit draw.
+ *
+ * Adding it did not bump `SIM_LOG_SCHEMA_VERSION`: every existing value keeps
+ * its meaning, so every `/3` log already written still reads the same, and a
+ * reader from before it refuses a `boardCap` row by name rather than misreading
+ * it. A bump would only have made the exact-version readers refuse those logs.
+ */
+export const SIM_END_REASONS = [
+  'lifeZero',
+  'emptyLibrary',
+  'spellOrAbility',
+  'concede',
+  'turnLimit',
+  'boardCap',
+] as const;
+export type SimEndReason = (typeof SIM_END_REASONS)[number];
+
 export const SimExtrasSchema = z.object({
   sim_schema_version: z.string(),
   sim_run_seed: z.string(),
@@ -257,7 +281,7 @@ export const SimExtrasSchema = z.object({
   sim_user_bot: z.string(),
   sim_oppo_bot: z.string(),
   sim_winner: z.union([z.literal(0), z.literal(1), z.null()]),
-  sim_end_reason: z.enum(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']),
+  sim_end_reason: z.enum(SIM_END_REASONS),
   sim_decisions: z.number().int().min(0),
 });
 

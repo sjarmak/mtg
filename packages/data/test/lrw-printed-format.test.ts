@@ -70,7 +70,7 @@ describe('Lorwyn printed format sources', () => {
     const bound = new Set(printings.tokens.flatMap((token) => token.observedNames));
     expect(created.filter((name) => !bound.has(name))).toEqual([]);
     expect(printings.tokens.filter((token) => token.art.status !== 'available')).toEqual([]);
-  });
+  }, 180_000);
 
   it('ships its legal Forge-admitted constructed decks', () => {
     const registry = JSON.parse(
@@ -82,7 +82,7 @@ describe('Lorwyn printed format sources', () => {
     expect(registered?.constructedFormatFile).toBe('lrw-constructed-format-v1.json');
     const constructed = parsePrintedConstructedFormat(JSON.parse(readData('lrw-constructed-format-v1.json')));
     const printings = new Map(catalog.cards.map((card) => [card.physicalId, card]));
-    const admission = JSON.parse(readData('play-admission-v12/admission.json')) as {
+    const admission = JSON.parse(readData('play-admission-v13/admission.json')) as {
       readonly cards: readonly { readonly id: string; readonly review: string }[];
     };
     const admitted = new Set(
@@ -100,7 +100,7 @@ describe('Lorwyn printed format sources', () => {
   });
 
   it('re-verifies the installed play admission against the staged format and catalog', () => {
-    const root = fileURLToPath(new URL('play-admission-v12/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v13/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

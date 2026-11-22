@@ -135,6 +135,10 @@ export { routeBackend } from './selection';
 export type { ProjectingSession, SeatProjection } from './seats';
 export { projectsPerSeat } from './seats';
 
+// The board-size ceiling every game runner reads (issue 302).
+export type { BoardCapStanding } from './board-cap';
+export { boardCapStanding, DEFAULT_BOARD_CAP } from './board-cap';
+
 export type { ConformanceOptions, Finding } from './conformance';
 export { checkBackend } from './conformance';
 

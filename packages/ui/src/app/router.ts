@@ -34,7 +34,7 @@ export type UiMode = (typeof UI_MODES)[number];
  * literal types and `SubOf` can say which subs belong to which mode.
  */
 export const UI_SUBS = {
-  play: ['constructed', 'draft', 'sealed', 'commander'],
+  play: ['constructed', 'draft', 'sealed', 'commander', 'momir'],
   customize: ['sets', 'decks'],
   cards: ['gallery', 'decks'],
   analysis: ['explorer', 'replay'],
@@ -97,6 +97,7 @@ export const SUB_LABELS: Readonly<Record<UiSub, string>> = {
   draft: 'Draft',
   sealed: 'Sealed',
   commander: 'Commander',
+  momir: 'Momir',
   sets: 'Sets',
   decks: 'Decks',
   gallery: 'Gallery',

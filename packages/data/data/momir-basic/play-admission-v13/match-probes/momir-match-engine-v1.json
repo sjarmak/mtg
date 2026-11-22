@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-play-probe-receipt",
+  "subject": {
+    "formatId": "momir-basic",
+    "formatSha256": "4b444700c5239901d101982996e7570f7fa3f52670514cb83a21340702b13c08",
+    "catalogs": {
+      "M11": "ea0c6153e664b1c21aed2054a7bd0af617700997d3836f7977be809d5eec5dfe"
+    },
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "552129e5a061b1d5e39d20b071313ed8516e59d003ecc13f733bdc8efa498de8",
+    "adapterSha256": "416b01896d7a8bd432797592361767988efdb1208e056bede5c39cf82097ba50",
+    "protocolVersion": 2
+  },
+  "result": {
+    "id": "momir-match-engine-v1",
+    "scope": "match",
+    "controller": "engine",
+    "cardIds": [],
+    "decisionFamilies": [
+      "starting-player",
+      "mulligan",
+      "priority"
+    ],
+    "status": "passed",
+    "assertions": [
+      "runs Momir Basic starting choice, mulligan and priority for an engine-controlled seat"
+    ]
+  }
+}

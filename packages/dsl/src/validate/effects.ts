@@ -1002,8 +1002,8 @@ export const EFFECT_RULES: EffectRulesTable = {
     // the one thing the unscoped form must never name, so the widening lands
     // here where no prompt can see it.
     //
-    // `selfPermanent` is the flagship set's Trisigil cycle (`mtg-rji`): a
-    // legendary artifact whose own upkeep trigger puts a counter on the
+    // `selfPermanent` is the flagship set's legendary artifact cycle
+    // (`mtg-rji`): an artifact whose own upkeep trigger puts a counter on the
     // artifact. Before this word that card was unprintable twice over — no
     // kind in this row reached the ability's own source at all, and the one
     // kind that reaches a source anywhere in the vocabulary, `selfCreature`,
@@ -1016,7 +1016,7 @@ export const EFFECT_RULES: EffectRulesTable = {
     // `selfCreature` is Quirion Dryad's exact current wording. It is distinct
     // from `selfPermanent`: the creature-only kind prints "this creature" and
     // `checkSourceReferentTarget` refuses it on noncreatures, while the broader
-    // kind lets artifacts such as the Trisigil cycle print "this permanent".
+    // kind lets artifacts such as that cycle print "this permanent".
     // Both stay hand-authored so the generator's target menu remains unchanged.
     //
     // `noTarget` is Steel Overseer's slot (M11 214, `mtg-hfex`), and it arrives

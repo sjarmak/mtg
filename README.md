@@ -41,11 +41,9 @@ npm run forge:install   # downloads Forge 2.0.14 (about 300 MB) and checks it
 npm run play
 ```
 
-**This doesn't work in the public repo yet.** Each printed format is only
-allowed to play against the exact Forge adapter it was tested with, and this
-tree's adapter doesn't match that evidence yet. Until the fix lands, starting a
-printed match says "runtime mismatch". The game screenshots on this page
-(Legacy Cube, Commander, Momir) come from the private development copy.
+Pick a format under _Magic printed formats_, or use the Draft and Commander
+tabs, and press _Play Forge match_. The first launch takes a few minutes while
+the lab checks each format against the installed Forge.
 
 ## What it looks like
 
@@ -112,11 +110,12 @@ npm run test:balance  # the seeded 10,035-game balance gate
 
 ## Known gaps
 
-- Printed-format matches refuse to start in this repo (see above).
 - Momir Basic needs the local card store, built with `@mtg/data` from Scryfall
   bulk data. Without it the format is hidden.
 - With Forge installed, the first launch is slow, a few minutes, while it
   checks each printed format.
+- Printed-format matches are one-on-one against Forge's AI. Commander is
+  played one-on-one too, not as a four-player pod.
 - The clone is large (about 110 MB of history plus card catalogs).
 - Phone layouts exist for the game table. The other pages are mainly built for
   desktop.

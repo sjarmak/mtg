@@ -9,8 +9,9 @@
  * A cube has no token set of its own, so `--catalog` derives the sheet from
  * what its card scripts create: every `TokenScript$` reference is looked up
  * by its printed name, the oldest Scryfall token printing stating the same
- * token is chosen, and the token sets those printings come from are fetched
- * whole so each carries a recorded source, exactly as a set sheet does.
+ * token (by that name, or by a stated alias in `token-printings.ts`) is chosen,
+ * and the token sets those printings come from are fetched whole so each
+ * carries a recorded source, exactly as a set sheet does.
  *
  *   npx tsx packages/data/tools/fetch-token-printings.ts \
  *     --catalog packages/data/data/legacy-cube-2021-card-catalog-v1.json \
@@ -30,14 +31,17 @@ import type { HttpClient } from '../src/http/client';
 import { formatJsonArtifact } from '../src/printed-card/format-build-files';
 import { readForgeScriptArchive } from '../src/printed-card/forge-install';
 import {
+  fetchScryfallPrinting,
   fetchScryfallSetPrintings,
   fetchScryfallTokenPrintingsNamed,
 } from '../src/printed-card/source-fetch';
 import { catalogTokenScriptReferences } from '../src/printed-card/token-references';
 import {
+  aliasSaysToken,
   bindTokenPrintings,
   parseForgeTokenScript,
   scriptSaysToken,
+  statedAliasesFor,
 } from '../src/printed-card/token-printings';
 import type { ForgeTokenScript } from '../src/printed-card/token-printings';
 import type { ScryfallCard } from '../src/scryfall/schemas';
@@ -113,6 +117,11 @@ function isNoResult(cause: unknown): boolean {
   return cause instanceof HttpError && cause.status === 404;
 }
 
+/** A printing's release date; one Scryfall gives none sorts last rather than first. */
+function releasedAt(card: ScryfallCard): string {
+  return card.released_at ?? '9999-12-31';
+}
+
 /**
  * The oldest printing stating each referenced token script, keyed by
  * Scryfall id, and the token sets they are printed in. A script whose printed
@@ -139,9 +148,16 @@ async function chooseCubePrintings(
       if (!isNoResult(cause)) throw cause;
       cards = [];
     }
-    const printing = cards.find(
-      (card) => card.layout === 'token' && /^t[a-z0-9]+$/u.test(card.set) && scriptSaysToken(card, script),
-    );
+    // A stated alias names a printing the name lookup cannot find (TMBS 1's "Germ" for
+    // "Phyrexian Germ Token"), so it competes on release date with what the lookup found.
+    const aliased: ScryfallCard[] = [];
+    for (const alias of statedAliasesFor(script)) {
+      const found = (await fetchScryfallPrinting(alias.setCode, alias.collectorNumber, http)).cards;
+      aliased.push(...found.filter((card) => aliasSaysToken(alias.setCode, card, script)));
+    }
+    const printing = [...aliased, ...cards.filter((card) => scriptSaysToken(card, script))]
+      .filter((card) => card.layout === 'token' && /^t[a-z0-9]+$/u.test(card.set))
+      .sort((left, right) => releasedAt(left).localeCompare(releasedAt(right)))[0];
     if (printing === undefined) {
       process.stdout.write(
         `  left out ${reference} (${script.name}): no Scryfall token printing states it\n`,

@@ -2601,7 +2601,7 @@ function animateSourceUntilEndOfTurnEffect<T extends ZodType>(target: T) {
  *
  * A token with a power and a toughness is a creature token; a token without
  * them is an artifact token, and `tokenCard` is where that sentence turns into
- * a card type. the flagship set needs the second kind for its first mechanic:
+ * a card type. The flagship set needs the second kind for its first mechanic:
  * "a part token is an artifact whose only ability is Fuse", and a part with a
  * body would be a 0/0 the state-based actions bury the instant it arrives.
  *
@@ -2802,7 +2802,7 @@ export const ModelTokenSpecSchema = z.strictObject({
 /**
  * Fuse, as a schema: the one ability a part token prints.
  *
- * the set design document writes the mechanic out in full — "a part
+ * The set design document writes the mechanic out in full — "a part
  * token is an artifact whose only ability is `Fuse {cost}: Sacrifice this. Put a
  * <part> counter on target creature you control`" — and everything in that
  * sentence except the mana cost and which part it is, is the mechanic rather

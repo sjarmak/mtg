@@ -8,23 +8,19 @@
  * reason — they live on `MatchRun`, which is not what the determinism test
  * compares.
  */
-import type { GameEndReason, PlayerId } from '@mtg/kernel';
+import type { PlayerId } from '@mtg/kernel';
 import type { GameOutcome } from './driver';
+import type { SimEndReason } from './log/schema';
+import { SIM_END_REASONS } from './log/schema';
 
-export const END_REASONS: readonly GameEndReason[] = [
-  'lifeZero',
-  'emptyLibrary',
-  'spellOrAbility',
-  'concede',
-  'turnLimit',
-];
+export const END_REASONS: readonly SimEndReason[] = SIM_END_REASONS;
 
 export interface MatchAggregate {
   readonly runSeed: string;
   readonly games: number;
   /** Wins by seat. Seat 0 always holds deck A, seat 1 deck B. */
   readonly wins: readonly [number, number];
-  /** Games with no winner: the turn cap, or a simultaneous loss. */
+  /** Games with no winner: the turn cap, a simultaneous loss, or the board cap. */
   readonly draws: number;
   readonly winRate: readonly [number, number];
   readonly onPlayGames: number;
@@ -37,7 +33,7 @@ export interface MatchAggregate {
   readonly maxTurns: number;
   /** Games ending on each turn; index is the turn number, index 0 unused. */
   readonly turnHistogram: readonly number[];
-  readonly endReasons: Readonly<Record<GameEndReason, number>>;
+  readonly endReasons: Readonly<Record<SimEndReason, number>>;
   readonly meanDecisions: number;
   readonly totalDecisions: number;
 }
@@ -56,12 +52,13 @@ function ratio(numerator: number, denominator: number): number {
 
 export function aggregateOutcomes(runSeed: string, outcomes: readonly GameOutcome[]): MatchAggregate {
   const wins: [number, number] = [0, 0];
-  const endReasons: Record<GameEndReason, number> = {
+  const endReasons: Record<SimEndReason, number> = {
     lifeZero: 0,
     emptyLibrary: 0,
     spellOrAbility: 0,
     concede: 0,
     turnLimit: 0,
+    boardCap: 0,
   };
   const turns: number[] = [];
   let draws = 0;

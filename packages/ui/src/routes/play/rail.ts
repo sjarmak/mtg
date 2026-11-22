@@ -150,7 +150,9 @@ const GROUP_ORDER: readonly { readonly title: string; readonly kinds: readonly P
   { title: 'Mana', kinds: ['activateManaAbility'] },
   { title: 'Combat', kinds: ['declareAttackers', 'declareBlockers', 'orderBlockers'] },
   { title: 'Hand', kinds: ['discard'] },
-  { title: 'Turn', kinds: ['concede'] },
+  // Not `Turn`: `askIndex` prints each title beside its count, and `Turn 1`
+  // read as a turn number on a table whose phase bar said `Turn 2: You`.
+  { title: 'Game', kinds: ['concede'] },
 ];
 
 /**
@@ -495,7 +497,7 @@ function railBody(
   ordering: OrderControl | null,
 ): readonly ReactNode[] {
   const concede = prompt.choices.filter((choice) => choice.kind === 'concede');
-  const turn = concede.length === 0 ? [] : [choiceGroup('Turn', 'Turn', concede, onChoose)];
+  const turn = concede.length === 0 ? [] : [choiceGroup('Game', 'Game', concede, onChoose)];
   if (prompt.textInput !== null)
     return [createElement(TextAnswer, { input: prompt.textInput, onChoose }), ...turn];
   if (declaration === null)

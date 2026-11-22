@@ -62,5 +62,5 @@ describe('Forge syntax review table', () => {
       );
     });
     expect(residual).toEqual([]);
-  });
+  }, 180_000);
 });

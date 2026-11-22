@@ -26,6 +26,18 @@ export function playSub(route: UiRoute): PlayFormat {
   return route.mode === 'play' ? route.sub : 'constructed';
 }
 
+/**
+ * The printed page a Play section draws its selection on.
+ *
+ * Momir Basic's section (issue 308) draws the page it drew while it was listed
+ * under Constructed: a constructed table of one shared list, which
+ * `../routes/printed/PrintedPreconRoute.ts` tells apart by the format's own
+ * rules variant rather than by the page.
+ */
+export function playPrintedPage(sub: PlayFormat): PrintedPage {
+  return sub === 'momir' ? 'constructed' : sub;
+}
+
 export interface PlayOpponentProps {
   readonly sub: PlayFormat;
   readonly opponent: Opponent;

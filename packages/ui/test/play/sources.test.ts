@@ -3,7 +3,7 @@ import type { PrintedFormatRow } from '../../src/lab/printed-format';
 import { LEGACY_CUBE_FORMAT } from '../../src/routes/legacy-cube/model';
 import {
   CUBE_SOURCE_NAME,
-  movedCommanderSource,
+  movedPlaySource,
   orderPrintedFormats,
   playSources,
   resolvePlaySource,
@@ -61,7 +61,7 @@ const withMomir: StagedSources = {
   ],
 };
 
-const stems = (sub: 'constructed' | 'draft' | 'sealed' | 'commander'): readonly string[] =>
+const stems = (sub: 'constructed' | 'draft' | 'sealed' | 'commander' | 'momir'): readonly string[] =>
   playSources(sub, staged).map((source) => source.stem);
 
 describe('what a Play section can be played with', () => {
@@ -140,13 +140,17 @@ describe('what a Play section can be played with', () => {
     );
   });
 
-  it('plays a Momir-variant constructed row on Constructed, never on Commander', () => {
+  it('plays a Momir-variant constructed row on its own section, never on Constructed or Commander', () => {
+    expect(playSources('momir', withMomir).map((source) => source.stem)).toEqual(['printed:momir-basic']);
     expect(playSources('commander', withMomir).map((source) => source.stem)).toEqual(['printed:scd']);
     expect(playSources('constructed', withMomir).map((source) => source.stem)).toEqual([
       'xmp',
       'printed:ktk',
-      'printed:momir-basic',
     ]);
+  });
+
+  it('lists nothing on Momir when no Momir-variant row is staged, not the kernel sets', () => {
+    expect(playSources('momir', staged)).toEqual([]);
   });
 
   it('keeps a product the format cannot deal and states why it is unavailable', () => {
@@ -301,26 +305,35 @@ describe('which of them a link lands on', () => {
   });
 });
 
-describe('where a Commander link to a moved printed row now belongs', () => {
-  it('sends a Momir-variant source to Constructed', () => {
-    expect(movedCommanderSource({ source: 'printed:momir-basic' }, withMomir.printed)).toBe('constructed');
+describe('where an old link to Momir Basic now belongs', () => {
+  it('sends a Momir-variant source on Constructed or Commander to the Momir section', () => {
+    expect(movedPlaySource('constructed', { source: 'printed:momir-basic' }, withMomir.printed)).toBe(
+      'momir',
+    );
+    expect(movedPlaySource('commander', { source: 'printed:momir-basic' }, withMomir.printed)).toBe('momir');
   });
 
-  it('leaves a genuine Commander source alone', () => {
-    expect(movedCommanderSource({ source: 'printed:scd' }, withMomir.printed)).toBeNull();
-  });
-
-  it('leaves a Cards-tab set address for a Momir-variant source alone too', () => {
-    expect(movedCommanderSource({ source: 'printed:momir-basic:M11' }, withMomir.printed)).toBe(
-      'constructed',
+  it('reads a Cards-tab set address for a Momir-variant source the same way', () => {
+    expect(movedPlaySource('constructed', { source: 'printed:momir-basic:M11' }, withMomir.printed)).toBe(
+      'momir',
     );
   });
 
+  it('leaves a source its section lists alone', () => {
+    expect(movedPlaySource('commander', { source: 'printed:scd' }, withMomir.printed)).toBeNull();
+    expect(movedPlaySource('constructed', { source: 'printed:ktk' }, withMomir.printed)).toBeNull();
+    expect(movedPlaySource('momir', { source: 'printed:momir-basic' }, withMomir.printed)).toBeNull();
+  });
+
+  it('never moves a Draft or Sealed link', () => {
+    expect(movedPlaySource('draft', { source: 'printed:momir-basic' }, withMomir.printed)).toBeNull();
+  });
+
   it('answers nothing for a source naming no staged printed row', () => {
-    expect(movedCommanderSource({ source: 'printed:unknown' }, withMomir.printed)).toBeNull();
+    expect(movedPlaySource('constructed', { source: 'printed:unknown' }, withMomir.printed)).toBeNull();
   });
 
   it('answers nothing when the hash names no source at all', () => {
-    expect(movedCommanderSource({}, withMomir.printed)).toBeNull();
+    expect(movedPlaySource('constructed', {}, withMomir.printed)).toBeNull();
   });
 });

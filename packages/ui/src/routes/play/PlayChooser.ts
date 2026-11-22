@@ -213,7 +213,7 @@ function useResume(
   }, [set, collation, landing]);
 }
 
-/** Which press the network column makes for this game; Commander has none yet. */
+/** Which press the network column makes for this game; Commander and Momir have none yet. */
 function lanKind(sub: PlayFormat): LanKind | null {
   switch (sub) {
     case 'constructed':
@@ -223,6 +223,7 @@ function lanKind(sub: PlayFormat): LanKind | null {
     case 'draft':
       return 'draft';
     case 'commander':
+    case 'momir':
       return null;
   }
 }
@@ -282,6 +283,7 @@ function botColumn(
     case 'draft':
       return props.draft ?? null;
     case 'commander':
+    case 'momir':
       return null;
   }
 }

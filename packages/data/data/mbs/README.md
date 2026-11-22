@@ -50,16 +50,16 @@ release order is chosen (`packages/printed-card/src/set-release-order.ts`,
 `mbs-token-printings-v1.json`, each to the oldest Scryfall token printing that
 states the same token, so the art does not always come from MBS's own token set:
 
-| token (Forge name)     | printing | note                                                                                                       |
-| ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| Phyrexian Horror Token | TBRC     | Phyrexian Rebirth                                                                                          |
-| Phyrexian Myr Token    | TCMM     | Myr Sire                                                                                                   |
-| Golem Token            | TMBS     | Titan Forge                                                                                                |
-| Thopter Token          | TMBS     | Thopter Assembly                                                                                           |
-| Phyrexian Germ Token   | TMH2     | Living Weapon: Bonehoard, Flayer Husk, Mortarpod, Skinwing, Strandwalker; the oldest Germ is not MBS's own |
-| Cat Token              | TSOM     | White Sun's Zenith                                                                                         |
-| Myr Token              | TSOM     | Master's Call, Myr Turbine                                                                                 |
-| Soldier Token          | TUGL     | Hero of Bladehold; a silver-border token, the oldest 1/1 white Soldier                                     |
+| token (Forge name)     | printing | note                                                                                                             |
+| ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| Phyrexian Horror Token | TBRC     | Phyrexian Rebirth                                                                                                |
+| Phyrexian Myr Token    | TCMM     | Myr Sire                                                                                                         |
+| Golem Token            | TMBS     | Titan Forge                                                                                                      |
+| Thopter Token          | TMBS     | Thopter Assembly                                                                                                 |
+| Phyrexian Germ Token   | TMBS     | Living Weapon: Bonehoard, Flayer Husk, Mortarpod, Skinwing, Strandwalker; TMBS 1 "Germ", bound by a stated alias |
+| Cat Token              | TSOM     | White Sun's Zenith                                                                                               |
+| Myr Token              | TSOM     | Master's Call, Myr Turbine                                                                                       |
+| Soldier Token          | TUGL     | Hero of Bladehold; a silver-border token, the oldest 1/1 white Soldier                                           |
 
 **Unbound: Phyrexian Zombie Token** (2/2 black, created by Nested Ghoul,
 script `b_2_2_phyrexian_zombie`). Forge names the token "Phyrexian Zombie Token"

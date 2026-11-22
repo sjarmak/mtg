@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import { z } from 'zod';
 import {
@@ -13,8 +12,8 @@ import {
   type PrintedScriptQualificationReceipt,
 } from '../index';
 import { verifyPrintedControllerContractReceipt } from './controller-contract';
+import { digestOf as digest, memoizedOver, memoizedReader, readerId } from './evidence-memo';
 
-const digest = (bytes: string | Uint8Array): string => createHash('sha256').update(bytes).digest('hex');
 const json = (bytes: string | Uint8Array): unknown =>
   JSON.parse(typeof bytes === 'string' ? bytes : new TextDecoder('utf-8', { fatal: true }).decode(bytes));
 const runtimeSubject = PrintedPlaySubjectSchema.omit({
@@ -95,8 +94,12 @@ export function buildPrintedScriptQualificationReceipt(input: {
   readonly sourceScript: { readonly path: string; readonly sha256: string };
   readonly decisionFamilies: readonly string[];
 }): PrintedScriptQualificationReceipt {
-  const report = CoverageReport.parse(json(input.coverageReport.bytes));
-  const plan = PrintedScriptCoveragePlanSchema.parse(json(input.coveragePlan.bytes));
+  const report = memoizedOver(input.coverageReport.bytes, 'coverage-report', () =>
+    CoverageReport.parse(json(input.coverageReport.bytes)),
+  );
+  const plan = memoizedOver(input.coveragePlan.bytes, 'coverage-plan', () =>
+    PrintedScriptCoveragePlanSchema.parse(json(input.coveragePlan.bytes)),
+  );
   if (
     report.plan.path !== input.coveragePlan.path ||
     report.plan.sha256 !== digest(input.coveragePlan.bytes)
@@ -131,7 +134,9 @@ export function buildPrintedScriptQualificationReceipt(input: {
   }
   const receipts = input.scenarioReceipts.map((file) => ({
     file,
-    receipt: PrintedScenarioProbeReceiptSchema.parse(json(file.bytes)),
+    receipt: memoizedOver(file.bytes, 'scenario-receipt', () =>
+      PrintedScenarioProbeReceiptSchema.parse(json(file.bytes)),
+    ),
   }));
   if (new Set(receipts.map(({ receipt }) => receipt.result.id)).size !== receipts.length)
     throw new Error('Duplicate scenario receipt');
@@ -146,7 +151,9 @@ export function buildPrintedScriptQualificationReceipt(input: {
   };
   const contracts = (input.controllerContracts ?? []).map((file) => ({
     file,
-    receipt: PrintedControllerContractReceiptSchema.parse(json(file.bytes)),
+    receipt: memoizedOver(file.bytes, 'controller-contract-receipt', () =>
+      PrintedControllerContractReceiptSchema.parse(json(file.bytes)),
+    ),
   }));
   if (new Set(contracts.map(({ receipt }) => receipt.id)).size !== contracts.length)
     throw new Error('Duplicate controller contract');
@@ -284,6 +291,16 @@ export function verifyPrintedScriptQualificationReceipt(
   body: string | Uint8Array,
   readEvidence: (path: string) => string | Uint8Array,
 ): PrintedScriptQualificationReceipt {
+  const read = memoizedReader(readEvidence);
+  return memoizedOver(body, `script-qualification:${String(readerId(read))}`, () =>
+    verifyScriptQualification(body, read),
+  );
+}
+
+function verifyScriptQualification(
+  body: string | Uint8Array,
+  readEvidence: (path: string) => string | Uint8Array,
+): PrintedScriptQualificationReceipt {
   const expected = PrintedScriptQualificationReceiptSchema.parse(json(body));
   const checked = (file: { readonly path: string; readonly sha256: string }): EvidenceFile => {
     const bytes = readEvidence(file.path);
@@ -301,13 +318,16 @@ export function verifyPrintedScriptQualificationReceipt(
       resourcesSha256: expected.runtime.resourcesSha256,
       protocolVersion: expected.runtime.protocolVersion,
     };
+    const contractKey = `controller-contract:${String(readerId(readEvidence))}:${JSON.stringify(expectedEngineRuntime)}`;
     for (const file of contractFiles)
-      verifyPrintedControllerContractReceipt({
-        body: file.bytes,
-        expectedEngineRuntime,
-        readEvidence,
-        readSource: readEvidence,
-      });
+      memoizedOver(file.bytes, contractKey, () =>
+        verifyPrintedControllerContractReceipt({
+          body: file.bytes,
+          expectedEngineRuntime,
+          readEvidence,
+          readSource: readEvidence,
+        }),
+      );
     rebuilt = buildPrintedScriptQualificationReceipt({
       coverageReport: checked(expected.evidence.coverageReport),
       coveragePlan: checked(expected.evidence.coveragePlan),

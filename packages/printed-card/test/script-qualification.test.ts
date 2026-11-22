@@ -334,6 +334,21 @@ it('builds an immutable exact-script qualification from covered local and engine
   );
 });
 
+it('verifies the same receipt bytes again under a reader whose evidence changed', () => {
+  // An admission's verifier remembers what it already checked, keyed by the
+  // bytes it read. The same receipt bytes handed in with another reader must
+  // be checked against that reader's evidence, not answered from memory.
+  const bundle = qualificationBundle();
+  const body = Buffer.from(json(bundle.receipt));
+  const clean = (path: string) => Buffer.from(bundle.readEvidence(path));
+  expect(verifyPrintedScriptQualificationReceipt(body, clean)).toEqual(bundle.receipt);
+  const tampered = (path: string) =>
+    path === 'script-coverage.json' ? Buffer.from(`${bundle.readEvidence(path)} `) : clean(path);
+  expect(() => verifyPrintedScriptQualificationReceipt(body, tampered)).toThrow(
+    'Script qualification evidence checksum mismatch: script-coverage.json',
+  );
+});
+
 it('reuses a bilateral named capability profile across exact scripts', () => {
   const receipt = crossScriptQualification('mandatory-single-target-v1')();
   expect(receipt.controllerClaims).toEqual([

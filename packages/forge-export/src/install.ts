@@ -94,6 +94,22 @@ export function forgeMissingReason(options: ForgeInstallOptions = {}): string {
 }
 
 /**
+ * The command that starts a Forge JVM with `jvmArgs` (`java` and its arguments).
+ *
+ * Forge's desktop entry point builds a Swing window even when a bot plays, so
+ * it needs a display. On Linux that is Xvfb through `xvfb-run -a`; macOS and
+ * Windows always have one, and have no `xvfb-run`, so the JVM runs directly.
+ */
+export function forgeJvmCommand(
+  jvmArgs: readonly [string, ...string[]],
+  platform: NodeJS.Platform = process.platform,
+): { readonly command: string; readonly args: readonly string[] } {
+  if (platform === 'linux') return { command: 'xvfb-run', args: ['-a', ...jvmArgs] };
+  const [command, ...args] = jvmArgs;
+  return { command, args };
+}
+
+/**
  * Points Forge's data directories at the lab's sandbox.
  *
  * `forge.profile.properties` in the program directory is the only mechanism

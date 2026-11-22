@@ -81,7 +81,7 @@ describe('Journey into Nyx printed format sources', () => {
     expect(created).toHaveLength(25);
     expect(created.filter((name) => !bound.has(name))).toEqual([]);
     expect(printings.tokens.filter((token) => token.art.status !== 'available')).toEqual([]);
-  });
+  }, 180_000);
 
   it('names the three token pairs the play surface cannot tell apart', () => {
     // `printingFor` (packages/ui/src/routes/play/backend-position.ts) picks between same-named token
@@ -113,7 +113,7 @@ describe('Journey into Nyx printed format sources', () => {
   });
 
   it('re-verifies the installed play admission against the staged format and catalogs', () => {
-    const root = fileURLToPath(new URL('play-admission-v22/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v23/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

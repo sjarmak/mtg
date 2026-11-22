@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "552129e5a061b1d5e39d20b071313ed8516e59d003ecc13f733bdc8efa498de8",
+    "adapterSha256": "416b01896d7a8bd432797592361767988efdb1208e056bede5c39cf82097ba50",
+    "protocolVersion": 2
+  },
+  "sourceScript": {
+    "path": "t/trumpet_blast.txt",
+    "sha256": "f32f778874c2d5bd955c59ca8b105c5ed1a95880fe4968bff5d65ce8a3fbb97a"
+  },
+  "decisionFamilies": [
+    "priority"
+  ],
+  "obligations": [
+    "controller-contract-priority",
+    "exact-source-declarations"
+  ],
+  "residualObligations": [],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "decisionFamilies": [
+        "priority"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "priority-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "decisionFamilies": [
+        "priority"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "priority-v1"
+      ]
+    }
+  ],
+  "dependencies": [],
+  "evidence": {
+    "coveragePlan": {
+      "path": "coverage-plan.json",
+      "sha256": "5c1e6408256dd9b84c877e6f3bc43f09cbda267876c93c5d57a2e756e359ac14"
+    },
+    "coverageReport": {
+      "path": "script-coverage.json",
+      "sha256": "c177b1df5d1a5cf0a9795eb497f2d07b89c07c6c9af39259ac8d510565e6cf02"
+    },
+    "scenarioReceipts": [],
+    "controllerContracts": [
+      {
+        "contractId": "priority-v1",
+        "file": {
+          "path": "contracts/priority-v1.json",
+          "sha256": "9ac7643d6c7251aca5a930ab85abb686fbfae6bbfdfdc35b61b9ed9aaf858977"
+        }
+      }
+    ]
+  }
+}

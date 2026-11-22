@@ -29,7 +29,7 @@ import {
 import type { GameEvent } from '@mtg/kernel';
 import { objectId } from '@mtg/kernel';
 import type { MatchRun, MatchSpec } from '@mtg/sim';
-import { greedySpec, SimGameLogSchema, withSimPool } from '@mtg/sim';
+import { greedySpec, SIM_END_REASONS, SimGameLogSchema, withSimPool } from '@mtg/sim';
 import { gameFingerprint } from './sample';
 import { wilsonInterval } from './stats';
 
@@ -216,7 +216,7 @@ const DraftGameEvidenceSchema = z
     draftSeats: z.tuple([seat, seat]),
     startingPlayer: z.union([z.literal(0), z.literal(1)]),
     winnerDraftSeat: seat.nullable(),
-    reason: z.enum(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']),
+    reason: z.enum(SIM_END_REASONS),
     turns: positive,
     decisions: nonnegative,
     trajectoryFingerprint: z.string().min(1).max(MAX_DRAFT_TRAJECTORY_LENGTH),

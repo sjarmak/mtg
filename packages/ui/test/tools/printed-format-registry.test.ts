@@ -113,7 +113,7 @@ describe('printed format launcher registry', () => {
       sealed: 'unavailable',
       play: { status: 'supported', reason: expect.stringMatching(/command-zone contracts are witnessed/) },
     });
-    expect(source.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/scd/play-admission-v31'));
+    expect(source.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/scd/play-admission-v32'));
     const installed = loadPrintedAdmissionSource(source);
     if (installed === undefined) throw new Error('SCD admission is not installed');
     const admission = PrintedPlayAdmissionSchema.parse(JSON.parse(installed.evidence.body));
@@ -143,7 +143,7 @@ describe('printed format launcher registry', () => {
     });
     expect(source.presentationCatalog).toBe('momir-oldest-creatures');
     expect(source.admissionDirectory).toBe(
-      resolve(REPO_ROOT, 'packages/data/data/momir-basic/play-admission-v12'),
+      resolve(REPO_ROOT, 'packages/data/data/momir-basic/play-admission-v13'),
     );
     const installed = loadPrintedAdmissionSource(source);
     if (installed === undefined) throw new Error('Momir Basic admission is not installed');
@@ -212,9 +212,9 @@ describe('printed format launcher registry', () => {
     if (guildpact === undefined) throw new Error('GPT is absent from the installed registry');
     if (ravnica === undefined) throw new Error('RAV is absent from the installed registry');
     expect(guildpact.catalogs.map((catalog) => catalog.code)).toEqual(['GPT', 'RAV']);
-    expect(guildpact.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/gpt/play-admission-v8'));
+    expect(guildpact.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/gpt/play-admission-v9'));
     expect(ravnica.catalogs.map((catalog) => catalog.code)).toEqual(['RAV']);
-    expect(ravnica.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/rav/play-admission-v13'));
+    expect(ravnica.admissionDirectory).toBe(resolve(REPO_ROOT, 'packages/data/data/rav/play-admission-v14'));
   });
 
   it('registers Dissension as DIS-GPT-RAV with its own admission', () => {
@@ -226,7 +226,7 @@ describe('printed format launcher registry', () => {
     if (dissension === undefined) throw new Error('DIS is absent from the installed registry');
     expect(dissension.catalogs.map((catalog) => catalog.code)).toEqual(['DIS', 'GPT', 'RAV']);
     expect(dissension.admissionDirectory).toBe(
-      resolve(REPO_ROOT, 'packages/data/data/dis/play-admission-v6'),
+      resolve(REPO_ROOT, 'packages/data/data/dis/play-admission-v7'),
     );
   });
 

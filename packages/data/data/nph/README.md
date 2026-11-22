@@ -67,7 +67,7 @@ non-choice except `MayEffectFromOpeningHand` -> pregame-actions,
 
 The set's scripts create six tokens, all bound in the token file, each to the
 oldest Scryfall printing that states the same token: Phyrexian Golem (T2X2),
-Phyrexian Myr (TCMM), Beast (TLRW), Phyrexian Germ (TMH2), Phyrexian Insect
+Phyrexian Myr (TCMM), Beast (TLRW), Phyrexian Germ (TMBS 1, printed as "Germ" and bound by a stated alias), Phyrexian Insect
 (TONC), Phyrexian Goblin (TONE). No token is left unbound.
 
 ## Closure, coverage, admission

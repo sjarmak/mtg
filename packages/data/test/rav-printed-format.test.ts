@@ -66,7 +66,7 @@ describe('Ravnica: City of Guilds printed format', () => {
 
     const constructed = parsePrintedConstructedFormat(JSON.parse(readData('rav-constructed-format-v1.json')));
     const printings = new Map(catalog.cards.map((card) => [card.physicalId, card]));
-    const admission = JSON.parse(readData('play-admission-v13/admission.json')) as {
+    const admission = JSON.parse(readData('play-admission-v14/admission.json')) as {
       readonly cards: readonly { readonly id: string; readonly review: string }[];
     };
     const admitted = new Set(
@@ -84,7 +84,7 @@ describe('Ravnica: City of Guilds printed format', () => {
   });
 
   it('re-verifies its installed admission', () => {
-    const root = fileURLToPath(new URL('play-admission-v13/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v14/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

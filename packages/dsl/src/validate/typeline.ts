@@ -343,8 +343,8 @@ const CREATURE_ONLY_KEYWORD_ABILITY_KINDS: readonly KeywordAbility['kind'][] = [
  * question of whatever object is being aimed at. Shroud joins them as the same
  * permanent-wide targeting rule without hexproof's controller exception, and
  * `canBeTargetedBy` now enforces that wider denial. Before these placement
- * exceptions, the DSL could not write The Trisigil ({3}, Legendary Artifact,
- * indestructible) or Whispersilk Cloak's own permanent-wide Shroud grant.
+ * exceptions, the DSL could not write the flagship set's indestructible
+ * legendary artifact ({3}) or Whispersilk Cloak's own permanent-wide Shroud grant.
  *
  * The message names the ability and the card type, because a validator that
  * says "a keyword ability is wrong here" on a card carrying three of them has

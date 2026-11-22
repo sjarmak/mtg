@@ -457,6 +457,7 @@ export {
 export type { CounterDeclaration, CounterKind, ModelCounterKind, StatBonus } from './counters';
 
 export { RETIRED_VOCABULARY, retiredNames } from './retired-vocabulary';
+export { FLAGSHIP_RETIRED_VOCABULARY, recordedRetirements } from './retired-flagship-vocabulary';
 export type { RetiredNames } from './retired-vocabulary';
 
 export {

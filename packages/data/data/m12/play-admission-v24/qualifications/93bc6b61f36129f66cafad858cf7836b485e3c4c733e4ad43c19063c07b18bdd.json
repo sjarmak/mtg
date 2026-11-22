@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "552129e5a061b1d5e39d20b071313ed8516e59d003ecc13f733bdc8efa498de8",
+    "adapterSha256": "416b01896d7a8bd432797592361767988efdb1208e056bede5c39cf82097ba50",
+    "protocolVersion": 2
+  },
+  "sourceScript": {
+    "path": "b/bloodrage_vampire.txt",
+    "sha256": "93bc6b61f36129f66cafad858cf7836b485e3c4c733e4ad43c19063c07b18bdd"
+  },
+  "decisionFamilies": [
+    "combat",
+    "priority"
+  ],
+  "obligations": [
+    "controller-contract-combat",
+    "controller-contract-priority",
+    "exact-source-declarations"
+  ],
+  "residualObligations": [],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "decisionFamilies": [
+        "combat",
+        "priority"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "priority-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "decisionFamilies": [
+        "combat",
+        "priority"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "priority-v1"
+      ]
+    }
+  ],
+  "dependencies": [],
+  "evidence": {
+    "coveragePlan": {
+      "path": "coverage-plan.json",
+      "sha256": "05b40f6b2b19afc06d4300aae32ff60d58ea4c067264445f0b63c6c389e6d2ef"
+    },
+    "coverageReport": {
+      "path": "script-coverage.json",
+      "sha256": "27744b7fcc5f35ad32a3f88a4af3a0f020c440f272d0b75ac6e8a04668f99311"
+    },
+    "scenarioReceipts": [],
+    "controllerContracts": [
+      {
+        "contractId": "combat-v1",
+        "file": {
+          "path": "contracts/combat-v1.json",
+          "sha256": "53e0f3a3e60ec331c074c4f927e0b16a3490d51414d7295fe8a0186e52fea762"
+        }
+      },
+      {
+        "contractId": "priority-v1",
+        "file": {
+          "path": "contracts/priority-v1.json",
+          "sha256": "9ac7643d6c7251aca5a930ab85abb686fbfae6bbfdfdc35b61b9ed9aaf858977"
+        }
+      }
+    ]
+  }
+}

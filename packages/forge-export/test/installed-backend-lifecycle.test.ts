@@ -23,6 +23,7 @@ import {
   installedForgeDiagnosticBackend,
 } from '@mtg/forge-export';
 import { installedForgeScenarioBackend } from '../src/observed/installed';
+import { forgeJvmCommand } from '../src/install';
 
 const TABLE: SessionSpec = {
   content: { kind: 'printed', format: 'legacy-cube-2021-08' },
@@ -121,6 +122,24 @@ function fixture(): {
   process.env['PATH'] = `${bin}:${originalPath ?? ''}`;
   return { forgeHome, runtimeParent, bridgeSource, outside };
 }
+
+describe('the command a Forge JVM starts under', () => {
+  it('wraps java in xvfb-run on Linux, which has no display of its own', () => {
+    expect(forgeJvmCommand(['java', '-jar', 'forge.jar'], 'linux')).toStrictEqual({
+      command: 'xvfb-run',
+      args: ['-a', 'java', '-jar', 'forge.jar'],
+    });
+  });
+
+  it('runs java directly on macOS and Windows, where xvfb-run does not exist', () => {
+    for (const platform of ['darwin', 'win32'] as const) {
+      expect(forgeJvmCommand(['java', '-jar', 'forge.jar'], platform)).toStrictEqual({
+        command: 'java',
+        args: ['-jar', 'forge.jar'],
+      });
+    }
+  });
+});
 
 describe('installed Forge backend lifecycle', () => {
   it('keeps an installed catalog-discovery backend separate from ordinary play admission', async () => {

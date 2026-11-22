@@ -28,8 +28,8 @@ import { transpileCard } from '../src/transpile';
 import { FORGE_COUNTER_TYPES, FORGE_VALID_TARGETS } from '../src/vocabulary-map';
 import { mustTranspile, slugId } from './helpers';
 
-/** An artifact that accrues its own counter at upkeep, the Trisigil cycle's shape. */
-function accruingRelic(name: string, counter: 'plusOnePlusOne' | 'trisigil'): Card {
+/** An artifact that accrues its own counter at upkeep, the legendary artifact cycle's shape. */
+function accruingRelic(name: string, counter: 'plusOnePlusOne' | 'defense'): Card {
   return parseCard({
     kind: 'artifact',
     id: slugId(name),
@@ -38,7 +38,7 @@ function accruingRelic(name: string, counter: 'plusOnePlusOne' | 'trisigil'): Ca
     set: { code: 'TST', collectorNumber: 1 },
     manaCost: { generic: 3 },
     supertypes: ['legendary'],
-    subtypes: ['Trisigil'],
+    subtypes: ['Relic'],
     abilities: [
       {
         kind: 'triggered',
@@ -75,16 +75,16 @@ describe('the two legality tables, which must agree about this kind', () => {
   });
 });
 
-describe('the Trisigil counter, which Forge has no type for', () => {
+describe('a marker counter Forge has no type for', () => {
   it('maps to nothing, the way a marker counter must', () => {
-    expect(FORGE_COUNTER_TYPES.trisigil).toBeNull();
+    expect(FORGE_COUNTER_TYPES.defense).toBeNull();
   });
 
   it('is refused by name rather than exported as something it is not', () => {
-    const result = transpileCard(accruingRelic('Trisigil of Power', 'trisigil'));
+    const result = transpileCard(accruingRelic('Relic of Power', 'defense'));
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.rejections.map((found) => found.code)).toContain('UNMAPPED_EFFECT_KIND');
-    expect(result.rejections.map((found) => found.message).join(' ')).toContain('trisigil');
+    expect(result.rejections.map((found) => found.message).join(' ')).toContain('defense');
   });
 });

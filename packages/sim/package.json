@@ -12,6 +12,7 @@
     "@mtg/bot-evidence": "*",
     "@mtg/deckbuild": "*",
     "@mtg/dsl": "*",
+    "@mtg/engine": "*",
     "@mtg/kernel": "*",
     "zod": "^4.1.12"
   }

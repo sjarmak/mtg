@@ -135,30 +135,68 @@ export function tokenCollectorKey(collectorNumber: string): TokenCollectorKey | 
  *
  * Wurmcoil Engine's two Wurm tokens (mtg-bn1ah): Scryfall prints them as
  * TSOM 8 and 9, named "Wurm", typed "Token Artifact Creature — Wurm"; both
- * Forge scripts say "Phyrexian Wurm Token", typed "Phyrexian Wurm". Keep this
+ * Forge scripts say "Phyrexian Wurm Token", typed "Artifact Creature Phyrexian
+ * Wurm", and differ only in deathtouch (TSOM 8) and lifelink (TSOM 9). Keep this
  * consistent with `STATED_ALIAS_TYPE_MISMATCH` in
  * packages/data/test/token-printings.test.ts, which exempts the same two
  * physical ids from the type-line check over the installed file.
+ *
+ * Living Weapon's Germ (mtg-9ggmy): its oldest printing is TMBS 1, named
+ * "Germ", typed "Token Creature — Germ", and Forge's Living Weapon creates
+ * "Phyrexian Germ Token", typed "Creature Phyrexian Germ". The printing also
+ * matches Forge's plain "Germ Token" by name, so a stated alias adds its
+ * script to the automatic witnesses rather than standing in for none.
  */
-const STATED_ALIASES: readonly {
-  readonly forgeName: string;
-  readonly forgeTypes: readonly string[];
-  readonly setCode: string;
-  readonly collectorNumber: string;
-}[] = [
+const STATED_ALIASES: readonly StatedTokenAlias[] = [
   {
     forgeName: 'Phyrexian Wurm Token',
-    forgeTypes: ['Artifact', 'Creature', 'Wurm'],
+    forgeTypes: ['Artifact', 'Creature', 'Phyrexian', 'Wurm'],
+    forgeScript: 'c_3_3_a_phyrexian_wurm_deathtouch.txt',
     setCode: 'TSOM',
     collectorNumber: '8',
   },
   {
     forgeName: 'Phyrexian Wurm Token',
-    forgeTypes: ['Artifact', 'Creature', 'Wurm'],
+    forgeTypes: ['Artifact', 'Creature', 'Phyrexian', 'Wurm'],
+    forgeScript: 'c_3_3_a_phyrexian_wurm_lifelink.txt',
     setCode: 'TSOM',
     collectorNumber: '9',
   },
+  {
+    forgeName: 'Phyrexian Germ Token',
+    forgeTypes: ['Creature', 'Phyrexian', 'Germ'],
+    setCode: 'TMBS',
+    collectorNumber: '1',
+  },
 ];
+
+export interface StatedTokenAlias {
+  readonly forgeName: string;
+  readonly forgeTypes: readonly string[];
+  /** The one script file meant, where two scripts share a name and types and differ only in keywords. */
+  readonly forgeScript?: string;
+  readonly setCode: string;
+  readonly collectorNumber: string;
+}
+
+/** The printings stated outright for a script, which a name lookup cannot find. */
+export function statedAliasesFor(script: ForgeTokenScript): readonly StatedTokenAlias[] {
+  return STATED_ALIASES.filter(
+    (alias) =>
+      alias.forgeName === script.name &&
+      alias.forgeTypes.join(' ') === script.types.join(' ') &&
+      (alias.forgeScript === undefined || alias.forgeScript === script.file),
+  );
+}
+
+/** Whether a stated alias binds this script to this printing: the facts other than name and type still agree. */
+export function aliasSaysToken(setCode: string, card: ScryfallCard, script: ForgeTokenScript): boolean {
+  return (
+    statedAliasesFor(script).some(
+      (alias) => alias.setCode === setCode.toUpperCase() && alias.collectorNumber === card.collector_number,
+    ) && scriptAgreesOnColorsAndPt(card, script)
+  );
+}
 
 /** Whether a script states the same colors and power/toughness as the card, ignoring name and type. */
 function scriptAgreesOnColorsAndPt(card: ScryfallCard, script: ForgeTokenScript): boolean {
@@ -205,24 +243,12 @@ export function bindTokenPrintings(
       });
       continue;
     }
-    let witnesses = scripts.filter(
+    const witnesses = scripts.filter(
       (script) =>
-        (script.name === card.name || script.name === `${card.name} Token`) && scriptSaysToken(card, script),
+        ((script.name === card.name || script.name === `${card.name} Token`) &&
+          scriptSaysToken(card, script)) ||
+        aliasSaysToken(setCode, card, script),
     );
-    if (witnesses.length === 0) {
-      const alias = STATED_ALIASES.find(
-        (candidate) =>
-          candidate.setCode === setCode.toUpperCase() && candidate.collectorNumber === card.collector_number,
-      );
-      if (alias !== undefined) {
-        witnesses = scripts.filter(
-          (script) =>
-            script.name === alias.forgeName &&
-            script.types.join(' ') === alias.forgeTypes.join(' ') &&
-            scriptAgreesOnColorsAndPt(card, script),
-        );
-      }
-    }
     if (witnesses.length === 0) {
       omitted.push({
         name: card.name,

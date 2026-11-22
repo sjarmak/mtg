@@ -1181,7 +1181,7 @@ export const FORGE_BASIC_LAND_TYPES: Readonly<Record<BasicLandType, string>> = {
  * names the one pair on purpose). Both boards read the same power and toughness
  * either way, because annihilation cancels a pair that sums to zero; they part
  * company the moment something reads counters by kind, and no DSL effect does.
- * the set design document states the boundary beside Fuse.
+ * The set design document states the boundary beside Fuse.
  *
  * `null` is the answer for a declaration this table cannot decompose: an empty
  * declaration is a marker counter Forge has no name for, and a stat bonus that
@@ -1228,15 +1228,6 @@ export const FORGE_COUNTER_TYPES: Readonly<Record<CounterKind, readonly [string,
   // `P1P1` while the kernel's gloom counter survives the pair, so a board with
   // both diverges by two counters and by no power or toughness.
   gloom: ['M1M1'],
-  // Null for `loyalty`'s reason and not for `gloom`'s. A Trisigil counter
-  // (`mtg-rji`) modifies nothing, so there is no meaning to decompose into
-  // Forge counter types, and Forge ships no counter type named for it either.
-  // The consequence is that a card putting one on itself is *rejected* rather
-  // than exported — `putCounters`'s script reads this table and refuses a null
-  // row with `UNMAPPED_EFFECT_KIND` — which is the correct trade for a marker
-  // counter whose whole function is a count some other card reads: exporting
-  // it as `P1P1` would hand Forge a board the kernel never had.
-  trisigil: null,
   phylactery: ['PHYLACTERY'],
   defense: null,
   // Forge 2.0.14 ships this exact named marker and uses it on Hellion

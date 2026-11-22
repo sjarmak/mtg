@@ -104,6 +104,7 @@ import {
   seatState,
   yieldPriority,
 } from '@mtg/kernel';
+import { boardCapStanding, DEFAULT_BOARD_CAP } from '@mtg/engine';
 import type { GameplayFormat, KernelGameCapture } from './gameplay';
 import type { SeatRefusal, SeatRequest, SeatSnapshot } from './protocol';
 import { fromWireAutoPass, NETPLAY_PROTOCOL, toWireAutoPass } from './protocol';
@@ -133,6 +134,12 @@ export interface TableSpec {
   readonly choices?: readonly Choice[] | undefined;
   /** What the table was dealt for, so a recorded game says which shelf it goes on. */
   readonly format?: GameplayFormat | undefined;
+  /**
+   * Permanents the battlefield may hold before the table stops the game as a
+   * draw (issue 302). `DEFAULT_BOARD_CAP` when absent, which is what a served table
+   * uses; the sim's `MatchSpec.boardCap` is the same knob.
+   */
+  readonly boardCap?: number | undefined;
 }
 
 /** Everything needed to build this table again somewhere else. */
@@ -171,6 +178,7 @@ export function createTable(spec: TableSpec): Table {
   const names: readonly [string, string] = [spec.seating[0].name, spec.seating[1].name];
   let auto: readonly [AutoPassSettings, AutoPassSettings] = [DEFAULT_AUTO_PASS, DEFAULT_AUTO_PASS];
   let revision = 0;
+  const cap = spec.boardCap ?? DEFAULT_BOARD_CAP;
   const projectionSalt = randomUUID();
   const listeners = new Set<() => void>();
 
@@ -192,6 +200,19 @@ export function createTable(spec: TableSpec): Table {
 
   function refuse(why: string): SeatRefusal {
     return { refused: why, at: session.decisions };
+  }
+
+  /**
+   * Whether the game stopped at the board cap (issue 302).
+   *
+   * The kernel never ends a game for being large, so this table does: past the
+   * cap it offers nobody a decision and spends no request, because the next
+   * `advance` is the one that would hold the server for half a minute a turn.
+   * Both seats read the same stop off the battlefield, which concealment leaves
+   * whole, so the wire carries nothing new.
+   */
+  function stopped(): boolean {
+    return session.result === null && boardCapStanding(session.state.battlefield.length, cap) === 'passed';
   }
 
   /**
@@ -246,7 +267,7 @@ export function createTable(spec: TableSpec): Table {
     },
 
     snapshotFor(seat: PlayerId): SeatSnapshot {
-      const pending = session.pending;
+      const pending = stopped() ? null : session.pending;
       const projectionKey = `${projectionSalt}:${String(revision)}:${String(seat)}`;
       return {
         protocol: NETPLAY_PROTOCOL,
@@ -274,6 +295,9 @@ export function createTable(spec: TableSpec): Table {
     },
 
     apply(seat: PlayerId, request: SeatRequest): SeatRefusal | null {
+      if (stopped()) {
+        return refuse(`the game stopped as a draw: the battlefield passed ${String(cap)} permanents`);
+      }
       if (request.kind === 'autoPass') {
         const settings = fromWireAutoPass(request.autoPass);
         auto = seat === 0 ? [settings, auto[1]] : [auto[0], settings];

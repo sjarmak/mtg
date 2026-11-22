@@ -1086,35 +1086,36 @@ describe('the bar takes the lane width and only its own height', () => {
   /**
    * Three caps, because the head is worth three different amounts of room.
    *
-   * A phone states its own, because that is the one layout where the lanes
-   * cannot grow to pay for a wrapped line: `styles/mobile.ts` carries the sweep,
-   * and up to 3.5rem the turn costs the bar nothing at 390x844 while 4rem costs
-   * a whole line, 13.9px of which comes off the opponent's battlefield.
+   * The base number is fitted at 1024x768, where half a rem more is a third line
+   * of steps, so it is the narrowest of the three.
    *
-   * A desktop states its own in the other direction (`mtg-aqxi`, 2026-08-22).
-   * The base number was fitted at 1024x768, where half a rem more is a third
-   * line of steps, and holding a 1440px window to that budget drew the app's own
-   * `Turn 7: Opponent` as `Turn 7: …` on every desktop capture. `styles/
-   * views.ts` carries that sweep and the 12px that rides with it.
+   * A desktop states its own (`mtg-aqxi`, 2026-08-22): holding a 1440px window
+   * to the base budget drew the app's own `Turn 7: Opponent` as `Turn 7: …` on
+   * every desktop capture. `styles/views.ts` carries that sweep and the 12px
+   * that rides with it.
    *
-   * The order is the assertion: narrowest on a phone, widest on a desktop, and
-   * the base between them, each in its own block. A tier that silently took
-   * another's number is exactly what this counts.
+   * A phone states its own too (mtg-lab issue 186). It was the narrowest, 3.5rem,
+   * and drew `Tu…` at every turn; a tall phone now wraps the turn with the
+   * steps as one row, so the head's width costs one line rather than all of
+   * them, and `styles/mobile.ts` carries the sweep that shows the bar's height
+   * no longer moves with it.
+   *
+   * Each in its own block, and both wider than the base. A tier that silently
+   * took another's number is exactly what this counts.
    */
-  it('states a cap per tier, narrowest on a phone and widest on a desktop', () => {
+  it('states a cap per tier, the base narrowest and the phone and desktop wider', () => {
     const caps = [...SHEET.matchAll(/\.mtg-phasebar > \.mtg-badge \{ max-width: ([\d.]+)rem; \}/g)];
     expect(caps, 'the sheet no longer states one cap per tier').toHaveLength(3);
     const base = Number(caps[0]?.[1]);
     const desk = Number(caps[1]?.[1]);
     const phone = Number(caps[2]?.[1]);
-    expect(phone, 'the phone cap is not narrower than the base one').toBeLessThan(base);
+    expect(phone, 'the phone cap is not wider than the base one').toBeGreaterThan(base);
     expect(desk, 'the desktop cap is not wider than the base one').toBeGreaterThan(base);
-    // 3.5rem is 56px and `Turn 18:` is 43.8px in this face, so the turn and its
-    // number survive the ellipsis on a phone as well.
-    expect(phone * 16).toBeGreaterThanOrEqual(48);
     // 106px is `Turn 12: Opponent` in this face, measured over `tools/
-    // step-bar.ts`: the desktop cap exists to clear the app's own longest
-    // ordinary turn text rather than to be merely larger.
+    // step-bar.ts`: both wider caps exist to clear the app's own longest
+    // ordinary turn text rather than to be merely larger. On a phone the head's
+    // padding, border, gap and disclosure marker take 28px more of the cap.
+    expect(phone * 16 - 28).toBeGreaterThanOrEqual(106);
     expect(desk * 16).toBeGreaterThanOrEqual(106);
     const phoneBlock = SHEET.indexOf(`@media (max-width: ${String(PHONE_MAX_REM)}rem)`);
     expect(phoneBlock, 'the sheet has no phone block').toBeGreaterThan(-1);

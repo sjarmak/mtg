@@ -11,6 +11,7 @@ import { sha256Text } from '../../src/routes/analysis/calibration-read';
 import { PrintedFormatRoute } from '../../src/routes/printed/PrintedFormatRoute';
 import { modeParams, routeHash, useHashRoute } from '../../src/app/router';
 import { mount } from '../../src/mount';
+import { playPrintedPage } from '../../src/dev/section-views';
 
 const catalogs = [akh, hou, mp2].map((catalog, index) => ({
   code: ['AKH', 'HOU', 'MP2'][index]!,
@@ -56,7 +57,7 @@ function Surface({ prepared }: { readonly prepared: PreparedPrintedLimitedFormat
       },
       title: prepared.format.name,
       sourceCode: undefined,
-      page: router.route.mode === 'play' ? router.route.sub : 'decks',
+      page: router.route.mode === 'play' ? playPrintedPage(router.route.sub) : 'decks',
       route: router.route,
       onSetParams: router.setParams,
       backend,

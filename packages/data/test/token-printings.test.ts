@@ -10,6 +10,7 @@ import { parsePrintedTokenPrintings } from '@mtg/printed-card';
 import {
   bindTokenPrintings,
   parseForgeTokenScript,
+  statedAliasesFor,
   tokenCollectorKey,
 } from '../src/printed-card/token-printings';
 import type { ForgeTokenScript } from '../src/printed-card/token-printings';
@@ -66,15 +67,18 @@ function forgeScripts(): Map<string, ForgeTokenScript[]> {
 
 /**
  * Printings bound by a stated alias rather than by the automatic name-and-type
- * match: Scryfall names Wurmcoil Engine's two tokens "Wurm", typed "Wurm", while
- * both Forge scripts say "Phyrexian Wurm Token", typed "Phyrexian Wurm" (mtg-bn1ah).
- * The type-line check below exists to catch drift in the *automatic* match, which
- * this pair was never subject to, so both physical ids are exempted from it; the
- * name, colors and P/T still have to agree.
+ * match. Scryfall names Wurmcoil Engine's two tokens "Wurm", typed "Wurm", while
+ * both Forge scripts say "Phyrexian Wurm Token", typed "Artifact Creature Phyrexian
+ * Wurm" (mtg-bn1ah); Scryfall prints the oldest Living Weapon Germ, TMBS 1, as
+ * "Germ", typed "Germ", which Forge creates as "Phyrexian Germ Token", typed
+ * "Creature Phyrexian Germ" (mtg-9ggmy). The type-line check below exists to catch
+ * drift in the *automatic* match, which these were never subject to, so their
+ * physical ids are exempted from it; the name, colors and P/T still have to agree.
  */
 const STATED_ALIAS_TYPE_MISMATCH = new Set([
   'tsom-token:0008:3e46e703-2157-41e5-9c21-c17af43e0d3f',
   'tsom-token:0009:ee53b9a0-8e07-404d-87ae-ff8397a0ba29',
+  'tmbs-token:0001:760dcba4-c0f1-4843-9c39-393c629aae8e',
 ]);
 
 describe('installed token printings', () => {
@@ -249,57 +253,66 @@ describe('bindTokenPrintings', () => {
     expect(outcome.omitted[0]?.reason).toBe('no Forge token script');
   });
 
+  // The installed scripts, not hand-built ones: a hand-built script typed the way the alias
+  // table was typed hid an alias that never matched Forge (mtg-bn1ah.1, mtg-9ggmy).
+  const installed = [...forgeScripts().values()].flat();
+  const wurm: Partial<ScryfallCard> = {
+    name: 'Wurm',
+    type_line: 'Token Artifact Creature — Wurm',
+    colors: [],
+    power: '3',
+    toughness: '3',
+  };
+
   it('binds a stated alias whose Forge name and type disagree with the printing (mtg-bn1ah.1)', () => {
-    const wurmScript: ForgeTokenScript = {
-      file: 'a_phyrexian_wurm_deathtouch.txt',
-      name: 'Phyrexian Wurm Token',
-      types: ['Artifact', 'Creature', 'Wurm'],
-      colors: [],
-      power: '3',
-      toughness: '3',
-    };
     const outcome = bindTokenPrintings(
       'TSOM',
-      [
-        row({
-          name: 'Wurm',
-          type_line: 'Token Artifact Creature — Wurm',
-          collector_number: '8',
-          colors: [],
-          power: '3',
-          toughness: '3',
-        }),
-      ],
-      [wurmScript],
+      [row({ ...wurm, collector_number: '8' }), row({ ...wurm, collector_number: '9' })],
+      installed,
     );
-    expect(outcome.tokens.map((token) => token.observedNames)).toEqual([['Phyrexian Wurm Token']]);
+    expect(outcome.tokens.map((token) => token.observedNames)).toEqual([
+      ['Phyrexian Wurm Token'],
+      ['Phyrexian Wurm Token'],
+    ]);
     expect(outcome.omitted).toEqual([]);
   });
 
-  it('does not use a stated alias for a collector number it does not name', () => {
-    const wurmScript: ForgeTokenScript = {
-      file: 'a_phyrexian_wurm_deathtouch.txt',
-      name: 'Phyrexian Wurm Token',
-      types: ['Artifact', 'Creature', 'Wurm'],
-      colors: [],
-      power: '3',
-      toughness: '3',
+  it('adds a stated alias to the scripts a printing already matches by name (mtg-9ggmy)', () => {
+    const germ: Partial<ScryfallCard> = {
+      name: 'Germ',
+      type_line: 'Token Creature — Germ',
+      colors: ['B'],
+      power: '0',
+      toughness: '0',
     };
     const outcome = bindTokenPrintings(
-      'TSOM',
-      [
-        row({
-          name: 'Wurm',
-          type_line: 'Token Artifact Creature — Wurm',
-          collector_number: '99',
-          colors: [],
-          power: '3',
-          toughness: '3',
-        }),
-      ],
-      [wurmScript],
+      'TMBS',
+      [row({ ...germ, collector_number: '1' }), row({ ...germ, collector_number: '2' })],
+      installed,
     );
+    expect(outcome.tokens.map((token) => token.observedNames)).toEqual([
+      ['Germ Token', 'Phyrexian Germ Token'],
+      ['Germ Token'],
+    ]);
+  });
+
+  it('does not use a stated alias for a collector number it does not name', () => {
+    const outcome = bindTokenPrintings('TSOM', [row({ ...wurm, collector_number: '99' })], installed);
     expect(outcome.tokens).toEqual([]);
     expect(outcome.omitted[0]?.reason).toBe('no Forge token script');
+  });
+
+  it('states each Wurmcoil Wurm for its own script, so the chooser picks its own art', () => {
+    const byFile = (file: string) => installed.find((script) => script.file === file)!;
+    expect(
+      statedAliasesFor(byFile('c_3_3_a_phyrexian_wurm_deathtouch.txt')).map((a) => a.collectorNumber),
+    ).toEqual(['8']);
+    expect(
+      statedAliasesFor(byFile('c_3_3_a_phyrexian_wurm_lifelink.txt')).map((a) => a.collectorNumber),
+    ).toEqual(['9']);
+    expect(statedAliasesFor(byFile('b_0_0_phyrexian_germ.txt'))).toMatchObject([
+      { setCode: 'TMBS', collectorNumber: '1' },
+    ]);
+    expect(statedAliasesFor(byFile('b_0_0_germ.txt'))).toEqual([]);
   });
 });

@@ -128,7 +128,7 @@ describe('Starter Commander Decks printed format sources', () => {
   });
 
   it('re-verifies the installed play admission against the shipped decks and their catalog', () => {
-    const root = fileURLToPath(new URL('play-admission-v31/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v32/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))

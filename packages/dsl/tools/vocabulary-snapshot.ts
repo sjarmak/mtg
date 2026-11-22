@@ -206,7 +206,7 @@ export const DSL_VOCABULARY: WatchedVocabulary = {
   packageName: '@mtg/dsl',
   namespace: dsl,
   snapshotPath: VOCABULARY_SNAPSHOT_PATH,
-  retiredNames: dsl.retiredNames,
+  retiredNames: dsl.recordedRetirements,
   retiredTablePath: 'packages/dsl/src/retired-vocabulary.ts',
 };
 
@@ -226,7 +226,7 @@ function missingFrom(left: readonly string[], right: readonly string[]): readonl
 export function diffVocabulary(
   committed: Vocabulary,
   current: Vocabulary,
-  lookup: (enumName: string) => RetiredNames = dsl.retiredNames,
+  lookup: (enumName: string) => RetiredNames = dsl.recordedRetirements,
 ): VocabularyDrift {
   const names = [...new Set([...Object.keys(committed), ...Object.keys(current)])].sort((left, right) =>
     left.localeCompare(right),

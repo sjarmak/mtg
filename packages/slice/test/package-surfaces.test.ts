@@ -141,7 +141,7 @@ const DECLARED_ARROWS: ReadonlyMap<string, readonly string[]> = new Map([
   ['render-spec', ['card-geometry', 'dsl']],
   ['referee', ['dsl', 'kernel', 'llm']],
   ['setgen', ['card-geometry', 'data', 'deckbuild', 'design-data', 'dsl', 'llm']],
-  ['sim', ['bot-evidence', 'dsl', 'kernel']],
+  ['sim', ['bot-evidence', 'dsl', 'engine', 'kernel']],
   ['slice', ['data', 'deckbuild', 'dsl', 'forge-export', 'kernel', 'llm', 'metrics', 'setgen', 'sim']],
   [
     'ui',

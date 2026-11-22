@@ -16,7 +16,14 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { COUNTER_KINDS, CounterKindSchema, RETIRED_VOCABULARY, retiredNames } from '../src/index';
+import {
+  COUNTER_KINDS,
+  CounterKindSchema,
+  FLAGSHIP_RETIRED_VOCABULARY,
+  RETIRED_VOCABULARY,
+  recordedRetirements,
+  retiredNames,
+} from '../src/index';
 import type { RetiredNames } from '../src/index';
 import {
   currentVocabulary,
@@ -148,13 +155,18 @@ describe('the retired table', () => {
       TOKEN_COLOR_OFF_IDENTITY: null,
     });
     expect(retiredNames('RARITIES')).toStrictEqual({});
+    expect(recordedRetirements('COUNTER_KINDS')).toStrictEqual({ saberHorn: 'horn', trisigil: null });
+    expect(() => CounterKindSchema.parse('trisigil')).toThrow();
     expect(CounterKindSchema.parse('saberHorn')).toBe('horn');
     expect(CounterKindSchema.parse('horn')).toBe('horn');
   });
 
   it('holds no stale entry: every key is a live enum and every value a live member', () => {
     const derived = currentVocabulary();
-    for (const [enumName, retired] of Object.entries(RETIRED_VOCABULARY)) {
+    for (const [enumName, retired] of [
+      ...Object.entries(RETIRED_VOCABULARY),
+      ...Object.entries(FLAGSHIP_RETIRED_VOCABULARY),
+    ]) {
       const members = derived[enumName];
       expect(members, enumName).toBeDefined();
       for (const [retiredName, currentName] of Object.entries(retired)) {

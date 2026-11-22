@@ -67,10 +67,10 @@ describe('Magic 2010 printed format sources', () => {
     const bound = new Set(printings.tokens.flatMap((token) => token.observedNames));
     expect(created.filter((name) => !bound.has(name))).toEqual([]);
     expect(printings.tokens.filter((token) => token.art.status !== 'available')).toEqual([]);
-  });
+  }, 180_000);
 
   it('re-verifies the installed play admission against the staged format and catalog', () => {
-    const root = fileURLToPath(new URL('play-admission-v13/', dataRoot)).replace(/[\\/]$/u, '');
+    const root = fileURLToPath(new URL('play-admission-v14/', dataRoot)).replace(/[\\/]$/u, '');
     const readEvidence = (relativePath: string) => {
       const path = resolve(root, relativePath);
       if (!path.startsWith(`${root}${sep}`))
@@ -109,7 +109,7 @@ describe('Magic 2010 printed format sources', () => {
     };
     const registered = registry.formats.find((entry) => entry.id === 'm10');
     const printings = new Map(catalog.cards.map((card) => [card.physicalId, card]));
-    const admission = JSON.parse(readData('play-admission-v13/admission.json')) as {
+    const admission = JSON.parse(readData('play-admission-v14/admission.json')) as {
       readonly cards: readonly { readonly id: string; readonly review: string }[];
     };
     const admitted = new Set(

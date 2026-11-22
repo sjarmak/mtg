@@ -136,19 +136,20 @@ describe('the ask names the groups it is holding, outside the scroller', () => {
     for (const title of titles) expect(text(index)).toContain(title);
     // And nothing the list did not draw: a group named in the head with no
     // section under it is a promise the scroll cannot keep.
-    for (const word of ['Hand', 'Turn', 'Other']) {
+    for (const word of ['Hand', 'Game', 'Other']) {
       if (titles.includes(word)) continue;
       expect(text(index)).not.toContain(word);
     }
   });
 
-  it('draws concession in the Turn group', () => {
+  it('draws concession in the Game group, whose count cannot read as a turn number', () => {
     play(manyGroupState());
     const button = screen.getByRole('button', { name: 'Concede' }) as unknown as NodeLike;
-    expect(groupTitles()).toContain('Turn');
-    expect(text(askIndex())).toContain('Turn 1');
+    expect(groupTitles()).toContain('Game');
+    expect(text(askIndex())).toContain('Game 1');
+    expect(text(askIndex())).not.toMatch(/Turn \d/u);
     expect(button.getAttribute('data-kind')).toBe('concede');
-    expect(text(button.closest('.mtg-choices__group'))).toContain('Turn');
+    expect(text(button.closest('.mtg-choices__group'))).toContain('Game');
   });
 
   it('counts each group, so the shape of the list is readable without scrolling', () => {

@@ -1258,7 +1258,7 @@ export function isScavengeAbility(ability: Ability): ability is ScavengeAbility 
 }
 
 /**
- * the flagship set's Flurry rush, CR 702-shaped but an ability word rather
+ * The flagship set's Flurry rush, CR 702-shaped but an ability word rather
  * than a keyword: `Flurry rush N` is one triggered ability with a fixed
  * envelope, and the printed word is a label on that envelope rather than a
  * grant a layer applies.
@@ -1331,7 +1331,7 @@ export function flurryRushRank(ability: Ability): number | null {
 }
 
 /**
- * the flagship set's Gloom, the second ability word on the same footing as
+ * The flagship set's Gloom, the second ability word on the same footing as
  * Flurry rush above and built the same way: `Gloom N` is one triggered ability
  * with a fixed envelope, and the printed word is a label on that envelope.
  *

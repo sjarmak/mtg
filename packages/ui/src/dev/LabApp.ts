@@ -30,7 +30,7 @@
  * section (`../routes/analysis/game-detail.ts`), and the route that used to
  * hold it is gone: `mtg-2ayr`.
  */
-import { createElement, useEffect, useMemo, useState } from 'react';
+import { createElement, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Card as DslCard } from '@mtg/dsl';
 import { parseCard } from '@mtg/dsl';
@@ -83,13 +83,14 @@ import { LanForgeStart, lanForgeSection } from '../routes/play/LanForgeStart';
 import { PLAY_UNNAMED_SET, PlayLanding } from '../routes/play/PlayLanding';
 import { preconLanPlay } from '../routes/printed/lan-precon';
 import { PRECON_DECK_PARAM } from '../routes/printed/PrintedPreconRoute';
-import { forgeFormatId, movedCommanderSource, playSources, resolvePlaySource } from '../routes/play/sources';
+import { forgeFormatId, movedPlaySource, playSources, resolvePlaySource } from '../routes/play/sources';
 import type { ForgeSource } from '../routes/play/sources';
 import { preconMatchRules } from '../routes/printed/precon-match';
 import { useTableServer } from '../net/invite';
 import { DEFAULT_TABLE_BASE } from '../routes/PlayRoute';
 import {
   playOpponentProps,
+  playPrintedPage,
   playSub,
   printedSelection,
   routeSeats,
@@ -119,7 +120,7 @@ import type { SetIndex, StagedSetRow } from '../lab/set-index';
 import { setDisplayName, setKindFact } from '../lab/set-label';
 import { setKindLabel } from '../lab/set-origin';
 import { SetPicker } from '../app/SetPicker';
-import { useHashRoute } from '../app/router';
+import { routeHash, useHashRoute } from '../app/router';
 import type { UiRouter } from '../app/router';
 import { DeckGallery } from '../routes/cards/DeckGallery';
 import { readReplayLog } from '../replay/timeline';
@@ -1357,11 +1358,26 @@ export function LabApp(props: LabAppProps): ReactElement {
       params: { ...sourceRouter.route.params, source: defaultPrintedSource },
     });
   }, [linkedStem, setIndex.status, stagedSet.state.status, defaultPrintedSource, sourceRouter]);
+  // A link kept from before Momir Basic had its own section (issue 308) names it
+  // under Constructed or Commander. Only the address the page opened at is
+  // moved, once the printed rows can say what it names: a section link carries
+  // `source` across, so moving every route would send somebody pressing
+  // Constructed from the Momir section straight back.
+  const openedAt = useRef<{ readonly hash: string; settled: boolean }>({
+    hash: routeHash(sourceRouter.route),
+    settled: false,
+  });
   useEffect(() => {
-    if (sourceRouter.route.mode !== 'play' || sourceRouter.route.sub !== 'commander') return;
-    const moved = movedCommanderSource(sourceRouter.route.params, printedRows);
-    if (moved === null) return;
-    sourceRouter.goToSub(moved);
+    const opened = openedAt.current;
+    if (opened.settled) return;
+    if (routeHash(sourceRouter.route) !== opened.hash) {
+      opened.settled = true;
+      return;
+    }
+    if (sourceRouter.route.mode !== 'play' || printedRows.length === 0) return;
+    opened.settled = true;
+    const moved = movedPlaySource(sourceRouter.route.sub, sourceRouter.route.params, printedRows);
+    if (moved !== null) sourceRouter.goToSub(moved);
   }, [sourceRouter, printedRows]);
   // Without the `(reduced)` suffix the document carries in its own name: what
   // that suffix says is said by the kind line under it, and saying it twice put
@@ -1758,7 +1774,9 @@ export function LabApp(props: LabAppProps): ReactElement {
     const sub = playSub(router.route);
     const taken = routeTakesThePage(router.route);
     if (playSource === null) {
-      return sub === 'commander' ? commanderNotice() : sections.play(router);
+      if (sub === 'commander') return commanderNotice();
+      if (sub === 'momir') return momirNotice();
+      return sections.play(router);
     }
     // A seat at a kernel table is `../routes/PlayRoute.ts`'s page whatever is
     // showing, but a seat at a Forge table over the network is not: its deck is
@@ -1798,7 +1816,7 @@ export function LabApp(props: LabAppProps): ReactElement {
         ? sections.draft(router)
         : printedSelection(
             printed,
-            sub,
+            playPrintedPage(sub),
             router,
             legacyCubeBackend,
             setPrintedPlaying,
@@ -1919,6 +1937,10 @@ const CUBE_NO_DECKS_BODY =
 export const COMMANDER_UNSTAGED_TITLE = 'Commander decks are not staged';
 const COMMANDER_UNSTAGED_BODY = 'Run `npm run play` to stage the Starter Commander decks.';
 
+/** What the Momir section says with no Momir Basic format staged. */
+export const MOMIR_UNSTAGED_TITLE = 'Momir Basic is not staged';
+const MOMIR_UNSTAGED_BODY = 'Run `npm run play` to stage Momir Basic.';
+
 function emptyNotice(title: string, body: string): ReactElement {
   return createElement(
     'div',
@@ -1946,4 +1968,9 @@ function cubeDecksNotice(): ReactElement {
  */
 function commanderNotice(): ReactElement {
   return emptyNotice(COMMANDER_UNSTAGED_TITLE, COMMANDER_UNSTAGED_BODY);
+}
+
+/** The Momir section with nothing staged; like Commander, it is only ever a printed format. */
+function momirNotice(): ReactElement {
+  return emptyNotice(MOMIR_UNSTAGED_TITLE, MOMIR_UNSTAGED_BODY);
 }

@@ -12,6 +12,7 @@ import type { Card } from '@mtg/dsl';
 import type { DeckList } from '@mtg/kernel';
 import type { BotSpec } from './bots';
 import type { EnumerationCaps, GameBudget } from './driver';
+import { DEFAULT_BOARD_CAP } from './driver';
 
 export interface MatchSpec {
   /** Every random draw in the run derives from this. */
@@ -24,6 +25,8 @@ export interface MatchSpec {
   readonly rolloutPool?: readonly Card[] | undefined;
   readonly alternatePlayFirst?: boolean | undefined;
   readonly maximumTurns?: number | undefined;
+  /** Permanents on the battlefield before a game is stopped as a `boardCap` draw; `null` for no cap. */
+  readonly boardCap?: number | null | undefined;
   readonly budget?: GameBudget | undefined;
   readonly caps?: EnumerationCaps | undefined;
   /** Building the replay log costs time; benchmarks turn it off. */
@@ -46,6 +49,7 @@ export interface ResolvedMatchSpec {
   readonly rolloutPool: readonly Card[] | undefined;
   readonly alternatePlayFirst: boolean;
   readonly maximumTurns: number;
+  readonly boardCap: number | null;
   readonly budget: GameBudget | undefined;
   readonly caps: EnumerationCaps | undefined;
   readonly collectLogs: boolean;
@@ -64,6 +68,10 @@ export function resolveMatchSpec(spec: MatchSpec): ResolvedMatchSpec {
     throw new Error(`match spec needs a positive integer game count, got ${String(spec.games)}`);
   }
   if (spec.runSeed.length === 0) throw new Error('match spec needs a non-empty run seed');
+  const boardCap = spec.boardCap === undefined ? DEFAULT_BOARD_CAP : spec.boardCap;
+  if (boardCap !== null && (!Number.isInteger(boardCap) || boardCap <= 0)) {
+    throw new Error(`match spec needs a positive integer board cap or null, got ${String(boardCap)}`);
+  }
   return {
     runSeed: spec.runSeed,
     games: spec.games,
@@ -72,6 +80,7 @@ export function resolveMatchSpec(spec: MatchSpec): ResolvedMatchSpec {
     rolloutPool: spec.rolloutPool,
     alternatePlayFirst: spec.alternatePlayFirst ?? true,
     maximumTurns: spec.maximumTurns ?? 40,
+    boardCap,
     budget: spec.budget,
     caps: spec.caps,
     collectLogs: spec.collectLogs ?? false,

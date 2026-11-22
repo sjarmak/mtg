@@ -12,8 +12,9 @@
  * seat's agent, reduce, repeat.
  */
 import type { BotEvidenceEpisode } from '@mtg/bot-evidence';
+import { boardCapStanding, DEFAULT_BOARD_CAP } from '@mtg/engine';
 import type { Card } from '@mtg/dsl';
-import type { DeckList, GameEndReason, GameEvent, GameState, PlayerAgent, PlayerId } from '@mtg/kernel';
+import type { DeckList, GameEvent, GameState, PlayerAgent, PlayerId } from '@mtg/kernel';
 import {
   agentView,
   createGame,
@@ -24,7 +25,7 @@ import {
 } from '@mtg/kernel';
 import { buildGameLog } from './log/collect';
 import { buildExtras, buildMetadata } from './log/metadata';
-import type { SimGameLog } from './log/schema';
+import type { SimEndReason, SimGameLog } from './log/schema';
 import type { ActivationCensus } from './activation-census';
 import { censusGameActivations } from './activation-census';
 import type { TriggerCensus } from './trigger-census';
@@ -47,6 +48,21 @@ export interface GameBudget {
 }
 
 export const DEFAULT_BUDGET: GameBudget = { maxDecisions: 20_000, maxMillis: 30_000 };
+
+/**
+ * How many permanents the battlefield may hold, both seats together, before the
+ * driver stops the game as a draw with reason `boardCap`.
+ *
+ * The number is `@mtg/engine`'s, shared with the play screen and the netplay
+ * table, and `board-cap.ts` there carries the measurement behind it. Without
+ * it a runaway eats the whole `DEFAULT_BUDGET` and throws
+ * `GameBudgetExceededError`, which ends the run.
+ *
+ * A capped game is a draw: `winner` is `null`, it counts in `draws`, and
+ * `decidedWinRate` leaves it out exactly as it leaves out a turn-limit draw. It
+ * is reported under its own reason so a run that capped games says how many.
+ */
+export { DEFAULT_BOARD_CAP };
 
 /** How many turns a game may run before the kernel calls it a draw. */
 export const DEFAULT_MAXIMUM_TURNS = 40;
@@ -108,6 +124,8 @@ export interface PlayGameOptions {
   readonly rolloutWorld?: 'fair' | 'privileged';
   readonly startingPlayer: PlayerId;
   readonly maximumTurns?: number;
+  /** `DEFAULT_BOARD_CAP` when absent; `null` lets the board grow without limit. */
+  readonly boardCap?: number | null;
   readonly budget?: GameBudget;
   readonly caps?: EnumerationCaps;
   /** `null` skips log construction entirely, which is the fast path for benchmarks. */
@@ -144,7 +162,7 @@ export interface GameOutcome {
   readonly seed: string;
   readonly startingPlayer: PlayerId;
   readonly winner: PlayerId | null;
-  readonly reason: GameEndReason;
+  readonly reason: SimEndReason;
   readonly turns: number;
   readonly decisions: number;
   readonly log: SimGameLog | null;
@@ -197,6 +215,7 @@ function errorMessage(error: unknown): string {
 export function playSimGame(options: PlayGameOptions): GameOutcome {
   const budget = options.budget ?? DEFAULT_BUDGET;
   const caps = options.caps ?? DEFAULT_CAPS;
+  const boardCap = options.boardCap === undefined ? DEFAULT_BOARD_CAP : options.boardCap;
   const started = Date.now();
   const evidenceRequest = options.evidence ?? null;
   const evidenceIdentity =
@@ -220,6 +239,7 @@ export function playSimGame(options: PlayGameOptions): GameOutcome {
     const events: GameEvent[] = keepsEvents ? [...created.events] : [];
     const endOfTurnStates = new Map<number, GameState>();
     let decisions = 0;
+    let capped = false;
 
     for (;;) {
       const awaiting = state.turn.awaiting;
@@ -300,12 +320,17 @@ export function playSimGame(options: PlayGameOptions): GameOutcome {
       if (state.turn.number !== before && !endOfTurnStates.has(before)) {
         endOfTurnStates.set(before, state);
       }
+      if (
+        boardCap !== null &&
+        state.result === null &&
+        boardCapStanding(state.battlefield.length, boardCap) === 'passed'
+      ) {
+        capped = true;
+        break;
+      }
     }
 
-    const result = state.result;
-    if (result === null) {
-      throw new Error(`game ${options.seed} stopped owing no decision but with no result`);
-    }
+    const result = endOf(state, capped, options.seed);
     if (!endOfTurnStates.has(state.turn.number)) endOfTurnStates.set(state.turn.number, state);
 
     const outcome: GameOutcome = {
@@ -316,7 +341,7 @@ export function playSimGame(options: PlayGameOptions): GameOutcome {
       reason: result.reason,
       turns: result.endedOnTurn,
       decisions,
-      log: wantsLog ? buildLog(options, state, events, endOfTurnStates, decisions, result.reason) : null,
+      log: wantsLog ? buildLog(options, state, result, events, endOfTurnStates, decisions) : null,
       events: wantsEvents ? events : null,
       triggerCensus: wantsCensus ? censusGameTriggers(events, state) : null,
       activationCensus: wantsCensus ? censusGameActivations(events, state) : null,
@@ -343,18 +368,39 @@ export function playSimGame(options: PlayGameOptions): GameOutcome {
   }
 }
 
+/** How a game ended, as the sim reports it. */
+interface SimResult {
+  readonly winner: PlayerId | null;
+  readonly reason: SimEndReason;
+  readonly endedOnTurn: number;
+}
+
+/**
+ * The kernel's result, or the board-cap draw the driver stopped the game at.
+ *
+ * A capped game has no kernel result because the kernel never ended it, so the
+ * draw is stated here rather than written into `GameState`, which the kernel
+ * owns.
+ */
+function endOf(state: GameState, capped: boolean, seed: string): SimResult {
+  if (capped) return { winner: null, reason: 'boardCap', endedOnTurn: state.turn.number };
+  if (state.result === null) {
+    throw new Error(`game ${seed} stopped owing no decision but with no result`);
+  }
+  return state.result;
+}
+
 function buildLog(
   options: PlayGameOptions,
   finalState: GameState,
+  result: SimResult,
   events: readonly GameEvent[],
   endOfTurnStates: ReadonlyMap<number, GameState>,
   decisions: number,
-  reason: GameEndReason,
 ): SimGameLog {
   const request = options.log ?? null;
-  const result = finalState.result;
-  if (request === null || result === null) {
-    throw new Error('buildLog called without a log request or a finished game');
+  if (request === null) {
+    throw new Error('buildLog called without a log request');
   }
   const inputs = {
     expansion: request.expansion,
@@ -378,7 +424,7 @@ function buildLog(
     finalState,
     endOfTurnStates,
     metadata: buildMetadata(inputs),
-    extras: buildExtras(inputs, reason),
+    extras: buildExtras(inputs, result.reason),
     userDeck: options.decks[0],
   });
 }

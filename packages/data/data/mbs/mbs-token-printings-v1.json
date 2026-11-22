@@ -4,38 +4,32 @@
     {
       "code": "TBRC",
       "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atbrc+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
-      "sourceSha256": "c977cef9495562b3fcee85aa031f3cfd8e0d45417063d5889a65b97b3626fd23",
-      "fetchedAt": "2026-09-19T06:58:30.564Z"
+      "sourceSha256": "8b402dad82070fea224b7c0a366504cfa5dde622fab98c31ceb7cd414f576347",
+      "fetchedAt": "2026-11-22T17:16:57.465Z"
     },
     {
       "code": "TCMM",
       "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atcmm+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
-      "sourceSha256": "bae51d553ebb704ecb3d2509b0a17e2fbed2c33549fcd42071b0844fbb7220a9",
-      "fetchedAt": "2026-09-19T06:58:30.699Z"
+      "sourceSha256": "9c45b73a6e76628734a974d936ac7735186b1f6510d89bce57e402c1c8fb5c1e",
+      "fetchedAt": "2026-11-22T17:16:57.586Z"
     },
     {
       "code": "TMBS",
       "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atmbs+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
-      "sourceSha256": "9ea4181243a453455a340eacaca0e653b5ffeed11305098833988f135314fd47",
-      "fetchedAt": "2026-09-19T06:58:30.762Z"
-    },
-    {
-      "code": "TMH2",
-      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atmh2+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
-      "sourceSha256": "ece1d704a7acb85499f246d4b02c7a13b06bf0665bad5d8cfe431122ad43e198",
-      "fetchedAt": "2026-09-19T06:58:31.538Z"
+      "sourceSha256": "b962bc6d4bb37cb17d22ee51d870faafc9ad34f8407244c94e2f4adb2220e726",
+      "fetchedAt": "2026-11-22T17:16:57.654Z"
     },
     {
       "code": "TSOM",
       "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atsom+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
-      "sourceSha256": "8505f4cc60c9cc90695dfa871224f90107f83cb7ffacbef7cd50e58e76596eeb",
-      "fetchedAt": "2026-09-19T06:58:31.562Z"
+      "sourceSha256": "e0620f539998d854e35a7f11194c39a18059ee1b8cecac14d1dce1fe5519259f",
+      "fetchedAt": "2026-11-22T17:16:57.759Z"
     },
     {
       "code": "TUGL",
       "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atugl+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
-      "sourceSha256": "f0cecfe784aa5e6da84d565d943c36f85ff3aa759c56f406f3463cd037ea8414",
-      "fetchedAt": "2026-09-19T06:58:31.663Z"
+      "sourceSha256": "3b7279d1e6cb17f64dafc1a6253bcef8cc8a7c718ab341ace9f853827889b679",
+      "fetchedAt": "2026-11-22T17:16:57.853Z"
     }
   ],
   "engine": { "name": "forge", "version": "2.0.14" },
@@ -119,6 +113,45 @@
       }
     },
     {
+      "physicalId": "tmbs-token:0001:760dcba4-c0f1-4843-9c39-393c629aae8e",
+      "position": 1,
+      "setCode": "TMBS",
+      "name": "Germ",
+      "observedNames": ["Germ Token", "Phyrexian Germ Token"],
+      "oracleId": "bb549594-35f6-4ac6-9f1f-cfb35784d99e",
+      "scryfallId": "760dcba4-c0f1-4843-9c39-393c629aae8e",
+      "typeLine": "Token Creature — Germ",
+      "power": "0",
+      "toughness": "0",
+      "loyalty": null,
+      "colors": ["B"],
+      "faces": [
+        {
+          "name": "Germ",
+          "manaCost": null,
+          "typeLine": "Token Creature — Germ",
+          "oracleText": "",
+          "power": "0",
+          "toughness": "0",
+          "loyalty": null,
+          "colors": ["B"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "760dcba4-c0f1-4843-9c39-393c629aae8e",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/7/6/760dcba4-c0f1-4843-9c39-393c629aae8e.jpg?1783941355"
+            }
+          }
+        ]
+      }
+    },
+    {
       "physicalId": "tmbs-token:0003:2d84926d-5892-4c62-a943-fac9f0ddc569",
       "position": 3,
       "setCode": "TMBS",
@@ -191,45 +224,6 @@
             "face": null,
             "uris": {
               "art_crop": "https://cards.scryfall.io/art_crop/front/8/f/8f4e230e-f604-4803-9cbd-fd08d2863db4.jpg?1783941355"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "physicalId": "tmh2-token:0003:b53e0681-603e-4180-bc86-3dadf214e61a",
-      "position": 3,
-      "setCode": "TMH2",
-      "name": "Phyrexian Germ",
-      "observedNames": ["Phyrexian Germ Token"],
-      "oracleId": "a1c2af93-83c0-4974-b4db-abf95981d4e3",
-      "scryfallId": "b53e0681-603e-4180-bc86-3dadf214e61a",
-      "typeLine": "Token Creature — Phyrexian Germ",
-      "power": "0",
-      "toughness": "0",
-      "loyalty": null,
-      "colors": ["B"],
-      "faces": [
-        {
-          "name": "Phyrexian Germ",
-          "manaCost": null,
-          "typeLine": "Token Creature — Phyrexian Germ",
-          "oracleText": "",
-          "power": "0",
-          "toughness": "0",
-          "loyalty": null,
-          "colors": ["B"]
-        }
-      ],
-      "art": {
-        "status": "available",
-        "source": "scryfall",
-        "scryfallId": "b53e0681-603e-4180-bc86-3dadf214e61a",
-        "images": [
-          {
-            "face": null,
-            "uris": {
-              "art_crop": "https://cards.scryfall.io/art_crop/front/b/5/b53e0681-603e-4180-bc86-3dadf214e61a.jpg?1783926593"
             }
           }
         ]

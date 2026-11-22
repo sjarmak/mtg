@@ -134,6 +134,7 @@ export function LiveGame(props: LiveGameProps): ReactElement {
       // false; `./undo.ts` argues it.
       onUndo: undo,
       canUndo,
+      ...(props.config.boardCap === undefined ? {} : { boardCap: props.config.boardCap }),
       ...(props.toolbar === undefined ? {} : { toolbar: props.toolbar }),
       ...(props.artFor === undefined ? {} : { artFor: props.artFor }),
       ...(rollNote === undefined ? {} : { status: rollNote }),

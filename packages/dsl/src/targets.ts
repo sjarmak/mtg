@@ -36,7 +36,7 @@
  * `withCounter` is the seventh member, and it is the one that reads state the
  * other six do not: a counter is stored on the object rather than derived from
  * it, so "target creature with a gloom counter on it" asks a question no power,
- * tap state or keyword can answer. the flagship set mints six cards' worth of
+ * tap state or keyword can answer. The flagship set mints six cards' worth of
  * gloom counters and prints nothing that reads one, which made the counter pure
  * attrition on a shared board; this is the word that lets a card point at it.
  * There is no `withoutCounter` beside it for the reason there is no seventh

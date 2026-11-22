@@ -16,7 +16,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v66",
+      "admissionDirectory": "play-admission-v67",
       "catalogs": [
         {
           "code": "AKH",
@@ -50,7 +50,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v39",
+      "admissionDirectory": "play-admission-v40",
       "catalogs": [
         {
           "code": "ISD",
@@ -62,7 +62,7 @@
     {
       "id": "scd",
       "formatFile": "scd-constructed-format-v1.json",
-      "admissionDirectory": "play-admission-v31",
+      "admissionDirectory": "play-admission-v32",
       "displayMetadataFile": "scd-display-metadata-v1.json",
       "tokenPrintingsFile": "scd-token-printings-v1.json",
       "availability": {
@@ -97,7 +97,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v25",
+      "admissionDirectory": "play-admission-v26",
       "catalogs": [
         {
           "code": "SOM",
@@ -121,7 +121,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v24",
+      "admissionDirectory": "play-admission-v25",
       "catalogs": [
         {
           "code": "MBS",
@@ -145,7 +145,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v24",
+      "admissionDirectory": "play-admission-v25",
       "catalogs": [
         {
           "code": "ROE",
@@ -169,7 +169,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v23",
+      "admissionDirectory": "play-admission-v24",
       "catalogs": [
         {
           "code": "M12",
@@ -193,7 +193,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v23",
+      "admissionDirectory": "play-admission-v24",
       "catalogs": [
         {
           "code": "DKA",
@@ -222,7 +222,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v23",
+      "admissionDirectory": "play-admission-v24",
       "catalogs": [
         {
           "code": "AVR",
@@ -246,7 +246,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v23",
+      "admissionDirectory": "play-admission-v24",
       "catalogs": [
         {
           "code": "GTC",
@@ -275,7 +275,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v22",
+      "admissionDirectory": "play-admission-v23",
       "catalogs": [
         {
           "code": "NPH",
@@ -299,7 +299,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v23",
+      "admissionDirectory": "play-admission-v24",
       "catalogs": [
         {
           "code": "M15",
@@ -323,7 +323,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v23",
+      "admissionDirectory": "play-admission-v24",
       "catalogs": [
         {
           "code": "M14",
@@ -347,7 +347,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v23",
+      "admissionDirectory": "play-admission-v24",
       "catalogs": [
         {
           "code": "THS",
@@ -371,7 +371,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v22",
+      "admissionDirectory": "play-admission-v23",
       "catalogs": [
         {
           "code": "BNG",
@@ -400,7 +400,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v22",
+      "admissionDirectory": "play-admission-v23",
       "catalogs": [
         {
           "code": "BNG",
@@ -434,7 +434,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v22",
+      "admissionDirectory": "play-admission-v23",
       "catalogs": [
         {
           "code": "DGM",
@@ -468,7 +468,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v22",
+      "admissionDirectory": "play-admission-v23",
       "catalogs": [
         {
           "code": "KTK",
@@ -492,7 +492,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v22",
+      "admissionDirectory": "play-admission-v23",
       "catalogs": [
         {
           "code": "ORI",
@@ -516,7 +516,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v22",
+      "admissionDirectory": "play-admission-v23",
       "catalogs": [
         {
           "code": "XLN",
@@ -540,7 +540,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v17",
+      "admissionDirectory": "play-admission-v18",
       "catalogs": [
         {
           "code": "AER",
@@ -574,7 +574,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v13",
+      "admissionDirectory": "play-admission-v14",
       "catalogs": [
         {
           "code": "RTR",
@@ -598,7 +598,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v13",
+      "admissionDirectory": "play-admission-v14",
       "catalogs": [
         {
           "code": "M11",
@@ -622,7 +622,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v13",
+      "admissionDirectory": "play-admission-v14",
       "catalogs": [
         {
           "code": "M13",
@@ -644,7 +644,7 @@
           "reason": "Verified real-Forge match admission is installed with an explicit global creature pool policy."
         }
       },
-      "admissionDirectory": "play-admission-v12",
+      "admissionDirectory": "play-admission-v13",
       "catalogs": [
         {
           "code": "M11",
@@ -668,7 +668,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v13",
+      "admissionDirectory": "play-admission-v14",
       "catalogs": [
         {
           "code": "M10",
@@ -692,7 +692,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v13",
+      "admissionDirectory": "play-admission-v14",
       "catalogs": [
         {
           "code": "ZEN",
@@ -716,7 +716,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v9",
+      "admissionDirectory": "play-admission-v10",
       "catalogs": [
         {
           "code": "WWK",
@@ -745,7 +745,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v13",
+      "admissionDirectory": "play-admission-v14",
       "catalogs": [
         {
           "code": "RAV",
@@ -769,7 +769,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v8",
+      "admissionDirectory": "play-admission-v9",
       "catalogs": [
         {
           "code": "GPT",
@@ -798,7 +798,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v12",
+      "admissionDirectory": "play-admission-v13",
       "catalogs": [
         {
           "code": "LRW",
@@ -822,7 +822,7 @@
           "reason": "Verified full-card and match interaction admission is installed."
         }
       },
-      "admissionDirectory": "play-admission-v6",
+      "admissionDirectory": "play-admission-v7",
       "catalogs": [
         {
           "code": "DIS",
@@ -844,7 +844,7 @@
     {
       "id": "commander-precons",
       "formatFile": "commander-precons-constructed-format-v1.json",
-      "admissionDirectory": "play-admission-v2",
+      "admissionDirectory": "play-admission-v3",
       "displayMetadataFile": "commander-precons-display-metadata-v1.json",
       "tokenPrintingsFile": "commander-precons-token-printings-v1.json",
       "availability": {

@@ -52,7 +52,7 @@ import { CARD_TRIM_MM } from '../../card/anatomy';
 import { cssNumber } from '../number';
 import { TRAY_BLOCK_CHROME_PX } from './attach';
 import { MIN_SLOT_WIDTH_REM } from './fit';
-import { playedPlace, playedSlot, RATIO, TABLE, THREE_COLUMN_MIN_WIDTH_PX } from './geometry';
+import { PLAY, playedPlace, playedSlot, RATIO, TABLE, THREE_COLUMN_MIN_WIDTH_PX } from './geometry';
 import { PLAY_RAIL_REM, RAIL_WIDTH_VAR } from './rail';
 
 /**
@@ -547,6 +547,49 @@ const HAND_RULES_CSS = HAND_RULES_LADDER.map(
  */
 const COMBAT_BOARD = `:has(.mtg-board__divider[data-combat='true'])`;
 
+/**
+ * The most cards the hand row divides itself by before it only scrolls.
+ *
+ * Twelve because a complete face is the floor either way: twelve 100px faces
+ * and their gaps are 1288px, wider than the hand row at every viewport the rigs
+ * measure, so a thirteenth divisor would only ever resolve to the floor too.
+ */
+const HAND_FIT_MOST = 12;
+
+/**
+ * A hand of more than seven shares its row out before it scrolls.
+ *
+ * The seventh below is the parity rule's — a held card the width of a permanent
+ * at rest — and an opening hand never asks for more. Past seven it hid the card
+ * just drawn: on the draw at 1440x900 the eighth card sat beyond the row's right
+ * edge (1056px of cards in a 924px row), the newest card in hand was the one out
+ * of sight, and the only sign of it was a 10px scrollbar under 180px of empty
+ * lane. So a hand of `n` cards divides the row by `n`, still floored at the
+ * complete face and capped at the hand's ceiling: eight fit at 1440x900, and
+ * where `n` faces cannot clear the floor the row scrolls exactly as before.
+ *
+ * Counted with `:has()` on the row because nothing else in the sheet knows the
+ * count; a filled eighth child implies eight cards, since `../../board/Hand.ts`
+ * draws empty places only under seven. Scoped to the seat's own hand lane off a
+ * dragged seam: a dragged seam sizes the slot from the height the player chose,
+ * and the command zone's hand slots are not this row. `PLAY` rather than `TABLE`
+ * because the replay viewer sizes its hands in `../replay.ts` and wins there only
+ * by order; a rule this specific would take its eight-card frames from it.
+ */
+const HAND_FIT_CSS = Array.from({ length: HAND_FIT_MOST - HAND_ACROSS }, (_unused, index) => {
+  const held = HAND_ACROSS + 1 + index;
+  return `
+${PLAY} .mtg-board__side[data-seat='you']:not([data-seam='true']) > .mtg-zone[data-tone='rail'] > .mtg-zone__body:has(> .mtg-slot[data-slot='hand']:not([data-empty='true']):nth-child(${String(held)})) > .mtg-slot[data-slot='hand']:not([data-empty='true']) {
+  width: min(
+    var(--hand-face-cap),
+    max(
+      calc((100% - var(${HAND_BASIS_TRIM_VAR}) - ${String(held - 1)} * ${HAND_GAP}) / ${String(held)}),
+      var(--hand-face-floor)
+    )
+  );
+}`;
+}).join('');
+
 export const HAND_CSS = `
 ${TABLE} .mtg-board {
   --hand-face-cap: ${cssNumber(HAND_FACE_MAX_REM)}rem;
@@ -754,7 +797,7 @@ ${TABLE} .mtg-slot[data-slot='hand']:not([data-empty='true']) {
   height: auto;
   aspect-ratio: ${RATIO};
   min-height: 0;
-}
+}${HAND_FIT_CSS}
 /* And a hand that scrolls says so, in the words ./fit.ts's spell row already
    uses. The row has always been able to overflow and never had to at seven
    cards; it does now at 1024x768, and a scroller nobody can see is a card in

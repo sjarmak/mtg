@@ -6,7 +6,7 @@ import { delimiter, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fingerprintBotFiles } from './bot-fingerprint';
 import { killProcessGroup, trackProcessGroup } from './process-group';
-import { findForgeInstall } from './install';
+import { findForgeInstall, forgeJvmCommand } from './install';
 
 // Resolved lazily (not at module scope): import.meta.url is not a real
 // file:// URL in every environment that ends up importing this module (e.g.
@@ -117,19 +117,15 @@ function runRankingProcess(
   timeoutMs: number,
 ): Promise<readonly (number | null)[]> {
   return new Promise((resolveResult, rejectResult) => {
-    const child = spawn(
-      'xvfb-run',
-      [
-        '-a',
-        'java',
-        '-Dfile.encoding=UTF-8',
-        '--class-path',
-        `${jar}${delimiter}${classes}`,
-        'ForgeDraftRankings',
-        setCode,
-      ],
-      { cwd, detached: true, stdio: ['pipe', 'pipe', 'pipe'] },
-    );
+    const jvm = forgeJvmCommand([
+      'java',
+      '-Dfile.encoding=UTF-8',
+      '--class-path',
+      `${jar}${delimiter}${classes}`,
+      'ForgeDraftRankings',
+      setCode,
+    ]);
+    const child = spawn(jvm.command, jvm.args, { cwd, detached: true, stdio: ['pipe', 'pipe', 'pipe'] });
     trackProcessGroup(child.pid);
     let stdout = '';
     let stderr = '';

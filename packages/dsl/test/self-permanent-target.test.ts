@@ -31,13 +31,10 @@
 import { describe, expect, it } from 'vitest';
 import type { AbilityInput, CardInput, TargetKind } from '../src/index';
 import {
-  COUNTER_DECLARATIONS,
-  COUNTER_KINDS,
   HAND_AUTHORED_TARGETS,
   LEGAL_TARGETS,
   MODEL_TARGET_KINDS,
   TARGET_KINDS,
-  counterReminderText,
   isSourceBodyOnlyTarget,
   legalTargetsFor,
   renderOracleText,
@@ -50,11 +47,11 @@ import { ModelTargetSpecSchema, targetKindsCanCollide } from '../src/targets';
 
 const SELF_PERMANENT_KIND: TargetKind = 'selfPermanent';
 
-/** "At the beginning of your upkeep, put a Trisigil counter on this permanent." */
+/** "At the beginning of your upkeep, put a charge counter on this permanent." */
 const UPKEEP_ACCRUAL: AbilityInput = {
   kind: 'triggered',
   condition: 'beginningOfYourUpkeep',
-  effects: [{ kind: 'putCounters', counter: 'trisigil', count: 1, target: { kind: SELF_PERMANENT_KIND } }],
+  effects: [{ kind: 'putCounters', counter: 'charge', count: 1, target: { kind: SELF_PERMANENT_KIND } }],
 };
 
 function trisigilInput(overrides: Record<string, unknown> = {}): Record<string, unknown> {
@@ -122,11 +119,11 @@ describe("the targeting mode that names the ability's own source as a permanent"
     expect(legalTargetsFor('sacrificeSelf')).not.toContain('selfCreatureOrPlaneswalker');
   });
 
-  it('prints the Trisigil cycle, counter and all', () => {
+  it('prints the legendary artifact cycle, counter and all', () => {
     const card = parseCard(trisigilInput() as CardInput);
     expect(validateCard(card)).toEqual([]);
     expect(renderOracleText(card)).toBe(
-      'At the beginning of your upkeep, put a Trisigil counter on this permanent.',
+      'At the beginning of your upkeep, put a charge counter on this permanent.',
     );
   });
 
@@ -164,7 +161,7 @@ describe("the targeting mode that names the ability's own source as a permanent"
     const result = safeParseCard(
       instantInput({
         effects: [
-          { kind: 'putCounters', counter: 'trisigil', count: 1, target: { kind: SELF_PERMANENT_KIND } },
+          { kind: 'putCounters', counter: 'charge', count: 1, target: { kind: SELF_PERMANENT_KIND } },
         ],
       }),
     );
@@ -181,13 +178,5 @@ describe("the targeting mode that names the ability's own source as a permanent"
     expect(restrictionFitsTargetKind(SELF_PERMANENT_KIND)).toBe(false);
     expect(targetKindsCanCollide(SELF_PERMANENT_KIND, 'targetPermanent')).toBe(false);
     expect(targetKindsCanCollide(SELF_PERMANENT_KIND, SELF_PERMANENT_KIND)).toBe(false);
-  });
-});
-
-describe('the Trisigil counter', () => {
-  it('is a marker counter: it modifies nothing and prints no reminder', () => {
-    expect(COUNTER_KINDS).toContain('trisigil');
-    expect(COUNTER_DECLARATIONS.trisigil.printName).toBe('Trisigil');
-    expect(counterReminderText('trisigil')).toBeNull();
   });
 });

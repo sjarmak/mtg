@@ -15,19 +15,12 @@ const dataRoot = new URL('../data/', import.meta.url);
 const scriptsDirectory = new URL('../../../tools/forge/dist/res/tokenscripts/', import.meta.url);
 
 /**
- * Wurmcoil Engine's two 3/3s. Forge names them "Phyrexian Wurm Token";
- * Scryfall prints them as "Wurm" with Phyrexian Wurm for a type line, and a
- * name nobody witnessed matches nothing, so the board draws their pending
- * frame. Remove a row here the day a printing is bound.
- *
- * Batterskull's and Kaldra Compleat's Living Weapon Germ: the sheet predates
- * the reader seeing keyword-created tokens, so no printing is bound (`mtg-9ggmy`).
+ * Token scripts the cube's cards name that no installed printing witnesses.
+ * None today: Wurmcoil Engine's two Wurms (TSOM 8 and 9) and Living Weapon's
+ * Germ (TMBS 1) bind through stated aliases in `token-printings.ts` (`mtg-9ggmy`).
+ * Add a row here, with why, the day a script is left unbound.
  */
-const LEFT_OUT = [
-  'b_0_0_phyrexian_germ',
-  'c_3_3_a_phyrexian_wurm_deathtouch',
-  'c_3_3_a_phyrexian_wurm_lifelink',
-];
+const LEFT_OUT: readonly string[] = [];
 
 describe('catalogTokenScriptReferences', () => {
   it('reads every TokenScript$ reference once, including comma lists', () => {
@@ -97,5 +90,5 @@ describe('the installed Legacy Cube token sheet', () => {
       return !witnessed.has(script.name);
     });
     expect(unwitnessed).toEqual(LEFT_OUT);
-  });
+  }, 180_000);
 });

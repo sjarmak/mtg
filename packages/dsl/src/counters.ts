@@ -106,7 +106,6 @@ export const MODEL_COUNTER_KINDS = [
   'fang',
   'gloom',
   'loyalty',
-  'trisigil',
 ] as const;
 
 /**
@@ -169,18 +168,6 @@ export type ModelCounterKind = (typeof MODEL_COUNTER_KINDS)[number];
  * counters remain on the object and both are read by layer 7d, which is what
  * the flagship set's gloom wants and what `minusOneMinusOne` under a second
  * name would not give it.
- *
- * `trisigil` is the set's Trisigil cycle (`mtg-rji`): three legendary artifacts
- * that each accrue one every upkeep until the third lands. It modifies nothing,
- * which makes it the second marker counter after `loyalty` and the first one a
- * card actually prints the name of — `counterReminderText` returns null for an
- * empty `modifications` list, so the card says what it does and adds no
- * reminder sentence about what the counter does, because the counter does
- * nothing on its own. Its printed name is capitalized, alone among these, and
- * that is not a slip: the other five name a quantity or a substance and this
- * one names a thing in the world. Eight characters spends more of `@mtg/setgen`'s
- * 140-character `longText` budget than `printName` above would like, and the
- * cycle is three legendary rares where that budget is loosest.
  */
 const DECLARATIONS = {
   plusOnePlusOne: {
@@ -234,10 +221,6 @@ const DECLARATIONS = {
     printName: 'loyalty',
     modifications: [],
   },
-  trisigil: {
-    printName: 'Trisigil',
-    modifications: [],
-  },
   phylactery: {
     printName: 'phylactery',
     modifications: [],
@@ -277,7 +260,7 @@ export const COUNTER_DECLARATIONS: Readonly<Record<CounterKind, CounterDeclarati
  * the pair drifting is exactly the failure the gate exists to prevent. What
  * this file still decides for itself is whether to *accept* the retired names
  * at parse time, which is a per-enum call: this enum says yes, because a set
- * generated before the rename (`out/XMP/set.json`, 2026-08-14) says
+ * generated before the rename (2026-08-14) says
  * `saberHorn` on disk and is the reason the mechanism exists at all.
  *
  * The map is read as plain strings and handed to `z.enum` for validation

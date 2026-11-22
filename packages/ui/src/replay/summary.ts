@@ -58,6 +58,7 @@ export function summarizeGames(games: readonly ReplayGame[]): ReplaySummary {
     spellOrAbility: 0,
     concede: 0,
     turnLimit: 0,
+    boardCap: 0,
   };
   let draws = 0;
   let onPlayWins = 0;

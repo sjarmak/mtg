@@ -1,6 +1,6 @@
 {
   "generatedBy": "npm run vocabulary:refresh",
-  "contentSha256": "f54485527d4faddf0e972b9725cedceb084ecc945e0801a68a49961c3afa2036",
+  "contentSha256": "3d4bdeca3ef14df0c3553db74688a9422f92bd329d45a4f3541e78927a832a24",
   "enums": {
     "ABILITY_KINDS": [
       "static",
@@ -175,7 +175,6 @@
       "fang",
       "gloom",
       "loyalty",
-      "trisigil",
       "phylactery",
       "defense",
       "pressure",
@@ -274,8 +273,7 @@
       "hide",
       "fang",
       "gloom",
-      "loyalty",
-      "trisigil"
+      "loyalty"
     ],
     "MODEL_EFFECT_KINDS": [
       "dealDamage",

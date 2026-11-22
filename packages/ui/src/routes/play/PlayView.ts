@@ -38,7 +38,7 @@
  * door for a move that is genuinely constructed — a click-built block
  * declaration is one — and this lane did not need it.
  */
-import { createElement, useCallback, useMemo } from 'react';
+import { createElement, Fragment, useCallback, useMemo } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type {
   AutoPassSettings,
@@ -73,6 +73,8 @@ import type { PlayChoice } from './prompt';
 import { beatPanel, promptPanel, resultPanel, waitingPanel } from './rail';
 import { useTableSelection } from './selection';
 import { stepBar } from './toolbar';
+import { boardCapStanding, DEFAULT_BOARD_CAP } from '@mtg/engine';
+import { boardCapPanel, boardCapWarning } from './board-cap';
 import { PlaySurface } from './PlaySurface';
 import { usePace } from './pace-preference';
 import type { TriggerYield } from './trigger-yields';
@@ -173,6 +175,12 @@ export interface PlayViewProps {
    */
   readonly canUndo?: boolean | undefined;
   readonly onUndo?: (() => void) | undefined;
+  /**
+   * Permanents the battlefield may hold before this view draws the game as
+   * stopped (`./board-cap.ts`, issue 302). `DEFAULT_BOARD_CAP` when absent; the
+   * caller that holds the session passes the cap it enforces.
+   */
+  readonly boardCap?: number | undefined;
 }
 
 // Re-exported from the shell so a caller has one import for the surface, and
@@ -195,7 +203,16 @@ export { clearTriggerYieldLabel, TRIGGER_YIELDS_LABEL, triggerYieldRowText } fro
 
 export function PlayView(props: PlayViewProps): ReactElement {
   const { session, viewer, names, onChoose, onAutoPass, onYield } = props;
-  const beat = props.beat ?? null;
+  /*
+   * The board-size cap (issue 302, `./board-cap.ts`). Read off the position, so a
+   * local table and a networked seat stop at the same board. Past it the game
+   * is over as far as this view is concerned: no move, no beat, no step bar.
+   */
+  const permanents = session.state.battlefield.length;
+  const cap = props.boardCap ?? DEFAULT_BOARD_CAP;
+  const capStanding = session.result === null ? boardCapStanding(permanents, cap) : 'clear';
+  const capped = capStanding === 'passed';
+  const beat = capped ? null : (props.beat ?? null);
   // Read once for the whole view: the strip's words for a halt and whether a
   // halt arrives drawn are the only two answers it changes, and both are below.
   const coarse = useCoarsePointer();
@@ -208,13 +225,13 @@ export function PlayView(props: PlayViewProps): ReactElement {
   // two different columns: the sentence that names the object is in the rail and
   // the object is on the board, and this is the one component that holds both.
   const pointing = usePointing();
-  const decision = session.pending;
+  const decision = capped ? null : session.pending;
   // `session.result`, not `decision === null`: a remote seat is also handed no
   // decision while its opponent is still deciding, and `awaitingName` is what
   // tells that apart from the game actually ending — this is the kernel's own
   // terminal-state field (`@mtg/kernel`'s `GameResult | null`) and never a
   // guess (`mtg-a1d6`).
-  const gameOver = session.result !== null;
+  const gameOver = session.result !== null || capped;
   const position = boardPosition(session.state, viewer, names, props.artFor ?? null);
   const prompt = decision === null ? null : buildPrompt(session.state, decision, names);
 
@@ -410,9 +427,11 @@ export function PlayView(props: PlayViewProps): ReactElement {
     : beat !== null
       ? beatPanel(beat, session.state, names, continuePress)
       : prompt === null
-        ? (props.awaitingName ?? null) === null
-          ? resultPanel(session, names, props.onNewGame)
-          : waitingPanel(props.awaitingName ?? '', session.decisions)
+        ? capped
+          ? boardCapPanel(permanents, cap, session.decisions, props.onNewGame)
+          : (props.awaitingName ?? null) === null
+            ? resultPanel(session, names, props.onNewGame)
+            : waitingPanel(props.awaitingName ?? '', session.decisions)
         : promptPanel(
             prompt,
             onChoose,
@@ -435,7 +454,7 @@ export function PlayView(props: PlayViewProps): ReactElement {
     : beat !== null
       ? { kind: 'halt' }
       : prompt === null
-        ? (props.awaitingName ?? null) === null
+        ? capped || (props.awaitingName ?? null) === null
           ? { kind: 'report' }
           : { kind: 'idle' }
         : { kind: 'decision', count: prompt.choices.length };
@@ -505,7 +524,11 @@ export function PlayView(props: PlayViewProps): ReactElement {
     decisions: session.decisions,
     events: session.events.length,
     opensItself: (coarse && askSlot.kind === 'halt') || askOpensItself(decision),
-    ...(props.status === undefined ? {} : { status: props.status }),
+    ...(capStanding === 'near'
+      ? { status: createElement(Fragment, null, props.status ?? null, boardCapWarning(permanents, cap)) }
+      : props.status === undefined
+        ? {}
+        : { status: props.status }),
     toolbar: props.toolbar,
     rootRef: motion.ref,
     inspect: (key): ReturnType<typeof findInspected> => findInspected(position, key),

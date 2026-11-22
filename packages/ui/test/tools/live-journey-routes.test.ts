@@ -75,12 +75,12 @@ describe('the live journey opens shipped decks where Play lists them', () => {
     expect(parseHash(hash)).toEqual({ mode: 'play', sub: 'commander', params: { source: 'printed:scd' } });
   });
 
-  it('builds a momir hash the router parses back to the constructed section and source', () => {
+  it('builds a momir hash the router parses back to the momir section and source', () => {
     const hash = playHash(sectionForPrecon('momir'), { source: 'printed:momir-basic' });
-    expect(hash).toBe('#/play/constructed?source=printed%3Amomir-basic');
+    expect(hash).toBe('#/play/momir?source=printed%3Amomir-basic');
     expect(parseHash(hash)).toEqual({
       mode: 'play',
-      sub: 'constructed',
+      sub: 'momir',
       params: { source: 'printed:momir-basic' },
     });
   });

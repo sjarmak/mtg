@@ -63,7 +63,7 @@
  * store holds (2026-11-13) except deathtouch, whose single wording is attested
  * to 2026-04-24 and has no competitor at all.
  *
- * Trample is the one that moved and the one worth reading twice. the playtester's
+ * Trample is the one that moved and the one worth reading twice. The playtester's
  * request quotes "…to the player or planeswalker it's attacking", which is the
  * wording every card first printed through 2024 carries — all twelve trample
  * reminders in Foundations say it. Every card first printed from 2025 onward

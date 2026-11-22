@@ -35,7 +35,7 @@ import { SPOKEN_NOT_DRAWN } from './base';
 import { cssNumber } from './number';
 import { FLYOUT_MAX_PERCENT } from './board/ask-flyout';
 import { SHORT_COMMAND_FACE_MIN_REM } from './board/command';
-import { PLAY, SHORT_VIEWPORT_QUERY, TABLE } from './board/geometry';
+import { PLAY, SHORT_VIEWPORT_MAX_HEIGHT_REM, SHORT_VIEWPORT_QUERY, TABLE } from './board/geometry';
 import { SHORT_TABLE_SPELLS_MIN_REM } from './board/fit';
 import { COMBAT_HAND_FACE_MAX_REM, CROWDED_HAND_FACE_MAX_REM } from './board/hand';
 import { SHORT_TABLE_LAND_TILE_REM } from './board/lands';
@@ -71,39 +71,47 @@ export const PHONE_MAX_REM = 40;
 export const SHORT_TABLE_BAND_MAX_SHARE = 60;
 
 /**
- * How much of the step bar's row the turn may take on a phone (`mtg-rgc.13`).
+ * How much of the step bar's row the turn may take on a phone (`mtg-rgc.13`,
+ * mtg-lab issue 186).
  *
- * `./views.ts` caps it at 5rem and argues that number against three desktop
- * viewports, where the lanes take whatever the column has left and a wrapped
- * line of steps is paid for out of a budget that can grow. A phone is the one
- * layout where it cannot: the block above gives `.mtg-board__lanes` a stated
- * 46rem and the two seats divide exactly that, so a line the near lane takes is
- * a line the opponent's board loses.
+ * It was 3.5rem, which left the label 28px of the 70 that `Turn 12: You` wants,
+ * so an upright phone drew `Tu…` at every turn. The cap was that small because
+ * the head and the steps sat side by side: the steps wrapped inside a box of
+ * their own, so every pixel the head took came off every wrapped line, and a
+ * little more head cost a whole line of steps.
  *
- * Measured in chrome-headless-shell 151 at 390x844 over the screenshot position
- * in `../../test/play/battlefield-geometry.browser.test.ts`, sweeping the cap.
- * Bar height, then the two lanes:
+ * On a phone tall enough that the steps wrap, the block under the phone block
+ * now dissolves the steps' box, so the head is the first item of the one
+ * wrapping row and takes its width off line one alone. Measured in
+ * chrome-headless-shell as a coarse-pointer phone over
+ * `../../test/play/phone-turn-label.browser.test.ts`'s page at turn 12, bar
+ * height in px with the seat named `You`, then `Opponent`:
  *
- *   cap        bar      opponent   you
- *   no head    105.8    198.4      397.1
- *   3rem       105.8    198.4      397.1
- *   3.5rem     105.8    198.4      397.1
- *   4rem       141.8    184.5      414.3
- *   5rem       141.8    184.5      414.3
+ *   viewport   3.5rem, beside   8.5rem, beside   8.5rem, wrapping (this)
+ *   360x780    136 / 136        182 / 182        136 / 136
+ *   375x667    136 / 136        136 / 182        136 / 136
+ *   390x844    136 / 136        136 / 182        136 / 136
+ *   430x932    136 / 136        136 / 136        136 / 136
  *
- * So this is a ledge in the same sense 5rem is on the desktop, and it is a
- * sharp one: up to 3.5rem the turn is free, and half a rem past it costs a
- * whole wrapped line — 36px of bar, 13.9px of which comes off the opponent's
- * battlefield. 3.5rem is 56px and `Turn 18:` is 43.8px in this face, so the
- * same half of the label survives here as on the desktop and the seat name is
- * what the ellipsis eats.
+ * A 182px bar is 23px off the opponent's battlefield (265 to 242). Wrapping,
+ * every cap from 3.5rem to 12rem measured the same 136, and a fine pointer in a
+ * window this narrow agreed (105.8 at 390x844, 131.8 at 360x780, against
+ * 141.8 for 4rem beside the steps) — so the cap no longer prices a line, and
+ * the head can take the width of its words. 8.5rem is 136px, which clears
+ * `Turn 12: Opponent` (133.9px, the app's own longest ordinary turn text and
+ * the line `./views.ts`'s desktop cap is fitted to). A longer seat name loses
+ * its tail to the ellipsis, never the number: `Turn 100:` is 48.8px.
+ *
+ * On a short phone (375x553, 320x568) the steps are a sideways scroller rather
+ * than a wrapping row, so the head's width comes off the scroller's view of the
+ * steps and the bar stays one 30.6px line whatever the cap.
  *
  * The head is not hidden here instead, which would be the cheaper rule and is
  * the wrong one: the disclosure on it is the only way to reach the auto-pass
  * settings now that the strip above the table is gone, so hiding it on a phone
  * would take the setting away rather than shorten it.
  */
-export const PHONE_HEAD_MAX_REM = 3.5;
+export const PHONE_HEAD_MAX_REM = 8.5;
 
 /**
  * The height the bottom navigation reserves at the foot of a phone screen,
@@ -125,6 +133,8 @@ export const BOTTOM_NAV_REM = 3;
 const BOTTOM_NAV_SPACE = `calc(${String(BOTTOM_NAV_REM)}rem + env(safe-area-inset-bottom))`;
 
 const SHORT_COMMAND_FACE_HEIGHT = `calc(${cssNumber(SHORT_COMMAND_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)})`;
+
+const TALL_VIEWPORT_QUERY = `(min-height: ${cssNumber(SHORT_VIEWPORT_MAX_HEIGHT_REM + 1 / 16)}rem)`;
 
 const SHORT_RAIL_TABLE_QUERY = `${SHORT_VIEWPORT_QUERY} and (min-width: ${cssNumber(PHONE_MAX_REM + 1 / 16)}rem)`;
 
@@ -322,6 +332,19 @@ export const MOBILE_CSS = `
     inset-inline-end: max(var(--mtg-space-3), env(safe-area-inset-right));
     max-width: calc(100vw - max(var(--mtg-space-3), env(safe-area-inset-left)) - max(var(--mtg-space-3), env(safe-area-inset-right)));
   }
+}
+/* The turn wraps with the steps rather than beside them (mtg-lab issue 186).
+
+   \`display: contents\` on the steps makes the head, the thirteen nodes and
+   the bar's two controls one flex row, so the head's width comes off the
+   first line only; the gap is the steps' own, so the lines stack exactly as
+   they did inside their box. The steps element carries no role, so dissolving
+   its box removes nothing from the accessibility tree. A short phone keeps the
+   steps' box, because there it is the sideways scroller. \`PHONE_HEAD_MAX_REM\`
+   carries the measurements. */
+@media (max-width: ${String(PHONE_MAX_REM)}rem) and ${TALL_VIEWPORT_QUERY} {
+  ${PLAY} .mtg-phasebar { flex-wrap: wrap; gap: 0.125rem; }
+  ${PLAY} .mtg-phasebar__steps { display: contents; }
 }
 @media (max-width: ${String(PHONE_MAX_REM)}rem) and (pointer: coarse) {
   ${PLAY} .mtg-phasebar__node { flex: 0 0 44px; min-width: 44px; }

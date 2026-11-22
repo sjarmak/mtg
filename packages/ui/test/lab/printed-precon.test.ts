@@ -18,6 +18,7 @@ import type { PrintedPage } from '../../src/routes/printed/page';
 import { loadPrintedConstructedFormat } from '../../src/lab/printed-constructed-format';
 import type { LoadedPrintedConstructedFormat } from '../../src/lab/printed-constructed-format';
 import * as BackendGameModule from '../../src/routes/play/BackendGame';
+import { playPrintedPage } from '../../src/dev/section-views';
 
 const read = (name: string): unknown => JSON.parse(readFileSync(`packages/data/data/scd/${name}`, 'utf8'));
 const row = {
@@ -68,7 +69,7 @@ const text = (node: unknown): string => (node as { textContent: string | null })
 
 /** The page the tab would say it is on at this route, the way `LabApp` does. */
 function pageOf(at: RouteAt): PrintedPage {
-  if (at.mode === 'play') return at.sub;
+  if (at.mode === 'play') return playPrintedPage(at.sub);
   return at.mode === 'cards' ? 'gallery' : 'decks';
 }
 
