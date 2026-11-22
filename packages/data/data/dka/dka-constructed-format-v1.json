@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "dka",
+  "name": "Dark Ascension / Innistrad",
+  "sources": [
+    {
+      "code": "DKA",
+      "catalogFormat": "dka-printed-v1",
+      "catalogSha256": "76b2f918d69578928e0cfb8c328bebfba9c714ec1c51dc37cd499934681e3c5d",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/DKA.json",
+        "sha256": "0aace8811c92f1d51fe5cca71e60ec148b41e379307743ced2a61a43b96a6b3c",
+        "version": "5.3.0+20260919"
+      }
+    },
+    {
+      "code": "ISD",
+      "catalogFormat": "isd-printed-v1",
+      "catalogSha256": "63879d480bd704b6428145523372eac6a7e8abf7fc6f5b71a7e8315ab9074604",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/ISD.json",
+        "sha256": "d6ed35172da20b10d6a6f685b2c80e7834fd382ba37b40113999257621e9bb70",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-spirits",
+      "name": "White-Blue Spirits",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dka-printed-v1:0136:b8238e36-625f-460d-9e39-fd501e65490c",
+          "name": "Drogskol Captain",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0022:fe1eb098-7128-4ec8-8218-51fdde3e8326",
+          "name": "Midnight Haunting",
+          "count": 4
+        },
+        {
+          "physicalId": "dka-printed-v1:0016:11bf2ff7-0f8d-47ea-adfd-af299e793a37",
+          "name": "Niblis of the Urn",
+          "count": 3
+        },
+        {
+          "physicalId": "dka-printed-v1:0036:b715da2e-c816-4c14-8522-811c97c66fed",
+          "name": "Dungeon Geists",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0014:846a2f9e-ad4f-4666-b152-fdeab7559d86",
+          "name": "Feeling of Dread",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0083:53e44060-a9a2-4095-9f5b-f60297525315",
+          "name": "Think Twice",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0244:1d5569e3-278c-4cf3-860e-712010333fe6",
+          "name": "Moorland Haunt",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0250:d595ba72-3334-48f4-9ea9-a43f5e824aa8",
+          "name": "Plains",
+          "count": 18
+        },
+        {
+          "physicalId": "isd-printed-v1:0253:cf258641-b73c-4813-8a23-da47cf79eca5",
+          "name": "Island",
+          "count": 18
+        }
+      ]
+    },
+    {
+      "id": "blue-black-zombies",
+      "name": "Blue-Black Zombies",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dka-printed-v1:0135:0e5f41eb-609b-4882-af9e-904daa717484",
+          "name": "Diregraf Captain",
+          "count": 4
+        },
+        {
+          "physicalId": "dka-printed-v1:0064:48d73cb5-22ac-43df-9c4b-0c860bb80b3e",
+          "name": "Gravecrawler",
+          "count": 4
+        },
+        {
+          "physicalId": "dka-printed-v1:0063:bffaad78-97ff-431f-bfb0-e96c7558f974",
+          "name": "Geralf's Messenger",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0097:4ed5790a-3354-49c2-89b6-3fc0de8dcc7c",
+          "name": "Diregraf Ghoul",
+          "count": 2
+        },
+        {
+          "physicalId": "dka-printed-v1:0076:09666671-601e-4fca-bdfb-fb288bf2672c",
+          "name": "Tragic Slip",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0245:ef058312-6926-49f8-ae72-a8d60fedbf6c",
+          "name": "Nephalia Drownyard",
+          "count": 3
+        },
+        {
+          "physicalId": "dka-printed-v1:0155:30066306-f943-44c1-8814-b8b60388c26d",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0253:cf258641-b73c-4813-8a23-da47cf79eca5",
+          "name": "Island",
+          "count": 10
+        },
+        {
+          "physicalId": "isd-printed-v1:0256:a5a14894-2936-4fc4-b6a5-f9c73c32b177",
+          "name": "Swamp",
+          "count": 27
+        }
+      ]
+    },
+    {
+      "id": "black-red-vampires",
+      "name": "Black-Red Vampires",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0164:9c16cf74-f9e0-4d80-9a29-b91dec0b6b38",
+          "name": "Stromkirk Noble",
+          "count": 4
+        },
+        {
+          "physicalId": "dka-printed-v1:0143:5bfcca87-04f8-480a-bae6-ae87f7afb7e1",
+          "name": "Stromkirk Captain",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0158:4afab3a6-95e3-4786-94f2-d9aa7365a4de",
+          "name": "Rakish Heir",
+          "count": 4
+        },
+        {
+          "physicalId": "dka-printed-v1:0096:122163dd-e070-48af-8036-e9850541d138",
+          "name": "Markov Blademaster",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0123:48105c2e-ee36-4117-b56b-3440298da995",
+          "name": "Vampire Interloper",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0132:6960f2da-6b84-4680-8ab2-f0567a5d1b0a",
+          "name": "Brimstone Volley",
+          "count": 3
+        },
+        {
+          "physicalId": "dka-printed-v1:0076:09666671-601e-4fca-bdfb-fb288bf2672c",
+          "name": "Tragic Slip",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0256:a5a14894-2936-4fc4-b6a5-f9c73c32b177",
+          "name": "Swamp",
+          "count": 17
+        },
+        {
+          "physicalId": "isd-printed-v1:0259:17de9f2c-e051-404c-8ec0-c35f500efd67",
+          "name": "Mountain",
+          "count": 21
+        }
+      ]
+    },
+    {
+      "id": "red-green-werewolves",
+      "name": "Red-Green Werewolves",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dka-printed-v1:0141:9326061f-ea76-4be7-a06f-aefb63454777",
+          "name": "Immerwolf",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0193:dd8ca448-f734-4cb9-b1d5-790eed9a4b2d",
+          "name": "Mayor of Avabruck",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0159:028aeebc-4073-4595-94da-02f9f96ea148",
+          "name": "Reckless Waif",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0182:57f0907f-74f4-4d86-93df-f2e50c9d0b2f",
+          "name": "Gatstaf Shepherd",
+          "count": 4
+        },
+        {
+          "physicalId": "dka-printed-v1:0140:aae6fb12-b252-453b-bca7-1ea2a0d6c8dc",
+          "name": "Huntmaster of the Fells",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0149:bb90a6f1-c7f2-4c2e-ab1e-59c5c7937841",
+          "name": "Instigator Gang",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0195:57153c3f-9e55-418c-b67b-36901f29f9c1",
+          "name": "Moonmist",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0132:6960f2da-6b84-4680-8ab2-f0567a5d1b0a",
+          "name": "Brimstone Volley",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0259:17de9f2c-e051-404c-8ec0-c35f500efd67",
+          "name": "Mountain",
+          "count": 15
+        },
+        {
+          "physicalId": "isd-printed-v1:0262:b606f644-1728-4cb3-90ed-121838875de1",
+          "name": "Forest",
+          "count": 17
+        }
+      ]
+    },
+    {
+      "id": "green-white-humans",
+      "name": "Green-White Humans",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0006:f7314414-c2d2-48ed-af2c-764cf0207c62",
+          "name": "Champion of the Parish",
+          "count": 4
+        },
+        {
+          "physicalId": "dka-printed-v1:0008:9cfa554b-ee6d-4d4e-aabc-fe7bc6b25236",
+          "name": "Gather the Townsfolk",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0187:1203ae4f-4d69-490f-8a7c-dadbefa6d697",
+          "name": "Hamlet Captain",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0193:dd8ca448-f734-4cb9-b1d5-790eed9a4b2d",
+          "name": "Mayor of Avabruck",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0011:652c3bbb-cac8-47ad-81de-41e954e17a29",
+          "name": "Doomed Traveler",
+          "count": 3
+        },
+        {
+          "physicalId": "dka-printed-v1:0024:824423ff-6441-4be6-b754-810adf9ca6a2",
+          "name": "Thalia, Guardian of Thraben",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0015:f1e4c7d8-11a5-40fe-962b-7e938bf08616",
+          "name": "Fiend Hunter",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0239:b5f73443-2fe8-424f-8e71-fc7ce1f3a3eb",
+          "name": "Gavony Township",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0250:d595ba72-3334-48f4-9ea9-a43f5e824aa8",
+          "name": "Plains",
+          "count": 18
+        },
+        {
+          "physicalId": "isd-printed-v1:0262:b606f644-1728-4cb3-90ed-121838875de1",
+          "name": "Forest",
+          "count": 15
+        }
+      ]
+    }
+  ],
+  "contentSha256": "1ae85e6bbee741e7b0f421ff3defb00328c1eb07d957890ad80bc766e3e6fe15"
+}

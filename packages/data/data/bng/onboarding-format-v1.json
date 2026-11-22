@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "bng",
+  "name": "Born of the Gods",
+  "sourceCodes": ["BNG", "THS"],
+  "products": [{ "id": "bng-draft", "setCode": "BNG", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["bng-draft", "bng-draft", "bng-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["bng-draft", "bng-draft", "bng-draft", "bng-draft", "bng-draft", "bng-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

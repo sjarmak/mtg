@@ -21,6 +21,7 @@ import {
   buildLayouts,
   buildSheets,
   collationReport,
+  DEFAULT_NATIVE_DRAFT_BOT_POLICY,
   draftedPool,
   formatCollationReport,
   runDraft,
@@ -33,8 +34,8 @@ import { gameFingerprint } from './sample';
 import { wilsonInterval } from './stats';
 
 export const DRAFT_COLLATION_VERSION = 'native-draft-collation-v1';
-export const DRAFT_CALIBRATION_ARTIFACT_VERSION = 'native-draft-calibration-v1';
-export const DRAFT_CALIBRATION_PRODUCER = '@mtg/metrics/native-draft-calibration-v1';
+export const DRAFT_CALIBRATION_ARTIFACT_VERSION = 'native-draft-calibration-v2';
+export const DRAFT_CALIBRATION_PRODUCER = '@mtg/metrics/native-draft-calibration-v2';
 export const DRAFT_CALIBRATION_SEATS = 8;
 export const DEFAULT_DRAFT_CARD_FLOOR = 200;
 export const DEFAULT_DRAFT_GAMES_PER_SEAT_ORDER = 1;
@@ -215,7 +216,7 @@ const DraftGameEvidenceSchema = z
     draftSeats: z.tuple([seat, seat]),
     startingPlayer: z.union([z.literal(0), z.literal(1)]),
     winnerDraftSeat: seat.nullable(),
-    reason: z.enum(['lifeZero', 'emptyLibrary', 'concede', 'turnLimit']),
+    reason: z.enum(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']),
     turns: positive,
     decisions: nonnegative,
     trajectoryFingerprint: z.string().min(1).max(MAX_DRAFT_TRAJECTORY_LENGTH),
@@ -298,6 +299,7 @@ export const DraftCalibrationArtifactSchema = z
     draft: z
       .object({
         packsPerSeat: positive.max(MAX_DRAFT_PACKS_PER_SEAT),
+        botPolicy: z.literal(DEFAULT_NATIVE_DRAFT_BOT_POLICY),
         seats: z.array(DraftSeatEvidenceSchema).length(DRAFT_CALIBRATION_SEATS),
       })
       .strict(),
@@ -919,7 +921,8 @@ function assertInput(cards: readonly Card[], options: DraftCalibrationOptions): 
   const codes = new Set(cards.map((card) => card.set.code));
   if (codes.size !== 1) throw new Error('Draft calibration set cards must share one set code');
   parseDraftCollation(options.collation);
-  const report = collationReport(buildSheets(cards), buildLayouts(options.collation.recipe));
+  const sheets = buildSheets(cards);
+  const report = collationReport(sheets, buildLayouts(options.collation.recipe, sheets));
   const findings = formatCollationReport(report);
   if (findings.length > 0) {
     throw new Error(`Draft calibration collation is not total over this set: ${findings.join('; ')}`);
@@ -1513,6 +1516,7 @@ export async function runDraftCalibration(
     seats: DRAFT_CALIBRATION_SEATS,
     packs: packsPerSeat,
     recipe: options.collation.recipe as BoosterRecipe,
+    botPolicy: DEFAULT_NATIVE_DRAFT_BOT_POLICY,
   });
   const decks = draft.seats.map((draftSeat) => {
     try {
@@ -1559,6 +1563,7 @@ export async function runDraftCalibration(
     },
     draft: {
       packsPerSeat,
+      botPolicy: DEFAULT_NATIVE_DRAFT_BOT_POLICY,
       seats: draftSeats,
     },
     decks: deckEvidence,

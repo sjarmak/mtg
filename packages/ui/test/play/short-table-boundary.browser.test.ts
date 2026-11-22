@@ -20,13 +20,10 @@
  *  3. **The rule is written inclusively**, `max-height` rather than `height <`.
  *     A size can tell the two apart at 800 and nowhere else, so the comparison
  *     is read out of the emitted sheet as well as measured.
- *  4. **The full table at eight a side draws a crowded row at two sizes**, and
- *     that is what holds the line at 800. The row asks for more width than it
- *     has, `styles/board/fit.ts` lets a battlefield slot shrink, and the two
- *     kinds of slot do not shrink alike: the upright permanents come out about
- *     6px under the tapped ones. Pinned here because it is the condition on this
- *     bound rather than a fact about it — fix it and this assertion fails, which
- *     is the notice that 800 can move up.
+ *  4. **Eight distinct places are constrained on both sides of the boundary.**
+ *     The approved thumbnail hand remains 48px while battlefield faces retain
+ *     their legibility floor; the short-table step is therefore a sparse-table
+ *     distinction and may not widen a crowded hand at 801px.
  *
  * Everything here is read off the page or out of the emitted sheet. The hand cap
  * is not restated: it is parsed from the rule that sets it, so a re-valued cap
@@ -41,6 +38,7 @@ import { join } from 'node:path';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { exampleCard } from '@mtg/dsl';
+import type { Card as DslCard } from '@mtg/dsl';
 import { DEFAULT_AUTO_PASS, humanSeat, pendingDecision, scenario } from '@mtg/kernel';
 import type { GameSession, GameState } from '@mtg/kernel';
 import { describe, expect } from 'vitest';
@@ -63,10 +61,15 @@ const LANDS = [
   exampleCard('slc-mountain'),
 ] as const;
 
+function distinctSpell(index: number): DslCard {
+  const card = SPELLS[index % SPELLS.length] ?? SPELLS[0];
+  return { ...card, id: `${card.id}-short-table-${String(index + 1)}` };
+}
+
 function board(perSide: number): GameSession {
   const battlefield = ([0, 1] as const).flatMap((controller) => [
     ...Array.from({ length: perSide }, (_unused, index) => ({
-      card: SPELLS[index % SPELLS.length] ?? SPELLS[0],
+      card: distinctSpell(index),
       controller,
       tapped: index % 2 === 0,
       summoningSick: false,
@@ -139,13 +142,13 @@ const MEASURE = `(() => {
   };
   const near = document.querySelector(".mtg-board__side[data-seat='you']");
   const hand = document.querySelector(".mtg-zone[data-tone='rail'] .mtg-slot[data-slot='hand'] > .mtg-card");
-  const permanent = near.querySelector(".mtg-board__spells > .mtg-slot[data-slot='play'][data-tapped='false'] > .mtg-card");
-  const tapped = near.querySelector(".mtg-board__spells > .mtg-slot[data-slot='play'][data-tapped='true'] > .mtg-card");
+  const permanent = near.querySelector(".mtg-board__spells > .mtg-attach > .mtg-slot[data-slot='play'][data-tapped='false'] > .mtg-card");
+  const tapped = near.querySelector(".mtg-board__spells > .mtg-attach > .mtg-slot[data-slot='play'][data-tapped='true'] > .mtg-card");
   const row = document.querySelector(".mtg-zone[data-tone='rail'] > .mtg-zone__body[data-layout='rail']");
   const spells = near.querySelector('.mtg-board__spells');
   const spellsBox = spells.getBoundingClientRect();
   let clip = 0;
-  for (const face of near.querySelectorAll(".mtg-board__spells > .mtg-slot[data-slot='play'] > .mtg-card")) {
+  for (const face of near.querySelectorAll(".mtg-board__spells > .mtg-attach > .mtg-slot[data-slot='play'] > .mtg-card")) {
     const box = face.getBoundingClientRect();
     clip = Math.max(clip, spellsBox.top - box.top, box.bottom - spellsBox.bottom);
   }
@@ -243,10 +246,18 @@ describe('the short table begins at a viewport height it was measured against', 
             expect(reading.w, `${where}: hand face ${label} the bound`).toBeCloseTo(capRem * root, 1);
           }
 
-          // 801 is not, and the step is a step rather than a rounding.
-          expect(overHand.w, `${where}: hand face one pixel over the bound`).toBeGreaterThan(
-            capRem * root + TOLERANCE_PX,
-          );
+          // 801 is not short, but the crowded thumbnail policy is independent
+          // of that height boundary and therefore survives it.
+          if (perSide >= 8) {
+            expect(overHand.w, `${where}: crowded hand one pixel over the bound`).toBeCloseTo(
+              capRem * root,
+              1,
+            );
+          } else {
+            expect(overHand.w, `${where}: hand face one pixel over the bound`).toBeGreaterThan(
+              capRem * root + TOLERANCE_PX,
+            );
+          }
 
           // Neither arm is paid for with a scrollbar, a permanent cut out of its
           // row, or a hand row sent sideways, at the bound or over it. That is
@@ -264,38 +275,49 @@ describe('the short table begins at a viewport height it was measured against', 
           }
 
           if (perSide === 8) {
-            // What the pixel is worth at eight a side, and it is not nothing:
-            // the type line, on the card in hand and on the permanent beside it.
-            // Its threshold is a content box in ../../src/styles/card.ts, so
-            // this reads the drawn region rather than a width.
+            // A constrained hand is deliberately a thumbnail on either side;
+            // the battlefield keeps the larger, actionable reading surface.
             expect(boundHand.typeDrawn, `${where}: held type line at the bound`).toBe(false);
-            expect(overHand.typeDrawn, `${where}: held type line one pixel over the bound`).toBe(true);
+            expect(overHand.typeDrawn, `${where}: held type line one pixel over the bound`).toBe(false);
             expect(
-              (over['permanent'] as Reading).typeDrawn,
-              `${where}: battlefield type line over the bound`,
-            ).toBe(true);
+              (bound['permanent'] as Reading).w,
+              `${where}: battlefield floor at the bound`,
+            ).toBeGreaterThanOrEqual(72);
+            expect(
+              (over['permanent'] as Reading).w,
+              `${where}: battlefield floor over the bound`,
+            ).toBeGreaterThanOrEqual(72);
 
-            // And what it buys, which is the reason the bound did not move. A
-            // crowded row on the short table draws one size of permanent; one
-            // pixel higher it draws two, the upright ones about 6px under the
-            // tapped ones. Fixing that is what releases 800.
-            expect(
-              Math.abs((bound['tapped'] as Reading).w - (bound['permanent'] as Reading).w),
-              `${where}: crowded row draws two sizes of permanent at the bound`,
-            ).toBeLessThanOrEqual(1);
-            expect(
-              (over['tapped'] as Reading).w - (over['permanent'] as Reading).w,
-              `${where}: crowded row draws one size of permanent over the bound, so this bound can move`,
-            ).toBeGreaterThan(1);
+            // A crowded row draws one size of permanent on both sides of the
+            // bound, and that is `mtg-6hhr`. It used to draw two one pixel over
+            // it - the upright ones about 6px under the tapped ones - because
+            // the rotated face's height guard read the slot's whole height where
+            // an upright face reads 63/88 of it. Both terms carry the share now,
+            // and the two states agree: 83.98 against 83.98 at the bound, 97.28
+            // against 97.28 over it. What holds the bound is the type line above
+            // rather than this; whether it can move on the strength of that
+            // alone is `mtg-rkld`.
+            for (const [label, reading] of [
+              ['at', bound],
+              ['over', over],
+            ] as const) {
+              expect(
+                Math.abs((reading['tapped'] as Reading).w - (reading['permanent'] as Reading).w),
+                `${where}: crowded row draws two sizes of permanent ${label} the bound`,
+              ).toBeLessThanOrEqual(1);
+            }
           }
 
-          // The rules box never depended on this bound and still does not.
-          for (const [label, reading] of [
-            ['under', underHand],
-            ['at', boundHand],
-            ['over', overHand],
-          ] as const) {
-            expect(reading.rulesDrawn, `${where}: held rules box ${label} the bound`).toBe(true);
+          // Sparse hands remain full reading surfaces; a crowded hand has
+          // intentionally yielded that space to the battlefield.
+          if (perSide < 8) {
+            for (const [label, reading] of [
+              ['under', underHand],
+              ['at', boundHand],
+              ['over', overHand],
+            ] as const) {
+              expect(reading.rulesDrawn, `${where}: held rules box ${label} the bound`).toBe(true);
+            }
           }
         }
       } catch (error) {

@@ -1,0 +1,371 @@
+{
+  "schemaVersion": 1,
+  "sets": [
+    {
+      "code": "TTHS",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atths+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "e1a1275e79e3da160f9bd5abea32b660914d3d3a79fb8b6ac9c0da8b8b777b82",
+      "fetchedAt": "2026-09-19T20:55:25.673Z"
+    },
+    {
+      "code": "TUGL",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atugl+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "f0cecfe784aa5e6da84d565d943c36f85ff3aa759c56f406f3463cd037ea8414",
+      "fetchedAt": "2026-09-19T20:55:25.706Z"
+    }
+  ],
+  "engine": { "name": "forge", "version": "2.0.14" },
+  "tokens": [
+    {
+      "physicalId": "tths-token:0001:7e4c9173-e530-4237-a03b-9aeca60ab0e4",
+      "position": 1,
+      "setCode": "TTHS",
+      "name": "Cleric",
+      "observedNames": ["Cleric Token"],
+      "oracleId": "196f9444-65ac-4072-8b9e-233e8df98d08",
+      "scryfallId": "7e4c9173-e530-4237-a03b-9aeca60ab0e4",
+      "typeLine": "Token Enchantment Creature — Cleric",
+      "power": "2",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Cleric",
+          "manaCost": null,
+          "typeLine": "Token Enchantment Creature — Cleric",
+          "oracleText": "",
+          "power": "2",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "7e4c9173-e530-4237-a03b-9aeca60ab0e4",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/7/e/7e4c9173-e530-4237-a03b-9aeca60ab0e4.jpg?1783939699"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tths-token:0004:ca72703f-d45b-4c80-98a8-55fad1fcf431",
+      "position": 4,
+      "setCode": "TTHS",
+      "name": "Bird",
+      "observedNames": ["Bird Token"],
+      "oracleId": "ee6f463c-5dd3-4a1d-8543-7f7cf7f27f48",
+      "scryfallId": "ca72703f-d45b-4c80-98a8-55fad1fcf431",
+      "typeLine": "Token Creature — Bird",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["U"],
+      "faces": [
+        {
+          "name": "Bird",
+          "manaCost": null,
+          "typeLine": "Token Creature — Bird",
+          "oracleText": "Flying",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["U"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "ca72703f-d45b-4c80-98a8-55fad1fcf431",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/c/a/ca72703f-d45b-4c80-98a8-55fad1fcf431.jpg?1783939699"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tths-token:0005:f0e68ed9-d863-4822-b281-e184f3d62faa",
+      "position": 5,
+      "setCode": "TTHS",
+      "name": "Elemental",
+      "observedNames": ["Elemental Token"],
+      "oracleId": "cb78f496-a5db-4d23-b63d-04584e8f3bb1",
+      "scryfallId": "f0e68ed9-d863-4822-b281-e184f3d62faa",
+      "typeLine": "Token Creature — Elemental",
+      "power": "1",
+      "toughness": "0",
+      "loyalty": null,
+      "colors": ["U"],
+      "faces": [
+        {
+          "name": "Elemental",
+          "manaCost": null,
+          "typeLine": "Token Creature — Elemental",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "0",
+          "loyalty": null,
+          "colors": ["U"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "f0e68ed9-d863-4822-b281-e184f3d62faa",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/f/0/f0e68ed9-d863-4822-b281-e184f3d62faa.jpg?1783939699"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tths-token:0006:26b24bbe-f5bc-44d3-b716-6612d39b07bc",
+      "position": 6,
+      "setCode": "TTHS",
+      "name": "Harpy",
+      "observedNames": ["Harpy Token"],
+      "oracleId": "0c34db9e-bdd4-4d58-ad86-57b1132940bd",
+      "scryfallId": "26b24bbe-f5bc-44d3-b716-6612d39b07bc",
+      "typeLine": "Token Creature — Harpy",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["B"],
+      "faces": [
+        {
+          "name": "Harpy",
+          "manaCost": null,
+          "typeLine": "Token Creature — Harpy",
+          "oracleText": "Flying",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["B"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "26b24bbe-f5bc-44d3-b716-6612d39b07bc",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/2/6/26b24bbe-f5bc-44d3-b716-6612d39b07bc.jpg?1783939700"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tths-token:0007:509e44d4-72c1-4d68-b942-c3e8de6ed7a8",
+      "position": 7,
+      "setCode": "TTHS",
+      "name": "Soldier",
+      "observedNames": ["Soldier Token"],
+      "oracleId": "971191ac-dedb-4cba-842e-65339a25ce44",
+      "scryfallId": "509e44d4-72c1-4d68-b942-c3e8de6ed7a8",
+      "typeLine": "Token Creature — Soldier",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["R"],
+      "faces": [
+        {
+          "name": "Soldier",
+          "manaCost": null,
+          "typeLine": "Token Creature — Soldier",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["R"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "509e44d4-72c1-4d68-b942-c3e8de6ed7a8",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/0/509e44d4-72c1-4d68-b942-c3e8de6ed7a8.jpg?1783939699"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tths-token:0008:2f40613b-1bde-4939-86ad-6bd40f9db0d6",
+      "position": 8,
+      "setCode": "TTHS",
+      "name": "Boar",
+      "observedNames": ["Boar Token"],
+      "oracleId": "11734409-b03b-4905-af83-261f29a96bc2",
+      "scryfallId": "2f40613b-1bde-4939-86ad-6bd40f9db0d6",
+      "typeLine": "Token Creature — Boar",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Boar",
+          "manaCost": null,
+          "typeLine": "Token Creature — Boar",
+          "oracleText": "",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "2f40613b-1bde-4939-86ad-6bd40f9db0d6",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/2/f/2f40613b-1bde-4939-86ad-6bd40f9db0d6.jpg?1783939698"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tths-token:0009:baa93038-2849-4c26-ab4f-1d50d276659f",
+      "position": 9,
+      "setCode": "TTHS",
+      "name": "Satyr",
+      "observedNames": ["Satyr Token"],
+      "oracleId": "a78fd535-59ce-4980-82f1-76f1b6bb2e35",
+      "scryfallId": "baa93038-2849-4c26-ab4f-1d50d276659f",
+      "typeLine": "Token Creature — Satyr",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["R", "G"],
+      "faces": [
+        {
+          "name": "Satyr",
+          "manaCost": null,
+          "typeLine": "Token Creature — Satyr",
+          "oracleText": "",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["R", "G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "baa93038-2849-4c26-ab4f-1d50d276659f",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/b/a/baa93038-2849-4c26-ab4f-1d50d276659f.jpg?1783939699"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tths-token:0010:dcee70ef-6285-4f09-8a71-8b7960e8fa99",
+      "position": 10,
+      "setCode": "TTHS",
+      "name": "Golem",
+      "observedNames": ["Golem Token"],
+      "oracleId": "d1683ad9-cad0-4e22-8313-701276e7dbaf",
+      "scryfallId": "dcee70ef-6285-4f09-8a71-8b7960e8fa99",
+      "typeLine": "Token Enchantment Artifact Creature — Golem",
+      "power": "3",
+      "toughness": "3",
+      "loyalty": null,
+      "colors": [],
+      "faces": [
+        {
+          "name": "Golem",
+          "manaCost": null,
+          "typeLine": "Token Enchantment Artifact Creature — Golem",
+          "oracleText": "",
+          "power": "3",
+          "toughness": "3",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "dcee70ef-6285-4f09-8a71-8b7960e8fa99",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/d/c/dcee70ef-6285-4f09-8a71-8b7960e8fa99.jpg?1783939698"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tugl-token:0090:b159b57d-bc52-4cef-ac7a-e364e40c3d03",
+      "position": 90,
+      "setCode": "TUGL",
+      "name": "Soldier",
+      "observedNames": ["Soldier Token"],
+      "oracleId": "eac25f12-6459-438c-a09e-93e23d2cf80d",
+      "scryfallId": "b159b57d-bc52-4cef-ac7a-e364e40c3d03",
+      "typeLine": "Token Creature — Soldier",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Soldier",
+          "manaCost": null,
+          "typeLine": "Token Creature — Soldier",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "b159b57d-bc52-4cef-ac7a-e364e40c3d03",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/b/1/b159b57d-bc52-4cef-ac7a-e364e40c3d03.jpg?1783946413"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

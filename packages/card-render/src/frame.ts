@@ -1,7 +1,7 @@
 /**
  * The frame: original geometry, driven entirely by card data.
  *
- * Three things vary, and all three are read off `@mtg/ui`'s `frameTreatment`
+ * Three things vary, and all three are read off `@mtg/render-spec`'s `frameTreatment`
  * rather than worked out here. The derivation is the face specification's; only
  * the painting below is this file's, and the two are separated because they
  * drifted while they were not:
@@ -23,8 +23,8 @@
  * and the drawing is ours (ADR-0001 section 5.6).
  */
 import type { Rarity } from '@mtg/dsl';
-import { setSealPath } from '@mtg/ui';
-import type { FrameTreatment } from '@mtg/ui';
+import { setSealPath } from '@mtg/render-spec';
+import type { FrameTreatment } from '@mtg/render-spec';
 import type { BleedGeometry, Box, CardGeometry } from './geometry';
 import { el, num } from './svg';
 
@@ -102,10 +102,13 @@ function roundedRect(area: Box, radius: number, attrs: Record<string, string | n
 /**
  * The ink that runs past the cut, drawn before anything else.
  *
- * A square of the card's own ground covering the whole document, bleed
+ * A square of the card's own black edge covering the whole document, bleed
  * included. It exists so the blade never meets unprinted paper: the rounded
  * ground above leaves the four corners of the sheet bare, and a cut that drifts
- * outward anywhere along an edge would otherwise show a white hairline. Square
+ * outward anywhere along an edge would otherwise show a white hairline. It is
+ * the black edge rather than the identity ground (`mtg-d4g`): the ink past the
+ * cut is the ink at the cut, so a drifted blade widens the black edge by a
+ * fraction of a millimeter instead of leaving a green line down one side. Square
  * rather than rounded on purpose — the rounded corner is something the knife
  * makes, not something the printer draws.
  *
@@ -120,7 +123,7 @@ export function bleedGround(bleed: BleedGeometry): string {
     y: bleed.document.y,
     width: bleed.document.width,
     height: bleed.document.height,
-    fill: 'var(--frame)',
+    fill: 'var(--mtg-card-edge)',
     stroke: 'none',
   });
 }
@@ -168,13 +171,27 @@ export function trimMarks(bleed: BleedGeometry): string {
  * well the panels sit in. Drawn back to front.
  */
 export function frameLayers(treatment: FrameTreatment, geometry: CardGeometry, ids: FrameIds): string {
+  // The black outer edge, then the identity ground inside it (`mtg-d4g`). Two
+  // rects rather than a stroke on one: a stroke straddles the path, so half of
+  // it would fall outside the trim and be cut away, and the half that survived
+  // would be half the width on a cut that drifted. The ground's corner radius
+  // comes in by the same amount as its box, so the two curves stay concentric
+  // and the edge does not thicken at the corners.
+  const edge = geometry.edgeWidth;
+  const ground: Box = {
+    x: geometry.card.x + edge,
+    y: geometry.card.y + edge,
+    width: geometry.card.width - edge * 2,
+    height: geometry.card.height - edge * 2,
+  };
   const layers: string[] = [
-    roundedRect(geometry.card, geometry.cornerRadius, { class: 'frame', 'stroke-width': 2 }),
+    roundedRect(geometry.card, geometry.cornerRadius, { class: 'frame-edge' }),
+    roundedRect(ground, geometry.cornerRadius - edge, { class: 'frame' }),
   ];
 
   if (treatment.artifact) {
     layers.push(
-      roundedRect(geometry.card, geometry.cornerRadius, {
+      roundedRect(ground, geometry.cornerRadius - edge, {
         fill: `url(#${ids.plateHatch})`,
         stroke: 'none',
       }),

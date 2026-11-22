@@ -1,7 +1,7 @@
 /**
  * Mana pips, set into the printed face.
  *
- * Which pips a cost runs is `@mtg/ui`'s `anatomy.ts` (`costPips`), and what each
+ * Which pips a cost runs is `@mtg/render-spec`'s `anatomy.ts` (`costPips`), and what each
  * one looks like is its symbol registry — the pip names its token (`pipToken`)
  * and the registry says what that token is drawn as, which is the same two
  * steps a brace token in the rules box goes through. So a cost cannot read one
@@ -30,8 +30,8 @@ import {
   pipArt,
   pipToken,
   symbolArt,
-} from '@mtg/ui';
-import type { PipGlyph, PipSpec, SymbolSet } from '@mtg/ui';
+} from '@mtg/render-spec';
+import type { PipGlyph, PipSpec, SymbolSet } from '@mtg/render-spec';
 import { el, num } from './svg';
 import { fitLine } from './text/layout';
 import { textRun } from './text/emit';
@@ -166,7 +166,7 @@ export function renderCost(cost: ManaCost, options: PipRenderOptions): string {
   const set = options.symbols ?? PRINTED_SYMBOL_SET;
   const children = pips.map((pip, index) => {
     const cx = startX + index * (radius * 2 + gap);
-    const identity = pip.kind === 'color' ? pip.identity : 'generic';
+    const identity = pip.kind === 'color' || pip.kind === 'hybrid' ? pip.identity : 'generic';
     return el(
       'g',
       { class: 'pip', 'data-pip': identity, transform: `translate(${num(cx)} ${num(options.centerY)})` },

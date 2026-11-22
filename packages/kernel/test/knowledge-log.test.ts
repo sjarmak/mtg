@@ -124,7 +124,7 @@ describe('a creature bounced out of play stays identifiable to the seat that wat
     expect(audit.searched).toBeGreaterThan(0);
     expect(audit.findings).toEqual([]);
     // And the license is the reason, recorded where the auditor reads it.
-    expect(audit.memo.revealed[1]).toContain(bear);
+    expect(audit.memo.revealed[0]).toContain(bear);
   });
 
   it('still reports a card that has been in that hand since the opening', () => {
@@ -155,7 +155,7 @@ describe('a creature bounced out of play stays identifiable to the seat that wat
     expect(audit.findings.map((one) => one.detail).join('\n')).toContain(
       `object ${held} is in seat 1's hand and in seat 0's payload`,
     );
-    expect(audit.memo.revealed[1]).not.toContain(held);
+    expect(audit.memo.revealed[0]).not.toContain(held);
   });
 });
 
@@ -225,10 +225,10 @@ describe('a hand revealed to the table stays identifiable to the seat it was sho
     const audit = auditOf(run, seats, 'after the hand reveal resolved');
     expect(audit.searched).toBeGreaterThan(0);
     expect(audit.findings).toEqual([]);
-    for (const oid of shown) expect(audit.memo.revealed[1]).toContain(oid);
+    for (const oid of shown) expect(audit.memo.revealed[0]).toContain(oid);
     // And the license stops at the cards the reveal named. Without this the
     // pass above would also be satisfied by a fill that licensed the hand.
-    expect(audit.memo.revealed[1]).not.toContain(drawn);
+    expect(audit.memo.revealed[0]).not.toContain(drawn);
   });
 
   it('still reports the card drawn into that hand after the reveal', () => {
@@ -251,6 +251,6 @@ describe('a hand revealed to the table stays identifiable to the seat it was sho
     expect(audit.findings.map((one) => one.detail).join('\n')).toContain(
       `object ${drawn} is in seat 1's hand and in seat 0's payload`,
     );
-    expect(audit.memo.revealed[1]).not.toContain(drawn);
+    expect(audit.memo.revealed[0]).not.toContain(drawn);
   });
 });

@@ -37,6 +37,7 @@ import type {
   NumericBand,
   PreconMatchupBlock,
   PreconMatchupCell,
+  RunClaims,
   RunFairness,
   RunSetRef,
   SkeletonTargets,
@@ -68,6 +69,7 @@ export interface AnalysisDocument {
   readonly targets: SkeletonTargets;
   readonly cards: CardPerformanceBlock;
   readonly precons: PreconMatchupBlock | null;
+  readonly claims: RunClaims | null;
 }
 
 export interface PreconAnalysisDeck extends DeckList {
@@ -371,6 +373,17 @@ export interface AnalysisRunInput {
         readonly seatRuns: readonly PreconSeatOrderRun[];
       }
     | undefined;
+  /**
+   * Does the format do what it claims, measured by `@mtg/cube` and handed in
+   * rather than computed here.
+   *
+   * `@mtg/cube` reaches `@mtg/decklab` and therefore `better-sqlite3`, and the
+   * arrow in this workspace does not run that into `@mtg/ui`. So the block
+   * crosses as a value in the shape `src/routes/analysis/model.ts` declares:
+   * whoever holds the criteria measures them and passes the result, and a
+   * producer that never had criteria passes nothing.
+   */
+  readonly claims?: RunClaims | undefined;
 }
 
 /**
@@ -401,5 +414,6 @@ export function buildAnalysisRun(input: AnalysisRunInput): AnalysisDocument {
     targets: input.targets,
     cards: cardPerformance(input.logs, input.decks),
     precons: input.precons === undefined ? null : preconMatchups(input.precons.decks, input.precons.seatRuns),
+    claims: input.claims ?? null,
   };
 }

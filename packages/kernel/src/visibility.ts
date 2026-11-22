@@ -87,6 +87,7 @@ import type { GameEvent } from './events';
 import type { ObjectId, PlayerId } from './ids';
 import type { RngState } from './rng';
 import type { GameObject, GameState, ZoneId } from './state';
+import { staticPlayerRuleApplies } from './player-rules';
 
 /** CR 400.2: the zones whose contents are not revealed to both players. */
 export const HIDDEN_ZONES: readonly ZoneId[] = ['library', 'hand'];
@@ -119,18 +120,37 @@ export function concealedFrom(state: GameState, viewer: PlayerId): ReadonlySet<O
     if (player.id === viewer) continue;
     for (const oid of player.hand) concealed.add(oid);
   }
+  for (const player of state.players) {
+    if (!staticPlayerRuleApplies(state, player.id, 'playWithTopLibraryRevealed')) continue;
+    const top = player.library[0];
+    if (top !== undefined) concealed.delete(top);
+  }
   if (state.pendingScry?.player === viewer) {
     for (const oid of state.pendingScry.cards) concealed.delete(oid);
   }
+  if (
+    state.pendingTopLibrary !== undefined &&
+    (state.pendingTopLibrary.player === viewer ||
+      state.pendingTopLibrary.selectionPublic === true ||
+      state.pendingTopLibrary.kind === 'partition' ||
+      state.pendingTopLibrary.kind === 'pile')
+  ) {
+    for (const oid of state.pendingTopLibrary.cards) concealed.delete(oid);
+  }
   // CR 701.19a: a search shows the searching player their whole library, and
-  // `PendingSearch.cards` is the part of it the filter matched — the only part
-  // a decision can name. Un-concealing exactly that list rather than the whole
-  // library is not a rules nicety, it is what keeps the leak surface equal to
-  // the decision surface: an id this seat cannot choose is an id it has no
-  // reason to hold, and the other seat's library is never in this list because
-  // `awaitSearch` reads the searcher's own.
+  // `PendingSearch.cards` is the current filter's decision surface, while
+  // `taken` preserves cards already chosen during a multi-pause search.
+  // Un-concealing exactly those lists rather than the whole library keeps the
+  // leak surface equal to what this seat has chosen or may choose. Another
+  // seat's library enters these lists only when a printed effect explicitly
+  // makes this viewer the chooser, as Haunting Echoes does.
   if (state.pendingSearch?.player === viewer) {
     for (const oid of state.pendingSearch.cards) concealed.delete(oid);
+    for (const oid of state.pendingSearch.taken) concealed.delete(oid);
+  }
+  if (state.pendingNamedZoneExile?.player === viewer) {
+    for (const oid of state.pendingNamedZoneExile.candidates) concealed.delete(oid);
+    for (const oid of state.pendingNamedZoneExile.chosen) concealed.delete(oid);
   }
   // CR 701.16a: a `chooseDiscard` showed the hand to both players before asking
   // anybody anything, and the reveal is what entitles the chooser to identify
@@ -141,6 +161,12 @@ export function concealedFrom(state: GameState, viewer: PlayerId): ReadonlySet<O
   // hand in every other case a future effect might reach this record with.
   if (state.pendingHandDiscard?.player === viewer && state.pendingHandDiscard.revealed) {
     for (const oid of state.pendingHandDiscard.cards) concealed.delete(oid);
+  }
+  if (state.pendingRevealedHandChoice?.player === viewer) {
+    for (const oid of state.pendingRevealedHandChoice.cards) concealed.delete(oid);
+  }
+  if (state.pendingFreeCast?.player === viewer) {
+    concealed.delete(state.pendingFreeCast.oid);
   }
   return concealed;
 }
@@ -197,11 +223,31 @@ export function seatState(state: GameState, viewer: PlayerId, key: string): Game
   // is not a fact the rules give it either.
   const seen = asked === viewer ? projected : withoutSelection(projected);
   const withoutScry = state.pendingScry?.player === viewer ? seen : withoutPendingScry(seen);
+  const withoutTopLibrary =
+    state.pendingTopLibrary !== undefined &&
+    (state.pendingTopLibrary.player === viewer ||
+      state.pendingTopLibrary.selectionPublic === true ||
+      state.pendingTopLibrary.kind === 'partition' ||
+      state.pendingTopLibrary.kind === 'pile')
+      ? withoutScry
+      : withoutPendingTopLibrary(withoutScry);
   const withoutSearch =
-    state.pendingSearch?.player === viewer ? withoutScry : withoutPendingSearch(withoutScry);
-  return state.pendingHandDiscard?.player === viewer
-    ? withoutSearch
-    : withoutPendingHandDiscard(withoutSearch);
+    state.pendingSearch?.player === viewer ? withoutTopLibrary : withoutPendingSearch(withoutTopLibrary);
+  const withoutNamedZoneExile =
+    state.pendingNamedZoneExile?.player === viewer
+      ? withoutSearch
+      : withoutPendingNamedZoneExile(withoutSearch);
+  const withoutHandDiscard =
+    state.pendingHandDiscard?.player === viewer
+      ? withoutNamedZoneExile
+      : withoutPendingHandDiscard(withoutNamedZoneExile);
+  const withoutRevealedHandChoice =
+    state.pendingRevealedHandChoice?.player === viewer
+      ? withoutHandDiscard
+      : withoutPendingRevealedHandChoice(withoutHandDiscard);
+  return state.pendingFreeCast?.player === viewer
+    ? withoutRevealedHandChoice
+    : withoutPendingFreeCast(withoutRevealedHandChoice);
 }
 
 function withoutSelection(state: GameState): GameState {
@@ -212,6 +258,11 @@ function withoutSelection(state: GameState): GameState {
 
 function withoutPendingScry(state: GameState): GameState {
   const { pendingScry: _concealed, ...concealed } = state;
+  return concealed;
+}
+
+function withoutPendingTopLibrary(state: GameState): GameState {
+  const { pendingTopLibrary: _concealed, ...concealed } = state;
   return concealed;
 }
 
@@ -228,6 +279,11 @@ function withoutPendingSearch(state: GameState): GameState {
   return concealed;
 }
 
+function withoutPendingNamedZoneExile(state: GameState): GameState {
+  const { pendingNamedZoneExile: _concealed, ...concealed } = state;
+  return concealed;
+}
+
 /**
  * The discard in progress, gone for the seat that is not choosing.
  *
@@ -241,6 +297,16 @@ function withoutPendingSearch(state: GameState): GameState {
  */
 function withoutPendingHandDiscard(state: GameState): GameState {
   const { pendingHandDiscard: _concealed, ...concealed } = state;
+  return concealed;
+}
+
+function withoutPendingRevealedHandChoice(state: GameState): GameState {
+  const { pendingRevealedHandChoice: _concealed, ...concealed } = state;
+  return concealed;
+}
+
+function withoutPendingFreeCast(state: GameState): GameState {
+  const { pendingFreeCast: _concealed, ...concealed } = state;
   return concealed;
 }
 
@@ -291,6 +357,7 @@ export function seatEvent(event: GameEvent, viewer: PlayerId, key: string, index
     case 'turnBegan':
     case 'stepBegan':
     case 'stepEnded':
+    case 'emblemCreated':
     case 'permanentUntapped':
     case 'permanentTapped':
     case 'untapSkipped':
@@ -303,12 +370,14 @@ export function seatEvent(event: GameEvent, viewer: PlayerId, key: string, index
     case 'manaPaid':
     case 'spellCast':
     case 'spellCopied':
+    case 'spellTargetsChanged':
     case 'abilityActivated':
     case 'abilityTriggered':
     case 'triggerTargetsChosen':
     case 'triggerDeclined':
     case 'triggerRemoved':
     case 'spellCountered':
+    case 'abilityCountered':
     case 'spellFizzled':
     case 'spellDeclined':
     case 'unlessPaid':
@@ -320,21 +389,34 @@ export function seatEvent(event: GameEvent, viewer: PlayerId, key: string, index
     case 'damagePrevented':
     case 'replacementApplied':
     case 'countersChanged':
+    case 'battleDefeated':
+    case 'freeCastDeclined':
+    case 'counterRemoved':
     case 'lifeChanged':
     case 'continuousEffectAdded':
+    case 'permanentAnimated':
+    case 'controlEffectAdded':
+    case 'subtypeAdded':
     case 'keywordGranted':
+    case 'keywordAbilityRemoved':
     case 'continuousEffectsExpired':
+    case 'delayedZoneChangeScheduled':
+    case 'delayedCounterPlacementScheduled':
+    case 'delayedSpellCopyScheduled':
     case 'permanentDestroyed':
     case 'permanentSacrificed':
     case 'permanentRegenerated':
     case 'attackersDeclared':
     case 'blockersDeclared':
     case 'blockerOrderChosen':
+    case 'attackerOrderChosen':
     case 'combatDamageStep':
     case 'cardsMilled':
     case 'cardsScried':
+    case 'coinFlipped':
     case 'handRevealed':
     case 'libraryTopRevealed':
+    case 'libraryCardsRevealed':
     case 'librarySearched':
     case 'librarySearchRevealed':
     case 'cardsDiscarded':
@@ -421,6 +503,7 @@ export function publiclyIdentified(event: GameEvent): readonly ObjectId[] {
   switch (event.type) {
     case 'handRevealed':
     case 'libraryTopRevealed':
+    case 'libraryCardsRevealed':
     case 'librarySearchRevealed':
       return event.oids;
     case 'zoneChanged':

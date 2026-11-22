@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "dawn-graveyard-boundaries-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0210:937dbc51-b589-4237-9fce-ea5c757f7c48"],
+      "decisionFamilies": ["dawn-native-low-power-recovery-high-power-and-opponent-exclusion"],
+      "assertions": [
+        "Forge Dawn recovers low power, excludes high power, and leaves the other graveyard unchanged"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-dawn-bot.integration.test.ts"
+    }
+  ]
+}

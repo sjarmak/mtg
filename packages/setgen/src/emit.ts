@@ -10,8 +10,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
-import { CardSchema, serializeCards } from '@mtg/dsl';
-import type { Card } from '@mtg/dsl';
+import { CardSchema, CardValidationError, serializeCards, validateCardRecord } from '@mtg/dsl';
+import type { Card, Violation } from '@mtg/dsl';
 import type { GenerationResult } from './generate';
 import type { GenerationReport } from './report';
 
@@ -46,9 +46,55 @@ export function buildSetFile(result: GenerationResult): SetFile {
   };
 }
 
-/** Parses a set file from disk; throws with the schema issues on bad input. */
+/**
+ * Parses a set file from disk; throws with the schema issues on bad input.
+ *
+ * Two doors, and for a long time only the first one was here. `SetFileSchema`
+ * is `z.array(CardSchema)` over the cards, which is the shape check; the
+ * structural checks live in `validateCardRecord` and were reachable only
+ * through `parseCard` / `parseCards`. One of them is `checkOracleText`: a
+ * cached `oracleText` must equal what the abilities under it render to. So a
+ * set file could carry a cached sentence that disagreed with its own card and
+ * this function accepted it (`mtg-6lny`).
+ *
+ * That matters because `parseSetFile` is what the surfaces read a set through:
+ * the play launcher, the art pipeline's plan, subjects and verify, the brief-drift
+ * triage, half the fixture tests. A card face prints `card.oracleText`
+ * directly, and an art brief written from `subjectSource` renders it fresh, so
+ * a stale cache means the picture was bought from one sentence and the card
+ * prints another. The break of 2026-08-27 is the precedent: a shortened print
+ * template left eleven cached strings stale in the flagship fixture, and what
+ * caught it was a precon test that happens to read the fixture through
+ * `parseCards` for an unrelated reason.
+ *
+ * It refuses rather than repairs. Repairing would leave the file on disk and
+ * the set in memory disagreeing, which is the same failure one layer along, and
+ * a refusal asks for the regeneration that fixes the file for every reader at
+ * once. Measured before this became strict: all three committed set fixtures
+ * pass, as do the reduced M11, M13 and RTR reference sets and the slice set.
+ * What it newly refuses is stale build output under `out/` — untracked, and a
+ * candidate the launcher already drops rather than serving.
+ */
 export function parseSetFile(input: unknown): SetFile {
-  return SetFileSchema.parse(input);
+  const file = SetFileSchema.parse(input);
+  const illegal = file.cards
+    .map((card, index) => locate(card, index))
+    .filter((violations) => violations.length > 0);
+  if (illegal.length > 0) {
+    throw new CardValidationError(
+      illegal.flat(),
+      `set ${file.set.code} carries ${String(illegal.length)} card(s) the DSL refuses`,
+    );
+  }
+  return file;
+}
+
+/** One card's violations, repathed from the card's root to the set file's. */
+function locate(card: Card, index: number): readonly Violation[] {
+  return validateCardRecord(card).map((one) => ({
+    ...one,
+    path: `cards[${String(index)}] ${card.id}${one.path.length > 0 ? `.${one.path}` : ''}`,
+  }));
 }
 
 export interface EmittedPaths {

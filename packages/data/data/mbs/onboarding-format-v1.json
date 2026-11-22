@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "mbs",
+  "name": "Mirrodin Besieged",
+  "sourceCodes": ["MBS"],
+  "products": [{ "id": "mbs-draft", "setCode": "MBS", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["mbs-draft", "mbs-draft", "mbs-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["mbs-draft", "mbs-draft", "mbs-draft", "mbs-draft", "mbs-draft", "mbs-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

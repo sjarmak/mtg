@@ -16,7 +16,6 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { parseCards } from '@mtg/dsl';
 import type { Card as DslCard } from '@mtg/dsl';
 import { Shell } from '../src/app/Shell';
 import { artResolver, readArtManifest } from '../src/lab/art-manifest';
@@ -26,6 +25,7 @@ import { ReplayViewer, readEventLog } from '../src/routes/replay';
 import { uiStyleSheet } from '../src/styles/index';
 import { recordGame, writeEventLog } from './record-replay';
 import { LAB_GAMES } from './stage-replay';
+import { readSetCards } from './set-file';
 
 const out = process.argv[2];
 const named = process.argv[3];
@@ -36,13 +36,7 @@ const setPath: string = named;
 const artPath = process.argv[4];
 
 const CARDS: readonly DslCard[] = ((): readonly DslCard[] => {
-  const document: unknown = JSON.parse(readFileSync(setPath, 'utf8'));
-  const listed =
-    typeof document === 'object' && document !== null && 'cards' in document
-      ? (document as { readonly cards: unknown }).cards
-      : null;
-  if (!Array.isArray(listed)) throw new Error(`${setPath} has no "cards" array`);
-  return parseCards(listed);
+  return readSetCards(setPath);
 })();
 
 const ART: ArtResolver | null = ((): ArtResolver | null => {
@@ -81,11 +75,11 @@ writeFileSync(
   page(
     'the replay, on a real recorded game',
     renderToStaticMarkup(
-      h(Shell, { mode: 'replay', onSelectMode: () => undefined, children: null }, [
+      h(Shell, { mode: 'analysis', sub: 'replay', onSelectMode: () => undefined, children: null }, [
         h(ReplayViewer, {
           key: 'viewer',
           state: { status: 'ready', log },
-          route: { mode: 'replay', params: { game: '0', seq: String(seq) } },
+          route: { mode: 'analysis', sub: 'replay', params: { game: '0', seq: String(seq) } },
           onSetParams: () => undefined,
           ...(ART === null ? {} : { artFor: ART }),
         }),

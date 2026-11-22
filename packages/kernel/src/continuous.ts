@@ -27,8 +27,17 @@
  * after another effect can produce a different set, which is the definition of
  * a dependency.
  */
-import type { CardKind, Color, Condition, CounterKind, Keyword, KeywordAbility, Supertype } from '@mtg/dsl';
-import { COUNTER_KINDS, counterGrantedKeywords, counterStatBonus } from '@mtg/dsl';
+import type {
+  Ability,
+  CardKind,
+  Color,
+  Condition,
+  CounterKind,
+  Keyword,
+  KeywordAbility,
+  Supertype,
+} from '@mtg/dsl';
+import { counterGrantedKeywords, counterStatBonus } from '@mtg/dsl';
 import type { ObjectId, PlayerId } from './ids';
 
 /** Fixed CR 613 application order. Never reorder; only fill in. */
@@ -68,11 +77,21 @@ export type EffectLayer = Exclude<Layer, '7d'>;
  * the moment it leaves and a new object is not what the effect was applied to.
  * This kernel keeps an object's id across a zone change, so "no duration" would
  * read as "and again the next time this card comes back", which is a different
- * card. `effectsPinnedTo` is the sweep and `moveObject` runs it, one line under
- * the `effectsRegisteredBy` sweep it mirrors.
+ * card. `detachEffectsFromSubject` is the operation and `moveObject` runs it,
+ * one line under the `effectsRegisteredBy` sweep it mirrors.
+ *
+ * `'whileSourceAndSubjectRemain'` is the intersection: a resolving ability
+ * installs the effect only while its source incarnation stays on the field,
+ * and CR 400.7 also prevents the targeted permanent from carrying it through
+ * a zone change. Awakener Druid's land animation is the first such effect.
  */
 export type EffectDuration =
-  'endOfTurn' | 'permanent' | 'whileOnBattlefield' | 'whileAttached' | 'whileSubjectRemains';
+  | 'endOfTurn'
+  | 'permanent'
+  | 'whileOnBattlefield'
+  | 'whileAttached'
+  | 'whileSubjectRemains'
+  | 'whileSourceAndSubjectRemain';
 
 /**
  * A declarative "which permanents" predicate.
@@ -80,10 +99,11 @@ export type EffectDuration =
  * Every field is `T[] | null` rather than optional: `null` means "don't care",
  * which keeps the record free of `undefined` so it canonicalizes and clones
  * cleanly. A list field matches when the object has *any* of the listed values,
- * except `keywords` and `allCardTypes`, which require *all* of them — that asymmetry is what
- * "creatures with flying and vigilance" needs and what "creatures that are
- * green or white" needs, and both are common. The two `exclude` lists are the
- * mirror: an object matches when it has *none* of the listed values.
+ * except `keywords`, `keywordAbilities`, and `allCardTypes`, which require
+ * *all* of them — that asymmetry is what "creatures with flying and vigilance"
+ * needs and what "creatures that are green or white" needs, and both are
+ * common. The two `exclude` lists are the mirror: an object matches when it has
+ * *none* of the listed values.
  */
 export interface ObjectFilter {
   readonly oids: readonly ObjectId[] | null;
@@ -127,6 +147,8 @@ export interface ObjectFilter {
   readonly excludeCardTypes: readonly CardKind[] | null;
   readonly subtypes: readonly string[] | null;
   readonly supertypes: readonly Supertype[] | null;
+  /** Current layer-derived names, not the printed card names used in hidden zones. */
+  readonly names: readonly string[] | null;
   readonly colors: readonly Color[] | null;
   /**
    * Colors this filter refuses, for `excludeCardTypes`' reason one field up and
@@ -137,6 +159,11 @@ export interface ObjectFilter {
    */
   readonly excludeColors: readonly Color[] | null;
   readonly keywords: readonly Keyword[] | null;
+  /** Structured keyword abilities matched by kind; every listed kind is required. */
+  readonly keywordAbilities: readonly KeywordAbility['kind'][] | null;
+  readonly excludeKeywords: readonly Keyword[] | null;
+  /** Object identity predicate: true selects only tokens, false only nontokens. */
+  readonly token: boolean | null;
   readonly controller: PlayerId | null;
   /**
    * `true` when `controller` should be resolved live, at application time, to
@@ -165,9 +192,13 @@ export const ANY_PERMANENT: ObjectFilter = {
   excludeCardTypes: null,
   subtypes: null,
   supertypes: null,
+  names: null,
   colors: null,
   excludeColors: null,
   keywords: null,
+  keywordAbilities: null,
+  excludeKeywords: null,
+  token: null,
   controller: null,
   controllerIsSource: false,
 };
@@ -183,33 +214,48 @@ export function onlyObject(oid: ObjectId): ObjectFilter {
 }
 
 /**
- * Effects pinned to one permanent, dropped when that permanent leaves.
+ * Detaches one departing battlefield incarnation from the effects applied to it.
  *
- * `effectsRegisteredBy`'s mirror across the two fields that differ: it matches
- * `sourceOid` and the two source-lifetime durations, this matches `affects.oids`
- * and the subject-lifetime one. Both are read by `moveObject` and by nothing
- * else, because a zone change is the only event either lifetime ends on.
+ * The kernel keeps a physical card's `ObjectId` across CR 400.7 zone changes,
+ * so an explicit oid list must stop naming the departing incarnation. Two
+ * durations use such lists as subject lifetimes: `whileSubjectRemains`, whose
+ * name states the boundary, and `endOfTurn`, whose clock is only the upper
+ * bound. A bounced creature does not regain this turn's pump, keyword, or
+ * control change when the same card returns before cleanup.
  *
- * The match is on the *whole* of `affects.oids` being this one object, not on
- * membership, and the strictness is the honest half. CR 609.2 froze the
- * membership of a group when the effect started, so a grant written over two
- * creatures ends for the one that died and keeps running for the one that did
- * not — which is a narrowing of the record, not a removal of it, and this sweep
- * removes. Nothing in this kernel constructs a multi-subject pinned grant, so
- * the case does not arise; a card that needs one has to teach `moveObject` to
- * rewrite `affects.oids` rather than widen this predicate.
+ * CR 609.2 also means one resolved effect may be frozen over a group. Removing
+ * the whole record when one member leaves would take the grant away from
+ * members that never changed zones, so this operation immutably narrows the
+ * filter. `expired` contains only records with no subjects left and is the
+ * exact set `moveObject` may report as fully ended.
  */
-export function effectsPinnedTo(
+export function detachEffectsFromSubject(
   effects: readonly ContinuousEffect[],
   subject: ObjectId,
-): readonly ContinuousEffect[] {
-  return effects.filter(
-    (effect) =>
-      effect.duration === 'whileSubjectRemains' &&
-      effect.affects.oids !== null &&
-      effect.affects.oids.length === 1 &&
-      effect.affects.oids[0] === subject,
-  );
+): {
+  readonly effects: readonly ContinuousEffect[];
+  readonly expired: readonly ContinuousEffect[];
+} {
+  const retained: ContinuousEffect[] = [];
+  const expired: ContinuousEffect[] = [];
+  for (const effect of effects) {
+    const subjectBound =
+      effect.duration === 'whileSubjectRemains' ||
+      effect.duration === 'whileSourceAndSubjectRemain' ||
+      effect.duration === 'endOfTurn';
+    const oids = effect.affects.oids;
+    if (!subjectBound || oids === null || !oids.includes(subject)) {
+      retained.push(effect);
+      continue;
+    }
+    const remaining = oids.filter((oid) => oid !== subject);
+    if (remaining.length === 0) {
+      expired.push(effect);
+      continue;
+    }
+    retained.push({ ...effect, affects: { ...effect.affects, oids: remaining } });
+  }
+  return { effects: retained, expired };
 }
 
 interface EffectCommon {
@@ -229,6 +275,10 @@ interface EffectCommon {
    * itself has one reader.
    */
   readonly enabledWhile: Condition | null;
+  /** Optional live orientation gate; absent keeps prior effects byte-identical. */
+  readonly requiresTapped?: true;
+  /** Optional static-only gate for turns controlled by another player. */
+  readonly activeDuringOtherTurns?: true;
 }
 
 /** Layer 1 (CR 613.1a): the object's copiable values become another's. */
@@ -300,6 +350,12 @@ export interface AbilityChangeEffect extends EffectCommon {
    * silently grant nothing.
    */
   readonly addKeywordAbilities: readonly KeywordAbility[];
+  /** Keyword abilities removed by identity before this effect's grants apply. */
+  readonly removeKeywordAbilities: readonly KeywordAbility[];
+  /** Ordinary abilities granted in layer 6, regardless of where they originated. */
+  readonly addAbilities: readonly Ability[];
+  /** Whether activated abilities of this permanent are prohibited. */
+  readonly prohibitActivation: boolean;
   /** "Loses all abilities" — applied before `addKeywords` of the same effect. */
   readonly removeAll: boolean;
 }
@@ -326,6 +382,11 @@ export interface BattlefieldCount {
 export interface GraveyardCardTypesCount {
   readonly kind: 'graveyardCardTypes';
   readonly whose: PlayerId | 'each';
+}
+
+/** Live creature-card count in the source controller's graveyard. */
+export interface ControllerGraveyardCreatureCount {
+  readonly kind: 'controllerGraveyardCreatures';
 }
 
 /**
@@ -359,7 +420,11 @@ export interface BattlefieldWithCountersCount {
 }
 
 /** What a CDA's P/T reads a live count from. `characteristics.ts`'s `applyPtDefine` resolves every arm. */
-export type PtCount = BattlefieldCount | GraveyardCardTypesCount | BattlefieldWithCountersCount;
+export type PtCount =
+  | BattlefieldCount
+  | GraveyardCardTypesCount
+  | BattlefieldWithCountersCount
+  | ControllerGraveyardCreatureCount;
 
 /**
  * Layer 7a (CR 613.4a): a characteristic-defining ability that sets P/T from a
@@ -419,6 +484,23 @@ export interface PtScaledModEffect extends EffectCommon {
   readonly countOf: PtCount;
 }
 
+/** Layer 7c bonus scaled by the affected permanent's distinct layer-5 colors. */
+export interface PtColorScaledModEffect extends EffectCommon {
+  readonly kind: 'ptColorScaledMod';
+  readonly layer: '7c';
+  readonly power: 1;
+  readonly toughness: 0;
+}
+
+/** Layer 7c +1/+1 per card in the affected permanent controller's live hand. */
+export interface PtControllerHandScaledModEffect extends EffectCommon {
+  readonly kind: 'ptControllerHandScaledMod';
+  readonly layer: '7c';
+  readonly power: 1;
+  readonly toughness: 1;
+}
+
+/** Layer 7c +1/+1 per creature card in the affected permanent controller's graveyard. */
 /** Layer 7e (CR 613.4e): P/T switched. */
 export interface PtSwitchEffect extends EffectCommon {
   readonly kind: 'ptSwitch';
@@ -436,6 +518,8 @@ export type ContinuousEffect =
   | PtSetEffect
   | PtModEffect
   | PtScaledModEffect
+  | PtColorScaledModEffect
+  | PtControllerHandScaledModEffect
   | PtSwitchEffect;
 
 /** CR 613.8a treats characteristic-defining abilities as their own class. */
@@ -464,6 +548,32 @@ export const NO_COUNTERS: Counters = { plusOnePlusOne: 0, minusOneMinusOne: 0 };
 /** How many counters of one kind a permanent carries; absent means none. */
 export function counterCount(current: Counters, kind: CounterKind): number {
   return current[kind] ?? 0;
+}
+
+/**
+ * The kinds this permanent has a tally for, which is what the three readers
+ * below walk instead of every kind the vocabulary declares.
+ *
+ * It is the same question. `counterCount` reads `current[kind] ?? 0`, so a kind
+ * absent from the record contributes nothing to a sum and grants nothing, and
+ * `setCounterCount` is the only writer that removes an entry — it deletes a kind
+ * that reaches zero and keeps the two stock kinds whatever they hold. So the
+ * keys present are always a superset of the kinds carrying counters.
+ *
+ * It matters because these three are read through `withCounterContribution` on
+ * every characteristics read of every battlefield object, which is the kernel's
+ * hot path by its own account, and a permanent with nothing on it was paying a
+ * property miss per declared kind to find that out. Fourteen kinds today; the
+ * bill grew every time the vocabulary gained one, and it was 53% of the
+ * 729-declaration blocker walk's self time (`mtg-7qdn`, `mtg-60ae`).
+ *
+ * The cast is sound rather than hopeful: `Counters` is a partial record keyed by
+ * `CounterKind`, every writer here takes a `CounterKind`, and no game state is
+ * ever parsed from outside — a kernel game is replayed from a seed and a choice
+ * list, so there is no boundary a foreign key could arrive through.
+ */
+function kindsOn(current: Counters): readonly CounterKind[] {
+  return Object.keys(current) as readonly CounterKind[];
 }
 
 export function addCounters(current: Counters, kind: CounterKind, count: number): Counters {
@@ -500,7 +610,7 @@ export function annihilateCounters(current: Counters): Counters {
 }
 
 export function hasCounters(current: Counters): boolean {
-  return COUNTER_KINDS.some((kind) => counterCount(current, kind) !== 0);
+  return kindsOn(current).some((kind) => counterCount(current, kind) !== 0);
 }
 
 /**
@@ -514,7 +624,7 @@ export function hasCounters(current: Counters): boolean {
 export function counterStatDelta(current: Counters): { readonly power: number; readonly toughness: number } {
   let power = 0;
   let toughness = 0;
-  for (const kind of COUNTER_KINDS) {
+  for (const kind of kindsOn(current)) {
     const count = counterCount(current, kind);
     if (count === 0) continue;
     const bonus = counterStatBonus(kind);
@@ -534,7 +644,7 @@ export function counterStatDelta(current: Counters): { readonly power: number; r
  */
 export function counterKeywords(current: Counters): readonly Keyword[] {
   const granted: Keyword[] = [];
-  for (const kind of COUNTER_KINDS) {
+  for (const kind of kindsOn(current)) {
     if (counterCount(current, kind) === 0) continue;
     for (const keyword of counterGrantedKeywords(kind)) {
       if (!granted.includes(keyword)) granted.push(keyword);

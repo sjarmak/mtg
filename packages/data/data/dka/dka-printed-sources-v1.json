@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-19T16:47:39.858Z",
+  "sources": [
+    {
+      "code": "DKA",
+      "mtgjson": {
+        "file": "DKA-0aace8811c92f1d51fe5cca71e60ec148b41e379307743ced2a61a43b96a6b3c.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/DKA.json",
+        "sha256": "0aace8811c92f1d51fe5cca71e60ec148b41e379307743ced2a61a43b96a6b3c",
+        "meta": {
+          "date": "2026-09-19",
+          "version": "5.3.0+20260919"
+        }
+      },
+      "scryfall": {
+        "file": "DKA-ee9d7f41ebab6ea70d6ff4a3fb64c809fbd4ecb0130ae77e1283e772a562ded9.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Adka+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "ee9d7f41ebab6ea70d6ff4a3fb64c809fbd4ecb0130ae77e1283e772a562ded9",
+        "cards": 158
+      }
+    },
+    {
+      "code": "ISD",
+      "mtgjson": {
+        "file": "ISD-d6ed35172da20b10d6a6f685b2c80e7834fd382ba37b40113999257621e9bb70.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/ISD.json",
+        "sha256": "d6ed35172da20b10d6a6f685b2c80e7834fd382ba37b40113999257621e9bb70",
+        "meta": {
+          "date": "2026-09-19",
+          "version": "5.3.0+20260919"
+        }
+      },
+      "scryfall": {
+        "file": "ISD-8a2814e2e5c92166136a7daeca5b970f73557ba02e8d48ea8edd0e177b2d8e0e.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Aisd+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "8a2814e2e5c92166136a7daeca5b970f73557ba02e8d48ea8edd0e177b2d8e0e",
+        "cards": 264
+      }
+    }
+  ]
+}

@@ -16,12 +16,22 @@
  *
  * **What it does not check is worth stating.** It says nothing about whether the
  * backend plays Magic correctly; that is the parity harness's job and it is a
- * different instrument entirely. This checks the seam: that the shapes are the
- * shapes, that the states are mutually exclusive, that a bad move is refused as
- * a value rather than thrown, that the log is dense, that a backend claiming the
- * recorded arm can actually reproduce a game it played, that a backend claiming
- * per-seat projection sends a seat nothing it may not identify, and that no
- * decision it asks is one it could not finish listing.
+ * different instrument entirely. This checks the seam: that a session keeps
+ * the backend identity, determinism arm, table and local seats that opened it;
+ * that states are mutually exclusive; that opaque move ids are distinct; that
+ * a bad move is refused as a value rather than thrown; that the log is dense;
+ * that a backend claiming the recorded arm can actually reproduce a game it
+ * played; that a backend claiming per-seat projection sends a seat nothing it
+ * may not identify; that no decision it asks is one it could not finish
+ * listing; and that the game it opened is the game the table's rules named,
+ * read off the opening board — the life every seat starts on, and on a
+ * commander table a command zone holding the commanders the decks named.
+ *
+ * That rules check sits at the seam and not on the backend's word because
+ * `supports` is where a backend refuses a variant it does not play, and a
+ * backend that accepts a commander table and deals the standard game has
+ * refused nothing and played the wrong game; the opening board is the one
+ * place that shows.
  *
  * That last one is the reason a declaration is not enough on its own.
  * `perSeatProjection` is a boolean a backend writes about itself, and the value
@@ -47,10 +57,14 @@
 import type { GameBackend, EngineSession, RecordedSession } from './session';
 import type { SessionError } from './errors';
 import type { MoveId, PendingDecision } from './decision';
-import type { SessionSpec } from './table';
+import { textInputError, textSubmission } from './decision';
+import type { DeckSlot, SessionSpec } from './table';
+import type { SeatId } from './table';
+import { rulesOf, seatIdsOf } from './table';
 import { PROJECTION_VERSION } from './projection';
 import type { PositionMemo } from './hidden-information';
 import { auditSeatPayloads } from './hidden-information';
+import type { Determinism } from './determinism';
 
 export interface Finding {
   /** Which rule was broken, short enough to read in a failure dump. */
@@ -97,6 +111,7 @@ export interface ConformanceOptions {
 }
 
 const DEFAULT_MAX_MOVES = 4_000;
+const MAX_CONFORMANCE_TEXT_SAMPLE = 1_048_576;
 
 /** The default policy: the first move offered, whatever it happens to be. */
 function firstOffered(decision: PendingDecision): MoveId {
@@ -138,6 +153,12 @@ export async function checkBackend(
     opened.session,
     options.maxMoves ?? DEFAULT_MAX_MOVES,
     backend.capabilities.perSeatProjection,
+    {
+      backend: backend.id,
+      determinism: backend.determinism,
+      table,
+      localSeats: localSeatsOf(table),
+    },
     add,
     options.pick ?? firstOffered,
   );
@@ -168,10 +189,151 @@ interface Played {
   readonly fingerprints: readonly string[];
 }
 
+interface ExpectedSession {
+  readonly backend: string;
+  readonly determinism: Determinism;
+  readonly table: SessionSpec;
+  readonly localSeats: readonly SeatId[];
+}
+
+function localSeatsOf(table: SessionSpec): readonly SeatId[] {
+  return seatIdsOf(table.seats.length).filter((seat) => table.seats[seat]?.controller === 'local');
+}
+
+function sameSequence<Value>(left: readonly Value[], right: readonly Value[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function sameCardOrigin(
+  left: SessionSpec['seats'][number]['deck']['cards'][number]['origin'],
+  right: SessionSpec['seats'][number]['deck']['cards'][number]['origin'],
+): boolean {
+  if (left === undefined || right === undefined) return left === right;
+  if (left.kind !== right.kind) return false;
+  return (
+    left.kind === 'printed' ||
+    (right.kind === 'custom' && left.setCode === right.setCode && left.cardId === right.cardId)
+  );
+}
+
+function sameSlots(left: readonly DeckSlot[] | undefined, right: readonly DeckSlot[] | undefined): boolean {
+  if (left === undefined || right === undefined) return left === right;
+  return (
+    left.length === right.length &&
+    left.every((slot, at) => {
+      const other = right[at];
+      return (
+        other !== undefined &&
+        slot.name === other.name &&
+        slot.count === other.count &&
+        sameCardOrigin(slot.origin, other.origin)
+      );
+    })
+  );
+}
+
+function sameTable(left: SessionSpec, right: SessionSpec): boolean {
+  const rules = rulesOf(left);
+  const otherRules = rulesOf(right);
+  if (
+    left.seed !== right.seed ||
+    left.maximumTurns !== right.maximumTurns ||
+    left.content.kind !== right.content.kind ||
+    rules.variant !== otherRules.variant ||
+    rules.startingLife !== otherRules.startingLife
+  ) {
+    return false;
+  }
+  switch (left.content.kind) {
+    case 'dsl-set':
+      if (right.content.kind !== 'dsl-set' || left.content.setCode !== right.content.setCode) return false;
+      break;
+    case 'printed':
+      if (right.content.kind !== 'printed' || left.content.format !== right.content.format) return false;
+      break;
+    case 'mixed':
+      if (
+        right.content.kind !== 'mixed' ||
+        left.content.format !== right.content.format ||
+        !sameSequence(left.content.customSetCodes, right.content.customSetCodes)
+      ) {
+        return false;
+      }
+      break;
+  }
+  return left.seats.every((seat, index) => {
+    const other = right.seats[index];
+    return (
+      other !== undefined &&
+      seat.name === other.name &&
+      seat.controller === other.controller &&
+      seat.deck.name === other.deck.name &&
+      sameSlots(seat.deck.cards, other.deck.cards) &&
+      sameSlots(seat.deck.sideboard ?? [], other.deck.sideboard ?? []) &&
+      sameSlots(seat.deck.commanders, other.deck.commanders)
+    );
+  });
+}
+
+/**
+ * The opening board shows which game was dealt.
+ *
+ * Life is public and so is the command zone, so both are read straight off the
+ * table view. The command zone is asked for at every position because a
+ * commander table has one at every position; the commanders' names are asked
+ * for only at the opening, which is the one position where the rules say what
+ * the zone holds.
+ */
+function checkRules(
+  session: EngineSession,
+  table: SessionSpec,
+  opening: boolean,
+  at: string,
+  add: Add,
+): void {
+  const rules = rulesOf(table);
+  session.view.seats.forEach((seat, index) => {
+    if (opening && seat.life !== rules.startingLife) {
+      add(
+        'rules',
+        `${at} seat ${String(index)} opened on ${String(seat.life)} life, and the table starts every seat on ${String(rules.startingLife)}`,
+      );
+    }
+    if (rules.variant === 'momir') {
+      const avatars = seat.avatars;
+      if (avatars === undefined) {
+        add('avatar-zone', `${at} seat ${String(index)} projects no avatar zone on a Momir table`);
+      } else if (
+        opening &&
+        (avatars.length !== 1 || avatars[0]?.name !== 'Momir Vig, Simic Visionary Avatar')
+      ) {
+        add('avatar-zone', `${at} seat ${String(index)} does not hold the Momir Vig avatar`);
+      }
+      return;
+    }
+    if (rules.variant !== 'commander') return;
+    const zone = seat.commandZone;
+    if (zone === undefined) {
+      add('command-zone', `${at} seat ${String(index)} projects no command zone on a commander table`);
+      return;
+    }
+    if (!opening) return;
+    const named = (table.seats[index]?.deck.commanders ?? []).map((slot) => slot.name).sort();
+    const held = zone.map((object) => object.name).sort();
+    if (!sameSequence(named, held)) {
+      add(
+        'command-zone',
+        `${at} seat ${String(index)}'s command zone holds [${held.join(', ')}], and its deck named [${named.join(', ')}]`,
+      );
+    }
+  });
+}
+
 async function playThrough(
   opening: EngineSession,
   cap: number,
   declared: boolean,
+  expected: ExpectedSession,
   add: Add,
   pick: (decision: PendingDecision) => MoveId,
 ): Promise<Played> {
@@ -181,7 +343,7 @@ async function playThrough(
   // The payload search is per position; the library search compares this
   // position against the one before it, so one memo walks the game with the
   // session. Null at the opening, where there is no position before.
-  let position = checkInvariants(session, 0, declared, add, null);
+  let position = checkInvariants(session, 0, declared, expected, add, null);
   let searched = position.searched;
   await checkRefusal(session, add);
 
@@ -189,12 +351,32 @@ async function playThrough(
     if (session.status !== 'awaiting') break;
     const decision = session.decision;
     if (decision === null) break;
-    if (decision.options[0] === undefined) {
+    const first = decision.options[0];
+    const input = decision.input;
+    if (first === undefined && input === undefined) {
       add('decision', `a pending "${decision.kind}" decision offered no options at all`);
       break;
     }
-    const chosen = pick(decision);
-    if (!decision.options.some((option) => option.id === chosen)) {
+    let chosen: MoveId;
+    if (first !== undefined) {
+      chosen = pick(decision);
+    } else {
+      if (input === undefined) break;
+      const problem = textInputError(input);
+      if (problem !== null) {
+        add('decision-input', `a pending "${decision.kind}" decision carried an invalid input: ${problem}`);
+        break;
+      }
+      if (input.minLength > MAX_CONFORMANCE_TEXT_SAMPLE) {
+        add(
+          'decision-input',
+          `a pending "${decision.kind}" decision required a minimum of ${String(input.minLength)} characters`,
+        );
+        break;
+      }
+      chosen = textSubmission(input, 'x'.repeat(input.minLength));
+    }
+    if (first !== undefined && !decision.options.some((option) => option.id === chosen)) {
       throw new Error(
         `conformance: the pick policy asked for "${chosen}", which the pending "${decision.kind}" decision does not offer`,
       );
@@ -207,7 +389,7 @@ async function playThrough(
     moves.push(chosen);
     session = result.session;
     if (session.determinism === 'recorded') fingerprints.push(session.fingerprint);
-    position = checkInvariants(session, moves.length, declared, add, position.memo);
+    position = checkInvariants(session, moves.length, declared, expected, add, position.memo);
     searched += position.searched;
   }
 
@@ -256,16 +438,39 @@ function checkInvariants(
   session: EngineSession,
   submitted: number,
   declared: boolean,
+  expected: ExpectedSession,
   add: Add,
   previous: PositionMemo | null,
 ): Position {
   const at = `after ${String(submitted)} moves`;
+  if (session.backend !== expected.backend) {
+    add(
+      'session-identity',
+      `${at} the session names backend ${JSON.stringify(session.backend)}, expected ${JSON.stringify(expected.backend)}`,
+    );
+  }
+  if (session.determinism !== expected.determinism) {
+    add(
+      'determinism',
+      `${at} the session is ${session.determinism}, but its backend is ${expected.determinism}`,
+    );
+  }
+  if (!sameTable(session.table, expected.table)) {
+    add('session-table', `${at} the session no longer carries the table the backend was asked to open`);
+  }
+  if (!sameSequence(session.localSeats, expected.localSeats)) {
+    add(
+      'local-seats',
+      `${at} the session names local seats [${session.localSeats.join(', ')}], expected [${expected.localSeats.join(', ')}]`,
+    );
+  }
   if (session.submitted !== submitted) {
     add('submitted', `${at} the session counted ${String(session.submitted)}`);
   }
   if (session.view.version !== PROJECTION_VERSION) {
     add('projection', `${at} the view declared version ${String(session.view.version)}`);
   }
+  checkRules(session, expected.table, submitted === 0, at, add);
   const hasDecision = session.decision !== null;
   const hasResult = session.result !== null;
   switch (session.status) {
@@ -323,7 +528,27 @@ function checkInvariants(
  * is not the list, when it had the option of asking a question it could finish.
  */
 function checkEnumeration(decision: PendingDecision | null, at: string, add: Add): void {
-  if (decision === null || decision.complete) return;
+  if (decision === null) return;
+  const seen = new Set<MoveId>();
+  for (const option of decision.options) {
+    if (option.id.length === 0) {
+      add('decision-options', `${at} a pending "${decision.kind}" decision offered an empty move id`);
+    } else if (seen.has(option.id)) {
+      add(
+        'decision-options',
+        `${at} a pending "${decision.kind}" decision offered duplicate move id ${JSON.stringify(option.id)}`,
+      );
+    }
+    seen.add(option.id);
+  }
+  if (decision.input !== undefined) {
+    const problem = textInputError(decision.input);
+    if (problem !== null) add('decision-input', `${at} carried an invalid input: ${problem}`);
+    if (decision.options.length > 0) {
+      add('decision-input', `${at} offered both enumerated moves and a text input`);
+    }
+  }
+  if (decision.complete) return;
   add(
     'enumeration',
     `${at} a pending "${decision.kind}" decision listed ${String(decision.options.length)} moves and ` +

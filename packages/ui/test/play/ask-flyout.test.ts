@@ -346,7 +346,7 @@ function pressBoldestMove(): void {
     if (idle === undefined) break;
     click(idle);
   }
-  const entries = moveButtons();
+  const entries = moveButtons().filter((entry) => attr(entry, 'data-kind') !== 'concede');
   if (entries.length === 0) {
     click(screen.getByRole('button', { name: PASS_LABEL }));
     return;
@@ -697,10 +697,12 @@ describe('the opening hand arrives without a press', () => {
     const session = openingSession();
     const decision = session.pending;
     if (decision === null) throw new Error('the deal left nobody to ask');
-    // The two labels are read off the enumeration rather than typed, so this
-    // asserts what the kernel offered instead of what a test author remembered.
     const prompt = buildPrompt(session.state, decision, SEATS);
-    expect(prompt.choices.map((choice) => choice.kind).toSorted()).toEqual(['keepHand', 'mulligan']);
+    expect(prompt.choices.map((choice) => choice.kind).toSorted()).toEqual([
+      'concede',
+      'keepHand',
+      'mulligan',
+    ]);
 
     shutTable(session);
     // No `showFlyout()`. That is the test: every other ask in this file needs

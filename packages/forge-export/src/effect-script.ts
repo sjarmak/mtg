@@ -11,14 +11,16 @@
  * this package.
  *
  * `FORGE_EFFECTS` is a total mapped type over `AnyEffectKind`, so a primitive
- * added to `@mtg/dsl` without a Forge form is a compile error here exactly as
- * the `assertNever` default used to be. The runtime table lookups still guard
- * for `undefined` because unvalidated input (LLM output, JSON on disk) can carry
- * values the types promise are impossible.
+ * added to `@mtg/dsl` without either a Forge form or its declared-partial
+ * refusal is a compile error here exactly as the `assertNever` default used to
+ * be. The runtime table lookups still guard for `undefined` because unvalidated
+ * input (LLM output, JSON on disk) can carry values the types promise are
+ * impossible.
  */
 import type {
   AnyEffectKind,
   Amount,
+  DeclaredPartialEffectKind,
   Effect,
   EffectScope,
   PumpAmount,
@@ -26,25 +28,34 @@ import type {
   TargetKind,
   TargetSpec,
   TokenSpec,
+  TriggerCondition,
 } from '@mtg/dsl';
 import {
   hasTarget,
+  isAllPlayersScope,
+  isGraveyardCardTargetKind,
   isLiteralAmount,
   isRateAmount,
   isReferentTarget,
+  isSourceAttachmentTarget,
   isSourceBodyOnlyTarget,
   isSpaceScope,
   requiresDistinctTarget,
   targetFilterOf,
+  targetMinimumOf,
   targetRestrictionOf,
+  targetsAnyNumber,
   tokenAbilities,
 } from '@mtg/dsl';
 import type { ForgeAbility, ForgeParam } from './script-text';
-import { isScriptSafe, params } from './script-text';
+import { isScriptSafe, params, renderNamedSubAbilityChain, renderSubAbility } from './script-text';
 import type { TranspileRejection } from './rejection';
 import { rejection } from './rejection';
 import {
   FORGE_CARD_DESTINATIONS,
+  FORGE_CARD_TYPES,
+  FORGE_COLOR_WORDS,
+  FORGE_COLOR_PROPERTIES,
   FORGE_COUNTER_TYPES,
   FORGE_GRAVEYARD_OWNER_QUALIFIERS,
   FORGE_GRAVEYARD_OWNERS,
@@ -56,10 +67,12 @@ import {
   FORGE_SCOPE_CHANGE_TYPES,
   FORGE_SCOPE_ORIGINS,
   FORGE_SCOPED_EFFECT_APIS,
+  FORGE_TRIGGERING_CREATURE_REFERENTS,
   FORGE_VALID_TARGETS,
   forgeFilteredTargets,
   forgeRestrictedTarget,
   forgeSearchType,
+  forgeSearchTypeUnion,
   forgeSweepSelector,
   forgeTargetRestriction,
   unmappedFilterField,
@@ -67,27 +80,32 @@ import {
 import { transpileAbility } from './ability-script';
 import { NO_COMPUTED_AMOUNTS, REMEMBER_CHANGED, type ComputedAmounts } from './remember';
 import { forgeTokenScriptName } from './naming';
+import { forgeManaCost } from './mana-script';
 
 export interface ForgeEffectScript {
   readonly ability: ForgeAbility;
   /**
-   * A second Forge ability this one DSL effect needs, chained straight after
-   * the first.
+   * Additional Forge abilities this one DSL effect needs, chained straight
+   * after the first.
    *
    * One primitive is one Forge API almost everywhere, and the hold on a tap is
    * the exception Forge itself makes: `frost_breath.txt` and `sleep.txt` both
    * write the tap and then a `Pump`/`PumpAll` carrying the hidden keyword, and
-   * there is no parameter on `Tap` that says it. A second link rather than a
-   * second effect in the DSL, because the DSL has one effect here and the card
-   * has one sentence; splitting it into two would put the seam in the wrong
-   * language.
+   * there is no parameter on `Tap` that says it. Cultivate needs three links
+   * after its search: two destinations and remembered-state cleanup. Links
+   * rather than extra effects in the DSL, because each DSL effect is still one
+   * printed instruction; splitting it would put the seam in the wrong language.
    *
    * The chain builders append it in the position the effect occupies, so a
    * card whose second effect draws a card still reads tap, hold, draw.
    */
-  readonly follow?: ForgeAbility;
+  readonly follow?: readonly ForgeAbility[];
   /** Token this effect creates; the set export writes it as a token script. */
   readonly token?: TokenSpec;
+  /** Supporting `SVar:` declarations referenced by this effect's ability. */
+  readonly supportingLines?: readonly string[];
+  /** This effect's follow chain already clears the remembered-card register. */
+  readonly cleansRemembered?: true;
 }
 
 export type EffectScriptResult =
@@ -121,6 +139,8 @@ function sweepSelection(
   scope: EffectScope,
   filter: TargetFilter | undefined,
 ): readonly ForgeParam[] | null {
+  if (isAllPlayersScope(scope)) return null;
+  if (scope === 'targetAndPermanentsItsPlayerControls') return null;
   if (!isSpaceScope(scope)) {
     return [...ctx.targeting, ...params(['ValidCards', FORGE_SCOPE_CHANGE_TYPES[scope]])];
   }
@@ -145,8 +165,6 @@ const UNMAPPED_FILTER_REASONS: Readonly<Record<NonNullable<ReturnType<typeof unm
   {
     allCardTypes:
       'a conjunctive card type ("allCardTypes") has no Forge selector attested in res/cardsfolder, and this exporter does not guess one',
-    keywords:
-      'a keyword narrowing ("keywords") has no Forge selector attested in res/cardsfolder, and this exporter does not guess one',
   };
 
 /**
@@ -178,8 +196,8 @@ function unmappedFilterRejections(
  *
  * Two causes, and the messages are separate because the fixes are: a space
  * scope with no `scopeFilter` beside it names a region and not which permanents
- * in it, and a `scopeFilter` carrying a conjunctive card type or a keyword
- * names permanents this exporter has no attested selector for.
+ * in it, and a `scopeFilter` carrying a conjunctive card type names permanents
+ * this exporter has no attested selector for.
  *
  * `checkSpaceScope` (`@mtg/dsl`) already refuses the first card, so nothing
  * valid reaches here — but this transpiler runs on whatever it is handed, and
@@ -209,15 +227,14 @@ function unwritableSweepRejection(
 }
 
 /**
- * A zone move whose scope names a region of the board, refused by name.
+ * A zone move whose scope names a region but carries no selection filter,
+ * refused by name.
  *
- * `ChangeZoneAll` needs an `Origin$`, and a space scope has no zone to give it:
- * `FORGE_SCOPE_ORIGINS` is keyed `TargetedPlayerScope` for exactly that reason,
- * so this arm exists rather than a lookup that could not be written. The DSL
- * refuses the combination too (`SCOPES_LEGAL_ON` admits no space scope on
- * either zone-move primitive), so this is the belt to that suspenders — and a
- * parity oracle that dropped the scope and exported the unscoped card would
- * report a mismatch as agreement, which is worse than the gap.
+ * A region alone does not say which permanents move. The DSL validator refuses
+ * this shape too, but the exporter keeps its own boundary: dropping the scope
+ * and exporting an unscoped card would report a mismatch as agreement, which
+ * is worse than the gap. A filtered battlefield region takes the
+ * source-attested `ChangeZoneAll` path in the exile row instead.
  */
 function spaceScopeZoneMoveRejection(ctx: EffectScriptContext, scope: EffectScope): EffectScriptResult {
   return {
@@ -236,6 +253,19 @@ function spaceScopeZoneMoveRejection(ctx: EffectScriptContext, scope: EffectScop
 interface TargetContext {
   readonly cardId: string;
   readonly path: string;
+  /** Enclosing trigger, when the effect reads an event-retained referent. */
+  readonly triggerCondition?: TriggerCondition;
+  /**
+   * Forge's name for the creature this trigger retains, when the enclosing
+   * `T:` line settles it rather than the condition does.
+   *
+   * Only `selfBlocksOrIsBlockedByGreaterPower` passes one. Its two lines are
+   * the two halves of a block and each retains the *other* creature, so the
+   * referent is a fact about the line rather than about the condition and the
+   * body is compiled once per line. Every other condition leaves this unset and
+   * `FORGE_TRIGGERING_CREATURE_REFERENTS` answers from the condition alone.
+   */
+  readonly triggeringCreatureReferent?: string;
 }
 
 /**
@@ -296,8 +326,27 @@ export interface ForgeEffectMapping<K extends AnyEffectKind = AnyEffectKind> {
   readonly script: (effect: EffectOf<K>, ctx: EffectScriptContext) => EffectScriptResult;
 }
 
+/** An explicit boundary refusal for a kernel-complete, declared-partial kind. */
+export interface ForgeEffectRefusal {
+  readonly refusal: {
+    readonly code: 'UNMAPPED_EFFECT_KIND';
+    readonly reason: string;
+  };
+}
+
+/** Narrows a total-table row without making every mapped row carry a tag. */
+export function isForgeEffectRefusal(row: object): row is ForgeEffectRefusal {
+  if (!('refusal' in row) || typeof row.refusal !== 'object' || row.refusal === null) return false;
+  return (
+    'code' in row.refusal &&
+    row.refusal.code === 'UNMAPPED_EFFECT_KIND' &&
+    'reason' in row.refusal &&
+    typeof row.refusal.reason === 'string'
+  );
+}
+
 /**
- * The Forge form of every DSL effect primitive.
+ * The Forge form or named refusal of every DSL effect primitive.
  *
  * A mapped type rather than `Record<AnyEffectKind, ForgeEffectMapping>` so each
  * row's writer is checked against the effect shape *that row* carries: the
@@ -306,7 +355,11 @@ export interface ForgeEffectMapping<K extends AnyEffectKind = AnyEffectKind> {
  * whole union also makes a missing row a compile error, which is what the
  * `assertNever` default on the old `switch` bought.
  */
-export type ForgeEffectTable = { readonly [K in AnyEffectKind]: ForgeEffectMapping<K> };
+export type ForgeEffectTable = {
+  readonly [K in AnyEffectKind]: K extends DeclaredPartialEffectKind
+    ? ForgeEffectRefusal
+    : ForgeEffectMapping<K>;
+};
 
 /**
  * One row of the table with the caller's kind unknown: the union of every row,
@@ -326,29 +379,205 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     targets: [
       'anyTarget',
       'targetCreature',
+      'targetCreatureYouDontControl',
       'targetPlayer',
       'targetOpponent',
       'targetPlayerOrPlaneswalker',
       'noTarget',
       'thatCreaturesController',
+      'targetCreatureDefendingPlayerControls',
+      'chosenPlayer',
+      'selfPermanent',
+      'triggeringPlayer',
     ],
     deckHas: null,
     script: (effect, ctx) => {
-      const damage = forgeNumber(effect.amount, ctx.computed);
+      const chosenX = !isLiteralAmount(effect.amount) && effect.amount.kind === 'chosenX';
+      const triggeringDamage =
+        !isLiteralAmount(effect.amount) && effect.amount.kind === 'triggeringDamageAmount';
+      const damage = chosenX || triggeringDamage ? 'X' : forgeNumber(effect.amount, ctx.computed);
       if (damage === null) return computedRejection(ctx.cardId, `${ctx.path}.amount`);
       const dealt = params(['NumDmg', damage]);
-      if (effect.scope === undefined) return ok(ctx.api, [...ctx.targeting, ...dealt]);
-      // Aggravate's line, which is this row scoped: the same `NumDmg$` under
-      // `DamageAll` with the group named beside the target.
+      if (effect.eachScopedPermanentDealsToItsController === true) {
+        if (effect.scope === undefined) return unwritableSweepRejection(ctx, 'allPermanents', undefined);
+        const group = sweepSelection(ctx, effect.scope, effect.scopeFilter);
+        const selector = group?.find(([name]) => name === 'ValidCards')?.[1];
+        if (group === null || selector === undefined) {
+          return unwritableSweepRejection(ctx, effect.scope, effect.scopeFilter);
+        }
+        const prevention = effect.preventable === false ? ' | NoPrevention$ True' : '';
+        return {
+          ok: true,
+          value: {
+            ability: {
+              api: 'RepeatEach',
+              params: params(
+                ['RepeatCards', selector],
+                ['RepeatSubAbility', 'DBDamage'],
+                ['DamageMap', 'True'],
+              ),
+            },
+            supportingLines: [
+              `SVar:DBDamage:DB$ DealDamage | Defined$ RememberedController | DamageSource$ Remembered | NumDmg$ ${damage}${prevention}`,
+              ...(chosenX ? ['SVar:X:Count$xPaid'] : []),
+              ...(triggeringDamage ? ['SVar:X:TriggerCount$DamageAmount'] : []),
+            ],
+          },
+        };
+      }
+      if (effect.scope === 'targetAndPermanentsItsPlayerControls') {
+        const filter = effect.scopeFilter;
+        if (filter === undefined) return unwritableSweepRejection(ctx, effect.scope, filter);
+        const members = forgeFilteredTargets('Permanent', filter, 'base');
+        if (members === null) return unwritableSweepRejection(ctx, effect.scope, filter);
+        const controlled = members.map((member) => `${member}.ControlledBy TargetedOrController`).join(',');
+        const prevention = effect.preventable === false ? params(['NoPrevention', 'True']) : [];
+        const scopedDamage =
+          effect.scopeAmount === undefined ? damage : forgeNumber(effect.scopeAmount, ctx.computed);
+        if (scopedDamage === null) return computedRejection(ctx.cardId, `${ctx.path}.scopeAmount`);
+        return {
+          ok: true,
+          value: {
+            ability: {
+              api: ctx.api,
+              params: [
+                ...ctx.targeting,
+                ...playerOrPlaneswalkerDamagePrompt(
+                  effect.target,
+                  effect.scope,
+                  effect.opponentPlayerOrPlaneswalkerOnly === true,
+                ),
+                ...dealt,
+                ...prevention,
+                ...params(['DamageMap', 'True']),
+              ],
+            },
+            follow: [
+              {
+                api: 'DamageAll',
+                params: [
+                  ...params(['NumDmg', scopedDamage]),
+                  ...params(['ValidCards', controlled]),
+                  ...prevention,
+                ],
+              },
+              { api: 'DamageResolve', params: [] },
+            ],
+          },
+        };
+      }
+      if (effect.scope === undefined && effect.players === undefined) {
+        const prevention = effect.preventable === false ? params(['NoPrevention', 'True']) : [];
+        const linkedDeathReplacement =
+          effect.exileDamagedCreatureIfItWouldDieThisTurn === true
+            ? [
+                ...params(['RememberDamaged', 'True']),
+                ...params(['ReplaceDyingDefined', 'Remembered.Creature']),
+                ...params(['SubAbility', 'DBCleanup']),
+              ]
+            : [];
+        const cardinality = ctx.targeting.filter(([key]) => key === 'TargetMin' || key === 'TargetMax');
+        const ordinaryTarget = ctx.targeting.filter(([key]) => key !== 'TargetMin' && key !== 'TargetMax');
+        const target =
+          effect.opponentPlayerOrPlaneswalkerOnly === true
+            ? params(['ValidTgts', 'Opponent,Planeswalker'])
+            : ordinaryTarget;
+        const division =
+          effect.division === undefined || effect.division.kind === 'each'
+            ? []
+            : effect.division.kind === 'evenlyRoundedDown'
+              ? params(['DivideEvenly', 'RoundedDown'])
+              : params(['DividedAsYouChoose', String(effect.amount)]);
+        const prompt =
+          effect.division?.kind === 'asYouChoose'
+            ? params(['TgtPrompt', 'Select any target to distribute damage to'])
+            : [];
+        const supportingLines = [
+          ...(chosenX ? ['SVar:X:Count$xPaid'] : []),
+          ...(triggeringDamage ? ['SVar:X:TriggerCount$DamageAmount'] : []),
+          ...(effect.division?.kind === 'evenlyRoundedDown' && targetsAnyNumber(effect.target)
+            ? [
+                'SVar:MaxTargets:SVar$MaxPlayers/Plus.MaxPermanents',
+                'SVar:MaxPlayers:PlayerCountPlayers$Amount',
+                'SVar:MaxPermanents:Count$Valid Any',
+              ]
+            : []),
+        ];
+        return {
+          ok: true,
+          value: {
+            ability: {
+              api: ctx.api,
+              params: [
+                ...target,
+                ...prompt,
+                ...playerOrPlaneswalkerDamagePrompt(
+                  effect.target,
+                  effect.scope,
+                  effect.opponentPlayerOrPlaneswalkerOnly === true,
+                ),
+                ...dealt,
+                ...cardinality,
+                ...division,
+                ...prevention,
+                ...filteredCreaturePrompt(effect.target),
+                ...linkedDeathReplacement,
+              ],
+            },
+            ...(supportingLines.length === 0 && effect.exileDamagedCreatureIfItWouldDieThisTurn !== true
+              ? {}
+              : {
+                  supportingLines: [
+                    ...supportingLines,
+                    ...(effect.exileDamagedCreatureIfItWouldDieThisTurn === true
+                      ? ['SVar:DBCleanup:DB$ Cleanup | ClearRemembered$ True']
+                      : []),
+                  ],
+                }),
+          },
+        };
+      }
+      // Aggravate and Magma Phoenix are the two widened forms of this row: the
+      // same `NumDmg$` under `DamageAll`, with a permanent group, a player
+      // group, or both named beside it.
       //
       // No `ValidPlayers$ Targeted`, which is the parameter that would burn the
       // targeted player as well. The DSL's scope reads "each creature that
       // player controls" and stops there; the cards that mean both say both,
       // and adding the key here would make the Forge card hit for damage the
       // kernel never deals.
-      const damageGroup = sweepSelection(ctx, effect.scope, effect.scopeFilter);
+      const players =
+        effect.players === undefined
+          ? []
+          : params(['ValidPlayers', FORGE_PLAYER_SCOPE_DEFINED[effect.players]]);
+      if (effect.scope === undefined) return ok('DamageAll', [...players, ...dealt]);
+      const damageGroup = (() => {
+        const primary = sweepSelection(ctx, effect.scope, effect.scopeFilter);
+        if (primary === null || effect.additionalScopeFilter === undefined) return primary;
+        const additional = sweepSelection(ctx, effect.scope!, effect.additionalScopeFilter);
+        if (additional === null) return null;
+        const primarySelector = primary.find(([name]) => name === 'ValidCards')?.[1];
+        const additionalSelector = additional.find(([name]) => name === 'ValidCards')?.[1];
+        return primarySelector === undefined || additionalSelector === undefined
+          ? null
+          : params(['ValidCards', `${primarySelector},${additionalSelector}`]);
+      })();
       if (damageGroup === null) return unwritableSweepRejection(ctx, effect.scope, effect.scopeFilter);
-      return ok('DamageAll', [...damageGroup, ...dealt]);
+      const supportingLines = chosenX ? ['SVar:X:Count$xPaid'] : [];
+      if (effect.tapScopeGroup !== true) {
+        const result = ok('DamageAll', [...damageGroup, ...players, ...dealt]);
+        return supportingLines.length === 0 || !result.ok
+          ? result
+          : { ...result, value: { ...result.value, supportingLines } };
+      }
+      return {
+        ok: true,
+        value: {
+          ability: { api: 'DamageAll', params: [...damageGroup, ...players, ...dealt] },
+          follow: [{ api: 'TapAll', params: damageGroup }],
+          ...(supportingLines.length === 0 ? {} : { supportingLines }),
+        },
+      };
     },
   },
   destroyPermanent: {
@@ -360,9 +589,12 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
       'targetCreature',
       'targetPlayer',
       'targetOpponent',
+      'targetCreatureOpponentControls',
       'targetArtifactOrEnchantment',
+      'targetArtifactYouDontControl',
       'targetPermanent',
       'noTarget',
+      'selfPermanent',
     ],
     deckHas: null,
     // Scoped, this is Mogg Infestation's first line: a different API, because
@@ -376,11 +608,61 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // in Forge and another in the kernel, which is the single thing this
     // transpiler exists to avoid.
     script: (effect, ctx) => {
-      if (effect.scope === undefined) return ok(ctx.api, ctx.targeting);
+      if (effect.controllerLibraryFollowup === 'revealUntilLandToGraveyard') {
+        return {
+          ok: true,
+          value: {
+            ability: { api: ctx.api, params: ctx.targeting },
+            follow: [
+              {
+                api: 'DigUntil',
+                params: params(
+                  ['Defined', 'TargetedController'],
+                  ['Valid', 'Land'],
+                  ['ValidDescription', 'land'],
+                  ['RevealedDestination', 'Graveyard'],
+                ),
+              },
+            ],
+          },
+        };
+      }
+      if (effect.scope === undefined) {
+        return ok(ctx.api, [
+          ...ctx.targeting,
+          ...monocoloredCreaturePrompt(effect.target),
+          ...dealtDamageCreaturePrompt(effect.target),
+        ]);
+      }
       const group = sweepSelection(ctx, effect.scope, effect.scopeFilter);
       return group === null
         ? unwritableSweepRejection(ctx, effect.scope, effect.scopeFilter)
         : ok('DestroyAll', group);
+    },
+  },
+  destroyAttachedPermanents: {
+    api: 'DestroyAll',
+    targets: ['thatCreature', 'targetPermanent'],
+    deckHas: null,
+    script: (effect, ctx) => {
+      const attachment = effect.filter.subtypes?.length === 1 ? effect.filter.subtypes[0] : null;
+      if (effect.target.kind === 'thatCreature' && attachment === 'Equipment') {
+        return ok(ctx.api, params(['ValidCards', 'Targeted.Equipment+Attached']));
+      }
+      if (effect.target.kind === 'targetPermanent' && attachment === 'Aura') {
+        return ok(ctx.api, [...params(['ValidCards', 'Card.Aura+AttachedTo Targeted']), ...ctx.targeting]);
+      }
+      return {
+        ok: false,
+        rejections: [
+          rejection(
+            'UNMAPPED_EFFECT_KIND',
+            ctx.cardId,
+            `${ctx.path}.filter`,
+            'attached-permanent destruction maps only Equipment on a retained creature or Auras on a targeted land',
+          ),
+        ],
+      };
     },
   },
   pumpUntilEndOfTurn: {
@@ -398,11 +680,16 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // purely to keep the two legality tables in agreement.
     targets: [
       'targetCreature',
+      'targetCreatureYouControl',
+      'targetCreatureYouDontControl',
       'targetCreatureDefendingPlayerControls',
       'targetPlayer',
       'targetOpponent',
       'selfCreature',
+      'enchantedCreature',
       'noTarget',
+      'thatCreature',
+      'thatCreaturesController',
     ],
     deckHas: null,
     script: (effect, ctx) => {
@@ -434,7 +721,32 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
       // `FORGE_KEYWORDS` is the same table the grant kind and a printed `K:`
       // line read, so a rider and a printed keyword spell identically.
       const rider = effect.keyword === undefined ? [] : params(['KW', FORGE_KEYWORDS[effect.keyword]]);
-      const deltas = [...params(['NumAtt', attack], ['NumDef', defense]), ...rider];
+      const omitZero = effect.target.kind === 'selfCreature';
+      // Forge's `IsCurse` is an AI hint rather than a rule the card carries,
+      // so it is derived at this export boundary instead of entering the DSL.
+      // Its useful source-attested role here is disambiguating an
+      // indiscriminate negative sweep: Golgari Charm, Mutilate and Nausea all
+      // say `Creature`, so the selector alone does not tell Forge which mode is
+      // hostile. A targeted or controller-qualified selector already carries
+      // that direction, and Forge's shipped Chemister's Trick, Downsize, Cower
+      // in Fear and Public Execution lines deliberately omit this hint.
+      const hostileBlockingPump =
+        effect.target.kind === 'targetCreature' &&
+        effect.target.filter?.combat === 'blocking' &&
+        (attack.startsWith('-') || defense.startsWith('-'));
+      const curse =
+        (effect.scope === 'allPermanents' && (attack.startsWith('-') || defense.startsWith('-'))) ||
+        hostileBlockingPump
+          ? params(['IsCurse', 'True'])
+          : [];
+      const deltas = [
+        ...params(
+          ['NumAtt', omitZero && attack === '+0' ? undefined : attack],
+          ['NumDef', omitZero && defense === '+0' ? undefined : defense],
+        ),
+        ...curse,
+        ...rider,
+      ];
       if (effect.scope === undefined) return ok(ctx.api, [...ctx.targeting, ...deltas]);
       // Arms of Hadar, which is this row scoped: the same two deltas over a
       // named group under `PumpAll` instead of over one target under `Pump`.
@@ -446,7 +758,11 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
   },
   drawCards: {
     api: 'Draw',
-    targets: ['noTarget', 'targetPlayer'],
+    // `triggeringPlayer` is reachable only through the validated Righteous
+    // Authority bundle. The generic target mapper correctly contributes no
+    // clause for a retained event player; the trigger writes `Defined$
+    // TriggeredPlayer` at its effect seam.
+    targets: ['noTarget', 'targetPlayer', 'triggeringPlayer'],
     deckHas: null,
     // `players` is Temple Bell, and Forge writes it the short way: `A:AB$ Draw |
     // Cost$ T | NumCards$ 1 | Defined$ Player`. `FORGE_PLAYER_SCOPE_DEFINED` is
@@ -455,22 +771,69 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // sweep replaces the target clause rather than qualifying it, because the
     // `noTarget` slot beside it would otherwise write `Defined$ You` and draw
     // for one.
-    script: (effect, ctx) =>
-      effect.players === undefined
-        ? numCards(effect.count, ctx)
-        : numCards(effect.count, {
-            ...ctx,
-            targeting: params(['Defined', FORGE_PLAYER_SCOPE_DEFINED[effect.players]]),
-          }),
+    script: (effect, ctx) => {
+      const chosenX = !isLiteralAmount(effect.count) && effect.count.kind === 'chosenX';
+      if (effect.players === undefined) {
+        const scripted = chosenX
+          ? ok(ctx.api, [...ctx.targeting, ...params(['NumCards', 'X'])])
+          : numCards(effect.count, ctx);
+        if (!scripted.ok) return scripted;
+        const supportingLines = [
+          ...(chosenX ? ['SVar:X:Count$xPaid'] : []),
+          ...(targetsAnyNumber(effect.target) ? ['SVar:MaxTgt:PlayerCountPlayers$Amount'] : []),
+        ];
+        if (supportingLines.length === 0) return scripted;
+        return {
+          ok: true,
+          value: {
+            ...scripted.value,
+            supportingLines,
+          },
+        };
+      }
+      const cards = chosenX ? 'X' : forgeNumber(effect.count, ctx.computed);
+      if (cards === null) return computedRejection(ctx.cardId, `${ctx.path}.count`);
+      const scripted = ok(
+        ctx.api,
+        params(['NumCards', cards], ['Defined', FORGE_PLAYER_SCOPE_DEFINED[effect.players]]),
+      );
+      if (!scripted.ok) return scripted;
+      return chosenX
+        ? { ...scripted, value: { ...scripted.value, supportingLines: ['SVar:X:Count$xPaid'] } }
+        : scripted;
+    },
   },
   gainLife: {
     api: 'GainLife',
-    targets: ['noTarget', 'targetPlayer'],
+    targets: ['noTarget', 'targetPlayer', 'thatCreaturesController'],
     deckHas: 'LifeGain',
     script: (effect, ctx) => {
-      const life = forgeNumber(effect.amount, ctx.computed);
+      const chosenX = !isLiteralAmount(effect.amount) && effect.amount.kind === 'chosenX';
+      const chosenColorCount =
+        !isLiteralAmount(effect.amount) && effect.amount.kind === 'triggeringSpellChosenColorCount';
+      const targetedPlayerHand = effect.amountFrom === 'thatPlayersHandSize';
+      const life =
+        chosenX || chosenColorCount || targetedPlayerHand ? 'X' : forgeNumber(effect.amount, ctx.computed);
       if (life === null) return computedRejection(ctx.cardId, `${ctx.path}.amount`);
-      return ok(ctx.api, [...ctx.targeting, ...params(['LifeAmount', life])]);
+      const scripted = ok(ctx.api, [
+        ...(chosenColorCount ? [] : ctx.targeting),
+        ...params(['LifeAmount', life]),
+      ]);
+      if (!scripted.ok) return scripted;
+      const supportingLines = [
+        ...(chosenX ? ['SVar:X:Count$xPaid'] : []),
+        ...(chosenColorCount ? ['SVar:X:Count$HasNumChosenColors.TriggeredCard'] : []),
+        ...(targetedPlayerHand ? ['SVar:X:Count$ValidHand Card.TargetedPlayerOwn'] : []),
+        ...(targetsAnyNumber(effect.target) ? ['SVar:MaxTgt:PlayerCountPlayers$Amount'] : []),
+      ];
+      if (supportingLines.length === 0) return scripted;
+      return {
+        ok: true,
+        value: {
+          ...scripted.value,
+          supportingLines,
+        },
+      };
     },
   },
   counterSpell: {
@@ -483,6 +846,7 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // target clause instead of going through `targetParams`, because the
     // primitive carries no `TargetSpec` at all, so the filter is read here.
     script: (effect, ctx) => {
+      const opposing = 'spellSelection' in effect && effect.spellSelection === 'targetSpellYouDontControl';
       const members =
         effect.spellFilter === undefined ? [] : forgeFilteredTargets('Card', effect.spellFilter, 'qualifier');
       if (members === null)
@@ -490,38 +854,220 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
           ok: false,
           rejections: unmappedFilterRejections(ctx, `${ctx.path}.spellFilter`, effect.spellFilter),
         };
+      const instantSorcery =
+        effect.spellFilter?.cardTypes?.length === 2 &&
+        effect.spellFilter.cardTypes[0] === 'instant' &&
+        effect.spellFilter.cardTypes[1] === 'sorcery';
+      const nonCreature =
+        effect.spellFilter?.excludeCardTypes?.length === 1 &&
+        effect.spellFilter.excludeCardTypes[0] === 'creature';
+      const creature =
+        effect.spellFilter?.cardTypes?.length === 1 && effect.spellFilter.cardTypes[0] === 'creature';
+      const validTargets = instantSorcery ? ['Instant', 'Sorcery'] : members;
+      const chosenX = effect.unlessCost !== undefined && 'kind' in effect.unlessCost;
+      const result = ok(
+        ctx.api,
+        params(
+          ['TargetType', 'Spell'],
+          [
+            'ValidTgts',
+            (validTargets.length === 0 ? ['Card'] : validTargets)
+              .map((member) => (opposing ? `${member}.YouDontCtrl` : member))
+              .join(','),
+          ],
+          [
+            'TgtPrompt',
+            opposing
+              ? "Select target spell you don't control"
+              : instantSorcery
+                ? 'Select target instant or sorcery spell'
+                : creature
+                  ? 'Select target creature spell'
+                  : nonCreature
+                    ? 'Select target noncreature spell'
+                    : 'Select target spell',
+          ],
+          ['Destination', effect.destination === 'exile' ? 'Exile' : undefined],
+          [
+            'UnlessCost',
+            effect.unlessCost === undefined
+              ? undefined
+              : 'kind' in effect.unlessCost
+                ? 'X'
+                : forgeManaCost(effect.unlessCost),
+          ],
+        ),
+      );
+      if (!result.ok) return result;
+      const supportingLines = [
+        ...(chosenX ? ['SVar:X:Count$xPaid'] : []),
+        ...(effect.dealDamageToControllerEqualToSpellPower === true
+          ? ['SVar:Backlash:Targeted$CardPower']
+          : []),
+      ];
+      return {
+        ok: true,
+        value: {
+          ...result.value,
+          ...(effect.dealDamageToControllerEqualToSpellPower === true
+            ? {
+                follow: [
+                  {
+                    api: 'DealDamage',
+                    params: params(['NumDmg', 'Backlash'], ['Defined', 'TargetedController']),
+                  },
+                ],
+              }
+            : {}),
+          ...(supportingLines.length === 0 ? {} : { supportingLines }),
+        },
+      };
+    },
+  },
+  changeSpellTargets: {
+    api: 'ChangeTargets',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) => {
+      const members =
+        effect.spellFilter === undefined ? [] : forgeFilteredTargets('Card', effect.spellFilter, 'qualifier');
+      if (members === null) {
+        return {
+          ok: false,
+          rejections: unmappedFilterRejections(ctx, `${ctx.path}.spellFilter`, effect.spellFilter),
+        };
+      }
       return ok(
         ctx.api,
         params(
           ['TargetType', 'Spell'],
+          ['Optional', 'True'],
           ['ValidTgts', members.length === 0 ? 'Card' : members.join(',')],
-          ['TgtPrompt', 'Select target spell'],
         ),
       );
     },
+  },
+  copySpell: {
+    api: 'CopySpellAbility',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) => {
+      const controlled = effect.spellSelection === 'targetSpellYouControl';
+      const members =
+        effect.spellFilter === undefined ? [] : forgeFilteredTargets('Card', effect.spellFilter, 'base');
+      if (members === null) {
+        return {
+          ok: false,
+          rejections: unmappedFilterRejections(ctx, `${ctx.path}.spellFilter`, effect.spellFilter),
+        };
+      }
+      return ok(
+        ctx.api,
+        params(
+          [
+            'ValidTgts',
+            (members.length === 0 ? ['Card'] : members)
+              .map((member) => (controlled ? `${member}.YouCtrl` : member))
+              .join(','),
+          ],
+          ['TargetType', 'Spell'],
+          ['AILogic', controlled ? 'Once' : undefined],
+          ['MayChooseTarget', 'True'],
+        ),
+      );
+    },
+  },
+  copyNextInstantOrSorceryThisTurn: {
+    api: 'DelayedTrigger',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: params(
+            ['AILogic', 'SpellCopy'],
+            ['Mode', 'SpellCast'],
+            ['ValidCard', 'Instant,Sorcery'],
+            ['ValidActivatingPlayer', 'You'],
+            ['ThisTurn', 'True'],
+            ['Execute', 'EffTrigCopy'],
+          ),
+        },
+        supportingLines: [
+          'SVar:EffTrigCopy:DB$ CopySpellAbility | Defined$ TriggeredSpellAbility | MayChooseTarget$ True',
+        ],
+      },
+    }),
+  },
+  populate: {
+    api: 'CopyPermanent',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) => ok(ctx.api, params(['Populate', 'True'])),
+  },
+  createTokenCopyOfSelf: {
+    api: 'CopyPermanent',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) => ok(ctx.api, params(['Defined', 'Self'])),
   },
   createToken: {
     api: 'Token',
     targets: [],
     deckHas: 'Token',
     script: (effect, ctx) => {
-      if (!isLiteralAmount(effect.count)) return computedRejection(ctx.cardId, `${ctx.path}.count`);
+      const lifeTotal = !isLiteralAmount(effect.count) && effect.count.kind === 'controllerLifeTotal';
+      const tokenAmount = isLiteralAmount(effect.count)
+        ? String(effect.count)
+        : lifeTotal
+          ? 'X'
+          : ctx.computed.numeral(effect.count);
+      const chosenXBody = effect.token.creationPowerToughness?.kind === 'chosenX';
+      if (tokenAmount === null) {
+        return computedRejection(ctx.cardId, `${ctx.path}.count`);
+      }
       const rejections = tokenRejections(effect.token, ctx);
       if (rejections.length > 0) return { ok: false, rejections };
       const ability: ForgeAbility = {
         api: ctx.api,
         params: params(
-          ['TokenAmount', String(effect.count)],
+          ...(effect.count === 1 ? [] : ([['TokenAmount', tokenAmount]] as const)),
           ['TokenScript', forgeTokenScriptName(effect.token)],
           ['TokenOwner', 'You'],
+          ...(chosenXBody
+            ? ([
+                ['TokenPower', 'X'],
+                ['TokenToughness', 'X'],
+              ] as const)
+            : []),
         ),
       };
-      return { ok: true, value: { ability, token: effect.token } };
+      return {
+        ok: true,
+        value: {
+          ability,
+          token: effect.token,
+          ...(lifeTotal || chosenXBody
+            ? {
+                supportingLines: [`SVar:X:${chosenXBody ? 'Count$xPaid' : 'Count$YourLifeTotal'}`],
+              }
+            : {}),
+        },
+      };
     },
   },
   tapPermanent: {
     api: 'Tap',
-    targets: ['targetCreature', 'targetPlayer', 'targetOpponent', 'thatCreature'],
+    targets: [
+      'targetCreature',
+      'targetCreatureYouDontControl',
+      'targetPlayer',
+      'targetOpponent',
+      'targetPermanent',
+      'thatCreature',
+    ],
     deckHas: null,
     // Dawnglare Invoker's activated ability is this row scoped, down to the
     // parameters: `TapAll` with the group beside the target, and tapping is the
@@ -538,15 +1084,43 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
         return unwritableSweepRejection(ctx, effect.scope, effect.scopeFilter);
       const tapped = tapGroup === null ? ok(ctx.api, ctx.targeting) : ok('TapAll', tapGroup);
       if (effect.doesNotUntap !== true || !tapped.ok) return tapped;
-      return { ok: true, value: { ...tapped.value, follow: holdPump(effect.scope !== undefined) } };
+      return {
+        ok: true,
+        value: { ...tapped.value, follow: [holdPump(effect.scope !== undefined)] },
+      };
     },
   },
   returnToHand: {
     api: 'ChangeZone',
-    targets: ['targetCreature', 'targetArtifactOrEnchantment'],
+    targets: [
+      'targetCreature',
+      'targetCreatureDefendingPlayerControls',
+      'targetArtifactOrEnchantment',
+      'targetNonlandPermanentOpponentControls',
+      'targetNonlandPermanentYouDontControl',
+      'targetCardInYourGraveyard',
+      'targetCardInAGraveyard',
+      'selfPermanent',
+    ],
     deckHas: null,
-    script: (_effect, ctx) =>
-      ok(ctx.api, [...ctx.targeting, ...params(['Origin', 'Battlefield'], ['Destination', 'Hand'])]),
+    script: (effect, ctx) =>
+      ok(ctx.api, [
+        ...ctx.targeting,
+        ...params(
+          ['Origin', isGraveyardCardTargetKind(effect.target.kind) ? 'Graveyard' : 'Battlefield'],
+          ['Destination', 'Hand'],
+        ),
+      ]),
+  },
+  exchangeControl: {
+    api: 'ExchangeControl',
+    targets: ['targetCreature', 'targetPermanentYouNeitherOwnNorControl'],
+    deckHas: null,
+    script: (effect, ctx) =>
+      ok(
+        ctx.api,
+        effect.exchangeSource === true ? [...params(['Defined', 'Self']), ...ctx.targeting] : ctx.targeting,
+      ),
   },
   millCards: {
     // `targetOpponent` rides the same `ValidTgts$` clause `targetPlayer` does
@@ -555,29 +1129,69 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // second parameter — only the DSL's permission, which arrived with the
     // hand-authored widening on this kind's rule.
     api: 'Mill',
-    targets: ['noTarget', 'targetPlayer', 'targetOpponent'],
+    targets: ['noTarget', 'targetPlayer', 'targetOpponent', 'triggeringPlayer'],
     deckHas: null,
-    script: (effect, ctx) => numCards(effect.count, ctx),
+    script: (effect, ctx) => {
+      if (!isLiteralAmount(effect.count) && effect.count.kind === 'triggeringDamageAmount') {
+        return {
+          ok: true,
+          value: {
+            ability: {
+              api: ctx.api,
+              params: [...ctx.targeting, ...params(['NumCards', 'X'])],
+            },
+            supportingLines: ['SVar:X:TriggerCount$DamageAmount'],
+          },
+        };
+      }
+      if (!isLiteralAmount(effect.count) && effect.count.kind === 'halfTargetLibraryRoundedDown') {
+        return {
+          ok: true,
+          value: {
+            ability: {
+              api: ctx.api,
+              params: [...ctx.targeting, ...params(['NumCards', 'X'])],
+            },
+            supportingLines: ['SVar:X:TargetedPlayer$CardsInLibrary/HalfDown'],
+          },
+        };
+      }
+      return numCards(effect.count, ctx);
+    },
   },
   putCounters: {
     api: 'PutCounter',
-    // `noTarget` and `targetCreatureDefendingPlayerControls` arrive together
-    // with the DSL's own widening (`mtg-hfex`, `mtg-fz3s`) and for the reasons
-    // the neighboring rows already carry: the first is the untargeted sweep's
-    // slot, the second is `Creature.DefenderCtrl` (`vocabulary-map.ts`), which
-    // `pumpUntilEndOfTurn` has written since it was the only row that could.
-    // Both must be listed or `conformance.test.ts`'s drift alarm catches the
-    // gap against `legalTargetsFor('putCounters')`.
+    // The hand-authored target widenings live in the DSL rule for this effect;
+    // this declaration mirrors all of them so the conformance drift alarm can
+    // prove Forge does not silently drop one. `selfCreature` is Quirion Dryad's
+    // source referent and maps to `Defined$ Self` through `targetParams`.
     targets: [
       'targetCreature',
       'targetCreatureYouControl',
       'targetOpponent',
+      'thatCreature',
+      'selfCreature',
       'selfPermanent',
       'noTarget',
       'targetCreatureDefendingPlayerControls',
+      'enchantedCreature',
+      'equippedCreature',
     ],
     deckHas: null,
     script: (effect, ctx) => {
+      if (effect.timing === 'nextEndStep') {
+        return {
+          ok: false,
+          rejections: [
+            rejection(
+              'UNMAPPED_EFFECT_KIND',
+              ctx.cardId,
+              `${ctx.path}.timing`,
+              'next-end-step counter placement requires a source-attested delayed-trigger envelope',
+            ),
+          ],
+        };
+      }
       const counters = FORGE_COUNTER_TYPES[effect.counter] ?? null;
       if (counters === null) {
         return {
@@ -621,7 +1235,14 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
       // list, and whether the trailing `CounterNum$ 1` is redundant or wrong is
       // the same standing gap the rest of this file carries: read off
       // `res/cardsfolder`, not off a game Forge ran.
-      if (!isLiteralAmount(effect.count)) return computedRejection(ctx.cardId, `${ctx.path}.count`);
+      const triggeringDamageAmount =
+        !isLiteralAmount(effect.count) && effect.count.kind === 'triggeringDamageAmount';
+      const count = triggeringDamageAmount
+        ? 'X'
+        : isLiteralAmount(effect.count)
+          ? String(effect.count)
+          : ctx.computed.numeral(effect.count);
+      if (count === null) return computedRejection(ctx.cardId, `${ctx.path}.count`);
       // A scoped placement is a different Forge API for the reason a scoped
       // exile is: Forge separates acting on one object from acting on a group,
       // and the DSL folds both into one primitive plus a scope word. Only the
@@ -640,15 +1261,49 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
         effect.scope === undefined ? null : sweepSelection(ctx, effect.scope, effect.scopeFilter);
       if (effect.scope !== undefined && scoped === null)
         return unwritableSweepRejection(ctx, effect.scope, effect.scopeFilter);
-      const selection = scoped ?? ctx.targeting;
+      const condition =
+        effect.recipientCondition === undefined
+          ? []
+          : params(
+              ['ConditionDefined', 'Equipped'],
+              ['ConditionPresent', `Creature.${FORGE_COLOR_PROPERTIES[effect.recipientCondition.color]}`],
+              ['ConditionCompare', 'EQ1'],
+            );
+      const selection = [...(scoped ?? ctx.targeting), ...condition];
       const [only, ...rest] = counters;
+      const withKeywordRider = (primary: EffectScriptResult): EffectScriptResult => {
+        if (!primary.ok || effect.keyword === undefined) return primary;
+        return {
+          ok: true,
+          value: {
+            ...primary.value,
+            follow: [
+              {
+                api: 'PumpAll',
+                params: [...selection, ...params(['KW', FORGE_KEYWORDS[effect.keyword]])],
+              },
+            ],
+          },
+        };
+      };
       if (rest.length === 0) {
         const singular: ForgeParam = ['CounterType', only];
-        return ok(api, [...selection, ...params(singular, ['CounterNum', String(effect.count)])]);
+        const rendered = withKeywordRider(
+          ok(api, [...selection, ...params(singular, ['CounterNum', count])]),
+        );
+        if (!triggeringDamageAmount || !rendered.ok) return rendered;
+        return {
+          ok: true,
+          value: {
+            ...rendered.value,
+            supportingLines: [...(rendered.value.supportingLines ?? []), 'SVar:X:TriggerCount$DamageAmount'],
+          },
+        };
       }
+      if (!isLiteralAmount(effect.count)) return computedRejection(ctx.cardId, `${ctx.path}.count`);
       const repeated = Array.from({ length: effect.count }, () => counters).flat();
       const plural: ForgeParam = ['CounterTypes', repeated.join(',')];
-      return ok(api, [...selection, ...params(plural, ['CounterNum', '1'])]);
+      return withKeywordRider(ok(api, [...selection, ...params(plural, ['CounterNum', '1'])]));
     },
   },
   exileTarget: {
@@ -658,7 +1313,17 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     api: 'ChangeZone',
     // Altar's Light is `A:SP$ ChangeZone | ValidTgts$ Artifact,Enchantment |
     // Destination$ Exile`, which is this row with one selector swapped.
-    targets: ['targetCreature', 'targetOpponent', 'targetArtifactOrEnchantment', 'targetPermanent'],
+    targets: [
+      'targetCreature',
+      'targetOpponent',
+      'targetArtifactOrEnchantment',
+      'targetPermanent',
+      'targetCreatureOpponentControls',
+      'targetCardInYourGraveyard',
+      'targetCardInOpponentsGraveyard',
+      'targetCardInAGraveyard',
+      'noTarget',
+    ],
     deckHas: null,
     // The same `ChangeZone` with the destination changed, which is how
     // `res/cardsfolder` writes every exile-a-creature spell — and a different
@@ -668,15 +1333,58 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
       // `RememberChanged$ True` only when a later clause counts what this one
       // exiled; `remember.ts` decides that from the whole chain, because this
       // writer can only see one effect.
-      const remembered = ctx.computed.remembers ? [REMEMBER_CHANGED] : [];
+      const delayedReturn = effect.returnAtNextEndStep !== undefined;
+      const remembered = ctx.computed.remembers || delayedReturn ? [REMEMBER_CHANGED] : [];
       if (effect.scope === undefined) {
-        return ok(ctx.api, [
-          ...ctx.targeting,
-          ...params(['Origin', 'Battlefield'], ['Destination', 'Exile']),
+        const ability = {
+          api: ctx.api,
+          params: [
+            ...ctx.targeting,
+            ...params(
+              ['Origin', isGraveyardCardTargetKind(effect.target.kind) ? 'Graveyard' : 'Battlefield'],
+              ['Destination', 'Exile'],
+            ),
+            ...remembered,
+          ],
+        };
+        if (!delayedReturn) return { ok: true, value: { ability } };
+        return {
+          ok: true,
+          value: {
+            ability,
+            follow: [
+              {
+                api: 'DelayedTrigger',
+                params: params(
+                  ['Mode', 'Phase'],
+                  ['Phase', 'End of Turn'],
+                  ['Execute', 'DelayedZoneReturn'],
+                  ['RememberObjects', 'RememberedLKI'],
+                  ['TriggerDescription', 'Return exiled card to the battlefield.'],
+                ),
+              },
+              { api: 'Cleanup', params: params(['ClearRemembered', 'True']) },
+            ],
+            supportingLines: [
+              'SVar:DelayedZoneReturn:DB$ ChangeZone | Origin$ Exile | Destination$ Battlefield | Defined$ DelayTriggerRememberedLKI | Tapped$ True',
+            ],
+            cleansRemembered: true,
+          },
+        };
+      }
+      if (isSpaceScope(effect.scope)) {
+        if (effect.scopeFilter === undefined) return spaceScopeZoneMoveRejection(ctx, effect.scope);
+        const selector = forgeSweepSelector(effect.scope, effect.scopeFilter);
+        if (selector === null) return unwritableSweepRejection(ctx, effect.scope, effect.scopeFilter);
+        return ok('ChangeZoneAll', [
+          ...params(['ChangeType', selector], ['Origin', 'Battlefield'], ['Destination', 'Exile']),
           ...remembered,
         ]);
       }
-      if (isSpaceScope(effect.scope)) return spaceScopeZoneMoveRejection(ctx, effect.scope);
+      if (isAllPlayersScope(effect.scope)) return spaceScopeZoneMoveRejection(ctx, effect.scope);
+      if (effect.scope === 'targetAndPermanentsItsPlayerControls') {
+        return unwritableSweepRejection(ctx, effect.scope, undefined);
+      }
       return ok(FORGE_SCOPED_EFFECT_APIS[effect.scope], [
         ...ctx.targeting,
         ...params(
@@ -694,11 +1402,117 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // Forge's own name for CR 701.16a's action on a whole hand. Unverified against
     // a booted Forge, like every row in this file; `mtg-17a` is that check.
     api: 'RevealHand',
-    targets: ['targetOpponent'],
+    targets: ['targetOpponent', 'targetPlayer'],
     deckHas: null,
     // The targeting clause is the whole ability: which hand is the target, and
     // showing it is what the API does.
     script: (_effect, ctx) => ok(ctx.api, ctx.targeting),
+  },
+  revealRandomCardFromHand: {
+    // Forge's shipped Merfolk Spy source: the random flag precedes the event
+    // referent, and `Reveal` (not `RevealHand`) reveals the selected subset.
+    api: 'Reveal',
+    targets: ['triggeringPlayer'],
+    deckHas: null,
+    script: (_effect, ctx) => ok(ctx.api, [...params(['Random', 'True']), ...ctx.targeting]),
+  },
+  playRandomHandCardWithoutPayingManaCost: {
+    // Wild Evocation's shipped four-link chain. Remembering bridges the random
+    // reveal to mutually exclusive land and spell selectors; Cleanup makes the
+    // register local to this resolution.
+    api: 'Reveal',
+    targets: ['triggeringPlayer'],
+    deckHas: null,
+    script: (_effect, ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: [...params(['Random', 'True'], ['RememberRevealed', 'True']), ...ctx.targeting],
+        },
+        follow: [
+          {
+            api: 'ChangeZone',
+            params: params(
+              ['Origin', 'Hand'],
+              ['Destination', 'Battlefield'],
+              ['Defined', 'ValidHand Land.IsRemembered'],
+              ['ForgetChanged', 'True'],
+            ),
+          },
+          {
+            api: 'Play',
+            params: params(
+              ['ValidZone', 'Hand'],
+              ['Controller', 'TriggeredPlayer'],
+              ['Defined', 'Remembered'],
+              ['ValidSA', 'Spell'],
+              ['WithoutManaCost', 'True'],
+            ),
+          },
+          { api: 'Cleanup', params: params(['ClearRemembered', 'True']) },
+        ],
+        cleansRemembered: true,
+      },
+    }),
+  },
+  castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts: {
+    api: 'Play',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) => {
+      if (effect.topXOriginalsProfile !== true) {
+        return ok(
+          ctx.api,
+          params(
+            ['Defined', 'Remembered'],
+            ['Amount', 'All'],
+            ['CopyCard', 'True'],
+            ['WithoutManaCost', 'True'],
+          ),
+        );
+      }
+      return {
+        ok: true,
+        value: {
+          ability: {
+            api: 'Dig',
+            params: params(
+              ['Defined', 'You'],
+              ['DigNum', 'X'],
+              ['ChangeNum', 'All'],
+              ['DestinationZone', 'Exile'],
+              ['RememberChanged', 'True'],
+            ),
+          },
+          follow: [
+            {
+              api: 'Play',
+              params: params(
+                ['Valid', 'Card.IsRemembered+YouOwn'],
+                ['ValidZone', 'Exile'],
+                ['ValidSA', 'Instant.cmcLEX,Sorcery.cmcLEX'],
+                ['Controller', 'You'],
+                ['WithoutManaCost', 'True'],
+                ['Optional', 'True'],
+                ['Amount', 'All'],
+              ),
+            },
+            {
+              api: 'ChangeZoneAll',
+              params: params(
+                ['Origin', 'Exile'],
+                ['Destination', 'Graveyard'],
+                ['ChangeType', 'Card.IsRemembered+YouOwn'],
+              ),
+            },
+            { api: 'Cleanup', params: params(['ClearRemembered', 'True']) },
+          ],
+          supportingLines: ['SVar:X:Count$xPaid'],
+          cleansRemembered: true,
+        },
+      };
+    },
   },
   scry: {
     /**
@@ -739,10 +1553,69 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // does and what its printed text says. Unverified against a booted Forge,
     // like every row in this file.
     api: 'ChangeZoneAll',
-    targets: ['targetPlayer', 'targetOpponent'],
+    targets: [
+      'targetPlayer',
+      'targetOpponent',
+      'noTarget',
+      'targetCardInYourGraveyard',
+      'targetCardInAGraveyard',
+    ],
     deckHas: null,
     script: (effect, ctx) => {
+      if (effect.fromBattlefieldThisTurn === true) {
+        return ok('ChangeZone', [
+          ...params(
+            ['Origin', 'Graveyard'],
+            ['Destination', 'Battlefield'],
+            ['Defined', 'ValidGraveyard Permanent.YouOwn+ThisTurnEnteredFrom_Battlefield'],
+          ),
+        ]);
+      }
+      if (effect.scope === undefined) {
+        const arrival = effect.alsoBecomes;
+        const ability: ForgeAbility = {
+          api: 'ChangeZone',
+          params: [
+            ...ctx.targeting,
+            ...params(
+              ['Origin', 'Graveyard'],
+              ['Destination', FORGE_CARD_DESTINATIONS[effect.destination ?? 'battlefield']],
+            ),
+            ...(effect.control === 'you' ? params(['GainControl', 'True']) : []),
+            ...(arrival === undefined ? [] : params(['StaticEffect', 'Animate'])),
+          ],
+        };
+        if (arrival === undefined) return { ok: true, value: { ability } };
+        return {
+          ok: true,
+          value: {
+            ability,
+            supportingLines: [
+              `SVar:Animate:Mode$ Continuous | Affected$ Card.IsRemembered${
+                arrival.subtypes === undefined ? '' : ` | AddType$ ${arrival.subtypes.join(',')}`
+              }${
+                arrival.colors === undefined
+                  ? ''
+                  : ` | AddColor$ ${arrival.colors.map((color) => FORGE_COLOR_PROPERTIES[color]).join(',')}`
+              }`,
+            ],
+          },
+        };
+      }
+      if (effect.scope === 'creatureCardsInAllGraveyards') {
+        return ok(ctx.api, [
+          ...params(
+            ['ChangeType', 'Creature'],
+            ['Origin', 'Graveyard'],
+            ['Destination', FORGE_CARD_DESTINATIONS[effect.destination ?? 'battlefield']],
+          ),
+          ...(effect.control === 'you' ? params(['GainControl', 'True']) : []),
+        ]);
+      }
       if (isSpaceScope(effect.scope)) return spaceScopeZoneMoveRejection(ctx, effect.scope);
+      if (effect.scope === 'targetAndPermanentsItsPlayerControls') {
+        return unwritableSweepRejection(ctx, effect.scope, undefined);
+      }
       return ok(FORGE_SCOPED_EFFECT_APIS[effect.scope], [
         ...ctx.targeting,
         ...params(
@@ -756,12 +1629,13 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
           // producing silently.
           ['Destination', FORGE_CARD_DESTINATIONS[effect.destination ?? 'battlefield']],
         ),
+        ...(effect.control === 'you' ? params(['GainControl', 'True']) : []),
       ]);
     },
   },
   fight: {
     api: 'Fight',
-    targets: ['targetCreatureYouDontControl'],
+    targets: ['targetCreatureYouDontControl', 'targetCreatureDefendingPlayerControls'],
     deckHas: null,
     // Affectionate Indrik, verbatim: `DB$ Fight | Defined$ TriggeredCardLKICopy
     // | ValidTgts$ Creature.YouDontCtrl`. `Defined$` is the other fighter, and
@@ -776,7 +1650,80 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // The `Defined$` value is what confines this row to a `selfEnters` trigger:
     // a fight on a sorcery would have to name the caster's chosen creature, and
     // `@mtg/dsl`'s `checkSourceBodyEffectInTrigger` refuses to print one.
-    script: (_effect, ctx) => ok(ctx.api, [...params(['Defined', 'TriggeredCardLKICopy']), ...ctx.targeting]),
+    script: (effect, ctx) => {
+      if (effect.fighter === undefined) {
+        return ok(ctx.api, [...params(['Defined', 'TriggeredCardLKICopy']), ...ctx.targeting]);
+      }
+      const fighterTargets = FORGE_VALID_TARGETS.targetCreatureYouControl;
+      if (fighterTargets === null) {
+        throw new Error('Forge has no selector for target creature you control');
+      }
+      return {
+        ok: true,
+        value: {
+          ability: {
+            api: 'Pump',
+            params: params(
+              ['ValidTgts', fighterTargets],
+              ['TgtPrompt', 'Select target creature you control'],
+              ['StackDescription', 'None'],
+            ),
+          },
+          follow: [
+            {
+              api: ctx.api,
+              params: [
+                ...params(['Defined', 'ParentTarget']),
+                ...ctx.targeting,
+                ...params(['TgtPrompt', "Select target creature you don't control"]),
+              ],
+            },
+          ],
+        },
+      };
+    },
+  },
+  petrifyCreature: {
+    api: 'PutCounter',
+    targets: ['targetCreature'],
+    deckHas: null,
+    script: (_effect, ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: [
+            ...ctx.targeting,
+            ...params(['CounterNum', '1'], ['CounterType', 'PETRIFICATION'], ['IsCurse', 'True']),
+          ],
+        },
+        follow: [
+          {
+            api: 'Animate',
+            params: params(
+              ['Defined', 'Targeted'],
+              ['Keywords', 'Defender'],
+              ['Colors', 'Colorless'],
+              ['OverwriteColors', 'True'],
+              ['Types', 'Artifact'],
+              ['Duration', 'Permanent'],
+            ),
+          },
+          {
+            api: 'Effect',
+            params: params(
+              ['RememberObjects', 'Targeted'],
+              ['StaticAbilities', 'PetrificationCantActivate'],
+              ['ForgetOnMoved', 'Battlefield'],
+              ['Duration', 'Permanent'],
+            ),
+          },
+        ],
+        supportingLines: [
+          "SVar:PetrificationCantActivate:Mode$ CantBeActivated | ValidCard$ Card.IsRemembered | Description$ Its activated abilities can't be activated.",
+        ],
+      },
+    }),
   },
   shuffleLibrary: {
     // Forge's own one-word API, with the player named because `Shuffle` takes
@@ -800,6 +1747,58 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     script: (effect, ctx) =>
       ok(ctx.api, params(['PeekAmount', String(effect.count)], ['RevealValid', 'Card'])),
   },
+  revealTopCardToHand: {
+    // Dark Tutelage, verbatim: Forge's `Dig` both reveals and moves the same
+    // top card. Remembering that moved card lets the following `LoseLife`
+    // link read its mana value before the chain clears the register.
+    api: 'Dig',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) =>
+      ok(
+        ctx.api,
+        params(
+          ['DigNum', '1'],
+          ['Reveal', 'True'],
+          ['ChangeNum', 'All'],
+          ['ChangeValid', 'Card'],
+          ['DestinationZone', 'Hand'],
+          ...(ctx.computed.remembers ? [REMEMBER_CHANGED] : []),
+        ),
+      ),
+  },
+  revealUntilCreatureCards: {
+    api: 'DigUntil',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) => {
+      const count = forgeNumber(effect.count, ctx.computed);
+      if (count === null) return computedRejection(ctx.cardId, `${ctx.path}.count`);
+      const cleansRemembered = ctx.computed.readsRemembered && ctx.computed.isFinalRememberedRead;
+      return {
+        ok: true,
+        value: {
+          ability: {
+            api: ctx.api,
+            params: params(
+              ['Amount', count],
+              ['Valid', 'Creature.YouOwn'],
+              ['ValidDescription', 'creature'],
+              ['RevealedDestination', 'Library'],
+              ['RevealedLibraryPosition', '0'],
+              ['FoundDestination', 'Battlefield'],
+              ['Shuffle', 'True'],
+            ),
+          },
+          follow: [
+            ...(cleansRemembered ? [{ api: 'Cleanup', params: params(['ClearRemembered', 'True']) }] : []),
+            { api: 'Shuffle', params: [] },
+          ],
+          ...(cleansRemembered ? { cleansRemembered: true } : {}),
+        },
+      };
+    },
+  },
   putOnLibrary: {
     // Condemn's and Griptide's line: an ordinary `ChangeZone` off the
     // battlefield, with `LibraryPosition$` saying which end. The index is a
@@ -815,6 +1814,25 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
           ['Origin', 'Battlefield'],
           ['Destination', 'Library'],
           ['LibraryPosition', FORGE_LIBRARY_POSITIONS[effect.position]],
+        ),
+      ]),
+  },
+  putSourceAndTargetOnOwnersLibrariesThenShuffle: {
+    // Forge's shipped Void Stalker script is one ChangeZone ability over Self
+    // plus the chosen creature. Shuffle$ True applies only after the move and
+    // deduplicates a shared owner library, matching the kernel helper.
+    api: 'ChangeZone',
+    targets: ['targetCreature'],
+    deckHas: null,
+    script: (_effect, ctx) =>
+      ok(ctx.api, [
+        ...ctx.targeting,
+        ...params(
+          ['ThisDefinedAndTgts', 'Self'],
+          ['Origin', 'Battlefield'],
+          ['Destination', 'Library'],
+          ['LibraryPosition', '0'],
+          ['Shuffle', 'True'],
         ),
       ]),
   },
@@ -839,66 +1857,295 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
      * Forge's spelling for a choice made as the ability resolves. That is the
      * same moment the kernel's `activateManaSource` narrows `produces` to the
      * color the action carried, so the two surfaces ask the same question even
-     * though they ask it at different points in the activation.
+     * though they ask it at different points in the activation. Forge's
+     * Chromatic Lantern uses the canonical `Produced$ Any` spelling for the
+     * exact WUBRG choice, so that closed five-color case is preserved too.
      */
     api: 'Mana',
     targets: [],
     deckHas: null,
     script: (effect, ctx) => {
+      if (effect.distribution === 'anyCombinationOfColors') {
+        return {
+          ok: true,
+          value: {
+            ability: {
+              api: ctx.api,
+              params: params(['Produced', 'Combo Any'], ['Amount', 'X']),
+            },
+            supportingLines: ['SVar:X:Count$Valid Creature.withDefender+YouCtrl'],
+          },
+        };
+      }
       const produced = effect.produces.map((color) => FORGE_MANA_PRODUCED[color]);
       const [only] = produced;
       if (only === undefined) return computedRejection(ctx.cardId, `${ctx.path}.produces`);
-      const choice = produced.length === 1 ? only : `Combo ${produced.join(' ')}`;
       const amount = forgeNumber(effect.amount, ctx.computed);
       if (amount === null) return computedRejection(ctx.cardId, `${ctx.path}.amount`);
+      const choice =
+        amount === '1' && produced.join(' ') === 'W U B R G'
+          ? 'Any'
+          : produced.length === 1
+            ? only
+            : `Combo ${produced.join(' ')}`;
       const quantity: readonly ForgeParam[] = amount === '1' ? [] : params(['Amount', amount]);
       return ok(ctx.api, [...params(['Produced', choice]), ...quantity]);
     },
   },
-  exileGraveyard: {
-    // The scoped-move shape without a scope: `ChangeZoneAll` from `Graveyard`
-    // to `Exile`, with whose graveyard written into `ChangeType$` rather than
-    // into a `ValidTgts$` clause. The DSL primitive names an owner by word and
-    // takes no target (`exileGraveyardEffect`), so there is nothing for a
-    // targeting clause to say and `ctx.targeting` is absent here on purpose —
-    // `FORGE_GRAVEYARD_OWNERS` carries the whole answer.
-    api: 'ChangeZoneAll',
+  createEmblem: {
+    api: 'Effect',
     targets: [],
     deckHas: null,
-    script: (effect, ctx) =>
-      ok(
+    script: (effect, ctx) => {
+      const grant = effect.emblem.grantsManaAbility;
+      const subtype = grant.filter.subtypes[0];
+      const color = grant.produces[0];
+      const suffix = ctx.path.replace(/[^A-Za-z0-9]/g, '');
+      const staticName = `EmblemManaGrant${suffix}`;
+      const abilityName = `EmblemManaAbility${suffix}`;
+      const symbols = `{${color}}`.repeat(grant.amount);
+      return {
+        ok: true,
+        value: {
+          ability: {
+            api: ctx.api,
+            params: params(
+              ['Name', effect.emblem.name],
+              ['StaticAbilities', staticName],
+              ['Stackable', 'False'],
+              ['Duration', 'Permanent'],
+            ),
+          },
+          supportingLines: [
+            `SVar:${staticName}:Mode$ Continuous | Affected$ ${subtype}.YouCtrl | AffectedZone$ Battlefield | AddAbility$ ${abilityName} | Description$ ${subtype}s you control have "{T}: Add ${symbols}."`,
+            `SVar:${abilityName}:AB$ Mana | Cost$ T | Produced$ ${FORGE_MANA_PRODUCED[color]} | Amount$ ${String(grant.amount)} | SpellDescription$ Add ${symbols}.`,
+          ],
+        },
+      };
+    },
+  },
+  exileGraveyard: {
+    // Both forms are `ChangeZoneAll` from `Graveyard` to `Exile`. A targeted
+    // player uses Forge's targeting clause and moves `Card`; the legacy owner
+    // form keeps the owner in `ChangeType$` and deliberately has no target.
+    api: 'ChangeZoneAll',
+    targets: ['targetPlayer'],
+    deckHas: null,
+    script: (effect, ctx) => {
+      if (hasTarget(effect)) {
+        return ok(ctx.api, [
+          ...params(['Origin', 'Graveyard'], ['Destination', 'Exile']),
+          ...ctx.targeting,
+          ...params(['ChangeType', 'Card']),
+          ...(ctx.path.startsWith('modes[') ? params(['IsCurse', 'True']) : []),
+        ]);
+      }
+      if (effect.whose === undefined) {
+        throw new Error('Validated exileGraveyard effect lost its owner form');
+      }
+      return ok(
         ctx.api,
         params(
           ['ChangeType', FORGE_GRAVEYARD_OWNERS[effect.whose]],
           ['Origin', 'Graveyard'],
           ['Destination', 'Exile'],
         ),
-      ),
+      );
+    },
+  },
+  exileNonbasicGraveyardAndMatchingLibrary: {
+    api: 'ChangeZoneAll',
+    targets: ['targetPlayer'],
+    deckHas: null,
+    // Verbatim from Forge's Haunting Echoes script. `RememberChanged` retains
+    // only cards the first move actually changed; the follow-up lets the
+    // controller choose zero-to-all cards sharing one of those names from the
+    // targeted player's library, then cleanup ends the temporary relation.
+    script: (_effect, ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: params(
+            ['Origin', 'Graveyard'],
+            ['Destination', 'Exile'],
+            ...ctx.targeting,
+            ['ChangeType', 'Card.nonBasic'],
+            ['RememberChanged', 'True'],
+          ),
+        },
+        follow: [
+          {
+            api: 'ChangeZone',
+            params: params(
+              ['Origin', 'Library'],
+              ['DefinedPlayer', 'Targeted'],
+              ['Destination', 'Exile'],
+              ['ChangeType', 'Card.sharesNameWith Remembered'],
+              ['ChangeNum', 'X'],
+              ['Chooser', 'You'],
+              ['Shuffle', 'True'],
+            ),
+          },
+          { api: 'Cleanup', params: params(['ClearRemembered', 'True']) },
+        ],
+        supportingLines: ['SVar:X:TargetedPlayer$CardsInLibrary'],
+      },
+    }),
+  },
+  eachPlayerNamesCardThenRevealsTop: {
+    api: 'NameCard',
+    targets: [],
+    deckHas: null,
+    // Verbatim machinery from Forge's Conundrum Sphinx script: collect every
+    // player's name before the repeated Dig reveals anything, then clear the
+    // temporary named-card relation. `DBDig` stays a named supporting ability
+    // because RepeatEach invokes it for each remembered player rather than as
+    // the next linear subability in this effect's chain.
+    script: (_effect, ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: params(['Defined', 'Player'], ['AILogic', 'RandomInComputerDeck']),
+        },
+        follow: [
+          {
+            api: 'RepeatEach',
+            params: params(['RepeatPlayers', 'Player'], ['RepeatSubAbility', 'DBDig']),
+          },
+          { api: 'Cleanup', params: params(['ClearNamedCard', 'True']) },
+        ],
+        supportingLines: [
+          'SVar:DBDig:DB$ Dig | DigNum$ 1 | Defined$ Player.IsRemembered | ChangeNum$ All | ChangeValid$ Card.NamedByRememberedPlayer | Reveal$ True',
+        ],
+      },
+    }),
+  },
+  nameNonlandCardAndExileMatchingOpponentZones: {
+    api: 'NameCard',
+    targets: ['targetOpponent'],
+    deckHas: null,
+    script: (_effect, ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: params(['Defined', 'You'], ['ValidCards', 'Card.nonLand'], ['ValidDescription', 'nonland']),
+        },
+        follow: [
+          {
+            api: 'ChangeZone',
+            params: params(
+              ['Origin', 'Graveyard'],
+              ['Destination', 'Exile'],
+              ...ctx.targeting,
+              ['ChangeType', 'Card.NamedCard'],
+              ['Chooser', 'You'],
+              ['ChangeNum', 'NumInYard'],
+              ['Hidden', 'True'],
+            ),
+          },
+          {
+            api: 'ChangeZone',
+            params: params(
+              ['Origin', 'Hand'],
+              ['Destination', 'Exile'],
+              ['DefinedPlayer', 'Targeted'],
+              ['ChangeType', 'Card.NamedCard'],
+              ['ChangeNum', 'NumInHand'],
+              ['Chooser', 'You'],
+            ),
+          },
+          {
+            api: 'ChangeZone',
+            params: params(
+              ['Origin', 'Library'],
+              ['Destination', 'Exile'],
+              ['DefinedPlayer', 'Targeted'],
+              ['ChangeType', 'Card.NamedCard'],
+              ['ChangeNum', 'NumInLib'],
+              ['Chooser', 'You'],
+              ['Shuffle', 'True'],
+            ),
+          },
+        ],
+        supportingLines: [
+          'SVar:NumInLib:TargetedPlayer$CardsInLibrary',
+          'SVar:NumInHand:TargetedPlayer$CardsInHand',
+          'SVar:NumInYard:TargetedPlayer$CardsInGraveyard',
+        ],
+      },
+    }),
   },
   shuffleGraveyardIntoLibrary: {
-    // Refused rather than guessed, for `UNMAPPED_FILTER_REASONS`' reason. The
-    // graveyard half looks like `exileGraveyard` with `Destination$ Library`
-    // and a shuffle parameter beside it, but which parameter — `Shuffle$`,
-    // `LibraryPosition$`, or neither because `ChangeZoneAll` into a library
-    // shuffles on its own — is a fact about Forge's card scripts, and
-    // `res/cardsfolder` is not in this checkout. The `includeSelf` half has no
-    // single-effect spelling at all: a permanent moving itself alongside a zone
-    // sweep is a `SubAbility` in every Forge script that does it, and this
-    // table writes one ability per effect.
+    // The parameter is `Shuffle$`, and `archangels_light.txt` is the whole
+    // plain form: `DB$ ChangeZoneAll | ChangeType$ Card.YouOwn | Origin$
+    // Graveyard | Destination$ Library | Shuffle$ True`. It was refused here
+    // for as long as `res/cardsfolder` was outside the checkout, which was the
+    // right refusal and is no longer the situation; 26 shipped scripts sweep a
+    // graveyard into a library and every one of them names `Shuffle$`.
+    //
+    // The `includeSelf` form is `elixir_of_immortality.txt`, which is the card
+    // the DSL field was written for, and its chain is why the field exists
+    // rather than a second effect. CR 701.22b makes the two moves and the
+    // shuffle one action, so neither move may shuffle: both carry `Shuffle$
+    // False` and remember what they moved, a `DB$ Shuffle` on
+    // `RememberedOwner` then shuffles once, and a cleanup ends the relation.
+    // The order is Elixir's -- the permanent leaves the battlefield first --
+    // and `Defined$ Self` is how a permanent names itself while it is still
+    // one.
+    //
+    // One word deviates from Elixir, which writes `ChangeType$ Card.YouCtrl`
+    // for the sweep where this writes `Card.YouOwn`. Both ship, and the owner's
+    // is the one 13 scripts use for this sweep and the one CR 404.1 makes
+    // meaningful: a graveyard is its owner's zone, and a card in it has no
+    // controller to name.
     api: 'ChangeZoneAll',
     targets: [],
     deckHas: null,
-    script: (_effect, ctx) => ({
-      ok: false,
-      rejections: [
-        rejection(
-          'UNMAPPED_EFFECT_KIND',
-          ctx.cardId,
-          ctx.path,
-          'shuffling a graveyard back into a library has no Forge parameter attested in res/cardsfolder, and this exporter does not guess one',
-        ),
-      ],
-    }),
+    script: (effect, ctx) => {
+      const sweep = (shuffle: 'True' | 'False'): readonly ForgeParam[] =>
+        params(
+          ['ChangeType', 'Card.YouOwn'],
+          ['Origin', 'Graveyard'],
+          ['Destination', 'Library'],
+          ['Shuffle', shuffle],
+        );
+      if (effect.includeSelf !== true) {
+        return ok(
+          ctx.api,
+          params(
+            ['ChangeType', 'Card.YouOwn'],
+            ['Origin', 'Graveyard'],
+            ['Destination', 'Library'],
+            ['Shuffle', 'True'],
+            ...(ctx.computed.remembers ? [REMEMBER_CHANGED] : []),
+          ),
+        );
+      }
+      return {
+        ok: true,
+        value: {
+          ability: {
+            api: 'ChangeZone',
+            params: params(
+              ['Origin', 'Battlefield'],
+              ['Destination', 'Library'],
+              ['Shuffle', 'False'],
+              ['RememberChanged', 'True'],
+              ['Defined', 'Self'],
+            ),
+          },
+          follow: [
+            { api: ctx.api, params: [...sweep('False'), ...params(['RememberChanged', 'True'])] },
+            { api: 'Shuffle', params: params(['Defined', 'RememberedOwner']) },
+            { api: 'Cleanup', params: params(['ClearRemembered', 'True']) },
+          ],
+          cleansRemembered: true,
+        },
+      };
+    },
   },
   searchLibrary: {
     // Demonic Tutor's line: `ChangeZone | Origin$ Library | Destination$ Hand |
@@ -922,7 +2169,17 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     targets: [],
     deckHas: null,
     script: (effect, ctx) => {
-      const changeType = forgeSearchType(effect.filter);
+      const quotaTypes =
+        effect.filterQuotas?.map((quota) => (quota.count === 1 ? forgeSearchType(quota.filter) : null)) ??
+        null;
+      // `forgeSearchType` is the one-member spelling by contract, so a quota
+      // term can never carry the comma that `EACH A & B` has no reading for.
+      const quotaChangeType =
+        quotaTypes !== null && quotaTypes.every((value): value is string => value !== null)
+          ? `EACH ${quotaTypes.join(' & ')}`
+          : null;
+      const changeType =
+        effect.filterQuotas === undefined ? forgeSearchTypeUnion(effect.filter ?? {}) : quotaChangeType;
       if (changeType === null) {
         return {
           ok: false,
@@ -931,48 +2188,190 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
               'UNMAPPED_EFFECT_KIND',
               ctx.cardId,
               `${ctx.path}.filter`,
-              'a search filter naming two card types, two subtypes, two supertypes or two colors has no Forge spelling here; Forge writes an OR as a comma-separated list of whole specs and this transpiler writes one spec',
+              'this search filter has no Forge ChangeType spelling: a named card cannot be spelled, and a quota term takes one spec rather than a member list',
             ),
           ],
         };
       }
-      const count = effect.count ?? 1;
+      const count = effect.filterQuotas === undefined ? (effect.count ?? 1) : 1;
       if (!isLiteralAmount(count)) return computedRejection(ctx.cardId, `${ctx.path}.count`);
-      // CR 701.16a's reveal is refused rather than guessed at. Forge spells a
-      // tapped arrival with a parameter this transpiler can name from the
-      // corpus (`Tapped$ True`, on this same `ChangeZone` line); it spells a
-      // search's reveal with something, and nothing in this checkout says what.
-      // `tools/forge/README.md` keeps Forge a downloaded artifact and commits no
-      // card scripts, so the corpus is not here to read, and a parameter name
-      // invented from memory would export a card that either does nothing or
-      // fails to parse — the kind of unevidenced cross-project claim this repo
-      // refuses elsewhere. A named rejection is checkable; a guess is not.
-      if (effect.reveal === true) {
+      if (effect.destination === 'libraryTop') {
+        return ok(
+          ctx.api,
+          params(
+            ['Origin', 'Library'],
+            ['Destination', 'Library'],
+            ['LibraryPosition', '0'],
+            ['ChangeType', changeType],
+            ['ChangeNum', String(count)],
+            ['Mandatory', 'True'],
+          ),
+        );
+      }
+      if (effect.destination === 'sourceLinkedExile') {
+        return ok(
+          ctx.api,
+          params(
+            ['Origin', 'Library'],
+            ['Destination', 'Exile'],
+            ['ChangeType', changeType],
+            ['ChangeNum', String(count)],
+            ['ShuffleNonMandatory', 'True'],
+          ),
+        );
+      }
+      if (typeof effect.destination !== 'string') {
+        if (
+          count === 2 &&
+          effect.reveal === true &&
+          effect.destination.kind === 'oneToHandRestToGraveyard' &&
+          changeType === 'Creature'
+        ) {
+          return {
+            ok: true,
+            value: {
+              ability: {
+                api: ctx.api,
+                params: params(
+                  ['Origin', 'Library'],
+                  ['Destination', 'Library'],
+                  ['ChangeType', 'Creature'],
+                  ['ChangeNum', '2'],
+                  ['RememberChanged', 'True'],
+                  ['Reveal', 'True'],
+                  ['Shuffle', 'False'],
+                ),
+              },
+              follow: [
+                {
+                  api: 'ChangeZone',
+                  params: params(
+                    ['Origin', 'Library'],
+                    ['Destination', 'Hand'],
+                    ['ChangeType', 'Creature.IsRemembered'],
+                    ['ChangeNum', '1'],
+                    ['Mandatory', 'True'],
+                    ['NoLooking', 'True'],
+                    ['Shuffle', 'False'],
+                  ),
+                },
+                {
+                  api: 'ChangeZone',
+                  params: params(
+                    ['Origin', 'Library'],
+                    ['Destination', 'Graveyard'],
+                    ['ChangeType', 'Creature.IsRemembered'],
+                    ['Mandatory', 'True'],
+                    ['NoLooking', 'True'],
+                  ),
+                },
+                { api: 'Cleanup', params: params(['ClearRemembered', 'True']) },
+              ],
+            },
+          };
+        }
+        if (
+          count !== 2 ||
+          effect.reveal !== true ||
+          effect.destination.kind !== 'oneAndRest' ||
+          effect.destination.one !== 'battlefieldTapped' ||
+          effect.destination.rest !== 'hand' ||
+          changeType !== 'Land.Basic'
+        ) {
+          return {
+            ok: false,
+            rejections: [
+              rejection(
+                'UNMAPPED_EFFECT_KIND',
+                ctx.cardId,
+                ctx.path,
+                "Forge export currently has source evidence only for Cultivate's two revealed basic lands split between the battlefield tapped and hand",
+              ),
+            ],
+          };
+        }
         return {
-          ok: false,
-          rejections: [
-            rejection(
-              'UNMAPPED_EFFECT_KIND',
-              ctx.cardId,
-              `${ctx.path}.reveal`,
-              "a search that reveals what it found has no Forge spelling here; Forge's parameter for it is not derivable from this checkout, which vendors no card scripts, and a guessed parameter name would export a card nobody could run",
-            ),
-          ],
+          ok: true,
+          value: {
+            ability: {
+              api: ctx.api,
+              params: params(
+                ['Origin', 'Library'],
+                ['Destination', 'Library'],
+                ['ChangeType', changeType],
+                ['ChangeNum', '2'],
+                ['RememberChanged', 'True'],
+                ['Reveal', 'True'],
+                ['Shuffle', 'False'],
+              ),
+            },
+            follow: [
+              {
+                api: 'ChangeZone',
+                params: params(
+                  ['Origin', 'Library'],
+                  ['Destination', 'Battlefield'],
+                  ['ChangeType', 'Land.IsRemembered'],
+                  ['ChangeNum', '1'],
+                  ['Mandatory', 'True'],
+                  ['NoLooking', 'True'],
+                  ['Tapped', 'True'],
+                  ['Shuffle', 'False'],
+                ),
+              },
+              {
+                api: 'ChangeZone',
+                params: params(
+                  ['Origin', 'Library'],
+                  ['Destination', 'Hand'],
+                  ['ChangeType', 'Land.IsRemembered'],
+                  ['Mandatory', 'True'],
+                  ['NoLooking', 'True'],
+                ),
+              },
+              { api: 'Cleanup', params: params(['ClearRemembered', 'True']) },
+            ],
+          },
         };
       }
+      // A revealed search adds no Forge parameter. This is source-proven rather
+      // than inferred: upstream `res/cardsfolder/f/fauna_shaman.txt` prints the
+      // Oracle word "reveal" and represents the search with an ordinary
+      // `ChangeZone` line, with no reveal-specific key. Forge's ChangeZone
+      // search machinery owns that public-information consequence, so the DSL
+      // flag changes Oracle text while the external script remains the same.
       return ok(
         ctx.api,
         params(
           ['Origin', 'Library'],
           ['Destination', FORGE_CARD_DESTINATIONS[effect.destination]],
           ['ChangeType', changeType],
-          ['ChangeNum', String(count)],
+          ...(effect.filterQuotas === undefined ? ([['ChangeNum', String(count)]] as const) : ([] as const)),
           ['Hidden', 'True'],
           ...(effect.destination === 'battlefieldTapped' ? ([['Tapped', 'True']] as const) : ([] as const)),
           ['ShuffleNonMandatory', 'True'],
         ),
       );
     },
+  },
+  moveSourceLinkedExile: {
+    // Every Forge ChangeZone into exile records the source and its game
+    // timestamp through `ExiledWith`. Unlike the card's general remembered set,
+    // the source's exiled-card collection is copied into LKI but not into a new
+    // ordinary zone incarnation. That is the same CR 400.7 boundary the kernel
+    // carries explicitly, including a death trigger resolving after reentry.
+    api: 'ChangeZone',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) =>
+      ok(
+        ctx.api,
+        params(
+          ['Defined', 'ExiledWith'],
+          ['Origin', 'Exile'],
+          ['Destination', effect.destination === 'hand' ? 'Hand' : 'Battlefield'],
+        ),
+      ),
   },
   chooseFromGraveyard: {
     /**
@@ -1003,21 +2402,16 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
      * shuffles because a library search exposes a hidden zone, and a graveyard
      * is public (CR 400.2), so there is nothing to hide again afterwards.
      *
-     * The divergence this row carries is the one `chooseFromGraveyard`'s own
-     * docblock names: the DSL effect is a choice and not a target, so an
-     * opponent cannot respond to it by making the chosen card illegal. Forge
-     * agrees here — a `Chooser$` fetch is chosen on resolution, the way the
-     * kernel does it — and it is the *printed* cards that disagree, since
-     * Disentomb and Gravedigger are `ValidTgts$ Creature.YouCtrl` in the
-     * corpus. An export of our Disentomb is therefore a slightly different
-     * card from Forge's Disentomb, and that is the DSL's gap showing through
-     * rather than this transpiler guessing.
+     * This row intentionally exports a non-targeted resolution-time choice.
+     * Printed graveyard targets take the ordinary targeted ChangeZone path
+     * instead, with `ValidTgts$` and ownership qualifiers, so the two rules
+     * shapes cannot collapse into one another here.
      */
     api: 'ChangeZone',
     targets: [],
     deckHas: null,
     script: (effect, ctx) => {
-      const changeType = forgeSearchType(effect.filter, FORGE_GRAVEYARD_OWNER_QUALIFIERS[effect.whose]);
+      const changeType = forgeSearchTypeUnion(effect.filter, FORGE_GRAVEYARD_OWNER_QUALIFIERS[effect.whose]);
       if (changeType === null) {
         return {
           ok: false,
@@ -1026,7 +2420,7 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
               'UNMAPPED_EFFECT_KIND',
               ctx.cardId,
               `${ctx.path}.filter`,
-              'a graveyard filter naming two card types, two subtypes, two supertypes or two colors has no Forge spelling here; Forge writes an OR as a comma-separated list of whole specs and this transpiler writes one spec',
+              'a graveyard filter naming a card outright has no Forge ChangeType spelling: a card name may contain the comma this grammar reads as the separator between members',
             ),
           ],
         };
@@ -1040,6 +2434,31 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
           ['ChangeNum', '1'],
           ['Hidden', 'True'],
           ['Chooser', 'You'],
+        ),
+      );
+    },
+  },
+  chooseFromBattlefield: {
+    api: 'ChangeZone',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) => {
+      const changeType = forgeSweepSelector('permanentsYouControl', effect.filter);
+      if (changeType === null) {
+        return {
+          ok: false,
+          rejections: unmappedFilterRejections(ctx, `${ctx.path}.filter`, effect.filter),
+        };
+      }
+      return ok(
+        ctx.api,
+        params(
+          ['Origin', 'Battlefield'],
+          ['Destination', 'Hand'],
+          ['Hidden', 'True'],
+          ['Mandatory', 'True'],
+          ['ChangeType', changeType],
+          ['ChangeNum', '1'],
         ),
       );
     },
@@ -1067,23 +2486,37 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
    */
   discardCards: {
     api: 'Discard',
-    targets: ['noTarget', 'targetPlayer', 'targetOpponent'],
+    targets: [
+      'noTarget',
+      'targetPlayer',
+      'targetOpponent',
+      'triggeringPlayer',
+      'thatCreaturesController',
+      'thatPlayerOrPlaneswalkerController',
+    ],
     deckHas: null,
-    // `players` is Liliana's Specter, and it is written the way `drawCards` and
-    // `loseLife` write theirs: `Defined$` replaces the target clause, because
-    // `Mode$ TgtChoose` still means "the seat holding the hand chooses" whether
-    // that seat was targeted or named. The `noTarget` slot admitted above is
-    // the sweep's slot alone — `EFFECT_RULES` in `@mtg/dsl` refuses a bare one
-    // — so this arm never writes `Defined$ You`.
+    // A player sweep replaces targeting with its Forge-defined seat group. A
+    // bare `noTarget` is the resolving controller (Thoughtflare), so it writes
+    // `Defined$ You` without turning the spell into a targeted one.
     script: (effect, ctx) => {
       const targeting =
-        effect.players === undefined
-          ? ctx.targeting
-          : params(['Defined', FORGE_PLAYER_SCOPE_DEFINED[effect.players]]);
-      return ok(ctx.api, [
-        ...targeting,
-        ...params(['NumCards', String(effect.count)], ['Mode', 'TgtChoose']),
-      ]);
+        effect.players !== undefined
+          ? params(['Defined', FORGE_PLAYER_SCOPE_DEFINED[effect.players]])
+          : effect.target.kind === 'noTarget'
+            ? params(['Defined', 'You'])
+            : ctx.targeting;
+      if (effect.count === 'all') return ok(ctx.api, [...targeting, ...params(['Mode', 'Hand'])]);
+      const count = effect.countFrom === 'chosenX' ? 'X' : String(effect.count);
+      const ability = {
+        api: ctx.api,
+        params: [
+          ...targeting,
+          ...params(['NumCards', count], ['Mode', effect.random === true ? 'Random' : 'TgtChoose']),
+        ],
+      };
+      return effect.countFrom === 'chosenX'
+        ? { ok: true, value: { ability, supportingLines: ['SVar:X:Count$xPaid'] } }
+        : { ok: true, value: { ability } };
     },
   },
   /**
@@ -1135,13 +2568,185 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
       ]);
     },
   },
+  /**
+   * The two linked revealed-hand shapes shipped on Mindclaw Shaman and
+   * Shimian Specter. Forge keeps the reveal, choice and use of the chosen
+   * object/name in one sub-ability chain, just as the kernel keeps them in one
+   * pending record; splitting the link would let a later effect read an
+   * unrelated card or leaked name.
+   */
+  chooseFromRevealedHand: {
+    api: 'RevealHand',
+    targets: ['targetOpponent', 'triggeringPlayer'],
+    deckHas: null,
+    script: (effect, ctx) => {
+      if (effect.outcome.kind === 'mayCastWithoutPayingManaCost') {
+        if (effect.target.kind !== 'targetOpponent') {
+          return {
+            ok: false,
+            rejections: [
+              rejection(
+                'UNMAPPED_EFFECT_KIND',
+                ctx.cardId,
+                `${ctx.path}.target`,
+                'Forge revealed-hand free casting is source-attested here only for Mindclaw Shaman targeting an opponent',
+              ),
+            ],
+          };
+        }
+        const kinds = effect.filter.cardTypes ?? [];
+        const unsupported =
+          kinds.length !== 2 ||
+          !kinds.includes('instant') ||
+          !kinds.includes('sorcery') ||
+          effect.filter.subtypes !== undefined ||
+          effect.filter.supertypes !== undefined ||
+          effect.filter.colors !== undefined ||
+          effect.filter.keywords !== undefined ||
+          effect.filter.maxManaValue !== undefined ||
+          effect.filter.excludeCardTypes !== undefined ||
+          effect.filter.names !== undefined;
+        if (unsupported) {
+          return {
+            ok: false,
+            rejections: [
+              rejection(
+                'UNMAPPED_EFFECT_KIND',
+                ctx.cardId,
+                `${ctx.path}.filter`,
+                "Forge Play from a revealed hand is source-attested here only for Mindclaw Shaman's instant-or-sorcery ValidSA selector",
+              ),
+            ],
+          };
+        }
+        return {
+          ok: true,
+          value: {
+            ability: { api: ctx.api, params: ctx.targeting },
+            follow: [
+              {
+                api: 'Play',
+                params: params(
+                  ['Valid', 'Card.TargetedPlayerCtrl'],
+                  ['ValidSA', kinds.map((kind) => FORGE_CARD_TYPES[kind]).join(',')],
+                  ['ValidZone', 'Hand'],
+                  ['WithoutManaCost', 'True'],
+                  ['Optional', 'True'],
+                ),
+              },
+            ],
+          },
+        };
+      }
+
+      if (effect.target.kind !== 'triggeringPlayer') {
+        return {
+          ok: false,
+          rejections: [
+            rejection(
+              'UNMAPPED_EFFECT_KIND',
+              ctx.cardId,
+              `${ctx.path}.target`,
+              "Forge remembered-name purging is source-attested here only for Shimian Specter's triggering player",
+            ),
+          ],
+        };
+      }
+
+      const excluded = effect.filter.excludeCardTypes ?? [];
+      const unsupported =
+        excluded.length !== 1 ||
+        excluded[0] !== 'land' ||
+        effect.filter.cardTypes !== undefined ||
+        effect.filter.subtypes !== undefined ||
+        effect.filter.supertypes !== undefined ||
+        effect.filter.colors !== undefined ||
+        effect.filter.keywords !== undefined ||
+        effect.filter.maxManaValue !== undefined ||
+        effect.filter.names !== undefined;
+      if (unsupported) {
+        return {
+          ok: false,
+          rejections: [
+            rejection(
+              'UNMAPPED_EFFECT_KIND',
+              ctx.cardId,
+              `${ctx.path}.filter`,
+              "Forge remembered-name choice is source-attested here only for Shimian Specter's nonland selector",
+            ),
+          ],
+        };
+      }
+      return {
+        ok: true,
+        value: {
+          ability: { api: ctx.api, params: ctx.targeting },
+          follow: [
+            {
+              api: 'ChooseCard',
+              params: params(
+                ['Choices', 'Card.nonLand+OwnedBy TriggeredTarget'],
+                ['ChoiceZone', 'Hand'],
+                ['RememberChosen', 'True'],
+              ),
+            },
+            {
+              api: 'ChangeZoneAll',
+              params: params(
+                ['Origin', 'Graveyard'],
+                ['Destination', 'Exile'],
+                ['Defined', 'TriggeredTarget'],
+                ['ChangeType', 'Remembered.sameName'],
+              ),
+            },
+            {
+              api: 'ChangeZone',
+              params: params(
+                ['Origin', 'Hand'],
+                ['Destination', 'Exile'],
+                ['DefinedPlayer', 'TriggeredTarget'],
+                ['ChangeType', 'Remembered.sameName'],
+                ['ChangeNum', 'NumInHand'],
+                ['Chooser', 'You'],
+              ),
+            },
+            {
+              api: 'ChangeZone',
+              params: params(
+                ['Origin', 'Library'],
+                ['Destination', 'Exile'],
+                ['DefinedPlayer', 'TriggeredTarget'],
+                ['ChangeType', 'Remembered.sameName'],
+                ['ChangeNum', 'NumInLib'],
+                ['Chooser', 'You'],
+                ['Shuffle', 'True'],
+              ),
+            },
+            { api: 'Cleanup', params: params(['ClearRemembered', 'True']) },
+          ],
+          supportingLines: [
+            'SVar:NumInHand:Count$Valid Remembered.sameName+inZoneHand',
+            'SVar:NumInLib:Count$Valid Remembered.sameName+inZoneLibrary',
+          ],
+          cleansRemembered: true,
+        },
+      };
+    },
+  },
   // `gainLife`'s row with Forge's other life API, and the same three parts.
   // `deckHas` is `null` rather than a mirror of `LifeGain`: the hint names what
   // a *deck* is built around, and the corpus writes `LifeGain` on cards that
   // gain it, not on cards that take it away.
   loseLife: {
     api: 'LoseLife',
-    targets: ['noTarget', 'targetPlayer', 'targetOpponent', 'thatPlayer'],
+    targets: [
+      'noTarget',
+      'targetPlayer',
+      'targetOpponent',
+      'thatPlayer',
+      'thatCreaturesController',
+      'triggeringPlayer',
+    ],
     deckHas: null,
     // `players` is written the way `drawCards` writes it, because Forge's
     // `Defined$` is a definition selector rather than an API's own parameter:
@@ -1151,6 +2756,18 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // row's reason — the `noTarget` slot beside it would otherwise write
     // `Defined$ You` and take the life off one seat.
     script: (effect, ctx) => {
+      if (effect.amountFrom === 'triggeringPlayerLifeHalfRoundedUp') {
+        return {
+          ok: true,
+          value: {
+            ability: {
+              api: ctx.api,
+              params: [...ctx.targeting, ...params(['LifeAmount', 'HavocX'])],
+            },
+            supportingLines: ['SVar:HavocX:TriggeredPlayer$LifeTotal/HalfUp'],
+          },
+        };
+      }
       const life = forgeNumber(effect.amount, ctx.computed);
       if (life === null) return computedRejection(ctx.cardId, `${ctx.path}.amount`);
       const targeting =
@@ -1170,61 +2787,150 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     script: (effect, ctx) => {
       const life = forgeNumber(effect.amount, ctx.computed);
       if (life === null) return computedRejection(ctx.cardId, `${ctx.path}.amount`);
-      return ok(ctx.api, params(['Defined', 'You'], ['LifeAmount', life]));
+      const defined = effect.players === undefined ? 'You' : FORGE_PLAYER_SCOPE_DEFINED[effect.players];
+      return ok(ctx.api, params(['Defined', defined], ['LifeAmount', life]));
     },
   },
-  // Refused, and the refusal is the point.
+  loseGame: {
+    api: 'LosesGame',
+    targets: ['targetPlayer', 'triggeringPlayer'],
+    deckHas: null,
+    script: (_effect, ctx) => ok(ctx.api, ctx.targeting),
+  },
+  winGame: {
+    api: 'WinsGame',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) => ok(ctx.api, params(['Defined', 'You'])),
+  },
+  // Fog, copied from Forge master `forge-gui/res/cardsfolder/f/fog.txt`, whose
+  // whole ability line is `A:SP$ Fog | SpellDescription$ Prevent all combat
+  // damage that would be dealt this turn.` — the DSL primitive's exact sentence
+  // on a dedicated API with no parameters to get wrong. Nine more files carry
+  // that line verbatim (Holy Day, Darkness, Angelsong, Lull, Root Snare,
+  // Moment's Peace, Haze of Pollen, Pause for Reflection, Constant Mists);
+  // 2.0.14's shipped corpus spells `Fog` in 69 files in all, 19 of them as this
+  // `A:SP$`. `SpellDescription$` is `card-script`'s to write, so this row
+  // contributes the API and nothing else.
   //
-  // A turn-long blanket prevention is not an effect API in Forge's grammar at
-  // all: it is a continuous replacement, which the corpus writes as an `SP$
-  // Effect` that installs a named `ReplacementEffects$` line living on a
-  // created effect object. This transpiler writes one `A:` ability line per DSL
-  // effect and emits no `R:` lines and no effect objects, so there is no
-  // shipped spelling here to write, and `FORGE_VALID_TARGETS`' rule applies:
-  // every spelling in this package is read off the corpus rather than guessed.
-  //
-  // A guess would be worse than the rejection rather than merely riskier. This
-  // artifact exists to disagree with the kernel when the kernel is wrong, and a
-  // Fog that exported as a one-shot `PreventDamage` would prevent the first
-  // instance and let the rest of the combat damage step through — a strictly
-  // different card, booting cleanly, in the file whose whole job is to catch
-  // that.
+  // It refused until `mtg-udc9`, on the stated ground that a turn-long blanket
+  // prevention is not an effect API in Forge's grammar at all but a continuous
+  // replacement installed by an `SP$ Effect`. That sentence is true of the
+  // targeted prevention below and false here. The difference is not a detail: a
+  // refusal that names a limitation the oracle does not have takes a card off
+  // the parity surface permanently, and unlike a wrong export it never trips a
+  // boot. `FORGE_VALID_TARGETS`' rule was satisfied the whole time — the
+  // spelling was in the corpus, unread.
   preventCombatDamage: {
-    api: 'PreventDamage',
+    api: 'Fog',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) => ok(ctx.api, []),
+  },
+  // Forge master `druids_deliverance.txt`: unlike the symmetric Fog API, the
+  // fixed recipient lives on a command-zone damage replacement. The primary
+  // Effect installs that replacement and the ordinary effect-chain writer
+  // links Populate as its SubAbility, reproducing the source file without a
+  // card-name branch.
+  preventCombatDamageToYou: {
+    api: 'Effect',
     targets: [],
     deckHas: null,
     script: (_effect, ctx) => ({
-      ok: false,
-      rejections: [
-        rejection(
-          'UNMAPPED_EFFECT_KIND',
-          ctx.cardId,
-          ctx.path,
-          'a blanket "prevent all combat damage this turn" is a Forge replacement effect installed by an SP$ Effect, not an effect API; this transpiler emits no R: lines, and no corpus-sourced spelling for it exists here',
-        ),
-      ],
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: params(['ReplacementEffects', 'RPrevent'], ['AILogic', 'Fog']),
+        },
+        supportingLines: [
+          'SVar:RPrevent:Event$ DamageDone | Prevent$ True | IsCombat$ True | ActiveZones$ Command | ValidTarget$ You | Description$ Prevent all combat damage that would be dealt to you this turn.',
+        ],
+      },
     }),
   },
-  // The row above with one word changed and the refusal unchanged: a targeted
-  // prevention is still a continuous replacement in Forge's grammar, aimed by
-  // `ValidTgts$` rather than `Defined$` if this transpiler ever grew the `R:`
-  // lines to write it, which it does not. `targets` is `['targetCreature']`
-  // rather than `[]` so the conformance test still agrees with
-  // `legalTargetsFor` while the refusal keeps this from ever reading that list.
+  detainPermanent: {
+    api: 'Detain',
+    targets: ['targetCreatureOpponentControls', 'targetNonlandPermanentOpponentControls'],
+    deckHas: null,
+    script: (_effect, ctx) => ok(ctx.api, ctx.targeting),
+  },
+  chooseBlockersThisCombat: {
+    api: 'Effect',
+    targets: [],
+    deckHas: null,
+    script: () => ({
+      ok: true,
+      value: {
+        ability: {
+          api: 'Effect',
+          params: params(['StaticAbilities', 'DeclareCombatants'], ['Duration', 'UntilEndOfCombat']),
+        },
+        supportingLines: [
+          'SVar:DeclareCombatants:Mode$ Continuous | Affected$ Player | DeclaresBlockers$ You | Description$ You choose which creatures block this combat and how those creatures block.',
+        ],
+      },
+    }),
+  },
+  // A targeted prevention is not an effect API in Forge: there is no
+  // `PreventDamage` spelling that takes a target and lasts the turn. Forge
+  // writes it as a continuous replacement the resolving `Effect` installs, and
+  // `indestructible_aura.txt` and `shielded_passage.txt` are that shape whole
+  // and identical to each other:
+  //
+  //   A:SP$ Effect | ValidTgts$ Creature | ReplacementEffects$ RPrevent |
+  //     RememberObjects$ Targeted | ExileOnMoved$ Battlefield
+  //   SVar:RPrevent:Event$ DamageDone | Prevent$ True |
+  //     ValidTarget$ Card.IsRemembered | Description$ ...
+  //
+  // `harvestguard_alseids.txt` installs the same pair from a trigger as
+  // `DB$ Effect`, and `faithful_squire_kaiso_memory_of_loyalty.txt` from an
+  // activation, so the shape is the effect's rather than the spell's -- which
+  // is what lets one row serve all three placements. The prevention is scoped
+  // by remembering the target rather than by naming it: `RememberObjects$
+  // Targeted` puts the creature on the command-zone effect and
+  // `Card.IsRemembered` is how the replacement finds it, so the shield follows
+  // the object and not a card name. `ExileOnMoved$ Battlefield` ends it when the
+  // creature leaves, which is Forge's spelling of a shield on an object that
+  // stops existing.
+  //
+  // Two things those two scripts carry that this does not. `SpellDescription$`
+  // is the ability writer's, as for every other row. `AI:RemoveDeck:All` is a
+  // card-level directive and both instants have it, but `harvestguard_alseids`
+  // does not, and this row cannot tell an instant from a creature's trigger; a
+  // card removed from every AI deck because one of its abilities prevents
+  // damage would be a worse parity oracle than one the AI plays badly.
+  //
+  // `RPrevent` is the corpus's own name for the SVar and 89 shipped scripts use
+  // it, none of them twice. Two rows here already emit a different definition
+  // under it (the combat-damage Fog above, and Safe Passage below), and
+  // `appendAbilityLines` deduplicates whole lines rather than names, so a card
+  // carrying two prevention effects would export two definitions of one name
+  // and Forge would read whichever it read last. That is `mtg-9111`; keeping
+  // the corpus name here is the parity-preserving half and the guard belongs in
+  // the writer, not in a rename that puts all three rows off-corpus.
   preventAllDamageToTarget: {
-    api: 'PreventDamage',
+    api: 'Effect',
     targets: ['targetCreature'],
     deckHas: null,
     script: (_effect, ctx) => ({
-      ok: false,
-      rejections: [
-        rejection(
-          'UNMAPPED_EFFECT_KIND',
-          ctx.cardId,
-          ctx.path,
-          'a targeted "prevent all damage to target creature this turn" is a Forge replacement effect installed by an SP$ Effect, not an effect API; this transpiler emits no R: lines, and no corpus-sourced spelling for it exists here',
-        ),
-      ],
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: [
+            ...ctx.targeting,
+            ...params(
+              ['ReplacementEffects', 'RPrevent'],
+              ['RememberObjects', 'Targeted'],
+              ['ExileOnMoved', 'Battlefield'],
+            ),
+          ],
+        },
+        supportingLines: [
+          'SVar:RPrevent:Event$ DamageDone | Prevent$ True | ValidTarget$ Card.IsRemembered | Description$ Prevent all damage that would be dealt to that creature this turn.',
+        ],
+      },
     }),
   },
   // `AB$ Pump | KW$ Flying`, which is the same Forge API the P/T version uses
@@ -1246,7 +2952,14 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
   // carries, and `sweepSelection` writes the group in its place.
   grantKeywordUntilEndOfTurn: {
     api: 'Pump',
-    targets: ['targetCreature', 'targetCreatureYouControl', 'selfCreature', 'noTarget'],
+    targets: [
+      'targetCreature',
+      'targetCreatureYouControl',
+      'selfCreature',
+      'thatCreature',
+      'equippedCreature',
+      'noTarget',
+    ],
     deckHas: null,
     // Scoped, this is `PumpAll` with the deltas left off — the same relationship
     // `Pump` and `PumpAll` have on the row above, and Forge's own
@@ -1258,58 +2971,268 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // inferred from `Pump`'s parameter list, which is `FORGE_VALID_TARGETS`'
     // standing rule.
     script: (effect, ctx) => {
-      const granted = params(['KW', FORGE_GRANTABLE_KEYWORDS[effect.keyword]]);
-      if (effect.scope === undefined) return ok(ctx.api, [...ctx.targeting, ...granted]);
+      const granted = params([
+        'KW',
+        [effect.keyword, ...(effect.additionalKeywords ?? [])]
+          .map((keyword) => FORGE_GRANTABLE_KEYWORDS[keyword])
+          .join(' & '),
+      ]);
+      if (effect.scope === undefined) {
+        if (effect.removeKeywordAbility === undefined) return ok(ctx.api, [...ctx.targeting, ...granted]);
+        return {
+          ok: true,
+          value: {
+            ability: {
+              api: 'Debuff',
+              params: [...ctx.targeting, ...params(['Keywords', 'Defender'])],
+            },
+            follow: [{ api: ctx.api, params: [...ctx.targeting, ...granted] }],
+          },
+        };
+      }
       const group = sweepSelection(ctx, effect.scope, effect.scopeFilter);
       if (group === null) return unwritableSweepRejection(ctx, effect.scope, effect.scopeFilter);
       return ok('PumpAll', [...group, ...granted]);
     },
   },
-  // Two refusals, and `preventCombatDamage`'s reason is the whole of both.
+  // Both rows below refused until `mtg-ij03` on one reason: Forge expresses
+  // them, but which parameter names it uses is exactly what `res/cardsfolder`
+  // would settle and that corpus was not in the checkout. It is now, and both
+  // are shipped whole. `preventAllDamageToTarget` above is the same story told
+  // earlier.
   //
-  // Forge does express these — a hidden-keyword `Pump` for the evasion, an
-  // attack requirement API for the lure — but which parameter names it uses is
-  // exactly what `res/cardsfolder` would settle and that corpus is not in this
-  // checkout. `FORGE_VALID_TARGETS`' rule stands: read off the corpus, never
-  // guessed. A guess here fails the way the prevention rows describe. An
-  // evasion grant that exported with the wrong keyword string would boot
-  // cleanly and simply not apply, and the parity oracle would report our kernel
-  // wrong about a blocker it was right about.
+  // `infiltrate.txt` is a U instant reading "Target creature can't be blocked
+  // this turn", which is this row's targeted arm with a different name on it:
   //
-  // `targets` matches `legalTargetsFor` in both rows so `conformance.test.ts`
-  // still agrees, exactly as `preventAllDamageToTarget` does above; the refusal
-  // keeps the list from ever being read for real selection.
+  //   A:SP$ Effect | ValidTgts$ Creature | RememberObjects$ Targeted |
+  //     ExileOnMoved$ Battlefield | StaticAbilities$ Unblockable
+  //   SVar:Unblockable:Mode$ CantBlockBy | ValidAttacker$ Card.IsRemembered |
+  //     Description$ This creature can't be blocked this turn.
+  //
+  // 206 scripts write `StaticAbilities$ Unblockable` and 190 carry that SVar
+  // line unedited. The self-scoped arm already wrote the shape, so the two arms
+  // differ by what they remember — `Self` against `Targeted` — and by the
+  // `ValidTgts$` the targeting builds, which is the whole of the difference
+  // between "this creature" and "target creature" in Forge as well.
+  //
+  // `AILogic$ Pump` is on 30 of the 206 and is not written here. It steers the
+  // AI rather than the rule, and the majority omit it; a row that cannot see
+  // whether the card is worth the hint should not invent one.
   cantBeBlockedThisTurn: {
-    api: 'Pump',
-    targets: ['targetCreature'],
+    api: 'Effect',
+    targets: ['targetCreature', 'targetCreatureYouControl', 'selfCreature', 'thatCreature'],
     deckHas: null,
-    script: (_effect, ctx) => ({
-      ok: false,
-      rejections: [
-        rejection(
-          'UNMAPPED_EFFECT_KIND',
-          ctx.cardId,
-          ctx.path,
-          'a turn-scoped "can\'t be blocked" is a hidden keyword on Forge\'s Pump rather than a parameter of it, and no corpus-sourced spelling for the keyword string exists here',
-        ),
-      ],
-    }),
+    script: (effect, ctx) => {
+      const self = effect.target.kind === 'selfCreature';
+      const retained = effect.target.kind === 'thatCreature';
+      return {
+        ok: true,
+        value: {
+          ability: {
+            api: ctx.api,
+            params: [
+              ...(self || retained ? [] : ctx.targeting),
+              ...params(
+                ['RememberObjects', self ? 'Self' : 'Targeted'],
+                [retained ? 'ForgetOnMoved' : 'ExileOnMoved', 'Battlefield'],
+                ['StaticAbilities', 'Unblockable'],
+              ),
+            ],
+          },
+          supportingLines: [
+            `SVar:Unblockable:Mode$ CantBlockBy | ValidAttacker$ Card.IsRemembered | Description$ ${
+              self ? 'EFFECTSOURCE' : 'This creature'
+            } can't be blocked this turn.`,
+          ],
+          ...(retained === true
+            ? {
+                follow: [{ api: 'Cleanup', params: params(['ClearRemembered', 'True']) }],
+                cleansRemembered: true,
+              }
+            : {}),
+        },
+      };
+    },
   },
+  // `alluring_siren.txt` settles the question the refusal here named out loud —
+  // whether the defender is written at all or left implicit. It is written:
+  //
+  //   ... RememberObjects$ Targeted | ExileOnMoved$ Battlefield |
+  //     StaticAbilities$ MustAttack | IsCurse$ True
+  //   SVar:MustAttack:Mode$ MustAttack | ValidCreature$ Creature.IsRemembered |
+  //     MustAttack$ You | Description$ This creature attacks you this turn if able.
+  //
+  // `attacksThisTurnIfAble` below is the same shape with that one key left off,
+  // which is what makes the pair legible: the key is the difference between
+  // "attacks if able" and "attacks *you* if able", and nothing else is.
+  //
+  // `IsCurse$ True` is the corpus's, and it is a rule about who may be asked to
+  // take the effect rather than an AI hint: Forge refuses to aim a curse at its
+  // own creatures. The DSL kind names an opponent's creature, so the two agree.
+  //
+  // `MustAttack` is the SVar name both rows write, because it is the name the
+  // corpus writes for both. Two definitions of one name on one card is
+  // `mtg-9111`, which `appendAbilityLines` refuses outright; renaming one of
+  // them here to dodge a guard that already exists would put the row off-corpus
+  // to no end. The `RPrevent` note above argues the same policy at length.
   attacksYouThisTurnIfAble: {
-    api: 'MustAttack',
+    api: 'Effect',
     targets: ['targetCreatureYouDontControl'],
     deckHas: null,
     script: (_effect, ctx) => ({
-      ok: false,
-      rejections: [
-        rejection(
-          'UNMAPPED_EFFECT_KIND',
-          ctx.cardId,
-          ctx.path,
-          "a turn-scoped attack requirement naming the ability's controller as the defender has no corpus-sourced spelling here, including whether the defender is named at all or left implicit",
-        ),
-      ],
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: [
+            ...ctx.targeting,
+            ...params(
+              ['RememberObjects', 'Targeted'],
+              ['ExileOnMoved', 'Battlefield'],
+              ['StaticAbilities', 'MustAttack'],
+              ['IsCurse', 'True'],
+            ),
+          ],
+        },
+        supportingLines: [
+          'SVar:MustAttack:Mode$ MustAttack | ValidCreature$ Creature.IsRemembered | MustAttack$ You | Description$ This creature attacks you this turn if able.',
+        ],
+      },
     }),
+  },
+  setColorsUntilEndOfTurn: {
+    api: 'Animate',
+    targets: ['targetCreature'],
+    deckHas: null,
+    script: (effect, ctx) =>
+      ok(ctx.api, [
+        ...ctx.targeting,
+        ['Colors', effect.colors.map((color) => FORGE_COLOR_PROPERTIES[color]).join(',')],
+        ['OverwriteColors', 'True'],
+      ]),
+  },
+  attacksThisTurnIfAble: {
+    api: 'Effect',
+    targets: ['targetCreature', 'thatCreature'],
+    deckHas: null,
+    // Incite in Forge 2.0.14 creates a remembered battlefield effect whose
+    // supporting static carries the actual MustAttack rule. `Defined$` is not
+    // forwarded: the Effect API remembers the primary spell's Targeted object
+    // and the static reads that remembered object by name.
+    script: (_effect, ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: params(
+            ['StaticAbilities', 'MustAttack'],
+            ['ExileOnMoved', 'Battlefield'],
+            ['RememberObjects', 'Targeted'],
+          ),
+        },
+        supportingLines: [
+          'SVar:MustAttack:Mode$ MustAttack | ValidCreature$ Creature.IsRemembered | Description$ This creature attacks this turn if able.',
+        ],
+      },
+    }),
+  },
+  cantBlockThisTurn: {
+    api: 'Pump',
+    targets: ['targetCreature'],
+    deckHas: null,
+    script: (_effect, ctx) =>
+      ok(ctx.api, [...ctx.targeting, ...params(['IsCurse', 'True'], ['KW', "HIDDEN CARDNAME can't block."])]),
+  },
+  blocksThisTurnIfAble: {
+    api: 'Effect',
+    targets: ['targetCreature', 'noTarget'],
+    deckHas: null,
+    script: (effect, ctx) => {
+      if (effect.scope === undefined) {
+        return {
+          ok: true,
+          value: {
+            ability: {
+              api: ctx.api,
+              params: [
+                ...ctx.targeting,
+                ...params(
+                  ['StaticAbilities', 'MustBlock'],
+                  ['RememberObjects', 'Targeted'],
+                  ['ExileOnMoved', 'Battlefield'],
+                ),
+              ],
+            },
+            supportingLines: [
+              'SVar:MustBlock:Mode$ MustBlock | ValidCreature$ Card.IsRemembered | Description$ This creature blocks this turn if able.',
+            ],
+          },
+        };
+      }
+      if (
+        effect.scope !== 'permanentsOpponentsControl' ||
+        effect.scopeFilter?.cardTypes?.length !== 1 ||
+        effect.scopeFilter.cardTypes[0] !== 'creature'
+      ) {
+        return unwritableSweepRejection(ctx, effect.scope, effect.scopeFilter);
+      }
+      return {
+        ok: true,
+        value: {
+          ability: { api: ctx.api, params: params(['StaticAbilities', 'STBlock']) },
+          supportingLines: [
+            'SVar:STBlock:Mode$ MustBlock | ValidCreature$ Creature.OppCtrl | Description$ Each creature your opponents control blocks this turn if able.',
+          ],
+        },
+      };
+    },
+  },
+  shuffleHandsAndGraveyardsIntoLibraries: {
+    api: 'ChangeZoneAll',
+    targets: [],
+    deckHas: null,
+    // Time Reversal, verbatim from Forge's shipped card script. The two
+    // origins are one ChangeZoneAll action and UseAllOriginZones prevents the
+    // first origin from exhausting the operation before the second is read.
+    script: (_effect, ctx) =>
+      ok(
+        ctx.api,
+        params(
+          ['ChangeType', 'Card'],
+          ['Origin', 'Hand,Graveyard'],
+          ['Destination', 'Library'],
+          ['Shuffle', 'True'],
+          ['UseAllOriginZones', 'True'],
+        ),
+      ),
+  },
+  exileHandsAndGraveyards: {
+    api: 'ChangeZoneAll',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: params(['Origin', 'Hand'], ['Destination', 'Exile'], ['ChangeType', 'Card']),
+        },
+        follow: [
+          {
+            api: 'ChangeZoneAll',
+            params: params(['Origin', 'Graveyard'], ['Destination', 'Exile'], ['ChangeType', 'Card']),
+          },
+        ],
+      },
+    }),
+  },
+  exileThisSpell: {
+    api: 'ChangeZone',
+    targets: [],
+    deckHas: null,
+    // A resolving spell is the current stack object, so Forge needs neither a
+    // target nor a Defined parameter; this is Time Reversal's shipped line.
+    script: (_effect, ctx) => ok(ctx.api, params(['Origin', 'Stack'], ['Destination', 'Exile'])),
   },
   untapPermanent: {
     // Forge's own API, and the corpus spelling is Voltaic Key's: `AB$ Untap`
@@ -1318,9 +3241,45 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // carry across. `tapPermanent`'s two extra links are its sweep and its
     // hold, and this kind has neither.
     api: 'Untap',
-    targets: ['targetPermanent', 'targetCreature', 'targetCreatureYouControl'],
+    targets: [
+      'targetPermanent',
+      'targetCreature',
+      'targetCreatureYouControl',
+      'selfCreature',
+      'thatCreature',
+    ],
     deckHas: null,
     script: (_effect, ctx) => ok(ctx.api, ctx.targeting),
+  },
+  untapPermanents: {
+    api: 'Untap',
+    targets: [],
+    deckHas: null,
+    // Rewind in Forge 2.0.14: `DB$ Untap | UntapUpTo$ True | UntapType$ Land
+    // | Amount$ 4`. This non-targeted form deliberately carries no
+    // `ValidTgts$`; the filter names the selectable battlefield class instead.
+    script: (effect, ctx) => {
+      const selectors = forgeFilteredTargets('Permanent', effect.filter, 'base');
+      if (selectors === null) {
+        return { ok: false, rejections: unmappedFilterRejections(ctx, `${ctx.path}.filter`, effect.filter) };
+      }
+      return ok(
+        ctx.api,
+        params(['UntapUpTo', 'True'], ['UntapType', selectors.join(',')], ['Amount', String(effect.upTo)]),
+      );
+    },
+  },
+  skipNextUntap: {
+    api: 'Pump',
+    // `triggeringCreature` is condition-gated in the DSL and bypasses both
+    // per-effect target tables. These are the directly chosen spell forms.
+    targets: ['targetPermanent', 'targetCreature'],
+    deckHas: null,
+    // Wall of Frost's current Forge body: a permanent-duration hidden keyword,
+    // with no Tap API ahead of it. `targetParams` supplies the block-pair
+    // referent.
+    script: (_effect, ctx) =>
+      ok(ctx.api, [...ctx.targeting, ...params(['KW', HOLD_KEYWORD], ['Duration', 'Permanent'])]),
   },
   sacrificeSelf: {
     // Arc Runner's and Ball Lightning's line, read off `res/cardsfolder`:
@@ -1334,7 +3293,7 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // `selfCreature` entry does. It is never read for target selection:
     // `targetParams` answers a source-body-only target before this array is
     // consulted.
-    targets: ['selfCreature'],
+    targets: ['selfCreature', 'selfPermanent'],
     deckHas: 'Sacrifice',
     // The one row in this table that deliberately DROPS `ctx.targeting`.
     // Everywhere else `Defined$ Self` is the right words for a retained
@@ -1344,8 +3303,8 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
     // `SacValid$ Self` is the corpus spelling and it is the whole clause.
     script: (_effect, _ctx) => ok('Sacrifice', params(['SacValid', 'Self'])),
   },
-  // Diabolic Edict's shape: a spell that targets a player and makes that
-  // player, not the caster, choose what leaves their own board (CR 701.17a).
+  // Diabolic Edict's targeted shape and Destructive Force's player sweep: the
+  // affected player, never the caster, chooses what leaves their own board.
   // Unverified against a booted Forge, `mtg-17a` is that check, but every
   // word here is composed rather than guessed. `ctx.targeting` is
   // `targetParams`'s own `ValidTgts$ Player` (or `Player.Opponent`) for
@@ -1356,16 +3315,59 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
   // rows in this table. `Defined$ Targeted` is not a new word either — it is
   // the same "the referent already picked by `ValidTgts$`" idiom `holdPump`
   // uses below for a targeted creature, aimed here at the targeted player
-  // instead. So the row states: the target is a player (`ctx.targeting`),
-  // that targeted player is who sacrifices (`Defined$ Targeted`), and a
-  // creature is what's valid to give up (`SacValid$ Creature` — no filter to
-  // carry, `sacrificePermanentEffect`'s stated cut in `@mtg/dsl`).
+  // instead. So the targeted form states: the target is a player
+  // (`ctx.targeting`), that targeted player is who sacrifices (`Defined$
+  // Targeted`), and `SacValid$` carries the filtered permanent set. The sweep
+  // replaces those targeting clauses with Forge's source-attested player-scope
+  // definition; Destructive Force supplies `Player`, `Land`, and `Amount$ 5`.
   sacrificePermanent: {
     api: 'Sacrifice',
-    targets: ['targetPlayer', 'targetOpponent'],
+    targets: [
+      'targetPlayer',
+      'targetOpponent',
+      'triggeringPlayer',
+      'noTarget',
+      'thatPlayerOrPlaneswalkerController',
+    ],
     deckHas: 'Sacrifice',
-    script: (_effect, ctx) =>
-      ok('Sacrifice', [...ctx.targeting, ...params(['Defined', 'Targeted'], ['SacValid', 'Creature'])]),
+    script: (effect, ctx) => {
+      const filter = effect.filter ?? { cardTypes: ['creature'] as const };
+      if (unmappedFilterField(filter) !== null) {
+        return { ok: false, rejections: unmappedFilterRejections(ctx, `${ctx.path}.filter`, filter) };
+      }
+      const valid = forgeFilteredTargets('Permanent', filter, 'base');
+      if (valid === null) {
+        return {
+          ok: false,
+          rejections: [
+            rejection(
+              'UNMAPPED_EFFECT_KIND',
+              ctx.cardId,
+              `${ctx.path}.filter`,
+              'the permanent sacrifice filter has no source-proven Forge SacValid selector',
+            ),
+          ],
+        };
+      }
+      const who =
+        effect.players === undefined
+          ? effect.target.kind === 'noTarget'
+            ? []
+            : effect.target.kind === 'triggeringPlayer' ||
+                effect.target.kind === 'thatPlayerOrPlaneswalkerController'
+              ? ctx.targeting
+              : [...ctx.targeting, ...params(['Defined', 'Targeted'])]
+          : params(['Defined', FORGE_PLAYER_SCOPE_DEFINED[effect.players]]);
+      const count = effect.count ?? 1;
+      const sacrificeValid =
+        effect.excludeSource === true ? valid.map((selector) => `${selector}.Other`) : valid;
+      return ok('Sacrifice', [
+        ...who,
+        ...params(['SacValid', sacrificeValid.join(',')]),
+        ...(ctx.computed.remembers ? params(['RememberSacrificed', 'True']) : []),
+        ...(count === 1 ? [] : params(['Amount', String(count)])),
+      ]);
+    },
   },
   // Diminish, read off `res/cardsfolder/d/diminish.txt` rather than composed:
   // `A:SP$ Animate | ValidTgts$ Creature | Power$ 1 | Toughness$ 1 |
@@ -1394,6 +3396,443 @@ export const FORGE_EFFECTS: ForgeEffectTable = {
         ...params(['Power', String(effect.power)], ['Toughness', String(effect.toughness)]),
       ]),
   },
+  animateLandWhileSourceOnBattlefield: {
+    api: 'Animate',
+    targets: ['targetPermanent'],
+    deckHas: null,
+    script: (effect, ctx) =>
+      ok(ctx.api, [
+        ...ctx.targeting,
+        ...params(
+          ['Types', ['Creature', ...effect.subtypes].join(',')],
+          ['Power', String(effect.power)],
+          ['Toughness', String(effect.toughness)],
+          ['Colors', effect.colors.map((color) => FORGE_COLOR_PROPERTIES[color]).join(',')],
+          ['OverwriteColors', 'True'],
+          ['Duration', 'AsLongAsInPlay'],
+        ),
+      ]),
+  },
+  animateSourceUntilEndOfTurn: {
+    api: 'Animate',
+    targets: ['selfPermanent'],
+    deckHas: null,
+    script: (effect, ctx) =>
+      ok(ctx.api, [
+        ...ctx.targeting,
+        ...params(
+          ['Power', String(effect.power)],
+          ['Toughness', String(effect.toughness)],
+          ['Types', ['Artifact', 'Creature', ...effect.subtypes].join(',')],
+          ['RemoveCreatureTypes', 'True'],
+          ['Colors', effect.colors.map((color) => FORGE_COLOR_PROPERTIES[color]).join(',')],
+          ['OverwriteColors', 'True'],
+        ),
+        ...(effect.keywords.length === 0
+          ? []
+          : params(['Keywords', effect.keywords.map((keyword) => FORGE_KEYWORDS[keyword]).join(',')])),
+      ]),
+  },
+  returnSourceFromGraveyard: {
+    api: 'ChangeZone',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) =>
+      ok(ctx.api, [
+        ...params(
+          ['Origin', 'Graveyard'],
+          ['Destination', effect.destination === 'hand' ? 'Hand' : 'Battlefield'],
+        ),
+        ...(effect.destination === 'battlefieldTapped' ? params(['Tapped', 'True']) : []),
+      ]),
+  },
+  returnDepartedSourceToOwnerHand: {
+    api: 'ChangeZone',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) =>
+      ok(
+        ctx.api,
+        params(['Origin', 'Graveyard'], ['Destination', 'Hand'], ['Defined', 'TriggeredNewCardLKICopy']),
+      ),
+  },
+  putDepartedSourceOnTopOfOwnerLibrary: {
+    api: 'ChangeZone',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) =>
+      ok(
+        ctx.api,
+        params(
+          ['Defined', 'TriggeredNewCardLKICopy'],
+          ['Origin', 'Graveyard'],
+          ['Destination', 'Library'],
+          ['LibraryPosition', '0'],
+        ),
+      ),
+  },
+  shuffleSourceIntoOwnerLibrary: {
+    api: 'ChangeZone',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) =>
+      ok(
+        ctx.api,
+        params(
+          ['Origin', 'Graveyard'],
+          ['Destination', 'Library'],
+          ['Shuffle', 'True'],
+          ['Defined', 'TriggeredCardLKICopy'],
+        ),
+      ),
+  },
+  // Forge's Act of Treason script spells temporary control as GainControl with
+  // LoseControl$ EOT. Untap and haste remain separate chained DSL effects, so
+  // this row contains no card-specific flags.
+  gainControlUntilEndOfTurn: {
+    api: 'GainControl',
+    targets: ['targetCreature'],
+    deckHas: null,
+    script: (_effect, ctx) => ok(ctx.api, [...ctx.targeting, ...params(['LoseControl', 'EOT'])]),
+  },
+  // Captivating Vampire, copied from Forge master: a permanent GainControl has
+  // no LoseControl clause, and its chained Animate retains the chosen creature
+  // through `Defined$ Targeted` for a permanent additive type change.
+  gainControl: {
+    api: 'GainControl',
+    targets: ['targetCreature'],
+    deckHas: null,
+    script: (_effect, ctx) => ok(ctx.api, ctx.targeting),
+  },
+  addSubtype: {
+    api: 'Animate',
+    targets: ['targetCreature', 'thatCreature'],
+    deckHas: null,
+    script: (effect, ctx) =>
+      ok(ctx.api, [...ctx.targeting, ...params(['Types', effect.subtype], ['Duration', 'Permanent'])]),
+  },
+  // Jinxed Idol, copied from Forge master: the affected object is the source
+  // permanent and the opponent is the actual CR 115 target. `Defined$ Self`
+  // therefore precedes the ordinary `ValidTgts$ Opponent` clause.
+  targetPlayerGainsControlOfSelfPermanent: {
+    api: 'GainControl',
+    targets: ['targetOpponent'],
+    deckHas: null,
+    script: (_effect, ctx) =>
+      ok(ctx.api, [...params(['Defined', 'Self']), ...params(['ValidTgts', 'Opponent'])]),
+  },
+  doubleSourceCounters: {
+    api: 'MultiplyCounter',
+    targets: [],
+    deckHas: 'Counters',
+    script: (effect, ctx) => {
+      const counters = FORGE_COUNTER_TYPES[effect.counter] ?? null;
+      if (counters === null || counters.length !== 1) {
+        return {
+          ok: false,
+          rejections: [
+            rejection(
+              'UNMAPPED_EFFECT_KIND',
+              ctx.cardId,
+              `${ctx.path}.counter`,
+              'counter doubling requires one exact Forge counter type',
+            ),
+          ],
+        };
+      }
+      return ok(ctx.api, params(['Defined', 'Self'], ['CounterType', counters[0]]));
+    },
+  },
+  regeneratePermanent: {
+    api: 'Regenerate',
+    targets: ['equippedCreature', 'noTarget'],
+    deckHas: null,
+    script: (effect, ctx) => {
+      if (effect.scope === undefined) return ok(ctx.api, ctx.targeting);
+      const group = sweepSelection(ctx, effect.scope, effect.scopeFilter);
+      if (group === null) return unwritableSweepRejection(ctx, effect.scope, effect.scopeFilter);
+      const valid = group.find(([name]) => name === 'ValidCards')?.[1];
+      if (valid === undefined) return unwritableSweepRejection(ctx, effect.scope, effect.scopeFilter);
+      return ok(ctx.api, params(['Defined', `Valid ${valid}`]));
+    },
+  },
+  returnSourceAuraAttached: {
+    api: 'Pump',
+    targets: ['targetCreatureYouDontControl'],
+    deckHas: null,
+    script: (_effect, _ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: 'Pump',
+          params: params(
+            ['ValidTgts', 'Creature'],
+            ['TgtPrompt', 'Choose a creature your opponents control'],
+            ['TargetsWithDefinedController', 'TriggeredCardOpponent'],
+            ['IsCurse', 'True'],
+            ['TargetingPlayer', 'TriggeredCardController'],
+          ),
+        },
+        follow: [
+          {
+            api: 'ChangeZone',
+            params: params(
+              ['Defined', 'Self'],
+              ['Origin', 'Graveyard'],
+              ['Destination', 'Battlefield'],
+              ['AttachedTo', 'ParentTarget'],
+            ),
+          },
+        ],
+      },
+    }),
+  },
+  // Safe Passage, copied from Forge master
+  // `forge-gui/res/cardsfolder/s/safe_passage.txt`. Unlike the two older
+  // prevention rows above, the exact spell provides both sides of the
+  // effect-object seam: an ordinary `SP$ Effect` ability and the named
+  // replacement definition it installs in the command zone. `card-script.ts`
+  // already carries supporting SVar lines beside an effect chain, so no
+  // card-name branch or alternate card assembler is needed.
+  preventAllDamageToYouAndCreaturesYouControl: {
+    api: 'Effect',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: params(['ReplacementEffects', 'RPrevent'], ['AILogic', 'Fog']),
+        },
+        supportingLines: [
+          'SVar:RPrevent:Event$ DamageDone | Prevent$ True | ActiveZones$ Command | ValidTarget$ You,Creature.YouCtrl | Description$ Prevent all damage that would be dealt to you and creatures you control this turn.',
+        ],
+      },
+    }),
+  },
+  // Forge master `vengeful_archon.txt`: the target is selected on the harmless
+  // primary Pump API and retained by `ParentTarget`; the prevention DB spends X
+  // against `You`, and its PreventionSubAbility reads exactly the amount this
+  // shield prevented. Keeping the whole protocol on this typed primitive avoids
+  // a card-name branch in either the activated-ability or card writer. The DSL
+  // schema admits only `chosenX` and its placement validator admits this effect
+  // only on an X activation, so the literal `Amount$ X` and `Count$xPaid` below
+  // cannot silently rewrite another amount or read a value nobody announced.
+  preventNextDamageToYouAndRetaliate: {
+    api: 'Pump',
+    targets: ['targetPlayerOrPlaneswalker', 'noTarget'],
+    deckHas: null,
+    script: (effect, ctx) => {
+      if (effect.target.kind === 'noTarget') {
+        const amount = forgeNumber(effect.amount, ctx.computed);
+        return amount === null
+          ? computedRejection(ctx.cardId, `${ctx.path}.amount`)
+          : ok('PreventDamage', params(['Defined', 'You'], ['Amount', amount]));
+      }
+      return {
+        ok: true,
+        value: {
+          ability: {
+            api: ctx.api,
+            params: [
+              ...ctx.targeting,
+              ...params(
+                ['TgtPrompt', 'Select target player or planeswalker damaged by shield effect'],
+                ['IsCurse', 'True'],
+                ['SubAbility', 'ArchonPrevention'],
+                ['StackDescription', 'None'],
+                ['AILogic', 'Never'],
+              ),
+            ],
+          },
+          supportingLines: [
+            'SVar:ArchonPrevention:DB$ PreventDamage | Defined$ You | Amount$ X | PreventionSubAbility$ ArchonsVengeance | ShieldEffectTarget$ ParentTarget',
+            'SVar:ArchonsVengeance:DB$ DealDamage | Defined$ ShieldEffectTarget | NumDmg$ PreventedDamage | SpellDescription$ CARDNAME deals that much damage to target player or planeswalker.',
+            'SVar:X:Count$xPaid',
+            'AI:RemoveDeck:All',
+          ],
+        },
+      };
+    },
+  },
+  // Silence, copied from Forge master
+  // `forge-gui/res/cardsfolder/s/silence.txt`: the resolving Effect installs
+  // one command-zone CantBeCast rule. This is deliberately not Counter$ True;
+  // a spell already on the stack is outside the rule's event.
+  cantCastSpellsThisTurn: {
+    api: 'Effect',
+    targets: [],
+    deckHas: null,
+    script: (_effect, ctx) => ({
+      ok: true,
+      value: {
+        ability: {
+          api: ctx.api,
+          params: params(['StaticAbilities', 'STCantBeCast'], ['AILogic', 'BeginningOfOppTurn']),
+        },
+        supportingLines: [
+          "SVar:STCantBeCast:Mode$ CantBeCast | ValidCard$ Card | Caster$ Opponent | Description$ Your opponents can't cast spells.",
+        ],
+      },
+    }),
+  },
+  // Autumn's Veil, copied from Forge master
+  // `forge-gui/res/cardsfolder/a/autumns_veil.txt`. One created effect carries
+  // both rules; emitting two chained Effect abilities would be executable but
+  // would no longer be parity with the oracle this package exists to provide.
+  protectSpellsAndCreaturesFromSpellColorsThisTurn: {
+    api: 'Effect',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) => {
+      const words = effect.colors.map((color) => FORGE_COLOR_WORDS[color]);
+      const titled = words.map((word) => `${word.slice(0, 1).toUpperCase()}${word.slice(1)}`);
+      const last = words.at(-1);
+      if (last === undefined) return computedRejection(ctx.cardId, `${ctx.path}.colors`);
+      const phrase = words.length === 1 ? last : `${words.slice(0, -1).join(', ')} or ${last}`;
+      return {
+        ok: true,
+        value: {
+          ability: {
+            api: ctx.api,
+            params: params(['ReplacementEffects', 'AntiMagic'], ['StaticAbilities', 'STCantBeTarget']),
+          },
+          supportingLines: [
+            `SVar:AntiMagic:Event$ Counter | ValidSA$ Spell.YouCtrl | ValidCause$ ${titled.map((color) => `Spell.${color}`).join(',')} | Layer$ CantHappen | Description$ Spells you control can't be countered by ${phrase} spells this turn.`,
+            `SVar:STCantBeTarget:Mode$ CantTarget | ValidTarget$ Creature.YouCtrl | ValidSource$ ${titled.map((color) => `Card.${color}`).join(',')} | ValidSA$ Spell | Description$ Creatures you control can't be the targets of ${phrase} spells this turn.`,
+          ],
+        },
+      };
+    },
+  },
+  flipCoin: {
+    api: 'FlipCoin',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) => {
+      const names = new Set<string>();
+      const supportingLines: string[] = [];
+      let token: TokenSpec | undefined;
+      const freshName = (preferred: string): string => {
+        let candidate = preferred;
+        let suffix = 2;
+        while (names.has(candidate)) {
+          candidate = `${preferred}${String(suffix)}`;
+          suffix += 1;
+        }
+        names.add(candidate);
+        return candidate;
+      };
+      const buildBranch = (
+        branch: 'winEffects' | 'loseEffects',
+      ): { readonly first: string | undefined; readonly rejections: readonly TranspileRejection[] } => {
+        const abilities: { readonly name: string; readonly ability: ForgeAbility }[] = [];
+        const rejections: TranspileRejection[] = [];
+        for (const [index, nested] of (effect[branch] ?? []).entries()) {
+          const result = transpileEffect(nested, ctx.cardId, `${ctx.path}.${branch}[${index}]`, ctx.computed);
+          if (!result.ok) {
+            rejections.push(...result.rejections);
+            continue;
+          }
+          if (result.value.token !== undefined) {
+            if (token !== undefined) {
+              rejections.push(
+                rejection(
+                  'UNMAPPED_EFFECT_KIND',
+                  ctx.cardId,
+                  `${ctx.path}.${branch}[${index}]`,
+                  'a coin branch exporting more than one token surface needs a plural token channel in ForgeEffectScript',
+                ),
+              );
+              continue;
+            }
+            token = result.value.token;
+          }
+          const primary =
+            nested.kind === 'sacrificeSelf' ? { ...result.value.ability, params: [] } : result.value.ability;
+          for (const ability of [primary, ...(result.value.follow ?? [])]) {
+            const preferred = ability.api === 'Sacrifice' ? 'DBSac' : `DB${ability.api}`;
+            abilities.push({ name: freshName(preferred), ability });
+          }
+          for (const line of result.value.supportingLines ?? []) {
+            if (!supportingLines.includes(line)) supportingLines.push(line);
+          }
+        }
+        supportingLines.push(
+          ...renderNamedSubAbilityChain(
+            abilities.map((entry) => ({
+              name: entry.name,
+              rendered: renderSubAbility(entry.ability),
+            })),
+          ),
+        );
+        return { first: abilities[0]?.name, rejections };
+      };
+      const win = buildBranch('winEffects');
+      const loss = buildBranch('loseEffects');
+      const rejections = [...win.rejections, ...loss.rejections];
+      if (rejections.length > 0) return { ok: false, rejections };
+      return {
+        ok: true,
+        value: {
+          ability: {
+            api: ctx.api,
+            params: params(['WinSubAbility', win.first], ['LoseSubAbility', loss.first]),
+          },
+          ...(supportingLines.length === 0 ? {} : { supportingLines }),
+          ...(token === undefined ? {} : { token }),
+        },
+      };
+    },
+  },
+  reorderTopLibrary: {
+    api: 'Dig',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) =>
+      ok(ctx.api, [
+        ['DigNum', String(effect.count)],
+        ['ChangeNum', 'All'],
+        ['DestinationZone', 'Library'],
+        ['DestinationPosition', 'Top'],
+      ]),
+  },
+  selectFromTopLibrary: {
+    api: 'Dig',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) =>
+      effect.grislySalvageProfile === true
+        ? ok(ctx.api, [
+            ['DigNum', '5'],
+            ['Reveal', 'True'],
+            ['ChangeNum', '1'],
+            ['ChangeValid', 'Creature,Land'],
+            ['DestinationZone2', 'Graveyard'],
+            ['Optional', 'True'],
+          ])
+        : ok(ctx.api, [
+            ['DigNum', String(effect.count)],
+            ['ChangeNum', '1'],
+            ['ChangeValid', 'Card.Instant,Card.Sorcery'],
+            ['DestinationZone', 'Hand'],
+            ['RestRandomOrder', 'False'],
+            ['RestZone', 'Library'],
+            ['RestPosition', 'Bottom'],
+          ]),
+  },
+  separateTopLibraryIntoPiles: {
+    api: 'MultiplePiles',
+    targets: [],
+    deckHas: null,
+    script: (effect, ctx) =>
+      ok(ctx.api, [
+        ['Zone', 'Library'],
+        ['Amount', String(effect.count)],
+        ['Reveal', 'True'],
+      ]),
+  },
 };
 
 /**
@@ -1414,18 +3853,45 @@ function targetParams(
   | { readonly ok: true; readonly params: readonly ForgeParam[] }
   | { readonly ok: false; readonly rejections: readonly TranspileRejection[] } {
   if (target.kind === 'triggeringCreature') {
-    // `Defined$ TriggeredTarget` rather than a `ValidTgts$` clause, because the
-    // kind names a referent the event retained and not a choice the caster
-    // makes. Which referent is decided by the enclosing trigger, and the DSL
-    // admits this kind under exactly two: the canonical exalted ability, and
-    // `selfDealsCombatDamageToCreature` (`dsl/src/validate/abilities.ts`, whose
-    // message names both). Exalted never reaches here — `ability-script.ts`
-    // answers it with `K:Exalted` before any effect is written, and a
-    // non-canonical exalted envelope is rejected there too — so everything that
-    // arrives is a combat-damage trigger, whose Forge mode is `DamageDone` with
-    // `ValidTarget$ Creature`, and `TriggeredTarget` is the name that mode gives
-    // the damaged creature.
-    return { ok: true, params: [['Defined', 'TriggeredTarget']] };
+    // A retained event referent is a `Defined$` value rather than a
+    // `ValidTgts$` choice, and which value depends on the mode: most supported
+    // ones name it `TriggeredTarget`, the block modes name the two sides of the
+    // pairing `TriggeredAttackerLKICopy` and `TriggeredBlockerLKICopy`.
+    // `FORGE_TRIGGERING_CREATURE_REFERENTS` is where those names live, keyed by
+    // condition and indexed by `T:` line; the explicit referent wins over it,
+    // because a condition whose two lines retain two different creatures can
+    // only be answered by the line.
+    const named =
+      ctx.triggeringCreatureReferent ??
+      (ctx.triggerCondition === undefined
+        ? undefined
+        : FORGE_TRIGGERING_CREATURE_REFERENTS[ctx.triggerCondition]?.[0]);
+    return { ok: true, params: [['Defined', named ?? 'TriggeredTarget']] };
+  }
+  if (target.kind === 'triggeringPlayer') {
+    // Both are retained event players rather than `ValidTgts$` choices, but
+    // Forge gives the two events different names: Discarded supplies the card
+    // controller, while DamageDone supplies its `TriggeredTarget` directly.
+    return {
+      ok: true,
+      params: [
+        [
+          'Defined',
+          ctx.triggerCondition === 'selfDealsCombatDamageToPlayer'
+            ? 'TriggeredTarget'
+            : ctx.triggerCondition === 'creatureAttacksYouOrPlaneswalkerYouControl'
+              ? 'TriggeredAttackerController'
+              : ctx.triggerCondition === 'selfAttacksAlone'
+                ? 'TriggeredDefendingPlayer'
+                : ctx.triggerCondition === 'beginningOfEachPlayersUpkeep'
+                  ? 'TriggeredPlayer'
+                  : 'TriggeredCardController',
+        ],
+      ],
+    };
+  }
+  if (target.kind === 'chosenPlayer') {
+    return { ok: true, params: [['Defined', 'ChosenPlayer']] };
   }
   if (isSourceBodyOnlyTarget(target.kind)) {
     // `Defined$ Self`, Forge's generic reference to the object whose card
@@ -1445,6 +3911,12 @@ function targetParams(
     // oracle text prints, and which cards may print it — has no counterpart in
     // Forge's grammar and nothing to translate into.
     return { ok: true, params: [['Defined', 'Self']] };
+  }
+  if (isSourceAttachmentTarget(target.kind)) {
+    return {
+      ok: true,
+      params: [['Defined', target.kind === 'enchantedCreature' ? 'Enchanted' : 'Equipped']],
+    };
   }
   if (isReferentTarget(target.kind)) {
     // The third `Defined$` escape from `ValidTgts$`, and the one Forge's own
@@ -1476,12 +3948,20 @@ function targetParams(
     // referent with no earlier chooser before a card ever reaches this file.
     return {
       ok: true,
-      params: [['Defined', target.kind === 'thatCreaturesController' ? 'TargetedController' : 'Targeted']],
+      params: [
+        [
+          'Defined',
+          target.kind === 'thatCreaturesController'
+            ? 'TargetedController'
+            : target.kind === 'thatPlayerOrPlaneswalkerController'
+              ? 'TargetedOrController'
+              : 'Targeted',
+        ],
+      ],
     };
   }
   const mapping: ForgeEffectRow | undefined = FORGE_EFFECTS[effect.kind];
-  const allowed = mapping?.targets;
-  if (allowed === undefined) {
+  if (mapping === undefined || isForgeEffectRefusal(mapping)) {
     return {
       ok: false,
       rejections: [
@@ -1489,11 +3969,12 @@ function targetParams(
           'UNMAPPED_EFFECT_KIND',
           ctx.cardId,
           ctx.path,
-          `effect "${effect.kind}" has no Forge targeting table`,
+          mapping?.refusal.reason ?? `effect "${effect.kind}" has no Forge targeting table`,
         ),
       ],
     };
   }
+  const allowed = mapping.targets;
   if (!allowed.includes(target.kind)) {
     return {
       ok: false,
@@ -1507,6 +3988,42 @@ function targetParams(
       ],
     };
   }
+  if (isGraveyardCardTargetKind(target.kind)) {
+    const filter = targetFilterOf(target);
+    const members = filter === null ? ['Card'] : forgeFilteredTargets('Card', filter, 'base');
+    if (members === null) {
+      return {
+        ok: false,
+        rejections: unmappedFilterRejections(ctx, `${ctx.path}.target.filter`, filter ?? undefined),
+      };
+    }
+    const qualified =
+      target.kind === 'targetCardInYourGraveyard'
+        ? members.map((member) => forgeGraveyardTarget(member, 'YouCtrl'))
+        : target.kind === 'targetCardInOpponentsGraveyard'
+          ? members.map((member) => forgeGraveyardTarget(member, 'OppOwn'))
+          : members;
+    if (qualified.some((member) => member === null)) {
+      return {
+        ok: false,
+        rejections: [
+          rejection(
+            'UNMAPPED_TARGET_KIND',
+            ctx.cardId,
+            `${ctx.path}.target.kind`,
+            'graveyard-card target filter cannot retain Forge ownership qualification',
+          ),
+        ],
+      };
+    }
+    return {
+      ok: true,
+      params: [
+        ['ValidTgts', qualified.join(',')],
+        ...(requiresDistinctTarget(target) ? ([['TargetUnique', 'True']] as const) : []),
+      ],
+    };
+  }
   const base = FORGE_VALID_TARGETS[target.kind];
   // The filter narrows the base before anything else touches it, because it can
   // change the base outright: "destroy target artifact" is `ValidTgts$ Artifact`
@@ -1515,14 +4032,23 @@ function targetParams(
   // each stage narrows what the one before it opened, and they end as one
   // string because Forge has one clause to put them in.
   const filter = targetFilterOf(target);
-  const members =
-    base === null || base === undefined || filter === null
+  const filterBase = target.kind === 'targetCreatureOpponentControls' ? 'Creature' : base;
+  const filtered =
+    filterBase === null || filterBase === undefined || filter === null
       ? null
-      : forgeFilteredTargets(base, filter, 'base');
+      : forgeFilteredTargets(filterBase, filter, 'base');
+  const members =
+    filtered === null || target.kind !== 'targetCreatureOpponentControls'
+      ? filtered
+      : filtered.map((member) => forgeRestrictedTarget(member, 'OppCtrl'));
   if (filter !== null && base !== null && base !== undefined && members === null) {
     return { ok: false, rejections: unmappedFilterRejections(ctx, `${ctx.path}.target.filter`, filter) };
   }
-  const validTgts = members === null ? base : members.join(',');
+  const selectedTargets = members === null ? base : members.join(',');
+  const validTgts =
+    selectedTargets === null || selectedTargets === undefined || target.excludeSource !== true
+      ? selectedTargets
+      : forgeRestrictedTarget(selectedTargets, 'Other');
   if (validTgts === undefined) {
     return {
       ok: false,
@@ -1537,6 +4063,11 @@ function targetParams(
     };
   }
   if (validTgts === null) return { ok: true, params: [['Defined', 'You']] };
+  const cardinality: readonly ForgeParam[] = targetsAnyNumber(target)
+    ? params(['TargetMin', '0'], ['TargetMax', target.kind === 'anyTarget' ? 'MaxTargets' : 'MaxTgt'])
+    : target.count === undefined
+      ? []
+      : params(['TargetMin', String(targetMinimumOf(target))], ['TargetMax', String(target.count)]);
   const unique: readonly ForgeParam[] = requiresDistinctTarget(target) ? [['TargetUnique', 'True']] : [];
   // The restriction narrows the same clause the kind opened, so it is attached
   // here rather than written as a second parameter: Forge says "creature you
@@ -1546,10 +4077,11 @@ function targetParams(
   // that is quietly wider than the card's is the one bug a parity oracle must
   // not have.
   const restriction = targetRestrictionOf(target);
-  if (restriction === null) return { ok: true, params: [['ValidTgts', validTgts], ...unique] };
+  if (restriction === null) {
+    return { ok: true, params: [['ValidTgts', validTgts], ...cardinality, ...unique] };
+  }
   const qualifier = forgeTargetRestriction(restriction);
-  const restricted = qualifier === null ? null : forgeRestrictedTarget(validTgts, qualifier);
-  if (restricted === null) {
+  if (qualifier === null) {
     return {
       ok: false,
       rejections: [
@@ -1562,11 +4094,93 @@ function targetParams(
       ],
     };
   }
-  return { ok: true, params: [['ValidTgts', restricted], ...unique] };
+  const exclusionBeforeYouDontControl =
+    target.kind === 'targetCreatureYouDontControl' && restriction.kind === 'withoutKeyword';
+  const defendingPlayerToughness =
+    target.kind === 'targetCreatureDefendingPlayerControls' && restriction.kind === 'maxToughness';
+  const restrictionBase = exclusionBeforeYouDontControl || defendingPlayerToughness ? 'Creature' : validTgts;
+  const narrowed = forgeRestrictedTarget(restrictionBase, qualifier);
+  const restricted = exclusionBeforeYouDontControl
+    ? forgeRestrictedTarget(narrowed, 'YouDontCtrl')
+    : defendingPlayerToughness
+      ? forgeRestrictedTarget(narrowed, 'ControlledBy TriggeredDefendingPlayer')
+      : narrowed;
+  const prompt: readonly ForgeParam[] =
+    restriction.kind === 'playerLostLifeThisTurn'
+      ? [['TgtPrompt', 'Select target player who lost life this turn']]
+      : [];
+  return { ok: true, params: [['ValidTgts', restricted], ...prompt, ...cardinality, ...unique] };
+}
+
+/** Forge writes graveyard ownership before characteristic qualifiers. */
+function forgeGraveyardTarget(member: string, owner: 'YouCtrl' | 'OppOwn'): string | null {
+  if (member.includes(',')) return null;
+  const separator = member.indexOf('.');
+  return separator === -1
+    ? `${member}.${owner}`
+    : `${member.slice(0, separator)}.${owner}+${member.slice(separator + 1)}`;
+}
+
+/**
+ * Forge's optional human-facing prompt for a pure color-filtered creature
+ * target. The selector remains the rules-bearing field; this is derived only
+ * when it can repeat that selector without dropping another restriction.
+ */
+function filteredCreaturePrompt(target: TargetSpec): readonly ForgeParam[] {
+  if (target.kind !== 'targetCreature') return [];
+  const filter = targetFilterOf(target);
+  const colors = filter?.colors;
+  if (filter === null || colors === undefined || Object.keys(filter).length !== 1) return [];
+  const words = colors.map((color) => FORGE_COLOR_WORDS[color].toLowerCase());
+  const phrase = words.length === 1 ? words[0] : `${words.slice(0, -1).join(', ')} or ${words.at(-1)}`;
+  return phrase === undefined ? [] : params(['TgtPrompt', `Select target ${phrase} creature.`]);
+}
+
+/** Ultimate Price's installed prompt, including its source's absent terminal punctuation. */
+function monocoloredCreaturePrompt(target: TargetSpec): readonly ForgeParam[] {
+  if (target.kind !== 'targetCreature') return [];
+  const filter = targetFilterOf(target);
+  return filter?.monocolored === true && Object.keys(filter).length === 1
+    ? params(['TgtPrompt', 'Select target monocolored creature'])
+    : [];
+}
+
+/** Avenging Arrow's installed prompt, including its terminal punctuation. */
+function dealtDamageCreaturePrompt(target: TargetSpec): readonly ForgeParam[] {
+  if (target.kind !== 'targetCreature') return [];
+  const filter = targetFilterOf(target);
+  return filter?.dealtDamageThisTurn === true && Object.keys(filter).length === 1
+    ? params(['TgtPrompt', 'Select target creature that dealt damage this turn.'])
+    : [];
+}
+
+/** Forge's source-attested prompts for damage aimed at a player or planeswalker. */
+function playerOrPlaneswalkerDamagePrompt(
+  target: TargetSpec,
+  scope: EffectScope | undefined,
+  opponentOnly = false,
+): readonly ForgeParam[] {
+  if (target.kind !== 'targetPlayerOrPlaneswalker') return [];
+  const text = opponentOnly
+    ? 'Select target opponent or planeswalker'
+    : scope === 'targetAndPermanentsItsPlayerControls'
+      ? 'Select a player or planeswalker'
+      : 'Select target player or planeswalker';
+  return params(['TgtPrompt', text]);
 }
 
 function tokenRejections(token: TokenSpec, ctx: TargetContext): TranspileRejection[] {
   const found: TranspileRejection[] = [];
+  if (token.characteristicPowerToughness?.kind === 'creaturesYouControl') {
+    found.push(
+      rejection(
+        'UNMAPPED_CHARACTERISTIC_VALUE',
+        ctx.cardId,
+        `${ctx.path}.token.characteristicPowerToughness`,
+        'this token CDA has no source-proven Forge Count$ spelling; exporting its 0/0 storage sentinel would change the token',
+      ),
+    );
+  }
   if (!isScriptSafe(token.name)) {
     found.push(
       rejection(
@@ -1721,6 +4335,8 @@ export function transpileEffect(
   cardId: string,
   path: string,
   computed: ComputedAmounts = NO_COMPUTED_AMOUNTS,
+  triggerCondition?: TriggerCondition,
+  triggeringCreatureReferent?: string,
 ): EffectScriptResult {
   const mapping: ForgeEffectRow | undefined = FORGE_EFFECTS[effect.kind];
   if (mapping === undefined) {
@@ -1736,7 +4352,18 @@ export function transpileEffect(
       ],
     };
   }
-  const target: TargetContext = { cardId, path };
+  if (isForgeEffectRefusal(mapping)) {
+    return {
+      ok: false,
+      rejections: [rejection(mapping.refusal.code, cardId, path, mapping.refusal.reason)],
+    };
+  }
+  const target: TargetContext = {
+    cardId,
+    path,
+    ...(triggerCondition === undefined ? {} : { triggerCondition }),
+    ...(triggeringCreatureReferent === undefined ? {} : { triggeringCreatureReferent }),
+  };
 
   let targeting: readonly ForgeParam[] = [];
   if (hasTarget(effect)) {
@@ -1752,7 +4379,16 @@ export function transpileEffect(
   // lookup. Each writer is still checked against its own row's effect shape at
   // the definition site above, which is where a mistake would actually be made.
   const write = mapping.script as (e: Effect, c: EffectScriptContext) => EffectScriptResult;
-  return write(effect, { ...target, api: mapping.api, targeting, computed });
+  const result = write(effect, { ...target, api: mapping.api, targeting, computed });
+  if (effect.kind === 'addMana' && effect.distribution === 'anyCombinationOfColors') return result;
+  if (!result.ok || computed.supportingLines.length === 0) return result;
+  return {
+    ok: true,
+    value: {
+      ...result.value,
+      supportingLines: [...(result.value.supportingLines ?? []), ...computed.supportingLines],
+    },
+  };
 }
 
 function ok(api: string, abilityParams: readonly ForgeParam[]): EffectScriptResult {

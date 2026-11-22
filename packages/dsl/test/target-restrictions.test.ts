@@ -40,6 +40,9 @@ describe('a restricted target slot', () => {
     expect(textOf(sorcery({ kind: 'targetCreature', restriction: { kind: 'minPower', power: 4 } }))).toBe(
       'Destroy target creature with power 4 or greater.',
     );
+    expect(
+      textOf(sorcery({ kind: 'targetCreature', restriction: { kind: 'maxToughness', toughness: 2 } })),
+    ).toBe('Destroy target creature with toughness 2 or less.');
   });
 
   it('prints a state as an adjective in front of the noun', () => {

@@ -1,0 +1,1881 @@
+{
+  "schemaVersion": 1,
+  "forge": {
+    "version": "2.0.14",
+    "jarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9"
+  },
+  "command": "javap -cp <forge-gui-desktop-2.0.14-jar-with-dependencies.jar> -p -c -constants forge.game.ability.ApiType forge.game.ability.SpellAbilityEffect forge.game.ability.effects.* forge.game.trigger.Trigger* forge.game.replacement.Replace* forge.game.staticability.StaticAbility*",
+  "baseEffectCalls": ["chooseSingleEntityForEffect"],
+  "effects": [
+    {
+      "apiType": "Abandon",
+      "effectClass": "AbandonEffect",
+      "classes": ["AbandonEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "ActivateAbility",
+      "effectClass": "ActivateAbilityEffect",
+      "classes": ["ActivateAbilityEffect"],
+      "controllerCalls": ["chooseSingleSpellForEffect", "playChosenSpellAbility"]
+    },
+    {
+      "apiType": "AddOrRemoveCounter",
+      "effectClass": "CountersPutOrRemoveEffect",
+      "classes": ["CountersPutOrRemoveEffect"],
+      "controllerCalls": ["chooseBinary", "chooseCounterType", "confirmAction"]
+    },
+    {
+      "apiType": "AddPhase",
+      "effectClass": "AddPhaseEffect",
+      "classes": ["AddPhaseEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "AddTurn",
+      "effectClass": "AddTurnEffect",
+      "classes": ["AddTurnEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "AdvanceCrank",
+      "effectClass": "AdvanceCrankEffect",
+      "classes": ["AdvanceCrankEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Airbend",
+      "effectClass": "AirbendEffect",
+      "classes": ["AirbendEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "AlterAttribute",
+      "effectClass": "AlterAttributeEffect",
+      "classes": ["AlterAttributeEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "Amass",
+      "effectClass": "AmassEffect",
+      "classes": ["AmassEffect", "TokenEffectBase", "TokenEffectBase$2", "TokenEffectBase$1"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "Animate",
+      "effectClass": "AnimateEffect",
+      "classes": ["AnimateEffect", "AnimateEffectBase$2", "AnimateEffectBase$1", "AnimateEffectBase"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "AnimateAll",
+      "effectClass": "AnimateAllEffect",
+      "classes": ["AnimateAllEffect", "AnimateEffectBase$2", "AnimateEffectBase$1", "AnimateEffectBase"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Ascend",
+      "effectClass": "AscendEffect",
+      "classes": ["AscendEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "AssembleContraption",
+      "effectClass": "AssembleContraptionEffect",
+      "classes": ["AssembleContraptionEffect"],
+      "controllerCalls": ["chooseSprocket"]
+    },
+    {
+      "apiType": "AssignGroup",
+      "effectClass": "AssignGroupEffect",
+      "classes": ["AssignGroupEffect"],
+      "controllerCalls": ["chooseSingleSpellForEffect"]
+    },
+    {
+      "apiType": "Attach",
+      "effectClass": "AttachEffect",
+      "classes": ["AttachEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "Balance",
+      "effectClass": "BalanceEffect",
+      "classes": ["BalanceEffect"],
+      "controllerCalls": ["chooseCardsToDiscardFrom", "choosePermanentsToSacrifice"]
+    },
+    {
+      "apiType": "BecomeMonarch",
+      "effectClass": "BecomeMonarchEffect",
+      "classes": ["BecomeMonarchEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "BecomesBlocked",
+      "effectClass": "BecomesBlockedEffect",
+      "classes": ["BecomesBlockedEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "BidLife",
+      "effectClass": "BidLifeEffect",
+      "classes": ["BidLifeEffect"],
+      "controllerCalls": ["announceRequirements", "chooseNumber", "confirmBidAction"]
+    },
+    {
+      "apiType": "BlankLine",
+      "effectClass": "BlankLineEffect",
+      "classes": ["BlankLineEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Blight",
+      "effectClass": "BlightEffect",
+      "classes": ["BlightEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "Block",
+      "effectClass": "BlockEffect",
+      "classes": ["BlockEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Bond",
+      "effectClass": "BondEffect",
+      "classes": ["BondEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "Branch",
+      "effectClass": "BranchEffect",
+      "classes": ["BranchEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Camouflage",
+      "effectClass": "CamouflageEffect",
+      "classes": ["CamouflageEffect"],
+      "controllerCalls": ["chooseCardsForEffect", "declareBlockers"]
+    },
+    {
+      "apiType": "ChangeCombatants",
+      "effectClass": "ChangeCombatantsEffect",
+      "classes": ["ChangeCombatantsEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "ChangeSpeed",
+      "effectClass": "ChangeSpeedEffect",
+      "classes": ["ChangeSpeedEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ChangeTargets",
+      "effectClass": "ChangeTargetsEffect",
+      "classes": ["ChangeTargetsEffect"],
+      "controllerCalls": ["chooseNewTargetsFor", "chooseTarget", "confirmAction"]
+    },
+    {
+      "apiType": "ChangeText",
+      "effectClass": "ChangeTextEffect",
+      "classes": ["ChangeTextEffect", "ChangeTextEffect$1"],
+      "controllerCalls": ["chooseColor", "chooseSomeType"]
+    },
+    {
+      "apiType": "ChangeX",
+      "effectClass": "ChangeXEffect",
+      "classes": ["ChangeXEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ChangeZone",
+      "effectClass": "ChangeZoneEffect",
+      "classes": ["ChangeZoneEffect$HiddenOriginChoices", "ChangeZoneEffect"],
+      "controllerCalls": [
+        "chooseCardsForZoneChange",
+        "chooseSingleCardForZoneChange",
+        "chooseSingleEntityForEffect",
+        "confirmAction",
+        "endTempShowCards",
+        "getAbilityToPlay",
+        "isAI",
+        "isFullControl",
+        "orderMoveToZoneList",
+        "playSaFromPlayEffect",
+        "reveal",
+        "tempShowCards"
+      ]
+    },
+    {
+      "apiType": "ChangeZoneAll",
+      "effectClass": "ChangeZoneAllEffect",
+      "classes": ["ChangeZoneAllEffect"],
+      "controllerCalls": ["confirmAction", "orderMoveToZoneList"]
+    },
+    {
+      "apiType": "ChangeZoneResolve",
+      "effectClass": "ChangeZoneResolveEffect",
+      "classes": ["ChangeZoneResolveEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ChaosEnsues",
+      "effectClass": "ChaosEnsuesEffect",
+      "classes": ["ChaosEnsuesEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Charm",
+      "effectClass": "CharmEffect",
+      "classes": ["CharmEffect"],
+      "controllerCalls": ["chooseModeForAbility", "chooseSingleEntityForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "ChooseCard",
+      "effectClass": "ChooseCardEffect",
+      "classes": ["ChooseCardEffect"],
+      "controllerCalls": ["chooseCardsForEffect", "chooseSingleEntityForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "ChooseColor",
+      "effectClass": "ChooseColorEffect",
+      "classes": ["ChooseColorEffect"],
+      "controllerCalls": ["chooseColors"]
+    },
+    {
+      "apiType": "ChooseDirection",
+      "effectClass": "ChooseDirectionEffect",
+      "classes": ["ChooseDirectionEffect"],
+      "controllerCalls": ["chooseBinary", "notifyOfValue"]
+    },
+    {
+      "apiType": "ChooseEvenOdd",
+      "effectClass": "ChooseEvenOddEffect",
+      "classes": ["ChooseEvenOddEffect"],
+      "controllerCalls": ["chooseBinary"]
+    },
+    {
+      "apiType": "ChooseNumber",
+      "effectClass": "ChooseNumberEffect",
+      "classes": ["ChooseNumberEffect"],
+      "controllerCalls": ["announceRequirements", "chooseNumber", "chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "ChoosePlayer",
+      "effectClass": "ChoosePlayerEffect",
+      "classes": ["ChoosePlayerEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "ChooseSector",
+      "effectClass": "ChooseSectorEffect",
+      "classes": ["ChooseSectorEffect"],
+      "controllerCalls": ["chooseSector"]
+    },
+    {
+      "apiType": "ChooseSource",
+      "effectClass": "ChooseSourceEffect",
+      "classes": ["ChooseSourceEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "ChooseType",
+      "effectClass": "ChooseTypeEffect",
+      "classes": ["ChooseTypeEffect"],
+      "controllerCalls": ["chooseSomeType"]
+    },
+    {
+      "apiType": "ClaimThePrize",
+      "effectClass": "ClaimThePrizeEffect",
+      "classes": ["ClaimThePrizeEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Clash",
+      "effectClass": "ClashEffect",
+      "classes": ["ClashEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect", "willPutCardOnTop"]
+    },
+    {
+      "apiType": "ClassLevelUp",
+      "effectClass": "ClassLevelUpEffect",
+      "classes": ["ClassLevelUpEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Cleanup",
+      "effectClass": "CleanUpEffect",
+      "classes": ["CleanUpEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Cloak",
+      "effectClass": "CloakEffect",
+      "classes": ["CloakEffect", "ManifestBaseEffect"],
+      "controllerCalls": ["chooseCardsForEffect"]
+    },
+    {
+      "apiType": "Clone",
+      "effectClass": "CloneEffect",
+      "classes": ["CloneEffect$1", "CloneEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "CompanionChoose",
+      "effectClass": "CharmEffect",
+      "classes": ["CharmEffect"],
+      "controllerCalls": ["chooseModeForAbility", "chooseSingleEntityForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "Connive",
+      "effectClass": "ConniveEffect",
+      "classes": ["ConniveEffect"],
+      "controllerCalls": ["chooseCardsToDiscardFrom", "chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "ControlPlayer",
+      "effectClass": "ControlPlayerEffect",
+      "classes": ["ControlPlayerEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ControlSpell",
+      "effectClass": "ControlSpellEffect",
+      "classes": ["ControlSpellEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "CopyPermanent",
+      "effectClass": "CopyPermanentEffect",
+      "classes": ["CopyPermanentEffect", "TokenEffectBase", "TokenEffectBase$2", "TokenEffectBase$1"],
+      "controllerCalls": ["chooseSingleEntityForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "CopySpellAbility",
+      "effectClass": "CopySpellAbilityEffect",
+      "classes": ["CopySpellAbilityEffect$1", "CopySpellAbilityEffect"],
+      "controllerCalls": [
+        "chooseSingleEntityForEffect",
+        "chooseSingleSpellForEffect",
+        "confirmAction",
+        "orderAndPlaySimultaneousSa"
+      ]
+    },
+    {
+      "apiType": "Counter",
+      "effectClass": "CounterEffect",
+      "classes": ["CounterEffect"],
+      "controllerCalls": ["chooseSomeType", "confirmAction"]
+    },
+    {
+      "apiType": "DamageAll",
+      "effectClass": "DamageAllEffect",
+      "classes": ["DamageAllEffect", "DamageBaseEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "DamageResolve",
+      "effectClass": "DamageResolveEffect",
+      "classes": ["DamageResolveEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "DayTime",
+      "effectClass": "DayTimeEffect",
+      "classes": ["DayTimeEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "DealDamage",
+      "effectClass": "DamageDealEffect",
+      "classes": ["DamageDealEffect", "DamageBaseEffect"],
+      "controllerCalls": ["assignCombatDamage", "chooseEntitiesForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "Debuff",
+      "effectClass": "DebuffEffect",
+      "classes": ["DebuffEffect", "DebuffEffect$1"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "DelayedTrigger",
+      "effectClass": "DelayedTriggerEffect",
+      "classes": ["DelayedTriggerEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Destroy",
+      "effectClass": "DestroyEffect",
+      "classes": ["DestroyEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "DestroyAll",
+      "effectClass": "DestroyAllEffect",
+      "classes": ["DestroyAllEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "Detain",
+      "effectClass": "DetainEffect",
+      "classes": ["DetainEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Dig",
+      "effectClass": "DigEffect",
+      "classes": ["DigEffect"],
+      "controllerCalls": [
+        "chooseEntitiesForEffect",
+        "chooseSingleEntityForEffect",
+        "confirmAction",
+        "endTempShowCards",
+        "notifyOfValue",
+        "orderMoveToZoneList",
+        "tempShowCards"
+      ]
+    },
+    {
+      "apiType": "DigMultiple",
+      "effectClass": "DigMultipleEffect",
+      "classes": ["DigMultipleEffect"],
+      "controllerCalls": ["chooseCardsForEffect", "chooseCardsForEffectMultiple", "notifyOfValue"]
+    },
+    {
+      "apiType": "DigUntil",
+      "effectClass": "DigUntilEffect",
+      "classes": ["DigUntilEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect", "confirmAction", "orderMoveToZoneList"]
+    },
+    {
+      "apiType": "Discard",
+      "effectClass": "DiscardEffect",
+      "classes": ["DiscardEffect"],
+      "controllerCalls": [
+        "chooseCardsToDiscardFrom",
+        "chooseCardsToDiscardUnlessType",
+        "chooseCardsToRevealFromHand",
+        "confirmAction",
+        "reveal"
+      ]
+    },
+    {
+      "apiType": "Discover",
+      "effectClass": "DiscoverEffect",
+      "classes": ["DiscoverEffect"],
+      "controllerCalls": ["confirmAction", "getAbilityToPlay", "playSaFromPlayEffect"]
+    },
+    {
+      "apiType": "Draft",
+      "effectClass": "DraftEffect",
+      "classes": ["DraftEffect"],
+      "controllerCalls": ["chooseSingleCardForZoneChange"]
+    },
+    {
+      "apiType": "DrainMana",
+      "effectClass": "DrainManaEffect",
+      "classes": ["DrainManaEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Draw",
+      "effectClass": "DrawEffect",
+      "classes": ["DrawEffect"],
+      "controllerCalls": ["chooseNumber", "confirmAction"]
+    },
+    {
+      "apiType": "EachDamage",
+      "effectClass": "DamageEachEffect",
+      "classes": ["DamageEachEffect", "DamageBaseEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Earthbend",
+      "effectClass": "EarthbendEffect",
+      "classes": ["EarthbendEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Effect",
+      "effectClass": "EffectEffect",
+      "classes": ["EffectEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Encode",
+      "effectClass": "EncodeEffect",
+      "classes": ["EncodeEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "EndCombatPhase",
+      "effectClass": "EndCombatPhaseEffect",
+      "classes": ["EndCombatPhaseEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "EndTurn",
+      "effectClass": "EndTurnEffect",
+      "classes": ["EndTurnEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "Endure",
+      "effectClass": "EndureEffect",
+      "classes": ["EndureEffect", "TokenEffectBase", "TokenEffectBase$2", "TokenEffectBase$1"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "ExchangeControl",
+      "effectClass": "ControlExchangeEffect",
+      "classes": ["ControlExchangeEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "ExchangeControlVariant",
+      "effectClass": "ControlExchangeVariantEffect",
+      "classes": ["ControlExchangeVariantEffect"],
+      "controllerCalls": ["chooseCardsForEffect"]
+    },
+    {
+      "apiType": "ExchangeLife",
+      "effectClass": "LifeExchangeEffect",
+      "classes": ["LifeExchangeEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ExchangeLifeVariant",
+      "effectClass": "LifeExchangeVariantEffect",
+      "classes": ["LifeExchangeVariantEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ExchangePower",
+      "effectClass": "PowerExchangeEffect",
+      "classes": ["PowerExchangeEffect", "PowerExchangeEffect$1"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ExchangeTextBox",
+      "effectClass": "TextBoxExchangeEffect",
+      "classes": ["TextBoxExchangeEffect", "TextBoxExchangeEffect$1", "TextBoxExchangeEffect$TextBoxData"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ExchangeZone",
+      "effectClass": "ZoneExchangeEffect",
+      "classes": ["ZoneExchangeEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "Explore",
+      "effectClass": "ExploreEffect",
+      "classes": ["ExploreEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "Fight",
+      "effectClass": "FightEffect",
+      "classes": ["FightEffect", "DamageBaseEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "FlipCoin",
+      "effectClass": "FlipCoinEffect",
+      "classes": ["FlipCoinEffect"],
+      "controllerCalls": ["chooseBinary", "chooseFlipResult"]
+    },
+    {
+      "apiType": "FlipOntoBattlefield",
+      "effectClass": "FlipOntoBattlefieldEffect",
+      "classes": ["FlipOntoBattlefieldEffect"],
+      "controllerCalls": ["chooseCardsForEffect"]
+    },
+    {
+      "apiType": "Fog",
+      "effectClass": "FogEffect",
+      "classes": ["FogEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "GainControl",
+      "effectClass": "ControlGainEffect",
+      "classes": ["ControlGainEffect$1", "ControlGainEffect", "ControlGainEffect$2"],
+      "controllerCalls": ["chooseCardsForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "GainControlVariant",
+      "effectClass": "ControlGainVariantEffect",
+      "classes": ["ControlGainVariantEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "GainLife",
+      "effectClass": "LifeGainEffect",
+      "classes": ["LifeGainEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "GainOwnership",
+      "effectClass": "OwnershipGainEffect",
+      "classes": ["OwnershipGainEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "GameDrawn",
+      "effectClass": "GameDrawEffect",
+      "classes": ["GameDrawEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "GenericChoice",
+      "effectClass": "ChooseGenericEffect",
+      "classes": ["ChooseGenericEffect"],
+      "controllerCalls": ["chooseSpellAbilitiesForEffect", "chooseTargetsFor"]
+    },
+    {
+      "apiType": "Goad",
+      "effectClass": "GoadEffect",
+      "classes": ["GoadEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Haunt",
+      "effectClass": "HauntEffect",
+      "classes": ["HauntEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "HealDamage",
+      "effectClass": "HealDamageEffect",
+      "classes": ["HealDamageEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Heist",
+      "effectClass": "HeistEffect",
+      "classes": ["HeistEffect"],
+      "controllerCalls": ["chooseSingleCardForZoneChange"]
+    },
+    {
+      "apiType": "ImmediateTrigger",
+      "effectClass": "ImmediateTriggerEffect",
+      "classes": ["ImmediateTriggerEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Incubate",
+      "effectClass": "IncubateEffect",
+      "classes": ["IncubateEffect", "TokenEffectBase", "TokenEffectBase$2", "TokenEffectBase$1"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Intensify",
+      "effectClass": "IntensifyEffect",
+      "classes": ["IntensifyEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "InternalIgnoreEffect",
+      "effectClass": "CharmEffect",
+      "classes": ["CharmEffect"],
+      "controllerCalls": ["chooseModeForAbility", "chooseSingleEntityForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "InternalLegendaryRule",
+      "effectClass": "CharmEffect",
+      "classes": ["CharmEffect"],
+      "controllerCalls": ["chooseModeForAbility", "chooseSingleEntityForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "InternalRadiation",
+      "effectClass": "InternalRadiationEffect",
+      "classes": ["InternalRadiationEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Investigate",
+      "effectClass": "InvestigateEffect",
+      "classes": ["InvestigateEffect", "TokenEffectBase", "TokenEffectBase$2", "TokenEffectBase$1"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "Learn",
+      "effectClass": "LearnEffect",
+      "classes": ["LearnEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "LookAt",
+      "effectClass": "LookAtEffect",
+      "classes": ["LookAtEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "LoseLife",
+      "effectClass": "LifeLoseEffect",
+      "classes": ["LifeLoseEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "LosePerpetual",
+      "effectClass": "LosePerpetualEffect",
+      "classes": ["LosePerpetualEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "LosesGame",
+      "effectClass": "GameLossEffect",
+      "classes": ["GameLossEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "MakeCard",
+      "effectClass": "MakeCardEffect",
+      "classes": ["MakeCardEffect"],
+      "controllerCalls": ["chooseCardName", "confirmAction"]
+    },
+    {
+      "apiType": "Mana",
+      "effectClass": "ManaEffect",
+      "classes": ["ManaEffect"],
+      "controllerCalls": ["chooseColor", "chooseColorAllowColorless", "confirmAction", "specifyManaCombo"]
+    },
+    {
+      "apiType": "ManaReflected",
+      "effectClass": "ManaReflectedEffect",
+      "classes": ["ManaReflectedEffect"],
+      "controllerCalls": ["chooseColor", "chooseColorAllowColorless", "specifyManaCombo"]
+    },
+    {
+      "apiType": "Manifest",
+      "effectClass": "ManifestEffect",
+      "classes": ["ManifestEffect", "ManifestBaseEffect"],
+      "controllerCalls": ["chooseCardsForEffect"]
+    },
+    {
+      "apiType": "ManifestDread",
+      "effectClass": "ManifestDreadEffect",
+      "classes": ["ManifestDreadEffect", "ManifestEffect", "ManifestBaseEffect"],
+      "controllerCalls": ["chooseCardsForEffect", "chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "Meld",
+      "effectClass": "MeldEffect",
+      "classes": ["MeldEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "Mill",
+      "effectClass": "MillEffect",
+      "classes": ["MillEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "MoveCounter",
+      "effectClass": "CountersMoveEffect",
+      "classes": ["CountersMoveEffect"],
+      "controllerCalls": ["chooseCardsForEffect", "chooseCounterType", "chooseNumber"]
+    },
+    {
+      "apiType": "MultiplePiles",
+      "effectClass": "MultiplePilesEffect",
+      "classes": ["MultiplePilesEffect"],
+      "controllerCalls": ["chooseCardsForEffect"]
+    },
+    {
+      "apiType": "MultiplyCounter",
+      "effectClass": "CountersMultiplyEffect",
+      "classes": ["CountersMultiplyEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "MustBlock",
+      "effectClass": "MustBlockEffect",
+      "classes": ["MustBlockEffect", "MustBlockEffect$1"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "Mutate",
+      "effectClass": "MutateEffect",
+      "classes": ["MutateEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "NameCard",
+      "effectClass": "ChooseCardNameEffect",
+      "classes": ["ChooseCardNameEffect"],
+      "controllerCalls": ["chooseCardName"]
+    },
+    {
+      "apiType": "OpenAttraction",
+      "effectClass": "OpenAttractionEffect",
+      "classes": ["OpenAttractionEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "PeekAndReveal",
+      "effectClass": "PeekAndRevealEffect",
+      "classes": ["PeekAndRevealEffect"],
+      "controllerCalls": ["confirmAction", "reveal"]
+    },
+    {
+      "apiType": "PermanentCreature",
+      "effectClass": "PermanentCreatureEffect",
+      "classes": ["PermanentCreatureEffect", "PermanentEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "PermanentNoncreature",
+      "effectClass": "PermanentNoncreatureEffect",
+      "classes": ["PermanentNoncreatureEffect", "PermanentEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Phases",
+      "effectClass": "PhasesEffect",
+      "classes": ["PhasesEffect"],
+      "controllerCalls": ["chooseCardsForEffect"]
+    },
+    {
+      "apiType": "Planeswalk",
+      "effectClass": "PlaneswalkEffect",
+      "classes": ["PlaneswalkEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "Play",
+      "effectClass": "PlayEffect",
+      "classes": ["PlayEffect"],
+      "controllerCalls": [
+        "chooseCardsForEffect",
+        "chooseSingleEntityForEffect",
+        "confirmAction",
+        "endTempShowCards",
+        "getAbilityToPlay",
+        "playSaFromPlayEffect",
+        "tempShowCards"
+      ]
+    },
+    {
+      "apiType": "PlayLandVariant",
+      "effectClass": "PlayLandVariantEffect",
+      "classes": ["PlayLandVariantEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Poison",
+      "effectClass": "PoisonEffect",
+      "classes": ["PoisonEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "PreventDamage",
+      "effectClass": "DamagePreventEffect",
+      "classes": ["DamagePreventEffect", "DamagePreventEffect$1"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Proliferate",
+      "effectClass": "CountersProliferateEffect",
+      "classes": ["CountersProliferateEffect$1", "CountersProliferateEffect"],
+      "controllerCalls": ["chooseEntitiesForEffect"]
+    },
+    {
+      "apiType": "Protection",
+      "effectClass": "ProtectEffect",
+      "classes": ["ProtectEffect", "ProtectEffect$1"],
+      "controllerCalls": ["chooseProtectionType"]
+    },
+    {
+      "apiType": "ProtectionAll",
+      "effectClass": "ProtectAllEffect",
+      "classes": ["ProtectAllEffect$2", "ProtectAllEffect", "ProtectAllEffect$1"],
+      "controllerCalls": ["chooseProtectionType"]
+    },
+    {
+      "apiType": "Pump",
+      "effectClass": "PumpEffect",
+      "classes": ["PumpEffect$1", "PumpEffect", "PumpEffect$2"],
+      "controllerCalls": ["chooseKeywordForPump", "confirmAction"]
+    },
+    {
+      "apiType": "PumpAll",
+      "effectClass": "PumpAllEffect",
+      "classes": ["PumpAllEffect", "PumpAllEffect$1"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "PutCounter",
+      "effectClass": "CountersPutEffect",
+      "classes": ["CountersPutEffect"],
+      "controllerCalls": [
+        "chooseCardsForEffect",
+        "chooseCounterType",
+        "chooseNumber",
+        "chooseSingleEntityForEffect",
+        "confirmAction"
+      ]
+    },
+    {
+      "apiType": "PutCounterAll",
+      "effectClass": "CountersPutAllEffect",
+      "classes": ["CountersPutAllEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Radiation",
+      "effectClass": "RadiationEffect",
+      "classes": ["RadiationEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "RearrangeTopOfLibrary",
+      "effectClass": "RearrangeTopOfLibraryEffect",
+      "classes": ["RearrangeTopOfLibraryEffect"],
+      "controllerCalls": ["confirmAction", "orderMoveToZoneList"]
+    },
+    {
+      "apiType": "Recruit",
+      "effectClass": "RecruitEffect",
+      "classes": ["RecruitEffect", "TokenEffectBase", "TokenEffectBase$2", "TokenEffectBase$1"],
+      "controllerCalls": ["chooseCardsToDiscardFrom"]
+    },
+    {
+      "apiType": "Regenerate",
+      "effectClass": "RegenerateEffect",
+      "classes": ["RegenerateEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Regeneration",
+      "effectClass": "RegenerationEffect",
+      "classes": ["RegenerationEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "RemoveCounter",
+      "effectClass": "CountersRemoveEffect",
+      "classes": ["CountersRemoveEffect"],
+      "controllerCalls": ["chooseCardsForEffect", "chooseCounterType", "chooseNumber", "confirmAction"]
+    },
+    {
+      "apiType": "RemoveCounterAll",
+      "effectClass": "CountersRemoveAllEffect",
+      "classes": ["CountersRemoveAllEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "RemoveFromCombat",
+      "effectClass": "RemoveFromCombatEffect",
+      "classes": ["RemoveFromCombatEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "RemoveFromGame",
+      "effectClass": "RemoveFromGameEffect",
+      "classes": ["RemoveFromGameEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "RemoveFromMatch",
+      "effectClass": "RemoveFromMatchEffect",
+      "classes": ["RemoveFromMatchEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ReorderZone",
+      "effectClass": "ReorderZoneEffect",
+      "classes": ["ReorderZoneEffect"],
+      "controllerCalls": ["orderMoveToZoneList"]
+    },
+    {
+      "apiType": "Repeat",
+      "effectClass": "RepeatEffect",
+      "classes": ["RepeatEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "RepeatEach",
+      "effectClass": "RepeatEachEffect",
+      "classes": ["RepeatEachEffect"],
+      "controllerCalls": ["chooseSomeType", "confirmAction", "orderMoveToZoneList"]
+    },
+    {
+      "apiType": "ReplaceCounter",
+      "effectClass": "ReplaceCounterEffect",
+      "classes": ["ReplaceCounterEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "ReplaceDamage",
+      "effectClass": "ReplaceDamageEffect",
+      "classes": ["ReplaceDamageEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ReplaceEffect",
+      "effectClass": "ReplaceEffect",
+      "classes": ["ReplaceEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ReplaceMana",
+      "effectClass": "ReplaceManaEffect",
+      "classes": ["ReplaceManaEffect"],
+      "controllerCalls": ["chooseColor"]
+    },
+    {
+      "apiType": "ReplaceSplitDamage",
+      "effectClass": "ReplaceSplitDamageEffect",
+      "classes": ["ReplaceSplitDamageEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "ReplaceToken",
+      "effectClass": "ReplaceTokenEffect",
+      "classes": ["ReplaceTokenEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "RestartGame",
+      "effectClass": "RestartGameEffect",
+      "classes": ["RestartGameEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Reveal",
+      "effectClass": "RevealEffect",
+      "classes": ["RevealEffect"],
+      "controllerCalls": ["chooseCardsToRevealFromHand"]
+    },
+    {
+      "apiType": "RevealHand",
+      "effectClass": "RevealHandEffect",
+      "classes": ["RevealHandEffect"],
+      "controllerCalls": ["confirmAction", "reveal"]
+    },
+    {
+      "apiType": "ReverseTurnOrder",
+      "effectClass": "ReverseTurnOrderEffect",
+      "classes": ["ReverseTurnOrderEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "RingTemptsYou",
+      "effectClass": "RingTemptsYouEffect",
+      "classes": ["RingTemptsYouEffect", "RingTemptsYouEffect$1", "EffectEffect"],
+      "controllerCalls": ["chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "RollDice",
+      "effectClass": "RollDiceEffect",
+      "classes": ["RollDiceEffect$1", "RollDiceEffect", "RollDiceEffect$DieRollResult"],
+      "controllerCalls": [
+        "chooseBinary",
+        "chooseDiceToReroll",
+        "chooseNumber",
+        "chooseRollSwapValue",
+        "chooseRollToIgnore",
+        "chooseRollToModify",
+        "chooseRollToSwap",
+        "chooseSingleEntityForEffect",
+        "confirmAction",
+        "payCostDuringRoll"
+      ]
+    },
+    {
+      "apiType": "RollPlanarDice",
+      "effectClass": "RollPlanarDiceEffect",
+      "classes": ["RollPlanarDiceEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "RunChaos",
+      "effectClass": "RunChaosEffect",
+      "classes": ["RunChaosEffect"],
+      "controllerCalls": ["orderAndPlaySimultaneousSa"]
+    },
+    {
+      "apiType": "Sacrifice",
+      "effectClass": "SacrificeEffect",
+      "classes": ["SacrificeEffect"],
+      "controllerCalls": [
+        "choosePermanentsToDestroy",
+        "choosePermanentsToSacrifice",
+        "confirmAction",
+        "payCostToPreventEffect"
+      ]
+    },
+    {
+      "apiType": "SacrificeAll",
+      "effectClass": "SacrificeAllEffect",
+      "classes": ["SacrificeAllEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Scry",
+      "effectClass": "ScryEffect",
+      "classes": ["ScryEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "Seek",
+      "effectClass": "SeekEffect",
+      "classes": ["SeekEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "SetInMotion",
+      "effectClass": "SetInMotionEffect",
+      "classes": ["SetInMotionEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "SetLife",
+      "effectClass": "LifeSetEffect",
+      "classes": ["LifeSetEffect"],
+      "controllerCalls": ["chooseEntitiesForEffect", "chooseNumber"]
+    },
+    {
+      "apiType": "SetState",
+      "effectClass": "SetStateEffect",
+      "classes": ["SetStateEffect"],
+      "controllerCalls": ["chooseCardsForEffect", "confirmAction"]
+    },
+    {
+      "apiType": "Shuffle",
+      "effectClass": "ShuffleEffect",
+      "classes": ["ShuffleEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "SkipPhase",
+      "effectClass": "SkipPhaseEffect",
+      "classes": ["SkipPhaseEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "SkipTurn",
+      "effectClass": "SkipTurnEffect",
+      "classes": ["SkipTurnEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "StoreSVar",
+      "effectClass": "StoreSVarEffect",
+      "classes": ["StoreSVarEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Subgame",
+      "effectClass": "SubgameEffect",
+      "classes": ["SubgameEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Surveil",
+      "effectClass": "SurveilEffect",
+      "classes": ["SurveilEffect"],
+      "controllerCalls": ["confirmAction"]
+    },
+    {
+      "apiType": "SwitchBlock",
+      "effectClass": "SwitchBlockEffect",
+      "classes": ["SwitchBlockEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "TakeInitiative",
+      "effectClass": "TakeInitiativeEffect",
+      "classes": ["TakeInitiativeEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Tap",
+      "effectClass": "TapEffect",
+      "classes": ["TapEffect"],
+      "controllerCalls": ["chooseEntitiesForEffect"]
+    },
+    {
+      "apiType": "TapAll",
+      "effectClass": "TapAllEffect",
+      "classes": ["TapAllEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "TapOrUntap",
+      "effectClass": "TapOrUntapEffect",
+      "classes": ["TapOrUntapEffect"],
+      "controllerCalls": ["chooseBinary"]
+    },
+    {
+      "apiType": "TapOrUntapAll",
+      "effectClass": "TapOrUntapAllEffect",
+      "classes": ["TapOrUntapAllEffect"],
+      "controllerCalls": ["chooseBinary"]
+    },
+    {
+      "apiType": "TimeTravel",
+      "effectClass": "TimeTravelEffect",
+      "classes": ["TimeTravelEffect"],
+      "controllerCalls": ["chooseBinary", "chooseEntitiesForEffect"]
+    },
+    {
+      "apiType": "Token",
+      "effectClass": "TokenEffect",
+      "classes": ["TokenEffect", "TokenEffectBase", "TokenEffectBase$2", "TokenEffectBase$1"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "TwoPiles",
+      "effectClass": "TwoPilesEffect",
+      "classes": ["TwoPilesEffect"],
+      "controllerCalls": ["chooseCardsForEffect", "chooseCardsPile", "chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "Unattach",
+      "effectClass": "UnattachEffect",
+      "classes": ["UnattachEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "UnlockDoor",
+      "effectClass": "UnlockDoorEffect",
+      "classes": ["UnlockDoorEffect"],
+      "controllerCalls": ["chooseSingleCardState", "chooseSingleEntityForEffect"]
+    },
+    {
+      "apiType": "Untap",
+      "effectClass": "UntapEffect",
+      "classes": ["UntapEffect"],
+      "controllerCalls": ["chooseCardsForEffect"]
+    },
+    {
+      "apiType": "UntapAll",
+      "effectClass": "UntapAllEffect",
+      "classes": ["UntapAllEffect"],
+      "controllerCalls": []
+    },
+    {
+      "apiType": "Venture",
+      "effectClass": "VentureEffect",
+      "classes": ["VentureEffect"],
+      "controllerCalls": ["chooseSingleCardFace", "chooseSingleSpellForEffect"]
+    },
+    {
+      "apiType": "VillainousChoice",
+      "effectClass": "VillainousChoiceEffect",
+      "classes": ["VillainousChoiceEffect"],
+      "controllerCalls": ["chooseSpellAbilitiesForEffect"]
+    },
+    {
+      "apiType": "Vote",
+      "effectClass": "VoteEffect",
+      "classes": ["VoteEffect"],
+      "controllerCalls": ["chooseNumber", "vote"]
+    },
+    {
+      "apiType": "WinsGame",
+      "effectClass": "GameWinEffect",
+      "classes": ["GameWinEffect"],
+      "controllerCalls": []
+    }
+  ],
+  "modes": [
+    {
+      "token": "AbilityCast",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "AbilityResolves",
+      "classes": ["trigger/TriggerAbilityResolves"],
+      "controllerCalls": []
+    },
+    {
+      "token": "ActivateAbilityAsIfHaste",
+      "classes": ["staticability/StaticAbilityActivateAbilityAsIfHaste"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Activations",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "AlternativeCost",
+      "classes": ["staticability/StaticAbilityAlternativeCost"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Always",
+      "classes": ["trigger/TriggerAlways"],
+      "controllerCalls": []
+    },
+    {
+      "token": "AssignCombatDamageAsUnblocked",
+      "classes": ["staticability/StaticAbilityAssignCombatDamageAsUnblocked"],
+      "controllerCalls": []
+    },
+    {
+      "token": "AssignNoCombatDamage",
+      "classes": ["staticability/StaticAbilityAssignNoCombatDamage"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Attached",
+      "classes": ["trigger/TriggerAttached", "replacement/ReplaceAttached"],
+      "controllerCalls": []
+    },
+    {
+      "token": "AttackRequirement",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "AttackRestrict",
+      "classes": ["staticability/StaticAbilityAttackRestrict"],
+      "controllerCalls": []
+    },
+    {
+      "token": "AttackerBlocked",
+      "classes": ["trigger/TriggerAttackerBlocked"],
+      "controllerCalls": []
+    },
+    {
+      "token": "AttackerBlockedByCreature",
+      "classes": ["trigger/TriggerAttackerBlockedByCreature"],
+      "controllerCalls": []
+    },
+    {
+      "token": "AttackerUnblocked",
+      "classes": ["trigger/TriggerAttackerUnblocked"],
+      "controllerCalls": []
+    },
+    {
+      "token": "AttackerUnblockedOnce",
+      "classes": ["trigger/TriggerAttackerUnblockedOnce"],
+      "controllerCalls": []
+    },
+    {
+      "token": "AttackersDeclared",
+      "classes": ["trigger/TriggerAttackersDeclared"],
+      "controllerCalls": []
+    },
+    {
+      "token": "AttackersDeclaredOneTarget",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Attacks",
+      "classes": ["trigger/TriggerAttacks"],
+      "controllerCalls": []
+    },
+    {
+      "token": "BecomeMonstrous",
+      "classes": ["trigger/TriggerBecomeMonstrous"],
+      "controllerCalls": []
+    },
+    {
+      "token": "BecomeRenowned",
+      "classes": ["trigger/TriggerBecomeRenowned"],
+      "controllerCalls": []
+    },
+    {
+      "token": "BecomesTarget",
+      "classes": ["trigger/TriggerBecomesTarget"],
+      "controllerCalls": []
+    },
+    {
+      "token": "BlockRestrict",
+      "classes": ["staticability/StaticAbilityBlockRestrict"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Blocks",
+      "classes": ["trigger/TriggerBlocks"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CanAttackDefender",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantAttack",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantAttack,CantBlock",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantAttack,CantBlock,CantBeActivated",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantAttack,CantBlock,CantCrew",
+      "classes": ["staticability/StaticAbilityCantCrew"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantAttackUnless",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantBeActivated",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantBeCast",
+      "classes": ["staticability/StaticAbilityCantBeCast"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantBlock",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantBlockBy",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantBlockUnless",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantChangeLife",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantDraw",
+      "classes": ["staticability/StaticAbilityCantDraw"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantGainLife",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantPayLife",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantPlayLand",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantPreventDamage",
+      "classes": ["staticability/StaticAbilityCantPreventDamage"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantPutCounter",
+      "classes": ["staticability/StaticAbilityCantPutCounter"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantRegenerate",
+      "classes": ["staticability/StaticAbilityCantRegenerate"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantSacrifice",
+      "classes": ["staticability/StaticAbilityCantSacrifice"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantTarget",
+      "classes": ["staticability/StaticAbilityCantTarget"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CantTransform",
+      "classes": ["staticability/StaticAbilityCantTransform"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CastWithFlash",
+      "classes": ["staticability/StaticAbilityCastWithFlash"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Championed",
+      "classes": ["trigger/TriggerChampioned"],
+      "controllerCalls": []
+    },
+    {
+      "token": "ChangesController",
+      "classes": ["trigger/TriggerChangesController"],
+      "controllerCalls": []
+    },
+    {
+      "token": "ChangesZone",
+      "classes": ["trigger/TriggerChangesZone"],
+      "controllerCalls": []
+    },
+    {
+      "token": "ChangesZoneAll",
+      "classes": ["trigger/TriggerChangesZoneAll"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Clashed",
+      "classes": ["trigger/TriggerClashed"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CombatDamageToughness",
+      "classes": ["staticability/StaticAbilityCombatDamageToughness"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Continuous",
+      "classes": [
+        "staticability/StaticAbilityContinuous",
+        "staticability/StaticAbilityContinuous$1",
+        "staticability/StaticAbilityContinuous$2"
+      ],
+      "controllerCalls": []
+    },
+    {
+      "token": "CounterAdded",
+      "classes": ["trigger/TriggerCounterAdded"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CounterAddedOnce",
+      "classes": ["trigger/TriggerCounterAddedOnce"],
+      "controllerCalls": []
+    },
+    {
+      "token": "CounterRemoved",
+      "classes": ["trigger/TriggerCounterRemoved"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Countered",
+      "classes": ["trigger/TriggerCountered"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Crewed",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Cycled",
+      "classes": ["trigger/TriggerCycled"],
+      "controllerCalls": []
+    },
+    {
+      "token": "DamageDealtOnce",
+      "classes": ["trigger/TriggerDamageDealtOnce"],
+      "controllerCalls": []
+    },
+    {
+      "token": "DamageDone",
+      "classes": ["trigger/TriggerDamageDone"],
+      "controllerCalls": []
+    },
+    {
+      "token": "DamageDoneOnce",
+      "classes": ["trigger/TriggerDamageDoneOnce"],
+      "controllerCalls": []
+    },
+    {
+      "token": "DamagePreventedOnce",
+      "classes": ["trigger/TriggerDamagePreventedOnce"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Defined",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Destroyed",
+      "classes": ["trigger/TriggerDestroyed"],
+      "controllerCalls": []
+    },
+    {
+      "token": "DisableTriggers",
+      "classes": ["staticability/StaticAbilityDisableTriggers"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Discarded",
+      "classes": ["trigger/TriggerDiscarded"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Drawn",
+      "classes": ["trigger/TriggerDrawn"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Evolved",
+      "classes": ["trigger/TriggerEvolved"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Exchange",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Exerted",
+      "classes": ["trigger/TriggerExerted"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Explores",
+      "classes": ["trigger/TriggerExplores"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Gain",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Hand",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "IgnoreHexproof",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "IgnoreLandWalk",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "IgnoreLegendRule",
+      "classes": ["staticability/StaticAbilityIgnoreLegendRule"],
+      "controllerCalls": []
+    },
+    {
+      "token": "InfectDamage",
+      "classes": ["staticability/StaticAbilityInfectDamage"],
+      "controllerCalls": []
+    },
+    {
+      "token": "LandPlayed",
+      "classes": ["trigger/TriggerLandPlayed"],
+      "controllerCalls": []
+    },
+    {
+      "token": "LifeGained",
+      "classes": ["trigger/TriggerLifeGained"],
+      "controllerCalls": []
+    },
+    {
+      "token": "LifeLost",
+      "classes": ["trigger/TriggerLifeLost"],
+      "controllerCalls": []
+    },
+    {
+      "token": "ManaAdded",
+      "classes": ["trigger/TriggerManaAdded"],
+      "controllerCalls": []
+    },
+    {
+      "token": "ManaConvert",
+      "classes": ["staticability/StaticAbilityManaConvert"],
+      "controllerCalls": ["confirmStaticApplication"]
+    },
+    {
+      "token": "MinMaxBlocker",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "MustAttack",
+      "classes": ["staticability/StaticAbilityMustAttack"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Mutates",
+      "classes": ["trigger/TriggerMutates"],
+      "controllerCalls": []
+    },
+    {
+      "token": "NumLoyaltyAct",
+      "classes": ["staticability/StaticAbilityNumLoyaltyAct"],
+      "controllerCalls": []
+    },
+    {
+      "token": "OptionalAttackCost",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "OptionalCost",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Panharmonicon",
+      "classes": ["staticability/StaticAbilityPanharmonicon"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Phase",
+      "classes": ["trigger/TriggerPhase"],
+      "controllerCalls": []
+    },
+    {
+      "token": "PlayerMustAttack",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "RaiseCost",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Random",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "ReduceCost",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "RevealDiscardAll",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "RevealTgtChoose",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "RevealYouChoose",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Sacrificed",
+      "classes": ["trigger/TriggerSacrificed"],
+      "controllerCalls": []
+    },
+    {
+      "token": "SearchedLibrary",
+      "classes": ["trigger/TriggerSearchedLibrary"],
+      "controllerCalls": []
+    },
+    {
+      "token": "SetCost",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Shuffled",
+      "classes": ["trigger/TriggerShuffled"],
+      "controllerCalls": []
+    },
+    {
+      "token": "SpellAbilityCast",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "SpellCast",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "SpellCastOrCopy",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Taps",
+      "classes": ["trigger/TriggerTaps"],
+      "controllerCalls": []
+    },
+    {
+      "token": "TapsForMana",
+      "classes": ["trigger/TriggerTapsForMana"],
+      "controllerCalls": []
+    },
+    {
+      "token": "TgtChoose",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Toughness",
+      "classes": [],
+      "controllerCalls": []
+    },
+    {
+      "token": "Transform",
+      "classes": ["replacement/ReplaceTransform"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Transformed",
+      "classes": ["trigger/TriggerTransformed"],
+      "controllerCalls": []
+    },
+    {
+      "token": "TurnBegin",
+      "classes": ["trigger/TriggerTurnBegin"],
+      "controllerCalls": []
+    },
+    {
+      "token": "TurnFaceUp",
+      "classes": ["trigger/TriggerTurnFaceUp", "replacement/ReplaceTurnFaceUp"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Unattached",
+      "classes": ["trigger/TriggerUnattached"],
+      "controllerCalls": []
+    },
+    {
+      "token": "UnspentMana",
+      "classes": ["staticability/StaticAbilityUnspentMana"],
+      "controllerCalls": []
+    },
+    {
+      "token": "UntapOtherPlayer",
+      "classes": ["staticability/StaticAbilityUntapOtherPlayer"],
+      "controllerCalls": []
+    },
+    {
+      "token": "Untaps",
+      "classes": ["trigger/TriggerUntaps"],
+      "controllerCalls": []
+    },
+    {
+      "token": "WitherDamage",
+      "classes": ["staticability/StaticAbilityWitherDamage"],
+      "controllerCalls": []
+    }
+  ]
+}

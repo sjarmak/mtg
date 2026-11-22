@@ -42,6 +42,7 @@ import type { Card as DslCard } from '@mtg/dsl';
 import { Battlefield } from '../../src/board/Battlefield';
 import type { BoardPermanent } from '../../src/board/Battlefield';
 import { ARRIVAL_MS, ARRIVAL_RISE_REM } from '../../src/styles/board/arrival';
+import { paceCss } from '../../src/motion/pace';
 import { BOARD_CSS } from '../../src/styles/board';
 
 afterEach(cleanup);
@@ -78,7 +79,7 @@ function equipment(): DslCard {
 }
 
 function permanent(key: string, card: DslCard = creature()): BoardPermanent {
-  return { key, card };
+  return { key, card: { ...card, id: `${card.id}-${key}`, name: `${card.name} ${key}` } };
 }
 
 /** The card element of the permanent with this key, or a failure naming it. */
@@ -132,7 +133,7 @@ describe('the arrival sheet', () => {
   it('runs for the stated duration, and the sheet is where that number comes from', () => {
     const declared = rulesNaming('.mtg-slot > .mtg-card').filter((body) => body.includes('mtg-arrive'));
     expect(declared).toHaveLength(1);
-    expect(declared[0]).toContain(`mtg-arrive ${String(ARRIVAL_MS)}ms`);
+    expect(declared[0]).toContain(`mtg-arrive ${paceCss(ARRIVAL_MS)}`);
   });
 
   /**
@@ -182,7 +183,7 @@ describe('the arrival sheet', () => {
     expect(onTheRow, 'the row is given one animation per branch').toHaveLength(2);
     const travel = onTheRow.filter((body) => !body.includes('mtg-arrive-in-place'));
     expect(travel, 'exactly one branch still moves the row').toHaveLength(1);
-    expect(travel[0]).toContain(`mtg-arrive ${String(ARRIVAL_MS)}ms`);
+    expect(travel[0]).toContain(`mtg-arrive ${paceCss(ARRIVAL_MS)}`);
 
     // And that one is the fallback's, which is the whole claim: the row moves
     // only where nothing else is moving it.
@@ -255,18 +256,7 @@ describe('what React replaces when the board changes', () => {
     expect(faceOf(root, 'p1')).toBe(first);
   });
 
-  /**
-   * The one false positive, asserted rather than glossed. Equipping moves the
-   * host inside the `.mtg-attach` tray (`src/board/Battlefield.ts`,
-   * `attachedGroup`), which is a different element type under the same key, so
-   * React builds a new node and the creature arrives a second time. An opponent
-   * equipping something is an opponent doing something, so the motion is not
-   * claiming an event that did not happen; it names the wrong one.
-   * Fixing it means grouping every permanent in a tray whether or not it holds
-   * anything, which changes the row's markup for every card on the table to
-   * remove one spurious 240ms — filed rather than taken.
-   */
-  it('does replace the host when an attachment groups with it, so the host arrives again', () => {
+  it('keeps the host when an attachment groups with it', () => {
     const host = permanent('p1');
     const weapon: BoardPermanent = { key: 'p2', card: equipment() };
     const view = render(h(Battlefield, { label: 'Battlefield', permanents: [host, weapon] }));
@@ -278,6 +268,6 @@ describe('what React replaces when the board changes', () => {
         permanents: [host, { ...weapon, attachedTo: host.card.name, attachedToKey: 'p1' }],
       }),
     );
-    expect(faceOf(root, 'p1')).not.toBe(face);
+    expect(faceOf(root, 'p1')).toBe(face);
   });
 });

@@ -28,7 +28,20 @@
  * a creature understates the mana base, and that is the one of the two errors a
  * reader cannot recover from the rest of the page.
  */
-import type { DeckArtifactEntry } from '../../lab/deck-artifact';
+/**
+ * What counting a deck's types actually needs, which is two fields.
+ *
+ * Structural rather than `DeckArtifactEntry`, because a second surface counts a
+ * deck now: `./workbench/VariationView.ts` holds `VariationEntry`, which is a
+ * different document for a different kind of deck and carries these two the
+ * same. Narrowing the parameter is what stops the second surface writing a
+ * second counter, and `deck-counts.ts`'s own docblock is about what happens when
+ * two surfaces count the same deck differently.
+ */
+export interface TypeCountable {
+  readonly typeLine: string;
+  readonly count: number;
+}
 
 export interface DeckTypeCounts {
   readonly lands: number;
@@ -44,7 +57,7 @@ const LAND = /(?:^|\s)Land(?:\s|$)/u;
 const CREATURE = /(?:^|\s)Creature(?:\s|$)/u;
 
 /** Cards, not entries: a four-of contributes four, as everywhere else on the page. */
-export function deckTypeCounts(entries: readonly DeckArtifactEntry[]): DeckTypeCounts {
+export function deckTypeCounts(entries: readonly TypeCountable[]): DeckTypeCounts {
   return entries.reduce<DeckTypeCounts>(
     (counts, entry) => {
       if (LAND.test(entry.typeLine)) return { ...counts, lands: counts.lands + entry.count };

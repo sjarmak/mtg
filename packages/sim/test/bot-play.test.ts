@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { parseCard } from '@mtg/dsl';
 import type { Action, GameState, ObjectId } from '@mtg/kernel';
 import { pendingDecision, scenario, validateAction } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import type { CastCandidate } from '@mtg/sim';
 import {
   DEFAULT_GREEDY_CONFIG,
@@ -30,7 +31,10 @@ function decide(state: GameState, player: 0 | 1 = 0, profile = config): Action {
   const decision = pendingDecision(state, 512);
   if (decision === null) throw new Error('no decision pending');
   expect(decision.player).toBe(player);
-  const action = decideGreedy({ state, player, decision }, profile);
+  const action = decideGreedy(
+    { state: observeState(state, player, 'test/bot-play.test.ts:33'), player, decision },
+    profile,
+  );
   expect(validateAction(state, action)).toBeNull();
   return action;
 }
@@ -294,5 +298,23 @@ describe('ordering and discard policies', () => {
     const discards = chooseDiscards(state, 0, hand, 1, config.discard);
     expect(discards).toHaveLength(1);
     expect(nameOf(state, discards[0] ?? '')).toBe('Clunker');
+  });
+
+  /**
+   * `mtg-odaj`. A spell was worth exactly its mana value, so a free spell was
+   * worth nothing and went before a land the bot had already established was
+   * surplus. `castableSpellFloor` is the floor under a spell we can cast now.
+   */
+  it('pitches a surplus land before a free spell it can cast', () => {
+    const thopter = creature('Thopter', 0, 2, [], { generic: 0 }, []);
+    const { state } = scenario({
+      active: 0,
+      battlefield: [{ card: FOREST, controller: 0 }],
+      hands: [[thopter, FOREST], []],
+    });
+    const hand = state.players[0].hand;
+    const discards = chooseDiscards(state, 0, hand, 1, config.discard);
+    expect(discards).toHaveLength(1);
+    expect(nameOf(state, discards[0] ?? '')).toBe('Forest');
   });
 });

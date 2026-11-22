@@ -241,7 +241,7 @@ const MEASURE = `(() => {
   return {
     viewport: [window.innerWidth, window.innerHeight],
     hand: [...document.querySelectorAll(".mtg-zone[data-tone='rail'] .mtg-slot[data-slot='hand'] > .mtg-card")].map(read),
-    board: [...near.querySelectorAll(".mtg-board__spells > .mtg-slot[data-slot='play'] > .mtg-card")].map(read),
+    board: [...near.querySelectorAll(".mtg-board__spells > .mtg-attach > .mtg-slot[data-slot='play'] > .mtg-card")].map(read),
   };
 })()`;
 

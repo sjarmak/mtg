@@ -15,20 +15,30 @@
  * of one list of primitives.
  */
 import { z } from 'zod';
+import type { ZodType } from 'zod';
+import type { ManaCost } from './mana';
+import { CounterKindSchema, type CounterKind } from './counters';
 import {
   abilitiesOver,
   ActivationCostSchema,
   AttachSchema,
+  FixedLoyaltyCostSchema,
   MechanicModelActivationCostSchema,
   LoyaltyCostSchema,
   ModelActivationCostSchema,
   ModelAttachSchema,
   ModelStaticModificationSchema,
   OptionalTriggerSchema,
-  StaticModificationSchema,
+  StaticScopeFilterSchema,
+  StaticBundleModificationSchema,
+  StaticModificationSchema as StaticModificationWithoutTriggeredAbilitySchema,
+  staticModificationsWithTriggeredAbility,
+  layeredStaticModificationsWithTriggeredAbility,
 } from './ability-shape';
 import { canonicalJson } from './canonical-json';
-import { mana } from './mana';
+import { CardFilterSchema } from './card-filter';
+import { mana, manaValue, ManaCostSchema } from './mana';
+import { ModesSchema } from './modal';
 import { ConditionSchema } from './condition';
 import {
   effectChoosesTarget,
@@ -36,12 +46,44 @@ import {
   ModelEffectSchema,
   PartBearingModelEffectSchema,
 } from './effects';
-import type { Attach } from './ability-shape';
+import type { Effect } from './effects';
+import type { Attach, LoyaltyCost } from './ability-shape';
 import type { AbilityKind } from './vocabulary';
-import { ABILITY_KINDS, ModelTriggerConditionSchema } from './vocabulary';
+import {
+  ABILITY_KINDS,
+  BasicLandTypeSchema,
+  COLORS,
+  ColorSchema,
+  EngineStaticScopeSchema,
+  ModelTriggerConditionSchema,
+  StaticGameRuleSchema,
+  StaticPlayerRuleSchema,
+  SUBTYPE_PATTERN,
+  TriggerConditionSchema,
+} from './vocabulary';
+
+/** A nonempty, duplicate-free spell-color filter in canonical WUBRG order. */
+const SpellColorsSchema = z
+  .array(ColorSchema)
+  .min(1)
+  .max(COLORS.length)
+  .refine((colors) => new Set(colors).size === colors.length, 'spellColors must not repeat a color')
+  .refine(
+    (colors) =>
+      colors.every(
+        (color, index) => index === 0 || COLORS.indexOf(colors[index - 1]!) < COLORS.indexOf(color),
+      ),
+    'spellColors must use WUBRG order',
+  );
+
+const CounterUnlessCostSchema = ManaCostSchema.refine(
+  (cost) => !cost.hasX && manaValue(cost) > 0,
+  'a counter toll must be a fixed, nonzero mana cost',
+);
 
 export {
   ActivationCostSchema,
+  FixedLoyaltyCostSchema,
   LoyaltyCostSchema,
   AttachSchema,
   ATTACH_MODIFICATION_LIMITS,
@@ -50,24 +92,33 @@ export {
   ModelAttachSchema,
   OptionalTriggerSchema,
   SacrificeOtherSchema,
-  StaticModificationSchema,
+  SacrificeMatchingSchema,
+  TapMatchingSchema,
+  StaticScopeFilterSchema,
   abilitiesOver,
-  LayeredStaticModificationSchema,
   AttachModificationSchema,
+  AttackAdmissionSchema,
   CombatModificationSchema,
+  DamagePreventionModificationSchema,
+  StaticBundleModificationSchema,
 } from './ability-shape';
+export { RemoveCounterCostSchema } from './ability-shape';
 export type {
   ActivationCost,
   ActivationCostInput,
   LoyaltyCost,
   Attach,
   ModelAttach,
+  RemoveCounterCost,
   SacrificeOther,
-  StaticModification,
-  StaticModificationOf,
-  LayeredStaticModification,
+  SacrificeMatching,
+  TapMatching,
+  StaticScopeFilter,
   AttachModification,
+  AttackAdmission,
   CombatModification,
+  DamagePreventionModification,
+  StaticBundleModification,
 } from './ability-shape';
 
 /**
@@ -91,13 +142,21 @@ export type {
  *
  * The fourth argument is CR 603.3b's "you may", which belongs to this union and
  * to a token's; `ability-shape.ts` argues why the generator's two go without it.
+ * It also raises only the engine-facing trigger list to three effects. Disciple
+ * of Bolas resolves a sacrifice, life gain, and draw in order; the model unions
+ * keep their two-effect bound, so this exact reference capability does not
+ * widen the generator's output space.
  *
- * The fifth argument is CR 611.2c's conditional continuous effect: a static
- * whose modification applies only "as long as" its `Condition` holds. It
- * belongs to this union alone — no token in the flagship set prints one, and
- * a field added to the schema the model is shown renames every recorded
+ * The fifth argument carries three hand-authored static fields.
+ * `enabledWhile` is CR 611.2c's conditional continuous effect. A
+ * `printedSubjectReference` preserves modern Oracle's "this creature" source
+ * wording when a self static would ordinarily print the card name, while
+ * `printedSourceReference` preserves "this card" for a replacement acting
+ * from hand. All three belong to this union alone — no token in The Hidden
+ * Kingdom prints them,
+ * and a field added to the schema the model is shown renames every recorded
  * fixture (`packages/llm/src/schema.ts` hashes the answer schema), so the
- * generator's five unions below all leave it unfilled.
+ * generator's five unions below all leave them unfilled.
  *
  * `.optional()` rather than `.nullable().default(null)`, for the `effects`
  * field's own reason above: a default fills the key back in on the *output*
@@ -109,19 +168,417 @@ export type {
  * mean unconditional; `abilities.ts` (kernel) normalizes with `?? null` at
  * its one read site rather than asking every producer to write the key.
  */
-export const AbilitySchema = abilitiesOver(
-  CardEffectSchema,
-  ActivationCostSchema,
-  {
-    attach: AttachSchema.optional(),
-    loyaltyCost: LoyaltyCostSchema.optional(),
-    regenerateSelf: z.literal(true).optional(),
-    effects: z.array(CardEffectSchema).max(2),
-  },
-  { optional: OptionalTriggerSchema },
-  { enabledWhile: ConditionSchema.nullable().optional() },
-  StaticModificationSchema,
+function objectAbilitiesOver<M extends ZodType>(staticModification: M) {
+  return abilitiesOver(
+    CardEffectSchema,
+    ActivationCostSchema,
+    {
+      attach: AttachSchema.optional(),
+      loyaltyCost: LoyaltyCostSchema.optional(),
+      regenerateSelf: z.literal(true).optional(),
+      activateOnlyWhileAttacking: z.literal(true).optional(),
+      /** Engine-only CR 602.1b timing restriction shared by scavenge and future abilities. */
+      activateOnlyAsSorcery: z.literal(true).optional(),
+      /** Printed reminder for a targeted mana-producing activation that uses the stack. */
+      activateOnlyAsInstantReminder: z.literal(true).optional(),
+      /** Engine-only per-source activation limit. */
+      activateOnlyOnceEachTurn: z.literal(true).optional(),
+      activationZone: z.literal('graveyard').optional(),
+      /** Hand-authored modern Oracle source reference for a permanent activation. */
+      printedSourceReference: z
+        .enum([
+          'thisCard',
+          'thisCreature',
+          'thisArtifact',
+          'thisEnchantment',
+          'thisLand',
+          'cardNameBeforeComma',
+        ])
+        .optional(),
+      effects: z.array(CardEffectSchema).max(3),
+      /** Engine-only CR 700.2 choice for an activated or loyalty ability. */
+      modes: ModesSchema.optional(),
+      /** Engine-only CR 118.8 toll on the one spell this activation counters. */
+      counterTargetSpellUnless: z.strictObject({ cost: CounterUnlessCostSchema }).optional(),
+      /** Izzet Staticaster's atomic target-relative same-name damage bundle. */
+      damageTargetAndCreaturesWithSameName: z.literal(true).optional(),
+      /** Vraska's source-incarnation retaliation lasting until its controller's next turn. */
+      retaliateForCombatDamageUntilYourNextTurn: z.literal(true).optional(),
+      /** Jace, Architect of Thought's three closed loyalty-resolution profiles. */
+      jaceArchitectProfile: z.enum(['attackDebuff', 'piles', 'searchAndCast']).optional(),
+    },
+    {
+      optional: OptionalTriggerSchema,
+      interveningIf: ConditionSchema.optional(),
+      targetChooser: z.literal('triggeringPlayer').optional(),
+      spellColors: SpellColorsSchema.optional(),
+      /** Engine-only structural refinement for a cast spell with at least two colors. */
+      spellIsMulticolored: z.literal(true).optional(),
+      /** Tablet of the Guilds' closed source-choice/cast-color intersection. */
+      spellSharesChosenColors: z.literal(true).optional(),
+      /** Engine-only widening of source combat damage to all source damage dealt to a player. */
+      includesNoncombatDamage: z.literal(true).optional(),
+      /**
+       * Ash Zealot's hand-authored cast-event bundle: watch every player, but
+       * only when the physical spell moved from a graveyard to the stack, and
+       * retain that caster. One flag keeps scope, origin, and referent atomic.
+       */
+      castFromGraveyardByAnyPlayer: z.literal(true).optional(),
+      /**
+       * Utvara Hellkite's atomic hand-authored refinement of the attack event
+       * family. The validator binds it to selfAttacks and one token payload;
+       * the kernel substitutes a controller/subtype scan for reflexivity.
+       */
+      attackingCreatureSubtype: z.string().regex(SUBTYPE_PATTERN).optional(),
+      /** Basic land type read from the permanent-entry event. */
+      landSubtype: BasicLandTypeSchema.optional(),
+      /**
+       * Engine-only refinement of each-player upkeep: fire only when the active
+       * player controls this creature Aura's live host, and retain that player.
+       */
+      triggeringPlayerIsEnchantedCreatureController: z.literal(true).optional(),
+      /**
+       * Righteous Authority's atomic hand-authored trigger refinement. The
+       * containing ability retains the enchanted creature controller and must
+       * draw that player exactly one card at their draw step; model schemas do
+       * not receive this field.
+       */
+      enchantedControllerDrawStepAdditionalDraw: z.literal(true).optional(),
+      /** Engine-only opponent-only refinement of each-player upkeep. */
+      triggeringPlayerIsOpponent: z.literal(true).optional(),
+      /** Engine-only CR 603.4 maximum over the retained upkeep player's hand. */
+      triggeringPlayerHandAtMost: z.int().min(0).optional(),
+      /** Desecration Demon's closed opponent-choice and conditional source update. */
+      opponentMaySacrificeCreatureThenTapAndCounterSelf: z.literal(true).optional(),
+      /** CR 113.6: an explicit exception to the battlefield ability default. */
+      triggerZone: z.literal('graveyard').optional(),
+      /**
+       * Source-faithful modern Oracle reference for a creature, artifact, enchantment,
+       * or Aura trigger whose ordinary template names its source. This changes
+       * presentation only; the condition remains the kernel's semantic
+       * authority.
+       *
+       * Hand-authored only. The model-facing unions below do not receive this
+       * extra field, so source transcription cannot become a design lever.
+       */
+      printedSourceReference: z
+        .enum(['thisCreature', 'thisArtifact', 'thisEnchantment', 'thisAura', 'cardNameBeforeComma'])
+        .optional(),
+      effects: z.array(CardEffectSchema).max(3),
+      counterTriggeringSpellOrAbilityUnless: z
+        .strictObject({
+          cost: ManaCostSchema,
+        })
+        .optional(),
+      /**
+       * Transguild Promenade's atomic hand-authored entry toll. The validator
+       * binds this to selfEnters plus one sacrificeSelf instruction; keeping
+       * the payer and payload together prevents either from becoming a general
+       * trigger-design dimension.
+       */
+      sacrificeSelfUnlessControllerPays: z
+        .strictObject({
+          cost: ManaCostSchema,
+        })
+        .optional(),
+      /** Soul Tithe's atomic Aura-host dynamic toll; never model-visible. */
+      sacrificeEnchantedPermanentUnlessControllerPaysManaValue: z.literal(true).optional(),
+      /** Faerie Impostor's atomic hand-authored return-or-sacrifice entry cost. */
+      returnAnotherCreatureOrSacrificeSelf: z.literal(true).optional(),
+      /** Hand-authored payment that gates one optional trigger's payload. */
+      optionalControllerPayment: z
+        .strictObject({
+          cost: ManaCostSchema,
+        })
+        .optional(),
+      /** Azor's Elocutors' atomic upkeep placement and post-placement victory check. */
+      putCounterThenWinAtThreshold: z
+        .strictObject({ counter: CounterKindSchema, atLeast: z.int().min(1) })
+        .optional(),
+      /** Azor's Elocutors' atomic any-source controller-damage counter removal. */
+      controllerDamageRemovesSourceCounter: z.strictObject({ counter: CounterKindSchema }).optional(),
+      /**
+       * Grave Betrayal's complete opponent-death delayed-return instruction.
+       *
+       * `controlledCreatureDies` is the internal death-event carrier; this
+       * bundle reverses the source-relative controller filter and owns the
+       * exact graveyard incarnation, future timing, controller, counter, and
+       * additive characteristics together. It is absent from every model
+       * ability schema.
+       */
+      opponentCreatureDiesReturnAtNextEndStep: z
+        .strictObject({
+          control: z.literal('you'),
+          counter: z.literal('plusOnePlusOne'),
+          count: z.literal(1),
+          alsoBecomes: z.strictObject({
+            colors: z.tuple([z.literal('B')]),
+            subtypes: z.tuple([z.literal('Zombie')]),
+          }),
+        })
+        .optional(),
+      /** Search the City's inseparable linked top-five and matching-play profiles. */
+      searchTheCityProfile: z.enum(['exileTopFive', 'matchingNameCompletion']).optional(),
+      /** Guild Feud's targeted, ordered two-library creature contest. */
+      guildFeudContest: z.literal(true).optional(),
+    },
+    {
+      enabledWhile: ConditionSchema.nullable().optional(),
+      /** Static-only temporal gate that does not widen the general condition union. */
+      activeDuring: z.literal('turnsOtherThanYours').optional(),
+      filter: StaticScopeFilterSchema.optional(),
+      /** Engine-only source-faithful presentation for a self static on a creature. */
+      printedSubjectReference: z.enum(['thisCreature', 'cardNameBeforeComma']).optional(),
+      /** Hand-authored modern Oracle source reference for an in-hand replacement. */
+      printedSourceReference: z.literal('thisCard').optional(),
+    },
+    staticModification,
+    TriggerConditionSchema,
+    EngineStaticScopeSchema,
+  );
+}
+
+const ObjectAbilityWithoutTriggeredGrantSchema = objectAbilitiesOver(
+  StaticModificationWithoutTriggeredAbilitySchema,
 );
+
+/**
+ * A typed triggered ability that an engine-only Aura may grant to its host.
+ *
+ * Keep the color filter's condition dependency at the schema boundary as well
+ * as in whole-card validation. Ability consumers such as Forge accept this
+ * schema directly and must never receive a parsed filter they would ignore.
+ */
+export const TriggeredAbilitySchema = ObjectAbilityWithoutTriggeredGrantSchema.options[1].superRefine(
+  (ability, ctx) => {
+    if (ability.spellColors !== undefined && ability.condition !== 'youCastSpell') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['spellColors'],
+        message: 'spellColors is legal only on youCastSpell',
+      });
+    }
+    if (ability.spellIsMulticolored === true && ability.condition !== 'youCastSpell') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['spellIsMulticolored'],
+        message: 'spellIsMulticolored is legal only on youCastSpell',
+      });
+    }
+    if (ability.spellSharesChosenColors === true && ability.condition !== 'youCastSpell') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['spellSharesChosenColors'],
+        message: 'spellSharesChosenColors is legal only on youCastSpell',
+      });
+    }
+    if (
+      ability.spellSharesChosenColors === true &&
+      (ability.spellColors !== undefined || ability.spellIsMulticolored === true)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['spellSharesChosenColors'],
+        message: 'spellSharesChosenColors is a complete cast-event refinement',
+      });
+    }
+    if (ability.spellColors !== undefined && ability.spellIsMulticolored === true) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['spellIsMulticolored'],
+        message: 'spellIsMulticolored and spellColors are competing cast-event refinements',
+      });
+    }
+    if (ability.castFromGraveyardByAnyPlayer === true && ability.condition !== 'youCastSpell') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['castFromGraveyardByAnyPlayer'],
+        message: 'castFromGraveyardByAnyPlayer is legal only on youCastSpell',
+      });
+    }
+    if (ability.attackingCreatureSubtype !== undefined && ability.condition !== 'selfAttacks') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['attackingCreatureSubtype'],
+        message: 'attackingCreatureSubtype is legal only on selfAttacks',
+      });
+    }
+    if (
+      ability.castFromGraveyardByAnyPlayer === true &&
+      (ability.spellColors !== undefined || ability.spellIsMulticolored === true)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['castFromGraveyardByAnyPlayer'],
+        message: 'castFromGraveyardByAnyPlayer is a complete cast-event refinement',
+      });
+    }
+    if (ability.putCounterThenWinAtThreshold !== undefined) {
+      const effect = ability.effects[0];
+      if (
+        ability.condition !== 'beginningOfYourUpkeep' ||
+        ability.effects.length !== 1 ||
+        effect?.kind !== 'putCounters' ||
+        effect.counter !== ability.putCounterThenWinAtThreshold.counter ||
+        effect.count !== 1 ||
+        effect.target.kind !== 'selfPermanent'
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['putCounterThenWinAtThreshold'],
+          message:
+            'putCounterThenWinAtThreshold requires beginningOfYourUpkeep and one matching source-counter placement',
+        });
+      }
+    }
+    if (ability.controllerDamageRemovesSourceCounter !== undefined) {
+      if (ability.condition !== 'selfIsDealtDamage' || ability.effects.length !== 0) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['controllerDamageRemovesSourceCounter'],
+          message:
+            'controllerDamageRemovesSourceCounter requires the selfIsDealtDamage carrier and no independent effects',
+        });
+      }
+    }
+    if (
+      ability.opponentCreatureDiesReturnAtNextEndStep !== undefined &&
+      (ability.condition !== 'controlledCreatureDies' || ability.effects.length !== 0)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['opponentCreatureDiesReturnAtNextEndStep'],
+        message:
+          'opponentCreatureDiesReturnAtNextEndStep requires the controlledCreatureDies event carrier and no independent effects',
+      });
+    }
+    if (
+      ability.putCounterThenWinAtThreshold !== undefined &&
+      ability.controllerDamageRemovesSourceCounter !== undefined
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['controllerDamageRemovesSourceCounter'],
+        message: 'the two counter-race clauses require separate trigger-stack entries',
+      });
+    }
+  },
+);
+
+/** Full engine static vocabulary; the generator continues to use its frozen two-member union. */
+export const StaticModificationSchema = staticModificationsWithTriggeredAbility(TriggeredAbilitySchema);
+export const LayeredStaticModificationSchema =
+  layeredStaticModificationsWithTriggeredAbility(TriggeredAbilitySchema);
+
+const ObjectAbilitySchema = objectAbilitiesOver(StaticModificationSchema);
+
+/** The engine's existing activated arm, named for hand-authored nested grants. */
+export const ActivatedAbilitySchema = ObjectAbilitySchema.options[2].superRefine((ability, ctx) => {
+  if (ability.counterTargetSpellUnless === undefined) return;
+  const effects = ability.modes === undefined ? ability.effects : [];
+  if (effects.length !== 1 || effects[0]?.kind !== 'counterSpell') {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['counterTargetSpellUnless'],
+      message: 'counterTargetSpellUnless requires exactly one nonmodal counterSpell effect',
+    });
+  }
+});
+
+/**
+ * A live static rule whose affected subject is a player rather than an object.
+ *
+ * `abilitiesOver`'s static member deliberately owns an object `scope`; putting
+ * "each opponent" into that enum would also expose it to the generator and
+ * make layer modifications such as +1/+1 parse against a player. This fourth
+ * executable shape keeps the ontology explicit and keeps the model union
+ * byte-for-byte on the original three shapes.
+ */
+export const StaticPlayerRuleAbilitySchema = z
+  .strictObject({
+    kind: z.literal('staticPlayerRule'),
+    players: z.enum(['eachOpponent', 'controller', 'eachPlayer']),
+    rule: StaticPlayerRuleSchema,
+    /** Optional only for castSpellsAsThoughFlash; validators reject it elsewhere. */
+    spellFilter: CardFilterSchema.refine(
+      (filter) => Object.values(filter).some((value) => value !== undefined),
+      'spellFilter must name at least one printed characteristic',
+    ).optional(),
+    /** Printed only on source cards whose filtered-flash line carries this reminder. */
+    flashTimingReminder: z.literal(true).optional(),
+  })
+  .superRefine((ability, ctx) => {
+    if (ability.spellFilter !== undefined && ability.rule !== 'castSpellsAsThoughFlash') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['spellFilter'],
+        message: 'spellFilter is legal only on castSpellsAsThoughFlash',
+      });
+    }
+    if (ability.flashTimingReminder === true && ability.rule !== 'castSpellsAsThoughFlash') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['flashTimingReminder'],
+        message: 'flashTimingReminder is legal only on castSpellsAsThoughFlash',
+      });
+    }
+  });
+
+/** A live rule over game results rather than an object or player action. */
+export const StaticGameRuleAbilitySchema = z.strictObject({
+  kind: z.literal('staticGameRule'),
+  rule: StaticGameRuleSchema,
+});
+
+/** One subject and condition shared by fixed modifications in different layers. */
+export const StaticBundleAbilitySchema = z.strictObject({
+  kind: z.literal('staticBundle'),
+  scope: z.literal('otherCreaturesYouControl'),
+  subtype: z.string().optional(),
+  includeSelf: z.literal(true).optional(),
+  enabledWhile: ConditionSchema,
+  modifications: z.array(StaticBundleModificationSchema).min(2).max(3),
+});
+
+/**
+ * A live prohibition over activated abilities rather than a characteristic.
+ *
+ * Pithing Needle supplies the complete closed rule: the containing permanent
+ * retains one card name as it enters, sources with that current name cannot
+ * activate non-mana abilities, and mana abilities remain outside the rule.
+ * Keeping those parameters atomic avoids exposing independent name scopes,
+ * activation classes, and exemptions to the model-facing ability grammar.
+ */
+export const StaticActivationRuleAbilitySchema = z.strictObject({
+  kind: z.literal('staticActivationRule'),
+  rule: z.literal('chosenNameNonManaAbilitiesCantActivate'),
+});
+
+export const STATE_TRIGGER_CONDITIONS = ['controllerControlsNoPermanentWithCounter'] as const;
+
+/** A CR 603.8 trigger that watches current state instead of a game event. */
+export const StateTriggerConditionSchema = z.strictObject({
+  kind: z.literal(STATE_TRIGGER_CONDITIONS[0]),
+  counter: CounterKindSchema,
+});
+
+/** Engine-only state trigger; model-facing ability schemas remain unchanged. */
+export const StateTriggeredAbilitySchema = z.strictObject({
+  kind: z.literal('stateTriggered'),
+  condition: StateTriggerConditionSchema,
+  effects: z.array(CardEffectSchema).min(1).max(2),
+});
+
+export const AbilitySchema = z.discriminatedUnion('kind', [
+  ObjectAbilitySchema.options[0],
+  TriggeredAbilitySchema,
+  ActivatedAbilitySchema,
+  StaticPlayerRuleAbilitySchema,
+  StaticGameRuleAbilitySchema,
+  StateTriggeredAbilitySchema,
+  StaticBundleAbilitySchema,
+  StaticActivationRuleAbilitySchema,
+]);
 
 export type Ability = z.infer<typeof AbilitySchema>;
 export type AbilityInput = z.input<typeof AbilitySchema>;
@@ -131,6 +588,537 @@ export type AbilityOf<K extends AbilityKind> = Extract<Ability, { kind: K }>;
 export type StaticAbility = AbilityOf<'static'>;
 export type TriggeredAbility = AbilityOf<'triggered'>;
 export type ActivatedAbility = AbilityOf<'activated'>;
+export type StaticPlayerRuleAbility = AbilityOf<'staticPlayerRule'>;
+export type StaticGameRuleAbility = AbilityOf<'staticGameRule'>;
+export type StateTriggeredAbility = AbilityOf<'stateTriggered'>;
+export type StaticBundleAbility = AbilityOf<'staticBundle'>;
+export type StaticActivationRuleAbility = AbilityOf<'staticActivationRule'>;
+export type StateTriggerCondition = z.infer<typeof StateTriggerConditionSchema>;
+export type StaticModification = StaticAbility['modification'];
+
+/** Grave Betrayal's one closed opponent-death delayed-return capability. */
+export type OpponentCreatureDiesReturnAbility = TriggeredAbility & {
+  readonly condition: 'controlledCreatureDies';
+  readonly effects: readonly [];
+  readonly opponentCreatureDiesReturnAtNextEndStep: {
+    readonly control: 'you';
+    readonly counter: 'plusOnePlusOne';
+    readonly count: 1;
+    readonly alsoBecomes: { readonly colors: readonly ['B']; readonly subtypes: readonly ['Zombie'] };
+  };
+};
+
+export function isOpponentCreatureDiesReturnAbility(
+  ability: Ability,
+): ability is OpponentCreatureDiesReturnAbility {
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'controlledCreatureDies' &&
+    ability.effects.length === 0 &&
+    ability.opponentCreatureDiesReturnAtNextEndStep !== undefined
+  );
+}
+
+/** Search the City's source-linked top-five entry instruction. */
+export type SourceLinkedTopFiveExileAbility = TriggeredAbility & {
+  readonly condition: 'selfEnters';
+  readonly effects: readonly [];
+  readonly searchTheCityProfile: 'exileTopFive';
+};
+
+/** Search the City's optional same-name return and mandatory completion tail. */
+export type SourceLinkedMatchingPlayCompletionAbility = TriggeredAbility & {
+  readonly condition: 'youCastSpell';
+  readonly optional: true;
+  readonly effects: readonly [];
+  readonly searchTheCityProfile: 'matchingNameCompletion';
+};
+
+export function isSourceLinkedTopFiveExileAbility(
+  ability: Ability,
+): ability is SourceLinkedTopFiveExileAbility {
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'selfEnters' &&
+    ability.effects.length === 0 &&
+    ability.optional !== true &&
+    ability.searchTheCityProfile === 'exileTopFive'
+  );
+}
+
+export function isSourceLinkedMatchingPlayCompletionAbility(
+  ability: Ability,
+): ability is SourceLinkedMatchingPlayCompletionAbility {
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'youCastSpell' &&
+    ability.effects.length === 0 &&
+    ability.optional === true &&
+    ability.searchTheCityProfile === 'matchingNameCompletion'
+  );
+}
+
+/** Guild Feud's one targeted upkeep trigger and its closed contest payload. */
+export type GuildFeudAbility = TriggeredAbility & {
+  readonly condition: 'beginningOfYourUpkeep';
+  readonly effects: readonly [];
+  readonly guildFeudContest: true;
+};
+
+export function isGuildFeudAbility(ability: Ability): ability is GuildFeudAbility {
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'beginningOfYourUpkeep' &&
+    ability.optional !== true &&
+    ability.effects.length === 0 &&
+    ability.guildFeudContest === true
+  );
+}
+export type StaticModificationOf<K extends StaticModification['kind']> = Extract<
+  StaticModification,
+  { kind: K }
+>;
+export type LayeredStaticModification = z.infer<typeof LayeredStaticModificationSchema>;
+
+/** The exact reflexive loot template whose optional choice governs both instructions. */
+export function isOptionalDrawThenDiscardAbility(ability: TriggeredAbility): boolean {
+  if (ability.optional !== true || ability.effects.length !== 2) return false;
+  return (
+    canonicalJson(ability.effects[0]) === '{"count":1,"kind":"drawCards","target":{"kind":"noTarget"}}' &&
+    canonicalJson(ability.effects[1]) === '{"count":1,"kind":"discardCards","target":{"kind":"noTarget"}}'
+  );
+}
+
+/** The exact reflexive rummage template whose discard must succeed before its draw. */
+export function isOptionalDiscardThenDrawAbility(ability: TriggeredAbility): boolean {
+  if (ability.optional !== true || ability.effects.length !== 2) return false;
+  return (
+    canonicalJson(ability.effects[0]) === '{"count":1,"kind":"discardCards","target":{"kind":"noTarget"}}' &&
+    canonicalJson(ability.effects[1]) === '{"count":1,"kind":"drawCards","target":{"kind":"noTarget"}}'
+  );
+}
+
+export type PutCounterThenWinAtThresholdAbility = TriggeredAbility & {
+  readonly putCounterThenWinAtThreshold: { readonly counter: CounterKind; readonly atLeast: number };
+};
+
+export function isPutCounterThenWinAtThresholdAbility(
+  ability: Ability,
+): ability is PutCounterThenWinAtThresholdAbility {
+  return ability.kind === 'triggered' && ability.putCounterThenWinAtThreshold !== undefined;
+}
+
+export type ControllerDamageRemovesSourceCounterAbility = TriggeredAbility & {
+  readonly controllerDamageRemovesSourceCounter: { readonly counter: CounterKind };
+};
+
+export function isControllerDamageRemovesSourceCounterAbility(
+  ability: Ability,
+): ability is ControllerDamageRemovesSourceCounterAbility {
+  return ability.kind === 'triggered' && ability.controllerDamageRemovesSourceCounter !== undefined;
+}
+
+/** The effect list selected when an activated ability was announced. */
+export function effectsForActivatedAbility(
+  ability: ActivatedAbility,
+  mode: number | null,
+): readonly Effect[] {
+  if (ability.modes === undefined) return ability.effects;
+  if (mode === null) throw new Error('effectsForActivatedAbility: a modal ability requires a chosen mode');
+  const chosen = ability.modes[mode];
+  if (chosen === undefined) {
+    throw new Error(
+      `effectsForActivatedAbility: mode ${String(mode)} is out of range for a ${String(ability.modes.length)}-mode ability`,
+    );
+  }
+  return chosen.effects;
+}
+
+/** Frost Titan's retained-stack-object counter clause, narrowed for readers. */
+export type CounterTriggeringSpellOrAbilityAbility = TriggeredAbility & {
+  readonly condition: 'selfBecomesTargetByOpponent';
+  readonly counterTriggeringSpellOrAbilityUnless: {
+    readonly cost: ManaCost;
+  };
+};
+export { isVariableLoyaltyCost, loyaltyCostChange } from './ability-shape';
+
+/** True only for the exact retained-stack-object counter envelope. */
+export function isCounterTriggeringSpellOrAbilityAbility(
+  ability: Ability,
+): ability is CounterTriggeringSpellOrAbilityAbility {
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'selfBecomesTargetByOpponent' &&
+    ability.counterTriggeringSpellOrAbilityUnless !== undefined
+  );
+}
+
+/** A self-entry trigger whose controller may pay to keep its source. */
+export type SacrificeSelfUnlessControllerPaysAbility = TriggeredAbility & {
+  readonly condition: 'selfEnters';
+  readonly printedSourceReference: 'thisCreature';
+  readonly effects: readonly [Extract<Effect, { kind: 'sacrificeSelf' }>];
+  readonly sacrificeSelfUnlessControllerPays: { readonly cost: ManaCost };
+};
+
+/** Soul Tithe's attachment-relative dynamic upkeep toll. */
+export type SacrificeEnchantedPermanentUnlessControllerPaysManaValueAbility = TriggeredAbility & {
+  readonly condition: 'beginningOfEachPlayersUpkeep';
+  readonly triggeringPlayerIsEnchantedCreatureController: true;
+  readonly sacrificeEnchantedPermanentUnlessControllerPaysManaValue: true;
+  readonly effects: readonly [];
+};
+
+export function isSacrificeEnchantedPermanentUnlessControllerPaysManaValueAbility(
+  ability: Ability,
+): ability is SacrificeEnchantedPermanentUnlessControllerPaysManaValueAbility {
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'beginningOfEachPlayersUpkeep' &&
+    ability.triggeringPlayerIsEnchantedCreatureController === true &&
+    ability.sacrificeEnchantedPermanentUnlessControllerPaysManaValue === true &&
+    ability.effects.length === 0
+  );
+}
+
+/** Chronic Flooding's closed, attachment-relative land-tap payload. */
+export type EnchantedLandBecomesTappedMillAbility = TriggeredAbility & {
+  readonly condition: 'enchantedLandBecomesTapped';
+  readonly effects: readonly [Extract<Effect, { kind: 'millCards' }>];
+};
+
+export function isEnchantedLandBecomesTappedMillAbility(
+  ability: Ability,
+): ability is EnchantedLandBecomesTappedMillAbility {
+  const effect = ability.kind === 'triggered' ? ability.effects[0] : undefined;
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'enchantedLandBecomesTapped' &&
+    ability.effects.length === 1 &&
+    effect?.kind === 'millCards' &&
+    effect.count === 3 &&
+    effect.target.kind === 'triggeringPlayer'
+  );
+}
+
+/** Necropolis Regent's closed retained creature-and-damage payload. */
+export type ControlledCreatureCombatDamageCountersAbility = TriggeredAbility & {
+  readonly condition: 'controlledCreatureDealsCombatDamageToPlayer';
+  readonly effects: readonly [Extract<Effect, { kind: 'putCounters' }>];
+};
+
+export function isControlledCreatureCombatDamageCountersAbility(
+  ability: Ability,
+): ability is ControlledCreatureCombatDamageCountersAbility {
+  const effect = ability.kind === 'triggered' ? ability.effects[0] : undefined;
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'controlledCreatureDealsCombatDamageToPlayer' &&
+    ability.effects.length === 1 &&
+    effect?.kind === 'putCounters' &&
+    effect.counter === 'plusOnePlusOne' &&
+    typeof effect.count !== 'number' &&
+    effect.count.kind === 'triggeringDamageAmount' &&
+    effect.target.kind === 'triggeringCreature' &&
+    effect.scope === undefined &&
+    effect.timing === undefined &&
+    effect.keyword === undefined &&
+    effect.recipientCondition === undefined
+  );
+}
+
+/** Conjured Currency's one optional source-and-target exchange trigger. */
+export type ConjuredCurrencyAbility = TriggeredAbility & {
+  readonly condition: 'beginningOfYourUpkeep';
+  readonly optional: true;
+  readonly effects: readonly [Extract<Effect, { kind: 'exchangeControl' }>];
+};
+
+export function isConjuredCurrencyAbility(ability: Ability): ability is ConjuredCurrencyAbility {
+  const effect = ability.kind === 'triggered' ? ability.effects[0] : undefined;
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'beginningOfYourUpkeep' &&
+    ability.optional === true &&
+    ability.effects.length === 1 &&
+    effect?.kind === 'exchangeControl' &&
+    effect.exchangeSource === true &&
+    effect.target.kind === 'targetPermanentYouNeitherOwnNorControl' &&
+    Object.keys(effect.target).length === 1
+  );
+}
+
+/** Detention Sphere's optional target-and-name-cohort linked exile. */
+export type SameNameCohortLinkedExileAbility = TriggeredAbility & {
+  readonly condition: 'selfEnters';
+  readonly optional: true;
+  readonly printedSourceReference: 'thisEnchantment';
+  readonly effects: readonly [Extract<Effect, { kind: 'exileTarget' }>];
+};
+
+export function isSameNameCohortLinkedExileAbility(
+  ability: Ability,
+): ability is SameNameCohortLinkedExileAbility {
+  const effect = ability.kind === 'triggered' ? ability.effects[0] : undefined;
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'selfEnters' &&
+    ability.optional === true &&
+    ability.printedSourceReference === 'thisEnchantment' &&
+    ability.effects.length === 1 &&
+    effect?.kind === 'exileTarget' &&
+    effect.linkToSource === true &&
+    effect.sameNameCohort !== undefined &&
+    effect.target.kind === 'targetPermanent' &&
+    effect.target.filter?.excludeCardTypes?.length === 1 &&
+    effect.target.filter.excludeCardTypes[0] === 'land' &&
+    Object.keys(effect.target).length === 2
+  );
+}
+
+/** The plural source-departure reader paired with a same-name cohort writer. */
+export type PluralSourceLinkedReturnAbility = TriggeredAbility & {
+  readonly condition: 'selfLeavesBattlefield';
+  readonly printedSourceReference: 'thisEnchantment';
+  readonly effects: readonly [Extract<Effect, { kind: 'moveSourceLinkedExile' }>];
+};
+
+export function isPluralSourceLinkedReturnAbility(
+  ability: Ability,
+): ability is PluralSourceLinkedReturnAbility {
+  const effect = ability.kind === 'triggered' ? ability.effects[0] : undefined;
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'selfLeavesBattlefield' &&
+    ability.optional !== true &&
+    ability.printedSourceReference === 'thisEnchantment' &&
+    ability.effects.length === 1 &&
+    effect?.kind === 'moveSourceLinkedExile' &&
+    effect.destination === 'battlefieldUnderOwner' &&
+    effect.plural === true
+  );
+}
+
+/** Angel of Serenity's atomic optional mixed-zone linked-exile writer. */
+export type AngelOfSerenityExileAbility = TriggeredAbility & {
+  readonly condition: 'selfEnters';
+  readonly printedSourceReference: 'thisCreature';
+  readonly optional: true;
+  readonly effects: readonly [Extract<Effect, { kind: 'exileTarget' }>];
+};
+
+export function isAngelOfSerenityExileAbility(ability: Ability): ability is AngelOfSerenityExileAbility {
+  const effect = ability.kind === 'triggered' ? ability.effects[0] : undefined;
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'selfEnters' &&
+    ability.printedSourceReference === 'thisCreature' &&
+    ability.optional === true &&
+    ability.effects.length === 1 &&
+    effect?.kind === 'exileTarget' &&
+    effect.creatureBattlefieldOrGraveyard === true
+  );
+}
+
+/** Angel of Serenity's plural leaves-the-battlefield owner-hand reader. */
+export function isAngelOfSerenityReturnAbility(ability: Ability): boolean {
+  const effect = ability.kind === 'triggered' ? ability.effects[0] : undefined;
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'selfLeavesBattlefield' &&
+    ability.printedSourceReference === 'thisCreature' &&
+    ability.effects.length === 1 &&
+    effect?.kind === 'moveSourceLinkedExile' &&
+    effect.destination === 'hand' &&
+    effect.plural === true
+  );
+}
+
+/** One mandatory token trigger for each controlled attacker of one subtype. */
+export type ControlledSubtypeAttacksTokenAbility = TriggeredAbility & {
+  readonly condition: 'selfAttacks';
+  readonly attackingCreatureSubtype: string;
+  readonly effects: readonly [Extract<Effect, { kind: 'createToken' }>];
+};
+
+/** True only for the atomic controlled-subtype attack/token envelope. */
+export function isControlledSubtypeAttacksTokenAbility(
+  ability: Ability,
+): ability is ControlledSubtypeAttacksTokenAbility {
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'selfAttacks' &&
+    ability.attackingCreatureSubtype !== undefined &&
+    ability.effects.length === 1 &&
+    ability.effects[0]?.kind === 'createToken' &&
+    ability.effects[0].count === 1
+  );
+}
+
+/** True only for the exact controller-paid self-sacrifice envelope. */
+export function isSacrificeSelfUnlessControllerPaysAbility(
+  ability: Ability,
+): ability is SacrificeSelfUnlessControllerPaysAbility {
+  const effect = ability.kind === 'triggered' ? ability.effects[0] : undefined;
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'selfEnters' &&
+    ability.effects.length === 1 &&
+    effect?.kind === 'sacrificeSelf' &&
+    effect.target.kind === 'selfPermanent' &&
+    ability.sacrificeSelfUnlessControllerPays !== undefined
+  );
+}
+
+/** A self-entry trigger paid by returning another controlled creature. */
+export type ReturnAnotherCreatureOrSacrificeSelfAbility = TriggeredAbility & {
+  readonly condition: 'selfEnters';
+  readonly effects: readonly [Extract<Effect, { kind: 'sacrificeSelf' }>];
+  readonly returnAnotherCreatureOrSacrificeSelf: true;
+};
+
+/** True only for Faerie Impostor's atomic return-or-sacrifice envelope. */
+export function isReturnAnotherCreatureOrSacrificeSelfAbility(
+  ability: Ability,
+): ability is ReturnAnotherCreatureOrSacrificeSelfAbility {
+  const effect = ability.kind === 'triggered' ? ability.effects[0] : undefined;
+  return (
+    ability.kind === 'triggered' &&
+    ability.condition === 'selfEnters' &&
+    ability.effects.length === 1 &&
+    effect?.kind === 'sacrificeSelf' &&
+    effect.target.kind === 'selfCreature' &&
+    ability.returnAnotherCreatureOrSacrificeSelf === true
+  );
+}
+
+/** An activated counter whose targeted spell's controller may pay a toll. */
+export type CounterTargetSpellUnlessAbility = ActivatedAbility & {
+  readonly effects: readonly [Extract<Effect, { kind: 'counterSpell' }>];
+  readonly counterTargetSpellUnless: { readonly cost: ManaCost };
+};
+
+/** One targeted damage instruction widened only to creatures sharing its target's name. */
+export type DamageTargetAndCreaturesWithSameNameAbility = ActivatedAbility & {
+  readonly effects: readonly [Extract<Effect, { kind: 'dealDamage' }>];
+  readonly damageTargetAndCreaturesWithSameName: true;
+};
+
+/** True only for Izzet Staticaster's atomic mapped-damage envelope. */
+export function isDamageTargetAndCreaturesWithSameNameAbility(
+  ability: Ability,
+): ability is DamageTargetAndCreaturesWithSameNameAbility {
+  const effect = ability.kind === 'activated' ? ability.effects[0] : undefined;
+  return (
+    ability.kind === 'activated' &&
+    ability.modes === undefined &&
+    ability.effects.length === 1 &&
+    effect?.kind === 'dealDamage' &&
+    effect.amount === 1 &&
+    effect.target.kind === 'targetCreature' &&
+    ability.damageTargetAndCreaturesWithSameName === true
+  );
+}
+
+/** Vraska's closed loyalty ability that installs one source-linked retaliation rule. */
+export type CombatDamageRetaliationAbility = ActivatedAbility & {
+  readonly loyaltyCost: 1;
+  readonly effects: readonly [];
+  readonly retaliateForCombatDamageUntilYourNextTurn: true;
+};
+
+export function isCombatDamageRetaliationAbility(
+  ability: Ability,
+): ability is CombatDamageRetaliationAbility {
+  return (
+    ability.kind === 'activated' &&
+    ability.loyaltyCost === 1 &&
+    ability.effects.length === 0 &&
+    ability.modes === undefined &&
+    ability.retaliateForCombatDamageUntilYourNextTurn === true
+  );
+}
+
+/** Jace, Architect of Thought's +1 delayed attack-trigger profile. */
+export type JaceArchitectAttackDebuffAbility = ActivatedAbility & {
+  readonly loyaltyCost: 1;
+  readonly effects: readonly [];
+  readonly jaceArchitectProfile: 'attackDebuff';
+};
+
+/** Jace, Architect of Thought's -2 reveal, partition, hand, and bottom profile. */
+export type JaceArchitectPilesAbility = ActivatedAbility & {
+  readonly loyaltyCost: -2;
+  readonly effects: readonly [];
+  readonly jaceArchitectProfile: 'piles';
+};
+
+/** Jace, Architect of Thought's -8 per-player search and free-cast profile. */
+export type JaceArchitectSearchAndCastAbility = ActivatedAbility & {
+  readonly loyaltyCost: -8;
+  readonly effects: readonly [];
+  readonly jaceArchitectProfile: 'searchAndCast';
+};
+
+export function isJaceArchitectAttackDebuffAbility(
+  ability: Ability,
+): ability is JaceArchitectAttackDebuffAbility {
+  return (
+    ability.kind === 'activated' &&
+    ability.loyaltyCost === 1 &&
+    ability.effects.length === 0 &&
+    ability.modes === undefined &&
+    ability.jaceArchitectProfile === 'attackDebuff'
+  );
+}
+
+export function isJaceArchitectPilesAbility(ability: Ability): ability is JaceArchitectPilesAbility {
+  return (
+    ability.kind === 'activated' &&
+    ability.loyaltyCost === -2 &&
+    ability.effects.length === 0 &&
+    ability.modes === undefined &&
+    ability.jaceArchitectProfile === 'piles'
+  );
+}
+
+export function isJaceArchitectSearchAndCastAbility(
+  ability: Ability,
+): ability is JaceArchitectSearchAndCastAbility {
+  return (
+    ability.kind === 'activated' &&
+    ability.loyaltyCost === -8 &&
+    ability.effects.length === 0 &&
+    ability.modes === undefined &&
+    ability.jaceArchitectProfile === 'searchAndCast'
+  );
+}
+
+/** True for exactly one of Jace, Architect of Thought's three closed profiles. */
+export function isJaceArchitectAbility(
+  ability: Ability,
+): ability is
+  JaceArchitectAttackDebuffAbility | JaceArchitectPilesAbility | JaceArchitectSearchAndCastAbility {
+  return (
+    isJaceArchitectAttackDebuffAbility(ability) ||
+    isJaceArchitectPilesAbility(ability) ||
+    isJaceArchitectSearchAndCastAbility(ability)
+  );
+}
+
+/** True only for the exact activated counter-toll envelope. */
+export function isCounterTargetSpellUnlessAbility(
+  ability: Ability,
+): ability is CounterTargetSpellUnlessAbility {
+  return (
+    ability.kind === 'activated' &&
+    ability.modes === undefined &&
+    ability.effects.length === 1 &&
+    ability.effects[0]?.kind === 'counterSpell' &&
+    ability.counterTargetSpellUnless !== undefined
+  );
+}
 
 /** The one canonical structured spelling of CR 702.83 exalted. */
 export type ExaltedAbility = TriggeredAbility & {
@@ -173,6 +1161,99 @@ export function isExaltedAbility(ability: Ability): ability is ExaltedAbility {
     effect.toughness === 1 &&
     effect.target.kind === 'triggeringCreature' &&
     effect.target.distinct !== true
+  );
+}
+
+/**
+ * CR 702.97 scavenge as executable primitives rather than a second resolution
+ * path. The source zone, source-exile payment, sorcery timing, and targeted
+ * counter effect are all fields the kernel already understands independently;
+ * this type names the one exact envelope that earns the printed keyword.
+ */
+export type ScavengeAbility = ActivatedAbility & {
+  readonly activationZone: 'graveyard';
+  readonly activateOnlyAsSorcery: true;
+  readonly cost: ActivatedAbility['cost'] & { readonly exileSelf: true };
+  readonly effects: readonly [
+    Extract<ActivatedAbility['effects'][number], { kind: 'putCounters' }> & {
+      readonly counter: 'plusOnePlusOne';
+      readonly count: number;
+      readonly target: { readonly kind: 'targetCreature' };
+    },
+  ];
+};
+
+/** Builds one canonical scavenge ability for a fixed-power creature card. */
+export function scavengeAbility(cost: ManaCost, printedPower: number): ScavengeAbility {
+  if (!Number.isInteger(printedPower) || printedPower < 1) {
+    throw new RangeError(`scavenge power must be a positive integer, not ${String(printedPower)}`);
+  }
+  return {
+    kind: 'activated',
+    activationZone: 'graveyard',
+    activateOnlyAsSorcery: true,
+    cost: {
+      mana: cost,
+      tapSelf: false,
+      sacrificeSelf: false,
+      exileSelf: true,
+    },
+    effects: [
+      {
+        kind: 'putCounters',
+        counter: 'plusOnePlusOne',
+        count: printedPower,
+        target: { kind: 'targetCreature' },
+      },
+    ],
+  };
+}
+
+/** True only for the canonical executable scavenge envelope. */
+export function isScavengeAbility(ability: Ability): ability is ScavengeAbility {
+  if (
+    ability.kind !== 'activated' ||
+    ability.activationZone !== 'graveyard' ||
+    ability.activateOnlyAsSorcery !== true ||
+    ability.cost.exileSelf !== true ||
+    ability.cost.tapSelf ||
+    ability.cost.payLife !== undefined ||
+    ability.cost.sacrificeSelf ||
+    ability.cost.sacrificeOther !== undefined ||
+    ability.cost.sacrificeMatching !== undefined ||
+    ability.cost.sacrificeLandSubtypePair !== undefined ||
+    ability.cost.tapMatching !== undefined ||
+    ability.cost.discard !== undefined ||
+    ability.cost.discardFilter !== undefined ||
+    ability.cost.discardMatching !== undefined ||
+    ability.cost.removeCounter !== undefined ||
+    ability.loyaltyCost !== undefined ||
+    ability.attach !== undefined ||
+    ability.regenerateSelf === true ||
+    ability.activateOnlyWhileAttacking === true ||
+    ability.modes !== undefined ||
+    ability.effects.length !== 1
+  ) {
+    return false;
+  }
+  const effect = ability.effects[0];
+  if (
+    effect?.kind !== 'putCounters' ||
+    effect.counter !== 'plusOnePlusOne' ||
+    typeof effect.count !== 'number' ||
+    !Number.isInteger(effect.count) ||
+    effect.count < 1
+  ) {
+    return false;
+  }
+  return (
+    canonicalJson(effect) ===
+    canonicalJson({
+      kind: 'putCounters',
+      counter: 'plusOnePlusOne',
+      count: effect.count,
+      target: { kind: 'targetCreature' },
+    })
   );
 }
 
@@ -374,6 +1455,38 @@ export const ModelAbilitySchema = abilitiesOver(
   ModelTriggerConditionSchema,
 );
 
+/**
+ * The reviewed generator capability for a creature entering under your
+ * control and growing another creature you control.
+ *
+ * The trigger, effect, counter, and target are one contract. None is appended
+ * to its global model tuple: exposing any of the four independently would also
+ * expose combinations whose color-pie and play-pattern review has not happened.
+ */
+export const ControlledCreatureCounterOnEntryModelAbilitySchema = z.strictObject({
+  kind: z.literal('triggered'),
+  condition: z.literal('anotherControlledCreatureEnters'),
+  effects: z
+    .array(
+      z.strictObject({
+        kind: z.literal('putCounters'),
+        counter: z.literal('plusOnePlusOne'),
+        count: z.int(),
+        target: z.strictObject({ kind: z.literal('targetCreatureYouControl') }),
+      }),
+    )
+    .min(1)
+    .max(1),
+});
+
+export type ControlledCreatureCounterOnEntryModelAbility = z.infer<
+  typeof ControlledCreatureCounterOnEntryModelAbilitySchema
+>;
+
+/** Compile-time containment proof: every promoted answer is engine-runnable. */
+export type ControlledCreatureCounterOnEntryModelAbilityIsAbility =
+  ControlledCreatureCounterOnEntryModelAbility extends Ability ? true : never;
+
 export type ModelAbility = z.infer<typeof ModelAbilitySchema>;
 export type ModelAbilityInput = z.input<typeof ModelAbilitySchema>;
 export type ModelAbilityKind = ModelAbility['kind'];
@@ -538,6 +1651,30 @@ export const AttachingMechanicModelAbilitySchema = abilitiesOver(
 export type AttachingMechanicModelAbility = z.infer<typeof AttachingMechanicModelAbilitySchema>;
 
 /**
+ * Any model-facing ability whose effects are already engine-contained.
+ *
+ * Capability schemas may narrow a trigger or effect without joining the global
+ * model union. Their only crossing work is still the activated cost and attach
+ * normalization below, so the seam is structural rather than tied to one
+ * named answer-schema tier.
+ */
+type WithEngineContainedEffects<T> = T extends { effects: readonly unknown[] }
+  ? Omit<T, 'effects'> & { readonly effects: readonly Effect[] }
+  : T;
+
+export type GeneratorModelAbility =
+  WithEngineContainedEffects<AttachingMechanicModelAbility> | ControlledCreatureCounterOnEntryModelAbility;
+
+type WithEngineContainedEffectInputs<T> = T extends { effects?: readonly unknown[] }
+  ? Omit<T, 'effects'> & { readonly effects?: readonly Effect[] }
+  : T;
+
+export type GeneratorModelAbilityInput =
+  | z.input<typeof AttachingMechanicModelAbilitySchema>
+  | WithEngineContainedEffectInputs<z.input<typeof AttachingMechanicModelAbilitySchema>>
+  | z.input<typeof ControlledCreatureCounterOnEntryModelAbilitySchema>;
+
+/**
  * The alias that keeps `filledAbilities` honest: it reads a filled card's
  * abilities back as the widest tier whichever of the five the card came from,
  * and that is only true if every narrower union is assignable to this one. It
@@ -585,7 +1722,7 @@ export type AttachingModelAbilityIsMechanicAbility =
  * costs the walker two counters and does nothing is not a design.
  */
 export const LoyaltyModelAbilitySchema = z.strictObject({
-  loyaltyCost: LoyaltyCostSchema,
+  loyaltyCost: FixedLoyaltyCostSchema,
   effects: z.array(ModelEffectSchema).min(1).max(2),
 });
 
@@ -650,7 +1787,8 @@ export function loyaltyAbilityFromModel(ability: LoyaltyModelAbility): Ability {
  * the field existed, applied at the one seam a generated ability crosses into
  * the engine's contract.
  */
-export function abilityFromModel(ability: AttachingMechanicModelAbility): Ability {
+export function abilityFromModel(ability: GeneratorModelAbility): Ability {
+  if (ability.kind === 'triggered') return { ...ability, effects: [...ability.effects] };
   if (ability.kind !== 'activated') return ability;
   // Destructured even when there is no clause, because the key carries the
   // model's type wherever it goes: under `exactOptionalPropertyTypes` an
@@ -659,8 +1797,9 @@ export function abilityFromModel(ability: AttachingMechanicModelAbility): Abilit
   // rather than "this ability has the wrong one".
   const { attach, ...rest } = ability;
   const cost = { ...rest.cost, mana: { ...rest.cost.mana, hasX: false } };
-  if (attach === undefined) return { ...rest, cost };
-  return { ...rest, cost, attach: { modifications: [attach.modification] } };
+  const effects = [...rest.effects];
+  if (attach === undefined) return { ...rest, effects, cost };
+  return { ...rest, effects, cost, attach: { modifications: [attach.modification] } };
 }
 
 /**
@@ -672,6 +1811,9 @@ export function abilityFromModel(ability: AttachingMechanicModelAbility): Abilit
 export const MODEL_ABILITY_KINDS: readonly ModelAbilityKind[] = ModelAbilitySchema.options.map(
   (option) => option.shape.kind.value,
 );
+
+/** The three ability kinds a generator-facing brief or slot may request. */
+export const ModelAbilityKindSchema = z.enum(MODEL_ABILITY_KINDS);
 
 /** Narrows an engine ability kind to one the generator may print. */
 export function isModelAbilityKind(kind: AbilityKind): kind is ModelAbilityKind {
@@ -700,7 +1842,9 @@ export function isRegenerationAbility(ability: Ability): ability is Regeneration
 }
 
 /** A loyalty ability, narrowed so the signed cost is present. */
-export type LoyaltyAbility = ActivatedAbility & { readonly loyaltyCost: number };
+export type LoyaltyAbility = ActivatedAbility & {
+  readonly loyaltyCost: LoyaltyCost;
+};
 
 export function isLoyaltyAbility(ability: Ability): ability is LoyaltyAbility {
   return ability.kind === 'activated' && ability.loyaltyCost !== undefined;
@@ -721,6 +1865,15 @@ export function isOptionalTrigger(ability: Ability): ability is OptionalTrigger 
   return ability.kind === 'triggered' && ability.optional === true;
 }
 
+/** A "you may pay" trigger whose controller pays only while resolving it. */
+export type PaidOptionalTrigger = OptionalTrigger & {
+  readonly optionalControllerPayment: { readonly cost: ManaCost };
+};
+
+export function isPaidOptionalTrigger(ability: Ability): ability is PaidOptionalTrigger {
+  return isOptionalTrigger(ability) && ability.optionalControllerPayment !== undefined;
+}
+
 /**
  * True when this trigger must choose targets as it is put on the stack (CR
  * 603.3d).
@@ -731,8 +1884,11 @@ export function isOptionalTrigger(ability: Ability): ability is OptionalTrigger 
  * the stack still owes an answer — and a second copy anywhere would be a way for
  * the stop and the removal to disagree about the same ability.
  */
-export function triggerChoosesTargets(ability: TriggeredAbility): boolean {
-  return ability.effects.some((effect) => effectChoosesTarget(effect));
+export function triggerChoosesTargets(ability: TriggeredAbility | StateTriggeredAbility): boolean {
+  return (
+    ('guildFeudContest' in ability && ability.guildFeudContest === true) ||
+    ability.effects.some((effect) => effectChoosesTarget(effect))
+  );
 }
 
 /** Abilities whose payload is an effect list; a static ability has none. */

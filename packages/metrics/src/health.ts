@@ -98,10 +98,15 @@ export function formatHealth(logs: readonly SimGameLog[], options: FormatHealthO
     abilityUsage: abilities,
     // The gate constructors compare an observation to a band and know nothing
     // about how many games bought it, so the run volume is applied here, once,
-    // over the assembled list: a miss smaller than the seed deviation at this
-    // volume becomes `withinNoise` rather than `fail` (`./gates`
-    // `abstainWithinNoise`). Doing it at the seam means the report, `fairness`
+    // over the assembled list: a gate landing within one seed deviation of its
+    // band at this volume, on either side of it, becomes `withinNoise`
+    // (`./gates` `abstainWithinNoise`). Doing it at the seam means the report, `fairness`
     // and the balance suite read one verdict rather than three opinions.
+    //
+    // `count.distinct` and not `count.total`, which is `mtg-pixl`: the band is
+    // narrowed by the square root of the sample, and a repeated trajectory is
+    // not a second sample. It is the same rule `./sample` applies to the
+    // under-sampling floor, applied to the other statistic that reads volume.
     gates: abstainWithinNoise(
       evaluateGates({
         length,
@@ -113,7 +118,7 @@ export function formatHealth(logs: readonly SimGameLog[], options: FormatHealthO
         ...(abilities === null ? {} : { abilityUsage: abilities }),
         config,
       }),
-      count.total,
+      count.distinct,
     ),
     config,
   };
@@ -130,13 +135,14 @@ export function healthUnderSampled(health: FormatHealth): readonly GateResult[] 
 }
 
 /**
- * Gates that missed a band by less than this run's own dice.
+ * Gates that came within this run's own dice of a band, on either side of it.
  *
  * The sibling of `healthUnderSampled` and read the same way: neither is a
  * pass, and a caller counting passes has to subtract both. The pinned balance
- * suite fails the run on a non-empty list here, because at 10,035 games a miss
- * inside the noise means the gate could not be judged at the volume that was
- * supposed to be able to judge it.
+ * suite fails the run on a non-empty list here, because at 10,035 games a gate
+ * this close to its bound could not be judged at the volume that was supposed
+ * to be able to judge it — and that is as true of a bound cleared by 0.0006 as
+ * of one missed by it (`mtg-ijl6`).
  */
 export function healthWithinNoise(health: FormatHealth): readonly GateResult[] {
   return withinNoiseGates(health.gates);

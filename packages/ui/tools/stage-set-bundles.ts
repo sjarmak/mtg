@@ -12,8 +12,11 @@
  *
  * `public/sets/<stem>/` holds one set's `set.json`, its `art.json`, that
  * manifest's rasters under `art/`, and the preconstructed decks cut from it.
- * Its collation rides inside the set document, so the Draft tab follows for
- * free. Everything a set needs is inside one directory, which is what makes a
+ * Its collation rides inside the set document, which every Play section reads:
+ * `readStagedCollation` checks the block against the card list beside it, and a
+ * set that carries usable sheets is dealt off them in any of them. That sentence
+ * was wrong for as long as `mtg-nmqp` was open — the Draft section derived
+ * sheets from DSL rarities and nothing on screen said the sections disagreed. Everything a set needs is inside one directory, which is what makes a
  * bundle disposable: restaging one set cannot disturb another, and a stale
  * bundle is removed by removing a directory rather than by reasoning about
  * which of a shared pool's files nobody points at any more.
@@ -37,10 +40,14 @@
  * nothing has been measured or recorded about the set on screen.
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { DEFAULT_IMAGE_CACHE_DIR } from '@mtg/image-cache';
+import type { ArtManifest } from '@mtg/render-spec';
 import { STAGED_SETS_DIR, SET_INDEX_VERSION } from '../src/lab/set-index';
 import type { SetIndex, StagedSetRow } from '../src/lab/set-index';
+import { setOrigin } from '../src/lab/set-origin';
+import type { SetOrigin } from '../src/lab/set-origin';
 import { applyArtPreferences, describePreferenceOrdering } from './art-preference-order';
 import type { PreferenceOrdering } from './art-preference-order';
 import { readSetDocument } from './resolve-set';
@@ -55,10 +62,24 @@ import {
   stageSetArt,
 } from './stage-set-art';
 import type { CachedSetArt, StagedSetArt } from './stage-set-art';
+import { DEFAULT_WEB_RASTER_CACHE_DIR } from './web-raster';
 import { printedCardIdsOf, surfaceIdsOf } from './set-surfaces';
 import { choosePreconFile, PRECON_FILENAME, preconCandidatesFor } from './stage-precons';
+import {
+  isPrintedReferenceDocument,
+  loadReferencePrintingCorpus,
+  printedReferenceManifest,
+} from './reference-card-images';
 
 /** Where a bundle's rasters live inside it, and therefore the tail of their URL. */
+/**
+ * The image cache is one directory at the repo root, and this module is a
+ * library rather than a launcher, so it derives the root the way `play.ts`
+ * does rather than reading a cwd. `mtg-21ka`: passing the relative default
+ * through made a second cache under whichever package the caller ran from.
+ */
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+
 const BUNDLE_ART_DIR = 'art';
 
 /** What the launcher achieved for one set's art, or why it staged none. */
@@ -74,6 +95,13 @@ export type ArtOutcome =
       readonly total: number;
       /** What the set's curated picks did to the manifest before it was staged. */
       readonly preferences: PreferenceOrdering;
+    }
+  | {
+      readonly status: 'reference';
+      readonly manifest: ArtManifest;
+      readonly covered: number;
+      readonly total: number;
+      readonly what: string;
     }
   | { readonly status: 'none'; readonly note: string };
 
@@ -111,7 +139,17 @@ export async function stageArt(
   // is whatever the last run left there, so a set whose art sits in a directory of
   // its own used to find the previous set's manifest and draw a board of pending
   // frames with the right rasters one directory away.
-  const ids = explicitManifest === undefined ? printedCardIdsOf(set) : surfaceIdsOf(set);
+  //
+  // Surfaces rather than printed cards, on the discovery path as well as the
+  // explicit one (`mtg-zzf`). A token id and a synthesized basic
+  // (`xmp-swamp`) appear in no card list, which is the whole
+  // reason `@mtg/dsl` grew `setTokens` and `setBasics`, so scoring on the card
+  // list scored them zero: a manifest holding only a set's tokens and basics
+  // read as another set's art and was discarded, and two manifests differing
+  // only there tied and fell to directory order. It is also the number
+  // `describeArt` prints, and a pending frame the count cannot see is a pending
+  // frame nobody goes and fixes.
+  const ids = surfaceIdsOf(set);
   const chosen =
     explicitManifest === undefined
       ? chooseArtManifest(artCandidatesFor(set.path, target.repoRoot), ids)
@@ -132,6 +170,7 @@ export async function stageArt(
     manifestDir,
     publicDir: target.publicDir,
     servedPrefix: target.servedPrefix,
+    webRasterCacheDir: join(target.repoRoot, DEFAULT_WEB_RASTER_CACHE_DIR),
   });
   if (explicitManifest !== undefined) requireCompleteStagedArt(staged, ids, chosen.candidate.path);
   // A reference set's manifest names Scryfall URLs rather than files on this
@@ -140,7 +179,7 @@ export async function stageArt(
   // `stage-art.ts` gives for decks. A generative run's manifest has no remote
   // hrefs, so this is a no-op there and costs one map walk.
   const cached = await cacheRemoteSetArt(staged.manifest, {
-    cacheDir: DEFAULT_IMAGE_CACHE_DIR,
+    cacheDir: join(REPO_ROOT, DEFAULT_IMAGE_CACHE_DIR),
     publicDir: target.publicDir,
     servedPrefix: target.servedPrefix,
   });
@@ -161,11 +200,20 @@ export async function stageArt(
 
 export function describeArt(outcome: ArtOutcome): string {
   if (outcome.status === 'none') return outcome.note;
+  if (outcome.status === 'reference') {
+    return (
+      `Staged authentic illustration crops for ${String(outcome.covered)} of ` +
+      `${String(outcome.total)} positions from ${outcome.what}; illustrations load on demand.`
+    );
+  }
   const { staged, cached, what, covered, total } = outcome;
   const picks = `\n${describePreferenceOrdering(outcome.preferences)}`;
   const head =
     `Staged ${String(staged.copied + cached.fetched + cached.reused)} illustrations ` +
-    `for ${String(covered)} of ${String(total)} cards from ${what}${extras(staged.manifest)}.`;
+    // Surfaces, not cards: the count includes the tokens the set's cards create
+    // and the basics it is played with, both of which draw a frame and neither
+    // of which is in any card list.
+    `for ${String(covered)} of ${String(total)} surfaces from ${what}${extras(staged.manifest)}.`;
   // Counted separately from the rasters already on this disk, because the two
   // numbers answer different questions: one says how much of the set the
   // manifest covers, the other says how much of it this run had to go and get.
@@ -182,11 +230,35 @@ export function describeArt(outcome: ArtOutcome): string {
       : `\n${String(cached.failures.length)} illustrations could not be pulled and still ` +
         `load from their own URL:\n` +
         cached.failures.map((line) => `  - ${line}`).join('\n');
-  if (staged.missing.length === 0) return `${head}${pulled}${gone}${picks}${stillRemote}`;
+  const shrunk = describeWebSizing(staged);
+  if (staged.missing.length === 0) return `${head}${pulled}${gone}${shrunk}${picks}${stillRemote}`;
   return (
-    `${head}${pulled}${gone}${picks}${stillRemote}\n` +
+    `${head}${pulled}${gone}${shrunk}${picks}${stillRemote}\n` +
     `${String(staged.missing.length)} rasters the manifest names are not on disk:\n` +
     staged.missing.map((line) => `  - ${line}`).join('\n')
+  );
+}
+
+/**
+ * What the web-sizing pass took off the bundle, in the launcher's own words.
+ *
+ * Said out loud because the number is large and invisible otherwise
+ * (`mtg-cax8`): the flagship staged 3.9 GB of full-resolution renders into a
+ * directory the Cards tab fetches whole. `tools/web-raster.ts` holds the budget
+ * and the reason for it. Silent when nothing was over budget, which is every
+ * reference set — a Scryfall `art_crop` is already smaller than the page draws
+ * it.
+ */
+function describeWebSizing(staged: StagedSetArt): string {
+  const cache =
+    staged.encoded + staged.reused === 0
+      ? ''
+      : ` ${String(staged.reused)} web rasters reused and ${String(staged.encoded)} re-encoded.`;
+  if (staged.resized === 0) return cache;
+  const mb = (bytes: number): string => (bytes / 1_000_000).toFixed(1);
+  return (
+    `${cache} ${String(staged.resized)} were over the web size budget and were shrunk to it: ` +
+    `${mb(staged.sourceBytes)} MB of renders staged as ${mb(staged.bytes)} MB.`
   );
 }
 
@@ -203,28 +275,39 @@ function extras(manifest: StagedSetArt['manifest']): string {
   return several === 0 ? '' : `, ${String(several)} of them with several illustrations`;
 }
 
-/** The set document's own identity block, as much of it as the document states. */
-function identityOf(json: string): {
+/**
+ * The set document's own identity block, as much of it as the document states.
+ *
+ * Unreadable and unstated are one case here on purpose: a document this cannot
+ * parse has no identity to report, and the bundle falls back to the file name
+ * and to `set-origin.ts`'s default. It is not the place to refuse a set — the
+ * strict readers downstream do that, with the schema issue in hand.
+ */
+export interface SetIdentity {
   readonly code: string | null;
   readonly name: string | null;
   readonly reduced: boolean;
-} {
+  readonly origin: SetOrigin;
+}
+
+const UNSTATED: SetIdentity = { code: null, name: null, reduced: false, origin: setOrigin({}) };
+
+export function identityOf(json: string): SetIdentity {
   let parsed: unknown;
   try {
     parsed = JSON.parse(json);
   } catch {
-    return { code: null, name: null, reduced: false };
+    return UNSTATED;
   }
-  if (typeof parsed !== 'object' || parsed === null || !('set' in parsed)) {
-    return { code: null, name: null, reduced: false };
-  }
+  if (typeof parsed !== 'object' || parsed === null || !('set' in parsed)) return UNSTATED;
   const { set } = parsed as { set: unknown };
-  if (typeof set !== 'object' || set === null) return { code: null, name: null, reduced: false };
+  if (typeof set !== 'object' || set === null) return UNSTATED;
   const value = set as { readonly code?: unknown; readonly name?: unknown; readonly reduced?: unknown };
   return {
     code: typeof value.code === 'string' && value.code.length > 0 ? value.code : null,
     name: typeof value.name === 'string' && value.name.length > 0 ? value.name : null,
     reduced: value.reduced === true,
+    origin: setOrigin(value),
   };
 }
 
@@ -358,6 +441,7 @@ export async function stageSetBundles(
   const taken = new Set<string>();
   const bundles: StagedBundle[] = [];
   let selected: string | null = null;
+  let referenceCorpus: ReturnType<typeof loadReferencePrintingCorpus> | null = null;
 
   for (const entry of library.entries) {
     const stem = stagedSetStem(entry.set.json, entry.set.path, taken);
@@ -367,12 +451,26 @@ export async function stageSetBundles(
     const url = `${STAGED_SETS_DIR}/${stem}`;
     writeFileSync(join(dir, 'set.json'), entry.set.json, 'utf8');
 
-    const art = await stageArt(entry.set, entry.selected ? explicitManifest : undefined, {
-      manifestPath: join(dir, ART_MANIFEST_FILENAME),
-      publicDir: join(dir, BUNDLE_ART_DIR),
-      servedPrefix: `${url}/${BUNDLE_ART_DIR}`,
-      repoRoot,
-    });
+    const art: ArtOutcome = isPrintedReferenceDocument(entry.set.json)
+      ? (() => {
+          referenceCorpus ??= loadReferencePrintingCorpus(repoRoot);
+          const manifest = printedReferenceManifest(entry.set.json, referenceCorpus);
+          if (manifest === null) throw new Error(`${entry.set.path} lost its reference-set identity`);
+          writeFileSync(join(dir, ART_MANIFEST_FILENAME), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+          return {
+            status: 'reference' as const,
+            manifest,
+            covered: Object.keys(manifest.art).length,
+            total: entry.set.cardCount,
+            what: 'the pinned reference printing corpus',
+          };
+        })()
+      : await stageArt(entry.set, entry.selected ? explicitManifest : undefined, {
+          manifestPath: join(dir, ART_MANIFEST_FILENAME),
+          publicDir: join(dir, BUNDLE_ART_DIR),
+          servedPrefix: `${url}/${BUNDLE_ART_DIR}`,
+          repoRoot,
+        });
 
     const precons = choosePreconFile(
       preconCandidatesFor(entry.set.path, repoRoot),
@@ -390,8 +488,11 @@ export async function stageSetBundles(
         what: entry.set.what,
         cardCount: entry.set.cardCount,
         reduced: identity.reduced,
+        origin: identity.origin,
         setUrl: `${url}/set.json`,
-        ...(art.status === 'staged' ? { artUrl: `${url}/${ART_MANIFEST_FILENAME}` } : {}),
+        ...(art.status === 'staged' || art.status === 'reference'
+          ? { artUrl: `${url}/${ART_MANIFEST_FILENAME}` }
+          : {}),
         ...(precons.chosen === null ? {} : { preconUrl: `${url}/${PRECON_FILENAME}` }),
       },
     });
@@ -420,7 +521,12 @@ export async function stageSetBundles(
 export function describeBundles(staging: BundleStaging): string {
   const lines = staging.bundles.map((bundle) => {
     const mark = bundle.row.stem === staging.index.selected ? '*' : ' ';
-    const art = bundle.art.status === 'staged' ? `${String(bundle.art.covered)} with art` : 'no art';
+    const art =
+      bundle.art.status === 'staged'
+        ? `${String(bundle.art.covered)} with art`
+        : bundle.art.status === 'reference'
+          ? `${String(bundle.art.covered)} illustration crops`
+          : 'no art';
     const decks = bundle.row.preconUrl === undefined ? 'no decks' : 'decks';
     return `  ${mark} ${bundle.row.stem} — ${bundle.row.name}, ${String(bundle.row.cardCount)} cards, ${art}, ${decks}`;
   });

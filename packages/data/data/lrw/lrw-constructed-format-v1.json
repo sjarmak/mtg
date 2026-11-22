@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "lrw",
+  "name": "Lorwyn",
+  "sources": [
+    {
+      "code": "LRW",
+      "catalogFormat": "lrw-printed-v1",
+      "catalogSha256": "5563a5eb1e2b24a42f12ffc836cfbe2b483f4d9e757dcdaa1e8d40ca2d791657",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/LRW.json",
+        "sha256": "120d0a7378be15b3e5e9a08d7eaf3d37fce32f326d7392bf1f67db8d8c061036",
+        "version": "5.3.0+20260929"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-merfolk",
+      "name": "White-Blue Merfolk",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "lrw-printed-v1:0042:13a4c124-216b-44b1-b49a-3db3f033e4cd",
+          "name": "Summon the School",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0086:9e07a38a-2d88-4b01-9634-f24cbc8d96d6",
+          "name": "Silvergill Adept",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0074:b57434d9-6fa5-43a6-98b9-044d2259d699",
+          "name": "Merrow Reejerey",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0063:d4237352-4e0e-4f40-946b-2a61753674d4",
+          "name": "Fallowsage",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0072:3ad0c3b4-fd24-44ad-8b30-4176f07be3d6",
+          "name": "Merrow Commerce",
+          "count": 3
+        },
+        {
+          "physicalId": "lrw-printed-v1:0092:1d5b00cb-ebc3-44e8-970d-724150eb7876",
+          "name": "Surgespanner",
+          "count": 3
+        },
+        {
+          "physicalId": "lrw-printed-v1:0058:149aa77e-fc10-4b9b-8f38-cc6db5be7b79",
+          "name": "Drowner of Secrets",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0019:c10ccaef-2a75-43d6-95f2-c3690ae5c87a",
+          "name": "Harpoon Sniper",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0251:fb1aefaf-1b96-4c08-a73e-98e401655965",
+          "name": "Sygg, River Guide",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0280:ccec69de-7203-4810-a8ec-8748705ee3a2",
+          "name": "Wanderwine Hub",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0272:4216656e-90e8-45fc-a0f6-0d0d79d0a021",
+          "name": "Shelldock Isle",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0282:b8e41010-a7d2-4e78-8f7b-502347f8c47d",
+          "name": "Plains",
+          "count": 12
+        },
+        {
+          "physicalId": "lrw-printed-v1:0286:5885738f-a51d-418c-b194-0ba8ef6af556",
+          "name": "Island",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "five-color-elementals",
+      "name": "Five-Color Elementals",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "lrw-printed-v1:0178:c8829b3c-5267-44c6-b709-c2dfc683b0a8",
+          "name": "Incandescent Soulstoke",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0167:f330c0f4-13d2-4432-9ced-f044bef98ec8",
+          "name": "Flamekin Harbinger",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0189:e3c6227b-bd43-47e8-927f-f8a78c532591",
+          "name": "Smokebraider",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0249:80b9ea46-ae9b-4729-b206-0ba3ddc7660d",
+          "name": "Horde of Notions",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0076:a97cfefa-ade7-49f6-b2aa-1118b9db4935",
+          "name": "Mulldrifter",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0139:ea19eb5e-0d70-42e6-bda2-b13757e08ca6",
+          "name": "Shriekmaw",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0202:c759c561-829d-483d-a433-fe1213f20236",
+          "name": "Cloudthresher",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0275:539001dc-69f0-42c0-b5c3-37d7b12eb79e",
+          "name": "Vivid Crag",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0276:2e3c2935-84ee-446d-b247-2f574ea84a8f",
+          "name": "Vivid Creek",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0277:6646babe-edd8-4367-ba8f-89af4f859dd8",
+          "name": "Vivid Grove",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0278:31f806c7-0063-4270-b37c-5363c41a7621",
+          "name": "Vivid Marsh",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0279:a535790b-d416-4807-bca0-acf6b192101c",
+          "name": "Vivid Meadow",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0273:b5e85acc-ed12-4036-8193-739721c3e178",
+          "name": "Shimmering Grotto",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0282:b8e41010-a7d2-4e78-8f7b-502347f8c47d",
+          "name": "Plains",
+          "count": 1
+        },
+        {
+          "physicalId": "lrw-printed-v1:0286:5885738f-a51d-418c-b194-0ba8ef6af556",
+          "name": "Island",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0290:4f799604-bbbf-4d57-83c8-13a0eafa974e",
+          "name": "Swamp",
+          "count": 1
+        },
+        {
+          "physicalId": "lrw-printed-v1:0294:83beeef7-2bb5-4c3a-9be4-79a968696d65",
+          "name": "Mountain",
+          "count": 8
+        },
+        {
+          "physicalId": "lrw-printed-v1:0298:6d3a661e-d890-4211-bc9c-8266001ebfba",
+          "name": "Forest",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "id": "white-black-green-treefolk",
+      "name": "White-Black-Green Treefolk",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "lrw-printed-v1:0247:b006b169-295d-4ead-8e8e-29a9c3246025",
+          "name": "Doran, the Siege Tower",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0239:9ef45cdc-2e1c-40c7-8978-b09a50f511fb",
+          "name": "Treefolk Harbinger",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0197:8a128ea6-cd00-4410-8dc4-cf66ce6f0fa1",
+          "name": "Battlewand Oak",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0238:14b93784-cbe5-437a-8235-f6864e413b41",
+          "name": "Timber Protector",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0203:ad87cb77-6b49-4e93-9151-29f53b48dd4b",
+          "name": "Dauntless Dourbark",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0128:94b4e4d2-2358-48d2-9a2a-3d17afea28f5",
+          "name": "Nameless Inversion",
+          "count": 3
+        },
+        {
+          "physicalId": "lrw-printed-v1:0011:a9044585-4d44-42fb-ad7b-e0e224fbc502",
+          "name": "Crib Swap",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0201:e742366f-e726-406e-bcbe-51a3bfd0151e",
+          "name": "Cloudcrown Oak",
+          "count": 3
+        },
+        {
+          "physicalId": "lrw-printed-v1:0270:38234590-812c-4d29-80c1-32b9e1282580",
+          "name": "Mosswort Bridge",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0277:6646babe-edd8-4367-ba8f-89af4f859dd8",
+          "name": "Vivid Grove",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0278:31f806c7-0063-4270-b37c-5363c41a7621",
+          "name": "Vivid Marsh",
+          "count": 3
+        },
+        {
+          "physicalId": "lrw-printed-v1:0279:a535790b-d416-4807-bca0-acf6b192101c",
+          "name": "Vivid Meadow",
+          "count": 3
+        },
+        {
+          "physicalId": "lrw-printed-v1:0268:cc4bbbb5-4218-4b2a-9ca2-de4d5f5dda19",
+          "name": "Gilt-Leaf Palace",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0273:b5e85acc-ed12-4036-8193-739721c3e178",
+          "name": "Shimmering Grotto",
+          "count": 2
+        },
+        {
+          "physicalId": "lrw-printed-v1:0282:b8e41010-a7d2-4e78-8f7b-502347f8c47d",
+          "name": "Plains",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0290:4f799604-bbbf-4d57-83c8-13a0eafa974e",
+          "name": "Swamp",
+          "count": 4
+        },
+        {
+          "physicalId": "lrw-printed-v1:0298:6d3a661e-d890-4211-bc9c-8266001ebfba",
+          "name": "Forest",
+          "count": 10
+        }
+      ]
+    }
+  ],
+  "contentSha256": "5e582269f2dd799c6ba174be8a8ba9fc1b91a7fe7b6e384e066186812bcd3f69"
+}

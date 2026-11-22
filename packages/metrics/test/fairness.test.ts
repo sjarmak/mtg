@@ -16,7 +16,8 @@ import {
   scaledSeedDeviation,
   seedDeviation,
 } from '@mtg/metrics';
-import { matchup, repeatedGame } from './helpers/log';
+import type { FakeGameSpec } from './helpers/log';
+import { fakeLog, matchup, repeatedGame } from './helpers/log';
 
 /** Hits every land drop through turn 6, so the flood checkpoint fires. */
 const FULL_CURVE = [1, 2, 3, 4, 5, 6, 6, 6, 6, 6];
@@ -26,31 +27,96 @@ const TEST_FLOORS: MetricsConfigInput = {
   floors: { gameLength: 20, onPlay: 20, manaCheckpoint: 20, decisiveness: 20, colorPair: 20, matchup: 20 },
 };
 
+/**
+ * Games per matchup in `evenLogs`, and the number is the load-bearing part.
+ *
+ * A gate reads green only when it clears its band by more than the seed moves
+ * the statistic at this run's volume (`abstainWithinNoise`), so a fixture whose
+ * claim is *nothing here fails* has to buy enough games to be allowed to make
+ * it. The binding gate is `onPlay.winRate`, and it binds for a reason worth
+ * knowing: its band is 48%-60%, because the on-play side really does win more
+ * than half, and this fixture alternates the seat perfectly and lands on 50.0%.
+ * That is a pass by 0.020 against a deviation of 0.0087 at the pinned 10,035
+ * games, and 0.020 does not clear the scaled deviation until about 1,900 games.
+ * 800 a matchup is 3,200, which clears that gate by 1.3x and the pair floors by
+ * 3x.
+ *
+ * `lopsidedLogs` proves something cheaper on a fortieth of the games, and the
+ * asymmetry is the rule rather than an inconsistency: a miss costs games in
+ * inverse proportion to its size, and *no miss anywhere* is the most expensive
+ * reading a run can buy.
+ */
+const GAMES_PER_MATCHUP = 800;
+
+/**
+ * What each game varies from the last, so the volume above is real evidence.
+ *
+ * `matchup` perturbs only the life totals, which cycle on 17, so 3,200 games
+ * off four specs would be 272 trajectories dealt twelve times each. The seed
+ * scaling divides by the games a run reports rather than by the trajectories it
+ * actually flew (`mtg-pixl`), so a fixture built that way would buy its
+ * decidability from a hole rather than from evidence. Two idle turns on periods
+ * of 11 and 13, coprime to the life cycle and to the play/draw alternation,
+ * make 3,152 of these 3,200 games distinct.
+ */
+const varied = (index: number): { readonly inertTurns: readonly number[] } => ({
+  inertTurns: [2 + (index % 11), 3 + (index % 13)],
+});
+
 /** Four pairs at 50%, games ending around round 8-9: nothing to fail. */
 function evenLogs(): ReturnType<typeof matchup> {
+  const half = GAMES_PER_MATCHUP / 2;
   return [
-    ...matchup('WU', 'BR', 40, 20, {
-      playerTurns: 16,
-      userLands: FULL_CURVE,
-      oppoLands: FULL_CURVE,
-      activationsPerTurn: 1,
-      triggersPerTurn: 1,
-    }),
-    ...matchup('GW', 'UB', 40, 20, {
-      playerTurns: 18,
-      userLands: STEADY,
-      oppoLands: STEADY,
-      activationsPerTurn: 1,
-      triggersPerTurn: 1,
-    }),
-    ...matchup('WB', 'RG', 40, 20, {
-      playerTurns: 16,
-      userLands: STEADY,
-      oppoLands: STEADY,
-      activationsPerTurn: 1,
-      triggersPerTurn: 1,
-    }),
-    ...matchup('UR', 'WR', 40, 20, { playerTurns: 18, userLands: FULL_CURVE, oppoLands: FULL_CURVE }),
+    ...matchup(
+      'WU',
+      'BR',
+      GAMES_PER_MATCHUP,
+      half,
+      {
+        playerTurns: 16,
+        userLands: FULL_CURVE,
+        oppoLands: FULL_CURVE,
+        activationsPerTurn: 1,
+        triggersPerTurn: 1,
+      },
+      varied,
+    ),
+    ...matchup(
+      'GW',
+      'UB',
+      GAMES_PER_MATCHUP,
+      half,
+      {
+        playerTurns: 18,
+        userLands: STEADY,
+        oppoLands: STEADY,
+        activationsPerTurn: 1,
+        triggersPerTurn: 1,
+      },
+      varied,
+    ),
+    ...matchup(
+      'WB',
+      'RG',
+      GAMES_PER_MATCHUP,
+      half,
+      {
+        playerTurns: 16,
+        userLands: STEADY,
+        oppoLands: STEADY,
+        activationsPerTurn: 1,
+        triggersPerTurn: 1,
+      },
+      varied,
+    ),
+    ...matchup(
+      'UR',
+      'WR',
+      GAMES_PER_MATCHUP,
+      half,
+      { playerTurns: 18, userLands: FULL_CURVE, oppoLands: FULL_CURVE },
+      varied,
+    ),
   ];
 }
 
@@ -247,10 +313,18 @@ describe('fairness over a format with a dominant pair', () => {
 
 describe('the dice get a say', () => {
   it('names a deviation only for the statistics somebody measured one for', () => {
-    expect(seedDeviation('balance.spread')).toBe(0.02);
-    expect(seedDeviation('balance.pair.WU')).toBe(0.02);
-    expect(seedDeviation('length.median')).toBeNull();
-    expect(seedDeviation('decisiveness.stall')).toBeNull();
+    expect(seedDeviation('balance.spread')).toBe(0.019);
+    expect(seedDeviation('balance.pair.WU')).toBe(0.019);
+    expect(seedDeviation('onPlay.winRate')).toBe(0.0087);
+    // Not a rate, and that is the point of rounding to figures rather than to a
+    // step: `abilities.triggers` guards a band whose floor is 0.0125 on a
+    // quarter-triggered pool, so a flat 0.005 would have been 40% of it.
+    expect(seedDeviation('abilities.triggers')).toBe(0.0024);
+    // A measured zero, which is a claim: 24 seeds moved this gate by nothing.
+    expect(seedDeviation('length.median')).toBe(0);
+    // A mana checkpoint no config in this repo asks for. The ids are built from
+    // a turn and a land count, so this is the shape the `null` branch is for.
+    expect(seedDeviation('mana.screw.t3.l2')).toBeNull();
   });
 
   it('widens the deviation for a sweep smaller than the one it was measured on', () => {
@@ -258,19 +332,28 @@ describe('the dice get a say', () => {
     // of the arithmetic. `npm run analyze` defaults to 2,700 against a pinned
     // 10,035, so this is the ordinary case and not a corner of it.
     const quarter = DEVIATION_MEASURED_AT_GAMES / 4;
-    expect(scaledSeedDeviation('balance.spread', quarter)).toBeCloseTo(0.04, 10);
-    expect(scaledSeedDeviation('balance.pair.WU', quarter)).toBeCloseTo(0.04, 10);
+    expect(scaledSeedDeviation('balance.spread', quarter)).toBeCloseTo(0.038, 10);
+    expect(scaledSeedDeviation('balance.pair.WU', quarter)).toBeCloseTo(0.038, 10);
   });
 
   it('never narrows it below the number anybody measured', () => {
-    // A larger sweep is not given a tighter band: the study sampled eight
-    // seeds, and extrapolating past its own resolution invents precision.
-    expect(scaledSeedDeviation('balance.spread', DEVIATION_MEASURED_AT_GAMES)).toBe(0.02);
-    expect(scaledSeedDeviation('balance.spread', DEVIATION_MEASURED_AT_GAMES * 100)).toBe(0.02);
+    // A larger sweep is not given a tighter band: the study sampled 24 seeds
+    // at one volume, and extrapolating past its own resolution invents
+    // precision.
+    expect(scaledSeedDeviation('balance.spread', DEVIATION_MEASURED_AT_GAMES)).toBe(0.019);
+    expect(scaledSeedDeviation('balance.spread', DEVIATION_MEASURED_AT_GAMES * 100)).toBe(0.019);
   });
 
   it('has nothing to widen for a statistic nobody measured', () => {
-    expect(scaledSeedDeviation('length.median', 10)).toBeNull();
+    expect(scaledSeedDeviation('mana.screw.t3.l2', 10)).toBeNull();
+  });
+
+  it('widens a measured zero to zero, however thin the sweep', () => {
+    // Scaling multiplies, so a gate that does not move on the seed does not
+    // start moving when the sweep gets thin. That is the arithmetic and it is
+    // also the right answer: `length.median` is an integer over ten thousand
+    // games and 24 seeds put every one of them on the same number.
+    expect(scaledSeedDeviation('length.median', 10)).toBe(0);
   });
 
   it('marks a miss smaller than the seed deviation on a list nobody re-read', () => {
@@ -288,7 +371,7 @@ describe('the dice get a say', () => {
     expect(finding?.withinNoise).toBe(true);
     // At least the pinned deviation, and wider here because this health block
     // is built from a handful of games rather than the pinned sweep.
-    expect(finding?.noise ?? 0).toBeGreaterThanOrEqual(0.02);
+    expect(finding?.noise ?? 0).toBeGreaterThanOrEqual(0.019);
     expect(fairness(nudged).verdict).toBe('unfair');
     expect(finding === undefined ? '' : findingLine(finding)).toContain(
       'another seed could put it either side',
@@ -313,13 +396,18 @@ describe('the dice get a say', () => {
  * The boundary is pinned at **two volumes over one unchanged gate**, which is
  * the whole point of the shape: the thing being tested is the scaling, not a
  * threshold somebody typed once. The gate below misses its band by 0.035 in
- * both cases. A spread's seed deviation is 0.020 at the pinned 10,035 games and
- * 0.060 at a ninth of them, because a rate's standard error falls as the square
+ * both cases. A spread's seed deviation is 0.019 at the pinned 10,035 games and
+ * 0.057 at a ninth of them, because a rate's standard error falls as the square
  * root of the sample, so the same miss is a verdict at one volume and inside
  * the dice at the other. Buying games is what makes a band enforceable, and
  * this is the arithmetic that says so.
+ *
+ * `mtg-ijl6` widened the same comparison to green rows. The distance a gate is
+ * from its band is the statistic under examination whichever side of the band
+ * it fell, so a bound cleared by less than the dice is exactly as undecided as
+ * one missed by that much, and the tests below pin both sides.
  */
-describe('a miss the run cannot tell from its own dice', () => {
+describe('a result the run cannot tell from its own dice', () => {
   const THIN_GAMES = DEVIATION_MEASURED_AT_GAMES / 9;
   const MISSED_BY = 0.035;
   /** A spread of 0.335 against the 0.300 limit, at whatever volume it is read. */
@@ -338,13 +426,13 @@ describe('a miss the run cannot tell from its own dice', () => {
     expect(read?.status).toBe('withinNoise');
     // Both numbers on the row, so the abstention argues rather than asserts.
     expect(read?.detail).toContain('missed by 0.035');
-    expect(read?.detail).toContain('inside the 0.060');
+    expect(read?.detail).toContain('inside the 0.057');
     expect(read?.observed).toBe(missing.observed);
   });
 
   it('gives an exact tie to the band rather than to the sample', () => {
-    // 0.020 against a deviation of 0.020, at the volume it was measured at.
-    const tied = gateOf({ observed: 0.02, band: { min: null, max: 0 } });
+    // 0.019 against a deviation of 0.019, at the volume it was measured at.
+    const tied = gateOf({ observed: 0.019, band: { min: null, max: 0 } });
     expect(abstainWithinNoise([tied], DEVIATION_MEASURED_AT_GAMES)[0]?.status).toBe('fail');
   });
 
@@ -352,18 +440,46 @@ describe('a miss the run cannot tell from its own dice', () => {
     // `null` means "nobody has measured it", not "zero noise". A gate with no
     // measured deviation fails the way it failed before this existed, at any
     // volume, which is what stops the abstention from spreading by default.
-    expect(seedDeviation('length.median')).toBeNull();
+    expect(seedDeviation('mana.screw.t3.l2')).toBeNull();
+    const unmeasured = gateOf({ id: 'mana.screw.t3.l2', observed: 0.4, band: { min: null, max: 0.3 } });
+    expect(abstainWithinNoise([unmeasured], 10)[0]?.status).toBe('fail');
+  });
+
+  it('never abstains for a statistic measured at zero either', () => {
+    // Same verdict, different reason, and no branch of its own: a miss is never
+    // smaller than zero, so the strict comparison settles it. Worth pinning
+    // because a `0` reaching a truthiness check somewhere would read as absent
+    // and the two are not the same claim.
+    expect(seedDeviation('length.median')).toBe(0);
     const median = gateOf({ id: 'length.median', observed: 13.1, band: { min: 6, max: 13 } });
     expect(abstainWithinNoise([median], 10)[0]?.status).toBe('fail');
   });
 
-  it('leaves every status that was not a fail exactly as it found it', () => {
+  it('leaves a status with nothing to measure exactly as it found it', () => {
+    // No observation, or no edge to be near: there is no distance for the dice
+    // to swallow, so neither of these is a reading the noise could take back.
     const others: readonly GateResult[] = [
-      gateOf({ status: 'pass', observed: 0.29 }),
       gateOf({ status: 'underSampled', observed: null }),
       gateOf({ status: 'notApplicable', observed: null, band: { min: null, max: null } }),
     ];
     expect(abstainWithinNoise(others, THIN_GAMES)).toEqual(others);
+  });
+
+  it('abstains on a pass that cleared its band by less than the dice', () => {
+    // 0.296 against a 0.300 limit is a pass by 0.004, and at a ninth of the
+    // pinned volume a spread moves 0.057 on the seed alone. Read as green, that
+    // row banks a band the run never cleared, which is `mtg-ijl6`.
+    const read = abstainWithinNoise([gateOf({ status: 'pass', observed: 0.296 })], THIN_GAMES)[0];
+    expect(read?.status).toBe('withinNoise');
+    expect(read?.detail).toContain('cleared by 0.004');
+    expect(read?.detail).toContain('inside the 0.057');
+  });
+
+  it('leaves a pass that cleared its band by more than the dice', () => {
+    // The other side of the same comparison, and the reason the change is not
+    // just "abstain more": 0.100 of headroom against 0.057 is a real pass.
+    const clear = gateOf({ status: 'pass', observed: 0.2 });
+    expect(abstainWithinNoise([clear], THIN_GAMES)).toEqual([clear]);
   });
 });
 
@@ -371,10 +487,22 @@ describe('a miss the run cannot tell from its own dice', () => {
  * A pair at 39%, and 400 games is nowhere near enough to say so.
  *
  * WU plays two matchups and wins 39% of both, one point under the 40% floor.
- * At 400 games a pair win rate moves 0.100 on the seed alone, so the run cannot
- * tell that point from the dice that produced it. Every other pair sits inside
- * the band and the spread is 0.22 against a 0.30 limit, so the one gate under
- * examination is the only thing that could have failed.
+ * A pair win rate moves 0.095 on the seed alone over 400 games, so the run
+ * cannot tell that point from the dice that produced it. Nothing here fails:
+ * the one gate under examination is the only one that misses a band at all.
+ *
+ * Three green rows abstain beside it, which is `mtg-ijl6` and is the same fact
+ * read from the other side. UB is the mirror of WU at 61% and clears the 70%
+ * ceiling by 0.090; the spread is 0.220 against a 0.300 limit, clearing by
+ * 0.080; both are inside the same 0.095. `onPlay.winRate` sits at 51.0%,
+ * clearing its 48% floor by 0.030 against a deviation of 0.044. At this volume
+ * the run cannot say UB is inside its band any more than it can say WU is
+ * outside its own.
+ *
+ * BR and GW sit at 50% and clear the 40% floor by 0.100, which is the other
+ * edge of the same comparison and the reason this is a rule and not a mood:
+ * five thousandths more headroom than the dice, and the row is a pass. Four
+ * abstentions out of a run that looked like it had one is what 400 games buys.
  */
 describe('the abstention lands where the gate list is assembled', () => {
   /** Half the matchups on each land curve, as `evenLogs` does: the mana gates
@@ -411,7 +539,12 @@ describe('the abstention lands where the gate list is assembled', () => {
     const wu = health.gates.find((gate) => gate.id === 'balance.pair.WU');
     expect(wu?.status).toBe('withinNoise');
     expect(wu?.observed).toBeCloseTo(0.39, 10);
+    expect(wu?.detail).toContain('missed by 0.010');
     expect(health.gates.filter((gate) => gate.status === 'fail')).toEqual([]);
+    // Its mirror, which never failed anything and is just as undecided.
+    const ub = health.gates.find((gate) => gate.id === 'balance.pair.UB');
+    expect(ub?.status).toBe('withinNoise');
+    expect(ub?.detail).toContain('cleared by 0.090');
   });
 
   it('is unjudged rather than a finding, so the run is not called fair either', () => {
@@ -431,7 +564,126 @@ describe('the abstention lands where the gate list is assembled', () => {
     expect(text).toContain('**Not judged:**');
     // The census subtracts it: an abstention counted as a pass is the whole
     // failure this status exists to prevent, one line up.
-    expect(text).toContain('1 inside the seed noise');
+    expect(text).toContain('4 inside the seed noise');
+  });
+});
+
+/**
+ * Two thousand games and two hundred and seventy-two of them, which is
+ * `mtg-pixl`.
+ *
+ * A sweep whose seeds collide flies the same trajectory again and again, and
+ * that is the sample illusion `../src/sample.ts` names in its second rule and
+ * sources: a repeated trajectory is one piece of evidence counted twice. The
+ * under-sampling floor has always been checked against the distinct count for
+ * exactly that reason. The seed-noise scaling read the total until 2026-08-27,
+ * so the two rules disagreed about what a game was.
+ *
+ * WU misses the 40% floor by 0.070 here. A pair moves 0.043 on the seed alone
+ * over 2,000 games and 0.115 over 272, so the miss is a verdict under the total
+ * and undecidable under the distinct count, and which number the seam reads is
+ * the difference between this run failing a set and admitting it cannot say.
+ * The set is the same either way; only the evidence differs.
+ */
+describe('a run whose games repeated each other', () => {
+  /** Distinct life lines per matchup, before the seat and the winner split them. */
+  const LINES_PER_MATCHUP = 34;
+
+  /**
+   * Measured, not derived: 68 per matchup is what the construction predicts
+   * (34 lines x 2 winners, the seat being pinned to the line's parity) and 272
+   * is what the four matchups actually fingerprint to. Written down rather than
+   * computed from the health object, because a test that asserts a number
+   * against itself asserts nothing.
+   */
+  const DISTINCT_TRAJECTORIES = 272;
+
+  /**
+   * A matchup that repeats itself: `count` games flown over `lines` life lines.
+   *
+   * Built rather than inherited. `matchup` deals a distinct trajectory per game
+   * by construction, so a fixture about repetition has to arrange the repetition
+   * itself, and the one line that does it is the wrapping `variant` — game `n`
+   * and game `n + lines` fly the same life line and fingerprint as one game.
+   */
+  function repeating(
+    userColors: string,
+    oppoColors: string,
+    count: number,
+    winsForUser: number,
+    lines: number,
+    spec: Omit<FakeGameSpec, 'userColors' | 'oppoColors' | 'winner' | 'onPlay' | 'index' | 'variant'>,
+  ): readonly ReturnType<typeof fakeLog>[] {
+    return Array.from({ length: count }, (_unused, index) =>
+      fakeLog({
+        ...spec,
+        index,
+        userColors,
+        oppoColors,
+        winner: index < winsForUser ? 0 : 1,
+        onPlay: index % 2 === 0 ? 0 : 1,
+        variant: index % lines,
+      }),
+    );
+  }
+
+  const fast = {
+    playerTurns: 16,
+    userLands: FULL_CURVE,
+    oppoLands: FULL_CURVE,
+    activationsPerTurn: 1,
+    triggersPerTurn: 1,
+  };
+  const slow = {
+    playerTurns: 18,
+    userLands: STEADY,
+    oppoLands: STEADY,
+    activationsPerTurn: 1,
+    triggersPerTurn: 1,
+  };
+
+  /** 33.0% for WU over its two matchups, every matchup repeating itself. */
+  function repetitiveLogs(): ReturnType<typeof matchup> {
+    return [
+      ...repeating('WU', 'BR', 500, 165, LINES_PER_MATCHUP, fast),
+      ...repeating('WU', 'GW', 500, 165, LINES_PER_MATCHUP, slow),
+      ...repeating('BR', 'UB', 500, 165, LINES_PER_MATCHUP, slow),
+      ...repeating('GW', 'UB', 500, 165, LINES_PER_MATCHUP, fast),
+    ];
+  }
+
+  const health = healthOf(repetitiveLogs(), 'two thousand games, two hundred trajectories');
+
+  it('counts the trajectories it flew, not the games it dealt', () => {
+    expect(health.games).toBe(2000);
+    expect(health.distinctGames).toBe(DISTINCT_TRAJECTORIES);
+    expect(health.duplicateShare).toBeCloseTo(1 - DISTINCT_TRAJECTORIES / 2000, 10);
+  });
+
+  it('is the arithmetic that makes the two counts different answers', () => {
+    // Stated rather than implied: the miss sits between the two deviations, so
+    // this fixture cannot come out the same way under both readings.
+    const missedBy = 0.07;
+    expect(scaledSeedDeviation('balance.pair.WU', health.games) ?? 0).toBeLessThan(missedBy);
+    expect(scaledSeedDeviation('balance.pair.WU', health.distinctGames) ?? 0).toBeGreaterThan(missedBy);
+  });
+
+  it('abstains, because 272 trajectories cannot decide a 0.070 miss', () => {
+    const wu = health.gates.find((gate) => gate.id === 'balance.pair.WU');
+    expect(wu?.status).toBe('withinNoise');
+    expect(wu?.observed).toBeCloseTo(0.33, 10);
+    expect(wu?.detail).toContain('missed by 0.070');
+    // The row names the number it judged against, so a reader can tell which
+    // of the two counts bought the verdict without re-deriving it.
+    expect(wu?.detail).toContain(`over ${String(DISTINCT_TRAJECTORIES)} distinct games`);
+    expect(health.gates.filter((gate) => gate.status === 'fail')).toEqual([]);
+  });
+
+  it('carries the same number into the finding, so the report holds one answer', () => {
+    const balance = fairness(health).readings.find((reading) => reading.question === 'balance');
+    expect(balance?.findings).toEqual([]);
+    expect(balance?.unjudged.map((entry) => entry.gate)).toContain('balance.pair.WU');
+    expect(balance?.verdict).toBe('unjudged');
   });
 });
 

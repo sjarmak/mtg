@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "dis",
+  "formatSha256": "a85d431f70af2280acd5e81ed1f6e3d4fe097d2fcfd790840c40215347bdb800",
+  "sourceSha256": "a8955c186c594e264f28ec6e3e1dce4bafec364c58ed14ff93c7e346add12f92",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "a8955c186c594e264f28ec6e3e1dce4bafec364c58ed14ff93c7e346add12f92",
+    "recipe.json": "32d1d7d7708dc9b119a39f22a9b6295139180360f28e034b88399b3ba0bfa655",
+    "dis-printed-catalog-v1.json": "0380a8a8c02d81d3505a8a1c71ed5ada8aca45d3edbf9e90638449f529d04329",
+    "gpt-printed-catalog-v1.json": "9701c5a2af2245df3c9de0dc682504d05b44886d9a508f833cdba31af23a31ce",
+    "rav-printed-catalog-v1.json": "fd3dbb55f5b850d098a16a3190cfa1d520f6c7fce084faad6d9d356be06d55c7",
+    "dis-limited-format-v1.json": "318b4832dc90c9cf386671af2f99e99f87931e85abdf7e51c8fdae28875941de"
+  },
+  "catalogs": [
+    {
+      "code": "DIS",
+      "cards": 180,
+      "contentSha256": "53b945b50fddb51b2d05203c7ad9ffeaf9ffa7c98da953655e491c240e0e59a4"
+    },
+    {
+      "code": "GPT",
+      "cards": 167,
+      "contentSha256": "071bdf7dcacab0b58fa2f5a2221d67a1e8789661a790ea74786bd554fd49a3b2"
+    },
+    {
+      "code": "RAV",
+      "cards": 306,
+      "contentSha256": "b539f35d7987fbbe523aebbba866f3a96033c8880798ee0022cf8d7528c7d775"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 2988.035077,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 636,
+    "printings": 653
+  }
+}

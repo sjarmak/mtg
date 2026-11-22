@@ -135,6 +135,7 @@ describe('a token entering the battlefield', () => {
     expect(created.map((event) => event.oid)).toEqual([token]);
     expect(entered.map((event) => event.oid)).toContain(token);
     expect(entered.find((event) => event.oid === token)?.controller).toBe(0);
+    expect(result.state.objects[token]?.battlefieldTimestamp).toBeDefined();
   });
 
   it('announces the object before it announces the arrival', () => {

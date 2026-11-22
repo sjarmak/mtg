@@ -211,6 +211,7 @@ describe('hexproof and protection', () => {
         amount: 2,
         deathtouch: false,
         lifelink: false,
+        preventable: true,
         combat: false,
       },
     ]);
@@ -347,11 +348,13 @@ describe('hexproof and protection', () => {
     expect(gone.objects[sourceOid]?.lastKnownSourceCharacteristics).toEqual({
       colors: ['W'],
       subtypes: ['Elf', 'Dragon'],
+      keywords: [],
     });
     const triggered = putTriggersOnStack(departedTrace, collectTriggers(departedTrace, 0));
     expect(triggered.state.stack[0]?.sourceCharacteristics).toEqual({
       colors: ['W'],
       subtypes: ['Elf', 'Dragon'],
+      keywords: [],
     });
     for (const sourceCharacteristics of [
       { colors: ['W'] as const, subtypes: ['Elf'] },
@@ -423,6 +426,7 @@ describe('hexproof and protection', () => {
     expect(activated.state.stack[0]?.sourceCharacteristics).toEqual({
       colors: ['W'],
       subtypes: ['Elf', 'Dragon'],
+      keywords: [],
     });
   });
 });
@@ -458,9 +462,13 @@ describe('indestructible and regeneration', () => {
               excludeCardTypes: null,
               subtypes: null,
               supertypes: null,
+              names: null,
               colors: null,
               excludeColors: null,
               keywords: null,
+              keywordAbilities: null,
+              excludeKeywords: null,
+              token: null,
               controller: null,
               controllerIsSource: false,
             },

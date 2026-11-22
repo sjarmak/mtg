@@ -1,0 +1,342 @@
+{
+  "Austere Command": {
+    "quality": 4.4,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Containment Priest": {
+    "quality": 2.5,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Loyal Retainers": {
+    "quality": 0.6,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Worship": {
+    "quality": 3.3,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Wrath of God": {
+    "quality": 4.2,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Consecrated Sphinx": {
+    "quality": 5.0,
+    "roles": ["draw"],
+    "tags": [],
+    "payoffs": []
+  },
+  "Counterbalance": {
+    "quality": 0.5,
+    "roles": ["interaction"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Counterspell": {
+    "quality": 3.2,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Cryptic Command": {
+    "quality": 4.2,
+    "roles": ["interaction", "draw"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Daze": {
+    "quality": 1.8,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Divert": {
+    "quality": 1.2,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Force of Will": {
+    "quality": 2.8,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Pact of Negation": {
+    "quality": 1.6,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": [],
+    "planningCost": "{3}{U}{U}"
+  },
+  "Spell Pierce": {
+    "quality": 1.7,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Stifle": {
+    "quality": 1.2,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Attrition": {
+    "quality": 4.3,
+    "roles": ["interaction"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Dark Ritual": {
+    "quality": 0.7,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Diabolic Intent": {
+    "quality": 1.8,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Entomb": {
+    "quality": 0.8,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Mind Twist": {
+    "quality": 3.8,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": [],
+    "planningCost": "{3}{B}"
+  },
+  "Aggravated Assault": {
+    "quality": 1.6,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Chain Lightning": {
+    "quality": 3.8,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Maelstrom Pulse": {
+    "quality": 4.0,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Vindicate": {
+    "quality": 4.0,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Armageddon": {
+    "quality": 2.0,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Capsize": {
+    "quality": 4.3,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Forbid": {
+    "quality": 3.3,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Omniscience": {
+    "quality": 0.1,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Opposition": {
+    "quality": 4.7,
+    "roles": ["interaction"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Sunder": {
+    "quality": 1.0,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Threads of Disloyalty": {
+    "quality": 2.7,
+    "roles": ["interaction"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Avatar of Woe": {
+    "quality": 4.2,
+    "roles": ["interaction"],
+    "tags": [],
+    "payoffs": []
+  },
+  "Damnation": {
+    "quality": 4.2,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Desolation Angel": {
+    "quality": 2.3,
+    "roles": [],
+    "tags": [],
+    "payoffs": [],
+    "planningCost": "{3}{B}{B}{W}{W}"
+  },
+  "Diabolic Edict": {
+    "quality": 2.7,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Doomsday": {
+    "quality": 0.1,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "No Mercy": {
+    "quality": 3.4,
+    "roles": ["interaction"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Slaughter Pact": {
+    "quality": 3.5,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": [],
+    "planningCost": "{2}{B}"
+  },
+  "Thoughtseize": {
+    "quality": 2.6,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Blood Moon": {
+    "quality": 0.4,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Boil": {
+    "quality": 0.6,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Shatterstorm": {
+    "quality": 0.6,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Through the Breach": {
+    "quality": 0.7,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Choke": {
+    "quality": 0.7,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Lord of Extinction": {
+    "quality": 3.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Aven Mindcensor": {
+    "quality": 3.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Oketra the True": {
+    "quality": 4.3,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Kefnet the Mindful": {
+    "quality": 3.0,
+    "roles": ["draw"],
+    "tags": [],
+    "payoffs": []
+  },
+  "Bontu the Glorified": {
+    "quality": 2.9,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Hazoret the Fervent": {
+    "quality": 4.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Rhonas the Indomitable": {
+    "quality": 4.7,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "The Locust God": {
+    "quality": 5.0,
+    "roles": ["draw"],
+    "tags": [],
+    "payoffs": []
+  },
+  "The Scarab God": {
+    "quality": 5.0,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": [
+      {
+        "tag": "zombie",
+        "weight": 0.7,
+        "target": 6
+      }
+    ]
+  },
+  "The Scorpion God": {
+    "quality": 5.0,
+    "roles": ["interaction", "draw"],
+    "tags": ["counter"],
+    "payoffs": [
+      {
+        "tag": "counter",
+        "weight": 0.6,
+        "target": 5
+      }
+    ]
+  }
+}

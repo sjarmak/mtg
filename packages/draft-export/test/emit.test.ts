@@ -12,12 +12,13 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { boosterRecipeFor, boosterSize, SLICE_BOOSTER } from '@mtg/deckbuild';
-import { EXAMPLE_SET, exampleCard } from '@mtg/dsl';
-import { DraftExportError, exportDraftmancerSet } from '@mtg/draft-export';
+import { EXAMPLE_SET, exampleCard, isBasicLand } from '@mtg/dsl';
+import { DRAFTMANCER_SIMPLE_BOT_POLICY, DraftExportError, exportDraftmancerSet } from '@mtg/draft-export';
 
 const GOLDEN = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'example-set.draftmancer.txt');
 
 const EXPORT = exportDraftmancerSet(EXAMPLE_SET);
+const POOL = EXAMPLE_SET.filter((card) => !isBasicLand(card));
 
 const MYTHIC_EXPORT = exportDraftmancerSet([
   ...EXAMPLE_SET,
@@ -47,6 +48,10 @@ function customCardsJson(text: string): readonly { readonly name: string }[] {
 }
 
 describe('file structure', () => {
+  it('identifies the static policy the exported file can actually run', () => {
+    expect(EXPORT.botPolicy).toBe(DRAFTMANCER_SIMPLE_BOT_POLICY);
+  });
+
   it('writes the custom cards, the settings, then one section per sheet', () => {
     expect([...sections(EXPORT.text).keys()]).toEqual([
       'CustomCards',
@@ -62,16 +67,23 @@ describe('file structure', () => {
     expect(EXPORT.text.endsWith('\n\n')).toBe(false);
   });
 
-  it('lists every card exactly once in [CustomCards]', () => {
+  /**
+   * The booster pool rather than the set: a basic land is in no sheet
+   * (`mtg-h77m`), so writing it into [CustomCards] would name a card the file
+   * reads and can never deal.
+   */
+  it('lists every card a sheet can deal exactly once in [CustomCards]', () => {
     const names = customCardsJson(EXPORT.text).map((entry) => entry.name);
-    expect(names).toHaveLength(EXAMPLE_SET.length);
-    expect(new Set(names).size).toBe(EXAMPLE_SET.length);
-    expect([...names].sort()).toEqual([...EXAMPLE_SET.map((card) => card.name)].sort());
+    expect(POOL.length).toBe(EXAMPLE_SET.length - 5);
+    expect(names).toHaveLength(POOL.length);
+    expect(new Set(names).size).toBe(POOL.length);
+    expect([...names].sort()).toEqual([...POOL.map((card) => card.name)].sort());
   });
 
-  it('lists every card exactly once across the sheet sections', () => {
+  it('lists every card exactly once across the sheet sections, and no basic land', () => {
     const listed = ['Common', 'Uncommon', 'Rare'].flatMap((name) => sections(EXPORT.text).get(name) ?? []);
-    expect([...listed].sort()).toEqual([...EXAMPLE_SET.map((card) => card.name)].sort());
+    expect([...listed].sort()).toEqual([...POOL.map((card) => card.name)].sort());
+    expect(listed).not.toContain('Plains');
   });
 
   it('writes settings whose slots sum to the pack size', () => {

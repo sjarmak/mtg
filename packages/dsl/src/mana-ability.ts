@@ -62,12 +62,12 @@
  */
 import type { ActivatedAbility, Ability } from './abilities';
 import type { Card } from './card';
-import { isManaEffect } from './effects';
+import { effectChoosesTarget, isManaEffect } from './effects';
 import type { ManaColor } from './vocabulary';
 
 /**
- * True when this printed ability is a mana ability: activated, and it adds
- * mana.
+ * True when this printed ability is a mana ability: activated, able to add
+ * mana, not a loyalty ability, and without a target (CR 605.1a).
  *
  * Deliberately a plain `boolean` rather than an `ability is ActivatedAbility`
  * predicate. Every caller that wants the narrowing already holds an
@@ -79,7 +79,11 @@ import type { ManaColor } from './vocabulary';
  */
 export function isManaAbility(ability: Ability): boolean {
   if (ability.kind !== 'activated') return false;
-  return ability.effects.some((effect) => isManaEffect(effect.kind));
+  return (
+    ability.loyaltyCost === undefined &&
+    ability.effects.some((effect) => isManaEffect(effect.kind)) &&
+    !ability.effects.some((effect) => effectChoosesTarget(effect))
+  );
 }
 
 /**

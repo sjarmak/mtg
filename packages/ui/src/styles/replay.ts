@@ -31,10 +31,10 @@
  */
 import { HAND_ACROSS, HAND_GAP } from './board/hand';
 import { cssNumber } from './number';
-import { routeScope } from './tokens';
+import { viewScope } from './tokens';
 
 /** The scope: the replay viewer's shell and nothing else. */
-const REPLAY = routeScope('replay');
+const REPLAY = viewScope('analysis', 'replay');
 
 /**
  * How much of a lane the hand row may take, and why the hand is the block that
@@ -105,6 +105,25 @@ const RAIL_PANEL_MIN_REM = 4.5;
  * take, so a long game scrolls the index inside its own panel instead of pushing
  * the graveyards off the column.
  */
+/**
+ * The class on the replay transport, and the one thing that tells it apart from
+ * the other toolbars on this route.
+ *
+ * `./mobile.ts` takes every `.mtg-toolbar` off a landscape table, on the
+ * argument that what those bands hold — the route switcher, a sentence about the
+ * set, the seed and the reshuffle — is not what a player uses mid-turn. True of
+ * the head band on this route, and false of the transport under it: on replay
+ * the toolbar *is* the game's controls, so the rule left a landscape phone
+ * watching a replay it could not advance, pause or seek (`mtg-aqxi.18`,
+ * measured: both bands `display: none` at 844x390 and at 932x430, both drawn in
+ * portrait and at 1440x900).
+ *
+ * Here rather than in `../routes/replay/Transport.ts` so the rule that spares it
+ * and the element it spares are written in the same layer and cannot drift into
+ * a landscape screen with no controls.
+ */
+export const TRANSPORT_CLASS = 'mtg-transport';
+
 const TURN_RAIL_MAX_PERCENT = 40;
 
 export const REPLAY_CSS = `
@@ -167,4 +186,5 @@ ${REPLAY} .mtg-board__rail > .mtg-panel[aria-label='Turns'] { max-height: ${cssN
 ${REPLAY} .mtg-board__rail .mtg-turn { padding: var(--mtg-space-1) 0; gap: var(--mtg-space-2); }
 ${REPLAY} .mtg-board__rail .mtg-turn__facts { gap: 0 var(--mtg-space-2); }
 ${REPLAY} .mtg-board__rail .mtg-lifebar__track { min-width: 2rem; }
+
 `;

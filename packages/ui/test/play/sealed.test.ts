@@ -23,7 +23,7 @@ import {
   MANA_BASE_LABEL,
   SUGGEST_BASICS_LABEL,
 } from '../../src/routes/deck/BasicsPanel';
-import { HOTSEAT_LABEL, SEALED_POOL_LABEL } from '../../src/routes/play/SealedBuilder';
+import { SEALED_POOL_LABEL } from '../../src/routes/play/SealedBuilder';
 import {
   adjustBasics,
   basicsFor,
@@ -34,6 +34,7 @@ import {
   resuggestBasics,
   toggle,
 } from '../../src/routes/play/sealed';
+import { generateSealed } from '../support/play-chooser';
 
 afterEach(cleanup);
 
@@ -100,11 +101,38 @@ function asElement(value: unknown): ElementLike {
   return candidate as ElementLike;
 }
 
-/** The value beside a toolbar label: how the builder states a count on screen. */
-function factValue(label: string): string {
-  const value = asElement(screen.getByText(label)).nextElementSibling;
-  if (value === null) throw new Error(`toolbar fact ${label} has no value`);
-  return value.textContent ?? '';
+/**
+ * The builder's one sentence about the deck it is holding.
+ *
+ * `mtg-aqxi.21`. Seven monospace toolbar facts stood here, each a label beside
+ * a number, and this file read them by walking to the label's next sibling. The
+ * sealed screen now prints the Constructed builder's sentence instead
+ * (`../../src/routes/deck/deck-counts.ts`), in the bar and again in the deck
+ * pane, so a count is read out of the sentence the screen actually shows.
+ */
+const COUNTS_LINE = /^\d+ of \d+ cards · /;
+
+function countsLine(): string {
+  const found = screen.getAllByText(COUNTS_LINE)[0];
+  if (found === undefined) throw new Error('the builder states no count of the deck');
+  return (found as unknown as { readonly textContent: string | null }).textContent ?? '';
+}
+
+/** How many cards are in the deck, which is the sentence's first number. */
+function deckTotal(): number {
+  const total = /^(\d+) of /.exec(countsLine());
+  if (total === null) throw new Error(`no deck total in ${countsLine()}`);
+  return Number(total[1]);
+}
+
+/** How many of one noun are in it: `creature`, `noncreature spell`, `land`. */
+function deckCount(noun: string): number {
+  const segment = countsLine()
+    .split(' · ')
+    .slice(1)
+    .find((part) => part.endsWith(` ${noun}`) || part.endsWith(` ${noun}s`));
+  if (segment === undefined) throw new Error(`no ${noun} count in ${countsLine()}`);
+  return Number(segment.split(' ')[0]);
 }
 
 /** True when a control is on screen and refusing to be pressed. */
@@ -258,14 +286,21 @@ const SEALED_FLOW_BUDGET_MS = 30_000;
 
 describe('the whole sealed flow, by clicking', { timeout: SEALED_FLOW_BUDGET_MS }, () => {
   it('shows the deck curve, creature split, and full or compact card views before play', () => {
-    render(h(PlayRoute, { set: ready(SET), seed: SEED }));
-    expect(Number(factValue('creatures'))).toBeGreaterThan(0);
-    expect(Number(factValue('noncreature spells'))).toBeGreaterThan(0);
+    render(h(PlayRoute, { sub: 'sealed', set: ready(SET), seed: SEED }));
+    generateSealed();
+    expect(deckCount('creature')).toBeGreaterThan(0);
+    expect(deckCount('noncreature spell')).toBeGreaterThan(0);
 
+    // Limited deckbuilding opens on the complete current card face; compact is
+    // still available when somebody wants to scan more cards at once.
     const view = screen.getByRole('group', { name: 'Your deck, View' });
     expect(within(view).getByRole('button', { name: 'Full cards', pressed: true })).toBeTruthy();
     const deck = asElement(screen.getByRole('group', { name: 'Cards in your deck' }));
     expect(deck.querySelectorAll('[data-size="full"]').length).toBeGreaterThan(0);
+    // In the same columns since `mtg-rgc.21`: full is a size, not a second
+    // arrangement. It was a wrapping run of faces until the playtester read it on
+    // 2026-08-29 and could not tell the cards were in mana-value order at all.
+    expect(deck.querySelectorAll('[aria-label^="Mana value "]').length).toBeGreaterThan(1);
 
     fireEvent.click(within(view).getByRole('button', { name: 'Compact list' }));
     const compactDeck = asElement(screen.getByRole('group', { name: 'Cards in your deck' }));
@@ -279,11 +314,12 @@ describe('the whole sealed flow, by clicking', { timeout: SEALED_FLOW_BUDGET_MS 
   });
 
   it('opens a pool, starts a game against a bot, and plays it', () => {
-    render(h(PlayRoute, { set: ready(SET), seed: SEED }));
+    render(h(PlayRoute, { sub: 'sealed', set: ready(SET), seed: SEED }));
+    generateSealed();
 
     // Phase one: a pool and a suggested deck.
-    expect(screen.getByText(SEALED_POOL_LABEL)).toBeTruthy();
-    expect(screen.getByText('Your deck')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: SEALED_POOL_LABEL })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Your deck' })).toBeTruthy();
     const play = screen.getByRole('button', { name: /Play this deck/ });
 
     // Phase two: a live game.
@@ -306,73 +342,22 @@ describe('the whole sealed flow, by clicking', { timeout: SEALED_FLOW_BUDGET_MS 
   });
 
   it('keeps setup controls on the setup surface and removes them from the active table', () => {
-    render(h(PlayRoute, { set: ready(SET), seed: SEED }));
-    expect(screen.getByText(SEALED_POOL_LABEL)).toBeTruthy();
+    render(h(PlayRoute, { sub: 'sealed', set: ready(SET), seed: SEED }));
+    generateSealed();
+    expect(screen.getByRole('heading', { name: SEALED_POOL_LABEL })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: /Play this deck/ }));
     expect(screen.queryByText(SEALED_POOL_LABEL)).toBeNull();
     expect(screen.queryByRole('button', { name: /Back to deckbuilding/ })).toBeNull();
   });
 
   it('refuses to start on an illegal deck', () => {
-    render(h(PlayRoute, { set: ready(SET), seed: SEED }));
+    render(h(PlayRoute, { sub: 'sealed', set: ready(SET), seed: SEED }));
+    generateSealed();
     fireEvent.click(screen.getByRole('button', { name: /^Clear/ }));
     const play = screen.getByRole('button', { name: /Play this deck/ });
     fireEvent.click(play);
     // Still on the builder: an empty selection is not a deck.
-    expect(screen.getByText(SEALED_POOL_LABEL)).toBeTruthy();
-  });
-
-  /**
-   * Two people, reachable.
-   *
-   * The seat-following board underneath this was built and tested against a
-   * `PlayConfig` a library consumer would have had to write in code, which meant
-   * `npm run play` — the one command that puts a game in front of a person —
-   * could only ever deal a bot. This is the button that closes that gap, so the
-   * test drives it the way a person does and never constructs a config.
-   */
-  it('starts a two-person game from this screen, which is the only way in from `npm run play`', () => {
-    render(h(PlayRoute, { set: ready(SET), seed: SEED }));
-    fireEvent.click(screen.getByRole('button', { name: HOTSEAT_LABEL }));
-
-    // Seats named rather than "You" and "Bot". That renaming only happens when
-    // a person is sitting where the bot would have been. Only the player
-    // currently holding the shared screen has a hand rail; the other public
-    // count remains in their seat pod.
-    expect(screen.getByLabelText("Player one's hand")).toBeTruthy();
-    expect(screen.queryByLabelText("Player two's hand")).toBeNull();
-    expect(
-      within(screen.getByLabelText("Player two's status")).getByText('7', {
-        selector: '[title="hand"]',
-      }),
-    ).toBeTruthy();
-    expect(screen.queryByLabelText("Bot's hand")).toBeNull();
-  });
-
-  it('asks both people in turn, covering the table between them', () => {
-    render(h(PlayRoute, { set: ready(SET), seed: SEED }));
-    fireEvent.click(screen.getByRole('button', { name: HOTSEAT_LABEL }));
-
-    let handoffs = 0;
-    for (let click = 0; click < 300 && handoffs < 3; click += 1) {
-      const pass = screen.queryByRole('button', { name: /^I am Player/ });
-      if (pass !== null) {
-        // Nothing of either hand is readable by whoever is still holding it.
-        expect(screen.queryByLabelText("Player one's hand")).toBeNull();
-        expect(screen.queryByLabelText("Player two's hand")).toBeNull();
-        handoffs += 1;
-        fireEvent.click(pass);
-      }
-      const group = screen.queryByRole('group', { name: 'Legal moves' });
-      if (group === null) break;
-      const first = within(group).queryAllByRole('button')[0];
-      if (first === undefined) break;
-      fireEvent.click(first);
-      expect(screen.queryByRole('alert')).toBeNull();
-    }
-    // Three passes back and forth is a game being played by two people rather
-    // than a bot quietly answering for one of them.
-    expect(handoffs).toBe(3);
+    expect(screen.getByRole('heading', { name: SEALED_POOL_LABEL })).toBeTruthy();
   });
 
   /**
@@ -383,7 +368,8 @@ describe('the whole sealed flow, by clicking', { timeout: SEALED_FLOW_BUDGET_MS 
    * screen reader can tell from the four others beside it.
    */
   it('offers a basic of every color, each one named', () => {
-    render(h(PlayRoute, { set: ready(SET), seed: SEED }));
+    render(h(PlayRoute, { sub: 'sealed', set: ready(SET), seed: SEED }));
+    generateSealed();
 
     expect(screen.getByRole('group', { name: MANA_BASE_LABEL })).toBeTruthy();
     for (const type of BASIC_LAND_TYPES) {
@@ -393,26 +379,28 @@ describe('the whole sealed flow, by clicking', { timeout: SEALED_FLOW_BUDGET_MS 
   });
 
   it('adds a land by clicking, and hands the computed base back', () => {
-    render(h(PlayRoute, { set: ready(SET), seed: SEED }));
-    expect(factValue('lands')).toBe('17');
+    render(h(PlayRoute, { sub: 'sealed', set: ready(SET), seed: SEED }));
+    generateSealed();
+    expect(deckCount('land')).toBe(17);
 
     fireEvent.click(screen.getByRole('button', { name: addBasicLabel('Mountain') }));
-    expect(factValue('lands')).toBe('18');
-    expect(factValue('deck')).toBe('41');
+    expect(deckCount('land')).toBe(18);
+    expect(deckTotal()).toBe(41);
     // Forty-one cards is not a deck, so the game cannot start on one.
     expect(isDisabled('Play this deck')).toBe(true);
 
     fireEvent.click(screen.getByRole('button', { name: SUGGEST_BASICS_LABEL }));
-    expect(factValue('lands')).toBe('17');
+    expect(deckCount('land')).toBe(17);
     expect(isDisabled('Play this deck')).toBe(false);
   });
 
   it('cannot cut a basic that is not there', () => {
-    render(h(PlayRoute, { set: ready(SET), seed: SEED }));
+    render(h(PlayRoute, { sub: 'sealed', set: ready(SET), seed: SEED }));
+    generateSealed();
     const missing = BASIC_LAND_TYPES.filter((type) => isDisabled(cutBasicLabel(type)));
     // The suggested build is two colors out of five, so some basic is at zero.
     expect(missing.length).toBeGreaterThan(0);
-    expect(factValue('lands')).toBe('17');
+    expect(deckCount('land')).toBe(17);
   });
 
   it('explains itself when handed no set at all', () => {

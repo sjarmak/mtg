@@ -39,11 +39,13 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Shell } from '../../src/app/Shell';
+import type { ShellAt } from '../../src/app/Shell';
+import { routeAt } from '../../src/app/router';
 import { ReplayViewer } from '../../src/routes/replay/ReplayViewer';
 import { SIDE_PANEL_LABEL } from '../../src/routes/play/rail-collapse';
 import { TABLE } from '../../src/styles/board/geometry';
 import { uiStyleSheet } from '../../src/styles/index';
-import { routeScope } from '../../src/styles/tokens';
+import { routeScope, viewScope } from '../../src/styles/tokens';
 import { fixtureLog } from './support/log-fixture';
 
 afterEach(cleanup);
@@ -97,14 +99,14 @@ function windowLike(): {
  */
 function paint(): { readonly replay: ElementLike; readonly control: ElementLike } {
   const { document } = windowLike();
-  const view = (mode: 'replay' | 'cards'): string =>
+  const view = (at: ShellAt): string =>
     renderToStaticMarkup(
       h(Shell, {
-        mode,
+        ...at,
         onSelectMode: () => undefined,
         children: h(ReplayViewer, {
           state: { status: 'ready', log: LOG },
-          route: { mode: 'replay', params: { seq: SEQ } },
+          route: routeAt('analysis', 'replay', { seq: SEQ }),
           onSetParams: () => undefined,
         }),
       }),
@@ -113,9 +115,9 @@ function paint(): { readonly replay: ElementLike; readonly control: ElementLike 
   const style = document.createElement('style');
   style.textContent = uiStyleSheet();
   document.head.appendChild(style);
-  document.body.innerHTML = `${view('replay')}${view('cards')}`;
-  const replay = document.body.querySelector("[data-mtg-mode='replay']");
-  const control = document.body.querySelector("[data-mtg-mode='cards']");
+  document.body.innerHTML = `${view({ mode: 'analysis', sub: 'replay' })}${view({ mode: 'cards' })}`;
+  const replay = document.body.querySelector(viewScope('analysis', 'replay'));
+  const control = document.body.querySelector(routeScope('cards'));
   if (replay === null || control === null) throw new Error('a shell did not render');
   return { replay, control };
 }
@@ -158,20 +160,23 @@ function mount(): void {
   render(
     h(ReplayViewer, {
       state: { status: 'ready', log: LOG },
-      route: { mode: 'replay', params: { seq: SEQ } },
+      route: routeAt('analysis', 'replay', { seq: SEQ }),
       onSetParams: () => undefined,
     }),
   );
 }
 
 describe('the mat is scoped to the routes that draw a table', () => {
-  it('names the play route and the replay viewer, and nothing else', () => {
-    // The scope is a list because two routes draw a whole table now, and it is
+  it('names the play route and the replay section, and nothing else', () => {
+    // The scope is a list because two surfaces draw a whole table now, and it is
     // an `:is()` rather than two emissions of every rule so that the specificity
-    // downstream is what a bare route scope always was.
+    // downstream is what a bare route scope always was. The replay half is the
+    // section's scope rather than the mode's: the explorer under Analysis is a
+    // page, and a mat scoped to the whole mode would fit it to the viewport.
     expect(TABLE).toContain(routeScope('play'));
-    expect(TABLE).toContain(routeScope('replay'));
-    for (const mode of ['deck', 'analysis', 'cards'] as const) {
+    expect(TABLE).toContain(viewScope('analysis', 'replay'));
+    expect(TABLE).not.toContain(`${routeScope('analysis')},`);
+    for (const mode of ['customize', 'cards'] as const) {
       expect(TABLE, `${mode} draws no table and must not be in the mat's scope`).not.toContain(
         routeScope(mode),
       );

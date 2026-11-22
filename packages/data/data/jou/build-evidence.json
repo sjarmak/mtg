@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "jou",
+  "formatSha256": "34c2b5b813a7ebd4903385a1c92538f4053d20896d31111f7ebb41307bcce746",
+  "sourceSha256": "cfba5ec5d5758fadeaa4ed2879ce33853043e9a82f63268c04d9c88f0f85dccd",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "cfba5ec5d5758fadeaa4ed2879ce33853043e9a82f63268c04d9c88f0f85dccd",
+    "recipe.json": "1f1ea9448564ada4f8aff0a2343b6406788d6348874e22769d4d9a1909aee973",
+    "bng-printed-catalog-v1.json": "d92b43760a89bceb47693704b2c05535246b51caf9aaf912807d02e4c6dd246f",
+    "jou-printed-catalog-v1.json": "5b2e86bf58b0a119ae52e1a307f6b7cf71f6ddfaf2bfb6d28290bc127cde55f1",
+    "ths-printed-catalog-v1.json": "97fce8b2521e539117c5179e56740d3539667531d243e3bb26519f8307528f6b",
+    "jou-limited-format-v1.json": "3a309d888c2d3d1d0388d2e7f29643f0301ef477dede6af0c34695c7f91e3731"
+  },
+  "catalogs": [
+    {
+      "code": "BNG",
+      "cards": 165,
+      "contentSha256": "68c366f3067f51da8029e9b0608028847a61baff8436e71ef0fc67afe74b2088"
+    },
+    {
+      "code": "JOU",
+      "cards": 165,
+      "contentSha256": "05e4813b34dc687ea1f615b0f73c2fb6f5e11d189686558900461c04250aa766"
+    },
+    {
+      "code": "THS",
+      "cards": 249,
+      "contentSha256": "fac9b57dfbd92961cbda727dfbbae869cc07567f86187abe335db142488c76cb"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 5257.655086,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 564,
+    "printings": 579
+  }
+}

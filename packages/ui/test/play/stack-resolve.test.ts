@@ -47,6 +47,7 @@ import { RESOLVE_LABEL } from '../../src/board/StackZone';
 import { LEGAL_MOVES_LABEL, PASS_LABEL, PlayView } from '../../src/routes/play/PlayView';
 import type { SeatNames } from '../../src/routes/play/position';
 import { ARRIVAL_MS } from '../../src/styles/board/arrival';
+import { paceCss } from '../../src/motion/pace';
 import { uiStyleSheet } from '../../src/styles/index';
 
 afterEach(cleanup);
@@ -185,7 +186,7 @@ describe('going onto the stack is something you can see', () => {
     // attackers into the divider compose rather than competing.
     expect(sheet).toContain('@keyframes mtg-arrive');
     expect(sheet).toMatch(/\.mtg-stack__entry[\s\S]{0,80}animation: mtg-arrive/);
-    expect(sheet).toContain(`animation: mtg-arrive ${String(ARRIVAL_MS)}ms`);
+    expect(sheet).toContain(`animation: mtg-arrive ${paceCss(ARRIVAL_MS)}`);
   });
 
   it('shows nothing at all under reduced motion, rather than showing it fast', () => {

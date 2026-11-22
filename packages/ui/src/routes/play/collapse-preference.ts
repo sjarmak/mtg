@@ -120,28 +120,49 @@ export interface CollapsePreference {
   /** What the board should draw. The player's answer, and nothing overrides it. */
   readonly collapsed: boolean;
   readonly toggle: () => void;
+  /** Opens an explicitly requested destination without closing an open one. */
+  readonly expand: () => void;
 }
 
 /**
- * The preference and the viewport it falls back to, resolved against each other.
+ * The preference and whatever it falls back to, resolved against each other.
  *
- * The player's answer wins outright wherever there is one; the viewport is only
- * consulted when the player has said nothing, which is why neither disclosure
- * has a disabled state and neither lies about what a press does. The first press
- * writes, so the fallback stops applying from then on — the behavior a person
- * expects of a panel they shut on a phone and then opened again.
+ * The player's answer wins outright wherever there is one; the fallback is only
+ * consulted when the player has said nothing, which is why no disclosure built
+ * on this has a disabled state and none of them lies about what a press does.
+ * The first press writes, so the fallback stops applying from then on — the
+ * behavior a person expects of a panel they shut on a phone and then opened
+ * again.
+ *
+ * The fallback is a value rather than a query because not every panel here falls
+ * back to a viewport. The two columns do, and `./log-open.ts` falls back to a
+ * constant: the game log's unanswered state is a decision the interface pass
+ * took (`mtg-rgc.8`) and no viewport moves it, since a table too small for the
+ * log has already collapsed the whole rail around it.
  */
-export function useCollapsePreference(key: string, media: string): CollapsePreference {
+export function useStoredCollapse(key: string, fallback: boolean): CollapsePreference {
   const [chosen, setChosen] = useState<boolean | null>(() => readPreference(key));
-  const [cramped, setCramped] = useState<boolean>(() => crampedTable(media));
-  useEffect((): (() => void) => watchCrampedTable(media, setCramped), [media]);
-  const collapsed = chosen ?? cramped;
+  const collapsed = chosen ?? fallback;
   const toggle = useCallback((): void => {
     setChosen((was) => {
-      const next = !(was ?? crampedTable(media));
+      const next = !(was ?? fallback);
       writePreference(key, next);
       return next;
     });
-  }, [key, media]);
-  return { collapsed, toggle };
+  }, [key, fallback]);
+  const expand = useCallback((): void => {
+    setChosen((was) => {
+      if ((was ?? fallback) === false) return was;
+      writePreference(key, false);
+      return false;
+    });
+  }, [key, fallback]);
+  return { collapsed, toggle, expand };
+}
+
+/** The stored preference over a viewport condition, watched rather than sampled. */
+export function useCollapsePreference(key: string, media: string): CollapsePreference {
+  const [cramped, setCramped] = useState<boolean>(() => crampedTable(media));
+  useEffect((): (() => void) => watchCrampedTable(media, setCramped), [media]);
+  return useStoredCollapse(key, cramped);
 }

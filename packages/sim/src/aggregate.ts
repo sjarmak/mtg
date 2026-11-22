@@ -11,7 +11,13 @@
 import type { GameEndReason, PlayerId } from '@mtg/kernel';
 import type { GameOutcome } from './driver';
 
-export const END_REASONS: readonly GameEndReason[] = ['lifeZero', 'emptyLibrary', 'concede', 'turnLimit'];
+export const END_REASONS: readonly GameEndReason[] = [
+  'lifeZero',
+  'emptyLibrary',
+  'spellOrAbility',
+  'concede',
+  'turnLimit',
+];
 
 export interface MatchAggregate {
   readonly runSeed: string;
@@ -53,6 +59,7 @@ export function aggregateOutcomes(runSeed: string, outcomes: readonly GameOutcom
   const endReasons: Record<GameEndReason, number> = {
     lifeZero: 0,
     emptyLibrary: 0,
+    spellOrAbility: 0,
     concede: 0,
     turnLimit: 0,
   };

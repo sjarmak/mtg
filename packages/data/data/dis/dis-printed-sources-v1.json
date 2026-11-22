@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-10-01T16:30:47.185Z",
+  "sources": [
+    {
+      "code": "DIS",
+      "mtgjson": {
+        "file": "DIS-a8f0cd408c7513c212e0f1c2d1c5a8113045593656832bd84b560c546b26ea92.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/DIS.json",
+        "sha256": "a8f0cd408c7513c212e0f1c2d1c5a8113045593656832bd84b560c546b26ea92",
+        "meta": {
+          "date": "2026-10-01",
+          "version": "5.3.0+20261001"
+        }
+      },
+      "scryfall": {
+        "file": "DIS-0c52f289cfa8fb99732811a642455264cf9985e42ae9643e563c884b2dd4db9c.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Adis+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "0c52f289cfa8fb99732811a642455264cf9985e42ae9643e563c884b2dd4db9c",
+        "cards": 180
+      }
+    },
+    {
+      "code": "GPT",
+      "mtgjson": {
+        "file": "GPT-6464ca1c0fa8ef316839eaa79479f1814d7beedd3f440f33ba7e2bf2e9487fc1.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/GPT.json",
+        "sha256": "6464ca1c0fa8ef316839eaa79479f1814d7beedd3f440f33ba7e2bf2e9487fc1",
+        "meta": {
+          "date": "2026-10-01",
+          "version": "5.3.0+20261001"
+        }
+      },
+      "scryfall": {
+        "file": "GPT-3505995bdac0338bdc996f29240adcac5d5b22d209d2d756c7b700bdf65cd8cc.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Agpt+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "3505995bdac0338bdc996f29240adcac5d5b22d209d2d756c7b700bdf65cd8cc",
+        "cards": 167
+      }
+    },
+    {
+      "code": "RAV",
+      "mtgjson": {
+        "file": "RAV-6b85f69c6247ad12cb3415b7a004e57b2edeecd7e67233e148bc9867227c4795.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/RAV.json",
+        "sha256": "6b85f69c6247ad12cb3415b7a004e57b2edeecd7e67233e148bc9867227c4795",
+        "meta": {
+          "date": "2026-10-01",
+          "version": "5.3.0+20261001"
+        }
+      },
+      "scryfall": {
+        "file": "RAV-575ea168a981950da390fbfa4a27910b4c63faaaa49df28a6c38a5464d435498.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Arav+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "575ea168a981950da390fbfa4a27910b4c63faaaa49df28a6c38a5464d435498",
+        "cards": 306
+      }
+    }
+  ]
+}

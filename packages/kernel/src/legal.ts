@@ -9,41 +9,78 @@
  * the enumerated list, so an agent that constructs its own declaration (needed
  * when a declaration space is too large to enumerate) is checked just as hard.
  */
-import type { ActivatedAbility, Card, CastableCard, Effect, ManaCost } from '@mtg/dsl';
+import type {
+  ActivatedAbility,
+  Card,
+  CastableCard,
+  Effect,
+  EntryCharacteristicMode,
+  ManaCost,
+} from '@mtg/dsl';
 import {
   assertNever,
   canonicalJson,
-  effectsFor,
+  COLORS,
+  effectsForActivatedAbility,
   hasTarget,
   isAttachingAbility,
   isAuraCard,
   isCastable,
   isLoyaltyAbility,
+  isGuildFeudAbility,
   isManaAbility,
-  manaAbilityOf,
-  manaSourceColors,
+  isMultipleTargetSpec,
+  isReturnAnotherCreatureOrSacrificeSelfAbility,
+  isTargetedFight,
+  isVariableLoyaltyCost,
+  manaValue,
   MAX_CHOSEN_X,
   MAX_SCRY_COUNT,
+  openingHandActionOf,
+  renderCastingRestriction,
+  renderOpponentLifeLossCastingRestriction,
   resolveX,
-  targetCountOf,
+  spellEffectsFor,
 } from '@mtg/dsl';
 import { counterCount } from './continuous';
+import { lifeLostByOpponentsThisTurn } from './life-history';
+import {
+  attackRequirement,
+  attacksCompletable,
+  blockRequirementCoverage,
+  blockRequirements,
+  blockRequirementsReachable,
+  maximizeBlockRequirements,
+  requiredAttackers,
+} from './combat-declarations';
+import { countTargetInstances } from './target-count';
+import {
+  hasPluralTargets,
+  minimumPluralChoice,
+  isPluralTargetEffect,
+  shouldStagePluralTargets,
+  validatePluralTargets,
+} from './plural-targets';
+import type { DamageAllocationDecision, PluralTargetsDecision } from './plural-decisions';
+import { damageAllocationDecision, pluralTargetsDecision } from './plural-decisions';
 import { isLegalAuraHost, isLegalHost } from './attach';
 import { canBeTargetedBy } from './keyword-abilities';
-import { activatedAbilityAt } from './abilities';
-import type { Action, AttackDeclaration, BlockDeclaration } from './actions';
+import type { Action, AttackDeclaration, BlockDeclaration, CastingCostChoice } from './actions';
+import { MAX_CARD_NAME_LENGTH } from './actions';
 import {
+  attackCohortRestriction,
   attackersNeedingOrder,
+  blockersNeedingAttackerOrder,
   canBlock,
+  canBlockAnyNumber,
   combatDefenders,
   eligibleAttackers,
   eligibleBlockers,
-  hasCombatModification,
   isLegalCombatDefender,
-  luredDefenders,
   validateBlocks,
 } from './combat';
 import { damageOrderClasses } from './damage-order';
+import { damagePreventionRange } from './damage';
 import type { Enumerated } from './enumerate';
 import {
   cartesian,
@@ -52,46 +89,285 @@ import {
   distinctPermutations,
   permutations,
   subsets,
-  subsetsUpToSize,
 } from './enumerate';
-import { honoursDistinctSlots, isTargetStillLegal, sameTarget, survivingMultipleTargets } from './effects';
-import { effectiveManaCost, maxPayableX } from './cost';
+import { honoursDistinctSlots, isTargetStillLegal, sameTarget } from './effects';
+import { maxPayableX, selectedCastingManaCost } from './cost';
 import type { ObjectId, PlayerId } from './ids';
-import { controlledBy, controllerOf, hasCardType, hasKeyword, hasSubtype, isCreatureObject } from './layers';
+import {
+  activatedAbilitiesProhibited,
+  abilitiesOf,
+  controlledBy,
+  currentActivatedAbilityAt,
+  controllerOf,
+  hasCardType,
+  hasKeyword,
+  hasSubtype,
+  isCreatureObject,
+} from './layers';
 import { opponentOf } from './ids';
-import { availableMana, canPay, landProduces } from './mana';
+import { nameOf } from './backend-naming';
+import { availableMana, canPay, landProducesOnBattlefield } from './mana';
+import { canPayAttackTaxes } from './attack-tax';
+import { anyColorCombinationAmount } from './mana-ability';
 import type { SpellOnStack } from './may-choice';
 import { spellAwaitingMay } from './may-choice';
-import type { TolledSpellOnStack } from './unless-choice';
-import { spellAwaitingUnless } from './unless-choice';
+import type { TolledStackObject } from './unless-choice';
+import { stackAwaitingUnless } from './unless-choice';
 import { canMulligan, cardsToBottom } from './mulligan';
+import { eligibleOpeningHandActionCards } from './opening-hand';
 import type { LegendCollision } from './sba';
 import { pendingLegendCollision } from './sba';
-import type { Block, CombatDefender, GameState, ManaColor, Target } from './state';
+import type {
+  AttackerOrder,
+  Block,
+  CombatDefender,
+  DamageAllocations,
+  EntryCounterKind,
+  GameState,
+  ManaColor,
+  PendingPermanentUntap,
+  PendingPermanentUntapChoice,
+  PendingBattlefieldChoice,
+  PendingPopulate,
+  PendingPopulateCandidate,
+  PendingCardCopyCast,
+  PendingFreeCast,
+  Target,
+} from './state';
 import { isMainPhase } from './state';
+import { isAttacking, satisfiesTargetFilter } from './target-filter';
 import {
-  countedSlotCandidates,
+  multipleTargetCandidates,
   everySlotHasAChoice,
   targetChoicesFor,
   targetChoicesForActivation,
   targetChoicesForEffects,
 } from './target-choices';
 import { playerOf } from './trace';
+import {
+  cleanupDiscardCount,
+  flashCastingPermissionApplies,
+  freeCastFromHandPermissionApplies,
+  staticPlayerRuleApplies,
+} from './player-rules';
 import type { TriggerOnStack } from './trigger-choice';
 import { optionalTriggerOnTop, triggerAwaitingTargets, triggerTargetChoices } from './trigger-choice';
-import { getObject, tryObject } from './zones';
+import { returnAnotherCreatureCandidates } from './return-another-creature';
+import { stackEntryTargetingController } from './abilities';
+import { canUntapObject, getObject, tryObject } from './zones';
+import { selectPrintedByCardFilter } from './zone-filter';
+import { isDetained } from './detention';
+import { spellCard } from './stack-spell';
 
 /** One eligible blocker and every attacker it may legally block. */
 export interface BlockCandidates {
   readonly blocker: ObjectId;
+  /** Whether this creature may be assigned to one attacker or several. */
+  readonly capacity: 'one' | 'any';
   /** Never empty: a creature that can block nothing is not a candidate list. */
   readonly attackers: readonly ObjectId[];
 }
 
 export type Decision =
   | {
+      /** A copy-as-entry replacement: every legal creature plus decline. */
+      readonly kind: 'entryCopy';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly creatures: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** A mandatory permanent choice made by an as-entry counter replacement. */
+      readonly kind: 'entryCounter';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly permanents: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** A required choice among complete copiable forms before entry. */
+      readonly kind: 'entryCharacteristics';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly modes: readonly EntryCharacteristicMode[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** An optional counter replacement answered before entry. */
+      readonly kind: 'entryOptionalCounter';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly counter: EntryCounterKind;
+      readonly count: number;
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** An optional life payment answered before entry. */
+      readonly kind: 'entryPayLife';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly life: number;
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** A mandatory player choice made before a permanent enters. */
+      readonly kind: 'entryPlayer';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** A mandatory exactly-two-color choice made before a permanent enters. */
+      readonly kind: 'entryColors';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** CR 303.4f's mandatory, non-targeted host choice for an entering Aura. */
+      readonly kind: 'entryAura';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly permanents: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** The remaining objects in one controller's CR 613.7m timestamp order. */
+      readonly kind: 'entryTimestampOrder';
+      readonly player: PlayerId;
+      readonly ordered: readonly ObjectId[];
+      readonly remaining: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** CR 615.7: one source's share of a finite simultaneous-damage shield. */
+      readonly kind: 'damagePrevention';
+      readonly player: PlayerId;
+      readonly effectId: string;
+      readonly source: { readonly sourceOid: ObjectId; readonly damage: number };
+      readonly remaining: number;
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** The complete target tuple a resolving Redirect or copy effect may use. */
+      readonly kind: 'spellTargets';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly targets: readonly (Target | null)[];
+      readonly multiTargets?: Readonly<Record<number, readonly Target[]>>;
+      readonly damageAllocations?: DamageAllocations;
+      readonly options: readonly Action[];
+      readonly complete: boolean;
+    }
+  | {
+      /** One filtered card from a hand revealed by the resolving instruction. */
+      readonly kind: 'revealedHandChoice';
+      readonly player: PlayerId;
+      readonly owner: PlayerId;
+      /** Eligible subset only; the pending record retains the complete reveal. */
+      readonly cards: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: boolean;
+    }
+  | {
+      /** Every complete declaration that can cast the revealed card for zero mana. */
+      readonly kind: 'freeCast';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      /** Whether leaving the card in its current zone is a legal answer. */
+      readonly optional: boolean;
+      readonly options: readonly Action[];
+      readonly complete: boolean;
+    }
+  | {
+      /**
+       * Card-authored actions available after every hand is kept and before
+       * turn 1. Cards are in stable hand order and the final option explicitly
+       * finishes this player's action round.
+       */
+      readonly kind: 'openingHandAction';
+      readonly player: PlayerId;
+      readonly cards: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** CR 201.4: free text, not an enumeration of hidden or format card names. */
+      readonly kind: 'cardName';
+      readonly player: PlayerId;
+      /** Earlier APNAP choices, public to players choosing later (CR 101.4b). */
+      readonly chosen: readonly { readonly player: PlayerId; readonly name: string }[];
+      readonly input: {
+        readonly kind: 'text';
+        readonly label: 'Card name';
+        readonly minLength: 1;
+        readonly maxLength: typeof MAX_CARD_NAME_LENGTH;
+      };
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** Remaining canonical matches from a resolving named three-zone search. */
+      readonly kind: 'namedZoneExile';
+      readonly player: PlayerId;
+      readonly targetPlayer: PlayerId;
+      readonly name: string;
+      readonly cards: readonly ObjectId[];
+      readonly chosen: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
       /** CR 701.18: every ordered partition of the visible top window. */
       readonly kind: 'scry';
+      readonly player: PlayerId;
+      readonly cards: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      readonly kind: 'topLibraryOrder';
+      readonly player: PlayerId;
+      readonly cards: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      readonly kind: 'topLibrarySelect';
+      readonly player: PlayerId;
+      readonly cards: readonly ObjectId[];
+      readonly eligible: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      readonly kind: 'topLibraryPartition';
+      readonly player: PlayerId;
+      readonly cards: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      readonly kind: 'topLibraryPile';
+      readonly player: PlayerId;
+      readonly piles: readonly [readonly ObjectId[], readonly ObjectId[]];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** Every found card that may be assigned to the destination plan's `one` arm. */
+      readonly kind: 'searchDestination';
       readonly player: PlayerId;
       readonly cards: readonly ObjectId[];
       readonly options: readonly Action[];
@@ -144,14 +420,32 @@ export type Decision =
       readonly complete: true;
     }
   | {
+      /** Mandatory current controlled-permanent choice; no decline arm. */
+      readonly kind: 'battlefieldChoice';
+      readonly player: PlayerId;
+      readonly permanents: readonly ObjectId[];
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** CR 701.30's mandatory, non-targeting controlled creature-token choice. */
+      readonly kind: 'populate';
+      readonly player: PlayerId;
+      readonly tokens: readonly ObjectId[];
+      readonly options: readonly (
+        Extract<Action, { type: 'choosePopulateToken' }> | Extract<Action, { type: 'concede' }>
+      )[];
+      readonly complete: true;
+    }
+  | {
       /**
-       * CR 701.17a: which of the target player's own creatures a resolving
-       * `sacrificePermanent` takes.
+       * CR 701.17a: which of the affected player's own filtered permanents a
+       * resolving `sacrificePermanent` takes.
        *
        * The graveyard choice above with the zone swapped for the battlefield —
        * same public-zone reasoning, same "not stripped from the other seat's
        * projection" consequence — and `legendRuleDecision`'s shape otherwise:
-       * one option per candidate creature and no "take none" arm, because CR
+       * one option per filtered candidate and no "take none" arm, because CR
        * 701.17a is mandatory whenever `permanents` is non-empty (an empty list
        * never reaches here at all; `applyResolutionEffects` resolves that case
        * without pausing).
@@ -162,12 +456,22 @@ export type Decision =
        * different enough objects that reusing the name would read as a copy-
        * paste rather than a deliberate reuse of the shape.
        *
-       * `complete` is always `true`: one option per creature the target
-       * controls, linear in the board, nothing to truncate.
+       * `complete` is always `true`: one option per currently eligible
+       * permanent, linear in the board, nothing to truncate.
        */
       readonly kind: 'permanentSacrifice';
       readonly player: PlayerId;
       readonly permanents: readonly ObjectId[];
+      readonly remaining: number;
+      readonly options: readonly Action[];
+      readonly complete: true;
+    }
+  | {
+      /** A canonical prefix choice for a non-targeted group untap. */
+      readonly kind: 'permanentUntap';
+      readonly player: PlayerId;
+      readonly permanents: readonly ObjectId[];
+      readonly remaining: number;
       readonly options: readonly Action[];
       readonly complete: true;
     }
@@ -196,6 +500,14 @@ export type Decision =
       readonly player: PlayerId;
       readonly options: readonly Action[];
       readonly complete: boolean;
+    }
+  | {
+      /** A resolving stack object is choosing one of its printed mana colors. */
+      readonly kind: 'manaColor';
+      readonly player: PlayerId;
+      readonly colors: readonly ManaColor[];
+      readonly options: readonly Action[];
+      readonly complete: true;
     }
   | {
       readonly kind: 'declareAttackers';
@@ -235,6 +547,13 @@ export type Decision =
       readonly kind: 'orderBlockers';
       readonly player: PlayerId;
       readonly blocks: readonly Block[];
+      readonly options: readonly Action[];
+      readonly complete: boolean;
+    }
+  | {
+      readonly kind: 'orderAttackers';
+      readonly player: PlayerId;
+      readonly blocks: readonly AttackerOrder[];
       readonly options: readonly Action[];
       readonly complete: boolean;
     }
@@ -296,14 +615,18 @@ export type Decision =
       readonly options: readonly Action[];
       readonly complete: boolean;
     }
+  | PluralTargetsDecision
+  | DamageAllocationDecision
   | {
       /**
-       * CR 603.3b: take an optional trigger, or decline it, as it resolves.
+       * Answer a triggered ability's yes/no choice as it resolves.
        *
        * `targets` is what the ability was aimed at when it went on the stack,
        * which is the half of the question the options themselves cannot show:
        * the two options are "yes" and "no", and what is being said yes to is the
-       * printed line pointed at these.
+       * printed line pointed at these. Most uses are CR 603.3b optional
+       * triggers; Faerie Impostor reuses the shape for its optional return
+       * cost, whose declined branch sacrifices the source.
        */
       readonly kind: 'optionalTrigger';
       readonly player: PlayerId;
@@ -394,9 +717,59 @@ function atSorcerySpeed(state: GameState, player: PlayerId): boolean {
   );
 }
 
-function canCastNow(state: GameState, player: PlayerId, card: Card): boolean {
-  if (card.kind === 'instant') return true;
-  return atSorcerySpeed(state, player);
+function castingRuleBlocks(state: GameState, player: PlayerId): boolean {
+  return state.turnPlayerRules.some((rule) => rule.rule === 'cantCastSpells' && rule.player === player);
+}
+
+function castPermissionError(state: GameState, player: PlayerId): string | undefined {
+  if (castingRuleBlocks(state, player)) return "you can't cast spells this turn";
+  if (staticPlayerRuleApplies(state, player, 'cantCastSpellsIfAttackedWithCreatureThisTurn')) {
+    return "you can't cast spells after attacking with a creature this turn";
+  }
+  return undefined;
+}
+
+function cardCastingRestrictionError(
+  state: GameState,
+  player: PlayerId,
+  card: CastableCard,
+): string | undefined {
+  if (
+    card.kind === 'creature' &&
+    card.opponentsLifeLostThisTurnCasting === true &&
+    lifeLostByOpponentsThisTurn(state, player) === 0
+  ) {
+    return renderOpponentLifeLossCastingRestriction(card.name);
+  }
+  const restriction = card.castingRestriction;
+  if (restriction === undefined) return undefined;
+  switch (restriction.kind) {
+    case 'prohibitedPlayerTurns':
+      return state.turn.active === player && restriction.turns.includes(playerOf(state, player).turnsBegun)
+        ? renderCastingRestriction(restriction, card.name)
+        : undefined;
+  }
+}
+
+function castTimingError(
+  state: GameState,
+  player: PlayerId,
+  oid: ObjectId,
+  card: CastableCard,
+): string | undefined {
+  const permission = castPermissionError(state, player);
+  if (permission !== undefined) return permission;
+  const restriction = cardCastingRestrictionError(state, player, card);
+  if (restriction !== undefined) return restriction;
+  if (
+    card.kind === 'instant' ||
+    card.keywordAbilities?.some((ability) => ability.kind === 'flash') === true ||
+    atSorcerySpeed(state, player) ||
+    flashCastingPermissionApplies(state, player, oid)
+  ) {
+    return undefined;
+  }
+  return 'wrong timing for this card type';
 }
 
 /**
@@ -464,7 +837,11 @@ function buildCastAction(
   targets: readonly (Target | null)[],
   x: number | undefined,
   mode: number | undefined,
-  multiTargets: Readonly<Record<number, readonly ObjectId[]>> | undefined,
+  multiTargets: Readonly<Record<number, readonly Target[]>> | undefined,
+  damageAllocations: DamageAllocations | undefined,
+  castingCost: CastingCostChoice | undefined,
+  sacrifices: readonly ObjectId[] | undefined,
+  discards: readonly ObjectId[] | undefined,
 ): Action {
   return {
     type: 'castSpell',
@@ -474,115 +851,391 @@ function buildCastAction(
     ...(x !== undefined ? { x } : {}),
     ...(mode !== undefined ? { mode } : {}),
     ...(multiTargets !== undefined ? { multiTargets } : {}),
+    ...(damageAllocations !== undefined ? { damageAllocations } : {}),
+    ...(castingCost !== undefined ? { castingCost } : {}),
+    ...(sacrifices !== undefined ? { sacrifices } : {}),
+    ...(discards !== undefined ? { discards } : {}),
   };
 }
 
-/**
- * The `Action.multiTargets` maps worth offering for one effect list, one per
- * combination of member choices across every `TargetSpec.count` slot the
- * list carries ("up to two target creatures", `mtg-kg44`) — the single
- * `undefined` slot for a list with no counted slot, so `castOptions` can
- * cross this against its ordinary `Target | null` combinations the same way
- * `xOptionsFor` and `modeOptionsFor` let it cross X and mode without
- * branching on whether the card has either.
- *
- * `targetChoicesForEffects` deliberately answers a counted slot's own
- * `Target | null` question with `[null]` regardless of the board (its own
- * docblock explains why); this is the function that answers the different
- * question of what the side-channel choice may hold, using
- * `countedSlotCandidates`' individually-legal creature list and
- * `subsetsUpToSize` for "0 through count members, smallest first" the same
- * way any other bounded enumeration in this file is built.
- */
-function multiTargetsOptionsFor(
-  state: GameState,
-  effects: readonly Effect[],
-  controller: PlayerId,
-  cap: number,
-  source?: ObjectId,
-): Enumerated<Readonly<Record<number, readonly ObjectId[]>> | undefined> {
-  const counted = effects
-    .map((effect, index) => ({ effect, index }))
-    .filter((entry): entry is { effect: Effect; index: number } => {
-      const { effect } = entry;
-      return hasTarget(effect) && targetCountOf(effect.target) !== null;
-    });
-  if (counted.length === 0) return { items: [undefined], complete: true };
-  let combos: Readonly<Record<number, readonly ObjectId[]>>[] = [{}];
-  let complete = true;
-  for (const { effect, index } of counted) {
-    if (!hasTarget(effect)) continue;
-    const count = targetCountOf(effect.target);
-    if (count === null) continue;
-    const candidates = countedSlotCandidates(state, effect, controller, source);
-    const memberOptions = subsetsUpToSize(candidates, count, cap);
-    if (!memberOptions.complete) complete = false;
-    const grown: Readonly<Record<number, readonly ObjectId[]>>[] = [];
-    for (const prefix of combos) {
-      for (const chosen of memberOptions.items) {
-        if (grown.length >= cap) {
-          complete = false;
-          break;
-        }
-        grown.push({ ...prefix, [index]: chosen });
-      }
-      if (grown.length >= cap) break;
-    }
-    combos = grown;
-    if (!complete) break;
+/** The filtered permanent payment belonging to the selected casting price. */
+function spellSacrificeRequirement(card: CastableCard, castingCost: CastingCostChoice) {
+  if (castingCost === 'alternative') return card.alternativeCost?.sacrificeMatching;
+  if (card.kind !== 'instant' && card.kind !== 'sorcery') return undefined;
+  const cost = card.additionalCost;
+  return cost !== undefined && 'sacrificeMatching' in cost ? cost.sacrificeMatching : undefined;
+}
+
+/** The hand-card payment belonging to the selected casting price. */
+function spellDiscardRequirement(card: CastableCard, castingCost: CastingCostChoice): number | undefined {
+  if (castingCost === 'alternative' || (card.kind !== 'instant' && card.kind !== 'sorcery')) {
+    return undefined;
   }
-  return { items: combos, complete };
+  const cost = card.additionalCost;
+  return cost !== undefined && 'discard' in cost ? cost.discard : undefined;
+}
+
+function buildBeginCastAction(
+  player: PlayerId,
+  oid: ObjectId,
+  targets: readonly (Target | null)[],
+  x: number | undefined,
+  mode: number | undefined,
+  castingCost: CastingCostChoice | undefined,
+  sacrifices: readonly ObjectId[] | undefined,
+  discards: readonly ObjectId[] | undefined,
+): Action {
+  return {
+    type: 'beginCastSpell',
+    player,
+    oid,
+    targets,
+    ...(x !== undefined ? { x } : {}),
+    ...(mode !== undefined ? { mode } : {}),
+    ...(castingCost !== undefined ? { castingCost } : {}),
+    ...(sacrifices !== undefined ? { sacrifices } : {}),
+    ...(discards !== undefined ? { discards } : {}),
+  };
+}
+
+/** Every permanent set that can pay this spell's additional sacrifice. */
+function spellSacrificePayments(
+  state: GameState,
+  player: PlayerId,
+  card: CastableCard,
+  castingCost: CastingCostChoice,
+  cap: number,
+): Enumerated<readonly ObjectId[]> {
+  const payment = spellSacrificeRequirement(card, castingCost);
+  if (payment === undefined) return { items: [[]], complete: true };
+  const candidates = state.battlefield.filter(
+    (oid) => controllerOf(state, oid) === player && satisfiesTargetFilter(state, oid, payment.filter),
+  );
+  return combinations(candidates, payment.count, cap);
+}
+
+/** Every hand-card set that can pay this spell's additional discard. */
+function spellDiscardPayments(
+  state: GameState,
+  player: PlayerId,
+  oid: ObjectId,
+  card: CastableCard,
+  castingCost: CastingCostChoice,
+  cap: number,
+): Enumerated<readonly ObjectId[]> {
+  const count = spellDiscardRequirement(card, castingCost);
+  if (count === undefined) return { items: [[]], complete: true };
+  const candidates = playerOf(state, player).hand.filter((candidate) => candidate !== oid);
+  return combinations(candidates, count, cap);
+}
+
+/** Validates the chosen objects against the same spell-payment predicate. */
+function validateSpellSacrifices(
+  state: GameState,
+  player: PlayerId,
+  card: CastableCard,
+  castingCost: CastingCostChoice,
+  offered: readonly ObjectId[],
+): string | null {
+  const payment = spellSacrificeRequirement(card, castingCost);
+  const wanted = payment?.count ?? 0;
+  if (offered.length !== wanted) {
+    return payment === undefined
+      ? `this spell sacrifices nothing, and ${String(offered.length)} was offered`
+      : `the additional cost sacrifices ${String(wanted)} matching permanents, and ${String(offered.length)} was offered`;
+  }
+  if (payment === undefined) return null;
+  const eligible = new Set(
+    state.battlefield.filter(
+      (oid) => controllerOf(state, oid) === player && satisfiesTargetFilter(state, oid, payment.filter),
+    ),
+  );
+  const seen = new Set<ObjectId>();
+  for (const oid of offered) {
+    if (seen.has(oid)) return `${oid} was offered twice`;
+    seen.add(oid);
+    if (!eligible.has(oid)) {
+      return `${oid} does not match a permanent you control permitted by this additional cost`;
+    }
+  }
+  return null;
+}
+
+/** Validates the chosen hand cards against the same spell-payment predicate. */
+function validateSpellDiscards(
+  state: GameState,
+  player: PlayerId,
+  spellOid: ObjectId,
+  card: CastableCard,
+  castingCost: CastingCostChoice,
+  offered: readonly ObjectId[],
+): string | null {
+  const wanted = spellDiscardRequirement(card, castingCost) ?? 0;
+  if (offered.length !== wanted) {
+    return wanted === 0
+      ? `this spell discards nothing, and ${String(offered.length)} was offered`
+      : `the additional cost discards ${String(wanted)} card, and ${String(offered.length)} was offered`;
+  }
+  if (wanted === 0) return null;
+  const eligible = new Set(playerOf(state, player).hand.filter((oid) => oid !== spellOid));
+  const seen = new Set<ObjectId>();
+  for (const oid of offered) {
+    if (seen.has(oid)) return `${oid} was offered twice`;
+    seen.add(oid);
+    if (!eligible.has(oid)) return `${oid} is not another card in your hand`;
+  }
+  return null;
+}
+
+/** Explicit choices only on cards that actually print an alternative. */
+function castingCostChoicesFor(card: CastableCard): readonly CastingCostChoice[] {
+  return card.alternativeCost === undefined ? ['mana'] : ['mana', 'alternative'];
+}
+
+function payableCastingCosts(
+  state: GameState,
+  player: PlayerId,
+  card: CastableCard,
+  x: number | undefined,
+  targetCount: number,
+): readonly CastingCostChoice[] {
+  return castingCostChoicesFor(card).filter((castingCost) => {
+    if (
+      castingCost === 'alternative' &&
+      (card.alternativeCost === undefined || playerOf(state, player).life < card.alternativeCost.payLife)
+    ) {
+      return false;
+    }
+    return canPay(state, player, selectedCastingManaCost(state, player, card, x, castingCost, targetCount));
+  });
+}
+
+function castActionsForMode(
+  state: GameState,
+  player: PlayerId,
+  oid: ObjectId,
+  card: CastableCard,
+  x: number | undefined,
+  mode: number | undefined,
+  effects: readonly Effect[],
+  cap: number,
+  castingCostOverride?: readonly CastingCostChoice[],
+): Enumerated<Action> {
+  const choices = isAuraCard(card)
+    ? targetChoicesFor(state, card, player, oid)
+    : targetChoicesForEffects(state, effects, player, oid);
+  if (!everySlotHasAChoice(choices)) return { items: [], complete: true };
+  const targetOptions = cartesian(choices, cap);
+  const items: Action[] = [];
+  let complete = targetOptions.complete;
+  for (const targets of targetOptions.items) {
+    if (!honoursDistinctSlots(effects, targets)) continue;
+    const minimum = hasPluralTargets(effects) ? minimumPluralChoice(state, effects, player, oid) : null;
+    if (hasPluralTargets(effects) && minimum === null) continue;
+    const targetCount = countTargetInstances(targets, minimum?.multiTargets);
+    const castingCosts = castingCostOverride ?? [
+      ...payableCastingCosts(state, player, card, x, targetCount),
+      ...(freeCastFromHandPermissionApplies(state, player) && (x === undefined || x === 0)
+        ? (['withoutMana'] as const)
+        : []),
+    ];
+    for (const castingCost of castingCosts) {
+      const sacrificePayments = spellSacrificePayments(state, player, card, castingCost, cap - items.length);
+      if (!sacrificePayments.complete) complete = false;
+      const discardPayments = spellDiscardPayments(state, player, oid, card, castingCost, cap - items.length);
+      if (!discardPayments.complete) complete = false;
+      const namesSacrifice = spellSacrificeRequirement(card, castingCost) !== undefined;
+      for (const sacrifices of sacrificePayments.items) {
+        for (const discards of discardPayments.items) {
+          const namedCastingCost =
+            castingCost === 'withoutMana' ||
+            card.alternativeCost !== undefined ||
+            ((card.kind === 'instant' || card.kind === 'sorcery') && card.overload !== undefined)
+              ? castingCost
+              : undefined;
+          const namedSacrifices = namesSacrifice ? sacrifices : undefined;
+          const namedDiscards =
+            spellDiscardRequirement(card, castingCost) === undefined ? undefined : discards;
+          if (minimum !== null) {
+            if (
+              validateCast(
+                state,
+                player,
+                oid,
+                targets,
+                x,
+                mode,
+                minimum.multiTargets,
+                minimum.damageAllocations,
+                namedCastingCost,
+                sacrifices,
+                discards,
+              ) !== null
+            ) {
+              continue;
+            }
+            items.push(
+              buildBeginCastAction(
+                player,
+                oid,
+                targets,
+                x,
+                mode,
+                namedCastingCost,
+                namedSacrifices,
+                namedDiscards,
+              ),
+            );
+          } else {
+            items.push(
+              buildCastAction(
+                player,
+                oid,
+                targets,
+                x,
+                mode,
+                undefined,
+                undefined,
+                namedCastingCost,
+                namedSacrifices,
+                namedDiscards,
+              ),
+            );
+          }
+          if (items.length >= cap) return { items, complete: false };
+        }
+      }
+    }
+  }
+  return { items, complete };
+}
+
+function castOptionsForCard(
+  state: GameState,
+  player: PlayerId,
+  oid: ObjectId,
+  card: CastableCard,
+  cap: number,
+): Enumerated<Action> {
+  if (castTimingError(state, player, oid, card) !== undefined) return { items: [], complete: true };
+  const payableXOptions = xOptionsFor(state, player, card, cap);
+  const xOptions =
+    card.manaCost.hasX &&
+    payableXOptions.values.length === 0 &&
+    freeCastFromHandPermissionApplies(state, player)
+      ? { values: [0] as const, complete: true }
+      : payableXOptions;
+  const items: Action[] = [];
+  let complete = xOptions.complete;
+  for (const x of xOptions.values) {
+    for (const mode of modeOptionsFor(card)) {
+      const effects = spellEffectsFor(card, mode ?? null, 'ordinary');
+      const actions = castActionsForMode(state, player, oid, card, x, mode, effects, cap - items.length);
+      items.push(...actions.items);
+      if (!actions.complete) complete = false;
+      if (items.length >= cap) return { items, complete: false };
+    }
+  }
+  if ((card.kind === 'instant' || card.kind === 'sorcery') && card.overload !== undefined) {
+    const variable = card.overload.cost.hasX;
+    const ceiling = Math.min(MAX_CHOSEN_X, availableMana(state, player));
+    const overloadX: readonly (number | undefined)[] = variable
+      ? Array.from({ length: ceiling + 1 }, (_, index) => index)
+      : [undefined];
+    const effects = spellEffectsFor(card, null, 'overload');
+    const targets = effects.map(() => null);
+    for (const x of overloadX) {
+      const action = buildCastAction(
+        player,
+        oid,
+        targets,
+        x,
+        undefined,
+        undefined,
+        undefined,
+        'overload',
+        undefined,
+        undefined,
+      );
+      if (
+        validateCast(state, player, oid, targets, x, undefined, undefined, undefined, 'overload') === null
+      ) {
+        items.push(action);
+      }
+      if (items.length >= cap) return { items, complete: false };
+    }
+  }
+  return { items, complete };
+}
+
+/**
+ * Complete declarations for one effect-instructed cast without its mana cost.
+ * Timing and mana availability are deliberately absent; targets, modes and
+ * mandatory additional sacrifices use the ordinary cast enumerators.
+ */
+export function freeCastOptionsForCard(
+  state: GameState,
+  player: PlayerId,
+  oid: ObjectId,
+  card: CastableCard,
+  cap: number,
+): Enumerated<Action> {
+  if (cap <= 0) return { items: [], complete: false };
+  if (castPermissionError(state, player) !== undefined) return { items: [], complete: true };
+  if (cardCastingRestrictionError(state, player, card) !== undefined) return { items: [], complete: true };
+  const x = card.manaCost.hasX ? 0 : undefined;
+  const items: Action[] = [];
+  let complete = true;
+  for (const mode of modeOptionsFor(card)) {
+    const effects = spellEffectsFor(card, mode ?? null, 'ordinary');
+    const actions = castActionsForMode(state, player, oid, card, x, mode, effects, cap - items.length, [
+      'withoutMana',
+    ]);
+    items.push(...actions.items);
+    if (!actions.complete) complete = false;
+    if (items.length >= cap) return { items, complete: false };
+  }
+  return { items, complete };
+}
+
+/** Resolves one currently valid candidate from an interrupted free-cast instruction. */
+export function pendingFreeCastCandidate(
+  state: GameState,
+  pending: PendingFreeCast,
+  oid: ObjectId,
+): { readonly card: CastableCard; readonly copy: PendingCardCopyCast | null } | null {
+  const object = tryObject(state, oid);
+  const copy = pending.copyCandidates?.find((candidate) => candidate.oid === oid);
+  if (copy !== undefined) {
+    const incarnation = object?.incarnation ?? 0;
+    return object?.zone === 'exile' && incarnation === copy.incarnation ? { card: copy.card, copy } : null;
+  }
+  const original = pending.originalCandidates?.find((candidate) => candidate.oid === oid);
+  if (original !== undefined) {
+    const incarnation = object?.incarnation ?? 0;
+    return object?.zone === 'exile' && incarnation === original.incarnation
+      ? { card: original.card, copy: null }
+      : null;
+  }
+  if (pending.oid !== oid || object?.zone !== pending.from) return null;
+  const card = pending.card ?? object.card;
+  return isCastable(card) ? { card, copy: null } : null;
 }
 
 function castOptions(state: GameState, player: PlayerId, cap: number): Enumerated<Action> {
-  const hand = playerOf(state, player).hand;
-  const options: Action[] = [];
+  if (cap < 0) return { items: [], complete: false };
+  const limit = cap + 1;
+  const items: Action[] = [];
   let complete = true;
-  for (const oid of hand) {
+  for (const oid of playerOf(state, player).hand) {
     const card = getObject(state, oid).card;
     if (!isCastable(card)) continue;
-    if (!canCastNow(state, player, card)) continue;
-    const xOptions = xOptionsFor(state, player, card, cap);
-    if (!xOptions.complete) complete = false;
-    for (const x of xOptions.values) {
-      if (!canPay(state, player, effectiveManaCost(state, player, card, x))) continue;
-      for (const mode of modeOptionsFor(card)) {
-        const effects = effectsFor(card, mode ?? null);
-        // An Aura carries its restriction on `card.aura.enchant` and prints no
-        // effect, so an effects-only enumeration hands it an empty slot list,
-        // offers it with no target, and `validateCast` then refuses every cast
-        // it produced — the card is uncastable while the enumeration reports it
-        // castable. `validateCast` reads `isAuraCard` before it reads the effect
-        // list; this reads it in the same order, so the two agree about what a
-        // legal cast of this card is.
-        //
-        // The casting object goes through as the protection source in both arms
-        // (CR 702.16b): a shrouded or protected permanent is not a choice the
-        // enumeration may offer, and dropping the argument makes it one.
-        const choices = isAuraCard(card)
-          ? targetChoicesFor(state, card, player, oid)
-          : targetChoicesForEffects(state, effects, player, oid);
-        if (!everySlotHasAChoice(choices)) continue;
-        const combos = cartesian(choices, cap);
-        if (!combos.complete) complete = false;
-        const multiTargetsOptions = isAuraCard(card)
-          ? { items: [undefined], complete: true }
-          : multiTargetsOptionsFor(state, effects, player, cap, oid);
-        if (!multiTargetsOptions.complete) complete = false;
-        for (const targets of combos.items) {
-          // A tuple dropped for aiming two `distinct` slots at one target is a
-          // tuple the card never offered, not one the cap cut off, so `complete`
-          // stays whatever the enumeration said. Reporting truncation here would
-          // tell the sweep the kernel ran out of room when it did not.
-          if (!honoursDistinctSlots(effects, targets)) continue;
-          for (const multiTargets of multiTargetsOptions.items) {
-            options.push(buildCastAction(player, oid, targets, x, mode, multiTargets));
-          }
-        }
-      }
-    }
+    const options = castOptionsForCard(state, player, oid, card, limit - items.length);
+    items.push(...options.items);
+    if (!options.complete) complete = false;
+    if (items.length > cap) return { items: items.slice(0, cap), complete: false };
   }
-  return { items: options, complete };
+  return { items, complete };
 }
 
 /**
@@ -602,20 +1255,21 @@ function castOptions(state: GameState, player: PlayerId, cap: number): Enumerate
  * read through `controllerOf` rather than `GameObject.controller`, so a
  * control-change effect moves the ability with the permanent.
  *
- * `cost.sacrificeSelf` adds no condition of its own, and that is a finding
- * rather than an omission. CR 701.17a lets a player sacrifice any permanent
- * they control, with no further restriction, so "the sacrifice is available" is
- * exactly "the source is a permanent this player controls" — which the first
- * two lines below already require of every activation. A separate check here
- * would be a branch nothing can enter. What the two lines gain is weight: they
- * are now the reason a sacrifice ability can be paid for exactly once, since
- * the source is in the graveyard the moment the cost is paid and neither
- * `controlledBy` nor this guard will see it again.
+ * `cost.sacrificeSelf` and `cost.exileSelf` add no condition of their own, and
+ * that is a finding rather than an omission. CR 701.17a lets a player sacrifice
+ * any permanent they control, with no further restriction, and CR 701.11a can
+ * move the same controlled battlefield source to exile. In either case, "the
+ * source-leaving payment is available" is exactly "the source is a permanent
+ * this player controls" — which the first two lines below already require of
+ * every activation. A separate check here would be a branch nothing can enter.
+ * What the two lines gain is weight: they are now the reason either ability can
+ * be paid for exactly once, since the source has left the battlefield when the
+ * cost is paid and neither `controlledBy` nor this guard will see it again.
  *
  * CR 302.6 is deliberately *not* extended to it. Summoning sickness restricts
  * `{T}` and `{Q}` and nothing else, so a creature that arrived this turn may
- * sacrifice itself for its own ability; hoisting that check out of the tap
- * branch would refuse a legal activation.
+ * sacrifice or exile itself for its own ability; hoisting that check out of the
+ * tap branch would refuse a legal activation.
  *
  * `cost.sacrificeOther` is the one part of a cost that can be unpayable for a
  * reason the board states rather than the source does, so it is the one that
@@ -624,26 +1278,91 @@ function castOptions(state: GameState, player: PlayerId, cap: number): Enumerate
  * by looking at what the agent offered, because this guard runs before there is
  * an offer — `validateSacrifices` checks the offer itself.
  *
- * An equip ability is the one exception, and it adds the two conditions CR
- * 702.6b writes into the keyword itself rather than into this card: it is
- * activated only as a sorcery, and CR 301.5e forbids an Equipment that is also
- * a creature from equipping one. Both are special-cased to equip rather than
- * generalized into a timing field on every activated ability, because CR 602.2
- * still leaves every other v1 ability instant-speed and a restriction field
- * nothing else sets is a field every renderer, the Forge transpiler and the
- * generator's prompt would have to learn to express one keyword. The day a
- * second sorcery-speed ability arrives, `atSorcerySpeed` is already named and
- * the field is one line.
+ * A printed `activateOnlyAsSorcery` declaration shares the same predicate as
+ * equip and loyalty abilities. It lives on the full engine ability only, so
+ * adding scavenge does not teach the set generator a new timing lever.
  */
+function canonicalCardName(name: string): string {
+  return name.trim().normalize('NFKC').toLowerCase();
+}
+
+/** Whether a live retained-name rule prohibits this particular non-mana ability. */
+function chosenNameActivationIsProhibited(
+  state: GameState,
+  oid: ObjectId,
+  ability: ActivatedAbility,
+): boolean {
+  if (isManaAbility(ability)) return false;
+  const subjectName = canonicalCardName(nameOf(state, oid));
+  return state.battlefield.some((sourceOid) => {
+    const chosen = state.objects[sourceOid]?.chosenCardName;
+    if (chosen === undefined || canonicalCardName(chosen) !== subjectName) return false;
+    return abilitiesOf(state, sourceOid).some(
+      (candidate) =>
+        candidate.kind === 'staticActivationRule' &&
+        candidate.rule === 'chosenNameNonManaAbilitiesCantActivate',
+    );
+  });
+}
+
+function activationProhibitionReason(
+  state: GameState,
+  oid: ObjectId,
+  ability?: ActivatedAbility,
+): string | null {
+  if (isDetained(state, oid)) {
+    return "this permanent is detained and its activated abilities can't be activated";
+  }
+  if (activatedAbilitiesProhibited(state, oid)) {
+    return "this permanent's activated abilities can't be activated";
+  }
+  return ability !== undefined && chosenNameActivationIsProhibited(state, oid, ability)
+    ? "a source with the chosen name can't activate non-mana abilities"
+    : null;
+}
+
+/** Stack objects that can pay the closed Nivmagus activation cost right now. */
+function controlledInstantOrSorcerySpells(state: GameState, player: PlayerId): readonly ObjectId[] {
+  return state.stack
+    .filter((entry) => {
+      if (entry.controller !== player) return false;
+      const card = spellCard(state, entry);
+      return card?.kind === 'instant' || card?.kind === 'sorcery';
+    })
+    .map((entry) => entry.oid);
+}
+
 function activationBlocker(
   state: GameState,
   player: PlayerId,
   oid: ObjectId,
   ability: ActivatedAbility,
+  abilityIndex?: number,
 ): string | null {
   const object = tryObject(state, oid);
-  if (object === undefined || object.zone !== 'battlefield') return 'source is not on the battlefield';
-  if (controllerOf(state, oid) !== player) return 'you do not control that source';
+  if (ability.activationZone === 'graveyard') {
+    if (object === undefined || object.zone !== 'graveyard' || object.owner !== player) {
+      return 'source is not in your graveyard';
+    }
+  } else {
+    if (object === undefined || object.zone !== 'battlefield') return 'source is not on the battlefield';
+    if (controllerOf(state, oid) !== player) return 'you do not control that source';
+    const prohibited = activationProhibitionReason(state, oid, ability);
+    if (prohibited !== null) return prohibited;
+  }
+  if (ability.activateOnlyWhileAttacking === true && !isAttacking(state, oid)) {
+    return 'this ability can be activated only while its source is attacking';
+  }
+  if (ability.activateOnlyAsSorcery === true && !atSorcerySpeed(state, player)) {
+    return 'this ability can be activated only as a sorcery';
+  }
+  if (
+    ability.activateOnlyOnceEachTurn === true &&
+    abilityIndex !== undefined &&
+    object.activationLimitedTurns?.[abilityIndex] === state.turn.number
+  ) {
+    return 'this ability has already been activated this turn';
+  }
   if (isAttachingAbility(ability)) {
     if (isCreatureObject(state, oid)) return 'an Equipment that is a creature cannot equip a creature';
     if (!atSorcerySpeed(state, player)) return 'equip is activated only as a sorcery';
@@ -655,8 +1374,19 @@ function activationBlocker(
       return 'this permanent has already activated a loyalty ability this turn';
     }
     const loyalty = counterCount(object.counters, 'loyalty');
-    if (ability.loyaltyCost < 0 && loyalty + ability.loyaltyCost < 0) {
+    if (
+      !isVariableLoyaltyCost(ability.loyaltyCost) &&
+      ability.loyaltyCost < 0 &&
+      loyalty + ability.loyaltyCost < 0
+    ) {
       return `the loyalty cost removes ${String(-ability.loyaltyCost)} counters and this permanent has ${String(loyalty)}`;
+    }
+  }
+  const removedCounter = ability.cost.removeCounter;
+  if (removedCounter !== undefined) {
+    const available = counterCount(object.counters, removedCounter.counter);
+    if (available < removedCounter.count) {
+      return `the cost removes ${String(removedCounter.count)} ${removedCounter.counter} counter and this permanent has ${String(available)}`;
     }
   }
   if (ability.cost.tapSelf) {
@@ -670,11 +1400,35 @@ function activationBlocker(
       return 'that creature has not been under your control since your turn began';
     }
   }
-  const sacrifice = ability.cost.sacrificeOther;
+  if (ability.cost.payLife !== undefined && playerOf(state, player).life < ability.cost.payLife) {
+    return `you cannot pay ${String(ability.cost.payLife)} life`;
+  }
+  if (
+    ability.cost.exileControlledInstantOrSorcerySpell === true &&
+    controlledInstantOrSorcerySpells(state, player).length === 0
+  ) {
+    return 'the cost needs an instant or sorcery spell you control on the stack';
+  }
+  const sacrifice = sacrificeCostOf(ability);
   if (sacrifice !== undefined) {
-    const available = sacrificeCandidates(state, player, oid, sacrifice.subtype).length;
-    if (available < sacrifice.count) {
-      return `you control ${available} ${sacrifice.subtype} permanents and the cost sacrifices ${sacrifice.count}`;
+    if (sacrifice.kind === 'landSubtypePair') {
+      if (sacrificePayments(state, player, oid, ability, 1).items.length === 0) {
+        return `the cost needs one ${sacrifice.subtypes[0]} and one ${sacrifice.subtypes[1]} permanent you control`;
+      }
+    } else {
+      const available = sacrificeCandidates(state, player, oid, ability).length;
+      if (available < sacrifice.count) {
+        return sacrifice.kind === 'other'
+          ? `you control ${available} ${sacrifice.subtype} permanents and the cost sacrifices ${sacrifice.count}`
+          : `you control ${available} matching permanents and the cost sacrifices ${sacrifice.count}`;
+      }
+    }
+  }
+  const tapMatching = ability.cost.tapMatching;
+  if (tapMatching !== undefined) {
+    const available = tapMatchingCandidates(state, player, oid, ability).length;
+    if (available < tapMatching.count) {
+      return `you control ${available} untapped matching permanents and the cost taps ${tapMatching.count}`;
     }
   }
   // CR 601.2h: a cost is paid in full or the activation is rewound, and CR
@@ -683,8 +1437,20 @@ function activationBlocker(
   // two discards differ in arithmetic, and reading the effect's clamp here
   // would let a player activate for free with an empty hand.
   const discard = ability.cost.discard;
-  if (discard !== undefined && playerOf(state, player).hand.length < discard) {
-    return `the cost discards ${String(discard)} and you hold ${String(playerOf(state, player).hand.length)}`;
+  const discardMatching = ability.cost.discardMatching;
+  if (discard !== undefined || discardMatching !== undefined) {
+    const eligible = discardCandidates(state, player, ability);
+    const wanted = discard ?? discardMatching?.count ?? 0;
+    const hasPayment =
+      discardMatching === undefined || discardPayments(state, player, ability, 1).items.length > 0;
+    if (eligible.length < wanted || !hasPayment) {
+      if (discardMatching !== undefined) {
+        return 'the cost discards two nonland cards with the same name and you hold no eligible pair';
+      }
+      return ability.cost.discardFilter === undefined
+        ? `the cost discards ${String(wanted)} and you hold ${String(eligible.length)}`
+        : `the cost discards ${String(wanted)} matching cards and you hold ${String(eligible.length)} eligible cards`;
+    }
   }
   // An `{X}` in the cost is priced at zero here, and that is the whole question
   // this function asks: X = 0 is always announceable (CR 107.3f puts no floor on
@@ -700,7 +1466,7 @@ function activationBlocker(
 }
 
 /**
- * The permanents a `sacrificeOther` cost could eat right now.
+ * The permanents a chosen sacrifice cost could eat right now.
  *
  * CR 701.17a: a player may sacrifice a permanent they control, and nothing
  * else. The subtype is read through `hasSubtype`, which is layer-aware, so a
@@ -710,15 +1476,105 @@ function activationBlocker(
  * and letting a Chest count itself as a Key would let a one-Key cost be paid
  * with no Key at all.
  */
+type SacrificeCost =
+  | {
+      readonly kind: 'other';
+      readonly count: number;
+      readonly subtype: string;
+    }
+  | {
+      readonly kind: 'matching';
+      readonly count: number;
+      readonly filter: NonNullable<ActivatedAbility['cost']['sacrificeMatching']>['filter'];
+      readonly excludeSource?: true;
+    }
+  | {
+      readonly kind: 'landSubtypePair';
+      readonly count: 2;
+      readonly subtypes: readonly [string, string];
+    };
+
+/** The one chosen-permanent sacrifice predicate a validated ability carries. */
+function sacrificeCostOf(ability: ActivatedAbility): SacrificeCost | undefined {
+  if (ability.cost.sacrificeLandSubtypePair !== undefined) {
+    return { kind: 'landSubtypePair', count: 2, subtypes: ability.cost.sacrificeLandSubtypePair };
+  }
+  if (ability.cost.sacrificeMatching !== undefined) {
+    const { excludeSource, ...matching } = ability.cost.sacrificeMatching;
+    return { kind: 'matching', ...matching, ...(excludeSource === true ? { excludeSource: true } : {}) };
+  }
+  if (ability.cost.sacrificeOther !== undefined) {
+    return { kind: 'other', ...ability.cost.sacrificeOther };
+  }
+  return undefined;
+}
+
 function sacrificeCandidates(
   state: GameState,
   player: PlayerId,
   source: ObjectId,
-  subtype: string,
+  ability: ActivatedAbility,
+): readonly ObjectId[] {
+  const sacrifice = sacrificeCostOf(ability);
+  if (sacrifice === undefined) return [];
+  return sacrifice.kind === 'other'
+    ? state.battlefield.filter(
+        (oid) =>
+          oid !== source && controllerOf(state, oid) === player && hasSubtype(state, oid, sacrifice.subtype),
+      )
+    : sacrifice.kind === 'matching'
+      ? matchingPermanentCandidates(state, player, sacrifice).filter(
+          (oid) => sacrifice.excludeSource !== true || oid !== source,
+        )
+      : state.battlefield.filter(
+          (oid) =>
+            controllerOf(state, oid) === player &&
+            sacrifice.subtypes.some((subtype) => hasSubtype(state, oid, subtype)),
+        );
+}
+
+type MatchingPermanentCost = NonNullable<ActivatedAbility['cost']['sacrificeMatching']>;
+
+/** Current-characteristic controlled candidates shared by sacrifice and tap cohorts. */
+function matchingPermanentCandidates(
+  state: GameState,
+  player: PlayerId,
+  cost: MatchingPermanentCost,
 ): readonly ObjectId[] {
   return state.battlefield.filter(
-    (oid) => oid !== source && controllerOf(state, oid) === player && hasSubtype(state, oid, subtype),
+    (oid) =>
+      controllerOf(state, oid) === player &&
+      (cost.nontoken !== true || state.objects[oid]?.token === false) &&
+      satisfiesTargetFilter(state, oid, cost.filter),
   );
+}
+
+function tapMatchingCandidates(
+  state: GameState,
+  player: PlayerId,
+  source: ObjectId,
+  ability: ActivatedAbility,
+): readonly ObjectId[] {
+  const cost = ability.cost.tapMatching;
+  if (cost === undefined) return [];
+  return matchingPermanentCandidates(state, player, cost).filter(
+    (oid) => (!ability.cost.tapSelf || oid !== source) && !getObject(state, oid).tapped,
+  );
+}
+
+/** The set rules common to every chosen-permanent activation payment. */
+function validateDistinctChosenPermanents(
+  offered: readonly ObjectId[],
+  eligible: ReadonlySet<ObjectId>,
+  invalid: (oid: ObjectId) => string,
+): string | null {
+  const seen = new Set<ObjectId>();
+  for (const oid of offered) {
+    if (seen.has(oid)) return `${oid} was offered twice`;
+    seen.add(oid);
+    if (!eligible.has(oid)) return invalid(oid);
+  }
+  return null;
 }
 
 /**
@@ -737,21 +1593,63 @@ function validateSacrifices(
   ability: ActivatedAbility,
   offered: readonly ObjectId[],
 ): string | null {
-  const sacrifice = ability.cost.sacrificeOther;
+  const sacrifice = sacrificeCostOf(ability);
   const wanted = sacrifice?.count ?? 0;
   if (offered.length !== wanted) {
     if (sacrifice === undefined) return `this ability sacrifices nothing, and ${offered.length} was offered`;
-    return `the cost sacrifices ${wanted} ${sacrifice.subtype} permanents, and ${offered.length} was offered`;
+    return sacrifice.kind === 'other'
+      ? `the cost sacrifices ${wanted} ${sacrifice.subtype} permanents, and ${offered.length} was offered`
+      : sacrifice.kind === 'matching'
+        ? `the cost sacrifices ${wanted} matching permanents, and ${offered.length} was offered`
+        : `the cost sacrifices one ${sacrifice.subtypes[0]} and one ${sacrifice.subtypes[1]}, and ${offered.length} was offered`;
   }
   if (sacrifice === undefined) return null;
-  const eligible = new Set(sacrificeCandidates(state, player, source, sacrifice.subtype));
-  const seen = new Set<ObjectId>();
-  for (const oid of offered) {
-    if (seen.has(oid)) return `${oid} was offered twice`;
-    seen.add(oid);
-    if (!eligible.has(oid)) return `${oid} is not a ${sacrifice.subtype} permanent you control`;
+  if (sacrifice.kind === 'landSubtypePair') {
+    const distinct = validateDistinctChosenPermanents(
+      offered,
+      new Set(sacrificeCandidates(state, player, source, ability)),
+      (oid) => `${oid} is not a ${sacrifice.subtypes[0]} or ${sacrifice.subtypes[1]} permanent you control`,
+    );
+    if (distinct !== null) return distinct;
+    const [first, second] = offered;
+    if (first === undefined || second === undefined) return 'the land-subtype pair is incomplete';
+    const direct =
+      hasSubtype(state, first, sacrifice.subtypes[0]) && hasSubtype(state, second, sacrifice.subtypes[1]);
+    const reversed =
+      hasSubtype(state, first, sacrifice.subtypes[1]) && hasSubtype(state, second, sacrifice.subtypes[0]);
+    return direct || reversed
+      ? null
+      : `the cost needs one ${sacrifice.subtypes[0]} and one ${sacrifice.subtypes[1]}`;
   }
-  return null;
+  const eligible = new Set(sacrificeCandidates(state, player, source, ability));
+  return validateDistinctChosenPermanents(offered, eligible, (oid) =>
+    sacrifice.kind === 'other'
+      ? `${oid} is not a ${sacrifice.subtype} permanent you control`
+      : `${oid} does not match a permanent you control permitted by this sacrifice cost`,
+  );
+}
+
+function validateTapMatching(
+  state: GameState,
+  player: PlayerId,
+  source: ObjectId,
+  ability: ActivatedAbility,
+  offered: readonly ObjectId[] | undefined,
+): string | null {
+  const cost = ability.cost.tapMatching;
+  if (cost === undefined) {
+    return offered === undefined ? null : 'this ability has no matching tap cost, and a tap list was offered';
+  }
+  if (offered === undefined) return `the cost taps ${cost.count} matching permanents, and none were offered`;
+  if (offered.length !== cost.count) {
+    return `the cost taps ${cost.count} matching permanents, and ${offered.length} were offered`;
+  }
+  const eligible = new Set(tapMatchingCandidates(state, player, source, ability));
+  return validateDistinctChosenPermanents(
+    offered,
+    eligible,
+    (oid) => `${oid} is not an untapped matching permanent you control permitted by this tap cost`,
+  );
 }
 
 /**
@@ -778,19 +1676,26 @@ function validateDiscards(
   ability: ActivatedAbility,
   offered: readonly ObjectId[],
 ): string | null {
-  const wanted = ability.cost.discard ?? 0;
+  const matching = ability.cost.discardMatching;
+  const wanted = ability.cost.discard ?? matching?.count ?? 0;
   if (offered.length !== wanted) {
-    if (ability.cost.discard === undefined) {
+    if (ability.cost.discard === undefined && matching === undefined) {
       return `this ability discards nothing, and ${offered.length} was offered`;
     }
     return `the cost discards ${wanted} cards, and ${offered.length} was offered`;
   }
   const hand = new Set(playerOf(state, player).hand);
+  const eligible = new Set(discardCandidates(state, player, ability));
   const seen = new Set<ObjectId>();
   for (const oid of offered) {
     if (seen.has(oid)) return `${oid} was offered twice`;
     seen.add(oid);
     if (!hand.has(oid)) return `${oid} is not in your hand`;
+    if (!eligible.has(oid)) return `${oid} does not match the discard filter`;
+  }
+  if (matching !== undefined) {
+    const names = offered.map((oid) => getObject(state, oid).card.name);
+    if (new Set(names).size !== 1) return 'the discarded cards do not have the same name';
   }
   return null;
 }
@@ -815,8 +1720,9 @@ function validateDiscards(
 function activationOptions(state: GameState, player: PlayerId, cap: number): Enumerated<Action> {
   const options: Action[] = [];
   let complete = true;
-  for (const oid of controlledBy(state, player)) {
-    const abilities = getObject(state, oid).card.abilities;
+  const sources = [...controlledBy(state, player), ...playerOf(state, player).graveyard];
+  for (const oid of sources) {
+    const abilities = abilitiesOf(state, oid);
     for (const [abilityIndex, ability] of abilities.entries()) {
       if (ability.kind !== 'activated') continue;
       // CR 605.3a: a mana ability does not use the stack, so it is never an
@@ -825,7 +1731,7 @@ function activationOptions(state: GameState, player: PlayerId, cap: number): Enu
       // offered twice under two action types, and the `activateAbility` copy
       // would push it onto the stack.
       if (isManaAbility(ability)) continue;
-      if (activationBlocker(state, player, oid, ability) !== null) continue;
+      if (activationBlocker(state, player, oid, ability, abilityIndex) !== null) continue;
       const enumerated = oneAbilityOptions(state, player, oid, abilityIndex, ability, cap);
       if (!enumerated.complete) complete = false;
       options.push(...enumerated.items);
@@ -862,28 +1768,37 @@ function activationXOptions(
   ability: ActivatedAbility,
   cap: number,
 ): Enumerated<number | undefined> {
-  if (!ability.cost.mana.hasX) return { items: [undefined], complete: true };
-  const excluded = ability.cost.tapSelf ? [oid] : [];
-  const ceiling = availableMana(state, player);
-  let max: number | null = null;
-  for (let x = ceiling; x >= 0; x -= 1) {
-    if (canPay(state, player, resolveX(ability.cost.mana, x), excluded)) {
-      max = x;
-      break;
-    }
+  const variableLoyalty = ability.loyaltyCost !== undefined && isVariableLoyaltyCost(ability.loyaltyCost);
+  if (!ability.cost.mana.hasX && !variableLoyalty) {
+    return { items: [undefined], complete: true };
   }
-  if (max === null) return { items: [], complete: true };
-  const announceable = Math.min(max, MAX_CHOSEN_X);
-  const bounded = Math.min(announceable, cap);
+  const excluded = ability.cost.tapSelf ? [oid] : [];
+  let max = MAX_CHOSEN_X;
+  if (ability.cost.mana.hasX) {
+    const ceiling = availableMana(state, player);
+    let maxPayable: number | null = null;
+    for (let x = ceiling; x >= 0; x -= 1) {
+      if (canPay(state, player, resolveX(ability.cost.mana, x), excluded)) {
+        maxPayable = x;
+        break;
+      }
+    }
+    if (maxPayable === null) return { items: [], complete: true };
+    max = Math.min(max, maxPayable);
+  }
+  if (variableLoyalty) {
+    max = Math.min(max, counterCount(getObject(state, oid).counters, 'loyalty'));
+  }
+  const bounded = Math.min(max, cap);
   return {
     items: Array.from({ length: bounded + 1 }, (_, index) => index),
-    complete: bounded === announceable,
+    complete: bounded === max,
   };
 }
 
 /**
- * Every activation of one printed ability: every target tuple against every way
- * of paying its `sacrificeOther` cost.
+ * Every activation of one current ability: every target tuple against every
+ * legal payment plan.
  *
  * The cap bounds what this returns, not what any one dimension returns on its
  * own. A cast's cap bounds one card's whole option list, and an activation now
@@ -902,53 +1817,83 @@ function oneAbilityOptions(
   ability: ActivatedAbility,
   cap: number,
 ): Enumerated<Action> {
-  // An empty slot needs no early-out: `cartesian` over a dimension with no
-  // members yields no tuples and stays `complete`, so the loop below simply
-  // does not run. A guard that only restates what the next line already does is
-  // a guard no test can reach.
-  const combos = cartesian(targetChoicesForActivation(state, ability, player, oid), cap);
-  // Which permanents pay a `sacrificeOther` cost is a choice the same way a
-  // target is, so it is enumerated the same way and rides in the same action. A
-  // cost that names none yields the single empty payment, so the loop below runs
-  // once per target tuple exactly as it did before.
-  const payments = sacrificePayments(state, player, oid, ability, cap);
-  // The third dimension, and the same argument a second time: which cards pay a
-  // `cost.discard` is a choice, so it is enumerated rather than picked, and an
-  // ability that names no discard yields the single empty payment so the loop
-  // below runs exactly as many times as it did before.
-  const discards = discardPayments(state, player, ability, cap);
-  // The fourth dimension, and the one that grows fastest: an announced X (CR
-  // 601.2b through CR 602.2b) is a choice like the other three, so it is
-  // enumerated rather than picked, and an ability with no `{X}` yields the
-  // single `undefined` slot so the loop below runs exactly as many times as it
-  // did before. This is the growth `activationOptions` warns about, at every
-  // priority window of both seats — which is why `checkActivationCost` refuses
-  // an `{X}` no effect reads rather than letting a card multiply the option
-  // list to change nothing.
-  const xValues = activationXOptions(state, player, oid, ability, cap);
+  const payments = activationPayments(state, player, oid, ability, cap);
   const options: Action[] = [];
-  for (const targets of combos.items) {
-    // The one filter that is load-bearing here: each slot's choices were built
-    // without looking at the others, so `cartesian` pairs a `distinct` slot with
-    // the very target the slot before it took.
-    if (!honoursDistinctSlots(ability.effects, targets)) continue;
-    for (const sacrifices of payments.items) {
-      for (const discarded of discards.items) {
+  let complete = payments.complete;
+  const modes = ability.modes === undefined ? [undefined] : ability.modes.map((_mode, index) => index);
+  for (const mode of modes) {
+    const effects = effectsForActivatedAbility(ability, mode ?? null);
+    const combos =
+      ability.cost.exileControlledInstantOrSorcerySpell === true
+        ? {
+            items: controlledInstantOrSorcerySpells(state, player).map((spell): readonly Target[] => [
+              { kind: 'spell', oid: spell },
+            ]),
+            complete: true,
+          }
+        : cartesian(targetChoicesForActivation(state, ability, player, oid, mode ?? null), cap);
+    if (!combos.complete) complete = false;
+    const plural = hasPluralTargets(effects);
+    const minimum = plural ? minimumPluralChoice(state, effects, player, oid) : null;
+    if (plural && minimum === null) continue;
+    for (const targets of combos.items) {
+      // Each slot was enumerated independently, so reject repeated targets for
+      // effect positions that declare themselves distinct.
+      if (!honoursDistinctSlots(effects, targets)) continue;
+      for (const payment of payments.items) {
+        if (options.length >= cap) return { items: options, complete: false };
+        options.push(
+          buildActivationAction(player, oid, abilityIndex, targets, payment.sacrifices, {
+            taps: ability.cost.tapMatching === undefined ? undefined : payment.taps,
+            discards:
+              ability.cost.discard === undefined && ability.cost.discardMatching === undefined
+                ? undefined
+                : payment.discards,
+            x: payment.x,
+            mode,
+          }),
+        );
+      }
+    }
+  }
+  return { items: options, complete };
+}
+
+interface ActivationPayment {
+  readonly sacrifices: readonly ObjectId[];
+  readonly taps: readonly ObjectId[];
+  readonly discards: readonly ObjectId[];
+  readonly x: number | undefined;
+}
+
+/** The payable product of every chosen activation-cost dimension. */
+function activationPayments(
+  state: GameState,
+  player: PlayerId,
+  oid: ObjectId,
+  ability: ActivatedAbility,
+  cap: number,
+): Enumerated<ActivationPayment> {
+  const sacrifices = sacrificePayments(state, player, oid, ability, cap);
+  const taps = matchingTapPayments(state, player, oid, ability, cap);
+  const discards = discardPayments(state, player, ability, cap);
+  const xValues = activationXOptions(state, player, oid, ability, cap);
+  const items: ActivationPayment[] = [];
+  for (const sacrifice of sacrifices.items) {
+    for (const tap of taps.items) {
+      for (const discard of discards.items) {
         for (const x of xValues.items) {
-          if (options.length >= cap) return { items: options, complete: false };
-          options.push(
-            buildActivationAction(player, oid, abilityIndex, targets, sacrifices, {
-              discards: ability.cost.discard === undefined ? undefined : discarded,
-              x,
-            }),
-          );
+          const excluded = [...(ability.cost.tapSelf ? [oid] : []), ...tap];
+          if (!canPay(state, player, resolveX(ability.cost.mana, x ?? 0), excluded)) continue;
+          if (items.length >= cap) return { items, complete: false };
+          items.push({ sacrifices: sacrifice, taps: tap, discards: discard, x });
         }
       }
     }
   }
   return {
-    items: options,
-    complete: combos.complete && payments.complete && discards.complete && xValues.complete,
+    items,
+    complete: sacrifices.complete && taps.complete && discards.complete && xValues.complete,
   };
 }
 
@@ -956,14 +1901,11 @@ function oneAbilityOptions(
  * Builds one `activateAbility` action.
  *
  * `buildCastAction` one card type out, and it exists for the same reason that
- * one does: `discards` and `x` are independently optional and
- * `exactOptionalPropertyTypes` forbids writing `undefined` into either slot, so
- * each is folded in through a conditional spread that omits the key rather than
- * setting it to `undefined`. Writing that inline was a two-branch ternary while
- * `discards` was the only optional field; a second one would have made it four
- * branches saying one thing.
+ * one does: `taps`, `discards`, and `x` are independently optional and
+ * `exactOptionalPropertyTypes` forbids writing `undefined` into any slot, so
+ * each is folded in through a conditional spread that omits the key.
  *
- * Both slots arrive as "present or `undefined`" and the caller decides which.
+ * All three slots arrive as "present or `undefined`" and the caller decides which.
  * A discard is `undefined` when the printed cost names none rather than when the
  * chosen list is empty, because an ability with no discard cost has never
  * carried the key at all and every recording made before that cost existed
@@ -976,7 +1918,12 @@ function buildActivationAction(
   abilityIndex: number,
   targets: readonly (Target | null)[],
   sacrifices: readonly ObjectId[],
-  optional: { readonly discards: readonly ObjectId[] | undefined; readonly x: number | undefined },
+  optional: {
+    readonly taps: readonly ObjectId[] | undefined;
+    readonly discards: readonly ObjectId[] | undefined;
+    readonly x: number | undefined;
+    readonly mode: number | undefined;
+  },
 ): Action {
   return {
     type: 'activateAbility',
@@ -985,8 +1932,10 @@ function buildActivationAction(
     abilityIndex,
     targets,
     sacrifices,
+    ...(optional.taps !== undefined ? { taps: optional.taps } : {}),
     ...(optional.discards !== undefined ? { discards: optional.discards } : {}),
     ...(optional.x !== undefined ? { x: optional.x } : {}),
+    ...(optional.mode !== undefined ? { mode: optional.mode } : {}),
   };
 }
 
@@ -1017,10 +1966,50 @@ function sacrificePayments(
   ability: ActivatedAbility,
   cap: number,
 ): Enumerated<readonly ObjectId[]> {
-  const sacrifice = ability.cost.sacrificeOther;
+  const sacrifice = sacrificeCostOf(ability);
   if (sacrifice === undefined) return { items: [[]], complete: true };
-  const candidates = sacrificeCandidates(state, player, oid, sacrifice.subtype);
+  if (sacrifice.kind === 'landSubtypePair') {
+    const left = state.battlefield.filter(
+      (candidate) =>
+        controllerOf(state, candidate) === player && hasSubtype(state, candidate, sacrifice.subtypes[0]),
+    );
+    const right = state.battlefield.filter(
+      (candidate) =>
+        controllerOf(state, candidate) === player && hasSubtype(state, candidate, sacrifice.subtypes[1]),
+    );
+    const items: ObjectId[][] = [];
+    const seen = new Set<string>();
+    let complete = true;
+    for (const first of left) {
+      for (const second of right) {
+        if (first === second) continue;
+        const pair = [first, second].sort();
+        const key = pair.join('\0');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        if (items.length >= cap) {
+          complete = false;
+          continue;
+        }
+        items.push(pair);
+      }
+    }
+    return { items, complete };
+  }
+  const candidates = sacrificeCandidates(state, player, oid, ability);
   return combinations(candidates, sacrifice.count, cap);
+}
+
+function matchingTapPayments(
+  state: GameState,
+  player: PlayerId,
+  oid: ObjectId,
+  ability: ActivatedAbility,
+  cap: number,
+): Enumerated<readonly ObjectId[]> {
+  const cost = ability.cost.tapMatching;
+  if (cost === undefined) return { items: [[]], complete: true };
+  return combinations(tapMatchingCandidates(state, player, oid, ability), cost.count, cap);
 }
 
 /**
@@ -1044,9 +2033,45 @@ function discardPayments(
   ability: ActivatedAbility,
   cap: number,
 ): Enumerated<readonly ObjectId[]> {
-  const discard = ability.cost.discard;
+  const matching = ability.cost.discardMatching;
+  const discard = ability.cost.discard ?? matching?.count;
   if (discard === undefined) return { items: [[]], complete: true };
-  return combinations(playerOf(state, player).hand, discard, cap);
+  const candidates = discardCandidates(state, player, ability);
+  if (matching === undefined) return combinations(candidates, discard, cap);
+
+  // Group before applying the cap. Filtering the first `cap` combinations
+  // afterwards can discard every returned cross-name pair even when a legal
+  // pair occurs later in hand order, making legality depend on hand order.
+  const byName = new Map<string, ObjectId[]>();
+  for (const oid of candidates) {
+    const name = getObject(state, oid).card.name;
+    const group = byName.get(name);
+    if (group === undefined) byName.set(name, [oid]);
+    else group.push(oid);
+  }
+  const items: Array<readonly ObjectId[]> = [];
+  for (const group of byName.values()) {
+    if (group.length < discard) continue;
+    if (items.length >= cap) return { items, complete: false };
+    const payments = combinations(group, discard, cap - items.length);
+    items.push(...payments.items);
+    if (!payments.complete) return { items, complete: false };
+  }
+  return { items, complete: true };
+}
+
+/** Cards in the activator's hand that the printed discard cost permits. */
+function discardCandidates(
+  state: GameState,
+  player: PlayerId,
+  ability: ActivatedAbility,
+): readonly ObjectId[] {
+  const hand = playerOf(state, player).hand;
+  if (ability.cost.discardMatching !== undefined) {
+    return selectPrintedByCardFilter(state, hand, { excludeCardTypes: ['land'] });
+  }
+  const filter = ability.cost.discardFilter;
+  return filter === undefined ? hand : selectPrintedByCardFilter(state, hand, filter);
 }
 
 /**
@@ -1062,16 +2087,87 @@ function discardPayments(
  * `activationBlocker` rather than restating it; a Llanowar Elf that arrived
  * this turn is refused by the same line that refuses a tap ability on it.
  */
-function manaSourceBlocker(state: GameState, player: PlayerId, oid: ObjectId): string | null {
+function indexedManaAbilities(
+  state: GameState,
+  oid: ObjectId,
+): readonly { readonly ability: ActivatedAbility; readonly index: number }[] {
+  return abilitiesOf(state, oid).flatMap((ability, index) =>
+    ability.kind === 'activated' && isManaAbility(ability) ? [{ ability, index }] : [],
+  );
+}
+
+function manaAbilityColors(ability: ActivatedAbility): readonly ManaColor[] {
+  return ability.effects.flatMap((effect) => (effect.kind === 'addMana' ? effect.produces : []));
+}
+
+function fixedManaAbilityAmount(ability: ActivatedAbility): number | undefined {
+  const effect = ability.effects[0];
+  return effect?.kind === 'addMana' && typeof effect.amount === 'number' ? effect.amount : undefined;
+}
+
+/** The canonical Lantern grant, whose choices subsume a basic land's intrinsic one. */
+function isUnrestrictedAnyColorTapAbility(ability: ActivatedAbility): boolean {
+  const effect = ability.effects[0];
+  const cost = ability.cost;
+  return (
+    ability.effects.length === 1 &&
+    effect?.kind === 'addMana' &&
+    effect.amount === 1 &&
+    effect.produces.join('') === 'WUBRG' &&
+    cost.tapSelf &&
+    !cost.sacrificeSelf &&
+    !cost.mana.hasX &&
+    manaValue(cost.mana) === 0 &&
+    cost.printedManaPips === undefined &&
+    cost.payLife === undefined &&
+    cost.exileSelf === undefined &&
+    cost.sacrificeOther === undefined &&
+    cost.sacrificeMatching === undefined &&
+    cost.sacrificeLandSubtypePair === undefined &&
+    cost.tapMatching === undefined &&
+    cost.discard === undefined &&
+    cost.discardFilter === undefined &&
+    cost.discardMatching === undefined &&
+    cost.removeCounter === undefined &&
+    ability.attach === undefined &&
+    ability.loyaltyCost === undefined &&
+    ability.regenerateSelf === undefined &&
+    ability.activateOnlyWhileAttacking === undefined &&
+    ability.activateOnlyAsSorcery === undefined &&
+    ability.activationZone === undefined &&
+    ability.modes === undefined &&
+    ability.counterTargetSpellUnless === undefined
+  );
+}
+
+function manaSourceBlocker(
+  state: GameState,
+  player: PlayerId,
+  oid: ObjectId,
+  abilityIndex?: number,
+): string | null {
   const object = tryObject(state, oid);
   if (object === undefined || object.zone !== 'battlefield') return 'source is not on the battlefield';
   // Layer-aware, to agree with `controlledBy`, which is what enumerates these
   // actions. Reading the raw `controller` field here let the previous
   // controller of a control-changed permanent keep tapping it.
   if (controllerOf(state, oid) !== player) return 'you do not control that source';
-  const ability = manaAbilityOf(object.card);
-  if (ability !== null) return activationBlocker(state, player, oid, ability);
-  if (landProduces(object.card).length === 0) return 'that source has no mana ability';
+  const indexed = indexedManaAbilities(state, oid);
+  if (abilityIndex !== undefined) {
+    const selected = indexed.find((entry) => entry.index === abilityIndex);
+    return selected === undefined
+      ? 'that slot is not a mana ability'
+      : activationBlocker(state, player, oid, selected.ability, selected.index);
+  }
+  const intrinsic = landProducesOnBattlefield(state, oid);
+  if (intrinsic.length === 0 && indexed.length === 1) {
+    return activationBlocker(state, player, oid, indexed[0]!.ability, indexed[0]!.index);
+  }
+  // A printed mana ability went through the ordinary activation gate above.
+  // Lands reach mana actions through this intrinsic route instead.
+  const prohibited = activationProhibitionReason(state, oid);
+  if (prohibited !== null) return prohibited;
+  if (intrinsic.length === 0) return 'that source has no unambiguous mana ability';
   if (object.tapped) return 'source is already tapped';
   return null;
 }
@@ -1079,9 +2175,34 @@ function manaSourceBlocker(state: GameState, player: PlayerId, oid: ObjectId): s
 function manaAbilityOptions(state: GameState, player: PlayerId): readonly Action[] {
   const options: Action[] = [];
   for (const oid of controlledBy(state, player)) {
-    if (manaSourceBlocker(state, player, oid) !== null) continue;
-    for (const color of manaSourceColors(getObject(state, oid).card)) {
-      options.push({ type: 'activateManaAbility', player, oid, color });
+    const intrinsic = landProducesOnBattlefield(state, oid);
+    const indexed = indexedManaAbilities(state, oid);
+    const anyColor = indexed.find(
+      ({ ability, index }) =>
+        isUnrestrictedAnyColorTapAbility(ability) && manaSourceBlocker(state, player, oid, index) === null,
+    );
+    if (intrinsic.length > 0 && manaSourceBlocker(state, player, oid) === null) {
+      for (const color of intrinsic) {
+        if (anyColor === undefined || !manaAbilityColors(anyColor.ability).includes(color)) {
+          options.push({ type: 'activateManaAbility', player, oid, color });
+        }
+      }
+    }
+    for (const { ability, index } of indexed) {
+      if (isUnrestrictedAnyColorTapAbility(ability) && index !== anyColor?.index) continue;
+      if (manaSourceBlocker(state, player, oid, index) !== null) continue;
+      const abilityIndex = intrinsic.length === 0 && indexed.length === 1 ? undefined : index;
+      const amount = fixedManaAbilityAmount(ability);
+      for (const color of manaAbilityColors(ability)) {
+        options.push({
+          type: 'activateManaAbility',
+          player,
+          oid,
+          color,
+          ...(abilityIndex === undefined ? {} : { abilityIndex }),
+          ...(amount === undefined || amount === 1 ? {} : { amount }),
+        });
+      }
     }
   }
   return options;
@@ -1107,8 +2228,6 @@ function priorityDecision(state: GameState, player: PlayerId, cap: number): Deci
     ...activations.items,
     ...manaAbilityOptions(state, player),
   ];
-  // `concede` is deliberately absent: it is always legal (see `validateAction`)
-  // but it must never be picked by an agent sampling uniformly from options.
   return { kind: 'priority', player, options, complete: casts.complete && activations.complete };
 }
 
@@ -1167,14 +2286,16 @@ function attackerDecision(state: GameState, player: PlayerId, cap: number): Deci
   // anything reaching this filter. The requirement therefore reduces to
   // removing the "leave it home" outcome for these creatures, never to adding
   // one: there is no cross-creature contention over *which* defender to
-  // attack (unlike menace's contention over *which blocker*), so no
-  // completability check is needed the way `blocksCompletable` is for menace.
+  // attack (unlike menace's contention over *which blocker*). The independent
+  // cohort restriction still needs `attacksCompletable` before a prefix is
+  // offered, because a lone Mogg must retain a route to a companion.
   //
   // A turn-scoped `attacksYouThisTurnIfAble` rides the same filter and adds the
   // one thing the static does not: it narrows *which* defender, so it is read
   // per creature through `attackRequirement` rather than as a flat list.
   const required = new Map(rest.map((oid) => [oid, attackRequirement(state, oid, defenders)] as const));
-  const mustAttack = rest.filter((oid) => required.get(oid)?.mustAttack === true);
+  const globallyRequired = requiredAttackers(state, eligible, defenders);
+  const mustAttack = rest.filter((oid) => globallyRequired.has(oid));
   const options: Action[] = [];
   let listable = true;
   if (defenders.length === 1) {
@@ -1183,13 +2304,17 @@ function attackerDecision(state: GameState, player: PlayerId, cap: number): Deci
     if (listable) {
       for (const chosen of enumerated.items) {
         if (mustAttack.some((oid) => !chosen.includes(oid))) continue;
+        if (attackCohortRestriction(state, [...fixed.map((attack) => attack.oid), ...chosen]) !== null)
+          continue;
+        const attackers = [
+          ...fixed,
+          ...chosen.map((oid): AttackDeclaration => ({ oid, defender: playerDefender })),
+        ];
+        if (!canPayAttackTaxes(state, player, attackers)) continue;
         options.push({
           type: 'declareAttackers',
           player,
-          attackers: [
-            ...fixed,
-            ...chosen.map((oid): AttackDeclaration => ({ oid, defender: playerDefender })),
-          ],
+          attackers,
         });
       }
     }
@@ -1210,6 +2335,14 @@ function attackerDecision(state: GameState, player: PlayerId, cap: number): Deci
           else if (mustAttack.includes(oid)) satisfiesMustAttack = false;
         }
         if (!satisfiesMustAttack) continue;
+        if (
+          attackCohortRestriction(
+            state,
+            attackers.map((attack) => attack.oid),
+          ) !== null
+        )
+          continue;
+        if (!canPayAttackTaxes(state, player, attackers)) continue;
         options.push({ type: 'declareAttackers', player, attackers });
       }
     }
@@ -1220,7 +2353,9 @@ function attackerDecision(state: GameState, player: PlayerId, cap: number): Deci
     defender,
     defenders,
     eligible,
-    options: listable ? options : nextAttackerOptions(state, eligible, fixed, defenders, settled, player),
+    options: listable
+      ? options
+      : nextAttackerOptions(state, eligible, fixed, defenders, settled, player, globallyRequired),
     complete: true,
   };
 }
@@ -1247,6 +2382,7 @@ function nextAttackerOptions(
   defenders: readonly CombatDefender[],
   settled: number,
   player: PlayerId,
+  required: ReadonlySet<ObjectId>,
 ): readonly Action[] {
   const asking = eligible[settled];
   // Unreachable: the caller is here because the remaining space did not fit
@@ -1254,14 +2390,35 @@ function nextAttackerOptions(
   if (asking === undefined) throw new Error('attackerDecision: no creature is left to ask about');
   const options: Action[] = [];
   const requirement = attackRequirement(state, asking, defenders);
-  if (!requirement.mustAttack) {
+  const later = eligible.slice(settled + 1);
+  if (
+    !required.has(asking) &&
+    canPayAttackTaxes(state, player, fixed) &&
+    attacksCompletable(
+      state,
+      fixed.map((attack) => attack.oid),
+      later,
+      required,
+    )
+  ) {
     options.push({ type: 'declareAttackers', player, attackers: fixed, settled: settled + 1 });
   }
   for (const target of requirement.allowed) {
+    const attackers = [...fixed, { oid: asking, defender: target }];
+    if (!canPayAttackTaxes(state, player, attackers)) continue;
+    if (
+      !attacksCompletable(
+        state,
+        attackers.map((attack) => attack.oid),
+        later,
+        required,
+      )
+    )
+      continue;
     options.push({
       type: 'declareAttackers',
       player,
-      attackers: [...fixed, { oid: asking, defender: target }],
+      attackers,
       settled: settled + 1,
     });
   }
@@ -1281,41 +2438,77 @@ function blockerDecision(state: GameState, player: PlayerId, cap: number): Decis
   const candidates: BlockCandidates[] = [];
   for (const [index, blocker] of eligible.entries()) {
     const blockable = perBlocker[index] ?? [];
-    if (blockable.length > 0) candidates.push({ blocker, attackers: blockable });
+    if (blockable.length > 0) {
+      candidates.push({
+        blocker,
+        capacity: canBlockAnyNumber(state, blocker) ? 'any' : 'one',
+        attackers: blockable,
+      });
+    }
   }
   const settled = state.combat.blocksSettled ?? 0;
+  const attackerChoicesSettled = state.combat.blockerAttacksSettled ?? 0;
   const fixed = declaredBlocks(state);
-  // CR 509.1c: the number of must-be-blocked attackers a finished declaration
-  // has to cover is capped by how many can *jointly* be covered at once — two
-  // must-attackers competing for the one creature able to block both cannot
-  // both be served, and a menace lure costs two creatures rather than one — so
-  // `target` is `mustBlockTarget` over the whole eligible pool, computed once
-  // here rather than re-derived per candidate.
-  const mustBeBlocked = attackers.filter((attacker) =>
-    hasCombatModification(state, attacker, 'mustBeBlockedIfAble'),
-  );
-  const target = mustBlockTarget(state, outstandingDemands(state, [], mustBeBlocked), eligible);
-  const enumerated = cartesian<ObjectId | null>(
-    perBlocker.slice(settled).map((blockable) => [null, ...blockable]),
+  const perBlockerChoices = perBlocker.map((blockable, index): Enumerated<readonly ObjectId[]> => {
+    const blocker = eligible[index];
+    if (blocker !== undefined && canBlockAnyNumber(state, blocker)) return subsets(blockable, cap);
+    return { items: [[], ...blockable.map((attacker) => [attacker])], complete: true };
+  });
+  // CR 509.1c: `target` is the joint maximum across attackers that must be
+  // blocked and blockers that must participate. Competing families share the
+  // same blocker capacity, and menace contributes only when its whole legal
+  // group is possible, so the ceiling is computed once over the eligible pool.
+  const requirements = blockRequirements(state);
+  const target = maximizeBlockRequirements(state, requirements, eligible).coverage;
+  const currentBlocker = eligible[settled];
+  const currentBlockable = perBlocker[settled] ?? [];
+  const currentSubsets = subsets(currentBlockable, cap);
+  const sequenceUnlimited =
+    currentBlocker !== undefined &&
+    canBlockAnyNumber(state, currentBlocker) &&
+    (attackerChoicesSettled > 0 || !currentSubsets.complete);
+  if (sequenceUnlimited) {
+    return {
+      kind: 'declareBlockers',
+      player,
+      attackers,
+      eligible,
+      candidates,
+      options: nextUnlimitedBlockerOptions(
+        state,
+        eligible,
+        currentBlockable,
+        fixed,
+        settled,
+        attackerChoicesSettled,
+        player,
+        requirements,
+        target,
+      ),
+      complete: true,
+    };
+  }
+  const enumerated = cartesian<readonly ObjectId[]>(
+    perBlockerChoices.slice(settled).map((entry) => entry.items),
     cap,
   );
   const options: Action[] = [];
-  if (enumerated.complete) {
-    for (const assignment of enumerated.items) {
+  if (enumerated.complete && perBlockerChoices.slice(settled).every((entry) => entry.complete)) {
+    for (const assignments of enumerated.items) {
       const blocks: BlockDeclaration[] = [...fixed];
-      for (const [index, attacker] of assignment.entries()) {
+      for (const [index, attackersForBlocker] of assignments.entries()) {
         const blocker = eligible[settled + index];
-        if (attacker === null || blocker === undefined) continue;
-        blocks.push({ blocker, attacker });
+        if (blocker === undefined) continue;
+        for (const attacker of attackersForBlocker) blocks.push({ blocker, attacker });
       }
-      if (validateBlocks(state, player, blocks) !== null) continue;
-      if (mustBlockCoverage(state, blocks, mustBeBlocked) < target) continue;
+      if (validateBlocks(state, opponentOf(state.turn.active), blocks) !== null) continue;
+      if (blockRequirementCoverage(state, blocks, requirements) < target) continue;
       options.push({ type: 'declareBlockers', player, blocks });
     }
     if (options.length === 0) options.push({ type: 'declareBlockers', player, blocks: fixed });
   } else {
     options.push(
-      ...nextBlockerOptions(state, eligible, perBlocker, fixed, settled, player, mustBeBlocked, target),
+      ...nextBlockerOptions(state, eligible, perBlockerChoices, fixed, settled, player, requirements, target),
     );
   }
   return {
@@ -1327,6 +2520,50 @@ function blockerDecision(state: GameState, player: PlayerId, cap: number): Decis
     options,
     complete: true,
   };
+}
+
+/**
+ * One yes/no attacker choice inside an unlimited-capacity blocker's subset.
+ *
+ * A ten-attacker subset has 1,024 members and therefore cannot be an option
+ * rail under the shipped cap. Asking the same mathematical subset one member
+ * at a time keeps every member reachable with two options per step. The action
+ * repeats the chosen pairs; `attackerChoicesSettled` records the declined
+ * members that no pair can otherwise represent.
+ */
+function nextUnlimitedBlockerOptions(
+  state: GameState,
+  eligible: readonly ObjectId[],
+  blockable: readonly ObjectId[],
+  fixed: readonly BlockDeclaration[],
+  settled: number,
+  attackerChoicesSettled: number,
+  player: PlayerId,
+  requirements: ReturnType<typeof blockRequirements>,
+  target: number,
+): readonly Action[] {
+  const blocker = eligible[settled];
+  const attacker = blockable[attackerChoicesSettled];
+  if (blocker === undefined || attacker === undefined) {
+    throw new Error('blockerDecision: no unlimited blocker choice is left to ask about');
+  }
+  const nextAttacker = attackerChoicesSettled + 1;
+  const blockerFinished = nextAttacker === blockable.length;
+  const nextSettled = blockerFinished ? settled + 1 : settled;
+  const available = blockerFinished ? eligible.slice(nextSettled) : [blocker, ...eligible.slice(settled + 1)];
+  const options: Action[] = [];
+  for (const include of [false, true]) {
+    const blocks = include ? [...fixed, { blocker, attacker }] : fixed;
+    if (!blockRequirementsReachable(state, blocks, requirements, target, available)) continue;
+    options.push({
+      type: 'declareBlockers',
+      player,
+      blocks,
+      settled: nextSettled,
+      ...(blockerFinished ? {} : { attackerChoicesSettled: nextAttacker }),
+    });
+  }
+  return options;
 }
 
 /**
@@ -1349,30 +2586,26 @@ function declaredBlocks(state: GameState): readonly BlockDeclaration[] {
  * The question about one creature: block each attacker it may legally block, or
  * stay home.
  *
- * A prefix is offered only when some complete legal declaration extends it
- * (`blocksCompletable`). That is the difference between this site and the attack
- * one: menace makes a partial block a dead end, and an option that cannot be
- * completed is a trap the whole contract forbids — `checkBackend` plays a game
- * by taking `options[0]` and files a finding when an offered move is refused.
- * Refusing at the offer needs no new player-facing state and no new refusal
- * path, and the last question's filter is exactly the menace rule itself, so the
- * finished declarations this sequence admits are the ones `validateBlocks`
- * admits.
+ * A prefix is offered only when some complete legal declaration extends it.
+ * Menace can make a partial block a dead end, and the
+ * cohort restriction can require a distinct companion, so an option that cannot
+ * be completed is a trap the whole contract forbids — `checkBackend` plays a
+ * game by taking `options[0]` and files a finding when an offered move is
+ * refused. Refusing at the offer needs no new player-facing state or refusal
+ * path, and the final filter uses canonical whole-declaration validation.
  *
- * `mustBlockReachable` sits beside `blocksCompletable` as a second, independent
- * gate rather than merged into it: menace asks "does every owed attacker reach
- * its full count", CR 509.1c asks "does total coverage still reach a
- * precomputed joint maximum", and the two use different attacker sets and
- * different pass conditions. A prefix must clear both.
+ * `blockRequirementsReachable` owns both halves of that completion: declaration
+ * legality for partial menace/cohort groups and CR 509.1c's precomputed joint
+ * maximum. Keeping one solver seam prevents those answers from drifting.
  */
 function nextBlockerOptions(
   state: GameState,
   eligible: readonly ObjectId[],
-  perBlocker: readonly (readonly ObjectId[])[],
+  perBlocker: readonly Enumerated<readonly ObjectId[]>[],
   fixed: readonly BlockDeclaration[],
   settled: number,
   player: PlayerId,
-  mustBeBlocked: readonly ObjectId[],
+  requirements: ReturnType<typeof blockRequirements>,
   target: number,
 ): readonly Action[] {
   const asking = eligible[settled];
@@ -1381,393 +2614,12 @@ function nextBlockerOptions(
   if (asking === undefined) throw new Error('blockerDecision: no creature is left to ask about');
   const later = eligible.slice(settled + 1);
   const options: Action[] = [];
-  for (const blocks of [
-    fixed,
-    ...(perBlocker[settled] ?? []).map((attacker) => [...fixed, { blocker: asking, attacker }]),
-  ]) {
-    if (!blocksCompletable(state, blocks, later)) continue;
-    if (!mustBlockReachable(state, blocks, mustBeBlocked, target, later)) continue;
+  for (const selection of perBlocker[settled]?.items ?? [[]]) {
+    const blocks = [...fixed, ...selection.map((attacker) => ({ blocker: asking, attacker }))];
+    if (!blockRequirementsReachable(state, blocks, requirements, target, later)) continue;
     options.push({ type: 'declareBlockers', player, blocks, settled: settled + 1 });
   }
   return options;
-}
-
-/**
- * Whether some assignment of the creatures not yet asked turns this prefix into
- * a legal declaration.
- *
- * Menace (CR 702.110b) is the only rule in the vocabulary that a finished
- * declaration can fail while every pair in it is legal, so the obligation is
- * exactly "every menace attacker currently blocked by one creature needs one
- * more". Two such attackers cannot be served by the same creature, so it is a
- * bipartite matching rather than a count, and Kuhn's algorithm over at most
- * blockers x attackers edges settles it.
- *
- * Exact, never conservative. An approximation that refused too much would make a
- * legal declaration undeclarable, which is the defect being fixed wearing
- * another hat. If the vocabulary ever grows a declaration-level rule whose
- * completability cannot be decided exactly, the answer is that this kind stops
- * being asked in steps and goes back to a capped product with a named reason,
- * not a relaxed predicate here.
- */
-function blocksCompletable(
-  state: GameState,
-  blocks: readonly BlockDeclaration[],
-  later: readonly ObjectId[],
-): boolean {
-  const counts = new Map<ObjectId, number>();
-  for (const block of blocks) counts.set(block.attacker, (counts.get(block.attacker) ?? 0) + 1);
-  const owed = [...counts.entries()]
-    .filter(([attacker, count]) => count === 1 && hasKeyword(state, attacker, 'menace'))
-    .map(([attacker]) => attacker);
-  if (owed.length === 0) return true;
-  const free = later.filter((blocker) => blocks.every((block) => block.blocker !== blocker));
-  const takenBy = new Map<ObjectId, ObjectId>();
-  const augment = (attacker: ObjectId, seen: Set<ObjectId>): boolean => {
-    for (const blocker of free) {
-      if (seen.has(blocker)) continue;
-      if (!canBlock(state, blocker, attacker)) continue;
-      seen.add(blocker);
-      const holder = takenBy.get(blocker);
-      if (holder === undefined || augment(holder, seen)) {
-        takenBy.set(blocker, attacker);
-        return true;
-      }
-    }
-    return false;
-  };
-  return owed.every((attacker) => augment(attacker, new Set<ObjectId>()));
-}
-
-/**
- * How many creatures CR 702.110b makes an attacker cost to block: two when it
- * has menace, one otherwise.
- *
- * Menace is a restriction and "must be blocked if able" is a requirement, and
- * CR 509.1c reads the two together, so a lure that also has menace is blocked
- * by two creatures or by none — and when only one creature is able to block it
- * the requirement cannot be satisfied at all. No card in the set prints both
- * modifications, which is why the joint maximum below used to price every lure
- * at one blocker; three cards *grant* menace, so the combination arrives on the
- * battlefield rather than on a card, and the sealed harness got back a repaired
- * declaration that `validateBlocks` in `combat.ts` then threw out as an illegal
- * single block.
- */
-function blockersRequired(state: GameState, attacker: ObjectId): number {
-  return hasKeyword(state, attacker, 'menace') ? 2 : 1;
-}
-
-/** A must-be-blocked attacker and how many more blockers it is still owed. */
-interface BlockDemand {
-  readonly attacker: ObjectId;
-  readonly needs: number;
-}
-
-/**
- * What a declaration still owes: every must-be-blocked attacker it has not yet
- * given its full complement, with the shortfall. A menace attacker already
- * blocked once needs one more, not two, which is what lets a prefix be judged
- * on the same footing as an empty declaration.
- */
-function outstandingDemands(
-  state: GameState,
-  blocks: readonly BlockDeclaration[],
-  mustBeBlocked: readonly ObjectId[],
-): readonly BlockDemand[] {
-  const counts = new Map<ObjectId, number>();
-  for (const block of blocks) counts.set(block.attacker, (counts.get(block.attacker) ?? 0) + 1);
-  const demands: BlockDemand[] = [];
-  for (const attacker of mustBeBlocked) {
-    const needs = blockersRequired(state, attacker) - (counts.get(attacker) ?? 0);
-    if (needs > 0) demands.push({ attacker, needs });
-  }
-  return demands;
-}
-
-/**
- * One blocker for every slot of every demand at once, as the assignment itself,
- * or null when no such assignment exists.
- *
- * Kuhn's algorithm over the *slots* rather than over the attackers: a menace
- * attacker's two slots compete for blockers with each other exactly as two
- * separate attackers would, which is the whole difference between this and a
- * pair matching. All or nothing by construction — a demand half-served is a
- * requirement not served, so a run that cannot fill every slot returns null
- * rather than a partial answer some caller might count.
- *
- * Two knobs a size-only caller never needs, both there for
- * `satisfyMustBeBlocked`, which wants the pairs: `seed` starts the search from
- * an assignment the caller already holds instead of from nothing, and
- * `blockers` is walked in the order given. Neither can turn a servable set
- * unservable — augmenting paths reach a maximum matching from any starting
- * matching, and a perfect matching of the slots is a maximum — so a caller that
- * expresses a preference gets a different assignment, never a worse one.
- */
-function serveDemands(
-  state: GameState,
-  demands: readonly BlockDemand[],
-  blockers: readonly ObjectId[],
-  seed: ReadonlyMap<ObjectId, ObjectId> = new Map<ObjectId, ObjectId>(),
-): ReadonlyMap<ObjectId, ObjectId> | null {
-  const slots: ObjectId[] = [];
-  for (const demand of demands) {
-    for (let index = 0; index < demand.needs; index += 1) slots.push(demand.attacker);
-  }
-  const takenBy = new Map<ObjectId, number>();
-  const filled = new Set<number>();
-  for (const [blocker, attacker] of seed) {
-    if (takenBy.has(blocker)) continue;
-    if (!blockers.includes(blocker)) continue;
-    if (!canBlock(state, blocker, attacker)) continue;
-    const slot = slots.findIndex((owner, index) => owner === attacker && !filled.has(index));
-    if (slot < 0) continue;
-    takenBy.set(blocker, slot);
-    filled.add(slot);
-  }
-  const augment = (slot: number, seen: Set<ObjectId>): boolean => {
-    const attacker = slots[slot];
-    if (attacker === undefined) return false;
-    for (const blocker of blockers) {
-      if (seen.has(blocker)) continue;
-      if (!canBlock(state, blocker, attacker)) continue;
-      seen.add(blocker);
-      const holder = takenBy.get(blocker);
-      if (holder === undefined || augment(holder, seen)) {
-        takenBy.set(blocker, slot);
-        return true;
-      }
-    }
-    return false;
-  };
-  for (let slot = 0; slot < slots.length; slot += 1) {
-    if (filled.has(slot)) continue;
-    if (!augment(slot, new Set<ObjectId>())) return null;
-    filled.add(slot);
-  }
-  const assignment = new Map<ObjectId, ObjectId>();
-  for (const [blocker, slot] of takenBy) {
-    const attacker = slots[slot];
-    if (attacker !== undefined) assignment.set(blocker, attacker);
-  }
-  return assignment;
-}
-
-/** How many unit demands can be met at once: Kuhn's algorithm, one pair each. */
-function maxUnitMatching(
-  state: GameState,
-  demands: readonly BlockDemand[],
-  blockers: readonly ObjectId[],
-): number {
-  const takenBy = new Map<ObjectId, ObjectId>();
-  const augment = (attacker: ObjectId, seen: Set<ObjectId>): boolean => {
-    for (const blocker of blockers) {
-      if (seen.has(blocker)) continue;
-      if (!canBlock(state, blocker, attacker)) continue;
-      seen.add(blocker);
-      const holder = takenBy.get(blocker);
-      if (holder === undefined || augment(holder, seen)) {
-        takenBy.set(blocker, attacker);
-        return true;
-      }
-    }
-    return false;
-  };
-  let served = 0;
-  for (const demand of demands) {
-    if (augment(demand.attacker, new Set<ObjectId>())) served += 1;
-  }
-  return served;
-}
-
-/**
- * The first subset of `demands` of exactly `size` that `accept` takes, walked
- * in lexicographic order so a caller that has sorted its demands by preference
- * gets the most preferred subset that works. Null when none does.
- */
-function firstAcceptedSubset(
-  demands: readonly BlockDemand[],
-  size: number,
-  accept: (subset: readonly BlockDemand[]) => boolean,
-): readonly BlockDemand[] | null {
-  const chosen: BlockDemand[] = [];
-  const walk = (index: number): readonly BlockDemand[] | null => {
-    if (chosen.length === size) return accept(chosen) ? [...chosen] : null;
-    if (demands.length - index < size - chosen.length) return null;
-    const demand = demands[index];
-    if (demand !== undefined) {
-      chosen.push(demand);
-      const taken = walk(index + 1);
-      chosen.pop();
-      if (taken !== null) return taken;
-    }
-    return walk(index + 1);
-  };
-  return walk(0);
-}
-
-/**
- * The CR 509.1c ceiling: the largest number of the given demands one
- * declaration can meet at once.
- *
- * Unit demands are a plain bipartite matching and that is still exactly what is
- * computed for them — two lures competing for the one creature able to block
- * either cannot both be served, so the ceiling is a matching size rather than a
- * count of individually-servable attackers. A menace lure breaks the matching
- * argument rather than bending it: it costs two blockers and is served all or
- * nothing, so serving it can cost two blockers that would have served two
- * ordinary lures, and no pair matching sees that. Nothing short of a search
- * over *which* demands are met decides it exactly.
- *
- * Exact, never conservative, for the same reason `blocksCompletable` is: a
- * ceiling set too high makes a legal declaration undeclarable, which is the
- * defect being fixed wearing another hat, and one set too low lets a defender
- * walk away from a requirement the rules do not let them decline.
- *
- * The search is bounded by the board rather than by a cap. Demands that cannot
- * be met on their own are dropped first — which is what removes a menace lure
- * with one capable blocker, the shape that produced the bug — and the subset
- * walk is entered only when a menace demand survives that filter.
- */
-function mustBlockTarget(
-  state: GameState,
-  demands: readonly BlockDemand[],
-  blockers: readonly ObjectId[],
-): number {
-  const servable = demands.filter((demand) => serveDemands(state, [demand], blockers) !== null);
-  if (servable.length <= 1) return servable.length;
-  if (!servable.some((demand) => demand.needs > 1)) {
-    return maxUnitMatching(state, servable, blockers);
-  }
-  for (let size = servable.length; size > 1; size -= 1) {
-    const found = firstAcceptedSubset(
-      servable,
-      size,
-      (subset) => serveDemands(state, subset, blockers) !== null,
-    );
-    if (found !== null) return size;
-  }
-  return 1;
-}
-
-/**
- * How many must-be-blocked attackers a declaration already covers. A menace
- * attacker is covered by two blockers or by neither of them, so a single block
- * on one counts for nothing here — the same reading `validateBlocks` gives a
- * finished declaration.
- */
-function mustBlockCoverage(
-  state: GameState,
-  blocks: readonly BlockDeclaration[],
-  mustBeBlocked: readonly ObjectId[],
-): number {
-  const counts = new Map<ObjectId, number>();
-  for (const block of blocks) counts.set(block.attacker, (counts.get(block.attacker) ?? 0) + 1);
-  return mustBeBlocked.filter((attacker) => (counts.get(attacker) ?? 0) >= blockersRequired(state, attacker))
-    .length;
-}
-
-/**
- * Whether some assignment of the blockers not yet asked can still bring this
- * prefix's must-be-blocked coverage up to `target`.
- *
- * `target` is `mustBlockTarget` over the *full* eligible pool, computed once by
- * the caller before any question is asked. A prefix is reachable when its
- * current coverage plus the most of what it still owes that the blockers not
- * yet committed either way can meet reaches that ceiling — the same augmenting-
- * path shape as `blocksCompletable`, but against a coverage target instead of a
- * per-attacker count, because CR 509.1c lets a scarce capable blocker satisfy
- * at most one of several competing requirements.
- */
-function mustBlockReachable(
-  state: GameState,
-  blocks: readonly BlockDeclaration[],
-  mustBeBlocked: readonly ObjectId[],
-  target: number,
-  later: readonly ObjectId[],
-): boolean {
-  if (target === 0) return true;
-  const covered = mustBlockCoverage(state, blocks, mustBeBlocked);
-  if (covered >= target) return true;
-  const free = later.filter((blocker) => blocks.every((block) => block.blocker !== blocker));
-  const outstanding = outstandingDemands(state, blocks, mustBeBlocked);
-  return covered + mustBlockTarget(state, outstanding, free) >= target;
-}
-
-/**
- * The same block declaration, with CR 509.1c satisfied.
- *
- * `validateBlockDeclaration` refuses a finished declaration that covers fewer
- * must-be-blocked attackers than could jointly be covered, and an agent that
- * *constructs* its declaration rather than picking one out of the enumeration
- * (`@mtg/sim`'s block policy, which prices every block against the race) has no
- * reason of its own to block a lure it would rather ignore. Rather than teach
- * every constructing agent the matching argument, the kernel hands back the
- * nearest declaration that passes: the agent decides which blocks it wants,
- * this decides which ones it owes.
- *
- * Owed beats wanted where the two collide, because the requirement is a rule
- * and a voluntary block is a preference — a blocker the requirement needs is
- * taken off whatever block it was making. It is taken last, though: blockers
- * already committed elsewhere are offered to the assignment only after the free
- * ones, the pairs already covering a must-attacker are seeded in first, and the
- * demands are walked most-covered first, so a declaration that satisfies the
- * rule already comes back untouched and one that nearly does gives up as little
- * as the rule allows.
- *
- * A menace lure is served with two blockers here or not at all, which is what
- * `blockersRequired` bought. Whatever is left over is still held to the same
- * rule: a *voluntary* two-blocker block that lost one of its blockers to the
- * requirement gives up the whole block rather than submit an illegal single.
- */
-export function satisfyMustBeBlocked(
-  state: GameState,
-  blocks: readonly BlockDeclaration[],
-): readonly BlockDeclaration[] {
-  const mustBeBlocked = state.combat.attacks
-    .map((attack) => attack.oid)
-    .filter((attacker) => hasCombatModification(state, attacker, 'mustBeBlockedIfAble'));
-  if (mustBeBlocked.length === 0) return blocks;
-  const eligible = eligibleBlockers(state);
-  const target = mustBlockTarget(state, outstandingDemands(state, [], mustBeBlocked), eligible);
-  if (target === 0) return blocks;
-  if (mustBlockCoverage(state, blocks, mustBeBlocked) >= target) return blocks;
-
-  const counts = new Map<ObjectId, number>();
-  for (const block of blocks) counts.set(block.attacker, (counts.get(block.attacker) ?? 0) + 1);
-  const demands = outstandingDemands(state, [], mustBeBlocked)
-    .filter((demand) => serveDemands(state, [demand], eligible) !== null)
-    .sort((a, b) => (counts.get(b.attacker) ?? 0) - (counts.get(a.attacker) ?? 0));
-  const seed = new Map<ObjectId, ObjectId>();
-  for (const block of blocks) {
-    if (mustBeBlocked.includes(block.attacker)) seed.set(block.blocker, block.attacker);
-  }
-  const committed = new Set(blocks.map((block) => block.blocker));
-  const preferred = [
-    ...eligible.filter((blocker) => !committed.has(blocker)),
-    ...eligible.filter((blocker) => committed.has(blocker)),
-  ];
-  let owed: ReadonlyMap<ObjectId, ObjectId> | null = null;
-  firstAcceptedSubset(demands, target, (subset) => {
-    owed = serveDemands(state, subset, preferred, seed);
-    return owed !== null;
-  });
-  // Unreachable: `target` is the size of a subset `mustBlockTarget` served over
-  // this very pool, and `preferred` is that pool in another order.
-  if (owed === null) throw new Error('satisfyMustBeBlocked: the joint maximum is not servable');
-
-  const taken: ReadonlyMap<ObjectId, ObjectId> = owed;
-  const repaired: BlockDeclaration[] = [];
-  for (const [blocker, attacker] of taken) repaired.push({ blocker, attacker });
-  for (const block of blocks) {
-    if (!taken.has(block.blocker)) repaired.push(block);
-  }
-  const repairedCounts = new Map<ObjectId, number>();
-  for (const block of repaired) {
-    repairedCounts.set(block.attacker, (repairedCounts.get(block.attacker) ?? 0) + 1);
-  }
-  return repaired.filter(
-    (block) => (repairedCounts.get(block.attacker) ?? 0) >= blockersRequired(state, block.attacker),
-  );
 }
 
 /**
@@ -1840,6 +2692,64 @@ function orderDecision(state: GameState, player: PlayerId, cap: number): Decisio
       }))
     : nextPositionOptions(blocks, fixed, rest, perAttacker, classes, player);
   return { kind: 'orderBlockers', player, blocks, options, complete: true };
+}
+
+/** CR 509.3's blocker-to-attacker damage order, symmetric with CR 509.2. */
+function attackerOrderDecision(state: GameState, player: PlayerId, cap: number): Decision {
+  const blocks = blockersNeedingAttackerOrder(state);
+  const settled = state.combat.attackersOrdered ?? {};
+  const classes = blocks.map((block) => damageOrderClasses(state, block.attackers));
+  const fixed = blocks.map((block) => block.attackers.slice(0, settled[block.blocker] ?? 0));
+  const rest = blocks.map((block) => block.attackers.slice(settled[block.blocker] ?? 0));
+  const perBlocker = rest.map((remaining, index) =>
+    distinctPermutations(remaining, (attacker) => classes[index]?.get(attacker) ?? attacker, cap),
+  );
+  const product = cartesian(
+    perBlocker.map((entry) => entry.items),
+    cap,
+  );
+  const listable = product.complete && perBlocker.every((entry) => entry.complete);
+  const options = listable
+    ? product.items.map((orders): Action => ({
+        type: 'orderAttackers',
+        player,
+        orders: orders.map((attackers, index) => ({
+          blocker: blocks[index]?.blocker ?? '',
+          attackers: [...(fixed[index] ?? []), ...attackers],
+        })),
+      }))
+    : nextAttackerPositionOptions(blocks, fixed, rest, perBlocker, classes, player);
+  return { kind: 'orderAttackers', player, blocks, options, complete: true };
+}
+
+function nextAttackerPositionOptions(
+  blocks: readonly AttackerOrder[],
+  fixed: readonly (readonly ObjectId[])[],
+  rest: readonly (readonly ObjectId[])[],
+  perBlocker: readonly Enumerated<readonly ObjectId[]>[],
+  classes: readonly ReadonlyMap<ObjectId, string>[],
+  player: PlayerId,
+): readonly Action[] {
+  const asking = perBlocker.findIndex((entry) => !entry.complete || entry.items.length > 1);
+  const block = blocks[asking];
+  const remaining = rest[asking];
+  if (block === undefined || remaining === undefined) {
+    throw new Error('attackerOrderDecision: no blocker has an ordering left to ask about');
+  }
+  const keyOf = (attacker: ObjectId): string => classes[asking]?.get(attacker) ?? attacker;
+  const offered = new Set<string>();
+  const options: Action[] = [];
+  for (const attacker of remaining) {
+    const key = keyOf(attacker);
+    if (offered.has(key)) continue;
+    offered.add(key);
+    options.push({
+      type: 'orderAttackers',
+      player,
+      orders: [{ blocker: block.blocker, attackers: [...(fixed[asking] ?? []), attacker] }],
+    });
+  }
+  return options;
 }
 
 /**
@@ -1934,12 +2844,21 @@ export function asksInSteps(decision: Decision): boolean {
         option.settled !== undefined,
     );
   }
-  if (decision.kind !== 'orderBlockers') return false;
+  if (decision.kind === 'orderBlockers') {
+    return decision.options.some((option) => {
+      if (option.type !== 'orderBlockers') return true;
+      return decision.blocks.some((block) => {
+        const entry = option.orders.find((order) => order.attacker === block.attacker);
+        return entry === undefined || entry.blockers.length < block.blockers.length;
+      });
+    });
+  }
+  if (decision.kind !== 'orderAttackers') return false;
   return decision.options.some((option) => {
-    if (option.type !== 'orderBlockers') return true;
+    if (option.type !== 'orderAttackers') return true;
     return decision.blocks.some((block) => {
-      const entry = option.orders.find((order) => order.attacker === block.attacker);
-      return entry === undefined || entry.blockers.length < block.blockers.length;
+      const entry = option.orders.find((order) => order.blocker === block.blocker);
+      return entry === undefined || entry.attackers.length < block.attackers.length;
     });
   });
 }
@@ -2023,10 +2942,27 @@ function completesTrigger(
  * from one slot up to all of them.
  */
 function triggerTargetsDecision(state: GameState, pending: TriggerOnStack, cap: number): Decision {
-  const player = pending.entry.controller;
+  const player = stackEntryTargetingController(state, pending.entry);
   const effects = pending.ability.effects;
   const settled = pending.entry.targets;
   const choices = triggerTargetChoices(state, pending);
+  if (hasPluralTargets(effects)) {
+    const ordinary = cartesian(choices, cap);
+    const options = ordinary.items.flatMap((targets): Action[] =>
+      honoursDistinctSlots(effects, targets)
+        ? [{ type: 'chooseTriggerTargets', player, oid: pending.entry.oid, targets }]
+        : [],
+    );
+    return {
+      kind: 'triggerTargets',
+      player,
+      oid: pending.entry.oid,
+      source: pending.source,
+      abilityIndex: pending.index,
+      options,
+      complete: ordinary.complete,
+    };
+  }
   const combos = cartesian(choices.slice(settled.length), cap);
   const options: Action[] = [];
   if (combos.complete) {
@@ -2054,17 +2990,25 @@ function triggerTargetsDecision(state: GameState, pending: TriggerOnStack, cap: 
 }
 
 /**
- * Take it or leave it (CR 603.3b).
+ * Answer a triggered ability's yes/no resolution choice.
  *
- * Two options, always both, always in this order: a "may" is never enumerated
- * as one, because an optional trigger whose only legal answer was "yes" would be
- * a mandatory trigger wearing the word. `complete` is unconditionally true —
- * there is no cap that can bite on a list of two — which is what stops the play
- * surface from printing a truncation warning over a yes/no question.
+ * Ordinary CR 603.3b optional triggers offer both answers in this order. A paid
+ * optional trigger whose controller cannot currently pay offers decline alone:
+ * the permission remains optional, while an impossible payment is not a legal
+ * action. Faerie Impostor's answer instead chooses whether to pay its return
+ * cost; accepting is omitted when no other controlled creature can pay it.
+ * `complete` is unconditionally true because no enumeration cap can bite on
+ * either list.
  */
-function optionalTriggerDecision(pending: TriggerOnStack): Decision {
-  const player = pending.entry.controller;
+function optionalTriggerDecision(state: GameState, pending: TriggerOnStack): Decision {
+  const player =
+    pending.ability.kind === 'triggered' &&
+    pending.ability.opponentMaySacrificeCreatureThenTapAndCounterSelf === true
+      ? opponentOf(pending.entry.controller)
+      : pending.entry.controller;
   const oid = pending.entry.oid;
+  const payment =
+    pending.ability.kind === 'triggered' ? pending.ability.optionalControllerPayment : undefined;
   return {
     kind: 'optionalTrigger',
     player,
@@ -2072,10 +3016,13 @@ function optionalTriggerDecision(pending: TriggerOnStack): Decision {
     source: pending.source,
     abilityIndex: pending.index,
     targets: pending.entry.targets,
-    options: [
-      { type: 'answerOptionalTrigger', player, oid, accept: true },
-      { type: 'answerOptionalTrigger', player, oid, accept: false },
-    ],
+    options:
+      payment === undefined || canPay(state, player, payment.cost)
+        ? [
+            { type: 'answerOptionalTrigger', player, oid, accept: true },
+            { type: 'answerOptionalTrigger', player, oid, accept: false },
+          ]
+        : [{ type: 'answerOptionalTrigger', player, oid, accept: false }],
     complete: true,
   };
 }
@@ -2128,6 +3075,81 @@ function scryDecision(state: GameState): Decision {
   return { kind: 'scry', player: pending.player, cards: pending.cards, options, complete: true };
 }
 
+function topLibraryDecision(state: GameState): Decision {
+  const pending = state.pendingTopLibrary;
+  if (pending === undefined) throw new Error('topLibraryDecision: no top-library choice is pending');
+  if (pending.kind === 'order') {
+    const ordered = permutations(pending.cards, 120);
+    if (!ordered.complete) throw new Error('topLibraryDecision: order exceeds its schema bound');
+    return {
+      kind: 'topLibraryOrder',
+      player: pending.chooser,
+      cards: pending.cards,
+      options: ordered.items.map((cards) => ({
+        type: 'orderTopLibrary' as const,
+        player: pending.chooser,
+        cards,
+      })),
+      complete: true,
+    };
+  }
+  if (pending.kind === 'select') {
+    const options: Action[] = [];
+    for (const chosen of [...(pending.eligible ?? []), null]) {
+      const rest = pending.cards.filter((oid) => oid !== chosen);
+      const orders = pending.selectionRest === 'graveyard' ? [rest] : permutations(rest, 6).items;
+      for (const order of orders) {
+        options.push({ type: 'selectFromTopLibrary', player: pending.chooser, chosen, rest: order });
+      }
+    }
+    return {
+      kind: 'topLibrarySelect',
+      player: pending.chooser,
+      cards: pending.cards,
+      eligible: pending.eligible ?? [],
+      options,
+      complete: true,
+    };
+  }
+  if (pending.kind === 'partition') {
+    const [anchor, ...rest] = pending.cards;
+    const options: Action[] = [];
+    for (let mask = 0; mask < 2 ** rest.length; mask += 1) {
+      const first = anchor === undefined ? [] : [anchor];
+      const second: ObjectId[] = [];
+      rest.forEach((oid, index) => ((mask & (1 << index)) === 0 ? first : second).push(oid));
+      options.push({ type: 'separateTopLibraryPiles', player: pending.chooser, first, second });
+    }
+    return {
+      kind: 'topLibraryPartition',
+      player: pending.chooser,
+      cards: pending.cards,
+      options,
+      complete: true,
+    };
+  }
+  if (pending.piles === undefined) throw new Error('topLibraryDecision: pile choice has no piles');
+  return {
+    kind: 'topLibraryPile',
+    player: pending.chooser,
+    piles: pending.piles,
+    options: [0, 1].map((pile) => ({
+      type: 'chooseTopLibraryPile' as const,
+      player: pending.chooser,
+      pile: pile as 0 | 1,
+    })),
+    complete: true,
+  };
+}
+
+function sameMembers(actual: readonly ObjectId[], expected: readonly ObjectId[]): boolean {
+  return (
+    actual.length === expected.length &&
+    new Set(actual).size === actual.length &&
+    actual.every((oid) => expected.includes(oid))
+  );
+}
+
 function searchDecision(state: GameState): Decision {
   const pending = state.pendingSearch;
   if (pending === undefined) throw new Error('searchDecision: no search is pending');
@@ -2136,8 +3158,27 @@ function searchDecision(state: GameState): Decision {
     player: pending.player,
     found: oid,
   }));
-  options.push({ type: 'searchLibrary', player: pending.player, found: null });
+  if (pending.mayFail) options.push({ type: 'searchLibrary', player: pending.player, found: null });
   return { kind: 'searchLibrary', player: pending.player, cards: pending.cards, options, complete: true };
+}
+
+function searchDestinationDecision(state: GameState): Decision {
+  const pending = state.pendingSearch;
+  if (pending === undefined) {
+    throw new Error('searchDestinationDecision: no search destination is pending');
+  }
+  const options: Action[] = pending.taken.map((one) => ({
+    type: 'chooseSearchDestination',
+    player: pending.player,
+    one,
+  }));
+  return {
+    kind: 'searchDestination',
+    player: pending.player,
+    cards: pending.taken,
+    options,
+    complete: true,
+  };
 }
 
 /**
@@ -2162,6 +3203,246 @@ function graveyardChoiceDecision(state: GameState): Decision {
   return { kind: 'graveyardChoice', player: pending.player, cards: pending.cards, options, complete: true };
 }
 
+/** Whether a frozen battlefield candidate still has the values the effect requires. */
+export function isCurrentBattlefieldChoiceCandidate(
+  state: GameState,
+  pending: PendingBattlefieldChoice,
+  candidate: PendingPermanentUntapChoice,
+): boolean {
+  const object = state.objects[candidate.oid];
+  return (
+    object?.zone === 'battlefield' &&
+    (object.incarnation ?? 0) === candidate.incarnation &&
+    controllerOf(state, candidate.oid) === pending.player &&
+    satisfiesTargetFilter(state, candidate.oid, pending.filter)
+  );
+}
+
+function battlefieldChoiceDecision(state: GameState): Decision {
+  const pending = state.pendingBattlefieldChoice;
+  if (pending === undefined) throw new Error('battlefieldChoiceDecision: no battlefield choice is pending');
+  const permanents = pending.permanents
+    .filter((candidate) => isCurrentBattlefieldChoiceCandidate(state, pending, candidate))
+    .map((candidate) => candidate.oid);
+  return {
+    kind: 'battlefieldChoice',
+    player: pending.player,
+    permanents,
+    options: permanents.map((chosen): Action => ({
+      type: 'chooseFromBattlefield',
+      player: pending.player,
+      chosen,
+    })),
+    complete: true,
+  };
+}
+
+/** Whether one frozen Populate candidate is still the same controlled creature token. */
+export function isCurrentPopulateCandidate(
+  state: GameState,
+  pending: PendingPopulate,
+  candidate: PendingPopulateCandidate,
+): boolean {
+  const object = state.objects[candidate.oid];
+  return (
+    object?.zone === 'battlefield' &&
+    object.token &&
+    (object.incarnation ?? 0) === candidate.incarnation &&
+    controllerOf(state, candidate.oid) === pending.player &&
+    isCreatureObject(state, candidate.oid)
+  );
+}
+
+function populateDecision(state: GameState): Decision {
+  const pending = state.pendingPopulate;
+  if (pending === undefined) throw new Error('populateDecision: no Populate choice is pending');
+  const tokens = pending.tokens
+    .filter((candidate) => isCurrentPopulateCandidate(state, pending, candidate))
+    .map((candidate) => candidate.oid);
+  return {
+    kind: 'populate',
+    player: pending.player,
+    tokens,
+    options: tokens.map((token): Extract<Action, { type: 'choosePopulateToken' }> => ({
+      type: 'choosePopulateToken',
+      player: pending.player,
+      token,
+    })),
+    complete: true,
+  };
+}
+
+function entryCopyDecision(state: GameState): Decision {
+  const pending = state.pendingEntryCopy;
+  if (pending === undefined) throw new Error('entryCopyDecision: no entry-copy choice is pending');
+  const copies = pending.creatures.map((copyOf): Action => ({
+    type: 'chooseEntryCopy',
+    player: pending.player,
+    oid: pending.oid,
+    copyOf,
+  }));
+  return {
+    kind: 'entryCopy',
+    player: pending.player,
+    oid: pending.oid,
+    creatures: pending.creatures,
+    options: [...copies, { type: 'chooseEntryCopy', player: pending.player, oid: pending.oid, copyOf: null }],
+    complete: true,
+  };
+}
+
+function entryCounterDecision(state: GameState): Decision {
+  const pending = state.pendingEntryCounterChoice;
+  if (pending === undefined) throw new Error('entryCounterDecision: no entry counter choice is pending');
+  return {
+    kind: 'entryCounter',
+    player: pending.player,
+    oid: pending.oid,
+    permanents: pending.permanents,
+    options: pending.permanents.map((permanent): Action => ({
+      type: 'chooseEntryCounterPermanent',
+      player: pending.player,
+      oid: pending.oid,
+      permanent,
+    })),
+    complete: true,
+  };
+}
+
+function entryCharacteristicsDecision(state: GameState): Decision {
+  const pending = state.pendingEntryCharacteristicsChoice;
+  if (pending === undefined) {
+    throw new Error('entryCharacteristicsDecision: no entry characteristic choice is pending');
+  }
+  return {
+    kind: 'entryCharacteristics',
+    player: pending.player,
+    oid: pending.oid,
+    modes: pending.modes,
+    options: pending.modes.map((_, mode): Action => ({
+      type: 'chooseEntryCharacteristics',
+      player: pending.player,
+      oid: pending.oid,
+      mode,
+    })),
+    complete: true,
+  };
+}
+
+function entryOptionalCounterDecision(state: GameState): Decision {
+  const pending = state.pendingEntryOptionalCounterChoice;
+  if (pending === undefined) {
+    throw new Error('entryOptionalCounterDecision: no optional entry counter choice is pending');
+  }
+  return {
+    kind: 'entryOptionalCounter',
+    player: pending.player,
+    oid: pending.entry.oid,
+    counter: pending.counter,
+    count: pending.count,
+    options: [true, false].map((accept): Action => ({
+      type: 'chooseEntryOptionalCounter',
+      player: pending.player,
+      oid: pending.entry.oid,
+      accept,
+    })),
+    complete: true,
+  };
+}
+
+function entryPayLifeDecision(state: GameState): Decision {
+  const pending = state.pendingEntryPayLifeChoice;
+  if (pending === undefined) {
+    throw new Error('entryPayLifeDecision: no entry life-payment choice is pending');
+  }
+  const decline: Extract<Action, { type: 'chooseEntryPayLife' }> = {
+    type: 'chooseEntryPayLife',
+    player: pending.player,
+    oid: pending.entry.oid,
+    life: pending.life,
+    pay: false,
+  };
+  const pay: Extract<Action, { type: 'chooseEntryPayLife' }> = { ...decline, pay: true };
+  return {
+    kind: 'entryPayLife',
+    player: pending.player,
+    oid: pending.entry.oid,
+    life: pending.life,
+    options: playerOf(state, pending.player).life < pending.life ? [decline] : [pay, decline],
+    complete: true,
+  };
+}
+
+function entryPlayerDecision(state: GameState): Decision {
+  const pending = state.pendingEntryPlayerChoice;
+  if (pending === undefined) throw new Error('entryPlayerDecision: no entry player choice is pending');
+  return {
+    kind: 'entryPlayer',
+    player: pending.player,
+    oid: pending.oid,
+    options: state.players.map((candidate): Action => ({
+      type: 'chooseEntryPlayer',
+      player: pending.player,
+      oid: pending.oid,
+      chosen: candidate.id,
+    })),
+    complete: true,
+  };
+}
+
+function entryColorsDecision(state: GameState): Decision {
+  const pending = state.pendingEntryColorsChoice;
+  if (pending === undefined) throw new Error('entryColorsDecision: no entry color choice is pending');
+  const options: Action[] = COLORS.flatMap((left, index) =>
+    COLORS.slice(index + 1).map((right) => ({
+      type: 'chooseEntryColors' as const,
+      player: pending.player,
+      oid: pending.oid,
+      colors: [left, right] as const,
+    })),
+  );
+  return { kind: 'entryColors', player: pending.player, oid: pending.oid, options, complete: true };
+}
+
+function entryAuraDecision(state: GameState): Decision {
+  const pending = state.pendingEntryAuraChoice;
+  if (pending === undefined) throw new Error('entryAuraDecision: no Aura entry choice is pending');
+  return {
+    kind: 'entryAura',
+    player: pending.player,
+    oid: pending.entry.oid,
+    permanents: pending.permanents,
+    options: pending.permanents.map((host): Action => ({
+      type: 'chooseEntryAuraHost',
+      player: pending.player,
+      oid: pending.entry.oid,
+      host,
+    })),
+    complete: true,
+  };
+}
+
+function entryTimestampOrderDecision(state: GameState): Decision {
+  const group = state.pendingBattlefieldEntryBatch?.timestampGroups?.find(
+    (candidate) => candidate.remaining.length > 1,
+  );
+  if (group === undefined) {
+    throw new Error('entryTimestampOrderDecision: no timestamp group is awaiting an answer');
+  }
+  return {
+    kind: 'entryTimestampOrder',
+    player: group.player,
+    ordered: group.chosen,
+    remaining: group.remaining,
+    options: group.remaining.map((oid): Action => ({
+      type: 'chooseEntryTimestampNext',
+      player: group.player,
+      oid,
+    })),
+    complete: true,
+  };
+}
+
 /**
  * CR 701.17a's question over the banked candidate list.
  *
@@ -2171,7 +3452,7 @@ function graveyardChoiceDecision(state: GameState): Decision {
  * `applyResolutionEffects`. The candidates are read off `pending.permanents`
  * rather than re-derived from the battlefield, `graveyardChoiceDecision`'s
  * stated reason: the chooser answers the question they were asked, and a
- * creature that left the battlefield between the pause and the answer is
+ * permanent that left the battlefield between the pause and the answer is
  * still one they were offered.
  */
 function permanentSacrificeDecision(state: GameState): Decision {
@@ -2182,7 +3463,119 @@ function permanentSacrificeDecision(state: GameState): Decision {
     kind: 'permanentSacrifice',
     player,
     permanents: pending.permanents,
+    remaining: pending.remainingCount,
     options: pending.permanents.map((oid): Action => ({ type: 'sacrificePermanent', player, oid })),
+    complete: true,
+  };
+}
+
+export function isCurrentPermanentUntapCandidate(
+  state: GameState,
+  pending: PendingPermanentUntap,
+  candidate: PendingPermanentUntapChoice,
+): boolean {
+  const object = state.objects[candidate.oid];
+  return (
+    object?.zone === 'battlefield' &&
+    (object.incarnation ?? 0) === candidate.incarnation &&
+    canUntapObject(state, candidate.oid) &&
+    satisfiesTargetFilter(state, candidate.oid, pending.filter)
+  );
+}
+
+function permanentUntapDecision(state: GameState): Decision {
+  const pending = state.pendingPermanentUntap;
+  if (pending === undefined) throw new Error('permanentUntapDecision: no permanent untap is pending');
+  const player = pending.controller;
+  const permanents = pending.permanents
+    .filter((candidate) => isCurrentPermanentUntapCandidate(state, pending, candidate))
+    .map((candidate) => candidate.oid);
+  return {
+    kind: 'permanentUntap',
+    player,
+    permanents,
+    remaining: pending.remainingCount,
+    options: [
+      ...permanents.map((oid): Action => ({ type: 'choosePermanentToUntap', player, oid })),
+      { type: 'choosePermanentToUntap', player, oid: null },
+    ],
+    complete: true,
+  };
+}
+
+function cardNameDecision(state: GameState): Decision {
+  const resolving = state.pendingCardNameChoice;
+  const entering = state.pendingEntryCardNameChoice;
+  if (resolving === undefined && entering === undefined) {
+    throw new Error('cardNameDecision: no card-name choice is pending');
+  }
+  return {
+    kind: 'cardName',
+    player: resolving?.player ?? entering!.player,
+    chosen: resolving?.chosen ?? [],
+    input: { kind: 'text', label: 'Card name', minLength: 1, maxLength: MAX_CARD_NAME_LENGTH },
+    options: [],
+    complete: true,
+  };
+}
+
+function namesKnownLand(state: GameState, name: string): boolean {
+  const canonical = name.trim().normalize('NFKC').toLowerCase();
+  if (new Set(['plains', 'island', 'swamp', 'mountain', 'forest']).has(canonical)) return true;
+  return Object.values(state.objects).some(
+    (object) =>
+      object.card.kind === 'land' && object.card.name.trim().normalize('NFKC').toLowerCase() === canonical,
+  );
+}
+
+function namedZoneExileDecision(state: GameState): Decision {
+  const pending = state.pendingNamedZoneExile;
+  if (pending === undefined) throw new Error('namedZoneExileDecision: no named-zone exile is pending');
+  return {
+    kind: 'namedZoneExile',
+    player: pending.player,
+    targetPlayer: pending.targetPlayer,
+    name: pending.name,
+    cards: pending.candidates,
+    chosen: pending.chosen,
+    options: [
+      ...pending.candidates.map((oid): Action => ({
+        type: 'chooseNamedZoneExile',
+        player: pending.player,
+        oid,
+      })),
+      { type: 'chooseNamedZoneExile', player: pending.player, oid: null },
+    ],
+    complete: true,
+  };
+}
+
+function damagePreventionDecision(state: GameState): Decision {
+  const pending = state.pendingDamagePrevention;
+  if (pending === undefined) {
+    throw new Error('damagePreventionDecision: no prevention allocation is pending');
+  }
+  const source = pending.plan.sources[0];
+  if (source === undefined) {
+    throw new Error('damagePreventionDecision: no simultaneous source is awaiting allocation');
+  }
+  const { minimum, maximum } = damagePreventionRange(pending);
+  const options: Action[] = [];
+  for (let amount = minimum; amount <= maximum; amount += 1) {
+    options.push({
+      type: 'allocateDamagePrevention',
+      player: pending.player,
+      sourceOid: source.sourceOid,
+      amount,
+    });
+  }
+  return {
+    kind: 'damagePrevention',
+    player: pending.player,
+    effectId: pending.plan.effectId,
+    source,
+    remaining: pending.remainingAmount,
+    options,
     complete: true,
   };
 }
@@ -2199,14 +3592,14 @@ function permanentSacrificeDecision(state: GameState): Decision {
  * afford the price, and a question whose only answer is "no" is not one this
  * kernel asks.
  */
-function unlessDecision(pending: TolledSpellOnStack): Decision {
+function unlessDecision(pending: TolledStackObject): Decision {
   const player = pending.payer;
   const oid = pending.entry.oid;
   return {
     kind: 'unless',
     player,
     oid,
-    cost: pending.clause.cost,
+    cost: pending.cost,
     targets: pending.entry.targets,
     options: [
       { type: 'answerUnless', player, oid, pay: true },
@@ -2333,6 +3726,20 @@ function mulliganDecision(state: GameState, player: PlayerId, cap: number): Deci
   };
 }
 
+function openingHandActionDecision(state: GameState, player: PlayerId): Decision {
+  const cards = eligibleOpeningHandActionCards(state, player);
+  return {
+    kind: 'openingHandAction',
+    player,
+    cards,
+    options: [
+      ...cards.map((oid): Action => ({ type: 'chooseOpeningHandAction', player, oid })),
+      { type: 'chooseOpeningHandAction', player, oid: null },
+    ],
+    complete: true,
+  };
+}
+
 /**
  * CR 704.5j: keep one of these, and the rest go to their owners' graveyards.
  *
@@ -2363,7 +3770,7 @@ function legendRuleDecision(collision: LegendCollision): Decision {
  */
 function discardDecision(state: GameState, player: PlayerId, cap: number): Decision {
   const hand = playerOf(state, player).hand;
-  const count = hand.length - state.config.maximumHandSize;
+  const count = cleanupDiscardCount(state, player);
   const options = selectionAnswers(hand, count, state.pendingSelection ?? [], cap).map((oids): Action => ({
     type: 'discard',
     player,
@@ -2414,6 +3821,208 @@ function handDiscardDecision(state: GameState, cap: number): Decision {
   };
 }
 
+function revealedHandChoiceDecision(state: GameState): Decision {
+  const pending = state.pendingRevealedHandChoice;
+  if (pending === undefined) {
+    throw new Error('revealedHandChoiceDecision: no revealed-hand choice is pending');
+  }
+  const mayDecline = pending.outcome.kind === 'mayCastWithoutPayingManaCost';
+  const options: readonly Action[] = [
+    ...(mayDecline
+      ? [{ type: 'chooseFromRevealedHand', player: pending.player, chosen: null } as const]
+      : []),
+    ...pending.choosable.map((chosen): Action => ({
+      type: 'chooseFromRevealedHand',
+      player: pending.player,
+      chosen,
+    })),
+  ];
+  return {
+    kind: 'revealedHandChoice',
+    player: pending.player,
+    owner: pending.owner,
+    cards: pending.choosable,
+    options,
+    complete: true,
+  };
+}
+
+function targetEqual(left: Target | null, right: Target | null): boolean {
+  if (left === null || right === null) return left === right;
+  return sameTarget(left, right);
+}
+
+function uniqueTargets(targets: readonly Target[]): readonly Target[] {
+  return targets.filter(
+    (target, index) => targets.findIndex((candidate) => sameTarget(candidate, target)) === index,
+  );
+}
+
+function spellTargetContext(state: GameState): {
+  readonly entry: GameState['stack'][number];
+  readonly card: Card;
+  readonly effects: readonly Effect[];
+  readonly controller: PlayerId;
+  readonly source: ObjectId | Card;
+} | null {
+  const pending = state.pendingSpellTargets;
+  if (pending === undefined) return null;
+  const entry = state.stack.find((candidate) => candidate.oid === pending.spell);
+  if (entry === undefined || entry.ability !== null) return null;
+  const card = spellCard(state, entry);
+  if (card === null) return null;
+  // Overload replacements are untargeted by construction, so a copied or
+  // redirected overloaded spell can never open this target-changing decision.
+  if (entry.castingCost === 'overload') return null;
+  return {
+    entry,
+    card,
+    effects: spellEffectsFor(card, entry.mode, 'ordinary'),
+    controller: pending.operation === 'copySpell' ? pending.controller : entry.controller,
+    source: entry.copiedSpell?.card ?? entry.oid,
+  };
+}
+
+function spellMultiTargetOptions(
+  state: GameState,
+  context: NonNullable<ReturnType<typeof spellTargetContext>>,
+  cap: number,
+): Enumerated<Readonly<Record<number, readonly Target[]>> | undefined> {
+  const original = context.entry.multiTargets;
+  if (original === undefined) return { items: [undefined], complete: true };
+  let maps: Readonly<Record<number, readonly Target[]>>[] = [{}];
+  let complete = true;
+  for (const [rawIndex, prior] of Object.entries(original)) {
+    const index = Number(rawIndex);
+    const effect = context.effects[index];
+    if (effect === undefined) return { items: [], complete: true };
+    const choices = isTargetedFight(effect)
+      ? cartesian(
+          [
+            uniqueTargets([
+              ...(prior[0] === undefined ? [] : [prior[0]]),
+              ...multipleTargetCandidates(state, effect, context.controller, context.source, 0),
+            ]),
+            uniqueTargets([
+              ...(prior[1] === undefined ? [] : [prior[1]]),
+              ...multipleTargetCandidates(state, effect, context.controller, context.source, 1),
+            ]),
+          ],
+          cap,
+        )
+      : combinations(
+          uniqueTargets([
+            ...prior,
+            ...multipleTargetCandidates(state, effect, context.controller, context.source),
+          ]),
+          prior.length,
+          cap,
+        );
+    if (!choices.complete) complete = false;
+    const grown: Readonly<Record<number, readonly Target[]>>[] = [];
+    for (const prefix of maps) {
+      for (const chosen of choices.items) {
+        if (grown.length >= cap) {
+          complete = false;
+          break;
+        }
+        grown.push({ ...prefix, [index]: chosen });
+      }
+      if (grown.length >= cap) break;
+    }
+    maps = grown;
+  }
+  return { items: maps, complete };
+}
+
+function spellTargetsDecision(state: GameState, cap: number): Decision {
+  const pending = state.pendingSpellTargets;
+  const context = spellTargetContext(state);
+  if (pending === undefined || context === null) {
+    throw new Error('spellTargetsDecision: no target spell is pending');
+  }
+  const legal = isAuraCard(context.card)
+    ? targetChoicesFor(state, context.card, context.controller, context.entry.oid)
+    : targetChoicesForEffects(state, context.effects, context.controller, context.source);
+  const choices = legal.map((slot, index) => {
+    const prior = context.entry.targets[index] ?? null;
+    const withPrior = [prior, ...slot];
+    return withPrior.filter(
+      (target, at) => withPrior.findIndex((candidate) => targetEqual(candidate, target)) === at,
+    );
+  });
+  const targetOptions = cartesian(choices, cap);
+  const multiOptions = spellMultiTargetOptions(state, context, cap);
+  const options: Action[] = [];
+  let complete = targetOptions.complete && multiOptions.complete;
+  for (const targets of targetOptions.items) {
+    if (!honoursDistinctSlots(context.effects, targets)) continue;
+    for (const multiTargets of multiOptions.items) {
+      if (options.length >= cap) {
+        complete = false;
+        break;
+      }
+      options.push({
+        type: 'chooseSpellTargets',
+        player: pending.player,
+        oid: pending.spell,
+        targets,
+        ...(multiTargets === undefined ? {} : { multiTargets }),
+        ...(context.entry.damageAllocations === undefined
+          ? {}
+          : { damageAllocations: context.entry.damageAllocations }),
+      });
+    }
+  }
+  return {
+    kind: 'spellTargets',
+    player: pending.player,
+    oid: pending.spell,
+    targets: context.entry.targets,
+    ...(context.entry.multiTargets === undefined ? {} : { multiTargets: context.entry.multiTargets }),
+    ...(context.entry.damageAllocations === undefined
+      ? {}
+      : { damageAllocations: context.entry.damageAllocations }),
+    options,
+    complete,
+  };
+}
+
+function freeCastDecision(state: GameState, cap: number): Decision {
+  const pending = state.pendingFreeCast;
+  if (pending === undefined) throw new Error('freeCastDecision: no free cast is pending');
+  const castCap = pending.optional === true ? Math.max(0, cap - 1) : cap;
+  const candidateOids = pending.copyCandidates?.map((candidate) => candidate.oid) ??
+    pending.originalCandidates?.map((candidate) => candidate.oid) ?? [pending.oid];
+  const casts = candidateOids.reduce<Enumerated<Action>>(
+    (all, oid) => {
+      const candidate = pendingFreeCastCandidate(state, pending, oid);
+      if (candidate === null) return all;
+      const next = freeCastOptionsForCard(
+        state,
+        pending.player,
+        oid,
+        candidate.card,
+        castCap - all.items.length,
+      );
+      return { items: [...all.items, ...next.items], complete: all.complete && next.complete };
+    },
+    { items: [], complete: true },
+  );
+  const options: readonly Action[] =
+    pending.optional === true
+      ? [{ type: 'declineFreeCast', player: pending.player, oid: pending.oid }, ...casts.items]
+      : casts.items;
+  return {
+    kind: 'freeCast',
+    player: pending.player,
+    oid: pending.oid,
+    optional: pending.optional === true,
+    options,
+    complete: casts.complete,
+  };
+}
+
 /**
  * The decision the kernel is currently blocked on, or `null` when the game is
  * over.
@@ -2426,21 +4035,41 @@ function handDiscardDecision(state: GameState, cap: number): Decision {
  */
 export function pendingDecision(state: GameState, cap: number = DEFAULT_ENUMERATION_CAP): Decision | null {
   if (state.result !== null) return null;
+  if (state.pendingManaCombination !== undefined) {
+    const pending = state.pendingManaCombination;
+    return {
+      kind: 'priority',
+      player: pending.player,
+      options: COLORS.map((color): Action => ({
+        type: 'activateManaAbility',
+        player: pending.player,
+        oid: pending.sourceOid,
+        color,
+      })),
+      complete: true,
+    };
+  }
   const { awaiting, awaitingPlayer, priority } = state.turn;
   if (awaiting !== null && awaitingPlayer !== null) {
     switch (awaiting) {
       case 'mulligan':
         return mulliganDecision(state, awaitingPlayer, cap);
+      case 'openingHandAction':
+        return openingHandActionDecision(state, awaitingPlayer);
       case 'attackers':
         return attackerDecision(state, awaitingPlayer, cap);
       case 'blockers':
         return blockerDecision(state, awaitingPlayer, cap);
       case 'blockerOrder':
         return orderDecision(state, awaitingPlayer, cap);
+      case 'attackerOrder':
+        return attackerOrderDecision(state, awaitingPlayer, cap);
       case 'discard':
         return discardDecision(state, awaitingPlayer, cap);
       case 'handDiscard':
         return handDiscardDecision(state, cap);
+      case 'revealedHandChoice':
+        return revealedHandChoiceDecision(state);
       case 'triggerTargets': {
         const pending = triggerAwaitingTargets(state);
         // Unreachable through `reduce`, which sets this only when the entry is
@@ -2450,10 +4079,14 @@ export function pendingDecision(state: GameState, cap: number = DEFAULT_ENUMERAT
         if (pending === null) throw new Error('pendingDecision: no trigger on the stack owes targets');
         return triggerTargetsDecision(state, pending, cap);
       }
+      case 'pluralTargets':
+        return pluralTargetsDecision(state);
+      case 'damageAllocation':
+        return damageAllocationDecision(state);
       case 'optionalTrigger': {
         const pending = optionalTriggerOnTop(state);
         if (pending === null) throw new Error('pendingDecision: no optional trigger is resolving');
-        return optionalTriggerDecision(pending);
+        return optionalTriggerDecision(state, pending);
       }
       case 'may': {
         const pending = spellAwaitingMay(state);
@@ -2463,10 +4096,11 @@ export function pendingDecision(state: GameState, cap: number = DEFAULT_ENUMERAT
         return mayDecision(pending);
       }
       case 'unless': {
-        const pending = spellAwaitingUnless(state);
+        const pending = stackAwaitingUnless(state);
         // Unreachable through `reduce`, which raises this only from
         // `stack.ts`'s `awaitUnless` and clears it the moment the toll answers.
-        if (pending === null) throw new Error('pendingDecision: no spell is awaiting an "unless" answer');
+        if (pending === null)
+          throw new Error('pendingDecision: no stack object is awaiting an "unless" answer');
         return unlessDecision(pending);
       }
       case 'legendRule': {
@@ -2478,12 +4112,68 @@ export function pendingDecision(state: GameState, cap: number = DEFAULT_ENUMERAT
       }
       case 'scry':
         return scryDecision(state);
+      case 'manaColor': {
+        const pending = state.pendingManaColorChoice;
+        if (pending === undefined) throw new Error('pendingDecision: no mana color is pending');
+        return {
+          kind: 'manaColor',
+          player: pending.player,
+          colors: pending.colors,
+          options: pending.colors.map((color) => ({
+            type: 'chooseManaColor' as const,
+            player: pending.player,
+            color,
+          })),
+          complete: true,
+        };
+      }
+      case 'topLibraryOrder':
+      case 'topLibrarySelect':
+      case 'topLibraryPartition':
+      case 'topLibraryPile':
+        return topLibraryDecision(state);
       case 'searchLibrary':
         return searchDecision(state);
+      case 'searchDestination':
+        return searchDestinationDecision(state);
       case 'graveyardChoice':
         return graveyardChoiceDecision(state);
+      case 'battlefieldChoice':
+        return battlefieldChoiceDecision(state);
+      case 'populate':
+        return populateDecision(state);
       case 'permanentSacrifice':
         return permanentSacrificeDecision(state);
+      case 'permanentUntap':
+        return permanentUntapDecision(state);
+      case 'entryCopy':
+        return entryCopyDecision(state);
+      case 'entryCounter':
+        return entryCounterDecision(state);
+      case 'entryAura':
+        return entryAuraDecision(state);
+      case 'entryTimestampOrder':
+        return entryTimestampOrderDecision(state);
+      case 'entryCharacteristics':
+        return entryCharacteristicsDecision(state);
+      case 'entryOptionalCounter':
+        return entryOptionalCounterDecision(state);
+      case 'entryPayLife':
+        return entryPayLifeDecision(state);
+      case 'entryPlayer':
+        return entryPlayerDecision(state);
+      case 'entryColors':
+        return entryColorsDecision(state);
+      case 'spellTargets':
+        return spellTargetsDecision(state, cap);
+      case 'freeCast':
+        return freeCastDecision(state, cap);
+      case 'damagePrevention':
+        return damagePreventionDecision(state);
+      case 'cardName':
+        return cardNameDecision(state);
+      case 'namedZoneExile':
+        return namedZoneExileDecision(state);
       default:
         return assertNever(awaiting, 'pendingDecision');
     }
@@ -2492,9 +4182,18 @@ export function pendingDecision(state: GameState, cap: number = DEFAULT_ENUMERAT
   return null;
 }
 
+export function ownedDecision(state: GameState, cap: number = DEFAULT_ENUMERATION_CAP): Decision | null {
+  const decision = pendingDecision(state, cap);
+  if (decision === null) return null;
+  return {
+    ...decision,
+    options: [...decision.options, { type: 'concede', player: decision.player }],
+  } as Decision;
+}
+
 /** Flat list of legal actions; empty when the kernel is not waiting on anyone. */
 export function legalActions(state: GameState, cap: number = DEFAULT_ENUMERATION_CAP): readonly Action[] {
-  return pendingDecision(state, cap)?.options ?? [];
+  return ownedDecision(state, cap)?.options ?? [];
 }
 
 function validateCast(
@@ -2504,17 +4203,49 @@ function validateCast(
   targets: readonly (Target | null)[],
   x?: number,
   mode?: number,
-  multiTargets?: Readonly<Record<number, readonly ObjectId[]>>,
+  multiTargets?: Readonly<Record<number, readonly Target[]>>,
+  damageAllocations?: DamageAllocations,
+  castingCost?: CastingCostChoice,
+  sacrifices: readonly ObjectId[] = [],
+  discards: readonly ObjectId[] = [],
 ): string | null {
   const object = tryObject(state, oid);
-  if (object === undefined || object.zone !== 'hand' || object.owner !== player) {
-    return 'card is not in your hand';
+  const freeCast = castingCost === 'withoutMana';
+  const pending = state.pendingFreeCast;
+  const candidate =
+    freeCast && pending?.player === player ? pendingFreeCastCandidate(state, pending, oid) : null;
+  const effectFreeCast = candidate === null ? undefined : pending;
+  if (effectFreeCast !== undefined) {
+    if (object === undefined || object.zone !== effectFreeCast.from) {
+      return `card is not in ${effectFreeCast.from}`;
+    }
+  } else {
+    if (object === undefined || object.zone !== 'hand' || object.owner !== player) {
+      return 'card is not in your hand';
+    }
+    if (freeCast && !freeCastFromHandPermissionApplies(state, player)) {
+      return 'this card is not awaiting a cast without paying its mana cost and no live permission allows it';
+    }
   }
-  const card = object.card;
+  const card = candidate?.card ?? object.card;
   if (!isCastable(card)) return 'lands are played, not cast';
-  if (!canCastNow(state, player, card)) return 'wrong timing for this card type';
-  if (card.manaCost.hasX && x === undefined) return 'this cost needs an announced X';
-  if (!card.manaCost.hasX && x !== undefined) return 'this cost has no X to announce';
+  if (effectFreeCast === undefined) {
+    const timingError = castTimingError(state, player, oid, card);
+    if (timingError !== undefined) return timingError;
+  } else {
+    const permissionError = castPermissionError(state, player);
+    if (permissionError !== undefined) return permissionError;
+    const restrictionError = cardCastingRestrictionError(state, player, card);
+    if (restrictionError !== undefined) return restrictionError;
+  }
+  const overloadChosen = castingCost === 'overload';
+  const selectedHasX =
+    overloadChosen && (card.kind === 'instant' || card.kind === 'sorcery')
+      ? card.overload?.cost.hasX === true
+      : card.manaCost.hasX;
+  if (selectedHasX && x === undefined) return 'this cost needs an announced X';
+  if (!selectedHasX && x !== undefined) return 'this cost has no X to announce';
+  if (freeCast && x !== undefined && x !== 0) return 'X must be 0 when casting without paying mana';
   // CR 107.3f announces X as a whole number, and `MAX_CHOSEN_X` is this
   // kernel's hostile-input ceiling on it. All four conditions are checked
   // here rather than downstream because `resolveX` is deliberately total —
@@ -2530,21 +4261,87 @@ function validateCast(
     if (mode === undefined) return 'this spell is modal and needs a chosen mode';
     if (mode < 0 || mode >= card.modes.length) return 'mode is out of range';
   }
-  if (!canPay(state, player, effectiveManaCost(state, player, card, x))) return 'cannot pay the mana cost';
+  if (
+    castingCost !== undefined &&
+    castingCost !== 'mana' &&
+    castingCost !== 'alternative' &&
+    castingCost !== 'overload' &&
+    castingCost !== 'withoutMana'
+  ) {
+    return 'this spell has an unknown casting-cost choice';
+  }
+  if (!freeCast) {
+    if (
+      castingCost === undefined &&
+      (card.alternativeCost !== undefined ||
+        ((card.kind === 'instant' || card.kind === 'sorcery') && card.overload !== undefined))
+    ) {
+      return 'this spell needs a casting-cost choice';
+    }
+  }
+  const selected = castingCost ?? 'mana';
+  if (selected === 'alternative' && card.alternativeCost === undefined) {
+    return 'this spell has no alternative casting cost to choose';
+  }
+  if (
+    selected === 'overload' &&
+    ((card.kind !== 'instant' && card.kind !== 'sorcery') || card.overload === undefined)
+  ) {
+    return 'this spell has no overload casting cost to choose';
+  }
+  if (
+    selected === 'alternative' &&
+    card.alternativeCost !== undefined &&
+    playerOf(state, player).life < card.alternativeCost.payLife
+  ) {
+    return `you cannot pay ${String(card.alternativeCost.payLife)} life`;
+  }
+  const additionalPayment = validateSpellSacrifices(state, player, card, selected, sacrifices);
+  if (additionalPayment !== null) return additionalPayment;
+  const discardPayment = validateSpellDiscards(state, player, oid, card, selected, discards);
+  if (discardPayment !== null) return discardPayment;
   if (isAuraCard(card)) {
+    if (multiTargets !== undefined || damageAllocations !== undefined) {
+      return 'an Aura has no plural target choices or damage allocations';
+    }
     if (targets.length !== 1) return 'an Aura chooses exactly one target';
     const target = targets[0];
     if (target === undefined || target === null || target.kind !== 'permanent') {
       return 'an Aura targets a permanent allowed by its enchant restriction';
     }
-    return isLegalAuraHost(state, card, target.oid) && canBeTargetedBy(state, target.oid, oid, player)
+    if (!isLegalAuraHost(state, card, target.oid) || !canBeTargetedBy(state, target.oid, oid, player)) {
+      return 'an Aura targets a permanent allowed by its enchant restriction';
+    }
+    return canPay(state, player, selectedCastingManaCost(state, player, card, x, selected))
       ? null
-      : 'an Aura targets a permanent allowed by its enchant restriction';
+      : 'cannot pay the mana cost';
   }
-  const effects = effectsFor(card, mode ?? null);
+  if (selected === 'overload') {
+    if (multiTargets !== undefined || damageAllocations !== undefined) {
+      return 'an overloaded spell has no plural target choices or damage allocations';
+    }
+    const effects = spellEffectsFor(card, null, 'overload');
+    if (targets.length !== effects.length || targets.some((target) => target !== null)) {
+      return 'an overloaded spell requires one untargeted slot per replacement effect';
+    }
+    return canPay(state, player, selectedCastingManaCost(state, player, card, x, selected))
+      ? null
+      : 'cannot pay the mana cost';
+  }
+  const effects = spellEffectsFor(card, mode ?? null, 'ordinary');
   if (targets.length !== effects.length) return 'one target slot per effect is required';
+  const pluralError = validatePluralTargets(
+    state,
+    effects,
+    targets,
+    multiTargets,
+    damageAllocations,
+    player,
+    oid,
+  );
+  if (pluralError !== null) return pluralError;
   for (const [index, effect] of effects.entries()) {
-    // A `TargetSpec.count` slot ("up to two target creatures", `mtg-kg44`)
+    // A plural target slot (`count` or `anyNumber`)
     // is chosen through `multiTargets`, not `targets` — `matchesTargetKind`
     // treats a `null` `targetCreature` target as absent rather than as "zero
     // of up to two", so routing it through the ordinary single-target check
@@ -2553,28 +4350,49 @@ function validateCast(
     // member must be legal right now and no two may name the same object,
     // the all-or-nothing sibling of CR 608.2b's resolution-time partial
     // survival (`stack.ts`'s `planResolution`).
-    if (hasTarget(effect)) {
-      const count = targetCountOf(effect.target);
-      if (count !== null) {
-        if (targets[index] !== null && targets[index] !== undefined) {
-          return `effect ${index} is a counted slot; choose it through multiTargets, not targets`;
-        }
-        const members = multiTargets?.[index] ?? [];
-        if (members.length > count) return `effect ${index} allows at most ${count} targets`;
-        if (new Set(members).size !== members.length) {
-          return `effect ${index}'s targets must be different objects`;
-        }
-        if (survivingMultipleTargets(state, effect, members, player, oid).length !== members.length) {
-          return `illegal target for effect ${index}`;
-        }
-        continue;
-      }
-    }
+    if (isPluralTargetEffect(effect)) continue;
     if (!isTargetStillLegal(state, effect, targets, index, player, oid)) {
       return `illegal target for effect ${index}`;
     }
   }
+  const targetCount = countTargetInstances(targets, multiTargets);
+  if (!canPay(state, player, selectedCastingManaCost(state, player, card, x, selected, targetCount))) {
+    return 'cannot pay the mana cost';
+  }
   return null;
+}
+
+function validateBeginCast(
+  state: GameState,
+  action: Extract<Action, { type: 'beginCastSpell' }>,
+): string | null {
+  const object = tryObject(state, action.oid);
+  const pending = action.castingCost === 'withoutMana' ? state.pendingFreeCast : undefined;
+  const card =
+    pending === undefined ? object?.card : pendingFreeCastCandidate(state, pending, action.oid)?.card;
+  if (card === undefined || !isCastable(card)) return 'card is not a castable card in the expected zone';
+  if (action.castingCost === 'overload') return 'an overloaded spell has no plural target choice to stage';
+  if (card.modes === undefined && action.mode !== undefined) return 'this spell has no modes to choose';
+  if (card.modes !== undefined && (action.mode === undefined || card.modes[action.mode] === undefined)) {
+    return 'this spell needs a valid mode';
+  }
+  const effects = spellEffectsFor(card, action.mode ?? null, 'ordinary');
+  if (!hasPluralTargets(effects)) return 'this spell has no plural target choice to stage';
+  const minimum = minimumPluralChoice(state, effects, action.player, action.oid);
+  if (minimum === null) return 'this spell cannot satisfy its minimum plural target count';
+  return validateCast(
+    state,
+    action.player,
+    action.oid,
+    action.targets,
+    action.x,
+    action.mode,
+    minimum.multiTargets,
+    minimum.damageAllocations,
+    action.castingCost,
+    action.sacrifices ?? [],
+    action.discards ?? [],
+  );
 }
 
 /**
@@ -2609,11 +4427,15 @@ function validateActivation(
   oid: ObjectId,
   abilityIndex: number,
   targets: readonly (Target | null)[],
+  multiTargets: Readonly<Record<number, readonly Target[]>> | undefined,
+  damageAllocations: DamageAllocations | undefined,
   sacrifices: readonly ObjectId[],
+  taps: readonly ObjectId[] | undefined,
   discards: readonly ObjectId[],
   x?: number,
+  mode?: number,
 ): string | null {
-  const ability = activatedAbilityAt(state, oid, abilityIndex);
+  const ability = currentActivatedAbilityAt(state, oid, abilityIndex);
   if (ability === undefined) return 'that permanent has no activated ability there';
   // The mirror of the skip in `activationOptions`. CR 605.3a puts a mana
   // ability outside the stack entirely, so `activateAbility` is the wrong
@@ -2621,26 +4443,71 @@ function validateActivation(
   // agent that builds its own actions is exactly what `validateAction` exists
   // to catch.
   if (isManaAbility(ability)) return 'a mana ability is activated as a mana ability';
-  const blocker = activationBlocker(state, player, oid, ability);
+  if (ability.modes === undefined && mode !== undefined) return 'this ability has no modes to choose';
+  if (ability.modes !== undefined && mode === undefined) {
+    return 'this ability is modal and needs a chosen mode';
+  }
+  if (mode !== undefined && ability.modes?.[mode] === undefined) return 'mode is out of range';
+  const effects = effectsForActivatedAbility(ability, mode ?? null);
+  const blocker = activationBlocker(state, player, oid, ability, abilityIndex);
   if (blocker !== null) return blocker;
-  if (ability.cost.mana.hasX && x === undefined) return 'this cost needs an announced X';
-  if (!ability.cost.mana.hasX && x !== undefined) return 'this cost has no X to announce';
+  const variableLoyalty = ability.loyaltyCost !== undefined && isVariableLoyaltyCost(ability.loyaltyCost);
+  const announcesX = ability.cost.mana.hasX || variableLoyalty;
+  if (announcesX && x === undefined) return 'this cost needs an announced X';
+  if (!announcesX && x !== undefined) return 'this cost has no X to announce';
   if (x !== undefined && (!Number.isInteger(x) || x < 0 || x > MAX_CHOSEN_X)) {
     return `X must be an integer between 0 and ${MAX_CHOSEN_X}`;
   }
-  if (
-    x !== undefined &&
-    !canPay(state, player, resolveX(ability.cost.mana, x), ability.cost.tapSelf ? [oid] : [])
-  ) {
-    return 'cannot pay the mana cost';
+  if (variableLoyalty && x !== undefined) {
+    const loyalty = counterCount(getObject(state, oid).counters, 'loyalty');
+    if (x > loyalty) {
+      return `the loyalty cost removes ${String(x)} counters and this permanent has ${String(loyalty)}`;
+    }
   }
   const payment = validateSacrifices(state, player, oid, ability, sacrifices);
   if (payment !== null) return payment;
+  const tapped = validateTapMatching(state, player, oid, ability, taps);
+  if (tapped !== null) return tapped;
+  if (
+    !canPay(state, player, resolveX(ability.cost.mana, x ?? 0), [
+      ...(ability.cost.tapSelf ? [oid] : []),
+      ...(taps ?? []),
+    ])
+  ) {
+    return 'cannot pay the mana cost';
+  }
   const discarded = validateDiscards(state, player, ability, discards);
   if (discarded !== null) return discarded;
+  if (ability.cost.exileControlledInstantOrSorcerySpell === true) {
+    const selected = targets[0];
+    if (
+      targets.length !== 1 ||
+      selected?.kind !== 'spell' ||
+      !controlledInstantOrSorcerySpells(state, player).includes(selected.oid)
+    ) {
+      return 'the cost exiles exactly one instant or sorcery spell you control';
+    }
+    return null;
+  }
   if (isAttachingAbility(ability)) return validateEquipTarget(state, player, oid, targets);
-  if (targets.length !== ability.effects.length) return 'one target slot per effect is required';
-  for (const [index, effect] of ability.effects.entries()) {
+  if (targets.length !== effects.length) return 'one target slot per effect is required';
+  const startsPluralChoice = shouldStagePluralTargets(effects, multiTargets, damageAllocations);
+  const minimum = startsPluralChoice ? minimumPluralChoice(state, effects, player, oid) : undefined;
+  if (startsPluralChoice && minimum === null) {
+    return 'this ability cannot satisfy its minimum plural target count';
+  }
+  const pluralError = validatePluralTargets(
+    state,
+    effects,
+    targets,
+    minimum?.multiTargets ?? multiTargets,
+    minimum?.damageAllocations ?? damageAllocations,
+    player,
+    oid,
+  );
+  if (pluralError !== null) return pluralError;
+  for (const [index, effect] of effects.entries()) {
+    if (isPluralTargetEffect(effect)) continue;
     if (!isTargetStillLegal(state, effect, targets, index, player, oid)) {
       return `illegal target for effect ${index}`;
     }
@@ -2698,12 +4565,66 @@ function validateTriggerTargets(
   state: GameState,
   oid: ObjectId,
   targets: readonly (Target | null)[],
+  multiTargets?: Readonly<Record<number, readonly Target[]>>,
+  damageAllocations?: DamageAllocations,
 ): string | null {
   const pending = triggerAwaitingTargets(state);
   if (pending === null) return 'no trigger is choosing targets';
   if (pending.entry.oid !== oid) return `${pending.entry.oid} is the trigger being aimed, not ${oid}`;
   const effects = pending.ability.effects;
   const settled = pending.entry.targets;
+  if (isGuildFeudAbility(pending.ability)) {
+    if (multiTargets !== undefined || damageAllocations !== undefined) {
+      return 'Guild Feud has one ordinary opponent target';
+    }
+    if (settled.length > 0) return 'the Guild Feud opponent is already chosen';
+    if (targets.length !== 1) return 'Guild Feud requires exactly one opponent target';
+    const target = targets[0];
+    const offered = triggerTargetChoices(state, pending)[0] ?? [];
+    return target !== undefined &&
+      target !== null &&
+      offered.some((choice) => choice !== null && sameTarget(choice, target))
+      ? null
+      : 'Guild Feud must target the legal opponent';
+  }
+  const hasPlural = hasPluralTargets(effects);
+  if (hasPlural) {
+    if (settled.length > 0) return 'a plural trigger target choice cannot rewrite settled slots';
+    if (targets.length !== effects.length) return 'one target slot per effect is required';
+    const source =
+      state.objects[pending.source]?.zone === 'battlefield'
+        ? pending.source
+        : (pending.entry.sourceCharacteristics ?? pending.source);
+    if (multiTargets === undefined && damageAllocations === undefined) {
+      for (const [index, effect] of effects.entries()) {
+        if (hasTarget(effect) && isMultipleTargetSpec(effect.target)) continue;
+        if (!isTargetStillLegal(state, effect, targets, index, pending.entry.controller, source)) {
+          return `illegal target for effect ${String(index)}`;
+        }
+      }
+      return null;
+    }
+    const pluralError = validatePluralTargets(
+      state,
+      effects,
+      targets,
+      multiTargets,
+      damageAllocations,
+      pending.entry.controller,
+      source,
+    );
+    if (pluralError !== null) return pluralError;
+    for (const [index, effect] of effects.entries()) {
+      if (hasTarget(effect) && isMultipleTargetSpec(effect.target)) continue;
+      if (!isTargetStillLegal(state, effect, targets, index, pending.entry.controller, source)) {
+        return `illegal target for effect ${String(index)}`;
+      }
+    }
+    return null;
+  }
+  if (multiTargets !== undefined || damageAllocations !== undefined) {
+    return 'this trigger has no plural target slots';
+  }
   if (targets.length <= settled.length) return 'at least one more target slot must be chosen';
   if (targets.length > effects.length) return 'one target slot per effect is required';
   for (const [index, already] of settled.entries()) {
@@ -2730,7 +4651,7 @@ function validateTriggerTargets(
         effect,
         targets,
         index,
-        pending.entry.controller,
+        stackEntryTargetingController(state, pending.entry),
         state.objects[pending.source]?.zone === 'battlefield'
           ? pending.source
           : (pending.entry.sourceCharacteristics ?? pending.source),
@@ -2743,15 +4664,29 @@ function validateTriggerTargets(
 }
 
 /**
- * Full legality of an answer to a "you may" (CR 603.3b).
+ * Full legality of a triggered ability's yes/no resolution answer.
  *
- * Both answers are always legal — that is what optional means — so the only
- * thing to check is that the ability being answered for is the one resolving.
+ * Declining is always legal. Accepting a paid CR 603.3b trigger additionally
+ * requires its controller to be able to pay at the moment of resolution;
+ * accepting Faerie Impostor's return cost requires another controlled
+ * creature at that same moment.
  */
-function validateOptionalTrigger(state: GameState, oid: ObjectId): string | null {
+function validateOptionalTrigger(state: GameState, oid: ObjectId, accept: boolean): string | null {
   const pending = optionalTriggerOnTop(state);
   if (pending === null) return 'no optional trigger is resolving';
   if (pending.entry.oid !== oid) return `${pending.entry.oid} is the trigger resolving, not ${oid}`;
+  const payment =
+    pending.ability.kind === 'triggered' ? pending.ability.optionalControllerPayment : undefined;
+  if (accept && payment !== undefined && !canPay(state, pending.entry.controller, payment.cost)) {
+    return 'cannot pay the optional trigger cost';
+  }
+  if (
+    accept &&
+    isReturnAnotherCreatureOrSacrificeSelfAbility(pending.ability) &&
+    returnAnotherCreatureCandidates(state, pending.source, pending.entry.controller).length === 0
+  ) {
+    return 'no other controlled creature can pay the return cost';
+  }
   return null;
 }
 
@@ -2783,9 +4718,12 @@ function validateMay(state: GameState, oid: ObjectId): string | null {
  * an affordability check.
  */
 function validateUnless(state: GameState, player: PlayerId, oid: ObjectId): string | null {
-  const pending = spellAwaitingUnless(state);
-  if (pending === null) return 'no spell is awaiting an "unless" answer';
-  if (pending.entry.oid !== oid) return `${pending.entry.oid} is the spell resolving, not ${oid}`;
+  const pending = stackAwaitingUnless(state);
+  if (pending === null) return 'no stack object is awaiting an "unless" answer';
+  if (pending.entry.oid !== oid) {
+    const object = pending.kind === 'spell' ? 'spell' : 'ability';
+    return `${pending.entry.oid} is the ${object} resolving, not ${oid}`;
+  }
   if (pending.payer !== player) return `${pending.payer} is the player being charged, not ${player}`;
   return null;
 }
@@ -2810,62 +4748,32 @@ function validateKeepLegend(state: GameState, player: PlayerId, oid: ObjectId): 
 }
 
 /**
- * Full legality of an answer to CR 701.17a, re-derived from the board.
+ * Full legality of an answer to CR 701.17a against the frozen candidate group.
  *
  * `validateKeepLegend`'s shape and its stated reason: a control-change or a
  * second removal effect landing between the pause and the answer could
- * otherwise let a stale decision sacrifice a creature the asked player no
- * longer controls, or answer for a seat the pause was never asking.
+ * otherwise let an action name a permanent outside the affected player's
+ * filtered group, repeat a choice, or answer for a seat the pause never asked.
  */
 function validatePermanentSacrifice(state: GameState, player: PlayerId, oid: ObjectId): string | null {
   const pending = state.pendingPermanentSacrifice;
   if (pending === undefined) return 'no permanent sacrifice is pending';
   if (pending.player !== player) return `${pending.player} is being asked to sacrifice, not ${player}`;
-  if (!pending.permanents.includes(oid)) return `${oid} is not one of the creatures ${player} controls`;
+  if (!pending.permanents.includes(oid)) return `${oid} is not one of the permanents ${player} may sacrifice`;
   return null;
 }
 
-/**
- * What CR 508.1d demands of one creature: whether it has to attack at all, and
- * which defenders a declaration may point it at.
- *
- * Two requirements land here and they compose differently. `attacksEachCombatIfAble`
- * (a printed static) says a creature attacks and says nothing about whom.
- * `attacksYouThisTurnIfAble` (a turn-scoped rule, `state.turnCombatRules`) says
- * both: the creature attacks, and it attacks the player who imposed it, so a
- * lured creature cannot satisfy the requirement by attacking a planeswalker
- * that player controls.
- *
- * A lure naming somebody who is not a legal defender of this attack narrows to
- * nothing, and CR 508.1a is what to do about it: a requirement that cannot be
- * obeyed is ignored rather than making the declaration illegal. So the empty
- * narrowing collapses back to "no requirement, every defender" rather than to
- * "this creature has no legal attack". The case is reachable — control of the
- * source can change after the rule is imposed — and treating it as a hard
- * constraint would produce a position with no legal declaration at all.
- *
- * Restrictions are not consulted here and do not need to be: every caller reads
- * `eligibleAttackers`, which has already dropped anything under `cantAttack` or
- * tapped or summoning-sick. That is CR 508.1's precedence (a restriction beats
- * a requirement) implemented by the requirement never seeing the creature.
- */
-function attackRequirement(
-  state: GameState,
-  oid: ObjectId,
-  defenders: readonly CombatDefender[],
-): {
-  readonly mustAttack: boolean;
-  readonly lured: boolean;
-  readonly allowed: readonly CombatDefender[];
-} {
-  const lured = luredDefenders(state, oid).filter((player) => defenders.includes(player));
-  const forcedByStatic = hasCombatModification(state, oid, 'attacksEachCombatIfAble');
-  if (lured.length === 0) return { mustAttack: forcedByStatic, lured: false, allowed: defenders };
-  return {
-    mustAttack: true,
-    lured: true,
-    allowed: defenders.filter((defender) => typeof defender === 'number' && lured.includes(defender)),
-  };
+function validatePermanentUntap(state: GameState, player: PlayerId, oid: ObjectId | null): string | null {
+  const pending = state.pendingPermanentUntap;
+  if (pending === undefined) return 'no permanent untap is pending';
+  if (pending.controller !== player)
+    return `${pending.controller} is choosing permanents to untap, not ${player}`;
+  if (oid === null) return null;
+  const candidate = pending.permanents.find((permanent) => permanent.oid === oid);
+  if (candidate === undefined) return `${oid} is not one of the permanents ${player} may untap`;
+  if (!isCurrentPermanentUntapCandidate(state, pending, candidate))
+    return `${oid} is no longer a tappable permanent matching the untap filter`;
+  return null;
 }
 
 /**
@@ -2886,6 +4794,12 @@ export function validateAttackerDeclaration(
   player: PlayerId,
   action: Extract<Action, { type: 'declareAttackers' }>,
 ): string | null {
+  if (
+    action.attackers.length > 0 &&
+    staticPlayerRuleApplies(state, player, 'cantAttackWithCreaturesIfCastSpellThisTurn')
+  ) {
+    return "you can't attack with creatures after casting a spell this turn";
+  }
   const order = eligibleAttackers(state);
   const eligible = new Set(order);
   const already = state.combat.attacksSettled ?? 0;
@@ -2893,7 +4807,14 @@ export function validateAttackerDeclaration(
   if (!Number.isInteger(settled) || settled < 0 || settled > order.length) {
     return 'a declaration answers for between none and all of the creatures that can attack';
   }
-  if (settled <= already) return 'a declaration must answer for at least one more creature';
+  const wholeEmptyDeclaration =
+    order.length === 0 &&
+    state.combat.attacksSettled === undefined &&
+    action.settled === undefined &&
+    action.attackers.length === 0;
+  if (settled <= already && !wholeEmptyDeclaration) {
+    return 'a declaration must answer for at least one more creature';
+  }
   const asked = new Set(order.slice(0, settled));
   const seen = new Set<ObjectId>();
   for (const declaration of action.attackers) {
@@ -2902,7 +4823,7 @@ export function validateAttackerDeclaration(
     if (seen.has(declaration.oid)) return `${declaration.oid} declared twice`;
     seen.add(declaration.oid);
     if (!isLegalCombatDefender(state, player, declaration.defender)) {
-      return 'attackers must attack the opponent or an opposing planeswalker';
+      return 'attackers must attack the opponent, an opposing planeswalker, or a Battle they protect';
     }
   }
   // CR 508.1d: a creature under `attacksEachCombatIfAble` that has already been
@@ -2913,14 +4834,17 @@ export function validateAttackerDeclaration(
   // that are able (untapped, unsick or hasty, `defender`-free, not
   // `cantAttack`), so the only way to fail is to have left it off the list.
   const defenders = combatDefenders(state, player);
+  const globallyRequired = requiredAttackers(state, order, defenders);
   for (const oid of order.slice(0, settled)) {
     const requirement = attackRequirement(state, oid, defenders);
-    if (!requirement.mustAttack) continue;
+    if (!globallyRequired.has(oid)) continue;
     const declared = action.attackers.find((declaration) => declaration.oid === oid);
     if (declared === undefined) {
       return requirement.lured
         ? `${oid} attacks that player this turn if able and must attack`
-        : `${oid} attacks each combat if able and must attack`;
+        : requirement.turnScoped
+          ? `${oid} attacks this turn if able and must attack`
+          : `${oid} attacks each combat if able and must attack`;
     }
     // The second half of the requirement, and only a lure has one: the
     // declaration has to point the creature at a defender the requirement
@@ -2938,6 +4862,17 @@ export function validateAttackerDeclaration(
       return `${attack.oid} is already attacking something else`;
     }
   }
+  const declared = action.attackers.map((attack) => attack.oid);
+  if (!canPayAttackTaxes(state, player, action.attackers)) {
+    return 'the attacking player cannot pay the additional attack cost';
+  }
+  const whole = settled === order.length;
+  if (whole) {
+    const cohort = attackCohortRestriction(state, declared);
+    if (cohort !== null) return cohort;
+  } else if (!attacksCompletable(state, declared, order.slice(settled), globallyRequired)) {
+    return 'no legal attack finishes that declaration';
+  }
   return null;
 }
 
@@ -2945,60 +4880,109 @@ export function validateAttackerDeclaration(
  * An answer to CR 509.1: the whole declaration, or a prefix of the creatures
  * that could block.
  *
- * `validateAttackerDeclaration`'s three rules, plus the one this site has and
- * that one does not: a prefix must be completable. Menace is the only rule a
- * finished declaration can fail while every pair in it is legal, so a prefix is
- * held to the per-pair rules and to a matching that says the block can still be
- * finished, and the last answer of a sequence is held to the menace rule itself.
- * `blocksCompletable` carries the argument and `legal.ts` refuses an
+ * `validateAttackerDeclaration`'s three prefix rules apply here too. Blocking
+ * adds menace matching to the cohort completability both declarations need:
+ * menace and cohort restrictions can fail only at the declaration level, so a
+ * prefix is held to the per-pair rules and to a solver that says the block can
+ * still be finished, and the last answer is held to the declaration rules.
+ * `blockRequirementsReachable` carries the argument and refuses an
  * uncompletable prefix at the offer as well, so the two agree by construction.
  *
- * CR 509.1c rides beside menace on the same shape: `target` (a joint maximum,
- * `mustBlockTarget` over the full eligible pool) is checked against
- * coverage on the whole declaration and against reachability on a prefix,
- * exactly mirroring how `blocksCompletable` is checked for menace two lines
- * below — this is the actual submission-time gate, so a caller that bypassed
- * `blockerDecision`'s offered options entirely (an adapter, a fuzzer) is held
- * to the requirement too, not just a surface that took what it was offered.
+ * CR 509.1c rides beside menace on the same shape: the joint target over both
+ * attacker-relative and blocker-relative requirements is checked against a
+ * whole declaration or the best completion of a prefix. This is the actual
+ * submission-time gate, so a caller that bypassed `blockerDecision`'s offered
+ * options entirely (an adapter, a fuzzer) is held to the requirement too.
  */
 export function validateBlockDeclaration(
   state: GameState,
-  player: PlayerId,
+  _player: PlayerId,
   action: Extract<Action, { type: 'declareBlockers' }>,
 ): string | null {
   const order = eligibleBlockers(state);
   const already = state.combat.blocksSettled ?? 0;
+  const priorAttackerChoices = state.combat.blockerAttacksSettled ?? 0;
   const settled = action.settled ?? order.length;
   if (!Number.isInteger(settled) || settled < 0 || settled > order.length) {
     return 'a declaration answers for between none and all of the creatures that can block';
   }
-  if (settled <= already) return 'a declaration must answer for at least one more creature';
+  if (settled < already) return 'a declaration cannot take back an answered blocker';
+  const attackerChoices = action.attackerChoicesSettled;
+  if (attackerChoices !== undefined) {
+    if (settled !== already) return 'attacker choices belong to the current blocker';
+    const blocker = order[settled];
+    if (blocker === undefined || !canBlockAnyNumber(state, blocker)) {
+      return 'only an unlimited-capacity blocker can answer attackers one at a time';
+    }
+    const blockable = state.combat.attacks
+      .map((attack) => attack.oid)
+      .filter((attacker) => canBlock(state, blocker, attacker));
+    if (
+      !Number.isInteger(attackerChoices) ||
+      attackerChoices <= priorAttackerChoices ||
+      attackerChoices >= blockable.length
+    ) {
+      return 'a blocker declaration must answer for at least one more attacker and leave one still to ask';
+    }
+  } else if (settled === already && action.settled !== undefined) {
+    return 'a declaration must answer for at least one more creature or attacker';
+  }
   const asked = new Set(order.slice(0, settled));
+  const current = attackerChoices === undefined ? undefined : order[settled];
+  if (current !== undefined) asked.add(current);
   for (const block of action.blocks) {
     if (!asked.has(block.blocker)) return `${block.blocker} has not been asked about yet`;
+    if (block.blocker === current && attackerChoices !== undefined) {
+      const blockable = state.combat.attacks
+        .map((attack) => attack.oid)
+        .filter((attacker) => canBlock(state, current, attacker));
+      const index = blockable.indexOf(block.attacker);
+      if (index < 0 || index >= attackerChoices) {
+        return `${block.attacker} has not been asked about for ${current} yet`;
+      }
+    }
   }
-  for (const standing of declaredBlocks(state)) {
-    const kept = action.blocks.find((block) => block.blocker === standing.blocker);
-    if (kept === undefined) return `${standing.blocker} is already blocking and cannot be taken back`;
-    if (kept.attacker !== standing.attacker) return `${standing.blocker} is already blocking something else`;
+  const standingBlocks = declaredBlocks(state);
+  for (const standing of standingBlocks) {
+    const kept = action.blocks.find(
+      (block) => block.blocker === standing.blocker && block.attacker === standing.attacker,
+    );
+    if (kept === undefined) {
+      return action.blocks.some((block) => block.blocker === standing.blocker)
+        ? `${standing.blocker} is already blocking something else`
+        : `${standing.blocker} is already blocking and cannot be taken back`;
+    }
+  }
+  if (priorAttackerChoices > 0) {
+    const priorBlocker = order[already];
+    if (priorBlocker === undefined) return 'the blocker declaration progress is outside the eligible list';
+    const priorBlockable = state.combat.attacks
+      .map((attack) => attack.oid)
+      .filter((attacker) => canBlock(state, priorBlocker, attacker));
+    for (const attacker of priorBlockable.slice(0, priorAttackerChoices)) {
+      const stood = standingBlocks.some(
+        (block) => block.blocker === priorBlocker && block.attacker === attacker,
+      );
+      const now = action.blocks.some(
+        (block) => block.blocker === priorBlocker && block.attacker === attacker,
+      );
+      if (!stood && now) return `${priorBlocker} already declined to block ${attacker}`;
+    }
   }
   const whole = settled === order.length;
-  const reason = validateBlocks(state, player, action.blocks, whole);
+  const reason = validateBlocks(state, opponentOf(state.turn.active), action.blocks, whole);
   if (reason !== null) return reason;
-  if (!whole && !blocksCompletable(state, action.blocks, order.slice(settled))) {
-    return 'no legal block finishes that declaration';
-  }
-  const attackers = state.combat.attacks.map((attack) => attack.oid);
-  const mustBeBlocked = attackers.filter((attacker) =>
-    hasCombatModification(state, attacker, 'mustBeBlockedIfAble'),
-  );
-  const target = mustBlockTarget(state, outstandingDemands(state, [], mustBeBlocked), order);
+  const available = current === undefined ? order.slice(settled) : [current, ...order.slice(settled + 1)];
+  const requirements = blockRequirements(state);
+  const target = maximizeBlockRequirements(state, requirements, order).coverage;
   if (whole) {
-    if (mustBlockCoverage(state, action.blocks, mustBeBlocked) < target) {
-      return 'not as many creatures able to block a must-be-blocked attacker are blocking it as jointly possible';
+    if (blockRequirementCoverage(state, action.blocks, requirements) < target) {
+      return requirements.some((requirement) => requirement.kind === 'blocker')
+        ? 'the block declaration does not satisfy as many requirements as jointly possible'
+        : 'not as many creatures able to block a must-be-blocked attacker are blocking it as jointly possible';
     }
-  } else if (!mustBlockReachable(state, action.blocks, mustBeBlocked, target, order.slice(settled))) {
-    return 'no legal block finishes the must-be-blocked requirement';
+  } else if (!blockRequirementsReachable(state, action.blocks, requirements, target, available)) {
+    return 'no legal block finishes the joint block requirements';
   }
   return null;
 }
@@ -3062,6 +5046,43 @@ function validateOrdering(
   }
   if (!progress) return 'an ordering must settle at least one position';
   return null;
+}
+
+function validateAttackerOrdering(
+  state: GameState,
+  orders: readonly { blocker: ObjectId; attackers: readonly ObjectId[] }[],
+): string | null {
+  const needed = blockersNeedingAttackerOrder(state);
+  const settled = state.combat.attackersOrdered ?? {};
+  const seen = new Set<ObjectId>();
+  let progress = false;
+  for (const order of orders) {
+    if (seen.has(order.blocker)) return `${order.blocker} is ordered twice`;
+    seen.add(order.blocker);
+    const block = needed.find((entry) => entry.blocker === order.blocker);
+    if (block === undefined) return `${order.blocker} is not a blocker that needs an ordering`;
+    if (order.attackers.length > block.attackers.length) {
+      return `ordering for ${block.blocker} names more creatures than it blocks`;
+    }
+    const members = new Set(block.attackers);
+    const named = new Set<ObjectId>();
+    for (const attacker of order.attackers) {
+      if (!members.has(attacker)) return `${order.blocker} is not blocking ${attacker}`;
+      if (named.has(attacker)) return `${attacker} is ordered twice for ${order.blocker}`;
+      named.add(attacker);
+    }
+    const already = settled[block.blocker] ?? 0;
+    if (order.attackers.length < already) {
+      return `ordering for ${block.blocker} takes back a position that is already settled`;
+    }
+    for (const [index, spelled] of order.attackers.slice(0, already).entries()) {
+      if (spelled !== block.attackers[index]) {
+        return `ordering for ${block.blocker} contradicts a position that is already settled`;
+      }
+    }
+    if (order.attackers.length > already) progress = true;
+  }
+  return progress ? null : 'an ordering must settle at least one position';
 }
 
 /**
@@ -3135,11 +5156,140 @@ function validateManaAbility(
   player: PlayerId,
   oid: ObjectId,
   color: ManaColor,
+  abilityIndex?: number,
+  amount?: number,
 ): string | null {
-  const blocked = manaSourceBlocker(state, player, oid);
+  const pending = state.pendingManaCombination;
+  if (pending !== undefined) {
+    if (pending.player !== player || pending.sourceOid !== oid) {
+      return 'a different mana source is completing its color combination';
+    }
+    if (color === 'C') return 'a color combination cannot include colorless mana';
+    if (abilityIndex !== undefined || amount !== undefined) {
+      return 'a later color choice cannot change the already-activated mana ability';
+    }
+    return null;
+  }
+  const blocked = manaSourceBlocker(state, player, oid, abilityIndex);
   if (blocked !== null) return blocked;
-  if (!manaSourceColors(getObject(state, oid).card).includes(color)) {
+  const intrinsic = landProducesOnBattlefield(state, oid);
+  const indexed = indexedManaAbilities(state, oid);
+  const colors =
+    abilityIndex === undefined
+      ? intrinsic.length > 0
+        ? intrinsic
+        : indexed.length === 1
+          ? manaAbilityColors(indexed[0]!.ability)
+          : []
+      : manaAbilityColors(indexed.find((entry) => entry.index === abilityIndex)!.ability);
+  const selected =
+    abilityIndex === undefined
+      ? intrinsic.length === 0 && indexed.length === 1
+        ? indexed[0]
+        : undefined
+      : indexed.find((entry) => entry.index === abilityIndex);
+  const combinationAmount =
+    selected === undefined ? null : anyColorCombinationAmount(state, player, selected.ability);
+  if (combinationAmount !== null) {
+    if (amount !== undefined) return 'the live mana combination amount is not submitted by the player';
+    if (color === 'C') return 'a color combination cannot include colorless mana';
+    return null;
+  }
+  if (!colors.includes(color)) {
     return `source cannot produce ${color}`;
+  }
+  if (amount !== undefined) {
+    const expected = selected === undefined ? 1 : fixedManaAbilityAmount(selected.ability);
+    if (expected !== amount) return `source does not produce ${String(amount)} mana`;
+  }
+  return null;
+}
+
+function validateSpellTargetChoice(
+  state: GameState,
+  action: Extract<Action, { type: 'chooseSpellTargets' }>,
+): string | null {
+  const pending = state.pendingSpellTargets;
+  const context = spellTargetContext(state);
+  if (pending === undefined || context === null) return 'no spell is choosing new targets';
+  if (action.oid !== pending.spell) return 'that spell is not choosing new targets';
+  if (action.targets.length !== context.entry.targets.length) {
+    return 'a target change cannot alter the number of target slots';
+  }
+  if (isAuraCard(context.card)) {
+    const prior = context.entry.targets[0] ?? null;
+    const target = action.targets[0] ?? null;
+    if (
+      !targetEqual(prior, target) &&
+      (target === null ||
+        target.kind !== 'permanent' ||
+        !isLegalAuraHost(state, context.card, target.oid) ||
+        !canBeTargetedBy(state, target.oid, context.entry.oid, context.controller))
+    ) {
+      return 'replacement target 0 is not legal for that Aura spell';
+    }
+    if (
+      action.multiTargets !== undefined ||
+      context.entry.multiTargets !== undefined ||
+      action.damageAllocations !== undefined ||
+      context.entry.damageAllocations !== undefined
+    ) {
+      return 'an Aura spell has no plural target slots';
+    }
+    return null;
+  }
+  if (!honoursDistinctSlots(context.effects, action.targets)) {
+    return "the replacement targets do not satisfy the spell's distinct targets";
+  }
+  for (const [index, target] of action.targets.entries()) {
+    const prior = context.entry.targets[index] ?? null;
+    if (targetEqual(prior, target)) continue;
+    const effect = context.effects[index];
+    if (effect === undefined) return 'a target change names a slot the spell does not have';
+    if (!isTargetStillLegal(state, effect, action.targets, index, context.controller, context.source)) {
+      return `replacement target ${String(index)} is not legal for that spell`;
+    }
+  }
+
+  const priorMulti = context.entry.multiTargets;
+  const nextMulti = action.multiTargets;
+  if (
+    canonicalJson(context.entry.damageAllocations ?? null) !== canonicalJson(action.damageAllocations ?? null)
+  ) {
+    return 'a target change cannot alter divided damage allocations';
+  }
+  if ((priorMulti === undefined) !== (nextMulti === undefined)) {
+    return 'a target change cannot add or remove plural target slots';
+  }
+  if (priorMulti === undefined || nextMulti === undefined) return null;
+  const priorKeys = Object.keys(priorMulti).sort();
+  const nextKeys = Object.keys(nextMulti).sort();
+  if (canonicalJson(priorKeys) !== canonicalJson(nextKeys)) {
+    return 'a target change cannot add or remove plural target slots';
+  }
+  for (const rawIndex of priorKeys) {
+    const index = Number(rawIndex);
+    const prior = priorMulti[index] ?? [];
+    const next = nextMulti[index] ?? [];
+    if (prior.length !== next.length) return 'a target change cannot alter target count';
+    if (uniqueTargets(next).length !== next.length)
+      return 'a spell cannot target the same object twice in one list';
+    const effect = context.effects[index];
+    if (effect === undefined) return 'a target change names a slot the spell does not have';
+    for (const [position, target] of next.entries()) {
+      const previous = prior[position];
+      if (previous !== undefined && sameTarget(previous, target)) continue;
+      const candidates = multipleTargetCandidates(
+        state,
+        effect,
+        context.controller,
+        context.source,
+        position,
+      );
+      if (!candidates.some((candidate) => sameTarget(candidate, target))) {
+        return `replacement target ${String(index)} is not legal for that spell`;
+      }
+    }
   }
   return null;
 }
@@ -3155,10 +5305,15 @@ export function validateAction(state: GameState, action: Action): string | null 
   const decision = pendingDecision(state);
   if (decision === null) return 'the kernel is not waiting for a decision';
   if (decision.player !== action.player) return `it is player ${decision.player}'s decision`;
+  if (state.pendingManaCombination !== undefined && action.type !== 'activateManaAbility') {
+    return 'the resolving mana ability still needs a color choice';
+  }
 
   switch (action.type) {
     case 'passPriority':
-      return decision.kind === 'priority' ? null : 'you owe a different decision first';
+      return decision.kind === 'priority' && state.pendingManaCombination === undefined
+        ? null
+        : 'you owe a different decision first';
     case 'playLand': {
       if (decision.kind !== 'priority') return 'you owe a different decision first';
       const object = tryObject(state, action.oid);
@@ -3173,7 +5328,21 @@ export function validateAction(state: GameState, action: Action): string | null 
       return null;
     }
     case 'castSpell':
-      if (decision.kind !== 'priority') return 'you owe a different decision first';
+    case 'beginCastSpell':
+      if (decision.kind !== 'priority' && decision.kind !== 'freeCast') {
+        return 'you owe a different decision first';
+      }
+      if (decision.kind === 'freeCast' && action.castingCost !== 'withoutMana') {
+        return 'the revealed card must use the cast-without-mana choice';
+      }
+      if (
+        decision.kind === 'freeCast' &&
+        (state.pendingFreeCast === undefined ||
+          pendingFreeCastCandidate(state, state.pendingFreeCast, action.oid) === null)
+      ) {
+        return 'the revealed card is the only spell this decision may cast';
+      }
+      if (action.type === 'beginCastSpell') return validateBeginCast(state, action);
       return validateCast(
         state,
         action.player,
@@ -3182,10 +5351,34 @@ export function validateAction(state: GameState, action: Action): string | null 
         action.x,
         action.mode,
         action.multiTargets,
+        action.damageAllocations,
+        action.castingCost,
+        action.sacrifices ?? [],
+        action.discards ?? [],
       );
+    case 'choosePluralTarget':
+      if (decision.kind !== 'pluralTargets') return 'no plural target choice is pending';
+      return decision.options.some((option) => canonicalJson(option) === canonicalJson(action))
+        ? null
+        : 'that is not a legal next plural target choice';
+    case 'allocateDividedDamage':
+      if (decision.kind !== 'damageAllocation') return 'no divided damage allocation is pending';
+      return decision.options.some((option) => canonicalJson(option) === canonicalJson(action))
+        ? null
+        : 'that is not a legal next damage allocation';
     case 'activateManaAbility':
       if (decision.kind !== 'priority') return 'you owe a different decision first';
-      return validateManaAbility(state, action.player, action.oid, action.color);
+      return validateManaAbility(
+        state,
+        action.player,
+        action.oid,
+        action.color,
+        action.abilityIndex,
+        action.amount,
+      );
+    case 'chooseManaColor':
+      if (decision.kind !== 'manaColor') return 'no stack-using mana effect is choosing a color';
+      return decision.colors.includes(action.color) ? null : 'that color is not offered by this effect';
     case 'activateAbility':
       if (decision.kind !== 'priority') return 'you owe a different decision first';
       return validateActivation(
@@ -3194,28 +5387,141 @@ export function validateAction(state: GameState, action: Action): string | null 
         action.oid,
         action.abilityIndex,
         action.targets,
+        action.multiTargets,
+        action.damageAllocations,
         action.sacrifices,
+        action.taps,
         action.discards ?? [],
         action.x,
+        action.mode,
       );
     case 'chooseTriggerTargets':
       if (decision.kind !== 'triggerTargets') return 'no trigger is choosing targets';
-      return validateTriggerTargets(state, action.oid, action.targets);
+      return validateTriggerTargets(
+        state,
+        action.oid,
+        action.targets,
+        action.multiTargets,
+        action.damageAllocations,
+      );
     case 'answerOptionalTrigger':
       if (decision.kind !== 'optionalTrigger') return 'no optional trigger is resolving';
-      return validateOptionalTrigger(state, action.oid);
+      return validateOptionalTrigger(state, action.oid, action.accept);
     case 'answerMay':
       if (decision.kind !== 'may') return 'no spell is awaiting a "you may" answer';
       return validateMay(state, action.oid);
     case 'answerUnless':
       if (decision.kind !== 'unless') return 'no spell is awaiting an "unless" answer';
       return validateUnless(state, action.player, action.oid);
+    case 'declineFreeCast':
+      return decision.kind === 'freeCast' && state.pendingFreeCast?.optional === true
+        ? decision.oid === action.oid
+          ? null
+          : 'a different free cast is pending'
+        : 'no optional free cast is pending';
     case 'keepLegend':
       if (decision.kind !== 'legendRule') return 'the legend rule is not being applied';
       return validateKeepLegend(state, action.player, action.oid);
     case 'sacrificePermanent':
       if (decision.kind !== 'permanentSacrifice') return 'no sacrifice is resolving';
       return validatePermanentSacrifice(state, action.player, action.oid);
+    case 'choosePermanentToUntap':
+      if (decision.kind !== 'permanentUntap') return 'no permanent untap is resolving';
+      return validatePermanentUntap(state, action.player, action.oid);
+    case 'chooseCardName':
+      if (decision.kind !== 'cardName') return 'no card-name choice is resolving';
+      if (action.name.trim().length === 0) return 'a card name cannot be empty';
+      if (state.pendingCardNameChoice?.targetPlayer !== undefined && namesKnownLand(state, action.name)) {
+        return 'the chosen name must be a nonland card name';
+      }
+      return action.name.length <= MAX_CARD_NAME_LENGTH
+        ? null
+        : `a card name cannot exceed ${String(MAX_CARD_NAME_LENGTH)} characters`;
+    case 'chooseNamedZoneExile':
+      if (decision.kind !== 'namedZoneExile') return 'no named-zone exile choice is resolving';
+      if (action.oid === null) return null;
+      return decision.cards.includes(action.oid) ? null : `${action.oid} is not an available named card`;
+    case 'chooseSpellTargets':
+      if (decision.kind !== 'spellTargets') return 'no spell is choosing new targets';
+      return validateSpellTargetChoice(state, action);
+    case 'chooseEntryCopy':
+      if (decision.kind !== 'entryCopy') return 'no permanent is choosing copied entry values';
+      if (action.oid !== decision.oid) return 'that permanent is not awaiting copied entry values';
+      if (action.copyOf === null) return null;
+      return decision.creatures.includes(action.copyOf)
+        ? null
+        : `${action.copyOf} is not a legal creature to copy`;
+    case 'chooseEntryCounterPermanent':
+      if (decision.kind !== 'entryCounter') return 'no permanent is choosing an as-entry counter bearer';
+      if (action.oid !== decision.oid) return 'that permanent is not awaiting an entry counter choice';
+      return decision.permanents.includes(action.permanent)
+        ? null
+        : `${action.permanent} is not a legal entry counter bearer`;
+    case 'chooseEntryAuraHost':
+      if (decision.kind !== 'entryAura') return 'no Aura is choosing an as-entry host';
+      if (action.oid !== decision.oid) return 'that Aura is not awaiting an entry host';
+      return decision.permanents.includes(action.host) ? null : `${action.host} is not a legal Aura host`;
+    case 'chooseEntryTimestampNext':
+      if (decision.kind !== 'entryTimestampOrder') return 'no entry timestamp order is being chosen';
+      return decision.remaining.includes(action.oid)
+        ? null
+        : `${action.oid} is not available in the current entry timestamp order`;
+    case 'chooseEntryCharacteristics':
+      if (decision.kind !== 'entryCharacteristics') {
+        return 'no creature is choosing as-entry characteristics';
+      }
+      if (action.oid !== decision.oid) return 'that creature is not awaiting entry characteristics';
+      return Number.isSafeInteger(action.mode) && action.mode >= 0 && action.mode < decision.modes.length
+        ? null
+        : `${String(action.mode)} is not a legal entry characteristic mode`;
+    case 'chooseEntryOptionalCounter':
+      if (decision.kind !== 'entryOptionalCounter') {
+        return 'no permanent is choosing an optional entry counter';
+      }
+      return action.oid === decision.oid
+        ? null
+        : 'that permanent is not awaiting an optional entry counter choice';
+    case 'chooseEntryPayLife':
+      if (decision.kind !== 'entryPayLife') {
+        return 'no permanent is choosing an entry life payment';
+      }
+      if (action.oid !== decision.oid) return 'that permanent is not awaiting an entry life payment';
+      if (action.life !== decision.life) return 'that is not the offered entry life payment';
+      return decision.options.some(
+        (option) => option.type === 'chooseEntryPayLife' && option.pay === action.pay,
+      )
+        ? null
+        : `you cannot pay ${String(decision.life)} life`;
+    case 'chooseEntryPlayer':
+      if (decision.kind !== 'entryPlayer') return 'no permanent is choosing an as-entry player';
+      if (action.oid !== decision.oid) return 'that permanent is not awaiting an entry player';
+      return state.players.some((player) => player.id === action.chosen)
+        ? null
+        : `${String(action.chosen)} is not a player in this game`;
+    case 'chooseEntryColors':
+      if (decision.kind !== 'entryColors') return 'no permanent is choosing as-entry colors';
+      if (action.oid !== decision.oid) return 'that permanent is not awaiting entry colors';
+      return decision.options.some(
+        (option) =>
+          option.type === 'chooseEntryColors' &&
+          option.colors[0] === action.colors[0] &&
+          option.colors[1] === action.colors[1],
+      )
+        ? null
+        : 'entry colors must be two distinct colors in WUBRG order';
+    case 'allocateDamagePrevention': {
+      if (decision.kind !== 'damagePrevention') return 'no damage prevention allocation is pending';
+      if (action.sourceOid !== decision.source.sourceOid) {
+        return `${action.sourceOid} is not the source currently being allocated`;
+      }
+      if (!Number.isSafeInteger(action.amount)) return 'the prevention allocation must be a safe integer';
+      const pending = state.pendingDamagePrevention;
+      if (pending === undefined) return 'no damage prevention allocation is pending';
+      const { minimum, maximum } = damagePreventionRange(pending);
+      return action.amount < minimum || action.amount > maximum
+        ? `the prevention allocation must be between ${String(minimum)} and ${String(maximum)}`
+        : null;
+    }
     case 'scry': {
       if (decision.kind !== 'scry') return 'no scry is resolving';
       if (action.top.length + action.bottom.length !== decision.cards.length) {
@@ -3230,19 +5536,74 @@ export function validateAction(state: GameState, action: Action): string | null 
       }
       return seen.size === wanted.size ? null : 'the scry choice must place every looked-at card';
     }
+    case 'orderTopLibrary':
+      if (decision.kind !== 'topLibraryOrder') return 'no top-library order is resolving';
+      return sameMembers(action.cards, decision.cards)
+        ? null
+        : 'the order must contain every looked-at card exactly once';
+    case 'selectFromTopLibrary': {
+      if (decision.kind !== 'topLibrarySelect') return 'no top-library selection is resolving';
+      if (action.chosen !== null && !decision.eligible.includes(action.chosen))
+        return 'that card is not an eligible selection';
+      const expected = decision.cards.filter((oid) => oid !== action.chosen);
+      if (
+        state.pendingTopLibrary?.selectionRest === 'graveyard' &&
+        JSON.stringify(action.rest) !== JSON.stringify(expected)
+      ) {
+        return 'the graveyard remainder must preserve the revealed order';
+      }
+      return sameMembers(action.rest, expected)
+        ? null
+        : 'the remainder must contain every unchosen card exactly once';
+    }
+    case 'separateTopLibraryPiles':
+      if (decision.kind !== 'topLibraryPartition') return 'no top-library partition is resolving';
+      return sameMembers([...action.first, ...action.second], decision.cards)
+        ? null
+        : 'the piles must contain every revealed card exactly once';
+    case 'chooseTopLibraryPile':
+      return decision.kind === 'topLibraryPile' ? null : 'no top-library pile choice is resolving';
     case 'searchLibrary': {
       if (decision.kind !== 'searchLibrary') return 'no search is resolving';
-      if (action.found === null) return null;
+      if (action.found === null) {
+        return state.pendingSearch?.mayFail === true ? null : 'this unrestricted search must find a card';
+      }
       return decision.cards.includes(action.found)
         ? null
         : `${action.found} is not a card this search may find`;
     }
+    case 'chooseSearchDestination':
+      if (decision.kind !== 'searchDestination') return 'no search destination is being chosen';
+      return decision.cards.includes(action.one) ? null : `${action.one} is not a card found by this search`;
     case 'chooseFromGraveyard': {
       if (decision.kind !== 'graveyardChoice') return 'no graveyard choice is resolving';
       if (action.chosen === null) return null;
       return decision.cards.includes(action.chosen)
         ? null
         : `${action.chosen} is not a card this effect may take from a graveyard`;
+    }
+    case 'chooseFromRevealedHand': {
+      if (decision.kind !== 'revealedHandChoice') return 'no revealed-hand choice is resolving';
+      if (action.chosen === null) {
+        return state.pendingRevealedHandChoice?.outcome.kind === 'mayCastWithoutPayingManaCost'
+          ? null
+          : 'this revealed-hand choice cannot be declined';
+      }
+      return decision.cards.includes(action.chosen)
+        ? null
+        : `${action.chosen} is not an eligible card from the revealed hand`;
+    }
+    case 'chooseFromBattlefield': {
+      if (decision.kind !== 'battlefieldChoice') return 'no battlefield choice is resolving';
+      return decision.permanents.includes(action.chosen)
+        ? null
+        : `${action.chosen} is not a permanent this effect may return`;
+    }
+    case 'choosePopulateToken': {
+      if (decision.kind !== 'populate') return 'no Populate choice is resolving';
+      return decision.tokens.includes(action.token)
+        ? null
+        : `${action.token} is not a creature token this effect may copy`;
     }
     case 'declareAttackers':
       if (decision.kind !== 'declareAttackers') return 'attackers are not being declared';
@@ -3253,6 +5614,9 @@ export function validateAction(state: GameState, action: Action): string | null 
     case 'orderBlockers':
       if (decision.kind !== 'orderBlockers') return 'blocker order is not being chosen';
       return validateOrdering(state, action.orders);
+    case 'orderAttackers':
+      if (decision.kind !== 'orderAttackers') return 'attacker order is not being chosen';
+      return validateAttackerOrdering(state, action.orders);
     case 'mulligan':
       if (decision.kind !== 'mulligan') return 'the opening hands are already settled';
       return canMulligan(state, action.player)
@@ -3267,6 +5631,17 @@ export function validateAction(state: GameState, action: Action): string | null 
         action.bottom,
         `you must put exactly ${String(decision.count)} on the bottom`,
       );
+    case 'chooseOpeningHandAction': {
+      if (decision.kind !== 'openingHandAction') return 'you owe a different decision first';
+      if (action.oid === null) return null;
+      const object = tryObject(state, action.oid);
+      if (object === undefined || object.zone !== 'hand' || object.owner !== action.player) {
+        return 'card is not in your opening hand';
+      }
+      return openingHandActionOf(object.card) === undefined
+        ? 'card has no eligible opening-hand action'
+        : null;
+    }
     case 'discard':
       if (decision.kind !== 'discard') return 'you are not discarding';
       return validateSelection(

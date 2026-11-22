@@ -21,9 +21,9 @@
  *  3. **Its cost is `{T}`, plus mana if it wants.** The tap is what stops the
  *     ability being repeatable at one priority — `{2}: Add {G}{G}{G}` with no
  *     tap is infinite mana, and `checkActivationCost`'s own free-and-repeatable
- *     rule is the same argument one step earlier. A sacrifice and a loyalty
- *     cost are refused for the other reason: the frozen action payload has
- *     nowhere to carry which permanent was eaten.
+ *     rule is the same argument one step earlier. Sacrifice, discard,
+ *     remove-counter and loyalty costs are refused for the other reason: the
+ *     frozen action payload has nowhere to carry or pay them.
  *  4. **A card prints at most one, and a land that already produces mana
  *     prints none.** This is what makes `oid` name one activation. Two mana
  *     abilities on one permanent, or an ability beside `producesMana`, and
@@ -55,6 +55,7 @@
  */
 import type { Ability } from '../abilities';
 import type { Card } from '../card';
+import { hasAbilityEffects } from '../abilities';
 import type { Effect } from '../effects';
 import { isManaEffect } from '../effects';
 import { isManaAbility } from '../mana-ability';
@@ -80,9 +81,43 @@ function invalid(path: string, message: string): Violation {
   return violation('MANA_ABILITY_INVALID', path, message);
 }
 
+/** The one source-attested any-combination bundle currently admitted by the engine. */
+function checkAnyColorCombination(effect: AddManaEffect, path: string, activated: boolean): Violation[] {
+  if (effect.distribution === undefined) return [];
+  if (!activated) {
+    return [
+      invalid(
+        `${path}.distribution`,
+        'a resolving spell has no activation action carrying an exact color distribution',
+      ),
+    ];
+  }
+  const amount = effect.amount;
+  const exactCount =
+    typeof amount !== 'number' &&
+    amount.kind === 'countMatching' &&
+    amount.whose === undefined &&
+    amount.excludeSource === undefined &&
+    amount.filter.cardTypes?.length === 1 &&
+    amount.filter.cardTypes[0] === 'creature' &&
+    amount.filter.keywordAbilities?.length === 1 &&
+    amount.filter.keywordAbilities[0] === 'defender' &&
+    amount.filter.subtypes === undefined &&
+    amount.filter.names === undefined;
+  if (effect.produces.join('') !== 'WUBRG' || !exactCount) {
+    return [
+      invalid(
+        `${path}.distribution`,
+        'anyCombinationOfColors is the closed Axebane bundle: WUBRG distributed across the live number of creatures you control with defender',
+      ),
+    ];
+  }
+  return [];
+}
+
 /** The distinct-colors rule and the choice-implies-one-mana rule, wherever printed. */
 function checkProduces(effect: AddManaEffect, path: string, activated: boolean): Violation[] {
-  const found: Violation[] = [];
+  const found: Violation[] = [...checkAnyColorCombination(effect, path, activated)];
   const distinct = new Set(effect.produces);
   if (distinct.size !== effect.produces.length) {
     found.push(
@@ -125,7 +160,12 @@ function checkManaAbilityShape(ability: Ability, path: string): Violation[] {
       ),
     );
   }
-  if (!ability.cost.tapSelf) {
+  const chargeLimited =
+    !ability.cost.tapSelf &&
+    ability.activateOnlyOnceEachTurn === true &&
+    ability.cost.removeCounter?.counter === 'charge' &&
+    ability.cost.removeCounter.count === 1;
+  if (!ability.cost.tapSelf && !chargeLimited) {
     found.push(
       invalid(
         `${path}.cost`,
@@ -133,11 +173,22 @@ function checkManaAbilityShape(ability: Ability, path: string): Violation[] {
       ),
     );
   }
-  if (ability.cost.sacrificeSelf || ability.cost.sacrificeOther !== undefined) {
+  if (
+    ability.cost.sacrificeSelf ||
+    ability.cost.exileSelf ||
+    ability.cost.payLife !== undefined ||
+    ability.cost.sacrificeOther !== undefined ||
+    ability.cost.sacrificeMatching !== undefined ||
+    ability.cost.sacrificeLandSubtypePair !== undefined ||
+    ability.cost.tapMatching !== undefined ||
+    ability.cost.discard !== undefined ||
+    ability.cost.discardMatching !== undefined ||
+    (ability.cost.removeCounter !== undefined && !chargeLimited)
+  ) {
     found.push(
       invalid(
         `${path}.cost`,
-        'a mana ability is activated through an action that carries only the source and the color chosen, and a sacrifice has no room in it; print the cost as mana and {T}',
+        'a mana ability is activated through an action that carries only the source and the color chosen, so a source-leaving, sacrifice, discard, or counter payment has no room in it; print the cost as mana and {T}',
       ),
     );
   }
@@ -191,7 +242,7 @@ export function checkManaAbilities(card: Card): Violation[] {
   }
 
   for (const [abilityIndex, ability] of card.abilities.entries()) {
-    if (ability.kind === 'static') continue;
+    if (!hasAbilityEffects(ability)) continue;
     const path = `abilities[${abilityIndex}]`;
     const mana = ability.effects.filter((effect) => isManaEffect(effect.kind));
     if (mana.length === 0) continue;
@@ -204,7 +255,7 @@ export function checkManaAbilities(card: Card): Violation[] {
       );
       continue;
     }
-    found.push(...checkManaAbilityShape(ability, path));
+    if (isManaAbility(ability)) found.push(...checkManaAbilityShape(ability, path));
     for (const [index, effect] of ability.effects.entries()) {
       if (effect.kind !== 'addMana') continue;
       found.push(...checkProduces(effect, `${path}.effects[${index}]`, true));

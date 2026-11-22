@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "sets": [
+    {
+      "code": "TXLN",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atxln+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "785153ea58015d20f2f02366b69895a000cad18f43be479677cc5b500e825196",
+      "fetchedAt": "2026-09-20T09:15:34.864Z"
+    },
+    {
+      "code": "TZEN",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atzen+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "2686b05f7d78fab831c305cec41a4799ad8666653521df0acb93f336b93e4649",
+      "fetchedAt": "2026-09-20T09:15:34.898Z"
+    }
+  ],
+  "engine": { "name": "forge", "version": "2.0.14" },
+  "tokens": [
+    {
+      "physicalId": "txln-token:0001:09293ae7-0629-417b-9eda-9bd3f6d8e118",
+      "position": 1,
+      "setCode": "TXLN",
+      "name": "Vampire",
+      "observedNames": ["Vampire Token"],
+      "oracleId": "97af46cb-6209-4ae7-81cc-792894999937",
+      "scryfallId": "09293ae7-0629-417b-9eda-9bd3f6d8e118",
+      "typeLine": "Token Creature — Vampire",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Vampire",
+          "manaCost": null,
+          "typeLine": "Token Creature — Vampire",
+          "oracleText": "Lifelink (Damage dealt by this creature also causes you to gain that much life.)",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "09293ae7-0629-417b-9eda-9bd3f6d8e118",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/0/9/09293ae7-0629-417b-9eda-9bd3f6d8e118.jpg?1783935812"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "txln-token:0004:2d7fc721-6b5b-4920-86fa-0fbfd90adaf5",
+      "position": 4,
+      "setCode": "TXLN",
+      "name": "Pirate",
+      "observedNames": ["Pirate Token"],
+      "oracleId": "3fb1576f-b9e7-4150-ab6e-2c1e56ac1c57",
+      "scryfallId": "2d7fc721-6b5b-4920-86fa-0fbfd90adaf5",
+      "typeLine": "Token Creature — Pirate",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["B"],
+      "faces": [
+        {
+          "name": "Pirate",
+          "manaCost": null,
+          "typeLine": "Token Creature — Pirate",
+          "oracleText": "Menace (This creature can't be blocked except by two or more creatures.)",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["B"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "2d7fc721-6b5b-4920-86fa-0fbfd90adaf5",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/2/d/2d7fc721-6b5b-4920-86fa-0fbfd90adaf5.jpg?1783935809"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "txln-token:0005:1ccee594-e1e6-4a82-bc17-93bcdeb36198",
+      "position": 5,
+      "setCode": "TXLN",
+      "name": "Dinosaur",
+      "observedNames": ["Dinosaur Token"],
+      "oracleId": "240300bd-5088-43c5-a873-290507515843",
+      "scryfallId": "1ccee594-e1e6-4a82-bc17-93bcdeb36198",
+      "typeLine": "Token Creature — Dinosaur",
+      "power": "3",
+      "toughness": "3",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Dinosaur",
+          "manaCost": null,
+          "typeLine": "Token Creature — Dinosaur",
+          "oracleText": "Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)",
+          "power": "3",
+          "toughness": "3",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "1ccee594-e1e6-4a82-bc17-93bcdeb36198",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/1/c/1ccee594-e1e6-4a82-bc17-93bcdeb36198.jpg?1783935808"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "txln-token:0006:642d1d93-22d0-43f9-8691-6790876185a0",
+      "position": 6,
+      "setCode": "TXLN",
+      "name": "Plant",
+      "observedNames": ["Plant Token"],
+      "oracleId": "639d5f0d-d0ea-49bf-9075-12252315601e",
+      "scryfallId": "642d1d93-22d0-43f9-8691-6790876185a0",
+      "typeLine": "Token Creature — Plant",
+      "power": "0",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Plant",
+          "manaCost": null,
+          "typeLine": "Token Creature — Plant",
+          "oracleText": "Defender (This creature can't attack.)",
+          "power": "0",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "642d1d93-22d0-43f9-8691-6790876185a0",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/6/4/642d1d93-22d0-43f9-8691-6790876185a0.jpg?1783935809"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "txln-token:0007:720f3e68-84c0-462e-a0d1-90236ccc494a",
+      "position": 7,
+      "setCode": "TXLN",
+      "name": "Treasure",
+      "observedNames": ["Treasure Token"],
+      "oracleId": "3c549374-6c37-42e0-8d88-a8555d46732d",
+      "scryfallId": "720f3e68-84c0-462e-a0d1-90236ccc494a",
+      "typeLine": "Token Artifact — Treasure",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "faces": [
+        {
+          "name": "Treasure",
+          "manaCost": null,
+          "typeLine": "Token Artifact — Treasure",
+          "oracleText": "{T}, Sacrifice this token: Add one mana of any color.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "720f3e68-84c0-462e-a0d1-90236ccc494a",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/7/2/720f3e68-84c0-462e-a0d1-90236ccc494a.jpg?1783935809"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tzen-token:0004:5dcbf662-7263-414a-b64b-ccf9aab20faa",
+      "position": 4,
+      "setCode": "TZEN",
+      "name": "Illusion",
+      "observedNames": ["Illusion Token"],
+      "oracleId": "eafd610d-a32e-4d92-b1f4-134f80720d16",
+      "scryfallId": "5dcbf662-7263-414a-b64b-ccf9aab20faa",
+      "typeLine": "Token Creature — Illusion",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["U"],
+      "faces": [
+        {
+          "name": "Illusion",
+          "manaCost": null,
+          "typeLine": "Token Creature — Illusion",
+          "oracleText": "",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["U"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "5dcbf662-7263-414a-b64b-ccf9aab20faa",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/d/5dcbf662-7263-414a-b64b-ccf9aab20faa.jpg?1783942179"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tzen-token:0005:fb1b292b-2da6-4601-9f93-5eb273ce3a50",
+      "position": 5,
+      "setCode": "TZEN",
+      "name": "Merfolk",
+      "observedNames": ["Merfolk Token"],
+      "oracleId": "4998e2fe-1537-40bb-a4d7-f668a5b8975f",
+      "scryfallId": "fb1b292b-2da6-4601-9f93-5eb273ce3a50",
+      "typeLine": "Token Creature — Merfolk",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["U"],
+      "faces": [
+        {
+          "name": "Merfolk",
+          "manaCost": null,
+          "typeLine": "Token Creature — Merfolk",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["U"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "fb1b292b-2da6-4601-9f93-5eb273ce3a50",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/f/b/fb1b292b-2da6-4601-9f93-5eb273ce3a50.jpg?1783942178"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

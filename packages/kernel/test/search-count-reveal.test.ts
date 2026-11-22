@@ -56,6 +56,20 @@ const MASS_RAMP = sorcery(
   { generic: 1, G: 1 },
 );
 
+/** An unrestricted "up to X cards" search whose X resolves to one. */
+const COMPUTED_UNRESTRICTED = sorcery(
+  'Errand of Any One',
+  [
+    {
+      kind: 'searchLibrary',
+      filter: {},
+      count: { kind: 'countMatching', filter: { cardTypes: ['land'] } },
+      destination: 'hand',
+    },
+  ],
+  { G: 1 },
+);
+
 function bench(count: number) {
   return Array.from({ length: count }, (_, index) => creature(`Bench ${String(index + 1)}`, 1, 1));
 }
@@ -193,6 +207,15 @@ describe('a search that takes more than one card', () => {
       found: false,
     });
   });
+
+  it('still offers the hidden-zone fail answer when no card matches a restricted search', () => {
+    const asked = cast(board(RANGERS_PATH, 4, 0), RANGERS_PATH.name);
+    const decision = pendingDecision(asked.state);
+    if (decision?.kind !== 'searchLibrary') throw new Error('the restricted search did not pause');
+
+    expect(decision.cards).toEqual([]);
+    expect(decision.options).toContainEqual({ type: 'searchLibrary', player: 0, found: null });
+  });
 });
 
 describe('a search whose count is read off the board', () => {
@@ -215,6 +238,15 @@ describe('a search whose count is read off the board', () => {
     expect(taken).toEqual([first[0], first[1]]);
     expect(taken.map((oid) => current.state.objects[oid]?.zone)).toEqual(['battlefield', 'battlefield']);
     expect(searching(current.state)).toBe(false);
+  });
+
+  it('retains the up-to answer when a computed unrestricted count resolves to one', () => {
+    const asked = cast(board(COMPUTED_UNRESTRICTED, 1, 0), COMPUTED_UNRESTRICTED.name);
+    const decision = pendingDecision(asked.state);
+    if (decision?.kind !== 'searchLibrary') throw new Error('the computed search did not pause');
+
+    expect(decision.cards.length).toBeGreaterThan(0);
+    expect(decision.options).toContainEqual({ type: 'searchLibrary', player: 0, found: null });
   });
 });
 

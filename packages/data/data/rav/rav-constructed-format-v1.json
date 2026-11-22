@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "rav",
+  "name": "Ravnica: City of Guilds",
+  "sources": [
+    {
+      "code": "RAV",
+      "catalogFormat": "rav-printed-v1",
+      "catalogSha256": "2f32c49619ad7fab74e161ceb856dfe150e322b2339e47f0ba2f8fc5e3be3aed",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/RAV.json",
+        "sha256": "3d497fb32c6dad815e0c5c5fa4222283c357df69bc2025bf08b2cbc657c96839",
+        "version": "5.3.0+20260929"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "boros-tempo",
+      "name": "Boros Tempo",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "rav-printed-v1:0243:5af01330-05c2-4c5b-9830-2886711b2b5d",
+          "name": "Boros Recruit",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0125:d307d8c7-b9b5-4f8f-933d-f1c64cbbf92f",
+          "name": "Frenzied Goblin",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0193:bf25cd63-3304-4eea-841b-1f058010c627",
+          "name": "Boros Swiftblade",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0242:072a1ff1-9c50-426a-a83c-817bde5beab7",
+          "name": "Boros Guildmage",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0232:d697ef7f-0e51-4bf1-b0f5-742325706d2a",
+          "name": "Skyknight Legionnaire",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0190:c2521942-0ecd-45a9-bac6-04267a2c29ed",
+          "name": "Agrus Kos, Wojek Veteran",
+          "count": 2
+        },
+        {
+          "physicalId": "rav-printed-v1:0213:1b2ecf55-c1cc-4b28-b7ce-e1b25305155e",
+          "name": "Lightning Helix",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0117:ff3a24af-e995-4d05-ac2c-e9676048675d",
+          "name": "Char",
+          "count": 2
+        },
+        {
+          "physicalId": "rav-printed-v1:0280:168ef687-5797-4b45-b75b-393d8117cebd",
+          "name": "Sacred Foundry",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0275:7dfe3f03-078f-44fb-89cd-efa3ebfaf637",
+          "name": "Boros Garrison",
+          "count": 3
+        },
+        {
+          "physicalId": "rav-printed-v1:0282:a8a69f7b-be68-43f7-b1ed-df528bde74e5",
+          "name": "Sunhome, Fortress of the Legion",
+          "count": 2
+        },
+        {
+          "physicalId": "rav-printed-v1:0287:3d8d3cd4-0f5f-4424-82ee-d8ba81da47fd",
+          "name": "Plains",
+          "count": 11
+        },
+        {
+          "physicalId": "rav-printed-v1:0299:dad3662a-f7b4-45d5-a35e-fc6c38474692",
+          "name": "Mountain",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "golgari-graveyard",
+      "name": "Golgari Graveyard",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "rav-printed-v1:0107:628903a0-6695-4643-80f3-9a6efc4d6a27",
+          "name": "Stinkweed Imp",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0167:f61b50e6-2166-435d-bf48-c4a0cff9999c",
+          "name": "Golgari Grave-Troll",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0087:87c39e21-3e2f-4cbf-9f99-69e977924a73",
+          "name": "Golgari Thug",
+          "count": 3
+        },
+        {
+          "physicalId": "rav-printed-v1:0172:7ac16d09-8bc7-407c-a757-666f4707bc90",
+          "name": "Life from the Loam",
+          "count": 3
+        },
+        {
+          "physicalId": "rav-printed-v1:0173:871c3f80-aaa7-485f-b519-57363f5905dd",
+          "name": "Moldervine Cloak",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0221:0a16086c-5a74-45d0-8b38-e832cfbc80f7",
+          "name": "Putrefy",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0230:4c93baa2-a23e-4e18-b4cd-779c992d2042",
+          "name": "Shambling Shell",
+          "count": 2
+        },
+        {
+          "physicalId": "rav-printed-v1:0111:8fe06560-bb3f-4f0b-ad3c-7257419eb8ef",
+          "name": "Vigor Mortis",
+          "count": 2
+        },
+        {
+          "physicalId": "rav-printed-v1:0211:23f7c7d0-a48b-4153-8386-a9ab71e01dbe",
+          "name": "Grave-Shell Scarab",
+          "count": 2
+        },
+        {
+          "physicalId": "rav-printed-v1:0279:fce07335-cc78-4683-b2f0-9c98a06ea1d8",
+          "name": "Overgrown Tomb",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0278:104364d5-ede8-4ac5-900f-19947f51bbc1",
+          "name": "Golgari Rot Farm",
+          "count": 3
+        },
+        {
+          "physicalId": "rav-printed-v1:0283:5cf3ba87-93a0-44db-83d9-92e23a677a62",
+          "name": "Svogthos, the Restless Tomb",
+          "count": 3
+        },
+        {
+          "physicalId": "rav-printed-v1:0295:2755f9f7-95f9-4907-8ec9-21853eb376f4",
+          "name": "Swamp",
+          "count": 11
+        },
+        {
+          "physicalId": "rav-printed-v1:0303:706be1bd-720d-4e74-b71f-568081afcab1",
+          "name": "Forest",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "id": "selesnya-tokens",
+      "name": "Selesnya Tokens",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "rav-printed-v1:0228:18bc93c1-f236-4d1b-bb54-5041b3cae5a6",
+          "name": "Selesnya Evangel",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0252:21061ce3-d098-4057-b341-c5db6ee1b6d4",
+          "name": "Selesnya Guildmage",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0164:7193c00f-0398-485c-974d-346ee59cd4c7",
+          "name": "Fists of Ironwood",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0181:c4415070-4304-482b-b8e5-2bf689af0843",
+          "name": "Scatter the Seeds",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0183:ae199825-563e-4837-a6d2-7b009b93cd4d",
+          "name": "Siege Wurm",
+          "count": 3
+        },
+        {
+          "physicalId": "rav-printed-v1:0212:1c293144-df82-481d-8d24-2bdc164a355f",
+          "name": "Guardian of Vitu-Ghazi",
+          "count": 2
+        },
+        {
+          "physicalId": "rav-printed-v1:0175:672f6cc6-52ed-417f-b816-5733a71566e8",
+          "name": "Overwhelm",
+          "count": 3
+        },
+        {
+          "physicalId": "rav-printed-v1:0284:794a2b79-8c55-4423-8843-7e6e96f84071",
+          "name": "Temple Garden",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0281:c5e51787-f9c9-4926-9df1-a384a3092676",
+          "name": "Selesnya Sanctuary",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0285:afc35026-a29e-4fb0-931f-5e90faf41802",
+          "name": "Vitu-Ghazi, the City-Tree",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0287:3d8d3cd4-0f5f-4424-82ee-d8ba81da47fd",
+          "name": "Plains",
+          "count": 10
+        },
+        {
+          "physicalId": "rav-printed-v1:0303:706be1bd-720d-4e74-b71f-568081afcab1",
+          "name": "Forest",
+          "count": 14
+        }
+      ]
+    }
+  ],
+  "contentSha256": "e80819f143f3daa365513a28cf116dad8a7ffa662de9b3941cb5ba0ec89005cd"
+}

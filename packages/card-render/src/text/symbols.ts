@@ -9,7 +9,8 @@
  * face does not draw.
  *
  * So a symbol is charged a *fixed* advance — `SYMBOL_ADVANCE_EM` from
- * `@mtg/ui`'s registry, the same number `styles/symbols.ts` writes into the web
+ * `@mtg/render-spec`'s registry, the same number `@mtg/ui`'s `styles/symbols.ts`
+ * writes into the web
  * sheet and `../symbols.ts` draws the box at. The three uses share one
  * declaration on purpose: measure at one width and draw at another and the
  * renderer reports a clean fit for a card that overflows.
@@ -18,8 +19,14 @@
  * because that one reaches the pip drawings and this one is imported by the
  * line breaker underneath them.
  */
-import { oracleChunks, SYMBOL_ADVANCE_EM, SYMBOL_BOX_EM, SYMBOL_DROP_EM, SYMBOL_MARGIN_EM } from '@mtg/ui';
-import type { OracleChunk } from '@mtg/ui';
+import {
+  oracleChunks,
+  SYMBOL_ADVANCE_EM,
+  SYMBOL_BOX_EM,
+  SYMBOL_DROP_EM,
+  SYMBOL_MARGIN_EM,
+} from '@mtg/render-spec';
+import type { OracleChunk } from '@mtg/render-spec';
 import { measureText } from './metrics';
 import type { MeasureOptions } from './metrics';
 

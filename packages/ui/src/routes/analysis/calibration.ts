@@ -296,7 +296,10 @@ function formatEvidence(artifact: CalibrationArtifact): readonly ReactElement[] 
         note(`${draft.archetypeSupport.evidence} n=${integer(draft.archetypeSupport.population.count)}.`),
         createElement(
           'ul',
-          { className: 'mtg-findings' },
+          // `mtg-finding-list` and not `mtg-findings`: the second was a name no
+          // sheet drew, so this list kept the browser's discs and its 40px
+          // indent while every other list in the lane sat flush. `mtg-21s0`.
+          { className: 'mtg-finding-list' },
           ...draft.archetypeSupport.pairs.map((pair) =>
             createElement(
               'li',

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "constructed",
+  "id": "momir-basic",
+  "name": "Momir Basic",
+  "sourceCodes": ["M11"],
+  "rules": {
+    "variant": "momir",
+    "startingLife": 24
+  },
+  "decks": [
+    {
+      "id": "momir-basic",
+      "name": "Momir Basic",
+      "commanders": [],
+      "cards": [
+        { "name": "Plains", "setCode": "M11", "count": 12 },
+        { "name": "Island", "setCode": "M11", "count": 12 },
+        { "name": "Swamp", "setCode": "M11", "count": 12 },
+        { "name": "Mountain", "setCode": "M11", "count": 12 },
+        { "name": "Forest", "setCode": "M11", "count": 12 }
+      ]
+    }
+  ]
+}

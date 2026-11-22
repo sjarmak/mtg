@@ -85,6 +85,38 @@ const CriterionSchema = z.object({
   statement: z.string().min(1),
 });
 
+const OpponentPopulationSchema = z.object({
+  id: z.string().min(1),
+  members: z.array(
+    z.object({
+      id: z.string().min(1),
+      share: z.number().positive().max(1),
+      strategy: z.string().min(1),
+    }),
+  ),
+});
+
+const ConstructionSchema = z.object({
+  format: z.object({
+    id: z.literal('decklab-constructed-format/v1'),
+    source: z.union([
+      z.object({ kind: z.literal('format'), format: z.string().min(1) }),
+      z.object({ kind: z.literal('sets'), sets: z.array(z.string().min(1)).min(1) }),
+    ]),
+    deckSize: z.int().positive(),
+    landCount: z.int().min(0),
+    spellCount: z.int().min(0),
+    copyLimit: z.int().positive(),
+    opponentPopulation: OpponentPopulationSchema.nullable(),
+  }),
+  selection: z.object({
+    id: z.literal('decklab-model-repair/v1'),
+    provider: z.string().min(1),
+    model: z.string().min(1),
+    fallbackId: z.literal('decklab-verified-partial/v1'),
+  }),
+});
+
 /** One count per bucket, built from the shared bucket list rather than restated. */
 const HistogramSchema = z.object(
   Object.fromEntries(CURVE_BUCKETS.map((bucket) => [String(bucket), z.int().min(0)])) as Record<
@@ -103,6 +135,8 @@ export const DeckArtifactSchema = z.object({
   totalCards: z.int().min(0),
   priceUsd: z.number().min(0),
   universeSize: z.int().min(0),
+  /** Added provenance; absent on artifacts written before the selector was versioned. */
+  construction: ConstructionSchema.optional(),
   landPlan: z.object({
     count: z.int().min(0),
     /** `LandCountSource` in `@mtg/decklab`: the player said so, or the model decided. */

@@ -25,6 +25,11 @@ function stagedArt(overrides: Partial<StagedSetArt> = {}): StagedSetArt {
     remote: 0,
     missing: [],
     pending: [],
+    bytes: 0,
+    sourceBytes: 0,
+    resized: 0,
+    encoded: 0,
+    reused: 0,
     ...overrides,
   };
 }
@@ -54,7 +59,7 @@ describe('describeArt', () => {
 
     const line = describeArt(outcome);
 
-    expect(line).toContain('for 20 of 249 cards');
+    expect(line).toContain('for 20 of 249 surfaces');
     expect(line).not.toContain('for 87 cards');
     expect(line).toContain('229 of them show the pending frame');
   });
@@ -102,7 +107,7 @@ describe('describeArt', () => {
 
     const line = describeArt(outcome);
 
-    expect(line).toContain('Staged 164 illustrations for 162 of 162 cards');
+    expect(line).toContain('Staged 164 illustrations for 162 of 162 surfaces');
     expect(line).toContain('160 pulled from their own host and 4 already in the shared cache');
     expect(line).toContain('served from this page');
   });
@@ -119,6 +124,20 @@ describe('describeArt', () => {
     };
 
     expect(describeArt(outcome)).not.toContain('pulled from their own host');
+  });
+
+  it('reports how many web rasters were reused and re-encoded', () => {
+    const outcome: ArtOutcome = {
+      status: 'staged',
+      staged: stagedArt({ copied: 3, encoded: 1, reused: 2 }),
+      cached: cachedArt(),
+      what: 'the manifest beside the set',
+      covered: 3,
+      total: 3,
+      preferences: NO_PICKS,
+    };
+
+    expect(describeArt(outcome)).toContain('2 web rasters reused and 1 re-encoded');
   });
 
   it('names every illustration that could not be pulled rather than swallowing it', () => {

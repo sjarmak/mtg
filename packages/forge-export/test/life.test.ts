@@ -1,15 +1,20 @@
 /**
- * The life vocabulary as Forge writes it, and the one member it refuses.
+ * The life vocabulary as Forge writes it.
  *
- * Two rows and one refusal. `LoseLife` and `SetLife` are both shipped Forge
- * effect APIs with corpus spellings behind them, so those two are asserted
- * against the lines the transpiler emits. A blanket "prevent all combat damage
- * this turn" is not an effect API at all — Forge writes it as an `SP$ Effect`
- * installing a `ReplacementEffects$` line — and this transpiler emits neither,
- * so the row rejects with a named code rather than approximating it. That
- * refusal is asserted here for the reason `conformance.test.ts` asserts the
- * characteristic-defining P/T's: a parity oracle that boots on a card we
- * exported wrong is worse than one that refuses to export it.
+ * Three rows, all of them shipped Forge effect APIs with corpus spellings
+ * behind them, so all three are asserted against the lines the transpiler
+ * emits. The third used to be a refusal, on the ground that a blanket "prevent
+ * all combat damage this turn" is not an effect API at all but an `SP$ Effect`
+ * installing a `ReplacementEffects$` line. Forge master spells it `A:SP$ Fog`,
+ * in 19 files of the 2.0.14 corpus, so the refusal named a limitation the
+ * oracle does not have (`mtg-udc9`).
+ *
+ * The reason the refusal existed is still the right instinct and is now met by
+ * a stronger assertion than a rejection code: this transpiler's Fog line is
+ * compared byte for byte against `res/cardsfolder/f/fog.txt`'s own. A parity
+ * oracle that boots on a card we exported wrong is worse than one that refuses
+ * to export it, and better than either is one that exports the file Forge
+ * ships.
  */
 import { describe, expect, it } from 'vitest';
 import { transpileCard } from '@mtg/forge-export';
@@ -54,11 +59,33 @@ describe('the life rows', () => {
     expect(line).not.toContain('ValidTgts$');
   });
 
-  it('refuses a Fog by name rather than exporting a different card', () => {
-    const result = transpileCard(spell('Test Held Blow', [{ kind: 'preventCombatDamage' }]));
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.rejections.map((entry) => entry.code)).toContain('UNMAPPED_EFFECT_KIND');
-    expect(result.rejections[0]?.message).toMatch(/replacement effect/iu);
+  /**
+   * Forge master `forge-gui/res/cardsfolder/f/fog.txt`, quoted whole. Nine more
+   * files carry the identical line: Holy Day, Darkness, Angelsong, Lull,
+   * Root Snare, Moment's Peace, Haze of Pollen, Pause for Reflection and
+   * Constant Mists. Equality rather than `toContain`, because the claim being
+   * made is that the exported card is the card Forge ships and not merely a
+   * card built on the right API.
+   */
+  it('writes a Fog as the line Forge ships for Fog', () => {
+    expect(lineStartingWith(spell('Test Held Blow', [{ kind: 'preventCombatDamage' }]), 'A:')).toBe(
+      'A:SP$ Fog | SpellDescription$ Prevent all combat damage that would be dealt this turn.',
+    );
+  });
+
+  /**
+   * The API carries the whole meaning, so there is nothing beside it to get
+   * wrong: no target clause for an effect that names no target, and no amount
+   * for a prevention that has none. `SP$ PreventDamage` with an `Amount$` was
+   * the approximation the refusal was protecting against, and it earns its
+   * assertion: it would prevent one instance and let the rest of the combat
+   * damage step through.
+   */
+  it('writes the Fog with no target clause and no damage amount', () => {
+    const line = lineStartingWith(spell('Test Held Blow Two', [{ kind: 'preventCombatDamage' }]), 'A:');
+    expect(line).not.toContain('ValidTgts$');
+    expect(line).not.toContain('Defined$');
+    expect(line).not.toContain('Amount$');
+    expect(line).not.toContain('PreventDamage');
   });
 });

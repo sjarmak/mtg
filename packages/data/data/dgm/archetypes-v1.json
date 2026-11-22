@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "formatId": "dgm",
+  "archetypes": [
+    {
+      "id": "selesnya-tokens",
+      "name": "Selesnya Tokens",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Bronzebeak Moa",
+        "physicalId": "dgm-printed-v1:0060:291c0ebc-d489-42c7-8d8a-9216c333412f"
+      },
+      "plan": "Build around Bronzebeak Moa: Populate valuable tokens, widen the battlefield, and use a mass pump effect to turn board advantage into lethal damage."
+    },
+    {
+      "id": "azorius-flyers",
+      "name": "Azorius Flyers",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Ascended Lawmage",
+        "physicalId": "dgm-printed-v1:0053:b1f00799-80ce-431e-97bb-8bb4e0e8ba49"
+      },
+      "plan": "Build around Ascended Lawmage: Stall the ground with efficient blockers while evasive creatures establish a clock in the air."
+    },
+    {
+      "id": "simic-counters",
+      "name": "Simic Counters",
+      "colors": ["U", "G"],
+      "signpost": {
+        "name": "Beetleform Mage",
+        "physicalId": "dgm-printed-v1:0054:1e2f7d7f-4097-419b-8de0-b7bf28fc3a4b"
+      },
+      "plan": "Build around Beetleform Mage: Place counters on adaptable creatures, move or multiply them for favorable combat, and grow beyond opposing removal."
+    },
+    {
+      "id": "izzet-spells",
+      "name": "Izzet Spells",
+      "colors": ["U", "R"],
+      "signpost": {
+        "name": "Blast of Genius",
+        "physicalId": "dgm-printed-v1:0055:b2ff592c-bd35-4947-ba17-8b6170d5388e"
+      },
+      "plan": "Build around Blast of Genius: Pair cheap spells with creatures that reward casting them, using burn and bounce to sustain tempo."
+    },
+    {
+      "id": "boros-tokens",
+      "name": "Boros Tokens",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Blaze Commando",
+        "physicalId": "dgm-printed-v1:0056:5e179f0d-2965-44e4-8483-67b330a8608c"
+      },
+      "plan": "Build around Blaze Commando: Produce several bodies, enhance the whole team, and use combat tricks to turn a wide attack into lethal damage."
+    },
+    {
+      "id": "rakdos-aggro",
+      "name": "Rakdos Aggro",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Carnage Gladiator",
+        "physicalId": "dgm-printed-v1:0061:20bde6c1-917c-4860-a8d0-a9d7c461f8d2"
+      },
+      "plan": "Build around Carnage Gladiator: Curve aggressive creatures into removal and direct damage, accepting trades that keep the opponent under pressure."
+    },
+    {
+      "id": "golgari-graveyard",
+      "name": "Golgari Graveyard",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Drown in Filth",
+        "physicalId": "dgm-printed-v1:0067:22feacda-01e0-4f0d-a3c7-a22e3d40bf4e"
+      },
+      "plan": "Build around Drown in Filth: Trade creatures early, stock the graveyard, and use recursion or scavenge-style payoffs to win the long game."
+    },
+    {
+      "id": "dimir-control",
+      "name": "Dimir Control",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Haunter of Nightveil",
+        "physicalId": "dgm-printed-v1:0076:438683f5-adfa-42ae-a6fb-c4649a8a30ab"
+      },
+      "plan": "Build around Haunter of Nightveil: Answer early threats, disrupt the opponent's hand or library, and win with an evasive threat after stabilizing."
+    },
+    {
+      "id": "orzhov-sacrifice",
+      "name": "Orzhov Sacrifice",
+      "colors": ["W", "B"],
+      "signpost": {
+        "name": "Maw of the Obzedat",
+        "physicalId": "dgm-printed-v1:0083:cd1131c6-04da-4c4d-ab61-874ac5be7087"
+      },
+      "plan": "Build around Maw of the Obzedat: Create expendable bodies, sacrifice them for value, and combine death triggers with recursion to grind ahead."
+    },
+    {
+      "id": "gruul-aggro",
+      "name": "Gruul Aggro",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Gruul War Chant",
+        "physicalId": "dgm-printed-v1:0075:df383a6a-5eb1-48e8-a5f3-f4731ddb871b"
+      },
+      "plan": "Build around Gruul War Chant: Curve efficient creatures into hasty pressure and use bloodrush-style tricks to punish blocks or force damage."
+    }
+  ]
+}

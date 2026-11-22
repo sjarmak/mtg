@@ -51,6 +51,8 @@ export type CubeFindingCode =
   | 'color-balance'
   /** A stated curve band holds too few or too many cards. */
   | 'curve-band'
+  /** A card's mana value falls in no stated band, so no band judges it. */
+  | 'curve-uncovered'
   /** A stated archetype has fewer playable cards than it requires. */
   | 'archetype-support'
   /** A card is tagged for an archetype it cannot be cast in. */
@@ -226,6 +228,7 @@ export function validateCube(
     ...copyFindings(entries, criteria),
     ...colorFindings(measurement, criteria),
     ...curveFindings(measurement, criteria),
+    ...curveCoverageFindings(entries, criteria),
     ...archetypeColorFindings(entries, criteria),
     ...archetypeSupportFindings(measurement),
     ...availabilityFindings(availability),
@@ -374,6 +377,97 @@ function cardsInBand(curve: readonly CurveMeasure[], band: CurveBand): number {
     .reduce((sum, point) => sum + point.cards, 0);
 }
 
+/**
+ * Mana values no stated band reaches, and the cards sitting in them.
+ *
+ * `criteria.ts`'s band refinement checks that stated bands do not overlap and
+ * that an open-ended one is last. Neither of those makes them cover anything: a
+ * curve stated as `MV 1-2` and `MV 4+` is well-formed and says nothing at all
+ * about a three-drop, so a three-drop is counted in the census, printed in the
+ * finished list, held to no minimum and no maximum, and the cube reports clean
+ * on a criterion it never applied to that card. A free spell reaches the same
+ * hole from below: bands stated from 1 leave every zero-cost card unjudged.
+ *
+ * Coverage is measured against the cards the cube actually holds rather than
+ * against 0 to 20, because an unreachable hole is not a fault. A curve with no
+ * band at 3 over a list that prints no three-drop judges every card it has, and
+ * failing it would be failing a cube for the shape of a list nobody built. Only
+ * a gap something fell into is a finding, and the finding names what fell in.
+ *
+ * Non-land cards only, which is the population the bands are measured over:
+ * `measureCube` leaves lands out of `measurement.curve`, so a land's zero mana
+ * value is not a hole in a curve stated from one.
+ *
+ * `measured` is the copies that landed in the gap and `required` is 0, which is
+ * how many cards a stated curve may leave unjudged. A cube that stated no curve
+ * gets nothing here, for the reason it gets no `curve-band` finding: an
+ * unstated dial is measured and reported, never failed.
+ */
+function curveCoverageFindings(
+  entries: readonly CubeEntry[],
+  criteria: CubeCriteria,
+): readonly CubeFinding[] {
+  if (criteria.curve.length === 0) return [];
+
+  const uncovered = new Map<number, { copies: number; readonly names: string[] }>();
+  for (const entry of entries) {
+    if (isLandCard(entry.card)) continue;
+    const manaValue = entry.card.manaValue;
+    if (criteria.curve.some((band) => bandHolds(band, manaValue))) continue;
+    const seen = uncovered.get(manaValue);
+    if (seen === undefined) uncovered.set(manaValue, { copies: entry.count, names: [entry.card.name] });
+    else {
+      seen.copies += entry.count;
+      if (!seen.names.includes(entry.card.name)) seen.names.push(entry.card.name);
+    }
+  }
+
+  return [...uncovered.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([manaValue, held]) => ({
+      code: 'curve-uncovered' as const,
+      subject: `MV ${String(manaValue)}`,
+      measured: held.copies,
+      required: 0,
+      detail:
+        `MV ${String(manaValue)} falls ${gapLabel(criteria.curve, manaValue)}, so ` +
+        `${plural(held.copies, 'card')} the cube holds ${held.copies === 1 ? 'is' : 'are'} judged by no band: ` +
+        `${nameList(held.names)}`,
+    }));
+}
+
+/** Where an uncovered mana value sits relative to the bands that were stated. */
+function gapLabel(curve: readonly CurveBand[], manaValue: number): string {
+  const sorted = [...curve].sort((a, b) => a.from - b.from);
+  const below = sorted.filter((band) => band.to !== null && band.to < manaValue).at(-1);
+  const above = sorted.find((band) => band.from > manaValue);
+  if (below !== undefined && above !== undefined) {
+    return `between the stated ${bandLabel(below)} and ${bandLabel(above)}`;
+  }
+  if (above !== undefined) return `below the lowest stated band, ${bandLabel(above)}`;
+  if (below !== undefined) return `above the highest stated band, ${bandLabel(below)}`;
+  return 'in no stated band';
+}
+
+/**
+ * Up to `NAMES_IN_A_FINDING` cards by name, then a count of the rest.
+ *
+ * A gap in a 360-card cube can hold sixty cards and a sixty-name sentence is
+ * not something a designer reads. The remainder is counted out loud rather than
+ * dropped, so the finding never reads as a shorter list than it measured.
+ */
+function nameList(names: readonly string[]): string {
+  const shown = names.slice(0, NAMES_IN_A_FINDING);
+  const rest = names.length - shown.length;
+  return rest === 0 ? shown.join(', ') : `${shown.join(', ')}, and ${plural(rest, 'more card')}`;
+}
+
+const NAMES_IN_A_FINDING = 8;
+
+function plural(count: number, noun: string): string {
+  return `${String(count)} ${noun}${count === 1 ? '' : 's'}`;
+}
+
 function archetypeColorFindings(
   entries: readonly CubeEntry[],
   criteria: CubeCriteria,
@@ -421,9 +515,9 @@ function archetypeSupportFindings(measurement: CubeMeasurement): readonly CubeFi
  *
  * A miss where the pod's own deal is short of what a deck needs is a
  * different subject wearing the archetype's name: `dealtCastable` below
- * `spellsRequired` means the seat cannot assemble the archetype from the deal
- * at all, however good the list is, so failing the archetype would name the
- * wrong cause. That case abstains instead — `archetype-availability-abstained`,
+ * `spellsRequired` means the expected deal is too shallow to attribute the
+ * miss solely to the list. That case abstains instead —
+ * `archetype-availability-abstained`,
  * carrying the deal and the requirement rather than the seat-draft count, and
  * excluded from `ok` by `isBlocking`. It only ever replaces a miss: a share
  * that already cleared the stated minimum returns nothing either way, deal or
@@ -447,8 +541,8 @@ function availabilityFindings(availability: CubeAvailability | null): readonly C
             `${archetype.name} was assembled by ${String(archetype.assembled)} of ${String(sample)} seat-drafts ` +
             `(${percent(archetype.share)}) against a stated minimum of ${percent(archetype.minShare)}, but not ` +
             `failed on it: this pod deals a seat ${archetype.dealtCastable.toFixed(1)} castable spells before a ` +
-            `pick, and a deck needs ${String(availability.spellsRequired)} — the seat cannot assemble the ` +
-            'archetype from that deal however well it drafts',
+            `pick in expectation, and a deck needs ${String(availability.spellsRequired)} — this sample cannot ` +
+            'separate a shallow pod from a thin archetype list',
         },
       ];
     }

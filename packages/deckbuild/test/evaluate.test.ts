@@ -411,6 +411,37 @@ describe('static abilities', () => {
     expect(abilityValue(conditional, WEIGHTS)).toBeLessThan(abilityValue(anthem, WEIGHTS));
   });
 
+  it('prices evergreen, parameterized, parameterless, and protection grants from their own tables', () => {
+    const bundle: Ability = {
+      kind: 'static',
+      scope: 'creaturesYouControl',
+      subtype: null,
+      modification: {
+        kind: 'grantKeywordAbilities',
+        grants: [
+          { kind: 'keyword', keyword: 'flying' },
+          { kind: 'keyword', keyword: 'indestructible' },
+          { kind: 'landwalk', landType: 'Island' },
+          { kind: 'protection', quality: { kind: 'color', color: 'B' } },
+          { kind: 'protection', quality: { kind: 'subtype', subtype: 'Dragon' } },
+        ],
+      },
+    };
+    const weights = {
+      ...WEIGHTS,
+      staticScopeReach: { ...WEIGHTS.staticScopeReach, creaturesYouControl: 1 },
+      keywordBase: { ...WEIGHTS.keywordBase, flying: 2 },
+      keywordAbilityValue: {
+        ...WEIGHTS.keywordAbilityValue,
+        indestructible: { ...WEIGHTS.keywordAbilityValue.indestructible, flat: 3 },
+        landwalk: { ...WEIGHTS.keywordAbilityValue.landwalk, flat: 7 },
+        protection: { ...WEIGHTS.keywordAbilityValue.protection, flat: 5 },
+      },
+    };
+
+    expect(abilityValue(bundle, weights)).toBe(22);
+  });
+
   /**
    * The restriction discount, and the two things it must not do.
    *
@@ -623,9 +654,9 @@ describe('static abilities', () => {
      * The fallback is derived, and this is what says so.
      *
      * `targetNarrowingFactor` decides "the color field is the only narrowing"
-     * by counting the fields the filter states, not by listing the other six.
+     * by counting the fields the filter states, not by listing the others.
      * A list would be a copy of `TargetFilter` that nothing keeps honest: the
-     * day a seventh narrowing field lands, a card that carried it beside a
+     * day another narrowing field lands, a card that carried it beside a
      * color would take the color's factor and the new field would price at
      * nothing at all - a silent under-discount on a card nobody wrote yet.
      *
@@ -643,8 +674,12 @@ describe('static abilities', () => {
         subtypes: { subtypes: ['Goblin'] },
         colors: { colors: ['U'] },
         excludeColors: { excludeColors: ['B'] },
+        monocolored: { monocolored: true },
         keywords: { keywords: ['flying'] },
+        excludeKeywords: { excludeKeywords: ['flying'] },
         combat: { combat: 'attacking' },
+        dealtDamageThisTurn: { dealtDamageThisTurn: true },
+        maxManaValue: { maxManaValue: 3 },
       };
       const fields = Object.keys(TargetFilterSchema.shape);
 
@@ -656,20 +691,26 @@ describe('static abilities', () => {
       const openPermanent = kill({ kind: 'targetPermanent' });
       const permanentBaseline = row.base + row.perUnit * effectMagnitude(openPermanent.effects[0]!, WEIGHTS);
 
-      // `keywords` is the third answer this tripwire can take, and it is the
-      // reason the skip below is spelled as an assertion rather than a comment.
-      // The field's only legal site is a sweep's `scopeFilter` (`mtg-nhyv.62`),
-      // and `targetNarrowingFactor` reads `effect.target.filter` and nothing
-      // else, so there is no price to set — a card carrying it never reaches
-      // this seam. The day the validator admits it on a target slot this stops
-      // throwing, and whoever made that change is handed the pricing question
-      // here instead of finding it in a balance sweep.
-      expect(() => kill({ kind: 'targetPermanent', filter: samples['keywords'] })).toThrow(
-        'ILLEGAL_TARGET_FILTER',
-      );
+      // Keyword fields are another answer this tripwire can take, and they are
+      // why the skips below are assertions rather than comments. Their only
+      // legal site is a sweep's `scopeFilter`, while `targetNarrowingFactor`
+      // reads `effect.target.filter`; a card carrying either never reaches this
+      // seam. If the validator admits one on a target, its assertion stops
+      // throwing and hands the pricing question to that change.
+      for (const field of ['keywords', 'excludeKeywords'] as const) {
+        expect(() => kill({ kind: 'targetPermanent', filter: samples[field] })).toThrow(
+          'ILLEGAL_TARGET_FILTER',
+        );
+      }
 
       for (const field of fields) {
-        if (field === 'colors' || field === 'excludeColors' || field === 'keywords') continue;
+        if (
+          field === 'colors' ||
+          field === 'excludeColors' ||
+          field === 'keywords' ||
+          field === 'excludeKeywords'
+        )
+          continue;
         const beside = kill({
           kind: 'targetPermanent',
           filter: { excludeColors: ['B'], ...samples[field] },
@@ -858,6 +899,21 @@ function spellEffectValueOf(effects: readonly unknown[]): number {
 function spellEffectValue(): number {
   return spellEffectValueOf([{ kind: 'gainLife', amount: 2, target: { kind: 'noTarget' } }]);
 }
+
+describe('temporary control pricing', () => {
+  it('sits above a combat keyword and below permanent removal on a boardless deck score', () => {
+    const control = spellEffectValueOf([
+      { kind: 'gainControlUntilEndOfTurn', target: { kind: 'targetCreature' } },
+    ]);
+    const haste = spellEffectValueOf([
+      { kind: 'grantKeywordUntilEndOfTurn', keyword: 'haste', target: { kind: 'targetCreature' } },
+    ]);
+    const destroy = spellEffectValueOf([{ kind: 'destroyPermanent', target: { kind: 'targetCreature' } }]);
+
+    expect(control).toBeGreaterThan(haste);
+    expect(control).toBeLessThan(destroy);
+  });
+});
 
 describe('a triggered ability', () => {
   it('is worth its effects times the number of times its condition is expected to fire', () => {
@@ -1073,7 +1129,7 @@ describe('an activated ability', () => {
    * is gone after the cost is paid (CR 602.2a), which is arithmetic rather than
    * an assumption, so it is not a weight.
    */
-  describe('an activation that sacrifices its own source', () => {
+  describe('an activation that moves its own source away', () => {
     const FUSE: Ability = {
       kind: 'activated',
       cost: { mana: mana({ generic: 1 }), tapSelf: false, sacrificeSelf: true },
@@ -1082,7 +1138,7 @@ describe('an activated ability', () => {
 
     /**
      * One use is a ceiling, and on the flagship's measured count it does not
-     * bind. `activationUseCount` is 0.608, so `Math.min(1, 0.608)` is 0.608 and
+     * bind. `activationUseCount` is 0.655, so `Math.min(1, 0.655)` is 0.655 and
      * a one-shot prices exactly as a non-tapping repeatable ability does. The
      * cap is still the rule; the pool it is applied to no longer reaches it.
      */
@@ -1105,6 +1161,14 @@ describe('an activated ability', () => {
     it('never scores above the same ability that keeps its source', () => {
       const repeatable: Ability = { ...FUSE, cost: { ...FUSE.cost, sacrificeSelf: false } } as Ability;
       expect(abilityValue(FUSE, WEIGHTS)).toBeLessThanOrEqual(abilityValue(repeatable, WEIGHTS));
+    });
+
+    it('applies the same one-shot ceiling when the source is exiled', () => {
+      const exiling: Ability = {
+        ...FUSE,
+        cost: { ...FUSE.cost, sacrificeSelf: false, exileSelf: true },
+      } as Ability;
+      expect(abilityValue(exiling, WEIGHTS)).toBeCloseTo(abilityValue(FUSE, WEIGHTS), 10);
     });
 
     /**
@@ -1300,7 +1364,7 @@ describe('an equip ability', () => {
 
   it('prices a modification under the ceiling exactly as printed, less the equip cost', () => {
     const modest = equip(3, 3, 1);
-    const modification = bodyValue(3, 3, [], [], WEIGHTS);
+    const modification = bodyValue(3, 3, [], [], [], WEIGHTS, undefined);
     expect(modification).toBeLessThan(CEILING);
     const expected = WEIGHTS.equipHostCount * (modification - WEIGHTS.activationCostPerMana * 1);
     expect(abilityValue(modest, WEIGHTS)).toBeCloseTo(expected, 10);
@@ -1349,7 +1413,7 @@ describe('an equip ability', () => {
     expect(manaPenalty?.value).toBeCloseTo(-WEIGHTS.spellManaPenaltyPerMana * 2, 10);
 
     const abilities = evaluation.components.find((entry) => entry.name === 'abilities');
-    const modification = bodyValue(3, 3, [], [], WEIGHTS);
+    const modification = bodyValue(3, 3, [], [], [], WEIGHTS, undefined);
     const equipOnlyCost = WEIGHTS.equipHostCount * (modification - WEIGHTS.activationCostPerMana * 1);
     expect(abilities?.value).toBeCloseTo(equipOnlyCost, 10);
   });
@@ -1393,6 +1457,28 @@ describe('an equip ability', () => {
 });
 
 describe('effectMagnitude', () => {
+  it('prices a whole-hand discard with the existing computed amount assumption', () => {
+    const effect: Effect = {
+      kind: 'discardCards',
+      count: 'all',
+      target: { kind: 'targetPlayer' },
+    };
+
+    expect(effectMagnitude(effect, WEIGHTS)).toBe(WEIGHTS.computedAmountAssumption);
+  });
+
+  it('counts the direct target plus the controller-relative creature group', () => {
+    const effect: Effect = {
+      kind: 'dealDamage',
+      amount: 10,
+      target: { kind: 'targetPlayerOrPlaneswalker' },
+      scope: 'targetAndPermanentsItsPlayerControls',
+      scopeFilter: { cardTypes: ['creature'] },
+    };
+    expect(WEIGHTS.effectScopeReach.targetAndPermanentsItsPlayerControls).toBe(4);
+    expect(effectMagnitude(effect, WEIGHTS)).toBe(40);
+  });
+
   /**
    * A sweep is worth the removal spells it replaces, and how many that is comes
    * from a named weight rather than from the effect: board width is not on the
@@ -1420,7 +1506,8 @@ describe('effectMagnitude', () => {
     const summons = exampleCard('slc-wild-summons');
     const effect = summons.effects[0];
     if (effect === undefined || effect.kind !== 'createToken') throw new Error('fixture changed');
-    const oneBody = bodyEffectValue(bodyValue(2, 2, [], [], WEIGHTS), WEIGHTS) + WEIGHTS.creaturePremium;
+    const oneBody =
+      bodyEffectValue(bodyValue(2, 2, [], [], [], WEIGHTS, undefined), WEIGHTS) + WEIGHTS.creaturePremium;
     expect(effectMagnitude(effect, WEIGHTS)).toBeCloseTo(2 * oneBody, 10);
   });
 
@@ -1508,7 +1595,8 @@ describe('effectMagnitude', () => {
     };
     const vanilla: Effect = { kind: 'createToken', count: 1, token: body };
 
-    const bodyPrice = bodyEffectValue(bodyValue(1, 1, [], [], WEIGHTS), WEIGHTS) + WEIGHTS.creaturePremium;
+    const bodyPrice =
+      bodyEffectValue(bodyValue(1, 1, [], [], [], WEIGHTS, undefined), WEIGHTS) + WEIGHTS.creaturePremium;
     expect(effectMagnitude(vanilla, WEIGHTS)).toBeCloseTo(bodyPrice, 10);
     // The ability is added unconverted: it is already worth what the same
     // ability printed on a card is worth, and only the body needs reading out
@@ -1630,7 +1718,8 @@ describe('token pricing against the creature baseline', () => {
     };
     const bare = evaluateCard(creature({ power: 2, toughness: 2 }), WEIGHTS).score;
     const dropper = evaluateCard(creature({ power: 2, toughness: 2, abilities: [drop] }), WEIGHTS).score;
-    const bodyPrice = bodyEffectValue(bodyValue(1, 1, [], [], WEIGHTS), WEIGHTS) + WEIGHTS.creaturePremium;
+    const bodyPrice =
+      bodyEffectValue(bodyValue(1, 1, [], [], [], WEIGHTS, undefined), WEIGHTS) + WEIGHTS.creaturePremium;
 
     expect(dropper - bare).toBeCloseTo(WEIGHTS.triggerFireCount.selfDies * bodyPrice, 10);
   });
@@ -1733,19 +1822,26 @@ describe('keyword value at zero power', () => {
 
   it('zeroes the offensive-evasion keywords on a zero-power body', () => {
     for (const keyword of offensive) {
-      expect(bodyValue(0, 2, [keyword], [], WEIGHTS)).toBeCloseTo(bodyValue(0, 2, [], [], WEIGHTS), 10);
+      expect(bodyValue(0, 2, [], [keyword], [], WEIGHTS, undefined)).toBeCloseTo(
+        bodyValue(0, 2, [], [], [], WEIGHTS, undefined),
+        10,
+      );
     }
   });
 
   it('keeps crediting keywords whose value does not depend on dealing damage', () => {
     for (const keyword of flat) {
-      expect(bodyValue(0, 2, [keyword], [], WEIGHTS)).toBeGreaterThan(bodyValue(0, 2, [], [], WEIGHTS));
+      expect(bodyValue(0, 2, [], [keyword], [], WEIGHTS, undefined)).toBeGreaterThan(
+        bodyValue(0, 2, [], [], [], WEIGHTS, undefined),
+      );
     }
   });
 
   it('resumes crediting an offensive keyword once the body has power to push through', () => {
     for (const keyword of offensive) {
-      expect(bodyValue(1, 2, [keyword], [], WEIGHTS)).toBeGreaterThan(bodyValue(1, 2, [], [], WEIGHTS));
+      expect(bodyValue(1, 2, [], [keyword], [], WEIGHTS, undefined)).toBeGreaterThan(
+        bodyValue(1, 2, [], [], [], WEIGHTS, undefined),
+      );
     }
   });
 

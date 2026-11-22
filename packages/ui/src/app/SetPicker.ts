@@ -1,13 +1,16 @@
 /**
- * The one control that says which set the whole lab is showing.
+ * The one control that says which set the browsing tabs are showing.
  *
  * It lives in the shell rather than on the Cards tab, and that placement is the
- * point rather than a layout preference: every tab reads the staged set. The
- * Draft tab deals packs from its collation, the Play tab deals a sealed pool
- * from its cards, the Deck tab resolves a decklist against them, and the board
- * paints them from its art manifest. A picker that only existed where the cards
- * are drawn would leave the Draft tab dealing the previous set's packs, which is
- * the same bug one indirection further along.
+ * point rather than a layout preference: Cards, Customize and Analysis all read
+ * one staged set, and a picker that only existed where the cards are drawn
+ * would leave the other two on the set somebody just switched away from.
+ *
+ * It does not reach Play (`mtg-a982g.5`). Which set a game is dealt from is the
+ * section's question and each section answers it differently -- Draft offers
+ * the cube, Sealed does not, Commander offers neither and lists printed decks
+ * -- so the choice is drawn in the section, out of what that section can
+ * actually deal (`../routes/play/sources.ts`).
  *
  * # One set renders as a label
  *
@@ -28,13 +31,30 @@
  * handling, focus management and an `aria-activedescendant` contract to arrive
  * at what the platform already does, and it would do it in the one bar that has
  * a height budget on two routes.
+ *
+ * It is also why the *Custom* and *Magic* grouping costs nothing here
+ * (`mtg-tewc.2`): `<optgroup>` is the platform's answer to the same question
+ * `../lab/set-origin.ts` asks, it adds no height to the closed control, and on a
+ * phone it is the system's own sheet drawing the headings.
+ *
+ * It is also the only surface that chooses a set. There was a Sets page beside
+ * it with the same list drawn as rows, and the playtester cut it: a page you navigate
+ * to in order to change what every other page is showing is a worse control than
+ * a control that is on every other page.
  */
 import { createElement } from 'react';
 import type { ReactElement } from 'react';
+import { setDisplayName } from '../lab/set-label';
+import { groupSetsByOrigin, setKindLabel } from '../lab/set-origin';
 import type { StagedSetRow } from '../lab/set-index';
 
+/** Picker facts are independent of whether a source is executable or printed. */
+export type SetPickerRow = Pick<StagedSetRow, 'stem' | 'name' | 'origin'> & {
+  readonly cardCount?: number;
+};
+
 export interface SetPickerProps {
-  readonly sets: readonly StagedSetRow[];
+  readonly sets: readonly SetPickerRow[];
   readonly selected: string;
   readonly onSelect: (stem: string) => void;
 }
@@ -45,14 +65,28 @@ export const SET_PICKER_LABEL = 'Set';
 /**
  * What one row is called in the list.
  *
- * The name alone does not identify a build: `out/XMP/set.json` and the committed
- * fixture are both called the flagship set, and a picker that drew two
- * identical options would be a picker that hides one of them. So the row's card
- * count and the launcher's own phrase for where it came from ride along — the
- * two facts that actually differ between two builds of one set.
+ * A native `<select>` draws the selected option's own text when it is closed, so
+ * the option label *is* the closed state, and the playtester's instruction is about
+ * the closed state: "the set selector should display only the human-readable set
+ * name". It used to read `the flagship set — 371 cards, the committed fixture`
+ * and that made the widest thing in the header a sentence about a build
+ * directory.
+ *
+ * The disambiguation it was carrying is real and stays, narrowed to the case
+ * that needs it: `out/XMP/set.json` and the committed fixture are both called
+ * the flagship set, and a picker drawing two identical options is a picker
+ * hiding one of them. So the card count is appended only when another staged set
+ * shares this one's display name — the fact that actually differs between two
+ * builds of one set, and the one a person can act on. The launcher's phrase for
+ * where the build came from is not drawn at all.
  */
-export function setOptionLabel(row: StagedSetRow): string {
-  return `${row.name} — ${String(row.cardCount)} cards, ${row.what}`;
+export function setOptionLabel(row: SetPickerRow, sets: readonly SetPickerRow[]): string {
+  const name = setDisplayName(row);
+  const shared = sets.some((other) => other.stem !== row.stem && setDisplayName(other) === name);
+  if (!shared) return name;
+  return row.cardCount === undefined
+    ? `${name} — ${setKindLabel(row.origin)}`
+    : `${name} — ${String(row.cardCount)} cards`;
 }
 
 export function SetPicker(props: SetPickerProps): ReactElement | null {
@@ -64,7 +98,7 @@ export function SetPicker(props: SetPickerProps): ReactElement | null {
       'span',
       { className: 'mtg-setpick mtg-setpick--only', 'data-set': current.stem },
       createElement('span', { className: 'mtg-setpick__label' }, SET_PICKER_LABEL),
-      createElement('span', { className: 'mtg-setpick__name' }, current.name),
+      createElement('span', { className: 'mtg-setpick__name' }, setDisplayName(current)),
     );
   }
   return createElement(
@@ -83,7 +117,15 @@ export function SetPicker(props: SetPickerProps): ReactElement | null {
           onSelect(event.target.value);
         },
       },
-      ...sets.map((row) => createElement('option', { key: row.stem, value: row.stem }, setOptionLabel(row))),
+      ...groupSetsByOrigin(sets).map((group) =>
+        createElement(
+          'optgroup',
+          { key: group.origin, label: group.label },
+          ...group.rows.map((row) =>
+            createElement('option', { key: row.stem, value: row.stem }, setOptionLabel(row, sets)),
+          ),
+        ),
+      ),
     ),
   );
 }

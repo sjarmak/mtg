@@ -72,6 +72,18 @@ describe('functional reprints', () => {
     );
   });
 
+  /**
+   * `mtg-odaj`. `costOf` returned the literal `{0}` for an uncastable card,
+   * which stopped being unambiguous once a card could genuinely cost zero.
+   */
+  it('prints a free spell as {0}, which now means the cost and nothing else', () => {
+    const cards = [removal('Free Murder', {}, { colors: [] }), removal('Dear Murder', { B: 1, generic: 6 })];
+    const found = reprintFindings(cards);
+    expect(found[0]?.message).toBe(
+      '"Destroy target creature." is printed on 2 cards spanning 7 mana (0 to 7), over the spread of 2 this set allows: Free Murder {0}, Dear Murder {6}{B}',
+    );
+  });
+
   it('takes the policy from its caller rather than the default', () => {
     const cards = [removal('Kill One', { B: 1, generic: 1 }), removal('Kill Two', { B: 1, generic: 2 })];
     expect(reprintFindings(cards, { ...DEFAULT_REPRINT_POLICY, maxCostSpread: 0 })).toHaveLength(1);

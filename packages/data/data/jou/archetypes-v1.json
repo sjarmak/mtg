@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "jou",
+  "archetypes": [
+    {
+      "id": "white-black-constellation",
+      "name": "White-Black Constellation",
+      "colors": ["W", "B"],
+      "signpost": {
+        "name": "Underworld Coinsmith",
+        "physicalId": "jou-printed-v1:0157:ea5346e3-3fe4-47ea-a184-e237091cc4a1"
+      },
+      "plan": "Build around Underworld Coinsmith: Cast enchantments steadily to trigger constellation drain and token effects while defensive creatures prolong the game."
+    },
+    {
+      "id": "blue-red-heroic",
+      "name": "Blue-Red Heroic",
+      "colors": ["U", "R"],
+      "signpost": {
+        "name": "Stormchaser Chimera",
+        "physicalId": "jou-printed-v1:0156:db6621dd-7220-4b53-a30f-7dd05b2e0134"
+      },
+      "plan": "Build around Stormchaser Chimera: Target heroic creatures with tricks and Auras, keeping mana open to protect the threat and win a tempo race."
+    },
+    {
+      "id": "black-green-constellation",
+      "name": "Black-Green Constellation",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Nyx Weaver",
+        "physicalId": "jou-printed-v1:0153:0e8553cc-8f61-4022-97c9-e31183b65059"
+      },
+      "plan": "Build around Nyx Weaver: Chain enchantments to trigger constellation repeatedly while defensive bodies buy time for the value engine."
+    },
+    {
+      "id": "red-white-heroic",
+      "name": "Red-White Heroic",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Desperate Stand",
+        "physicalId": "jou-printed-v1:0147:e8a4fb8d-8ddd-4d1d-92c7-2bf6b0e6c488"
+      },
+      "plan": "Build around Desperate Stand: Target heroic attackers with tricks, remove key blockers, and turn one protected creature into a fast clock."
+    },
+    {
+      "id": "green-blue-tempo",
+      "name": "Green-Blue Tempo",
+      "colors": ["U", "G"],
+      "signpost": {
+        "name": "Fleetfeather Cockatrice",
+        "physicalId": "jou-printed-v1:0149:1139236e-5d71-4fc1-937d-ba1efadee031"
+      },
+      "plan": "Build around Fleetfeather Cockatrice: Deploy efficient creatures, hold up bounce or flash threats, and keep the opponent off balance long enough to race."
+    }
+  ]
+}

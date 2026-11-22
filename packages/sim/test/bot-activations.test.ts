@@ -23,6 +23,7 @@ import type { AbilityInput, Card } from '@mtg/dsl';
 import { parseCard } from '@mtg/dsl';
 import type { Action, GameState, PlayerId } from '@mtg/kernel';
 import { pendingDecision, scenario, validateAction } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import type { GreedyBotConfig } from '@mtg/sim';
 import {
   chooseActivation,
@@ -66,7 +67,111 @@ function artifact(name: string, abilities: readonly AbilityInput[]): Card {
 
 const BEACON = artifact('Ashen Beacon', [PING]);
 const GILDED_FONT = artifact('Gilded Font', [DEAR_LIFE]);
+const STRONGBOX = artifact("Sorcerer's Strongbox", [
+  {
+    kind: 'activated',
+    cost: { mana: { generic: 2 }, tapSelf: true },
+    effects: [
+      {
+        kind: 'flipCoin',
+        winEffects: [
+          { kind: 'sacrificeSelf', target: { kind: 'selfPermanent' } },
+          { kind: 'drawCards', count: 3, target: { kind: 'noTarget' } },
+        ],
+      },
+    ],
+  },
+]);
+const JINXED_IDOL = artifact('Jinxed Idol', [
+  {
+    kind: 'triggered',
+    condition: 'beginningOfYourUpkeep',
+    effects: [{ kind: 'dealDamage', amount: 2, target: { kind: 'noTarget' } }],
+  },
+  {
+    kind: 'activated',
+    cost: { mana: {}, sacrificeMatching: { count: 1, filter: { cardTypes: ['creature'] } } },
+    effects: [
+      {
+        kind: 'targetPlayerGainsControlOfSelfPermanent',
+        target: { kind: 'targetOpponent' },
+      },
+    ],
+  },
+]);
 const BRIGAND = creature('Brigand Scout', 1, 1, [], { generic: 1, R: 1 }, ['R']);
+const GARGOYLE = parseCard({
+  kind: 'creature',
+  id: 'tst-gargoyle-sentinel',
+  name: 'Gargoyle Sentinel',
+  rarity: 'uncommon',
+  set: { code: 'TST', collectorNumber: 799 },
+  manaCost: { generic: 3 },
+  colors: [],
+  artifact: true,
+  subtypes: ['Gargoyle'],
+  power: 3,
+  toughness: 3,
+  keywordAbilities: [{ kind: 'defender' }],
+  abilities: [
+    {
+      kind: 'activated',
+      cost: { mana: { generic: 3 } },
+      effects: [
+        {
+          kind: 'grantKeywordUntilEndOfTurn',
+          keyword: 'flying',
+          removeKeywordAbility: 'defender',
+          target: { kind: 'selfCreature' },
+        },
+      ],
+    },
+  ],
+});
+
+const CAPTIVATING_VAMPIRE = parseCard({
+  kind: 'creature',
+  id: 'm11-87-bot-probe',
+  name: 'Captivating Vampire',
+  rarity: 'rare',
+  set: { code: 'M11', collectorNumber: 87 },
+  manaCost: { generic: 1, B: 2 },
+  colors: ['B'],
+  subtypes: ['Vampire'],
+  power: 2,
+  toughness: 2,
+  abilities: [
+    {
+      kind: 'static',
+      scope: 'otherCreaturesYouControl',
+      subtype: 'Vampire',
+      modification: { kind: 'statBonus', power: 1, toughness: 1 },
+    },
+    {
+      kind: 'activated',
+      cost: { mana: {}, tapMatching: { count: 5, filter: { subtypes: ['Vampire'] } } },
+      effects: [
+        { kind: 'gainControl', target: { kind: 'targetCreature' } },
+        { kind: 'addSubtype', subtype: 'Vampire', target: { kind: 'thatCreature' } },
+      ],
+    },
+  ],
+});
+
+function vampire(name: string, power: number, toughness: number): Card {
+  return parseCard({
+    kind: 'creature',
+    id: `tst-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+    name,
+    rarity: 'common',
+    set: { code: 'TST', collectorNumber: ++collector },
+    manaCost: { generic: 5, B: 1 },
+    colors: ['B'],
+    subtypes: ['Vampire'],
+    power,
+    toughness,
+  });
+}
 
 /** `{T}: You gain 2 life.` on a 2/2 for `1W`, so the body is the control. */
 const TAP_FOR_LIFE: AbilityInput = {
@@ -130,7 +235,10 @@ function mountains(count: number): { card: Card; controller: PlayerId }[] {
 function decide(state: GameState, profile: GreedyBotConfig = config): Action {
   const decision = pendingDecision(state, 512);
   if (decision === null) throw new Error('no decision pending');
-  const action = decideGreedy({ state, player: 0, decision }, profile);
+  const action = decideGreedy(
+    { state: observeState(state, 0, 'test/bot-activations.test.ts:237'), player: 0, decision },
+    profile,
+  );
   expect(validateAction(state, action)).toBeNull();
   return action;
 }
@@ -138,7 +246,10 @@ function decide(state: GameState, profile: GreedyBotConfig = config): Action {
 function activationFor(state: GameState, profile: GreedyBotConfig): Action | null {
   const decision = pendingDecision(state, 512);
   if (decision === null) throw new Error('no decision pending');
-  return chooseActivation({ state, player: 0, decision }, profile);
+  return chooseActivation(
+    { state: observeState(state, 0, 'test/bot-activations.test.ts:245'), player: 0, decision },
+    profile,
+  );
 }
 
 describe('a permanent with a printed activated ability', () => {
@@ -197,6 +308,18 @@ describe('a permanent with a printed activated ability', () => {
     expect(decide(start.state, timid).type).toBe('passPriority');
   });
 
+  it('values removing defender from its own source as part of a temporary keyword exchange', () => {
+    const start = scenario({
+      seed: 'sim/activate/defender-exchange',
+      battlefield: [...mountains(3), { card: GARGOYLE, controller: 0 }],
+      hands: [[], []],
+    });
+    const action = activationFor(start.state, config);
+    expect(action?.type).toBe('activateAbility');
+    if (action?.type !== 'activateAbility') return;
+    expect(start.state.objects[action.oid]?.card.name).toBe('Gargoyle Sentinel');
+  });
+
   /**
    * `manaValueWeight` is the other half of the same decision, and this is the
    * board where it decides alone: two life is worth 0.8 to the target policy
@@ -217,6 +340,78 @@ describe('a permanent with a printed activated ability', () => {
     expect(action.type).toBe('activateAbility');
     if (action.type !== 'activateAbility') return;
     expect(start.state.objects[action.oid]?.card.name).toBe('Gilded Font');
+  });
+
+  it("values a fair random branch and activates Sorcerer's Strongbox", () => {
+    const start = scenario({
+      seed: 'sim/activate/strongbox',
+      battlefield: [...mountains(2), { card: STRONGBOX, controller: 0 }],
+      hands: [[], []],
+    });
+
+    const action = activationFor(start.state, config);
+    expect(action?.type).toBe('activateAbility');
+    if (action?.type !== 'activateAbility') return;
+    expect(start.state.objects[action.oid]?.card.name).toBe("Sorcerer's Strongbox");
+  });
+
+  it('donates Jinxed Idol and pays with the least valuable creature', () => {
+    const start = scenario({
+      seed: 'sim/activate/jinxed-idol',
+      battlefield: [
+        { card: JINXED_IDOL, controller: 0 },
+        { card: BRIGAND, controller: 0 },
+        { card: GARGOYLE, controller: 0 },
+      ],
+      hands: [[], []],
+    });
+
+    const action = activationFor(start.state, config);
+    expect(action?.type).toBe('activateAbility');
+    if (action?.type !== 'activateAbility') return;
+    expect(start.state.objects[action.oid]?.card.name).toBe('Jinxed Idol');
+    expect(action.sacrifices.map((oid) => start.state.objects[oid]?.card.name)).toEqual(['Brigand Scout']);
+  });
+
+  it('does not tap five valuable Vampires before combat to steal a low-value creature', () => {
+    const start = scenario({
+      seed: 'sim/activate/captivating-tempo',
+      battlefield: [
+        { card: CAPTIVATING_VAMPIRE, controller: 0 },
+        ...Array.from({ length: 4 }, (_, index) => ({
+          card: vampire(`Highborn ${index + 1}`, 5, 5),
+          controller: 0 as PlayerId,
+        })),
+        { card: BRIGAND, controller: 1 },
+      ],
+      hands: [[], []],
+    });
+
+    expect(decide(start.state).type).toBe('passPriority');
+  });
+
+  it('still taps a cheap Vampire cohort to steal a high-value creature', () => {
+    const target = creature('Siege Giant', 6, 6);
+    const start = scenario({
+      seed: 'sim/activate/captivating-payoff',
+      battlefield: [
+        { card: CAPTIVATING_VAMPIRE, controller: 0 },
+        ...Array.from({ length: 4 }, (_, index) => ({
+          card: vampire(`Thrall ${index + 1}`, 1, 1),
+          controller: 0 as PlayerId,
+        })),
+        { card: target, controller: 1 },
+      ],
+      hands: [[], []],
+    });
+
+    const action = decide(start.state);
+    expect(action.type).toBe('activateAbility');
+    if (action.type !== 'activateAbility') return;
+    const chosen = action.targets[0];
+    expect(chosen?.kind).toBe('permanent');
+    if (chosen?.kind !== 'permanent') return;
+    expect(start.state.objects[chosen.oid]?.card.name).toBe(target.name);
   });
 
   it('is not invented on a board that has none', () => {

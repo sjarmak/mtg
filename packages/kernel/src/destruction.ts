@@ -3,11 +3,11 @@ import type { ObjectId, PlayerId } from './ids';
 import { hasKeywordAbility } from './layers';
 import { applyReplacements } from './replacement';
 import type { ReplacementEffect } from './replacement-effects';
-import type { GameState } from './state';
 import type { Trace } from './trace';
 import { emit, putObject, withState } from './trace';
 import { noteReplacements } from './damage';
 import { getObject, isOnBattlefield, moveObject, tapObject } from './zones';
+import { removeObjectFromCombat } from './combat-state';
 
 export function createRegenerationShield(trace: Trace, oid: ObjectId, controller: PlayerId): Trace {
   if (!isOnBattlefield(trace.state, oid)) return trace;
@@ -27,19 +27,6 @@ export function createRegenerationShield(trace: Trace, oid: ObjectId, controller
     nextId: trace.state.nextId + 1,
     replacements: [...trace.state.replacements, effect],
   });
-}
-
-function removeFromCombat(state: GameState, oid: ObjectId): GameState {
-  return {
-    ...state,
-    combat: {
-      ...state.combat,
-      attacks: state.combat.attacks.filter((attack) => attack.oid !== oid),
-      blocks: state.combat.blocks
-        .filter((block) => block.attacker !== oid)
-        .map((block) => ({ ...block, blockers: block.blockers.filter((blocker) => blocker !== oid) })),
-    },
-  };
 }
 
 /**
@@ -95,7 +82,7 @@ export function destroyPermanent(trace: Trace, oid: ObjectId, reason: DestroyRea
     const object = getObject(current.state, oid);
     current = withState(
       current,
-      removeFromCombat(
+      removeObjectFromCombat(
         putObject(current.state, {
           ...object,
           damage: 0,

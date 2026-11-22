@@ -26,12 +26,34 @@
 import { z } from 'zod';
 import { CardKindSchema } from './vocabulary';
 
-export const CostReductionSchema = z.strictObject({
-  /** CR 118.9: how much less, in generic mana. Never reduces a pip below 0. */
-  amount: z.int().positive(),
-  /** Which spells this reaches; `null` reaches every spell this player casts. */
-  cardType: CardKindSchema.nullable(),
-});
+const ReductionAmountSchema = z.int().positive();
+
+const MultipleCardKindsSchema = z
+  .array(CardKindSchema)
+  .min(2)
+  .superRefine((kinds, context) => {
+    const duplicate = kinds.find((kind, index) => kinds.indexOf(kind) !== index);
+    if (duplicate !== undefined) {
+      context.addIssue({
+        code: 'custom',
+        message: `cardTypes repeats ${duplicate}`,
+      });
+    }
+  });
+
+export const CostReductionSchema = z.union([
+  z.strictObject({
+    /** CR 118.9: how much less, in generic mana. Never reduces a pip below 0. */
+    amount: ReductionAmountSchema,
+    /** Which one spell type this reaches; `null` reaches every spell cast. */
+    cardType: CardKindSchema.nullable(),
+  }),
+  z.strictObject({
+    amount: ReductionAmountSchema,
+    /** A disjunction of two or more exact spell types. */
+    cardTypes: MultipleCardKindsSchema,
+  }),
+]);
 
 export type CostReduction = z.infer<typeof CostReductionSchema>;
 export type CostReductionInput = z.input<typeof CostReductionSchema>;
@@ -40,11 +62,24 @@ function capitalize(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
+function listSpellTypes(cardTypes: readonly string[]): string {
+  const [first, ...rest] = cardTypes;
+  if (first === undefined) throw new Error('a cost reduction has no spell types');
+  if (rest.length === 0) return capitalize(first);
+  if (rest.length === 1) return `${capitalize(first)} and ${rest[0] ?? ''}`;
+  return `${capitalize(first)}, ${rest.slice(0, -1).join(', ')}, and ${rest.at(-1) ?? ''}`;
+}
+
 /**
  * `Spells you cast cost {1} less to cast.` or, scoped to a card type,
  * `Creature spells you cast cost {2} less to cast.`
  */
 export function describeCostReduction(reduction: CostReduction): string {
-  const subject = reduction.cardType === null ? 'Spells' : `${capitalize(reduction.cardType)} spells`;
+  const subject =
+    'cardTypes' in reduction
+      ? `${listSpellTypes(reduction.cardTypes)} spells`
+      : reduction.cardType === null
+        ? 'Spells'
+        : `${capitalize(reduction.cardType)} spells`;
   return `${subject} you cast cost {${reduction.amount}} less to cast.`;
 }

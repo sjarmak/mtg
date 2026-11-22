@@ -148,3 +148,41 @@ export type {
   AnalysisSection,
   AnalysisSurfaceProps,
 } from './AnalysisView';
+
+export { GameDetailPanels, clampGameIndex, selectTurn } from './game-detail';
+export type { GameDetailProps } from './game-detail';
+
+export {
+  EVIDENCE_FAMILIES,
+  EVIDENCE_SNAPSHOT_VERSION,
+  EVIDENCE_STRENGTHS,
+  EVIDENCE_URL,
+  EvidenceRecordSchema,
+  EvidenceSnapshotSchema,
+  EvidenceStrengthSchema,
+  FAMILY_LABELS,
+  readEvidenceSnapshot,
+  recordsFor,
+  summarizeEpisode,
+} from './evidence-record';
+export type {
+  ArmCount,
+  EpisodeIdentitySummary,
+  EvidenceFamily,
+  EvidenceRecord,
+  EvidenceSnapshot,
+  EvidenceSnapshotResult,
+  EvidenceState,
+  EvidenceStrength,
+  EvidenceStrengthKind,
+  EvidenceSubject,
+} from './evidence-record';
+export {
+  EVIDENCE_SECTION_LABEL,
+  EvidencePanel,
+  STAGE_EVIDENCE_COMMAND,
+  gamesLabel,
+  producedDay,
+  strengthLabel,
+} from './evidence-panel';
+export type { EvidencePanelProps } from './evidence-panel';

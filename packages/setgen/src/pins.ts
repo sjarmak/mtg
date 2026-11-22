@@ -25,6 +25,18 @@
  * rares to give and an uncommon in a set that has none, which is the same
  * sentence read at two sizes rather than two sentences to keep in step.
  *
+ * A card may state a `seatCeiling` below its rarity, and then that is the
+ * ceiling instead. The two were one field until `mtg-4xvs`, and because the
+ * ceiling is a seat *competition*, saying a truer thing about one card moved
+ * which other cards got seats: the flagship could not call the Trisigil its
+ * mythic without pushing Last-Blow Obliterator onto the 75-card common sheet and
+ * costing a re-record of a paid run, so the brief said `common` about the set's
+ * marquee relic. Split, `rarity` is only the design statement and is carried
+ * into the report untouched, and the ceiling is what this file relaxes from.
+ * The ceiling is spent here: the pinned card this returns never carries one,
+ * because everything downstream reads the pinned brief and a ceiling on a
+ * seated card is a second chance to relax it.
+ *
  * The pool and the card kind are never touched, because changing either would
  * make the card a different card. The mana value is touched last and only when
  * no rarity on the ladder seats the card with it, because a cost is a harder
@@ -68,13 +80,21 @@ function rarityLadder(stated: string): SliceRarity[] {
   return [...reachable].reverse();
 }
 
-/** The card with its rarity pin replaced, or removed when there is none to state. */
+/**
+ * The card with its rarity pin replaced, or removed when there is none to state.
+ *
+ * `seatCeiling` goes with it. It is a statement about the derivation, and the
+ * derivation is over by the time this card is returned: everything downstream
+ * reads the pinned brief, so a ceiling left on it would be a second chance to
+ * relax a card that is already seated.
+ */
 function atRarity(card: RequiredCard, rarity: SliceRarity | undefined): RequiredCard {
+  const { seatCeiling: _capped, ...uncapped } = card;
   if (rarity === undefined) {
-    const { rarity: _dropped, ...rest } = card;
+    const { rarity: _dropped, ...rest } = uncapped;
     return rest;
   }
-  return { ...card, rarity };
+  return { ...uncapped, rarity };
 }
 
 /** The card with its mana-value pin removed. */
@@ -91,8 +111,10 @@ function withoutManaValue(card: RequiredCard): RequiredCard {
  * brief described and a card that keeps its tier and loses its cost may not be.
  */
 function ladderFor(card: RequiredCard): RequiredCard[] {
-  const rarities: (SliceRarity | undefined)[] =
-    card.rarity === undefined ? [undefined] : rarityLadder(card.rarity);
+  // The ceiling, not the design statement (`mtg-4xvs`). A brief that states
+  // neither is every brief written before the field existed, and reads the same.
+  const ceiling = card.seatCeiling ?? card.rarity;
+  const rarities: (SliceRarity | undefined)[] = ceiling === undefined ? [undefined] : rarityLadder(ceiling);
   const byRarity = rarities.map((rarity) => atRarity(card, rarity));
   if (card.manaValue === undefined) return byRarity;
   return [...byRarity, ...byRarity.map(withoutManaValue)];
@@ -167,6 +189,15 @@ function notesFor(before: SetBrief, after: SetBrief): string[] {
     if (seated === undefined) return [];
     const move = describeMove(card, seated);
     if (move === undefined) return [];
+    // Two different sentences, and saying the wrong one is how a displacement
+    // reads as a size limit. A card seated at its own stated ceiling was moved
+    // by the brief, on purpose, at every size; only a card below its ceiling
+    // was moved by this skeleton not having the seat.
+    if (card.seatCeiling !== undefined && seated.rarity === card.seatCeiling) {
+      return [
+        `required card "${card.name}": design rarity ${card.rarity ?? 'unstated'}, seated at ${card.seatCeiling} because the brief caps it there; the ${before.targetSize}-card skeleton was not asked for the higher tier.`,
+      ];
+    }
     return [
       `required card "${card.name}": ${move}; the ${before.targetSize}-card skeleton has no slot for the pin the brief states.`,
     ];

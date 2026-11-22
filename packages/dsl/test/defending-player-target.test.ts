@@ -11,7 +11,7 @@
  * an attack, so the phrase has a referent only on a triggered ability whose
  * condition is `selfAttacks`; every other placement is refused by the
  * validator rather than left for the kernel to discover at resolution.
- * `ATTACK_TRIGGER_ONLY_TARGETS` is where that rule is stated once, because four
+ * `SOURCE_ATTACK_TARGETS` is where that rule is stated once, because four
  * readers need it: the two validators that refuse the kind, and the two
  * `@mtg/dsl-coverage` instruments that enumerate "every legal pair" and would
  * otherwise build cards the validator throws out.
@@ -24,9 +24,9 @@
 import { describe, expect, it } from 'vitest';
 import type { AbilityInput, Card, CardInput, Effect, TargetKind } from '@mtg/dsl';
 import {
-  ATTACK_TRIGGER_ONLY_TARGETS,
+  SOURCE_ATTACK_TARGETS,
   HAND_AUTHORED_TARGETS,
-  isAttackTriggerOnlyTarget,
+  isSourceAttackTarget,
   LEGAL_TARGETS,
   legalTargetsFor,
   MODEL_EFFECT_KINDS,
@@ -105,7 +105,7 @@ describe('the targeting mode that names the defending player', () => {
   });
 
   /**
-   * Two effects, read out of the table rather than listed here, so an effect
+   * Five effects, read out of the table rather than listed here, so an effect
    * that gains the kind tomorrow fails this sentence and has to say why in the
    * row it changed.
    *
@@ -116,17 +116,17 @@ describe('the targeting mode that names the defending player', () => {
    * gloom cards were being written with a bare `targetCreature` because this
    * row did not admit the narrower phrase.
    */
-  it('is legal on the pump and the counter effects and on no other', () => {
+  it('is legal on the effects with exact attack-trigger cards and on no other', () => {
     const allowed = Object.keys(HAND_AUTHORED_TARGETS).filter((kind) =>
       legalTargetsFor(kind as Effect['kind']).includes(DEFENDER_TARGET),
     );
-    expect(allowed).toEqual(['pumpUntilEndOfTurn', 'putCounters']);
+    expect(allowed).toEqual(['dealDamage', 'pumpUntilEndOfTurn', 'returnToHand', 'putCounters', 'fight']);
   });
 
   it('is the one kind the restriction table names', () => {
-    expect([...ATTACK_TRIGGER_ONLY_TARGETS]).toEqual([DEFENDER_TARGET]);
-    expect(isAttackTriggerOnlyTarget(DEFENDER_TARGET)).toBe(true);
-    expect(isAttackTriggerOnlyTarget('targetCreature')).toBe(false);
+    expect([...SOURCE_ATTACK_TARGETS]).toEqual([DEFENDER_TARGET]);
+    expect(isSourceAttackTarget(DEFENDER_TARGET)).toBe(true);
+    expect(isSourceAttackTarget('targetCreature')).toBe(false);
   });
 
   it('shrinks a defending player creature on an attack trigger, and prints that', () => {
@@ -145,7 +145,7 @@ describe('the targeting mode that names the defending player', () => {
     ).toContain('ILLEGAL_TARGET_IN_ABILITY');
   });
 
-  it('is refused on an activated ability, which has no attack to read', () => {
+  it('is refused on an unrestricted activated ability, which has no attack to read', () => {
     expect(
       codesFor(
         creatureInput([
@@ -153,6 +153,20 @@ describe('the targeting mode that names the defending player', () => {
         ]),
       ),
     ).toContain('ILLEGAL_TARGET_IN_ABILITY');
+  });
+
+  it('is legal on an activated ability restricted to its source attacking', () => {
+    const card = parseCard(
+      creatureInput([
+        {
+          kind: 'activated',
+          cost: { mana: { B: 1 } },
+          activateOnlyWhileAttacking: true,
+          effects: [SHRINK],
+        },
+      ]) as CardInput,
+    );
+    expect(validateCard(card)).toEqual([]);
   });
 
   it('is refused on a spell, where the phrase would print without a referent', () => {

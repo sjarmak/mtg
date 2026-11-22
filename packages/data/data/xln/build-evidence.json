@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "xln",
+  "formatSha256": "8686e8b65c0b58a9bea91519f9ba7360acaf0ac02b71d77ed9555c145ba389c4",
+  "sourceSha256": "145bbd7db2eda22e38d2182d28e9f188ec55c50e712f66e545e727fb41ce8f70",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "145bbd7db2eda22e38d2182d28e9f188ec55c50e712f66e545e727fb41ce8f70",
+    "recipe.json": "0cfe6dcac5c4d605ffabdefebb835daaedf4c240ec6936618e17bbc63e3d1251",
+    "xln-printed-catalog-v1.json": "f5f43e93039648a9471eb99d5858e2d8df5776ba6560c872334b1cd8397aa19a",
+    "xln-limited-format-v1.json": "644a316834234f161decd48780080af044cf81ce226e3850ba027d7f789ca9b2"
+  },
+  "catalogs": [
+    {
+      "code": "XLN",
+      "cards": 289,
+      "contentSha256": "6db0ad8e7743508c0d49d4e7365c55ea106f9bbc1e85425ad5c5ad25453605dc"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1867.971633,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 274,
+    "printings": 289
+  }
+}

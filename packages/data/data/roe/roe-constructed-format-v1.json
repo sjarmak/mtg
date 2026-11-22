@@ -1,0 +1,370 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "roe",
+  "name": "Rise of the Eldrazi",
+  "sources": [
+    {
+      "code": "ROE",
+      "catalogFormat": "roe-printed-v1",
+      "catalogSha256": "b20fb6532481136a90d16538e7259d23bae07a3bc2787b8851a4aa45465a7140",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/ROE.json",
+        "sha256": "346ae5d15a5b9240ae2a64336a3d878adea4dc56099e502e21fb03a129fcafa2",
+        "version": "5.3.0+20260917"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-levelers",
+      "name": "White-Blue Levelers",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "roe-printed-v1:0093:9ec4d902-8841-4f37-9b07-9e8d0f671071",
+          "name": "Venerated Teacher",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0047:9f4df9be-324b-458a-9379-ab4aa437a6d2",
+          "name": "Student of Warfare",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0029:5e8332e9-7b02-4d58-b081-11004e690524",
+          "name": "Knight of Cliffhaven",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0057:4f8d1bea-58cd-4483-a70a-0330ad5ab4a1",
+          "name": "Coralhelm Commander",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0072:0ff68d2f-6758-45ee-8109-4e8909f49de8",
+          "name": "Halimar Wavewatch",
+          "count": 3
+        },
+        {
+          "physicalId": "roe-printed-v1:0053:6e3510f5-e450-400b-98ea-341dbf212054",
+          "name": "Wall of Omens",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0079:a88e502e-2421-46fb-b880-a9000930e6d9",
+          "name": "Narcolepsy",
+          "count": 3
+        },
+        {
+          "physicalId": "roe-printed-v1:0040:07313dd3-d0dc-40ca-98a3-fa4d39e5bcae",
+          "name": "Oust",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0228:bc7e0407-fea1-43ef-8580-82271e440bb3",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0229:c3345553-8f04-4a83-9b6b-95ca0654921d",
+          "name": "Plains",
+          "count": 12
+        },
+        {
+          "physicalId": "roe-printed-v1:0233:4c799192-43bb-4c25-ab4f-b1d4ef0df660",
+          "name": "Island",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "roe-printed-v1:0099:1b2f83d5-9269-4297-b507-558c2bdec32b",
+          "name": "Cadaver Imp",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0115:6a3ff5c3-0fdb-4d54-b4e5-ce7bad9953f0",
+          "name": "Inquisition of Kozilek",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0079:a88e502e-2421-46fb-b880-a9000930e6d9",
+          "name": "Narcolepsy",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0085:fd056c91-5026-41ea-bc9e-68078d78ca82",
+          "name": "Sea Gate Oracle",
+          "count": 3
+        },
+        {
+          "physicalId": "roe-printed-v1:0070:0523e59a-91f7-4893-a4fe-8814a745b422",
+          "name": "Guard Gomazoa",
+          "count": 3
+        },
+        {
+          "physicalId": "roe-printed-v1:0078:ffaebb4a-cb9b-4ac8-b661-3e63d9d984f4",
+          "name": "Mnemonic Wall",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0059:2efecdd9-bd3a-4b79-92da-6485589d5bde",
+          "name": "Deprive",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0100:921ebea0-48bf-4338-9e84-2cd06ffe6f4b",
+          "name": "Consume the Meek",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0101:008de17e-aa79-4d4c-ab66-d516eca49e42",
+          "name": "Consuming Vapors",
+          "count": 1
+        },
+        {
+          "physicalId": "roe-printed-v1:0089:eff88609-f55e-45c5-be10-087d88789a83",
+          "name": "Sphinx of Magosi",
+          "count": 1
+        },
+        {
+          "physicalId": "roe-printed-v1:0228:bc7e0407-fea1-43ef-8580-82271e440bb3",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0233:4c799192-43bb-4c25-ab4f-b1d4ef0df660",
+          "name": "Island",
+          "count": 16
+        },
+        {
+          "physicalId": "roe-printed-v1:0237:5f75f4aa-cede-452b-80c1-bd3b8221dbcb",
+          "name": "Swamp",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "id": "black-red-spawn-sacrifice",
+      "name": "Black-Red Spawn Sacrifice",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "roe-printed-v1:0122:85f4d77d-e0de-48fe-899b-5718cee779e2",
+          "name": "Pawn of Ulamog",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0108:38d65339-e419-40b9-814a-374874f5585f",
+          "name": "Dread Drone",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0142:1a901c3f-313d-495e-96a0-29f1a33b8225",
+          "name": "Emrakul's Hatcher",
+          "count": 3
+        },
+        {
+          "physicalId": "roe-printed-v1:0103:c91c152d-1829-438c-b571-74361e09df62",
+          "name": "Corpsehatch",
+          "count": 3
+        },
+        {
+          "physicalId": "roe-printed-v1:0145:006d2bf1-20f7-4b09-8d98-8233d91682bd",
+          "name": "Flame Slash",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0166:75624ab3-ddbd-4fe8-8a07-7d1f78ec8a84",
+          "name": "Staggershock",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0013:76bacedb-9fa8-4a21-b0eb-e7ead64360b4",
+          "name": "Ulamog's Crusher",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0002:3ac80eb8-321d-476a-87e7-d25bdac6a91c",
+          "name": "Artisan of Kozilek",
+          "count": 1
+        },
+        {
+          "physicalId": "roe-printed-v1:0227:315924c9-77e3-405b-9bbf-852ed563c6e3",
+          "name": "Eldrazi Temple",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0237:5f75f4aa-cede-452b-80c1-bd3b8221dbcb",
+          "name": "Swamp",
+          "count": 19
+        },
+        {
+          "physicalId": "roe-printed-v1:0241:cf940cc3-282e-4b6b-877d-5ce71ee797bc",
+          "name": "Mountain",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "red-green-eldrazi-ramp",
+      "name": "Red-Green Eldrazi Ramp",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "roe-printed-v1:0193:4ab37d0e-5542-4ae0-a48e-d0a4e6bf48e7",
+          "name": "Kozilek's Predator",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0201:24517d9c-6cde-41e8-9e82-ee73f069379a",
+          "name": "Nest Invader",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0186:61d6a649-ae48-4cf1-b0e3-ba627b4ac1e1",
+          "name": "Growth Spasm",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0142:1a901c3f-313d-495e-96a0-29f1a33b8225",
+          "name": "Emrakul's Hatcher",
+          "count": 3
+        },
+        {
+          "physicalId": "roe-printed-v1:0145:006d2bf1-20f7-4b09-8d98-8233d91682bd",
+          "name": "Flame Slash",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0002:3ac80eb8-321d-476a-87e7-d25bdac6a91c",
+          "name": "Artisan of Kozilek",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0013:76bacedb-9fa8-4a21-b0eb-e7ead64360b4",
+          "name": "Ulamog's Crusher",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0009:3fdd84b5-fd93-483e-a131-028d04d9dea7",
+          "name": "Pathrazer of Ulamog",
+          "count": 1
+        },
+        {
+          "physicalId": "roe-printed-v1:0012:225e3cc6-34d0-4f81-9f49-162d97e2ea59",
+          "name": "Ulamog, the Infinite Gyre",
+          "count": 1
+        },
+        {
+          "physicalId": "roe-printed-v1:0006:067fac91-2483-4678-b86a-2c54a3a480cf",
+          "name": "Kozilek, Butcher of Truth",
+          "count": 1
+        },
+        {
+          "physicalId": "roe-printed-v1:0227:315924c9-77e3-405b-9bbf-852ed563c6e3",
+          "name": "Eldrazi Temple",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0241:cf940cc3-282e-4b6b-877d-5ce71ee797bc",
+          "name": "Mountain",
+          "count": 16
+        },
+        {
+          "physicalId": "roe-printed-v1:0245:10e2588b-7781-418c-abc8-08601fbb2336",
+          "name": "Forest",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "green-white-auras",
+      "name": "Green-White Auras",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "roe-printed-v1:0175:8f8dbb4f-4b01-4666-b62f-a2323dac7a19",
+          "name": "Aura Gnarlid",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0031:03066fa1-ea16-4a87-9218-120efa976909",
+          "name": "Kor Spiritdancer",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0052:a55705d3-8640-478e-ace4-f4f900d617c5",
+          "name": "Umbra Mystic",
+          "count": 3
+        },
+        {
+          "physicalId": "roe-printed-v1:0050:1364a830-36b7-48b9-bf69-6fd35eed9399",
+          "name": "Totem-Guide Hartebeest",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0026:f1461e2f-fb1d-4092-9935-4cee092f27e7",
+          "name": "Hyena Umbra",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0208:2e593a5b-0de6-4df2-bbda-54195400dc69",
+          "name": "Spider Umbra",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0179:8dfdec4f-e66a-48f8-ba6d-13459e80b52c",
+          "name": "Boar Umbra",
+          "count": 3
+        },
+        {
+          "physicalId": "roe-printed-v1:0207:4a011820-80c6-484f-84be-f07f0e45f1a8",
+          "name": "Snake Umbra",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0177:212a953b-3205-41bf-a5b2-5b852e889c5a",
+          "name": "Bear Umbra",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0205:dfd0d15f-8200-46a4-a9e9-e7f0ee2aa0e4",
+          "name": "Prey's Vengeance",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0040:07313dd3-d0dc-40ca-98a3-fa4d39e5bcae",
+          "name": "Oust",
+          "count": 2
+        },
+        {
+          "physicalId": "roe-printed-v1:0228:bc7e0407-fea1-43ef-8580-82271e440bb3",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "roe-printed-v1:0229:c3345553-8f04-4a83-9b6b-95ca0654921d",
+          "name": "Plains",
+          "count": 12
+        },
+        {
+          "physicalId": "roe-printed-v1:0245:10e2588b-7781-418c-abc8-08601fbb2336",
+          "name": "Forest",
+          "count": 12
+        }
+      ]
+    }
+  ],
+  "contentSha256": "7fd234d20c37041ef43e4b86451d1d973eabec4d68c57b7bfc68312fa0b5eeab"
+}

@@ -29,8 +29,9 @@
  * may not move: `hand.ts` sizes a board face as a share of this row's *content*
  * box, so inline padding taken off the row comes straight off every permanent.
  * How much headroom there is before that costs a reading is
- * `../src/styles/card.ts`'s `BOARD_RULES_MIN_REM`, which drops the rules box
- * when a face's own content box reaches 4rem — an 80.00px face, against the
+ * `../src/styles/card.ts`'s `BOARD_RULES_PANEL_MAX_REM`, which moves the rules
+ * box out of the column and over the picture when a face's own content box
+ * reaches 4rem — an 80.00px face, against the
  * 82.61px one a 1280x800 board draws at four a side.
  *
  * Node-only, like everything else under `tools/`: it writes files and opens no
@@ -46,18 +47,19 @@
  * permanent into the states that paint the marks, because the defect is
  * invisible on a card that wears none.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { EXAMPLE_SET, isLand, parseCards, renderOracleText, setBasics } from '@mtg/dsl';
+import { EXAMPLE_SET, isLand, renderOracleText, setBasics } from '@mtg/dsl';
 import type { Card as DslCard } from '@mtg/dsl';
 import type { GameSession, GameState, PlayerId } from '@mtg/kernel';
 import { DEFAULT_AUTO_PASS, humanSeat, pendingDecision, scenario } from '@mtg/kernel';
 import { Shell } from '../src/app/Shell';
 import { PlayView } from '../src/routes/play/PlayView';
 import { uiStyleSheet } from '../src/styles/index';
+import { readSetCards } from './set-file';
 
 const UI_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REPO_ROOT = resolve(UI_ROOT, '..', '..');
@@ -79,13 +81,7 @@ const setPath = process.argv[3];
 /** The cards the page is dealt from; a set that fails to parse stops the run. */
 function cards(): readonly DslCard[] {
   if (setPath === undefined) return EXAMPLE_SET;
-  const document: unknown = JSON.parse(readFileSync(setPath, 'utf8'));
-  const listed =
-    typeof document === 'object' && document !== null && 'cards' in document
-      ? (document as { readonly cards: unknown }).cards
-      : null;
-  if (!Array.isArray(listed)) throw new Error(`${setPath} has no "cards" array`);
-  return parseCards(listed);
+  return readSetCards(setPath);
 }
 
 const CARDS = cards();

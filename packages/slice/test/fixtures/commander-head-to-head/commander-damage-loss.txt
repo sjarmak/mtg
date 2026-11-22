@@ -1,0 +1,5 @@
+Simulation mode
+Game Outcome: Turn 8
+Game Outcome: Ai(1)-chaos-incarnate has lost due to accumulation of 21 damage from generals
+Game Outcome: Ai(2)-draconic-destruction has won because all opponents have lost
+Game Result: Game 9 ended in 740 ms. Ai(2)-draconic-destruction has won!

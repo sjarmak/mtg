@@ -45,6 +45,8 @@ export interface SliceOptions {
   readonly runSeed: string;
   readonly briefPath: string;
   readonly fixtureDir: string;
+  /** Manifest whose producer semantics make the fixture request sequence reproducible. */
+  readonly fixtureManifestPath: string | null;
   readonly outDir: string;
   readonly provider: ProviderName;
   /** Ceiling on live model spend; `null` means no ceiling (fixtures cost nothing). */
@@ -81,6 +83,17 @@ export function defaultFixtureDir(): string {
   return join(repoRoot(), 'packages', 'setgen', 'fixtures', 'llm');
 }
 
+export function defaultFixtureManifestPath(): string {
+  return join(
+    repoRoot(),
+    'packages',
+    'setgen',
+    'fixtures',
+    'runs',
+    'tideglass-reach-2026-08-09T22-30-10Z.json',
+  );
+}
+
 export function defaultOutDir(): string {
   return join(repoRoot(), 'out', 'slice');
 }
@@ -90,6 +103,7 @@ export function defaultSliceOptions(): SliceOptions {
     runSeed: DEFAULT_RUN_SEED,
     briefPath: defaultBriefPath(),
     fixtureDir: defaultFixtureDir(),
+    fixtureManifestPath: defaultFixtureManifestPath(),
     outDir: defaultOutDir(),
     provider: 'fixture',
     maxUsd: null,
@@ -109,10 +123,19 @@ export function defaultSliceOptions(): SliceOptions {
 export function resolveSliceOptions(input: SliceOptionsInput = {}): SliceOptions {
   const base = defaultSliceOptions();
   const merged: SliceOptions = { ...base, ...input };
+  const briefPath = absolutePath(merged.briefPath);
+  const fixtureDir = absolutePath(merged.fixtureDir);
+  const fixtureManifestPath =
+    input.fixtureManifestPath !== undefined
+      ? input.fixtureManifestPath
+      : briefPath === absolutePath(base.briefPath) && fixtureDir === absolutePath(base.fixtureDir)
+        ? base.fixtureManifestPath
+        : null;
   return {
     ...merged,
-    briefPath: absolutePath(merged.briefPath),
-    fixtureDir: absolutePath(merged.fixtureDir),
+    briefPath,
+    fixtureDir,
+    fixtureManifestPath: fixtureManifestPath === null ? null : absolutePath(fixtureManifestPath),
     outDir: absolutePath(merged.outDir),
     forgeHome: merged.forgeHome === null ? null : absolutePath(merged.forgeHome),
     storePath: merged.storePath === null ? null : absolutePath(merged.storePath),

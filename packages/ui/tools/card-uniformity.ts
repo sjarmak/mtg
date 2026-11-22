@@ -33,21 +33,23 @@
  * later lines were clipped away. Summarized per seat and again over the whole
  * mat: how many distinct face heights there were, how far apart the tallest and
  * the shortest are, which trims were drawn, and every name that was cut. The
- * acceptance evidence is `seats.<seat>.heights: 1`, `spread: 0` and
- * `cutNames: []`.
+ * acceptance evidence is `seats.<seat>.heights: 1`, `spread` no greater than
+ * `HEIGHT_TOLERANCE_PX`, and `cutNames: []`.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { EXAMPLE_SET, isLand, parseCards, setBasics } from '@mtg/dsl';
+import { EXAMPLE_SET, isLand, setBasics } from '@mtg/dsl';
 import type { Card as DslCard } from '@mtg/dsl';
 import type { GameSession, GameState, PlayerId } from '@mtg/kernel';
 import { DEFAULT_AUTO_PASS, humanSeat, pendingDecision, scenario } from '@mtg/kernel';
 import { Shell } from '../src/app/Shell';
 import { PlayView } from '../src/routes/play/PlayView';
 import { uiStyleSheet } from '../src/styles/index';
+import { HEIGHT_TOLERANCE_PX, distinctHeights } from './height-clusters';
+import { readSetCards } from './set-file';
 
 const UI_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REPO_ROOT = resolve(UI_ROOT, '..', '..');
@@ -74,15 +76,7 @@ const setPath = process.argv[3];
  */
 function cards(): readonly DslCard[] {
   if (setPath === undefined) return EXAMPLE_SET;
-  const document: unknown = JSON.parse(readFileSync(setPath, 'utf8'));
-  const listed =
-    typeof document === 'object' && document !== null && 'cards' in document
-      ? (document as { readonly cards: unknown }).cards
-      : null;
-  if (!Array.isArray(listed)) {
-    throw new Error(`${setPath} has no "cards" array, so it is not a set document`);
-  }
-  return parseCards(listed);
+  return readSetCards(setPath);
 }
 
 const CARDS = cards();
@@ -180,13 +174,17 @@ function dealtSession(count: number): GameSession {
  * is either true or false. The mat-wide numbers are reported too, under `mat`,
  * so the seat difference stays visible rather than being defined away.
  *
- * Heights are rounded to a tenth before they are counted distinct, so a
- * sub-pixel difference between two faces is not reported as two heights. A
- * genuine difference here is tens of pixels, not tenths.
+ * Two heights within `HEIGHT_TOLERANCE_PX` of each other are one height, and
+ * `./height-clusters.ts` argues that tolerance and holds the rule the browser
+ * runs. `heightsExact` is reported beside `heights` so the tolerance never
+ * hides what was measured: on 2026-08-14 this row read 73.6 and 73.5 at
+ * 1440x900 with twelve a side, which is `heightsExact: 2` and one height.
  */
 const MEASURE = `
 window.mtgCardUniformity = function () {
   var round = function (value) { return Math.round(value * 10) / 10; };
+  var TOLERANCE = ${String(HEIGHT_TOLERANCE_PX)};
+  var distinctHeights = ${String(distinctHeights)};
   var faces = [];
   var slots = document.querySelectorAll(".mtg-slot[data-slot='play']");
   for (var i = 0; i < slots.length; i += 1) {
@@ -228,7 +226,8 @@ window.mtgCardUniformity = function () {
     var tall = Object.keys(heights).map(Number);
     return {
       faces: row.length,
-      heights: tall.length,
+      heights: distinctHeights(tall, TOLERANCE),
+      heightsExact: tall.length,
       tallest: tall.length === 0 ? null : Math.max.apply(null, tall),
       shortest: tall.length === 0 ? null : Math.min.apply(null, tall),
       spread: tall.length === 0 ? null : round(Math.max.apply(null, tall) - Math.min.apply(null, tall)),

@@ -46,8 +46,10 @@ function exileOrder(cards: readonly ExileCard[]): readonly ExileCard[] {
 export function Exile(props: ExileProps): ReactElement {
   return createElement(ZoneBrowser, {
     label: props.label,
+    drawnLabel: 'Exile',
     cards: exileOrder(props.cards),
-    emptyText: 'exile is empty',
+    // The state, not the noun: `./Graveyard.ts` carries the reason.
+    emptyText: 'empty',
     zone: 'exile',
     ...(props.seat === undefined ? {} : { seat: props.seat }),
   });

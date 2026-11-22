@@ -1,0 +1,579 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-coverage-plan",
+  "scripts": [
+    {
+      "sourceScript": {
+        "path": "a/ahn_crop_crasher.txt",
+        "sha256": "5a809d85b621b760dc06eb0eecb1c02f64bf92b857dd74625658da00cf4a61c7"
+      },
+      "review": "partial",
+      "obligations": [
+        {
+          "id": "cast-and-characteristics",
+          "description": "Exact printed identity, mana cost, types, and power/toughness declarations are checksum-bound; behavior is not claimed.",
+          "lines": [1, 2, 3, 4],
+          "dependsOn": [],
+          "proof": "source"
+        },
+        {
+          "id": "attack-exert",
+          "description": "The attacking source offers exert and choosing it resolves the associated trigger.",
+          "lines": [6],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "ahn-crop-crasher-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Ahn-Crop Crasher: exert=false",
+                "single-source attack exert contract Ahn-Crop Crasher: exert=true"
+              ],
+              "decisionFamilies": ["combat-exert"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "ahn-crop-crasher-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Ahn-Crop Crasher': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["combat-exert"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["engine", "local"]
+        },
+        {
+          "id": "decline-exert",
+          "description": "Declining exert leaves the ordinary attack without an exert payoff or skipped untap.",
+          "lines": [6],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "ahn-crop-crasher-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Ahn-Crop Crasher: exert=false",
+                "single-source attack exert contract Ahn-Crop Crasher: exert=true"
+              ],
+              "decisionFamilies": ["combat-exert"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["local"]
+        },
+        {
+          "id": "skip-and-recover-untap",
+          "description": "An exerted source skips its next untap and recovers on the following own turn.",
+          "lines": [6],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "ahn-crop-crasher-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Ahn-Crop Crasher: exert=false",
+                "single-source attack exert contract Ahn-Crop Crasher: exert=true"
+              ],
+              "decisionFamilies": ["exert-skip-untap", "exert-recover-untap"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "ahn-crop-crasher-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Ahn-Crop Crasher': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["exert-skip-untap", "exert-recover-untap"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["engine", "local"]
+        },
+        {
+          "id": "haste",
+          "description": "Haste permits attacking without waiting a turn.",
+          "lines": [5],
+          "dependsOn": [],
+          "proof": "scenario",
+          "requiredControllers": ["local", "engine"],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "ahn-crop-crasher-local-haste-scenario-v1",
+              "assertions": [
+                "AKH/HOU haste scenarios 'Ahn-Crop Crasher' 'local' can attack on the turn it resolves"
+              ],
+              "decisionFamilies": ["priority", "combat"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "ahn-crop-crasher-engine-haste-scenario-v1",
+              "assertions": [
+                "AKH/HOU haste scenarios 'Ahn-Crop Crasher' 'engine' can attack on the turn it resolves"
+              ],
+              "decisionFamilies": ["priority", "combat"]
+            }
+          ]
+        },
+        {
+          "id": "blocking-restriction",
+          "description": "The selected creature cannot block this combat while another creature remains eligible.",
+          "lines": [7, 8],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "ahn-crop-crasher-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Ahn-Crop Crasher: exert=false",
+                "single-source attack exert contract Ahn-Crop Crasher: exert=true"
+              ],
+              "decisionFamilies": ["exert-payoff"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "ahn-crop-crasher-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Ahn-Crop Crasher': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["exert-payoff"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["engine", "local"]
+        },
+        {
+          "id": "restriction-expiration",
+          "description": "The selected creature can block again in the next combat on a later turn.",
+          "lines": [7, 8],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "ahn-crop-crasher-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Ahn-Crop Crasher: exert=false",
+                "single-source attack exert contract Ahn-Crop Crasher: exert=true"
+              ],
+              "decisionFamilies": ["exert-payoff"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["local"]
+        },
+        {
+          "id": "target-validity-and-zone-change-cleanup",
+          "description": "Target legality and remembered-object identity remain correct across zone changes.",
+          "lines": [7, 8],
+          "dependsOn": [],
+          "proof": "scenario",
+          "requiredControllers": ["local", "engine"],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "ahn-crop-crasher-local-cleanup-scenario-v1",
+              "assertions": [
+                "Ahn-Crop Crasher target cleanup 'local' removes a departed target from the temporary blocking restriction"
+              ],
+              "decisionFamilies": ["targets", "exert-payoff"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "ahn-crop-crasher-engine-cleanup-scenario-v1",
+              "assertions": [
+                "Ahn-Crop Crasher target cleanup 'engine' removes a departed target from the temporary blocking restriction"
+              ],
+              "decisionFamilies": ["targets", "exert-payoff"]
+            }
+          ]
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "sourceScript": {
+        "path": "g/gust_walker.txt",
+        "sha256": "a801f8ce2eedfe50720a374bcb6ae71c5fcc73dd292dd24e1f7d2d3fa845cd3f"
+      },
+      "review": "partial",
+      "obligations": [
+        {
+          "id": "cast-and-characteristics",
+          "description": "Exact printed identity, mana cost, types, and power/toughness declarations are checksum-bound; behavior is not claimed.",
+          "lines": [1, 2, 3, 4],
+          "dependsOn": [],
+          "proof": "source"
+        },
+        {
+          "id": "attack-exert",
+          "description": "The attacking source offers exert and choosing it resolves the associated trigger.",
+          "lines": [5],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "gust-walker-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Gust Walker: exert=false",
+                "single-source attack exert contract Gust Walker: exert=true"
+              ],
+              "decisionFamilies": ["combat-exert"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "gust-walker-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Gust Walker': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["combat-exert"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["engine", "local"]
+        },
+        {
+          "id": "decline-exert",
+          "description": "Declining exert leaves the ordinary attack without an exert payoff or skipped untap.",
+          "lines": [5],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "gust-walker-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Gust Walker: exert=false",
+                "single-source attack exert contract Gust Walker: exert=true"
+              ],
+              "decisionFamilies": ["combat-exert"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["local"]
+        },
+        {
+          "id": "skip-and-recover-untap",
+          "description": "An exerted source skips its next untap and recovers on the following own turn.",
+          "lines": [5],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "gust-walker-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Gust Walker: exert=false",
+                "single-source attack exert contract Gust Walker: exert=true"
+              ],
+              "decisionFamilies": ["exert-skip-untap", "exert-recover-untap"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "gust-walker-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Gust Walker': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["exert-skip-untap", "exert-recover-untap"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["engine", "local"]
+        },
+        {
+          "id": "power-increase",
+          "description": "Exert increases power from two to three in combat.",
+          "lines": [6],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "gust-walker-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Gust Walker: exert=false",
+                "single-source attack exert contract Gust Walker: exert=true"
+              ],
+              "decisionFamilies": ["exert-payoff"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "gust-walker-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Gust Walker': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["exert-payoff"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["engine", "local"]
+        },
+        {
+          "id": "flying-and-toughness",
+          "description": "Exert grants Flying and increases toughness by one.",
+          "lines": [6],
+          "dependsOn": [],
+          "proof": "scenario",
+          "requiredControllers": ["local", "engine"],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "gust-walker-local-exert-scenario-v1",
+              "assertions": ["single-source attack exert contract Gust Walker: exert=true"],
+              "decisionFamilies": ["exert-payoff", "exert-skip-untap"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "gust-walker-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Gust Walker': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["exert-payoff", "exert-skip-untap"]
+            }
+          ]
+        },
+        {
+          "id": "power-restored-by-next-upkeep",
+          "description": "Power has returned to its baseline by the next own upkeep.",
+          "lines": [6],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "gust-walker-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Gust Walker: exert=false",
+                "single-source attack exert contract Gust Walker: exert=true"
+              ],
+              "decisionFamilies": ["exert-payoff", "exert-skip-untap"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "gust-walker-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Gust Walker': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["exert-payoff", "exert-skip-untap"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["engine", "local"]
+        },
+        {
+          "id": "end-of-turn-effect-expiration",
+          "description": "All exert bonuses expire at the end-of-turn boundary.",
+          "lines": [6],
+          "dependsOn": [],
+          "proof": "scenario",
+          "requiredControllers": ["local", "engine"],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "gust-walker-local-exert-scenario-v1",
+              "assertions": ["single-source attack exert contract Gust Walker: exert=true"],
+              "decisionFamilies": ["exert-payoff", "exert-skip-untap"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "gust-walker-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Gust Walker': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["exert-payoff", "exert-skip-untap"]
+            }
+          ]
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "sourceScript": {
+        "path": "g/glorybringer.txt",
+        "sha256": "f556f84acac4a9fdb880d4528f12b0ccdb17fb40ca51e374e9f50724b8aa8993"
+      },
+      "review": "partial",
+      "obligations": [
+        {
+          "id": "cast-and-characteristics",
+          "description": "Exact printed identity, mana cost, types, and power/toughness declarations are checksum-bound; behavior is not claimed.",
+          "lines": [1, 2, 3, 4],
+          "dependsOn": [],
+          "proof": "source"
+        },
+        {
+          "id": "attack-exert",
+          "description": "The attacking source offers exert and choosing it resolves the associated trigger.",
+          "lines": [7],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "glorybringer-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Glorybringer: exert=false",
+                "single-source attack exert contract Glorybringer: exert=true"
+              ],
+              "decisionFamilies": ["combat-exert"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "glorybringer-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Glorybringer': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["combat-exert"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["engine", "local"]
+        },
+        {
+          "id": "decline-exert",
+          "description": "Declining exert leaves the ordinary attack without an exert payoff or skipped untap.",
+          "lines": [7],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "glorybringer-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Glorybringer: exert=false",
+                "single-source attack exert contract Glorybringer: exert=true"
+              ],
+              "decisionFamilies": ["combat-exert"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["local"]
+        },
+        {
+          "id": "skip-and-recover-untap",
+          "description": "An exerted source skips its next untap and recovers on the following own turn.",
+          "lines": [7],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "glorybringer-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Glorybringer: exert=false",
+                "single-source attack exert contract Glorybringer: exert=true"
+              ],
+              "decisionFamilies": ["exert-skip-untap", "exert-recover-untap"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "glorybringer-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Glorybringer': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["exert-skip-untap", "exert-recover-untap"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["engine", "local"]
+        },
+        {
+          "id": "flying",
+          "description": "Flying restricts blockers.",
+          "lines": [5],
+          "dependsOn": [],
+          "proof": "scenario",
+          "requiredControllers": ["local", "engine"],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "glorybringer-local-exert-scenario-v1",
+              "assertions": ["single-source attack exert contract Glorybringer: exert=true"],
+              "decisionFamilies": ["combat"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "glorybringer-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Glorybringer': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["combat"]
+            }
+          ]
+        },
+        {
+          "id": "haste",
+          "description": "Haste permits attacking without waiting a turn.",
+          "lines": [6],
+          "dependsOn": [],
+          "proof": "scenario",
+          "requiredControllers": ["local", "engine"],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "glorybringer-local-haste-scenario-v1",
+              "assertions": [
+                "AKH/HOU haste scenarios 'Glorybringer' 'local' can attack on the turn it resolves"
+              ],
+              "decisionFamilies": ["priority", "combat"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "glorybringer-engine-haste-scenario-v1",
+              "assertions": [
+                "AKH/HOU haste scenarios 'Glorybringer' 'engine' can attack on the turn it resolves"
+              ],
+              "decisionFamilies": ["priority", "combat"]
+            }
+          ]
+        },
+        {
+          "id": "small-target-dies",
+          "description": "The exert trigger destroys the selected one-toughness opposing creature.",
+          "lines": [8],
+          "dependsOn": [],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "glorybringer-local-exert-scenario-v1",
+              "assertions": [
+                "single-source attack exert contract Glorybringer: exert=false",
+                "single-source attack exert contract Glorybringer: exert=true"
+              ],
+              "decisionFamilies": ["exert-payoff"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "glorybringer-engine-exert-scenario-v1",
+              "assertions": [
+                "native bot exert opportunities 'Glorybringer': native choice, payoff and skipped untap"
+              ],
+              "decisionFamilies": ["exert-payoff"]
+            }
+          ],
+          "proof": "scenario",
+          "requiredControllers": ["engine", "local"]
+        },
+        {
+          "id": "four-damage-and-target-restrictions",
+          "description": "The trigger deals exactly four damage and only targets opposing non-Dragon creatures, including legality on resolution.",
+          "lines": [8],
+          "dependsOn": [],
+          "proof": "scenario",
+          "requiredControllers": ["local", "engine"],
+          "claims": [
+            {
+              "controller": "local",
+              "receiptId": "glorybringer-local-exact-damage-scenario-v1",
+              "assertions": [
+                "Glorybringer exact damage and targets 'local' deals four only to the opposing non-Dragon target"
+              ],
+              "decisionFamilies": ["targets", "exert-payoff"]
+            },
+            {
+              "controller": "engine",
+              "receiptId": "glorybringer-engine-exact-damage-scenario-v1",
+              "assertions": [
+                "Glorybringer exact damage and targets 'engine' deals four only to the opposing non-Dragon target"
+              ],
+              "decisionFamilies": ["targets", "exert-payoff"]
+            }
+          ]
+        }
+      ],
+      "dependencies": []
+    }
+  ]
+}

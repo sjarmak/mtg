@@ -22,9 +22,19 @@
  *    because a default return here would be the lab inventing a move.
  *
  * `unsupported` is the capability refusal: the caller asked for something this
- * backend declared it does not do. It names the capability so the message can
- * say which, and so a caller can tell it apart from a bug.
+ * backend declared it does not do. `content-unsupported` is narrower: the
+ * selected backend exists and implements the session contract, but named
+ * cards or decision families in this table are outside its current surface.
+ * Both are backend-neutral values. The latter keeps every named reason because
+ * a caller needs those reasons to change the deck rather than only a count.
  */
+
+export interface ContentUnsupportedError {
+  readonly kind: 'content-unsupported';
+  readonly backend: string;
+  readonly reasons: readonly string[];
+  readonly message: string;
+}
 
 export type SessionError =
   /** Nothing is pending, so there was nothing to answer. */
@@ -35,6 +45,8 @@ export type SessionError =
   | { readonly kind: 'illegal-move'; readonly message: string }
   /** The backend cannot resolve the content or a deck it was handed. */
   | { readonly kind: 'content-unresolved'; readonly message: string; readonly unresolved: readonly string[] }
+  /** The selected backend names every unsupported card or decision family. */
+  | ContentUnsupportedError
   /** Declared unsupported by this backend. `capability` names which. */
   | { readonly kind: 'unsupported'; readonly message: string; readonly capability: string }
   /** The boundary did not answer in time. */
@@ -59,5 +71,8 @@ export type OpenResult<S> =
   { readonly ok: true; readonly session: S } | { readonly ok: false; readonly error: SessionError };
 
 export function describeSessionError(error: SessionError): string {
-  return `${error.kind}: ${error.message}`;
+  const heading = `${error.kind}: ${error.message}`;
+  return error.kind === 'content-unsupported'
+    ? `${heading}\n${error.reasons.map((reason) => `- ${reason}`).join('\n')}`
+    : heading;
 }

@@ -21,10 +21,7 @@ import {
   ARTIFACT_ROLES,
   buildFillPrompt,
   FillBatchSchema,
-  FillBatchWithAbilitiesAndSpellPermanentsSchema,
-  FillBatchWithEquipSchema,
-  FillBatchWithMechanicsAndSpellPermanentsSchema,
-  FillBatchWithSpellPermanentsSchema,
+  fillSchemaForCapabilities,
   fillSchemaFor,
   isPlaneswalkerRole,
   isSpellPermanentRole,
@@ -36,6 +33,16 @@ import {
 } from '@mtg/setgen';
 import type { SetBrief, SetBriefInput, Slot } from '@mtg/setgen';
 import { briefFromFile, TEST_BRIEF } from './helpers';
+const FillBatchWithAbilitiesAndSpellPermanentsSchema = fillSchemaForCapabilities([
+  'abilities',
+  'spellPermanents',
+]);
+const FillBatchWithEquipSchema = fillSchemaForCapabilities(['equipment']);
+const FillBatchWithMechanicsAndSpellPermanentsSchema = fillSchemaForCapabilities([
+  'setMechanics',
+  'spellPermanents',
+]);
+const FillBatchWithSpellPermanentsSchema = fillSchemaForCapabilities(['spellPermanents']);
 
 /** Large enough that the derivation prints a rare tier; the default 20 does not. */
 const LARGE = 250;

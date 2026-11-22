@@ -10,7 +10,7 @@
  * spelling or the schema version drifts apart.
  */
 
-export const REPLAY_SCHEMA_VERSION = 'mtg-sim/replay-superset/2';
+export const REPLAY_SCHEMA_VERSION = 'mtg-sim/replay-superset/3';
 
 export const SIDES = ['user', 'oppo'] as const;
 export type ReplaySide = (typeof SIDES)[number];
@@ -88,7 +88,7 @@ export const EXTRA_STRING_FIELDS = [
   'sim_oppo_bot',
 ] as const;
 
-export const END_REASONS = ['lifeZero', 'emptyLibrary', 'concede', 'turnLimit'] as const;
+export const END_REASONS = ['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit'] as const;
 export type EndReason = (typeof END_REASONS)[number];
 
 export type TurnOwnerField = (typeof TURN_OWNER_FIELDS)[number];

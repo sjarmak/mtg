@@ -543,7 +543,7 @@ describe('Analysis calibration workflow', () => {
         games: { status: 'absent' },
         calibration: { status: 'invalid', message: 'Payload checksum mismatch.' },
         retune: { status: 'absent' },
-        route: { mode: 'analysis', params: { section: 'calibration' } },
+        route: { mode: 'analysis', sub: 'explorer', params: { section: 'calibration' } },
         onSetParams: () => undefined,
       }),
     );
@@ -558,7 +558,7 @@ describe('Analysis calibration workflow', () => {
         games: { status: 'absent' },
         calibration: { status: 'ready', artifact: artifact() },
         retune: { status: 'absent' },
-        route: { mode: 'analysis', params: { section: 'calibration' } },
+        route: { mode: 'analysis', sub: 'explorer', params: { section: 'calibration' } },
         onSetParams: () => undefined,
       }),
     );

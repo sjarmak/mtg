@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "formatId": "ori",
+  "archetypes": [
+    {
+      "id": "white-blue-flyers",
+      "name": "White-Blue Flyers",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Thunderclap Wyvern",
+        "physicalId": "ori-printed-v1:0218:dd20971a-11aa-452b-8507-0f48229062a0"
+      },
+      "plan": "Build around Thunderclap Wyvern: Hold the ground with defensive creatures and interaction while a concentrated suite of flyers wins overhead."
+    },
+    {
+      "id": "blue-black-graveyard",
+      "name": "Blue-Black Graveyard",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Possessed Skaab",
+        "physicalId": "ori-printed-v1:0215:6ebc94e5-a595-43ab-929b-426009190669"
+      },
+      "plan": "Build around Possessed Skaab: Stock the graveyard through looting and self-mill, then recur threats or cash in cards from the graveyard."
+    },
+    {
+      "id": "black-red-sacrifice",
+      "name": "Black-Red Sacrifice",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Blazing Hellhound",
+        "physicalId": "ori-printed-v1:0210:332769b1-1eb5-4c77-8317-27addc28650b"
+      },
+      "plan": "Build around Blazing Hellhound: Feed expendable creatures to sacrifice outlets so death triggers and drain effects turn every trade into reach."
+    },
+    {
+      "id": "red-green-creature-ramp",
+      "name": "Red-Green Creature Ramp",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Zendikar Incarnate",
+        "physicalId": "ori-printed-v1:0219:eb12b1d8-c53e-4d48-89e5-2168ff34a853"
+      },
+      "plan": "Build around Zendikar Incarnate: Accelerate with mana creatures, curve into oversized threats, and use trample effects to close through blockers."
+    },
+    {
+      "id": "green-white-renown",
+      "name": "Green-White Renown",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Citadel Castellan",
+        "physicalId": "ori-printed-v1:0213:9aa11f30-f2b7-4279-9176-c336c74538bf"
+      },
+      "plan": "Build around Citadel Castellan: Use tricks and removal to push creatures through once, then leverage their renown counters to control combat."
+    },
+    {
+      "id": "white-black-auras",
+      "name": "White-Black Auras",
+      "colors": ["W", "B"],
+      "signpost": {
+        "name": "Blood-Cursed Knight",
+        "physicalId": "ori-printed-v1:0211:644bb558-113e-4e49-a395-7e0036c3419c"
+      },
+      "plan": "Build around Blood-Cursed Knight: Enhance a protected creature with Auras, recur lost enchantments when possible, and win through lifelink or evasion."
+    },
+    {
+      "id": "blue-red-artifacts",
+      "name": "Blue-Red Artifacts",
+      "colors": ["U", "R"],
+      "signpost": {
+        "name": "Reclusive Artificer",
+        "physicalId": "ori-printed-v1:0216:5299a549-06cf-47e8-b6cd-7e44d9f1efb8"
+      },
+      "plan": "Build around Reclusive Artificer: Combine cheap artifacts with cards that trigger from casting or sacrificing them, then win through tempo and reach."
+    },
+    {
+      "id": "black-green-elves",
+      "name": "Black-Green Elves",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Shaman of the Pack",
+        "physicalId": "ori-printed-v1:0217:304687b1-2294-4144-b2bd-7e36f9aaac34"
+      },
+      "plan": "Build around Shaman of the Pack: Fill the battlefield with Elves, exploit tribal mana and card advantage, then attack with a wide enhanced team."
+    },
+    {
+      "id": "red-white-aggro",
+      "name": "Red-White Aggro",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Iroas's Champion",
+        "physicalId": "ori-printed-v1:0214:c0441583-c9d5-47a1-8754-c9162cec64bc"
+      },
+      "plan": "Build around Iroas's Champion: Curve low-cost attackers into combat tricks and burn, widening the board enough to punish slow starts."
+    },
+    {
+      "id": "green-blue-tempo",
+      "name": "Green-Blue Tempo",
+      "colors": ["U", "G"],
+      "signpost": {
+        "name": "Bounding Krasis",
+        "physicalId": "ori-printed-v1:0212:660befe5-9c98-4aa3-9ca7-e643eaf91490"
+      },
+      "plan": "Build around Bounding Krasis: Deploy efficient creatures, hold up bounce or flash threats, and keep the opponent off balance long enough to race."
+    }
+  ]
+}

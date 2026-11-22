@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-19T06:22:48.115Z",
+  "sources": [
+    {
+      "code": "MBS",
+      "mtgjson": {
+        "file": "MBS-08417b70c6f8c145cfbfec541844a211fa4258a2d8dd190a3be75b8ceaabf2df.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/MBS.json",
+        "sha256": "08417b70c6f8c145cfbfec541844a211fa4258a2d8dd190a3be75b8ceaabf2df",
+        "meta": {
+          "date": "2026-09-17",
+          "version": "5.3.0+20260917"
+        }
+      },
+      "scryfall": {
+        "file": "MBS-69284a99dd41638c4446b302275f67a20e6a47d95bbc855d27f58724070a89a4.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Ambs+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "69284a99dd41638c4446b302275f67a20e6a47d95bbc855d27f58724070a89a4",
+        "cards": 155
+      }
+    }
+  ]
+}

@@ -7,9 +7,9 @@
  */
 import { describe, expect, it } from 'vitest';
 import { parseCard } from '@mtg/dsl';
-import { combatDefenders, eligibleAttackers, scenario } from '@mtg/kernel';
-import type { GameState, ObjectId } from '@mtg/kernel';
-import { DEFAULT_GREEDY_CONFIG, chooseAttackers, greedyConfig } from '@mtg/sim';
+import { advance, botSeat, combatDefenders, eligibleAttackers, humanSeat, scenario } from '@mtg/kernel';
+import type { GameSession, GameState, ObjectId } from '@mtg/kernel';
+import { DEFAULT_GREEDY_CONFIG, chooseAttackers, greedyBot, greedyConfig } from '@mtg/sim';
 import { creature, creatureWithStatic } from './cards';
 
 const config = DEFAULT_GREEDY_CONFIG;
@@ -119,6 +119,108 @@ describe('attack policy', () => {
       ],
     });
     expect(attackersFor(state)).toEqual([]);
+  });
+
+  it("does not submit Mogg Flunkies as the attack's only creature", () => {
+    const { state } = scenario({
+      active: 0,
+      step: 'declareAttackers',
+      battlefield: [
+        {
+          card: creatureWithStatic('Mogg Flunkies', 3, 3, { kind: 'cantAttackOrBlockAlone' }),
+          controller: 0,
+        },
+      ],
+    });
+
+    expect(attackersFor(state)).toEqual([]);
+  });
+
+  it('returns an exact-M13 game to human priority when the bot controls lone Mogg Flunkies', () => {
+    const moggFlunkies = parseCard({
+      kind: 'creature',
+      id: 'm13-143',
+      name: 'Mogg Flunkies',
+      rarity: 'common',
+      set: { code: 'M13', collectorNumber: 143 },
+      manaCost: { generic: 1, R: 1 },
+      colors: ['R'],
+      subtypes: ['Goblin'],
+      power: 3,
+      toughness: 3,
+      abilities: [
+        {
+          kind: 'static',
+          scope: 'self',
+          subtype: null,
+          modification: { kind: 'cantAttackOrBlockAlone' },
+        },
+      ],
+    });
+    const position = scenario({
+      active: 0,
+      step: 'declareAttackers',
+      battlefield: [{ card: moggFlunkies, controller: 0 }],
+    });
+    const session: GameSession = {
+      seats: [botSeat(greedyBot('Bot')), humanSeat('You')],
+      state: position.state,
+      events: position.events,
+      result: null,
+      pending: null,
+      beat: null,
+      choices: [],
+      decisions: 0,
+      committed: null,
+    };
+
+    const advanced = advance(session, { maxDecisions: 8 });
+
+    expect(advanced.decisions).toBeGreaterThan(0);
+    expect(advanced.pending).toMatchObject({ kind: 'priority', player: 1 });
+    expect(advanced.events).toContainEqual({ type: 'attackersDeclared', player: 0, attacks: [] });
+  });
+
+  it('adds a companion when a Flunkies-shaped creature is compelled to attack', () => {
+    const compelled = parseCard({
+      kind: 'creature',
+      id: 'bot-compelled-flunkies',
+      name: 'Compelled Flunkies',
+      rarity: 'common',
+      set: { code: 'BOT', collectorNumber: 3 },
+      manaCost: { generic: 2, R: 1 },
+      colors: ['R'],
+      power: 3,
+      toughness: 3,
+      abilities: [
+        {
+          kind: 'static',
+          scope: 'self',
+          subtype: null,
+          modification: { kind: 'cantAttackOrBlockAlone' },
+        },
+        {
+          kind: 'static',
+          scope: 'self',
+          subtype: null,
+          modification: { kind: 'attacksEachCombatIfAble' },
+        },
+      ],
+    });
+    const { state } = scenario({
+      active: 0,
+      step: 'declareAttackers',
+      battlefield: [
+        { card: compelled, controller: 0 },
+        { card: creature('Reluctant Companion', 1, 1), controller: 0 },
+        { card: creature('Colossus', 5, 5), controller: 1 },
+      ],
+    });
+
+    expect(attackersFor(state).map((oid) => nameOf(state, oid))).toEqual([
+      'Compelled Flunkies',
+      'Reluctant Companion',
+    ]);
   });
 
   it('sends a creature that attacks each combat if able into a losing exchange (CR 508.1d)', () => {

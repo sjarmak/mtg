@@ -16,7 +16,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type { Card } from '@mtg/dsl';
-import { isBasicLand, parseCard, setBasics } from '@mtg/dsl';
+import { basicLand, isBasicLand, parseCard, setBasics } from '@mtg/dsl';
 import { CONSTRUCTED_COPY_LIMIT, CONSTRUCTED_DECK_SIZE } from '@mtg/deckbuild';
 import {
   addCopy,
@@ -180,6 +180,24 @@ describe('starting from a list somebody already tuned', () => {
     expect(build.basics).not.toBeNull();
     const color = basicsFor(build);
     expect(Object.values(color).reduce((sum, count) => sum + count, 0)).toBe(3);
+  });
+
+  it('mints the mana base from the printings the list held, not the union pool', () => {
+    // `mtg-ac0h`, one caller over from `reopenVariation`: this is how "start
+    // from this precon and edit it" is expressed, the pool it sits over is the
+    // union of every staged set, and five counts by color cannot say which
+    // Plains the precon played. Its own list can, so the printings ride along.
+    const card = subject();
+    const basic = POOL.find(isBasicLand);
+    if (basic === undefined) throw new Error('the pool has no basic land');
+    // Through `basicLand`, which is the one place a basic's record is built, so
+    // the foreign printing here is the record a reference set actually stages.
+    const foreign = basicLand('Plains', 'M11', 230);
+
+    const build = buildFromCards([foreign, ...POOL], [card, basic, basic]);
+    const lands = deckFor(build).lands;
+    expect(lands.length).toBeGreaterThan(0);
+    expect(new Set(lands.map((land) => land.id))).toStrictEqual(new Set([basic.id]));
   });
 
   it('leaves the base suggested when the list holds no land', () => {

@@ -79,11 +79,15 @@ describe('the one-shot scope vocabulary', () => {
       'allPermanents',
       'permanentsYouControl',
       'permanentsOpponentsControl',
+      'creatureCardsInAllGraveyards',
+      'targetAndPermanentsItsPlayerControls',
     ]);
     expect(EFFECT_SCOPES.filter((scope) => !isSpaceScope(scope))).toEqual([
       'creaturesThatPlayerControls',
       'creatureCardsInPlayerHand',
       'creatureCardsInPlayerGraveyard',
+      'creatureCardsInAllGraveyards',
+      'targetAndPermanentsItsPlayerControls',
     ]);
     expect(EFFECT_SCOPES.filter(isSpaceScope)).toEqual([
       'allPermanents',
@@ -196,18 +200,28 @@ describe('scope and target as one statement', () => {
   /**
    * Both halves of the row are reachable, which is what makes the scope check
    * load-bearing rather than decorative: the target table alone admits either
-   * kind and only the pairing rule tells them apart. The last two kinds belong
+   * kind and only the pairing rule tells them apart. The next two kinds belong
    * to the unscoped half — Altar's Light names an artifact or an enchantment,
    * and `targetPermanent` is the filtered space M11's exile spells draw from
-   * (`mtg-6y4g`) — and they are here so that a widening of this row has to be
-   * stated rather than absorbed.
+   * (`mtg-6y4g`). `noTarget` is the scoped Mass Polymorph half: it exiles every
+   * creature in `permanentsYouControl`, rather than selecting one. Mystifying
+   * Maze adds the opponent-controlled creature slot between those two halves.
+   * Vile Rebirth and Spelltwine add all three graveyard-card ownership spaces; the validator then
+   * narrows their filters and refuses delayed returns from a graveyard target.
+   * They are here so that a widening of this row has to be stated rather than
+   * absorbed.
    */
-  it('keeps both target kinds on the row the pairing rule sorts out', () => {
+  it('keeps every target kind on the row the pairing rule sorts out', () => {
     expect([...legalTargetsFor('exileTarget')]).toEqual([
       'targetCreature',
       'targetOpponent',
       'targetArtifactOrEnchantment',
       'targetPermanent',
+      'targetCreatureOpponentControls',
+      'targetCardInYourGraveyard',
+      'targetCardInOpponentsGraveyard',
+      'targetCardInAGraveyard',
+      'noTarget',
     ]);
   });
 });

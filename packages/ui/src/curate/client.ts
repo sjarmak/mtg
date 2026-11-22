@@ -11,6 +11,7 @@
  * every other reader in this package states: this one crossed a network.
  */
 import { z } from 'zod';
+import { isHelperAbsent } from '../net/helper-absent';
 
 const AcceptedSchema = z.object({ ok: z.literal(true) });
 const RefusedSchema = z.object({ ok: z.literal(false), reason: z.string().min(1) });
@@ -63,6 +64,9 @@ export type RemoteCurationState = z.infer<typeof CurationStateSchema>;
 /** What the page shows after a write: nothing, or the reason it did not happen. */
 export type WriteOutcome = { readonly ok: true } | { readonly ok: false; readonly reason: string };
 
+export const NO_CURATION_SERVER =
+  'this lab runs without the curation server, so nothing was recorded. Start one with npm run curate';
+
 async function post(path: string, body: unknown): Promise<WriteOutcome> {
   let response: Response | null = null;
   try {
@@ -74,7 +78,13 @@ async function post(path: string, body: unknown): Promise<WriteOutcome> {
   } catch (cause: unknown) {
     return { ok: false, reason: `could not reach the curation server (${describe(cause)})` };
   }
-  const parsed: unknown = await response.json().catch(() => null);
+  let parsed: unknown;
+  try {
+    parsed = await response.json();
+  } catch {
+    return { ok: false, reason: NO_CURATION_SERVER };
+  }
+  if (isHelperAbsent(parsed)) return { ok: false, reason: NO_CURATION_SERVER };
   const refused = RefusedSchema.safeParse(parsed);
   if (refused.success) return { ok: false, reason: refused.data.reason };
   if (!AcceptedSchema.safeParse(parsed).success) {

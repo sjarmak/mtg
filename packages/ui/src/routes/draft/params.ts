@@ -1,5 +1,10 @@
 /** Boundary validation for the URL-backed draft transcript. */
-import { DEFAULT_PACKS_PER_SEAT } from '@mtg/draft-export';
+import {
+  DEFAULT_NATIVE_DRAFT_BOT_POLICY,
+  DEFAULT_PACKS_PER_SEAT,
+  DRAFTMANCER_SIMPLE_BOT_POLICY,
+} from '@mtg/draft-export';
+import type { NativeDraftBotPolicy } from '@mtg/draft-export';
 
 export const MAX_DRAFT_SEED_LENGTH = 128;
 export const MAX_PICK_LOG_LENGTH = 16_384;
@@ -9,10 +14,16 @@ export const MAX_CARD_ID_LENGTH = 128;
 export interface DraftRouteParams {
   readonly seed?: string;
   readonly picks?: string;
+  readonly bot?: string;
 }
 
 export type DraftInputs =
-  | { readonly ok: true; readonly seed: string; readonly picks: readonly string[] }
+  | {
+      readonly ok: true;
+      readonly seed: string;
+      readonly picks: readonly string[];
+      readonly botPolicy: NativeDraftBotPolicy;
+    }
   | { readonly ok: false; readonly message: string };
 
 export function encodePickLog(picks: readonly string[]): string {
@@ -54,6 +65,14 @@ function readPicks(value: string | undefined): readonly string[] | string {
   return picks;
 }
 
+function readBotPolicy(value: string | undefined): NativeDraftBotPolicy | null {
+  if (value === undefined || value.length === 0) return DRAFTMANCER_SIMPLE_BOT_POLICY;
+  if (value === DEFAULT_NATIVE_DRAFT_BOT_POLICY || value === DRAFTMANCER_SIMPLE_BOT_POLICY) {
+    return value;
+  }
+  return null;
+}
+
 export function readDraftInputs(params: DraftRouteParams, fallbackSeed: string): DraftInputs {
   const seed = readSeed(params.seed, fallbackSeed);
   if (seed === null) {
@@ -62,6 +81,10 @@ export function readDraftInputs(params: DraftRouteParams, fallbackSeed: string):
       message: `The seed must be 1 to ${String(MAX_DRAFT_SEED_LENGTH)} printable characters.`,
     };
   }
+  const botPolicy = readBotPolicy(params.bot);
+  if (botPolicy === null) {
+    return { ok: false, message: 'The draft link names an unknown bot policy.' };
+  }
   const picks = readPicks(params.picks);
-  return typeof picks === 'string' ? { ok: false, message: picks } : { ok: true, seed, picks };
+  return typeof picks === 'string' ? { ok: false, message: picks } : { ok: true, seed, picks, botPolicy };
 }

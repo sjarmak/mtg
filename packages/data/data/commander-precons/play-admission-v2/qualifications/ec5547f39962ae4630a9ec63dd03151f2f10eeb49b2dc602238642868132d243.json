@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "552129e5a061b1d5e39d20b071313ed8516e59d003ecc13f733bdc8efa498de8",
+    "adapterSha256": "f8cdee5bbe0f10787f68b94ef2b797cb12dbb98065af82b2d853e5f965966534",
+    "protocolVersion": 2
+  },
+  "sourceScript": {
+    "path": "s/scourge_of_nel_toth.txt",
+    "sha256": "ec5547f39962ae4630a9ec63dd03151f2f10eeb49b2dc602238642868132d243"
+  },
+  "decisionFamilies": [
+    "combat",
+    "optional-costs",
+    "priority",
+    "zone-card-selection"
+  ],
+  "obligations": [
+    "controller-contract-combat",
+    "controller-contract-optional-costs",
+    "controller-contract-priority",
+    "controller-contract-zone-card-selection",
+    "exact-source-declarations"
+  ],
+  "residualObligations": [],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "decisionFamilies": [
+        "combat",
+        "optional-costs",
+        "priority",
+        "zone-card-selection"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "optional-costs-v1",
+        "priority-v1",
+        "zone-card-selection-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "decisionFamilies": [
+        "combat",
+        "optional-costs",
+        "priority",
+        "zone-card-selection"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "optional-costs-v1",
+        "priority-v1",
+        "zone-card-selection-v1"
+      ]
+    }
+  ],
+  "dependencies": [],
+  "evidence": {
+    "coveragePlan": {
+      "path": "coverage-plan.json",
+      "sha256": "86990bbad2b269c2952a83bfd2fd74b8fbc21bf0dd2022ea2f4e3f2ff64927b5"
+    },
+    "coverageReport": {
+      "path": "script-coverage.json",
+      "sha256": "c188b88ecdb958adfcdcf9a4c564af9fb30d99888bc4f9f1e48e7d3653ef5e94"
+    },
+    "scenarioReceipts": [],
+    "controllerContracts": [
+      {
+        "contractId": "combat-v1",
+        "file": {
+          "path": "contracts/combat-v1.json",
+          "sha256": "53e0f3a3e60ec331c074c4f927e0b16a3490d51414d7295fe8a0186e52fea762"
+        }
+      },
+      {
+        "contractId": "optional-costs-v1",
+        "file": {
+          "path": "contracts/optional-costs-v1.json",
+          "sha256": "9f24dc60de0d314219d03742b03b358df977de5b34eb0405439fe4c29eeaee27"
+        }
+      },
+      {
+        "contractId": "priority-v1",
+        "file": {
+          "path": "contracts/priority-v1.json",
+          "sha256": "9ac7643d6c7251aca5a930ab85abb686fbfae6bbfdfdc35b61b9ed9aaf858977"
+        }
+      },
+      {
+        "contractId": "zone-card-selection-v1",
+        "file": {
+          "path": "contracts/zone-card-selection-v1.json",
+          "sha256": "2c00d04ef403291623fce69092ada0107d565b7d91aaf9f4613346012186e952"
+        }
+      }
+    ]
+  }
+}

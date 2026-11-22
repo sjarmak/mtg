@@ -16,7 +16,7 @@
  * frame reproduction is exactly what drew the CardConjurer C&D).
  *
  * The trim and the art window's ratio are not decided here. They come from
- * `@mtg/ui`'s `card/anatomy.ts`, which the web face builds from as well, so a
+ * `@mtg/card-geometry`'s `anatomy.ts`, which the web face builds from as well, so a
  * card cannot be one shape on screen and another on paper (ADR-0002). The row
  * heights below *are* decided here, because they only mean anything against a
  * fixed trim, which is exactly the difference the split rests on.
@@ -26,10 +26,13 @@ import { isPlaneswalker } from '@mtg/dsl';
 import {
   ART_WINDOW,
   CARD_TRIM_MM,
+  CARD_EDGE_MM,
   FRAME_BAND_MM,
+  LAND_ART_WINDOW,
   LOYALTY_SHIELD_SHARE,
   PLANESWALKER_ART_WINDOW,
   TITLE_PIP_TO_TEXT,
+  usesLargeLandArt,
 } from '@mtg/card-geometry';
 
 /** Trimmed card size in millimeters; the physical size the SVG declares. */
@@ -71,6 +74,15 @@ export function contains(outer: Box, inner: Box, epsilon = 0.01): boolean {
 
 /** The frame band, in user units. `FRAME_BAND_MM` is the one declaration of it. */
 const BORDER = FRAME_BAND_MM * UNITS_PER_MM;
+
+/**
+ * The black outer edge, in user units, and the outermost slice of that band
+ * rather than anything added to it (`CARD_EDGE_MM`, `mtg-d4g`). The identity
+ * ground starts here instead of at the trim, and the bleed past the cut is this
+ * ink, so a cut that lands outside the trim shows black rather than a colored
+ * hairline down one side of the card.
+ */
+const CARD_EDGE = CARD_EDGE_MM * UNITS_PER_MM;
 const GAP = 8; // 0.8 mm between stacked regions
 
 /**
@@ -99,6 +111,7 @@ const titleHeight = 66;
 const artY = titleY + titleHeight + GAP;
 /** The window fills the content column, so its height follows the shared ratio. */
 const artHeight = (contentWidth * ART_WINDOW.height) / ART_WINDOW.width;
+const landArtHeight = (contentWidth * LAND_ART_WINDOW.height) / LAND_ART_WINDOW.width;
 const typeY = artY + artHeight + GAP;
 const typeHeight = 56;
 const rulesY = typeY + typeHeight + GAP;
@@ -112,19 +125,8 @@ const PT_HEIGHT = 44;
 const BADGE_GUTTER = 10;
 
 /**
- * The planeswalker face, which is the same stack with two rows re-cut.
- *
- * A planeswalker prints three or four abilities where a creature prints one,
- * and the box they go in is the same rectangle, so the box has to grow and the
- * only region on the face with height to spare is the picture. That is what a
- * printed planeswalker does too — its window is visibly shorter than a
- * creature's — and `@mtg/card-geometry`'s `PLANESWALKER_ART_WINDOW` is the one
- * declaration of the shorter ratio, read by this file and by `@mtg/ui`'s sheet.
- *
- * Nothing above the window moves: the title bar is where it always was, and the
- * type bar and the rules box each rise by exactly the height the window gave
- * up. The bottom of the rules box is not where an ordinary card's is either,
- * and that is the second half of this — the shield is a real object with a real
+ * The planeswalker face uses the shared nonland window and reserves the lower
+ * edge for its loyalty shield. The shield is a real object with a real
  * rectangle, and a box that ran under it would be a box whose last ability is
  * covered by the number it belongs to. `mtg` UI feedback, 2026-08-18: "the
  * loyalty is covering up too much text". So the box stops one `GAP` above the
@@ -156,7 +158,7 @@ export const TITLE_MAX_SIZE = 34;
 
 /**
  * A cost pip's radius: half the title's own line box, which is the shared rule
- * (`@mtg/ui`'s `TITLE_PIP_TO_TEXT`).
+ * (`@mtg/card-geometry`'s `TITLE_PIP_TO_TEXT`).
  *
  * It was a flat 15.5 and is now 20.4, which looks like the wrong direction —
  * the complaint that produced the rule was that the *screen* pip was too large.
@@ -197,6 +199,8 @@ export interface CardGeometry {
    */
   readonly loyalty: Box;
   readonly cornerRadius: number;
+  /** Width of the black outer edge, in user units. */
+  readonly edgeWidth: number;
   /** Distance from the trim to the outside of the identity ring, in user units. */
   readonly ringInset: number;
   /** Stroke width of the identity ring. */
@@ -228,6 +232,7 @@ export const CARD_GEOMETRY: CardGeometry = {
   ),
   loyalty: box(contentX + contentWidth - SHIELD_WIDTH, shieldY, SHIELD_WIDTH, SHIELD_HEIGHT),
   cornerRadius: 30,
+  edgeWidth: CARD_EDGE,
   ringInset: RING_INSET,
   ringWidth: RING_WIDTH,
   framePadding: BORDER,
@@ -237,8 +242,8 @@ export const CARD_GEOMETRY: CardGeometry = {
 };
 
 /**
- * The planeswalker variant of the same frame: shorter window, taller rules box
- * stopped above the shield, and a footer bar narrowed for the shield rather
+ * The planeswalker variant of the same frame: shared window, rules box stopped
+ * above the shield, and a footer bar narrowed for the shield rather
  * than for a P/T plate. Everything else is the ordinary face's, spread in from
  * it rather than restated, so a change to the trim or the ring reaches both.
  */
@@ -250,6 +255,19 @@ export const PLANESWALKER_GEOMETRY: CardGeometry = {
   footer: box(contentX, footerY, contentWidth - SHIELD_WIDTH - BADGE_GUTTER, footerHeight),
 };
 
+/** The ordinary frame with the extra illustration height sparse land text affords. */
+export const LAND_GEOMETRY: CardGeometry = {
+  ...CARD_GEOMETRY,
+  art: box(contentX, artY, contentWidth, landArtHeight),
+  type: box(contentX, typeY + landArtHeight - artHeight, contentWidth, typeHeight),
+  rules: box(
+    contentX,
+    rulesY + landArtHeight - artHeight,
+    contentWidth,
+    rulesHeight - (landArtHeight - artHeight),
+  ),
+};
+
 /**
  * The frame a card is drawn in. One card kind takes the variant above; every
  * other kind takes the ordinary face, unchanged and byte for byte.
@@ -259,7 +277,8 @@ export const PLANESWALKER_GEOMETRY: CardGeometry = {
  * switch to, so the two faces cannot end up with different pictures.
  */
 export function cardGeometry(card: Card): CardGeometry {
-  return isPlaneswalker(card) ? PLANESWALKER_GEOMETRY : CARD_GEOMETRY;
+  if (isPlaneswalker(card)) return PLANESWALKER_GEOMETRY;
+  return usesLargeLandArt(card) ? LAND_GEOMETRY : CARD_GEOMETRY;
 }
 
 /** Inner padding of the single-line bars (title, type, footer). */

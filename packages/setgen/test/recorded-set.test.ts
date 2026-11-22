@@ -4,13 +4,14 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   createFixtureProvider,
+  readRunManifest,
   keyForRequest,
   listRunManifests,
   readManifestFixtures,
   toJsonSchema,
 } from '@mtg/llm';
 import type { JsonSchema } from '@mtg/llm';
-import { validateCard, validateSetUniqueness } from '@mtg/dsl';
+import { DECLARED_PARTIAL_EFFECT_KINDS, validateCard, validateSetUniqueness } from '@mtg/dsl';
 import type { Slot } from '@mtg/setgen';
 import {
   allocateSlots,
@@ -18,6 +19,7 @@ import {
   FillBatchSchema,
   formatReport,
   generateSet,
+  generationSemanticsFor,
   parseBrief,
 } from '@mtg/setgen';
 
@@ -91,6 +93,23 @@ const FIXTURES_ROOT = join(PACKAGE_ROOT, 'fixtures');
 const FIXTURE_DIR = join(FIXTURES_ROOT, 'llm');
 const RUN_DIR = join(FIXTURES_ROOT, 'runs');
 const BRIEF_PATH = join(PACKAGE_ROOT, 'briefs', 'tideglass-reach.json');
+const TIDEGLASS_MANIFEST_PATH = join(RUN_DIR, 'tideglass-reach-2026-08-09T22-30-10Z.json');
+
+async function replayTideglass(onCall?: (key: string) => void) {
+  const brief = parseBrief(JSON.parse(readFileSync(BRIEF_PATH, 'utf8')) as unknown);
+  const manifest = readRunManifest(TIDEGLASS_MANIFEST_PATH);
+  const provider = createFixtureProvider({
+    dir: FIXTURE_DIR,
+    record: false,
+    ...(onCall === undefined ? {} : { onCall }),
+  });
+  const result = await generateSet({
+    provider,
+    brief,
+    semanticsVersion: generationSemanticsFor(manifest),
+  });
+  return { result, manifest };
+}
 
 /** Every directory of recorded request/response pairs, whichever run wrote it. */
 function fixtureDirs(): readonly string[] {
@@ -103,10 +122,8 @@ function fixtureDirs(): readonly string[] {
 describe('the recorded Tideglass Reach run', () => {
   it('replays to an enforceable 90-card set', { timeout: 30_000 }, async () => {
     expect(existsSync(FIXTURE_DIR), `no recorded fixtures at ${FIXTURE_DIR}`).toBe(true);
-    const brief = parseBrief(JSON.parse(readFileSync(BRIEF_PATH, 'utf8')) as unknown);
-    const provider = createFixtureProvider({ dir: FIXTURE_DIR, record: false });
-
-    const result = await generateSet({ provider, brief });
+    const keys: string[] = [];
+    const { result, manifest } = await replayTideglass((key) => keys.push(key));
 
     expect(result.cards).toHaveLength(90);
     // Twenty-five calls is the shape of this run — twelve fill batches, two
@@ -115,6 +132,8 @@ describe('the recorded Tideglass Reach run', () => {
     // being that the moment a second run was recorded into the same directory.
     // Said about the run, it survives every future recording.
     expect(result.report.usage.calls).toBe(25);
+    expect(keys).toHaveLength(manifest.calls);
+    expect([...new Set(keys)]).toStrictEqual(manifest.keys);
     // Warnings are output, not failure: the archetype pass reports a partial
     // curve gap or thin answers in a color pair the pie cannot arm. Errors are
     // what "enforceable" means, and there must be none.
@@ -126,23 +145,24 @@ describe('the recorded Tideglass Reach run', () => {
   });
 
   it('prints 90 cards the engine can run and no functional reprints', async () => {
-    const brief = parseBrief(JSON.parse(readFileSync(BRIEF_PATH, 'utf8')) as unknown);
-    const provider = createFixtureProvider({ dir: FIXTURE_DIR, record: false });
-    const result = await generateSet({ provider, brief });
+    const { result } = await replayTideglass();
 
     // Re-checked here against the DSL directly, not through the pipeline's own
     // report: enforceability is the claim the whole package exists to make.
     for (const card of result.cards) {
       expect(validateCard(card), `${card.name} is not enforceable`).toStrictEqual([]);
     }
+    const partial = new Set<string>(DECLARED_PARTIAL_EFFECT_KINDS);
+    const generatedKinds = JSON.stringify(result.cards, (key, value: unknown) =>
+      key === 'kind' && typeof value === 'string' && partial.has(value) ? `DECLARED_PARTIAL:${value}` : value,
+    );
+    expect(generatedKinds).not.toContain('DECLARED_PARTIAL:');
     expect(validateSetUniqueness(result.cards)).toStrictEqual([]);
     expect(new Set(result.cards.map((card) => card.name)).size).toBe(result.cards.length);
   });
 
   it('says how many repeated effects it had to drop', async () => {
-    const brief = parseBrief(JSON.parse(readFileSync(BRIEF_PATH, 'utf8')) as unknown);
-    const provider = createFixtureProvider({ dir: FIXTURE_DIR, record: false });
-    const result = await generateSet({ provider, brief });
+    const { result } = await replayTideglass();
 
     // Seven of the ninety cards proposed the same effect twice. Two came from
     // slots that could not offer a second, different entry, which mtg-bc2.56
@@ -154,9 +174,7 @@ describe('the recorded Tideglass Reach run', () => {
   });
 
   it('needed retries and produced critique revisions, so the loop really ran', async () => {
-    const brief = parseBrief(JSON.parse(readFileSync(BRIEF_PATH, 'utf8')) as unknown);
-    const provider = createFixtureProvider({ dir: FIXTURE_DIR, record: false });
-    const result = await generateSet({ provider, brief });
+    const { result } = await replayTideglass();
 
     const rounds = result.report.retryRounds;
     expect(rounds.length).toBeGreaterThan(0);

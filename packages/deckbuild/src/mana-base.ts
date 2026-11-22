@@ -50,9 +50,10 @@
  * decklab enforces castability itself. `mana-base.test.ts` pins the arithmetic
  * that decides which of those a format can afford.
  */
-import type { BasicLandType, Card, Color } from '@mtg/dsl';
+import type { BasicLandType, Card, Color, LandCard } from '@mtg/dsl';
 import {
   apportion,
+  assertNever,
   BASIC_LAND_COLOR,
   BASIC_LAND_TYPES,
   COLORS,
@@ -258,6 +259,13 @@ function enforceFloors(counts: number[], shares: readonly number[], config: Mana
  * manifest key its illustration is stored under, so two derivations of it are
  * two chances to disagree — and the one that disagreed drew the pending frame
  * for Swamp through a whole game.
+ *
+ * One derivation is not enough on its own, which is `mtg-aqxi.9`: the same
+ * function disagrees with itself when it is handed two different card lists.
+ * The art pipeline walks the set and finds `m11-238`; this walked the pool,
+ * which is six boosters, and found a printed Swamp or did not depending on the
+ * seed. So the list is the caller's now — `config.set` when the caller knows
+ * which set the deck is for, and the pool only when nothing better exists.
  */
 function landCardFor(color: Color, basics: readonly Card[]): Card {
   const card = basics[BASIC_LAND_TYPES.indexOf(BASIC_FOR_COLOR[color])];
@@ -307,7 +315,7 @@ function describeManaBase(
 ): ManaBase {
   const manaConfig = config.manaBase;
   const shares = demandShares(demand);
-  const basics = setBasics(pool);
+  const basics = setBasics(config.set ?? pool);
   const lands: Card[] = [...retainedLands];
   const landsByColor: Record<Color, number> = { W: 0, U: 0, B: 0, R: 0, G: 0 };
   const reports: ColorSourceReport[] = [];
@@ -368,6 +376,106 @@ export function demandedColors(demand: Readonly<Record<Color, ColorDemand>>): re
 }
 
 /**
+ * What playing this nonbasic land costs, in the order a deck feels it: nothing,
+ * a turn sometimes, a turn always.
+ *
+ * Read off `card.entryReplacement` rather than through `printedEntryReplacement`
+ * because the question here is about lands only, and the land union is exactly
+ * the three clauses a land may print. Switching on it is what makes a fourth
+ * clause a compile error in this function rather than a land silently ranked as
+ * though it cost nothing.
+ *
+ * `entersWithCounters` costs nothing: a land that arrives with counters is a
+ * land that arrives, and what the counters do is its own ability's business.
+ *
+ * The conditional clause is charged as the unconditional one when the deck
+ * cannot turn it off. "Enters tapped unless you control a Swamp or a Mountain"
+ * in a deck paying neither black nor red is a land that always enters tapped,
+ * printed differently; ranking it above a Guildgate would be reading the word
+ * rather than what the word does in this deck.
+ */
+function landEntryCost(card: LandCard, paid: readonly Color[]): number {
+  const replacement = card.entryReplacement;
+  if (replacement === undefined) return 0;
+  switch (replacement.kind) {
+    case 'entersWithCounters':
+      return 0;
+    case 'entersTappedUnlessControlsLandSubtype':
+      return replacement.landTypes.some((type) => paid.includes(BASIC_LAND_COLOR[type])) ? 1 : 2;
+    case 'entersTapped':
+      return 2;
+    case 'payLifeOrEntersTapped':
+      return 0;
+    default:
+      return assertNever(replacement, 'landEntryCost');
+  }
+}
+
+/**
+ * The nonbasic lands a deck paying `paid` may play, best first.
+ *
+ * The filter is unchanged and is the whole of what a nonbasic land has to be to
+ * belong in this deck at all: it produces at least one color the deck pays for,
+ * and it produces nothing else. A land that taps for a color the deck does not
+ * pay is a land whose second half is dead, and this file has no way to weigh
+ * whatever else it does, because a land scores zero in `evaluate.ts` by design.
+ *
+ * What changed is the order (`mtg-h6ut`). It used to be the pool's, so which
+ * duals a deck played was whichever the set happened to list first, and a
+ * Guildgate outranked an untapped dual for no reason but collector number. Two
+ * keys, in this order:
+ *
+ *  1. The share of the deck's weighted pip demand the land actually serves,
+ *     summed over the distinct paid colors it produces. This is the figure
+ *     `measureDemand` computes two lines up and that the basics are already
+ *     apportioned by, so a dual for the deck's two real colors outranks a
+ *     nonbasic that taps for one of them and a colorless splash outranks
+ *     neither.
+ *  2. What it costs to play, from `landEntryCost`. Second rather than first
+ *     because fixing is why a nonbasic land is in the deck: a tapped dual for
+ *     both of the deck's colors beats an untapped land that taps for one, and
+ *     that ordering is the one every Limited deck plays.
+ *
+ * Ties keep the pool's order, which is what `Array.prototype.sort`'s stability
+ * gives, so a build stays reproducible on a pool the two keys cannot separate.
+ *
+ * The cap is `landCount` and it is a bound rather than a target: a pool holding
+ * fewer matching nonbasics than the deck plays lands keeps all of them, which is
+ * every sealed pool this repo opens today. It binds on a cube, and the order is
+ * what decides which lands fall off the end when it does.
+ */
+function rankNonbasicLands(
+  pool: readonly Card[],
+  paid: readonly Color[],
+  demand: Readonly<Record<Color, ColorDemand>>,
+  landCount: number,
+): readonly Card[] {
+  const shares = demandShares(demand);
+  const ranked = pool
+    .filter(isLand)
+    .filter(
+      (card) =>
+        card.basicLandType === undefined &&
+        card.producesMana.some((mana) => mana !== 'C' && paid.includes(mana)) &&
+        card.producesMana.every((mana) => mana === 'C' || paid.includes(mana)),
+    )
+    .map((card) => {
+      const colors = new Set(card.producesMana.filter((mana): mana is Color => mana !== 'C'));
+      return {
+        card,
+        served: [...colors].reduce((sum, color) => sum + shares[color], 0),
+        cost: landEntryCost(card, paid),
+      };
+    });
+  ranked.sort((left, right) => {
+    const byDemand = right.served - left.served;
+    if (byDemand !== 0) return byDemand;
+    return left.cost - right.cost;
+  });
+  return ranked.slice(0, landCount).map((entry) => entry.card);
+}
+
+/**
  * Apportions the deck's land slots across the colors it is told to pay for.
  *
  * The color list is the caller's: `buildDeck` hands the pair it ranked and
@@ -386,15 +494,7 @@ export function buildManaBase(
   const manaConfig = config.manaBase;
   const paid = sortColors(colors);
   const demand = measureDemand(spells, manaConfig);
-  const retainedLands = pool
-    .filter(
-      (card) =>
-        card.kind === 'land' &&
-        card.basicLandType === undefined &&
-        card.producesMana.some((mana) => mana !== 'C' && paid.includes(mana)) &&
-        card.producesMana.every((mana) => mana === 'C' || paid.includes(mana)),
-    )
-    .slice(0, config.landCount);
+  const retainedLands = rankNonbasicLands(pool, paid, demand, config.landCount);
   const landSlots = config.landCount - retainedLands.length;
   const weights = paid.map((color) => demand[color].weightedDemand);
   const totalDemand = weights.reduce((sum, weight) => sum + weight, 0);

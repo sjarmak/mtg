@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "xln",
+  "name": "Ixalan",
+  "sourceCodes": ["XLN"],
+  "products": [{ "id": "xln-draft", "setCode": "XLN", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["xln-draft", "xln-draft", "xln-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["xln-draft", "xln-draft", "xln-draft", "xln-draft", "xln-draft", "xln-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

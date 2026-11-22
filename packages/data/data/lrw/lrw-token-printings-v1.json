@@ -1,0 +1,443 @@
+{
+  "schemaVersion": 1,
+  "sets": [
+    {
+      "code": "TLRW",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atlrw+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "4cf10296ca19569aa90c280221aad3fd6bee9cedef30e6d78fbb09d84e3a250c",
+      "fetchedAt": "2026-09-29T23:57:22.879Z"
+    }
+  ],
+  "engine": { "name": "forge", "version": "2.0.14" },
+  "tokens": [
+    {
+      "physicalId": "tlrw-token:0001:f669cb99-be79-413b-8266-1dfd6a15cb41",
+      "position": 1,
+      "setCode": "TLRW",
+      "name": "Avatar",
+      "observedNames": ["Avatar Token"],
+      "oracleId": "6a20eb3c-4ebb-4560-9b77-da35a4c2f207",
+      "scryfallId": "f669cb99-be79-413b-8266-1dfd6a15cb41",
+      "typeLine": "Token Creature — Avatar",
+      "power": "*",
+      "toughness": "*",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Avatar",
+          "manaCost": null,
+          "typeLine": "Token Creature — Avatar",
+          "oracleText": "This creature's power and toughness are each equal to your life total.",
+          "power": "*",
+          "toughness": "*",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "f669cb99-be79-413b-8266-1dfd6a15cb41",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/f/6/f669cb99-be79-413b-8266-1dfd6a15cb41.jpg?1783942843"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0002:1c791044-be86-47d8-8c1b-299f6ab254e6",
+      "position": 2,
+      "setCode": "TLRW",
+      "name": "Elemental",
+      "observedNames": ["Elemental Token"],
+      "oracleId": "3b6d8366-9459-43f7-9d3e-371b8398aee2",
+      "scryfallId": "1c791044-be86-47d8-8c1b-299f6ab254e6",
+      "typeLine": "Token Creature — Elemental",
+      "power": "4",
+      "toughness": "4",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Elemental",
+          "manaCost": null,
+          "typeLine": "Token Creature — Elemental",
+          "oracleText": "Flying",
+          "power": "4",
+          "toughness": "4",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "1c791044-be86-47d8-8c1b-299f6ab254e6",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/1/c/1c791044-be86-47d8-8c1b-299f6ab254e6.jpg?1783942839"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0003:ad29eb21-7ee3-4a67-9601-a62ea0cbe4c0",
+      "position": 3,
+      "setCode": "TLRW",
+      "name": "Kithkin Soldier",
+      "observedNames": ["Kithkin Soldier Token"],
+      "oracleId": "caf4a0d2-64de-42df-a88e-bb0d3f34e207",
+      "scryfallId": "ad29eb21-7ee3-4a67-9601-a62ea0cbe4c0",
+      "typeLine": "Token Creature — Kithkin Soldier",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Kithkin Soldier",
+          "manaCost": null,
+          "typeLine": "Token Creature — Kithkin Soldier",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "ad29eb21-7ee3-4a67-9601-a62ea0cbe4c0",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/a/d/ad29eb21-7ee3-4a67-9601-a62ea0cbe4c0.jpg?1783942839"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0004:526da544-23dd-42b8-8c00-c3609eea4489",
+      "position": 4,
+      "setCode": "TLRW",
+      "name": "Merfolk Wizard",
+      "observedNames": ["Merfolk Wizard Token"],
+      "oracleId": "224debbd-6073-4455-accf-bcf3c9674c72",
+      "scryfallId": "526da544-23dd-42b8-8c00-c3609eea4489",
+      "typeLine": "Token Creature — Merfolk Wizard",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["U"],
+      "faces": [
+        {
+          "name": "Merfolk Wizard",
+          "manaCost": null,
+          "typeLine": "Token Creature — Merfolk Wizard",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["U"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "526da544-23dd-42b8-8c00-c3609eea4489",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/2/526da544-23dd-42b8-8c00-c3609eea4489.jpg?1783942838"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0005:f44d5271-5d10-46b2-9ba2-5788d99de2e6",
+      "position": 5,
+      "setCode": "TLRW",
+      "name": "Goblin Rogue",
+      "observedNames": ["Goblin Rogue Token"],
+      "oracleId": "a0814e97-bf28-4ffb-b65d-845de3613065",
+      "scryfallId": "f44d5271-5d10-46b2-9ba2-5788d99de2e6",
+      "typeLine": "Token Creature — Goblin Rogue",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["B"],
+      "faces": [
+        {
+          "name": "Goblin Rogue",
+          "manaCost": null,
+          "typeLine": "Token Creature — Goblin Rogue",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["B"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "f44d5271-5d10-46b2-9ba2-5788d99de2e6",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/f/4/f44d5271-5d10-46b2-9ba2-5788d99de2e6.jpg?1783942839"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0006:a280aee2-e15a-4625-b429-4032eae08a41",
+      "position": 6,
+      "setCode": "TLRW",
+      "name": "Elemental Shaman",
+      "observedNames": ["Elemental Shaman Token"],
+      "oracleId": "a44da885-2d0f-4e16-ba68-ec80640e819f",
+      "scryfallId": "a280aee2-e15a-4625-b429-4032eae08a41",
+      "typeLine": "Token Creature — Elemental Shaman",
+      "power": "3",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["R"],
+      "faces": [
+        {
+          "name": "Elemental Shaman",
+          "manaCost": null,
+          "typeLine": "Token Creature — Elemental Shaman",
+          "oracleText": "",
+          "power": "3",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["R"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "a280aee2-e15a-4625-b429-4032eae08a41",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/a/2/a280aee2-e15a-4625-b429-4032eae08a41.jpg?1783942839"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0007:c3cbd01b-dbf5-424a-855d-f9a9d7e7e414",
+      "position": 7,
+      "setCode": "TLRW",
+      "name": "Beast",
+      "observedNames": ["Beast Token"],
+      "oracleId": "6bb61f34-5d57-4eaa-a02c-f5d08c1ee920",
+      "scryfallId": "c3cbd01b-dbf5-424a-855d-f9a9d7e7e414",
+      "typeLine": "Token Creature — Beast",
+      "power": "3",
+      "toughness": "3",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Beast",
+          "manaCost": null,
+          "typeLine": "Token Creature — Beast",
+          "oracleText": "",
+          "power": "3",
+          "toughness": "3",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "c3cbd01b-dbf5-424a-855d-f9a9d7e7e414",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/c/3/c3cbd01b-dbf5-424a-855d-f9a9d7e7e414.jpg?1783942838"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0008:8b4ef48d-a328-4eb9-a2e3-925c1cd38b1a",
+      "position": 8,
+      "setCode": "TLRW",
+      "name": "Elemental",
+      "observedNames": ["Elemental Token"],
+      "oracleId": "c5a790eb-a3cf-4214-b743-9123ad002ade",
+      "scryfallId": "8b4ef48d-a328-4eb9-a2e3-925c1cd38b1a",
+      "typeLine": "Token Creature — Elemental",
+      "power": "4",
+      "toughness": "4",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Elemental",
+          "manaCost": null,
+          "typeLine": "Token Creature — Elemental",
+          "oracleText": "",
+          "power": "4",
+          "toughness": "4",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "8b4ef48d-a328-4eb9-a2e3-925c1cd38b1a",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/8/b/8b4ef48d-a328-4eb9-a2e3-925c1cd38b1a.jpg?1783942837"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0009:27b171ac-b2ef-4a80-92d1-6d9e71f3e3ca",
+      "position": 9,
+      "setCode": "TLRW",
+      "name": "Elf Warrior",
+      "observedNames": ["Elf Warrior Token"],
+      "oracleId": "dac8a765-6845-4b57-bb79-4ec463436f92",
+      "scryfallId": "27b171ac-b2ef-4a80-92d1-6d9e71f3e3ca",
+      "typeLine": "Token Creature — Elf Warrior",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Elf Warrior",
+          "manaCost": null,
+          "typeLine": "Token Creature — Elf Warrior",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "27b171ac-b2ef-4a80-92d1-6d9e71f3e3ca",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/2/7/27b171ac-b2ef-4a80-92d1-6d9e71f3e3ca.jpg?1783942838"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0010:02a80dc2-0811-4df0-95f1-dd80ce9e24de",
+      "position": 10,
+      "setCode": "TLRW",
+      "name": "Wolf",
+      "observedNames": ["Wolf Token"],
+      "oracleId": "b2224843-8274-4872-a7ca-2adf69cc066b",
+      "scryfallId": "02a80dc2-0811-4df0-95f1-dd80ce9e24de",
+      "typeLine": "Token Creature — Wolf",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Wolf",
+          "manaCost": null,
+          "typeLine": "Token Creature — Wolf",
+          "oracleText": "",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "02a80dc2-0811-4df0-95f1-dd80ce9e24de",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/0/2/02a80dc2-0811-4df0-95f1-dd80ce9e24de.jpg?1783942837"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0011:1a7d89ca-8611-4bda-b5c8-0350ce091102",
+      "position": 11,
+      "setCode": "TLRW",
+      "name": "Shapeshifter",
+      "observedNames": ["Shapeshifter Token"],
+      "oracleId": "fe8478ec-2af9-472b-b104-a71521a3559f",
+      "scryfallId": "1a7d89ca-8611-4bda-b5c8-0350ce091102",
+      "typeLine": "Token Creature — Shapeshifter",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": [],
+      "faces": [
+        {
+          "name": "Shapeshifter",
+          "manaCost": null,
+          "typeLine": "Token Creature — Shapeshifter",
+          "oracleText": "Changeling",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "1a7d89ca-8611-4bda-b5c8-0350ce091102",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/1/a/1a7d89ca-8611-4bda-b5c8-0350ce091102.jpg?1783942837"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

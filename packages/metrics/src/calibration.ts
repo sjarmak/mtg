@@ -223,7 +223,7 @@ function isSimColumn(column: string): boolean {
 export function verifyJoinCompatibility(log: SimGameLog): JoinCompatibility {
   const row: ReplayRow = replayRow(log);
   const present = new Set(Object.keys(row));
-  const expected = expectedReplayColumns(log.turns);
+  const expected = expectedReplayColumns(log.turns, log.cards);
   const missing = expected.filter((column) => !present.has(column));
   const expectedSet = new Set(expected);
   const simOnly = [...present].filter(isSimColumn).sort();

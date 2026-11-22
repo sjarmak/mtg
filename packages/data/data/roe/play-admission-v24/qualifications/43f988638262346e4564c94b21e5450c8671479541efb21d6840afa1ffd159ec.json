@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "552129e5a061b1d5e39d20b071313ed8516e59d003ecc13f733bdc8efa498de8",
+    "adapterSha256": "f8cdee5bbe0f10787f68b94ef2b797cb12dbb98065af82b2d853e5f965966534",
+    "protocolVersion": 2
+  },
+  "sourceScript": {
+    "path": "c/corpsehatch.txt",
+    "sha256": "43f988638262346e4564c94b21e5450c8671479541efb21d6840afa1ffd159ec"
+  },
+  "decisionFamilies": [
+    "combat",
+    "priority",
+    "targets"
+  ],
+  "obligations": [
+    "controller-contract-combat",
+    "controller-contract-priority",
+    "controller-contract-targets",
+    "exact-source-declarations"
+  ],
+  "residualObligations": [],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "decisionFamilies": [
+        "combat",
+        "priority",
+        "targets"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "priority-v1",
+        "targets-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "decisionFamilies": [
+        "combat",
+        "priority",
+        "targets"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "combat-v1",
+        "priority-v1",
+        "targets-v1"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "tokenscripts/c_0_1_eldrazi_spawn_sac.txt",
+      "sha256": "0f82a817834aabc4b637f2991426d60a8aee3c7d907e35928d0585d4e8a9a05b"
+    }
+  ],
+  "evidence": {
+    "coveragePlan": {
+      "path": "coverage-plan.json",
+      "sha256": "ecf346d3a26226a67e038c3dd5fc24187d1e17998bc6e370221ae9e29f17dd45"
+    },
+    "coverageReport": {
+      "path": "script-coverage.json",
+      "sha256": "ab46c89b6e2da632d7d26180008a55ddf649b8d3ccbb2b1ad26d50000bd21f79"
+    },
+    "scenarioReceipts": [],
+    "controllerContracts": [
+      {
+        "contractId": "combat-v1",
+        "file": {
+          "path": "contracts/combat-v1.json",
+          "sha256": "53e0f3a3e60ec331c074c4f927e0b16a3490d51414d7295fe8a0186e52fea762"
+        }
+      },
+      {
+        "contractId": "priority-v1",
+        "file": {
+          "path": "contracts/priority-v1.json",
+          "sha256": "9ac7643d6c7251aca5a930ab85abb686fbfae6bbfdfdc35b61b9ed9aaf858977"
+        }
+      },
+      {
+        "contractId": "targets-v1",
+        "file": {
+          "path": "contracts/targets-v1.json",
+          "sha256": "aa8e3dce357394bf679da30e84e2b37012e32149898b61a2a4a63d4346cbee41"
+        }
+      }
+    ]
+  }
+}

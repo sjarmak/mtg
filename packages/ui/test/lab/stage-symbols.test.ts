@@ -12,7 +12,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { CachedImage } from '@mtg/image-cache';
-import { SCRYFALL_SYMBOL_BASE, SYMBOL_TOKENS } from '../../src/card/symbols';
+import { SCRYFALL_SYMBOL_BASE, SYMBOL_TOKENS, symbolAssetName } from '../../src/card/symbols';
 import { stageSymbols } from '../../tools/stage-symbols';
 import type { StageSymbolsOptions } from '../../tools/stage-symbols';
 
@@ -47,11 +47,15 @@ describe('staging every rules-text symbol', () => {
     const seen = recorder();
     const staged = await stageSymbols(harness(seen));
 
-    expect(seen.requested).toEqual(SYMBOL_TOKENS.map((token) => `${SCRYFALL_SYMBOL_BASE}${token}.svg`));
+    expect(seen.requested).toEqual(
+      SYMBOL_TOKENS.map((token) => `${SCRYFALL_SYMBOL_BASE}${symbolAssetName(token)}.svg`),
+    );
     // Named for the token rather than for the URL digest: the registry's href
     // is a function of the token alone, so the page needs no manifest to find
     // the file the way it needs one for a card's illustration.
-    expect(seen.published).toEqual(SYMBOL_TOKENS.map((token) => `/tmp/public/symbols/${token}.svg`));
+    expect(seen.published).toEqual(
+      SYMBOL_TOKENS.map((token) => `/tmp/public/symbols/${symbolAssetName(token)}.svg`),
+    );
     expect(staged.set).toBe('local');
     expect(staged.fetched).toBe(SYMBOL_TOKENS.length);
     expect(staged.failures).toEqual([]);

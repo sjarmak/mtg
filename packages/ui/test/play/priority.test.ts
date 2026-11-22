@@ -59,6 +59,8 @@ import {
 } from '@mtg/kernel';
 import { GAME_LOG_STATUS_LABEL } from '../../src/log/GameLog';
 import { PHASE_BAR_STATUS_LABEL } from '../../src/routes/play/PhaseBar';
+import { LAND_DROP_LABEL } from '../../src/routes/play/land-drop';
+import { priorityHolderText } from '../../src/routes/play/priority';
 import {
   HELD_OVER_YOUR_OWN,
   PASS_KEY_STATUS_LABEL,
@@ -184,8 +186,8 @@ describe('priority, announced rather than printed twice', () => {
 
   it('names the other seat by name when priority is theirs', () => {
     // The board follows the seat being asked, so the viewer is the one holding
-    // priority in an ordinary game; this is the position the handoff card sits
-    // in front of, and the bar has to read correctly from either side of it.
+    // priority in an ordinary game; this is the position drawn from the other
+    // side of the table, and the bar has to read correctly from either side.
     const state = reduce(openState(), { type: 'passPriority', player: 0 }).state;
     expect(state.turn.priority).toBe(1);
     renderAt(state, 0);
@@ -197,24 +199,32 @@ describe('priority, announced rather than printed twice', () => {
    * `mtg-1th`. The bug was two sentences on one screen about one seat at one
    * moment: the ask column said `Player two may act, or pass and move the game
    * on.` and the bar under it said `You have priority`, because the column
-   * decided at the label and the bar decided at the seat id. On a hotseat table
+   * decided at the label and the bar decided at the seat id. On a two-human table
    * neither seat is second person, so only one of those can be right.
    */
-  it('agrees with the ask column on a hotseat table, where neither seat is you', () => {
-    const hotseat: SeatNames = ['Player one', 'Player two'];
+  it('agrees with the ask column on a two-human table, where neither seat is you', () => {
+    const twoHuman: SeatNames = ['Player one', 'Player two'];
     const state = reduce(openState(), { type: 'passPriority', player: 0 }).state;
     const decision = pendingDecision(state);
     if (decision === null) throw new Error('the fixture settled to a finished game');
     expect(state.turn.priority).toBe(1);
-    // Drawn for the seat being asked, which is what a hotseat game does: the
+    // Drawn for the seat being asked, which is what a two-human game does: the
     // session stops in front of whoever owes the next decision.
-    render(h(PlayView, { session: sessionAt(state), viewer: 1, names: hotseat, onChoose: () => undefined }));
-    const asked = buildPrompt(state, decision, hotseat).explain;
+    render(h(PlayView, { session: sessionAt(state), viewer: 1, names: twoHuman, onChoose: () => undefined }));
+    const asked = buildPrompt(state, decision, twoHuman).explain;
     expect(asked).toContain('Player two may act');
     expect(textOf(bar())).toContain('Player two has priority');
     // The whole surface, not just the two strings: no second person survives
     // anywhere on a table with no seat by that name.
     expect(textOf(bar())).not.toMatch(/\byou\b/i);
+  });
+
+  it('names a third or fourth seat at a pod, and never prints an index for a seat with no name', () => {
+    const pod = ['You', 'Bo', 'Cy', 'Di'];
+    expect(priorityHolderText(2, pod)).toBe('Cy has priority');
+    expect(priorityHolderText(3, pod)).toBe('Di has priority');
+    expect(priorityHolderText(null, pod)).toBe('Nobody has priority');
+    expect(priorityHolderText(4, pod)).toBe('Seat 5 has priority');
   });
 
   it('says how deep the stack is while nothing of yours is on top', () => {
@@ -223,7 +233,7 @@ describe('priority, announced rather than printed twice', () => {
     expect(textOf(bar())).not.toContain(HELD_OVER_YOUR_OWN);
   });
 
-  it('holds the four named status regions apart', () => {
+  it('holds the five named status regions apart', () => {
     // The full strip, because the phase bar's region is drawn only for a caller
     // that owns the settings, and this is the collision that has to be ruled out
     // on the table a player actually gets.
@@ -242,8 +252,8 @@ describe('priority, announced rather than printed twice', () => {
     const names = regions.map((region) =>
       (region as { getAttribute(name: string): string | null }).getAttribute('aria-label'),
     );
-    expect(names).toHaveLength(4);
-    expect(new Set(names).size, 'two status regions share a name').toBe(4);
+    expect(names).toHaveLength(5);
+    expect(new Set(names).size, 'two status regions share a name').toBe(5);
     expect(names).toContain(PRIORITY_STATUS_LABEL);
     expect(names).toContain(PHASE_BAR_STATUS_LABEL);
     expect(names).toContain(GAME_LOG_STATUS_LABEL);
@@ -251,6 +261,10 @@ describe('priority, announced rather than printed twice', () => {
     // pass to spend, and it answers in a region of its own rather than in the
     // running commentary above it.
     expect(names).toContain(PASS_KEY_STATUS_LABEL);
+    // The fifth is `mtg-re3`'s: the unspent land drop is a position that arrives
+    // and departs mid-turn, so it announces on its own change rather than
+    // re-announcing the whole priority sentence whenever the count moves.
+    expect(names).toContain(LAND_DROP_LABEL);
   });
 
   it('announces the holder, the stack and the step, with no serial number', () => {
@@ -298,7 +312,7 @@ describe('holding priority over your own spell', () => {
     // Drawn for seat 1, which this table calls `Bot`, so that is what the bar
     // calls it (`mtg-1th`). It said `You have priority` here until the ask
     // column two inches above it started saying `Bot may act` at the same
-    // moment, on a hotseat table where neither seat is second person.
+    // moment, on a two-human table where neither seat is second person.
     expect(textOf(bar())).toContain(`${NAMES[1]} has priority`);
     expect(textOf(bar())).not.toContain('You have priority');
     expect(textOf(bar())).not.toContain(HELD_OVER_YOUR_OWN);

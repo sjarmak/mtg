@@ -26,11 +26,13 @@
  * is second, which is a heuristic over English and would be wrong about `has`
  * inside a week. Both rules below are mechanical instead.
  *
- *  1. **A hotseat table says no second person.** With both seats named, nothing
+ *  1. **A two-human table says no second person.** With both seats named, nothing
  *     on screen may say `you`, `your` or `yours`: there is no seat by that name,
  *     so the word can only be addressing whoever happens to be holding the
- *     device, which is the assumption `deal.ts` deleted when it started naming
- *     both seats. This is the whole of `mtg-1th`, and it needs no exemptions.
+ *     device. The lab no longer deals that table (`../support/two-human.ts`
+ *     builds it), and the rule outlives the arm because a wrong pronoun is
+ *     wrong at any table. This is the whole of `mtg-1th`, and it needs no
+ *     exemptions.
  *  2. **A second-person sentence must differ by more than the label.** The same
  *     position is rendered twice, once with the near seat called `You` and once
  *     with it called `Player one`. Any string that mentions the near seat and is
@@ -67,11 +69,12 @@ import { createElement as h } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render } from '@testing-library/react';
 import { EXAMPLE_CARDS, exampleCard, mana, renderAbility } from '@mtg/dsl';
-import type { Beat, Decision, GameSession, GameState, ObjectId, PlayerId } from '@mtg/kernel';
+import type { Action, Beat, Decision, GameSession, GameState, ObjectId, PlayerId } from '@mtg/kernel';
 import { choose, createSession, DEFAULT_AUTO_PASS, scenario, simpleAgent } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { buildLog } from '../../src/log/group';
 import type { DecisionKind, LogNames } from '../../src/log/narrate';
-import { dealMirrorGame } from '../../src/routes/play/deal';
+import { TWO_HUMAN_NAMES, twoHumanMirror } from '../support/two-human';
 import { ownedName } from '../../src/routes/play/naming';
 import { PlayView } from '../../src/routes/play/PlayView';
 import { nameOf } from '../../src/routes/play/position';
@@ -99,13 +102,13 @@ const SECOND: SeatNames = ['You', 'Bot'];
  */
 const THIRD: SeatNames = ['Player one', 'Bot'];
 
-/** The hotseat table `deal.ts` deals when two people share a screen. */
-const HOTSEAT: SeatNames = ['Player one', 'Player two'];
+/** The two-human table `../support/two-human.ts` builds. */
+const TWO_HUMAN: SeatNames = TWO_HUMAN_NAMES;
 
 /** The near seat's label in `THIRD`, which is what rule 2 swaps. */
 const THIRD_NEAR = THIRD[0];
 
-/** Any second-person word, as a whole word: what a hotseat table may not say. */
+/** Any second-person word, as a whole word: what a two-human table may not say. */
 const SECOND_PERSON_WORD = /\b(you|your|yours)\b/i;
 
 // A DOM this package may not name: the root tsconfig has no `lib: dom`, so the
@@ -164,8 +167,8 @@ function renderedStrings(container: ElementLike): readonly string[] {
  * to read would never be written. The sweep supplies the play instead.
  */
 function openingSession(): GameSession {
-  const game = dealMirrorGame(EXAMPLE_CARDS, { opponent: 'human' });
-  return createSession(game.config.setup, game.config.seats, { autoPass: DEFAULT_AUTO_PASS });
+  const game = twoHumanMirror(EXAMPLE_CARDS);
+  return createSession(game.setup, game.seats, { autoPass: DEFAULT_AUTO_PASS });
 }
 
 interface PlayedGame {
@@ -195,8 +198,16 @@ function playedGame(): PlayedGame {
   for (let step = 0; step < 10_000 && session.pending !== null; step += 1) {
     asked.push(session);
     const decision = session.pending;
-    const action = agent.decide({ state: session.state, player: decision.player, decision });
-    const at = decision.options.indexOf(action);
+    if (decision.kind === 'cardName') {
+      throw new Error('the seat-voice fixture unexpectedly reached a free-text decision');
+    }
+    const action = agent.decide({
+      state: observeState(session.state, decision.player, 'test/seat-voice.test.ts:201'),
+      player: decision.player,
+      decision,
+    });
+    const options: readonly Action[] = decision.options;
+    const at = options.indexOf(action);
     if (at < 0) throw new Error(`the agent answered "${decision.kind}" with an unenumerated action`);
     session = choose(session, at, { autoPass: DEFAULT_AUTO_PASS });
   }
@@ -258,8 +269,40 @@ function parkedOid(at: number): ObjectId {
  * every kind the game does reach is swept from the real decision above.
  */
 const SYNTHETIC: Readonly<Record<DecisionKind, Decision>> = {
+  cardName: {
+    kind: 'cardName',
+    player: 0,
+    chosen: [],
+    input: { kind: 'text', label: 'Card name', minLength: 1, maxLength: 256 },
+    options: [],
+    complete: true,
+  },
+  namedZoneExile: {
+    kind: 'namedZoneExile',
+    player: 0,
+    targetPlayer: 1,
+    name: 'Runeclaw Bear',
+    cards: [],
+    chosen: [],
+    options: [],
+    complete: true,
+  },
   mulligan: { kind: 'mulligan', player: 0, mulligans: 1, count: 1, hand: [], options: [], complete: true },
+  openingHandAction: {
+    kind: 'openingHandAction',
+    player: 0,
+    cards: [],
+    options: [],
+    complete: true,
+  },
   priority: { kind: 'priority', player: 0, options: [], complete: true },
+  manaColor: {
+    kind: 'manaColor',
+    player: 0,
+    colors: ['W', 'U', 'B', 'R', 'G'],
+    options: [{ type: 'chooseManaColor', player: 0, color: 'G' }],
+    complete: true,
+  },
   declareAttackers: {
     kind: 'declareAttackers',
     player: 0,
@@ -274,7 +317,7 @@ const SYNTHETIC: Readonly<Record<DecisionKind, Decision>> = {
     player: 0,
     attackers: [parkedOid(2)],
     eligible: [parkedOid(0)],
-    candidates: [{ blocker: parkedOid(0), attackers: [parkedOid(2)] }],
+    candidates: [{ blocker: parkedOid(0), capacity: 'one', attackers: [parkedOid(2)] }],
     options: [],
     complete: true,
   },
@@ -282,6 +325,13 @@ const SYNTHETIC: Readonly<Record<DecisionKind, Decision>> = {
     kind: 'orderBlockers',
     player: 0,
     blocks: [{ attacker: parkedOid(2), blockers: [parkedOid(0)] }],
+    options: [],
+    complete: true,
+  },
+  orderAttackers: {
+    kind: 'orderAttackers',
+    player: 0,
+    blocks: [{ blocker: parkedOid(0), attackers: [parkedOid(1), parkedOid(2)] }],
     options: [],
     complete: true,
   },
@@ -293,8 +343,38 @@ const SYNTHETIC: Readonly<Record<DecisionKind, Decision>> = {
     options: [],
     complete: true,
   },
+  topLibraryOrder: { kind: 'topLibraryOrder', player: 0, cards: [parkedOid(0)], options: [], complete: true },
+  topLibrarySelect: {
+    kind: 'topLibrarySelect',
+    player: 0,
+    cards: [parkedOid(0)],
+    eligible: [parkedOid(0)],
+    options: [],
+    complete: true,
+  },
+  topLibraryPartition: {
+    kind: 'topLibraryPartition',
+    player: 0,
+    cards: [parkedOid(0)],
+    options: [],
+    complete: true,
+  },
+  topLibraryPile: {
+    kind: 'topLibraryPile',
+    player: 0,
+    piles: [[parkedOid(0)], []],
+    options: [],
+    complete: true,
+  },
   searchLibrary: {
     kind: 'searchLibrary',
+    player: 0,
+    cards: [parkedOid(0), parkedOid(1)],
+    options: [],
+    complete: true,
+  },
+  searchDestination: {
+    kind: 'searchDestination',
     player: 0,
     cards: [parkedOid(0), parkedOid(1)],
     options: [],
@@ -307,12 +387,43 @@ const SYNTHETIC: Readonly<Record<DecisionKind, Decision>> = {
     options: [],
     complete: true,
   },
+  revealedHandChoice: {
+    kind: 'revealedHandChoice',
+    player: 0,
+    owner: 1,
+    cards: [parkedOid(0), parkedOid(1)],
+    options: [],
+    complete: true,
+  },
+  battlefieldChoice: {
+    kind: 'battlefieldChoice',
+    player: 0,
+    permanents: [parkedOid(0), parkedOid(1)],
+    options: [],
+    complete: true,
+  },
+  populate: {
+    kind: 'populate',
+    player: 0,
+    tokens: [parkedOid(0), parkedOid(1)],
+    options: [],
+    complete: true,
+  },
   // CR 701.17a: `player` is both who is asked and whose board `permanents`
   // was read from — no owner/chooser split, unlike `handDiscard` above.
   permanentSacrifice: {
     kind: 'permanentSacrifice',
     player: 0,
     permanents: [parkedOid(0), parkedOid(1)],
+    remaining: 1,
+    options: [],
+    complete: true,
+  },
+  permanentUntap: {
+    kind: 'permanentUntap',
+    player: 0,
+    permanents: [parkedOid(0), parkedOid(1)],
+    remaining: 4,
     options: [],
     complete: true,
   },
@@ -339,6 +450,25 @@ const SYNTHETIC: Readonly<Record<DecisionKind, Decision>> = {
     options: [],
     complete: true,
   },
+  pluralTargets: {
+    kind: 'pluralTargets',
+    player: 0,
+    oid: parkedOid(0),
+    effectIndex: 0,
+    selected: [],
+    options: [],
+    complete: true,
+  },
+  damageAllocation: {
+    kind: 'damageAllocation',
+    player: 0,
+    oid: parkedOid(0),
+    effectIndex: 0,
+    total: 3,
+    allocated: [],
+    options: [],
+    complete: true,
+  },
   optionalTrigger: {
     kind: 'optionalTrigger',
     player: 0,
@@ -354,6 +484,105 @@ const SYNTHETIC: Readonly<Record<DecisionKind, Decision>> = {
     player: 0,
     oid: parkedOid(0),
     targets: [],
+    options: [],
+    complete: true,
+  },
+  spellTargets: {
+    kind: 'spellTargets',
+    player: 0,
+    oid: parkedOid(0),
+    targets: [{ kind: 'player', player: 1 }],
+    options: [],
+    complete: true,
+  },
+  freeCast: {
+    kind: 'freeCast',
+    player: 0,
+    oid: parkedOid(0),
+    optional: false,
+    options: [],
+    complete: true,
+  },
+  entryCopy: {
+    kind: 'entryCopy',
+    player: 0,
+    oid: parkedOid(0),
+    creatures: [parkedOid(1)],
+    options: [],
+    complete: true,
+  },
+  entryCounter: {
+    kind: 'entryCounter',
+    player: 0,
+    oid: parkedOid(0),
+    permanents: [parkedOid(1)],
+    options: [],
+    complete: true,
+  },
+  entryAura: {
+    kind: 'entryAura',
+    player: 0,
+    oid: parkedOid(0),
+    permanents: [parkedOid(1)],
+    options: [],
+    complete: true,
+  },
+  entryTimestampOrder: {
+    kind: 'entryTimestampOrder',
+    player: 0,
+    ordered: [],
+    remaining: [parkedOid(0), parkedOid(1)],
+    options: [],
+    complete: true,
+  },
+  entryCharacteristics: {
+    kind: 'entryCharacteristics',
+    player: 0,
+    oid: parkedOid(0),
+    modes: [
+      { power: 3, toughness: 3 },
+      { power: 1, toughness: 6 },
+    ],
+    options: [],
+    complete: true,
+  },
+  entryOptionalCounter: {
+    kind: 'entryOptionalCounter',
+    player: 0,
+    oid: parkedOid(0),
+    counter: 'plusOnePlusOne',
+    count: 1,
+    options: [],
+    complete: true,
+  },
+  entryPayLife: {
+    kind: 'entryPayLife',
+    player: 0,
+    oid: parkedOid(0),
+    life: 2,
+    options: [],
+    complete: true,
+  },
+  entryPlayer: {
+    kind: 'entryPlayer',
+    player: 0,
+    oid: parkedOid(0),
+    options: [],
+    complete: true,
+  },
+  entryColors: {
+    kind: 'entryColors',
+    player: 0,
+    oid: parkedOid(0),
+    options: [],
+    complete: true,
+  },
+  damagePrevention: {
+    kind: 'damagePrevention',
+    player: 0,
+    effectId: 'shield-1',
+    source: { sourceOid: parkedOid(0), damage: 3 },
+    remaining: 2,
     options: [],
     complete: true,
   },
@@ -375,6 +604,36 @@ const SYNTHETIC: Readonly<Record<DecisionKind, Decision>> = {
     complete: true,
   },
 };
+
+it("uses the revealed hand owner's label-aware possessive", () => {
+  const decision: Decision = {
+    kind: 'revealedHandChoice',
+    player: 1,
+    owner: 0,
+    cards: [parkedOid(0)],
+    options: [{ type: 'chooseFromRevealedHand', player: 1, chosen: null }],
+    complete: true,
+  };
+  expect(buildPrompt(PARKED, decision, SECOND).explain).toBe(
+    'You revealed your hand, and Bot chooses one of 1 eligible card, or chooses none.',
+  );
+  expect(
+    buildPrompt(
+      PARKED,
+      {
+        kind: 'handDiscard',
+        player: 1,
+        owner: 0,
+        count: 1,
+        hand: [parkedOid(0)],
+        revealed: true,
+        options: [],
+        complete: true,
+      },
+      SECOND,
+    ).explain,
+  ).toBe('You revealed your hand, and Bot chooses 1 card for them to discard.');
+});
 
 /** The headline and explanation of every decision kind, asked of both seats. */
 function syntheticStrings(names: SeatNames): readonly string[] {
@@ -501,7 +760,7 @@ function sweep(names: SeatNames): readonly string[] {
 
 const SECOND_SWEEP = sweep(SECOND);
 const THIRD_SWEEP = sweep(THIRD);
-const HOTSEAT_SWEEP = sweep(HOTSEAT);
+const TWO_HUMAN_SWEEP = sweep(TWO_HUMAN);
 
 describe('the sweep is worth asserting against', () => {
   it('collects the whole surface rather than a handful of strings', () => {
@@ -516,7 +775,7 @@ describe('the sweep is worth asserting against', () => {
     // The three configurations walk the same game and the same renders, which is
     // what lets rule 2 pair a string with its counterpart by position.
     expect(THIRD_SWEEP.length).toBe(SECOND_SWEEP.length);
-    expect(HOTSEAT_SWEEP.length).toBe(SECOND_SWEEP.length);
+    expect(TWO_HUMAN_SWEEP.length).toBe(SECOND_SWEEP.length);
   });
 
   it('reaches the sentences that are not the move list', () => {
@@ -543,7 +802,7 @@ describe('the sweep is worth asserting against', () => {
  * keywords their reminder text, and two of the eight reminders are written in
  * Magic's second person — "as soon as it comes under your control", "causes you
  * to gain that much life". That `you` is the card speaking, exactly as
- * `You gain 1 life.` on a printed card is, so it is correct at a hotseat table
+ * `You gain 1 life.` on a printed card is, so it is correct at a two-human table
  * and rule 1 has to exclude it. The exclusion is by *identity* rather than by a
  * pattern: a string is exempt only if it is a block some card in the pool
  * actually prints, so a sentence the surface wrote can never hide behind it.
@@ -573,7 +832,7 @@ const PRINTED_CARD_TEXT: ReadonlySet<string> = new Set(
   ),
 );
 
-describe('a hotseat table addresses nobody as you', () => {
+describe('a two-human table addresses nobody as you', () => {
   /**
    * The premise rule 1 rests on, restated now that a card in the pool does print
    * a second person.
@@ -598,7 +857,7 @@ describe('a hotseat table addresses nobody as you', () => {
   });
 
   it('says no second-person word anywhere on the surface', () => {
-    const said = HOTSEAT_SWEEP.filter(
+    const said = TWO_HUMAN_SWEEP.filter(
       (line) => SECOND_PERSON_WORD.test(line) && !PRINTED_CARD_TEXT.has(line),
     );
     expect([...new Set(said)]).toEqual([]);

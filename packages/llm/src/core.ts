@@ -64,7 +64,7 @@ async function runCompletion<T>(
   request: CompletionRequest<T>,
 ): Promise<CompletionResult<T>> {
   const startedAt = Date.now();
-  const jsonSchema = toJsonSchema(request.schema);
+  const jsonSchema = toJsonSchema(request.schema, request.schemaEncoding);
   const maxTokens = request.maxTokens ?? defaultMaxTokens;
   const failures: AttemptRecord[] = [];
 

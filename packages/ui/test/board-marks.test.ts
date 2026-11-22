@@ -25,7 +25,7 @@ import { EXAMPLE_CARDS } from '@mtg/dsl';
 import type { Card as DslCard } from '@mtg/dsl';
 import { Battlefield, SICK_MARK_LABEL, permanentMarks } from '../src/board/Battlefield';
 import { uiStyleSheet } from '../src/styles/index';
-import type { BoardPermanent } from '../src/board/Battlefield';
+import type { BoardMark, BoardPermanent } from '../src/board/Battlefield';
 
 afterEach(cleanup);
 
@@ -57,6 +57,29 @@ function textOf(node: Node): string {
 
 function attributeOf(node: Node, name: string): string | null {
   return (node as unknown as { getAttribute(name: string): string | null }).getAttribute(name);
+}
+
+/**
+ * Every selector in the sheet that strikes text through on a card face.
+ *
+ * The ban below is about a card: a size the layers moved is drawn as a dotted
+ * underline under the printed pair, never as a strike-through of it. It was
+ * written as one substring search over the whole sheet, and the whole sheet is
+ * more than the board -- `.mtg-deck-card__built` strikes out the count a deck
+ * was built with beside the count a person moved it to (`mtg-ipse`), which is a
+ * number in a list two screens away from a card face. So the search is a walk
+ * over rules that reach a card, and a strike-through drawing no card face is
+ * not this file's business.
+ */
+function struckCardSelectors(sheet: string): readonly string[] {
+  const found: string[] = [];
+  for (const [, selector, body] of sheet.matchAll(/([^{}]*)\{([^{}]*)\}/gu)) {
+    if (selector === undefined || body === undefined) continue;
+    if (!/text-decoration:[^;]*line-through/u.test(body)) continue;
+    if (!/\.mtg-card|\.mtg-slot/u.test(selector)) continue;
+    found.push(selector.trim());
+  }
+  return found;
 }
 
 describe('the summoning-sick mark', () => {
@@ -114,7 +137,7 @@ describe('a size the layer system moved', () => {
     show(equipped);
     expect(screen.getByRole('img', { name: /^Now 5\/5/ })).toBeTruthy();
     const sheet = uiStyleSheet();
-    expect(sheet).not.toContain('text-decoration: line-through');
+    expect(struckCardSelectors(sheet), 'a card face draws a size struck through').toEqual([]);
     expect(sheet).toContain(
       ".mtg-slot:has(.mtg-slot__marks .mtg-mark[data-mark='derived']) .mtg-card__pt {\n  text-decoration: underline dotted;",
     );
@@ -216,6 +239,33 @@ describe('a keyword the card does not print', () => {
   });
 });
 
+describe('a soulbond pair', () => {
+  const paired = permanent({ pair: { number: 2, partner: 'Thraben Valiant' } });
+
+  it('draws the link glyph with the pair number beside it, and names the partner', () => {
+    const markup = renderToStaticMarkup(h(Battlefield, { label: 'Battlefield', permanents: [paired] }));
+    expect(markup).toContain('data-mark="paired"');
+    expect(markup).toContain('mtg-mark__badge');
+
+    show(paired);
+    const mark = screen.getByRole('img', { name: 'Soulbond pair 2: paired with Thraben Valiant.' });
+    expect(textOf(mark)).toBe('2');
+  });
+
+  it('puts the same number on both members and a different one on a second pair', () => {
+    const numberOn = (subject: BoardPermanent): string | undefined =>
+      permanentMarks(subject).find((mark) => mark.key === 'paired')?.badge;
+
+    expect(numberOn(permanent({ pair: { number: 1, partner: 'B' } }))).toBe('1');
+    expect(numberOn(permanent({ key: 'o2', pair: { number: 1, partner: 'A' } }))).toBe('1');
+    expect(numberOn(permanent({ key: 'o3', pair: { number: 2, partner: 'D' } }))).toBe('2');
+  });
+
+  it('is absent from an unpaired creature, including one whose partner just left', () => {
+    expect(markKeys(permanent({}))).not.toContain('paired');
+  });
+});
+
 describe('a creature staged to attack', () => {
   it('carries a silent mark saying so, since the position it moved to says nothing to a screen reader', () => {
     show(permanent({ staged: true }));
@@ -290,6 +340,46 @@ describe('counters on the wrong side of zero', () => {
 
   it('leave a permanent with none of them unmarked', () => {
     expect(markKeys(permanent({ counters: 0 }))).not.toContain('counters');
+  });
+});
+
+describe('a counter kind a backend names in its own code', () => {
+  function named(counters: Readonly<Record<string, number>>, kind: string): BoardMark | undefined {
+    return permanentMarks(permanent({ namedCounters: counters })).find(
+      (mark) => mark.key === `counter-${kind}`,
+    );
+  }
+
+  it('reads as the stat change a player calls it, with the count beside it', () => {
+    expect(named({ P1P1: 2 }, 'P1P1')).toMatchObject({
+      label: '+1/+1 ×2',
+      title: '2 +1/+1 counters.',
+      tone: 'positive',
+    });
+    expect(named({ M1M1: 1 }, 'M1M1')).toMatchObject({
+      label: '-1/-1 ×1',
+      title: '1 -1/-1 counter.',
+      tone: 'negative',
+    });
+    expect(named({ P2P0: 1 }, 'P2P0')?.label).toBe('+2/+0 ×1');
+    expect(named({ M0M2: 3 }, 'M0M2')?.label).toBe('-0/-2 ×3');
+  });
+
+  it('reads as plain lowercase words when it is a word', () => {
+    expect(named({ CHARGE: 3 }, 'CHARGE')).toMatchObject({
+      label: '3 charge',
+      title: '3 charge counters.',
+      tone: 'neutral',
+    });
+    expect(named({ FADE_AWAY: 1 }, 'FADE_AWAY')?.label).toBe('1 fade away');
+    expect(named({ charge: 1 }, 'charge')?.label).toBe('1 charge');
+  });
+
+  it('never prints the code itself', () => {
+    const labels = permanentMarks(permanent({ namedCounters: { P1P1: 2, M1M1: 1, LOYALTY: 4 } })).flatMap(
+      (mark) => [mark.label, mark.title ?? ''],
+    );
+    expect(labels.join(' ')).not.toMatch(/P1P1|M1M1|LOYALTY/u);
   });
 });
 

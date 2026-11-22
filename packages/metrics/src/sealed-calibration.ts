@@ -276,7 +276,7 @@ const GameEvidenceSchema = z
     sealedSeats: z.tuple([sealedSeat, sealedSeat]),
     startingPlayer: gameSeat,
     winnerSealedSeat: sealedSeat.nullable(),
-    reason: z.enum(['lifeZero', 'emptyLibrary', 'concede', 'turnLimit']),
+    reason: z.enum(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']),
     turns: positive,
     decisions: nonnegative,
     trajectoryFingerprint: z.string().min(1).max(MAX_TRAJECTORY_LENGTH),

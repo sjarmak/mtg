@@ -36,11 +36,11 @@ import type { GameState } from './state';
  * one step rather than looping until the decision itself changes kind.
  */
 export function lastDeclarationOption(decision: Decision): Action {
-  const option = decision.options[decision.options.length - 1];
-  if (option === undefined) {
-    throw new Error(`driveDeclaration: ${decision.kind} enumerated no options`);
+  for (let index = decision.options.length - 1; index >= 0; index -= 1) {
+    const option = decision.options[index];
+    if (option !== undefined && option.type !== 'concede') return option;
   }
-  return option;
+  throw new Error(`driveDeclaration: ${decision.kind} enumerated no options`);
 }
 
 /**

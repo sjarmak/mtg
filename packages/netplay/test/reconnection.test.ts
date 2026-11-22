@@ -48,7 +48,7 @@ function play(live: Table, steps: number): void {
     const owing = live.snapshotFor(owed);
     live.apply(owed, {
       kind: 'choose',
-      index: (owing.pending?.options.length ?? 1) - 1,
+      index: owing.pending?.options.findLastIndex((option) => option.type !== 'concede') ?? 0,
       at: owing.decisions,
     });
   }

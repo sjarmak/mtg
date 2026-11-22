@@ -29,7 +29,7 @@ describe('bounded reference keyword export', () => {
     expect(result.value.lines).toEqual(
       expect.arrayContaining([
         'K:Defender',
-        'K:Swampwalk',
+        'K:Landwalk:Swamp',
         'K:Hexproof',
         'K:Indestructible',
         'K:Protection from black',
@@ -112,7 +112,7 @@ describe('bounded reference keyword export', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.lines).toContain(
-      'A:AB$ Regenerate | Cost$ G | SpellDescription$ {G}: Regenerate this creature.',
+      'A:AB$ Regenerate | Cost$ G | SpellDescription$ Regenerate this creature.',
     );
   });
 });

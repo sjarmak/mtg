@@ -153,6 +153,59 @@ function boardMarkup(state: GameState): string {
 }
 
 describe('an attacker is drawn in the seam rather than in its row', () => {
+  function attackersOn(count: number): {
+    readonly declared: GameState;
+    readonly raiders: readonly ObjectId[];
+  } {
+    const state = scenario({
+      battlefield: Array.from({ length: count }, (_unused, index) => ({
+        card: index < 2 ? RAIDER : { ...RAIDER, id: `${RAIDER.id}-${String(index)}` },
+        controller: 0 as PlayerId,
+        summoningSick: false,
+      })),
+      step: 'declareAttackers',
+      active: 0,
+      turn: 4,
+    }).state;
+    const raiders = [...state.battlefield];
+    return {
+      raiders,
+      declared: {
+        ...state,
+        combat: {
+          ...state.combat,
+          attacks: raiders.map((oid) => ({ oid, defender: 1 as PlayerId })),
+        },
+      },
+    };
+  }
+
+  it('keeps duplicate attackers individually visible while the seam has nine places', () => {
+    const { declared, raiders } = attackersOn(9);
+    render(h(Board, boardPosition(declared, VIEWER, NAMES)));
+    const band = nodeOf(bodyNode().querySelector(`[aria-label='${COMBAT_ZONE_LABEL}']`), 'the band');
+
+    expect(band.querySelectorAll('[data-permanent-key]')).toHaveLength(9);
+    expect(screen.queryByRole('button', { name: /permanents, collapsed/ })).toBeNull();
+    for (const oid of raiders) expect(band.querySelector(`[data-permanent-key='${oid}']`)).not.toBeNull();
+  });
+
+  it('piles the matching pair when the seam reaches ten places and expands their exact objects', () => {
+    const { declared, raiders } = attackersOn(10);
+
+    render(h(Board, boardPosition(declared, VIEWER, NAMES)));
+    const band = nodeOf(bodyNode().querySelector(`[aria-label='${COMBAT_ZONE_LABEL}']`), 'the band');
+    const opener = screen.getByRole('button', {
+      name: `2 ${RAIDER.name} permanents, collapsed; expand to choose one`,
+    });
+    expect(band.querySelectorAll('[data-permanent-key]')).toHaveLength(9);
+
+    fireEvent.click(opener);
+
+    expect(band.querySelectorAll('[data-permanent-key]')).toHaveLength(10);
+    for (const oid of raiders) expect(band.querySelector(`[data-permanent-key='${oid}']`)).not.toBeNull();
+  });
+
   it('leaves the row it came from and enters the band, with its seat named on it', () => {
     const state = attacking(false);
     const raider = oidOf(state, RAIDER.name, 0);
@@ -201,12 +254,69 @@ describe('what a screen reader gets when the drawing took over', () => {
   it('names what is blocking it, on the attacker and on the blocker', () => {
     render(h(Board, boardPosition(attacking(true), VIEWER, NAMES)));
     expect(screen.getByLabelText(`Attacking Bot, blocked by Bot's ${DRAKE.name}.`)).toBeTruthy();
-    // The blocker did not move — CR 509.1a makes a block an assignment to one
-    // attacker, so a blocker in a shared band without its attacker beside it
-    // would say less than this does — so it keeps a visible badge, and the badge
-    // gained the only question worth asking of it.
+    // The blocker moved into the seam beside its attacker (below), and the seam
+    // holds both seats' cards in one row, so it keeps a visible badge: that is
+    // what says which card in the tray is the one that answered.
     expect(screen.getByText('BLK')).toBeTruthy();
     expect(screen.getByLabelText(`Blocking your ${RAIDER.name}.`)).toBeTruthy();
+  });
+
+  /**
+   * `mtg-31b0r`: a block the engine had taken left the blocker in its row, so
+   * which blocker answered which attacker was worked out from two rows and a
+   * badge, and the seat that had not staged anything never saw a pairing drawn
+   * at all. The declared block now takes the same tray a staged one does.
+   */
+  it('pairs a declared blocker with its attacker in the seam, from either seat', () => {
+    for (const viewer of [0, 1] as const) {
+      cleanup();
+      const state = attacking(true);
+      const raider = oidOf(state, RAIDER.name, 0);
+      const drake = oidOf(state, DRAKE.name, 1);
+      render(h(Board, boardPosition(state, viewer, NAMES)));
+
+      const tray = nodeOf(
+        bodyNode().querySelector('.mtg-combat__pair'),
+        `a pair tray for seat ${String(viewer)}`,
+      );
+      expect(tray.getAttribute('data-attacker')).toBe(raider);
+      expect(tray.getAttribute('aria-label')).toBe(`${RAIDER.name}, blocked by ${DRAKE.name}`);
+      const entries = [...tray.querySelectorAll('.mtg-combat__entry')];
+      expect(entries.map((entry) => entry.getAttribute('data-state'))).toEqual(['declared', 'declared']);
+      expect(entries.map((entry) => entry.getAttribute('data-blocks'))).toEqual([null, raider]);
+      expect(entries.map((entry) => entry.getAttribute('data-seat'))).toEqual(
+        viewer === 0 ? ['you', 'opponent'] : ['opponent', 'you'],
+      );
+      // The blocker left its row for the seam: one node on the table carries
+      // its key, and it is inside the tray.
+      expect(bodyNode().querySelectorAll(`[data-permanent-key='${drake}']`)).toHaveLength(1);
+      expect(tray.querySelector(`[data-permanent-key='${drake}']`)).not.toBeNull();
+    }
+  });
+
+  it('names every attacker blocked by one unlimited blocker', () => {
+    const state = combat();
+    const raider = oidOf(state, RAIDER.name, 0);
+    const guardian = oidOf(state, GUARDIAN.name, 0);
+    const drake = oidOf(state, DRAKE.name, 1);
+    const blocked: GameState = {
+      ...state,
+      combat: {
+        ...state.combat,
+        attacks: [
+          { oid: raider, defender: 1 },
+          { oid: guardian, defender: 1 },
+        ],
+        blocks: [
+          { attacker: raider, blockers: [drake] },
+          { attacker: guardian, blockers: [drake] },
+        ],
+      },
+    };
+
+    render(h(Board, boardPosition(blocked, VIEWER, NAMES)));
+
+    expect(screen.getByLabelText(`Blocking your ${RAIDER.name}, your ${GUARDIAN.name}.`)).toBeTruthy();
   });
 
   it('draws no derived-size badge and still says both numbers', () => {

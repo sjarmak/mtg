@@ -24,9 +24,16 @@ export type {
   LandPolicyConfig,
   MulliganPolicyConfig,
   RacePolicyConfig,
+  StateEvalConfig,
   TargetPolicyConfig,
 } from './config';
-export { DEFAULT_GREEDY_CONFIG, DEFAULT_KEYWORD_VALUE, DEFAULT_RACE_CONFIG, greedyConfig } from './config';
+export {
+  DEFAULT_GREEDY_CONFIG,
+  DEFAULT_KEYWORD_VALUE,
+  DEFAULT_RACE_CONFIG,
+  DEFAULT_STATE_EVAL_CONFIG,
+  greedyConfig,
+} from './config';
 
 export type { CombatExchange } from './evaluate';
 export {
@@ -74,10 +81,58 @@ export { costPayable, landSourcesOf, readCastability } from './policies/castabil
 export { answerOptionalTrigger, chooseTriggerTargets } from './policies/trigger';
 
 export { decideGreedy, greedyBot } from './greedy-bot';
+export type { LearnedModel, LearnedModelArtifact, LearnedModelPayload } from './learned-evaluator';
+export type { LearnedDatasetProjection, LearnedExample } from './learned-dataset';
+export { learnedExamplesFromEpisode, learnedPreferenceExamplesFromEpisode } from './learned-dataset';
+export type { LearnedBranchDatasetOptions, LearnedBranchDatasetProjection } from './learned-branch-dataset';
+export { centeredBranchAdvantages, learnedBranchExamplesFromGame } from './learned-branch-dataset';
+export {
+  createLearnedModel,
+  encodeLearnedCandidate,
+  LEARNED_FEATURE_SCHEMA,
+  learnedBot,
+  learnedModelSha256,
+} from './learned-evaluator';
+export type { LearnedFeatures, SparseLearnedFeatures } from './learned-features';
+export { learnedFeatureSize, sparsifyLearnedFeatures } from './learned-features';
+export type { LearnedFineTuneConfig, LearnedTrainingConfig } from './learned-training';
+export { fineTuneLearnedModel, trainLearnedModel, trainLearnedRankingModel } from './learned-training';
+export type {
+  AdvantageCalibration,
+  AdvantageCalibrationSample,
+  LearnedAdvantagePolicyArtifact,
+  LearnedAdvantagePolicyPayload,
+} from './learned-advantage-policy';
+export {
+  calibrateAdvantageMargin,
+  learnedAdvantageBot,
+  learnedAdvantagePolicySha256,
+} from './learned-advantage-policy';
+export { evaluateState } from './evaluate-state';
+export type { SearchBotConfig } from './search-bot';
+export { DEFAULT_SEARCH_CONFIG, decideSearch, quiesce, searchBot } from './search-bot';
+export type { RolloutAgentView, RolloutBotConfig, RolloutKnowledge, RolloutRequest } from './rollout-bot';
+export {
+  DEFAULT_ROLLOUT_CONFIG,
+  decideRollout,
+  rolloutBot,
+  withPrivilegedRolloutPreview,
+  withRolloutPreview,
+} from './rollout-bot';
 export { randomBot } from './random-bot';
 
+export type { NativeGameplayDecisionEvidence, ObservationRetention } from './native-evidence';
+export { nativeGameplayDecision, nativeGameplayFailedDecision } from './native-evidence';
+export type { NativeGameplayEvidenceRequest, NativeGameplayFailureStatus } from './native-game-evidence';
+export {
+  completedNativeGameplayEvidence,
+  failedNativeGameplayEvidence,
+  NativeGameplayEvidenceError,
+  nativeGameplayEvidenceIdentity,
+} from './native-game-evidence';
+
 export type { AgentFactory, BotKind, BotSpec } from './bots';
-export { createBot, greedySpec, randomSpec } from './bots';
+export { createBot, greedySpec, learnedSpec, randomSpec, rolloutSpec, searchSpec } from './bots';
 
 export { agentSeed, gameSeed, startingPlayerFor } from './seeds';
 
@@ -98,14 +153,22 @@ export { playIndex } from './play-index';
 export type { MatchAggregate } from './aggregate';
 export { aggregateFingerprint, aggregateOutcomes, decidedWinRate, END_REASONS } from './aggregate';
 
-export type { ActivationArm, ActivationArmCensus, ActivationCensus } from './activation-census';
+export type {
+  ActivationArm,
+  ActivationArmCensus,
+  ActivationCensus,
+  ActivationPartition,
+} from './activation-census';
 export {
   ACTIVATION_ARMS,
   activationArm,
+  activationRow,
   censusGameActivations,
   emptyActivationCensus,
   hostsPerInstance,
+  isSacrificeOutlet,
   mergeActivationCensus,
+  outletFactor,
   sumActivationCensus,
   tapFactor,
   usesPerInstance,
@@ -150,6 +213,8 @@ export {
 } from './round-robin';
 
 export type {
+  CardGameStats,
+  CardStatPrefix,
   GameMetadata,
   ReplayRow,
   ReplayValue,
@@ -161,6 +226,10 @@ export type {
   TurnRecord,
 } from './log/schema';
 export {
+  CARD_STAT_PREFIXES,
+  CardGameStatsSchema,
+  cardColumn,
+  emptyCardGameStats,
   emptySideTotals,
   emptySideTurnStats,
   eotColumn,
@@ -193,5 +262,6 @@ export {
   FIXTURE_DECK_GW,
   FIXTURE_DECK_RW,
   FIXTURE_DECK_UB,
+  FIXTURE_FORMAT_POOL,
   fixtureDeck,
 } from './fixtures';

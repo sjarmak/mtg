@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "isd",
+  "formatSha256": "4d62858d8e1a1541af1eb82d3cdf1aa96e81f5c62742b3aa1d580f6239ddb258",
+  "sourceSha256": "c2a0df430a873b29bd52451415a47d1a4e7475d1f3f46603a4b7668e42532f80",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "c2a0df430a873b29bd52451415a47d1a4e7475d1f3f46603a4b7668e42532f80",
+    "recipe.json": "06562ebc7a8e1a535b1a42e893171b2f8ff6ebfef87633fd31f70c9da51e9d61",
+    "isd-printed-catalog-v1.json": "ebfcff180f8bc8496a4b8bd1189a953daea8ecf632f38515e80e688924f7a03a",
+    "isd-limited-format-v1.json": "a01da6ff0945640ebe595742bb3330d67ad7173c437127601d255a21952e0b4d"
+  },
+  "catalogs": [
+    {
+      "code": "ISD",
+      "cards": 264,
+      "contentSha256": "95fe8d23da0e04b7fe3fd67551560f8fad1c6e36f1cc33bd8fb881e74d04a4e0"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 964.1983100000001,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 254,
+    "printings": 264
+  }
+}

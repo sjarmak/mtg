@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "akh-hou",
+  "archetypes": [
+    {
+      "id": "white-black-zombies",
+      "name": "White-Black Zombies",
+      "colors": ["W", "B"],
+      "signpost": {
+        "name": "Unraveling Mummy",
+        "physicalId": "hou-printed-v1:0147:fe3802f3-feb3-4dcd-a5ba-f493baf3d447"
+      },
+      "plan": "Build around Unraveling Mummy: Curve out with Zombies, use embalm or recursion for resilience, and turn Zombie combat into incremental life loss."
+    },
+    {
+      "id": "blue-red-spells",
+      "name": "Blue-Red Spells",
+      "colors": ["U", "R"],
+      "signpost": {
+        "name": "Bloodwater Entity",
+        "physicalId": "hou-printed-v1:0138:474d0a04-b640-4d1d-b538-2d946c1ff913"
+      },
+      "plan": "Build around Bloodwater Entity: Cast cheap instants and sorceries to trigger spell payoffs while bounce and burn keep attackers connecting."
+    },
+    {
+      "id": "black-green-1-1-counters",
+      "name": "Black-Green -1/-1 Counters",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Obelisk Spider",
+        "physicalId": "hou-printed-v1:0141:ae054604-0d77-45d0-b17b-55a83fb18e39"
+      },
+      "plan": "Build around Obelisk Spider: Place -1/-1 counters where they create profitable trades, then convert those counters into drain and card advantage."
+    },
+    {
+      "id": "red-white-exert",
+      "name": "Red-White Exert",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Resolute Survivors",
+        "physicalId": "hou-printed-v1:0142:713f469e-58c3-4db4-aa7a-77126bda13f2"
+      },
+      "plan": "Build around Resolute Survivors: Attack early and exert aggressively, using untap effects and exert rewards to offset the skipped untap step."
+    },
+    {
+      "id": "green-blue-ramp",
+      "name": "Green-Blue Ramp",
+      "colors": ["U", "G"],
+      "signpost": {
+        "name": "River Hoopoe",
+        "physicalId": "hou-printed-v1:0143:585ec4c2-aae2-403e-af32-3324122c472a"
+      },
+      "plan": "Build around River Hoopoe: Accelerate and fix mana into large threats, then use late-game card draw to keep presenting finishers."
+    }
+  ]
+}

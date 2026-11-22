@@ -65,19 +65,19 @@ function lineStartingWith(card: Card, prefix: string): string {
 describe('a permanent that taps for mana', () => {
   it('writes the activated row Llanowar Elves writes', () => {
     expect(lineStartingWith(accelerant('Thicket Mystic', ['G'], 1), 'A:')).toBe(
-      'A:AB$ Mana | Cost$ T | Produced$ G | SpellDescription$ {T}: Add {G}.',
+      'A:AB$ Mana | Cost$ T | Produced$ G | SpellDescription$ Add {G}.',
     );
   });
 
   it('omits the quantity at one and states it above one', () => {
     expect(lineStartingWith(accelerant('Sun Ring', ['C'], 2), 'A:')).toBe(
-      'A:AB$ Mana | Cost$ T | Produced$ C | Amount$ 2 | SpellDescription$ {T}: Add {C}{C}.',
+      'A:AB$ Mana | Cost$ T | Produced$ C | Amount$ 2 | SpellDescription$ Add {C}{C}.',
     );
   });
 
   it('spells a color choice as a Combo rather than as a sentence', () => {
     expect(lineStartingWith(accelerant('Prism Warden', ['W', 'U'], 1), 'A:')).toBe(
-      'A:AB$ Mana | Cost$ T | Produced$ Combo W U | SpellDescription$ {T}: Add {W} or {U}.',
+      'A:AB$ Mana | Cost$ T | Produced$ Combo W U | SpellDescription$ Add {W} or {U}.',
     );
   });
 
@@ -101,7 +101,7 @@ describe('a permanent that taps for mana', () => {
       ],
     } as CardInput);
     expect(lineStartingWith(keeper, 'A:')).toBe(
-      'A:AB$ Mana | Cost$ 2 T | Produced$ B | Amount$ 2 | SpellDescription$ {2}, {T}: Add {B}{B}.',
+      'A:AB$ Mana | Cost$ 2 T | Produced$ B | Amount$ 2 | SpellDescription$ Add {B}{B}.',
     );
   });
 });

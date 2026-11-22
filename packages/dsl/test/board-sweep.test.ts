@@ -299,17 +299,19 @@ describe('the three rules a region scope adds', () => {
    * unscoped destroy could sit on that slot, print "Destroy target creature"
    * with nothing to destroy, and resolve into nothing.
    */
-  it('refuses an unscoped sweeper that chooses nothing either', () => {
+  it('refuses an unscoped object sweeper but admits controller-relative damage', () => {
     expect(codesFor([{ kind: 'destroyPermanent', target: NOWHERE }])).toContain('ILLEGAL_EFFECT_SCOPE');
-    expect(codesFor([{ kind: 'dealDamage', amount: 2, target: NOWHERE }])).toContain('ILLEGAL_EFFECT_SCOPE');
+    expect(codesFor([{ kind: 'dealDamage', amount: 2, target: NOWHERE }])).not.toContain(
+      'ILLEGAL_EFFECT_SCOPE',
+    );
   });
 
   /**
    * `SCOPES_LEGAL_ON` moves by census, not by symmetry. Nothing in M11 or M13
    * taps a region of the board — every printed tapper of the era names a player
    * (Sleep, Frost Breath) and was expressible before this lane — so the row
-   * stays where it was, and the same goes for the two zone moves, which would
-   * have to say what "exile all creatures" means about a hand.
+   * stays where it was. Worldfire is the reviewed exception for exile: its
+   * unfiltered all-permanents scope says exactly what the printed line says.
    */
   it('keeps the region scopes off the rows no printed card asked for', () => {
     expect(
@@ -322,7 +324,7 @@ describe('the three rules a region scope adds', () => {
         },
       ]),
     ).toContain('ILLEGAL_EFFECT_SCOPE');
-    expect(codesFor([{ kind: 'exileTarget', scope: 'allPermanents', target: NOWHERE }])).toContain(
+    expect(codesFor([{ kind: 'exileTarget', scope: 'allPermanents', target: NOWHERE }])).not.toContain(
       'ILLEGAL_EFFECT_SCOPE',
     );
     expect(

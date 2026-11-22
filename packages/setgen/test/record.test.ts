@@ -5,7 +5,8 @@ import { describe, expect, it } from 'vitest';
 import type { LlmTransport, RawRequest, RawResponse } from '@mtg/llm';
 import { createResumableRecorderTransport } from '@mtg/setgen';
 import { runManifestPath } from '@mtg/llm';
-import { buildRunManifest, RUN_MANIFEST_DIR } from '../src/cli';
+import { buildRunManifest, parseArgs, replaySemanticsFor, RUN_MANIFEST_DIR } from '../src/cli';
+import { LEGACY_GENERATION_SEMANTICS_VERSION } from '../src/generation-semantics';
 
 function countingTransport(): LlmTransport & { calls: number } {
   const transport = {
@@ -97,6 +98,7 @@ describe('the manifest a recorded run leaves behind', () => {
     expect(manifest.run).toBe('proving-ground');
     expect(manifest.recordedAt).toBe('2026-08-13T16:00:00.000Z');
     expect(manifest.keys).toStrictEqual(['bbb', 'aaa', 'ccc']);
+    expect(manifest.generator).toStrictEqual({ name: '@mtg/setgen', semanticsVersion: 2 });
   });
 
   it('counts requests as calls and distinct fixtures as keys', () => {
@@ -125,5 +127,22 @@ describe('the manifest a recorded run leaves behind', () => {
       runManifestPath(RUN_MANIFEST_DIR, second.id),
     );
     expect(RUN_MANIFEST_DIR.endsWith(join('fixtures', 'runs'))).toBe(true);
+  });
+});
+
+describe('the standalone replay boundary', () => {
+  it('uses the sole manifest recorded for the default Tideglass brief', () => {
+    const options = parseArgs(['--brief', 'packages/setgen/briefs/tideglass-reach.json']);
+    expect(replaySemanticsFor(options)).toBe(LEGACY_GENERATION_SEMANTICS_VERSION);
+  });
+
+  it('does not apply an unrelated manifest to a custom fixture corpus', () => {
+    const options = parseArgs([
+      '--brief',
+      'packages/setgen/briefs/tideglass-reach.json',
+      '--fixtures',
+      'other-fixtures',
+    ]);
+    expect(replaySemanticsFor(options)).toBeUndefined();
   });
 });

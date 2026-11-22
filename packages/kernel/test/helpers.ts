@@ -87,6 +87,16 @@ export function playCombat(start: ReduceResult, script: CombatScript): ReduceRes
             decision.blocks.map((block) => ({ attacker: block.attacker, blockers: block.blockers })),
         });
         break;
+      case 'orderAttackers':
+        current = apply(current, {
+          type: 'orderAttackers',
+          player: decision.player,
+          orders: decision.blocks.map((block) => ({
+            blocker: block.blocker,
+            attackers: block.attackers,
+          })),
+        });
+        break;
       case 'priority':
         if (current.state.turn.step === 'endCombat') return current;
         current = apply(current, { type: 'passPriority', player: decision.player });

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-controller-contract-receipt",
+  "id": "combat-v1",
+  "engineRuntime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "protocolVersion": 2
+  },
+  "decisionFamilies": [
+    "combat"
+  ],
+  "sourceRegions": [
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        public void declareAttackers(Player attackingPlayer, Combat combat) {",
+      "endMarker": "        public List<Card> exertAttackers(List<Card> attackers) {",
+      "sha256": "e728ed9a8ecf298e5df40b75ec309142972348f087adf7ce5a6c1ae3ff3d1c90"
+    }
+  ],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "scenarioReceiptIds": [
+        "ancient-crab-local-controller-profile-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "scenarioReceiptIds": [
+        "ancient-crab-engine-controller-profile-v1"
+      ]
+    }
+  ],
+  "evidence": {
+    "scenarioReceipts": [
+      {
+        "receiptId": "ancient-crab-engine-controller-profile-v1",
+        "file": {
+          "path": "scenarios/ancient-crab-engine-controller-profile-v1.json",
+          "sha256": "094f27639284d9af69aa9f74ff63a37b33a225269f21a5c760cf77413393a29d"
+        }
+      },
+      {
+        "receiptId": "ancient-crab-local-controller-profile-v1",
+        "file": {
+          "path": "scenarios/ancient-crab-local-controller-profile-v1.json",
+          "sha256": "73ed70216dd16d48eca0655cdf3ff8f315304b8dbfc3201b5a677507e41231dc"
+        }
+      }
+    ]
+  }
+}

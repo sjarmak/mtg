@@ -31,7 +31,7 @@ import {
   sortColors,
   typeLineParts,
 } from '@mtg/dsl';
-import type { CardRating } from './rating';
+import type { RatedCard } from './rating';
 
 /**
  * A Draftmancer custom card. The snake-case field names are the format's, not
@@ -61,7 +61,7 @@ function draftmancerManaCost(card: Card): string {
 }
 
 /** Builds the entry for one already-rated card. */
-export function toCustomCard(rated: CardRating): DraftmancerCustomCard {
+export function toCustomCard(rated: RatedCard): DraftmancerCustomCard {
   const { card } = rated;
   const subtypes = typeLineParts(card).subtypes;
   const oracleText = renderOracleText(card);
@@ -80,7 +80,14 @@ export function toCustomCard(rated: CardRating): DraftmancerCustomCard {
   };
 }
 
-/** Builds the whole `[CustomCards]` array, in the order it was rated. */
-export function toCustomCards(ratings: readonly CardRating[]): readonly DraftmancerCustomCard[] {
+/**
+ * Builds the whole `[CustomCards]` array, in the order it was rated.
+ *
+ * Draftmancer's file format has one numeric `rating` field, so this is where
+ * a rating's `source` — evaluator or play data — is deliberately dropped. The
+ * flattening is intentional, not an oversight: SimpleBot only ever reads the
+ * one number.
+ */
+export function toCustomCards(ratings: readonly RatedCard[]): readonly DraftmancerCustomCard[] {
   return ratings.map(toCustomCard);
 }

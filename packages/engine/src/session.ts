@@ -55,6 +55,7 @@ import type { EngineEvent } from './events';
 import type { OpenResult, SubmitResult } from './errors';
 import type { MoveId } from './decision';
 import type { TableView } from './projection';
+import type { PlayInteraction } from './play';
 import type { SeatProjection } from './seats';
 import type { MatchResult, SeatId, SessionSpec } from './table';
 import type { BackendCapabilities, SessionRecord, TranscriptFrame } from './determinism';
@@ -73,6 +74,14 @@ export interface SessionBase {
   readonly events: readonly EngineEvent[];
   /** Non-null exactly when `status` is `awaiting`. */
   readonly decision: PendingDecision | null;
+  /**
+   * Backend-declared roles used by the shared play controls.
+   *
+   * Absent when the backend exposes only the neutral table projection. A
+   * surface must treat absence as unsupported rather than interpret opaque
+   * decision or turn strings itself.
+   */
+  readonly play?: PlayInteraction | undefined;
   /**
    * The same three values again, per seat, with what that seat may not identify
    * removed rather than merely undrawn.
@@ -139,6 +148,16 @@ export interface BackendBase {
    * so the answer is a list of names and never a boolean.
    */
   supports(table: SessionSpec): Promise<readonly string[]>;
+  /**
+   * Releases resources owned by this backend instance, when it owns any.
+   *
+   * The transition is terminal and idempotent. Calling it stops later opens
+   * before they touch backend resources, waits for opens already begun and
+   * their live sessions to close, then releases instance-scoped resources.
+   * Resource-free backends omit it. A resource-owning adapter documents its
+   * conservative fallback when its owner never calls shutdown.
+   */
+  shutdown?(): Promise<void>;
 }
 
 export interface RecordedBackend extends BackendBase {

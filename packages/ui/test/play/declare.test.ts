@@ -34,12 +34,14 @@ import {
   DEFAULT_ENUMERATION_CAP,
   driveDeclaration,
   humanSeat,
+  ownedDecision,
   pendingDecision,
   reduce,
   scenario,
 } from '@mtg/kernel';
 import { LEGAL_MOVES_LABEL, PlayView } from '../../src/routes/play/PlayView';
 import {
+  assignedKeys,
   assignmentKey,
   declarationChoice,
   declarationPlan,
@@ -93,6 +95,29 @@ function planeswalker(name: string): Card {
   });
 }
 
+function unlimitedBlocker(name: string): Card {
+  minted += 1;
+  return parseCard({
+    kind: 'creature',
+    id: `slc-declare-${String(minted)}`,
+    name,
+    rarity: 'uncommon',
+    set: { code: 'SLC', collectorNumber: (minted % 900) + 1 },
+    manaCost: { generic: 3 },
+    colors: [],
+    power: 1,
+    toughness: 4,
+    abilities: [
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'canBlockAnyNumber' },
+      },
+    ],
+  });
+}
+
 /**
  * A board with `attackers` creatures attacking and `blockers` untapped to answer
  * them, parked on the blocker declaration.
@@ -132,7 +157,7 @@ function blockingState(attackers: readonly Card[], blockers: readonly Card[]): G
 }
 
 function sessionOn(state: GameState, cap = DEFAULT_ENUMERATION_CAP): GameSession {
-  const pending = pendingDecision(state, cap);
+  const pending = ownedDecision(state, cap);
   if (pending === null) throw new Error('the board left nobody to ask');
   return {
     seats: [humanSeat(SEATS[0]), humanSeat(SEATS[1])],
@@ -148,7 +173,7 @@ function sessionOn(state: GameState, cap = DEFAULT_ENUMERATION_CAP): GameSession
 }
 
 function decisionOn(state: GameState, cap = DEFAULT_ENUMERATION_CAP): Decision {
-  const decision = pendingDecision(state, cap);
+  const decision = ownedDecision(state, cap);
   if (decision === null) throw new Error('the board left nobody to ask');
   return decision;
 }
@@ -207,7 +232,7 @@ describe('the declaration model', () => {
     const space = blockSpace(1, 8);
     const decision = decisionOn(state, space);
     expect(decision.kind).toBe('declareBlockers');
-    expect(decision.options.length).toBe(space);
+    expect(decision.options.filter((option) => option.type === 'declareBlockers')).toHaveLength(space);
 
     const plan = declarationPlan(state, SEATS, decision);
     if (plan === null) throw new Error('the blocker decision produced no plan');
@@ -219,7 +244,7 @@ describe('the declaration model', () => {
     render(h(PlayView, { session: sessionOn(state, space), viewer: 1, names: SEATS, onChoose: vi.fn() }));
     // The confirm and the eight rows. Linear in the board where the flat list
     // was exponential in it, which is the whole of the bead.
-    expect(within(rail()).getAllByRole('button')).toHaveLength(9);
+    expect(within(rail()).getAllByRole('button')).toHaveLength(10);
   });
 
   it('leaves every other decision listing one button per option', () => {
@@ -259,24 +284,26 @@ describe('the declaration model', () => {
  * so what this walks is the surface rather than the model under it.
  */
 function drive(assignment: Assignment, names: ReadonlyMap<string, string>): void {
-  for (const [oid, attacker] of assignment) {
+  for (const [oid] of assignment) {
     const creatureName = names.get(oid);
-    const attackerName = names.get(attacker);
-    if (creatureName === undefined || attackerName === undefined) {
-      throw new Error('the assignment named an object the board does not hold');
+    if (creatureName === undefined) throw new Error('the assignment named an object the board does not hold');
+    for (const attacker of assignedKeys(assignment, oid)) {
+      const attackerName = names.get(attacker);
+      if (attackerName === undefined)
+        throw new Error('the assignment named an attacker the board does not hold');
+      const row = rowsByName('declareBlockers').get(creatureName);
+      if (row === undefined) throw new Error(`no roster row for ${creatureName}`);
+      fireEvent.click(row as Parameters<typeof fireEvent.click>[0]);
+      // Two attackers, so every creature is asked which one it blocks.
+      const answers = screen.getByRole('group', {
+        name: declarationWords('declareBlockers').ask(creatureName),
+      });
+      const answer = within(answers)
+        .getAllByRole('button')
+        .find((button) => accessibleName(button).includes(attackerName));
+      if (answer === undefined) throw new Error(`no answer naming ${attackerName}`);
+      fireEvent.click(answer);
     }
-    const row = rowsByName('declareBlockers').get(creatureName);
-    if (row === undefined) throw new Error(`no roster row for ${creatureName}`);
-    fireEvent.click(row as Parameters<typeof fireEvent.click>[0]);
-    // Two attackers, so every creature is asked which one it blocks.
-    const answers = screen.getByRole('group', {
-      name: declarationWords('declareBlockers').ask(creatureName),
-    });
-    const answer = within(answers)
-      .getAllByRole('button')
-      .find((button) => accessibleName(button).includes(attackerName));
-    if (answer === undefined) throw new Error(`no answer naming ${attackerName}`);
-    fireEvent.click(answer);
   }
 }
 
@@ -380,7 +407,7 @@ describe('the completeness walk', () => {
     expect(space).toBe(9);
     const decision = decisionOn(state, space);
     if (decision.kind !== 'declareBlockers') throw new Error('the board is not declaring blockers');
-    expect(decision.options).toHaveLength(space);
+    expect(decision.options.filter((option) => option.type === 'declareBlockers')).toHaveLength(space);
 
     const names = new Map<string, string>();
     for (const oid of state.battlefield) {
@@ -397,7 +424,7 @@ describe('the completeness walk', () => {
 
     const submitted = new Map<string, number>();
     for (const [index, option] of decision.options.entries()) {
-      if (option.type !== 'declareBlockers') throw new Error('a non-declaration was enumerated');
+      if (option.type !== 'declareBlockers') continue;
       const assignment: Assignment = new Map(option.blocks.map((block) => [block.blocker, block.attacker]));
       const clear = screen.queryByRole('button', { name: DECLARE_CLEAR_LABEL });
       if (clear !== null) fireEvent.click(clear);
@@ -429,14 +456,14 @@ describe('the completeness walk', () => {
     const space = blockSpace(1, 8);
     const decision = decisionOn(state, space);
     if (decision.kind !== 'declareBlockers') throw new Error('the board is not declaring blockers');
-    expect(decision.options).toHaveLength(space);
+    expect(decision.options.filter((option) => option.type === 'declareBlockers')).toHaveLength(space);
 
     const plan = declarationPlan(state, SEATS, decision);
     if (plan === null) throw new Error('the blocker decision produced no plan');
 
     const reached = new Set<number>();
     for (const [index, option] of decision.options.entries()) {
-      if (option.type !== 'declareBlockers') throw new Error('a non-declaration was enumerated');
+      if (option.type !== 'declareBlockers') continue;
       // Assembled the way the panel assembles it: every creature starts idle and
       // is pressed once if the declaration wants it, through the one function
       // that decides what a press means.
@@ -495,7 +522,7 @@ describe('an assignment the rules do not allow yet', () => {
     const state = blockingState([MENACING], [creature('Coil Sentry'), creature('Pier Watchman')]);
     const decision = decisionOn(state);
     // No blocks, or both of them. One blocker alone is not on the list.
-    expect(decision.options).toHaveLength(2);
+    expect(decision.options.filter((option) => option.type === 'declareBlockers')).toHaveLength(2);
 
     const onChoose = vi.fn();
     render(h(PlayView, { session: sessionOn(state), viewer: 1, names: SEATS, onChoose }));
@@ -536,12 +563,13 @@ describe('the attack declaration', () => {
     }).state;
     const decision = decisionOn(state);
     expect(decision.kind).toBe('declareAttackers');
-    expect(decision.options).toHaveLength(4);
+    expect(decision.options.filter((option) => option.type === 'declareAttackers')).toHaveLength(4);
 
     const onChoose = vi.fn();
     render(h(PlayView, { session: sessionOn(state), viewer: 0, names: SEATS, onChoose }));
     // The confirm, and one row per creature.
-    expect(within(rail()).getAllByRole('button')).toHaveLength(3);
+    expect(within(rail()).getAllByRole('button')).toHaveLength(4);
+    expect(within(rail()).getByRole('button', { name: 'Concede' })).not.toBeNull();
     // The empty declaration is what the confirm submits before anything is
     // pressed, and it is first: `declare-panel.ts` argues that order, and
     // `play.test.ts` drives a whole game by pressing the first button.
@@ -645,7 +673,7 @@ describe('a board bigger than the enumeration cap', () => {
     // creature's answers (decline plus the three attackers) and still mentions
     // nothing about the other seven, which is what the roster has to survive.
     expect(asksInSteps(decision)).toBe(true);
-    expect(decision.options).toHaveLength(4);
+    expect(decision.options.filter((option) => option.type === 'declareBlockers')).toHaveLength(4);
 
     const mentioned = new Set<string>();
     for (const option of decision.options) {
@@ -664,7 +692,7 @@ describe('a board bigger than the enumeration cap', () => {
     render(h(PlayView, { session: sessionOn(state), viewer: 1, names: SEATS, onChoose: vi.fn() }));
     // The confirm and eight rows, on a board whose flat list was 512 buttons
     // and whose whole space is 65,536.
-    expect(within(rail()).getAllByRole('button')).toHaveLength(9);
+    expect(within(rail()).getAllByRole('button')).toHaveLength(10);
   });
 
   it('submits a block the enumeration never listed, as the declaration itself', () => {
@@ -735,5 +763,87 @@ describe('a board bigger than the enumeration cap', () => {
     expect(applied.state.combat.blocks).toHaveLength(1);
     expect(applied.state.combat.blocks[0]?.blockers).toHaveLength(8);
     expect(applied.choices).toEqual([submitted]);
+  });
+});
+
+describe('an unlimited-capacity blocker', () => {
+  it('submits a complete declaration instead of one capped-enumeration step', () => {
+    const state = blockingState(
+      Array.from({ length: 10 }, (_unused, at) => creature(`Wide Raider ${String(at + 1)}`)),
+      [unlimitedBlocker('Wide Guard')],
+    );
+    const decision = decisionOn(state);
+    if (decision.kind !== 'declareBlockers') throw new Error('the board is not declaring blockers');
+    expect(decision.options.filter((option) => option.type === 'declareBlockers')).toHaveLength(2);
+    expect(
+      decision.options
+        .filter((option) => option.type !== 'concede')
+        .every((option) => option.type === 'declareBlockers' && option.settled === 0),
+    ).toBe(true);
+
+    const plan = declarationPlan(state, SEATS, decision);
+    if (plan === null) throw new Error('the blocker decision produced no plan');
+    const subject = plan.subjects[0];
+    const first = subject?.candidates[0];
+    if (subject === undefined || first === undefined)
+      throw new Error('the unlimited blocker has no first answer');
+    const assignment = withAssignment(new Map(), subject.oid, first.key, subject.multiple);
+
+    const choice = declarationChoice(state, plan, assignment);
+    expect(choice).toEqual({
+      type: 'declareBlockers',
+      player: 1,
+      blocks: [{ blocker: subject.oid, attacker: first.key }],
+    });
+    if (choice === null) throw new Error('the complete declaration has no choice');
+    const applied = choose(sessionOn(state), choice);
+    expect(applied.state.combat.blocksSettled).toBeUndefined();
+    expect(applied.pending?.kind).not.toBe('declareBlockers');
+  });
+
+  it('stages and submits assignments to several attackers from one roster row', () => {
+    const state = blockingState(
+      [creature('North Raider'), creature('South Raider')],
+      [unlimitedBlocker('Wide Guard')],
+    );
+    const decision = decisionOn(state);
+    if (decision.kind !== 'declareBlockers') throw new Error('the board is not declaring blockers');
+    const plan = declarationPlan(state, SEATS, decision);
+    if (plan === null) throw new Error('the blocker decision produced no plan');
+    const subject = plan.subjects[0];
+    if (subject === undefined) throw new Error('the unlimited blocker has no roster row');
+    expect(subject.multiple).toBe(true);
+
+    let assignment: Assignment = new Map();
+    for (const candidate of subject.candidates) {
+      assignment = withAssignment(assignment, subject.oid, candidate.key, subject.multiple);
+    }
+    const choice = declarationChoice(state, plan, assignment);
+    expect(choice).not.toBeNull();
+    const action = typeof choice === 'number' ? decision.options[choice] : choice;
+    expect(action).toEqual({
+      type: 'declareBlockers',
+      player: 1,
+      blocks: subject.candidates.map((candidate) => ({
+        blocker: subject.oid,
+        attacker: candidate.key,
+      })),
+    });
+
+    const onChoose = vi.fn();
+    render(h(PlayView, { session: sessionOn(state), viewer: 1, names: SEATS, onChoose }));
+    for (const candidate of subject.candidates) {
+      const row = rowsByName('declareBlockers').get(subject.name);
+      if (row === undefined) throw new Error('the unlimited blocker row disappeared');
+      fireEvent.click(row as Parameters<typeof fireEvent.click>[0]);
+      const answers = screen.getByRole('group', {
+        name: declarationWords('declareBlockers').ask(subject.name),
+      });
+      fireEvent.click(within(answers).getByRole('button', { name: candidate.label }));
+    }
+    const confirm = within(rail()).getAllByRole('button')[0];
+    if (confirm === undefined) throw new Error('the multi-block assignment has no confirm');
+    fireEvent.click(confirm);
+    expect(onChoose).toHaveBeenCalledWith(choice);
   });
 });

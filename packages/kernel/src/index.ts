@@ -15,13 +15,17 @@ export { createRng, nextBelow, nextFloat, nextUint32, shuffle } from './rng';
 
 export type {
   Attack,
+  AttackerOrder,
   AwaitKind,
   Block,
   CombatState,
   CombatDefender,
+  DelayedZoneChange,
+  DelayedCounterPlacement,
   GameConfig,
   GameEndReason,
   GameObject,
+  LinkedExileReference,
   GameResult,
   GameState,
   ManaColor,
@@ -35,6 +39,7 @@ export type {
   Step,
   Target,
   TriggerContext,
+  TurnPlayerRule,
   TurnState,
   ZoneId,
 } from './state';
@@ -52,32 +57,46 @@ export {
 export type { DamageTarget, DestroyReason, GameEvent, GameEventType, LifeChangeReason } from './events';
 export { eventsOfType, serializeEvents } from './events';
 
+export type { CounterRemoval } from './counters';
+export { placeCounters, removeCounters } from './counters';
+
+export type { KernelKeywordImplementation, KeywordExecutionSubsystem } from './keyword-implementation';
+export { KERNEL_KEYWORD_IMPLEMENTATIONS } from './keyword-implementation';
+
 export type {
   Action,
   ActionType,
   AttackDeclaration,
+  AttackerOrdering,
   BlockDeclaration,
   BlockerOrdering,
+  CastingCostChoice,
   DeclarationAction,
 } from './actions';
-export { asDeclaration, IllegalActionError } from './actions';
+export { asDeclaration, IllegalActionError, MAX_CARD_NAME_LENGTH } from './actions';
 
 export type { ReduceResult } from './reduce';
 export { reduce, reduceAll, settle } from './reduce';
+export { spellCardByOid } from './stack-spell';
 
 // CR 301.5 / 702.6 attachment: what an Equipment is attached to, and the
-// continuous effect being attached registers. There is no attachment-aware
-// branch in the layer walk; `attach.ts` says why.
+// layered effects an attachment registers and combat rules read live from the
+// attachment relation. There is no attachment-aware branch in the layer walk;
+// `attach.ts` says why.
 export {
+  attachTo,
   attachmentOf,
+  hasAttachmentModification,
   hasAuraModification,
   illegalAttachments,
+  isLegalAuraEntryHost,
   isLegalAuraHost,
   isLegalHost,
 } from './attach';
 
 export type { BlockCandidates, Decision } from './legal';
-export { asksInSteps, legalActions, pendingDecision, satisfyMustBeBlocked, validateAction } from './legal';
+export { asksInSteps, legalActions, ownedDecision, pendingDecision, validateAction } from './legal';
+export { requiredAttackers, satisfyMustBeBlocked } from './combat-declarations';
 
 export { driveDeclaration, lastDeclarationOption } from './drive-declaration';
 
@@ -91,7 +110,9 @@ export {
   targetChoicesForActivation,
   targetChoicesForEffects,
 } from './target-choices';
+export { countTargetInstances } from './target-count';
 export { satisfiesTargetRestriction } from './target-restrictions';
+export { detainPermanent, isDetained, type DetentionRule } from './detention';
 // The filter half of the same question (mtg-6y4g). Exported beside the
 // restriction because a caller that wants to know whether a target is legal
 // wants both, and `isAttacking`/`isBlocking` come with them because the combat
@@ -132,6 +153,8 @@ export type {
   Layer,
   ObjectFilter,
   PtCount,
+  PtColorScaledModEffect,
+  PtControllerHandScaledModEffect,
   PtDefiningEffect,
   PtModEffect,
   PtSetEffect,
@@ -163,10 +186,15 @@ export type {
 } from './layers';
 export {
   affectedByEffect,
+  abilitiesOf,
+  activatedAbilitiesProhibited,
   characteristicsOf,
+  copiableValuesOf,
   conditionHolds,
   controlledBy,
   controllerOf,
+  currentAbilityAt,
+  currentActivatedAbilityAt,
   deriveLayers,
   derivedCharacteristics,
   effectsApplyingTo,
@@ -184,8 +212,17 @@ export {
   printedCharacteristics,
   selectMatching,
   startingLoyaltyOf,
+  startingDefenseOf,
   toughnessOf,
 } from './layers';
+
+export {
+  canDamageBePrevented,
+  canGraveyardCardsBeTargeted,
+  canPlayerGainLife,
+  canPlayerLoseGame,
+  canPlayerWinGame,
+} from './game-rules';
 
 export { dependencyGraph, orderLayer, timestampOrder } from './dependency';
 
@@ -201,7 +238,7 @@ export { ANY_CARD, graveyardMembers, printedFilter, selectPrinted } from './zone
 // which is otherwise the kernel's business: a policy that wants to know what a
 // sweep would hit has to ask the same function the resolution asks, or it is
 // scoring a different spell.
-export { objectsInEffectScope, scopedGroup } from './effects';
+export { objectsInEffectScope, scopedDamageGroup, scopedGroup } from './effects';
 
 // CR 113 printed abilities, in two shapes that share nothing but the word.
 // A static ability compiles to continuous effects and to nothing else, so it
@@ -218,7 +255,7 @@ export {
   staticEffectsFor,
 } from './abilities';
 export type { PendingTrigger } from './triggers';
-export { collectTriggers, putTriggersOnStack } from './triggers';
+export { attackDeclarationTriggers, collectTriggers, putTriggersOnStack } from './triggers';
 
 // CR 603.3d's targets and CR 603.3b's "you may": the two decisions a triggered
 // ability can owe, derived from the stack rather than recorded on it.
@@ -237,14 +274,16 @@ export {
 // from a triggered ability's controller to whichever player the card names.
 export type { SpellOnStack } from './may-choice';
 export { mayChooser, spellAwaitingMay } from './may-choice';
-export type { TolledSpellOnStack } from './unless-choice';
-export { spellAwaitingUnless, unlessPayer } from './unless-choice';
+export type { TolledStackObject } from './unless-choice';
+export { spellAwaitingUnless, stackAwaitingUnless, stackUnless, unlessPayer } from './unless-choice';
 
 // CR 614/615/616 replacement and prevention effects.
 export type {
   DamageRecipient,
+  DiscardCause,
   ReplaceableEvent,
   ReplaceableEventKind,
+  ReplacementDuration,
   ReplacementEffect,
   ReplacementModification,
   ReplacementTrigger,
@@ -266,6 +305,8 @@ export {
   availableMana,
   canPay,
   landProduces,
+  landProducesOnBattlefield,
+  manaSourceColorsOf,
   payFromPool,
   planPayment,
   poolTotal,
@@ -273,19 +314,30 @@ export {
 } from './mana';
 
 export type { CostModifierRegistration } from './cost';
-export { costModifiersRegisteredBy, effectiveManaCost, maxPayableX, registerCostModifiers } from './cost';
+export {
+  costModifiersRegisteredBy,
+  effectiveManaCost,
+  maxPayableX,
+  registerCostModifiers,
+  selectedCastingManaCost,
+} from './cost';
 
 export type { BlockAssignment } from './combat';
 export {
   assignAttackerDamage,
+  assignBlockerDamage,
+  attackCohortRestriction,
   attackersNeedingOrder,
+  blockersNeedingAttackerOrder,
   canBlock,
+  canBlockAnyNumber,
   combatNeedsFirstStrikeStep,
   combatDefenders,
   dealCombatDamage,
   eligibleAttackers,
   eligibleBlockers,
   groupBlocks,
+  groupAttackerOrders,
   hasCombatModification,
   isBlocked,
   isLegalCombatDefender,
@@ -299,11 +351,12 @@ export { loseLife, setLife } from './life';
 export type { StaticReplacementRegistration } from './static-replacements';
 export {
   registerStaticReplacements,
+  handDiscardReplacementsFor,
   staticReplacementsFor,
   staticReplacementsRegisteredBy,
 } from './static-replacements';
 export { createRegenerationShield, destroyPermanent, sacrificePermanent } from './destruction';
-export { canBeTargetedBy, isProtectedFrom } from './keyword-abilities';
+export { canBeTargetedBy, canPlayerBeTargetedBy, isProtectedFrom } from './keyword-abilities';
 
 export type { LegendCollision } from './sba';
 export { checkStateBasedActions, endGameWith, keepLegend, pendingLegendCollision } from './sba';
@@ -318,22 +371,30 @@ export {
   drawCard,
   drawCards,
   exileGraveyard,
+  exileHandsAndGraveyards,
   getObject,
   isOnBattlefield,
   landsControlledBy,
   millCards,
   moveObject,
+  moveObjectsToBattlefieldSimultaneously,
   putOnLibrary,
+  putObjectsOnOwnersLibrariesThenShuffle,
   revealTopCards,
+  revealTopCardToHand,
+  shuffleHandAndGraveyardIntoLibrary,
   shuffleGraveyardIntoLibrary,
   shuffleLibrary,
   tapObject,
   tryObject,
+  canUntapObject,
   untapObject,
   updateObject,
 } from './zones';
+export type { SimultaneousBattlefieldEntry } from './zones';
 
 export { copySpellOnStack, pushAbility, resolveAnswered, resolveTop, topOfStack } from './stack';
+export { canCounterStackEntry } from './counter';
 
 export { MAX_CHOSEN_X } from '@mtg/dsl';
 
@@ -367,8 +428,11 @@ export {
   seatState,
 } from './visibility';
 
-export type { AgentView, PlayerAgent } from './agent';
+export type { AgentObservation, AgentView, PlayerAgent } from './agent';
 export { functionAgent, randomAgent, scoringAgent, scriptedAgent } from './agent';
+export { agentDecision, agentView, observeState } from './agent-view';
+export type { PrivilegedAgentPreview } from './agent-view';
+export { settleAgentAction } from './agent-preview';
 export { simpleAgent } from './simple-agent';
 
 export type { GameRun, PlayOptions } from './game';

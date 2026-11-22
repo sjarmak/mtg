@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-20T09:10:22.473Z",
+  "sources": [
+    {
+      "code": "XLN",
+      "mtgjson": {
+        "file": "XLN-a05432ba5637e48c7a959eed1a43db3d8a178c782dcac3055f8826c550122181.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/XLN.json",
+        "sha256": "a05432ba5637e48c7a959eed1a43db3d8a178c782dcac3055f8826c550122181",
+        "meta": {
+          "date": "2026-09-19",
+          "version": "5.3.0+20260919"
+        }
+      },
+      "scryfall": {
+        "file": "XLN-af8244ccda1f9fc527d61bdb0f359d5685a71a08384f797ffcd31bc7f4b19302.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Axln+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "af8244ccda1f9fc527d61bdb0f359d5685a71a08384f797ffcd31bc7f4b19302",
+        "cards": 289
+      }
+    }
+  ]
+}

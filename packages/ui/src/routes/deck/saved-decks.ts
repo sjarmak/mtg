@@ -56,10 +56,12 @@
  * untouched sixty are still there to open against the right set tomorrow.
  */
 import { z } from 'zod';
-import { COLORS } from '@mtg/dsl';
+import { BASIC_LAND_COLOR, COLORS } from '@mtg/dsl';
+import { SET_ORIGINS } from '../../lab/set-origin';
 import type { Card, Color } from '@mtg/dsl';
 import { addCopy, copiesOf, emptyBuild } from './build';
 import type { ConstructedBuild } from './build';
+import type { DeckSetRef } from './library';
 import { readStored, writeStored } from './local-store';
 
 /**
@@ -91,8 +93,68 @@ const SavedEntrySchema = z.object({
  * colors were counted out. `null` means the build never overrode the computed
  * mana base, which `./build.ts` treats as a state of its own rather than as five
  * zeroes — reloading it re-suggests the base, which is what the deck had.
+ *
+ * # Why the printing is recorded beside the count
+ *
+ * `mtg-t7ez`. A color and a number cannot say *which* Plains, and the pool a
+ * deck is reopened against is the union of every staged set, so the count alone
+ * was answered by whichever Plains that union offers first — M11's, on this
+ * machine, in a deck cut from the flagship set alone. Every land on the board
+ * then drew the labeled pending frame, because the flagship's art manifest has
+ * no key for `m11-plains`. It is the same failure `ConstructedBuild.set` and
+ * `Variation.basics` already carry an id for, one store further out.
+ *
+ * Optional, and for `SavedSetSchema`'s reason: a deck written before this change
+ * still parses and still opens, where a `SAVED_DECK_VERSION` bump would have
+ * dropped every deck already in every browser to gain a printing. It is also
+ * *only* written when the build knows one. A build assembled by clicking cards
+ * carries no printings, and stamping the union's first answer into the document
+ * would make a guess durable — the one thing a recorded id is supposed to end.
+ * `restoreBuild` resolves those decks through the set the deck names instead.
  */
-const SavedBasicSchema = z.object({ color: z.enum(COLORS), count: z.int().min(0) });
+const SavedBasicSchema = z.object({
+  color: z.enum(COLORS),
+  count: z.int().min(0),
+  id: z.string().min(1).optional(),
+});
+
+/**
+ * The set the deck was cut from, recorded so the library can shelve it under
+ * that set rather than under whichever set happens to be staged today.
+ *
+ * `mtg-tewc.6` asks for one collection grouped by set, and a deck that carries
+ * only card ids cannot say which set those ids came from: `xmp-emberwake-scout`
+ * looks exactly like a card of any other set to a reader that has not got that
+ * set staged. The origin rides along with the name because the taxonomy above
+ * the group is a fact about the *set* (`../../lab/set-origin.ts` decides it off
+ * the set document), and the deck list has no set document to read.
+ *
+ * # Why this did not bump `SAVED_DECK_VERSION`
+ *
+ * The field is optional, so a deck written before this change still parses and
+ * still opens; a version bump would have dropped every deck already in every
+ * browser to gain a grouping. An unrecorded set is drawn as exactly what it is —
+ * a deck whose set is not known — rather than guessed at from the staged one,
+ * which would file somebody's Magic 2011 deck under the flagship set the first
+ * time they opened the tab.
+ */
+const SavedSetSchema = z.object({ name: z.string().min(1), origin: z.enum(SET_ORIGINS) });
+
+/**
+ * Which surface the deck came off.
+ *
+ * `mtg-j1rg` asks for Draft, Sealed and constructed decks to coexist, and
+ * coexisting means being told apart: three decks cut from one set with three
+ * different histories are three different things to a person looking for one of
+ * them. `./library.ts` draws it on the tile.
+ *
+ * Optional, and absent means `constructed`, which did not bump
+ * `SAVED_DECK_VERSION` for the reason `set` did not: every deck saved before
+ * this existed came off the constructed builder, because it was the only surface
+ * that could save one. A bump would have dropped them all to gain a word.
+ */
+export const SAVED_SOURCES = ['constructed', 'sealed', 'draft'] as const;
+export type SavedDeckSource = (typeof SAVED_SOURCES)[number];
 
 export const SavedDeckSchema = z.object({
   version: z.literal(SAVED_DECK_VERSION),
@@ -103,17 +165,48 @@ export const SavedDeckSchema = z.object({
   savedAt: z.string().min(1),
   entries: z.array(SavedEntrySchema).readonly(),
   basics: z.array(SavedBasicSchema).readonly().nullable(),
+  /** Absent for a deck saved before the library grouped by set, and only then. */
+  set: SavedSetSchema.optional(),
+  /** Absent for a deck saved before there was more than one surface to save from. */
+  source: z.enum(SAVED_SOURCES).optional(),
 });
 
 export type SavedDeck = z.infer<typeof SavedDeckSchema>;
 export type SavedDeckEntry = z.infer<typeof SavedEntrySchema>;
 export type SavedDeckBasic = z.infer<typeof SavedBasicSchema>;
+export type SavedDeckSet = z.infer<typeof SavedSetSchema>;
 
 const SavedDeckListSchema = z.array(SavedDeckSchema);
 
 /** How many cards a saved deck plays, counting copies. */
 export function savedCardCount(deck: SavedDeck): number {
   return deck.entries.reduce((sum, entry) => sum + entry.count, 0);
+}
+
+/**
+ * The colors a saved deck plays, in WUBRG order.
+ *
+ * Off the saved basics when the build counted them out, and off the staged
+ * cards otherwise: a deck saved before its mana base was touched carries
+ * `basics: null`, which means "the computed base", not "no colors". Falling
+ * back to the cards is what keeps such a deck from being drawn as colorless.
+ *
+ * Exported (moved from `./DeckLibrary.ts` by `mtg-aay2k`) so the Cards tab's
+ * gallery (`../cards/DeckGallery.ts`) can draw the same colors the library
+ * does, rather than a second derivation that can drift from this one.
+ */
+export function savedDeckColors(deck: SavedDeck, cards: readonly Card[] | undefined): readonly Color[] {
+  if (deck.basics !== null && deck.basics.length > 0) {
+    return COLORS.filter((color) => deck.basics?.some((basic) => basic.color === color && basic.count > 0));
+  }
+  if (cards === undefined) return [];
+  const played = new Set(deck.entries.map((entry) => entry.id));
+  const seen = new Set<Color>();
+  for (const card of cards) {
+    if (!played.has(card.id)) continue;
+    for (const color of card.colors) seen.add(color);
+  }
+  return COLORS.filter((color) => seen.has(color));
 }
 
 /**
@@ -140,22 +233,113 @@ export function savedEntries(build: ConstructedBuild): readonly SavedDeckEntry[]
 export function savedBasics(build: ConstructedBuild): readonly SavedDeckBasic[] | null {
   const chosen = build.basics;
   if (chosen === null) return null;
-  return COLORS.filter((color) => (chosen[color] ?? 0) > 0).map((color) => ({
-    color,
-    count: chosen[color] ?? 0,
-  }));
+  const printed = basicPrintings(build.set);
+  return COLORS.filter((color) => (chosen[color] ?? 0) > 0).map((color) => {
+    const id = printed.get(color);
+    return { color, count: chosen[color] ?? 0, ...(id === undefined ? {} : { id }) };
+  });
 }
 
-/** The document a save writes. `savedAt` is passed in so a test is not a clock. */
-export function toSavedDeck(id: string, name: string, build: ConstructedBuild, savedAt: string): SavedDeck {
-  return {
-    version: SAVED_DECK_VERSION,
+/**
+ * Which printing the build plays for each basic color, off the list it was
+ * handed, or an empty map when it was handed none.
+ *
+ * First printing of a type wins, which is `setBasics`' own rule read from the
+ * other end: that function takes the first card of each type out of the list it
+ * mints from, so recording any later one would write down a card the game does
+ * not deal.
+ */
+function basicPrintings(set: readonly Card[] | null): ReadonlyMap<Color, string> {
+  const byColor = new Map<Color, string>();
+  if (set === null) return byColor;
+  for (const card of set) {
+    if (card.kind !== 'land' || card.basicLandType === undefined) continue;
+    const color = BASIC_LAND_COLOR[card.basicLandType];
+    if (!byColor.has(color)) byColor.set(color, card.id);
+  }
+  return byColor;
+}
+
+/**
+ * The document a save writes. `savedAt` is passed in so a test is not a clock.
+ *
+ * `set` is optional at the call site as well as in the document, because the
+ * page can be opened on a flat set with no index row behind it and there is then
+ * nothing truthful to record. Writing the staged set's name into every save
+ * regardless would put a claim in the store that no reader could check.
+ */
+export function toSavedDeck(
+  id: string,
+  name: string,
+  build: ConstructedBuild,
+  savedAt: string,
+  set?: SavedDeckSet,
+  source?: SavedDeckSource,
+): SavedDeck {
+  return savedDeckDocument({
     id,
     name,
     savedAt,
     entries: savedEntries(build),
     basics: savedBasics(build),
+    ...(set === undefined ? {} : { set }),
+    ...(source === undefined ? {} : { source }),
+  });
+}
+
+/** Everything a saved deck is, minus the version, which is this module's to say. */
+export interface SavedDeckFields {
+  readonly id: string;
+  readonly name: string;
+  readonly savedAt: string;
+  readonly entries: readonly SavedDeckEntry[];
+  readonly basics: readonly SavedDeckBasic[] | null;
+  readonly set?: SavedDeckSet;
+  readonly source?: SavedDeckSource;
+}
+
+/**
+ * The one place the document is assembled.
+ *
+ * `toSavedDeck` above derives the entries and the basics from a Constructed
+ * build, and that derivation does not fit the other two surfaces: a Limited pool
+ * lists the same card three times, so counting copies off the pool the way
+ * `savedEntries` does would record three one-ofs
+ * (`../play/keep-limited-deck.ts`). What the two share is the *document*, and it
+ * is stamped here so the version is written down once — a second constructor
+ * spelling out `version: SAVED_DECK_VERSION` is a second thing to remember to
+ * bump on the day the shape changes.
+ */
+export function savedDeckDocument(fields: SavedDeckFields): SavedDeck {
+  return {
+    version: SAVED_DECK_VERSION,
+    id: fields.id,
+    name: fields.name,
+    savedAt: fields.savedAt,
+    entries: fields.entries,
+    basics: fields.basics,
+    ...(fields.set === undefined ? {} : { set: fields.set }),
+    ...(fields.source === undefined ? {} : { source: fields.source }),
   };
+}
+
+/**
+ * What each source is called where a deck is listed.
+ *
+ * A deck that records no source is a deck saved before there was more than one
+ * surface, which the schema above says means `constructed`; it is labeled as
+ * that rather than left blank, because a tile with the word missing reads as a
+ * fourth kind of deck rather than as the oldest of the three.
+ */
+export const SAVED_SOURCE_LABELS: Readonly<Record<SavedDeckSource, string>> = {
+  constructed: 'Constructed',
+  sealed: 'Sealed',
+  draft: 'Draft',
+};
+
+/** The source a deck records, with the default the schema states applied. */
+export function savedDeckSource(deck: SavedDeck): SavedDeckSource {
+  return deck.source ?? 'constructed';
 }
 
 /**
@@ -178,6 +362,23 @@ export function deckFingerprint(build: ConstructedBuild): string {
  * it is never reached by any other route.
  */
 export type RestoreMode = 'whole' | 'what-is-left';
+
+/** Everything `restoreBuild` reads besides the pool and the deck itself. */
+export interface RestoreOptions {
+  readonly mode?: RestoreMode;
+  /**
+   * Which staged set each pool card came from, when the caller knows.
+   *
+   * `./constructed-pool.ts` builds it, and it is what resolves the basics of a
+   * deck saved before the printing was recorded: the deck names its set, this
+   * says which pool cards belong to that set, and the two together name the
+   * Plains without guessing. Absent is an ordinary state — `./DeckFilePanel.ts`
+   * restores a deck parsed out of a text list, which names no set at all — and
+   * then a deck with no recorded printing is left to the union's order, which is
+   * a deck whose printing is not known rather than one that has been guessed at.
+   */
+  readonly setOf?: ReadonlyMap<string, DeckSetRef>;
+}
 
 export type RestoreResult =
   | {
@@ -227,8 +428,9 @@ function nameList(names: readonly string[]): string {
 export function restoreBuild(
   pool: readonly Card[],
   saved: SavedDeck,
-  mode: RestoreMode = 'whole',
+  options: RestoreOptions = {},
 ): RestoreResult {
+  const mode = options.mode ?? 'whole';
   const held = new Set(pool.map((card) => card.id));
   const missing = saved.entries.filter((entry) => !held.has(entry.id));
   if (missing.length > 0 && mode === 'whole') {
@@ -260,12 +462,63 @@ export function restoreBuild(
         `that this format cannot play. The deck is left as it was saved.`,
     };
   }
+  build = { ...build, set: restoredPrintings(pool, saved, options.setOf) };
   if (saved.basics !== null) {
     const basics: Partial<Record<Color, number>> = {};
     for (const basic of saved.basics) basics[basic.color] = basic.count;
     build = { ...build, basics };
   }
   return { ok: true, build, omitted: missing };
+}
+
+/**
+ * The printings the reopened deck mints its basics from, or `null` when nothing
+ * recorded names one.
+ *
+ * Two sources, most specific first, because they answer different populations.
+ * A deck that recorded printing ids is answered by those ids and by nothing
+ * else. A deck saved before there were ids — every deck already in every browser
+ * on the day `SavedBasicSchema` gained one — names its set, and the set's own
+ * basics are in the pool, so the deck's Plains is nameable without a guess. The
+ * set route also answers the colors a counted base left out and the deck that
+ * never counted a base at all: `setBasics` mints a type this list does not print
+ * from the list's dominant set code, so five basics resolve out of one recorded
+ * set the same way `./workbench/play.ts` resolves them out of one variation.
+ *
+ * `null` for a deck with neither, and that is the answer rather than a fallback:
+ * the union's order then stands, which is what a deck whose printing is not
+ * known should get. It is separate from the missing-card refusal above on
+ * purpose — a basic the pool does not hold is not a card the deck loses, because
+ * `setBasics` mints one, so an unresolvable printing narrows what this can say
+ * and never refuses the deck.
+ */
+function restoredPrintings(
+  pool: readonly Card[],
+  saved: SavedDeck,
+  setOf: ReadonlyMap<string, DeckSetRef> | undefined,
+): readonly Card[] | null {
+  const byId = new Map(pool.map((card) => [card.id, card]));
+  const printings: Card[] = [];
+  const taken = new Set<string>();
+  const take = (card: Card | undefined): void => {
+    if (card === undefined || taken.has(card.id)) return;
+    taken.add(card.id);
+    printings.push(card);
+  };
+  for (const basic of saved.basics ?? []) {
+    take(basic.id === undefined ? undefined : byId.get(basic.id));
+  }
+  const named = saved.set;
+  if (named !== undefined && setOf !== undefined) {
+    for (const card of pool) {
+      if (card.kind !== 'land' || card.basicLandType === undefined) continue;
+      const owner = setOf.get(card.id);
+      // Both halves, because the taxonomy is part of the name: two sets shelved
+      // under different origins are two sets however alike they are called.
+      if (owner?.name === named.name && owner.origin === named.origin) take(card);
+    }
+  }
+  return printings.length === 0 ? null : printings;
 }
 
 /**

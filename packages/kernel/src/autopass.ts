@@ -141,12 +141,6 @@ export const STOPPABLE_STEPS: readonly Step[] = STEPS.filter(
  * anything held back is wasted. Those are the three Magic Online's own default
  * stop set keys on, for the same reason.
  *
- * On your own turn: both main phases. That is where a turn is spent, and it is
- * also the one place a pass could silently spend a whole turn — an empty hand or
- * a missing land means nothing to do in every window, so without these two stops
- * a turn you could do nothing in would flash past with no beat in it at all. Two
- * clicks a turn is the price of always seeing your own turn happen.
- *
  * Not defaulted: everything in the beginning phase, the combat steps either side
  * of the declarations, and the opponent's main phases. The opposing-stack rule
  * below still hands the game back in them whenever the other seat casts
@@ -157,7 +151,7 @@ export const STOPPABLE_STEPS: readonly Step[] = STEPS.filter(
  * control. Every surface that ships stops makes a player do that.
  */
 export const DEFAULT_STOPS: StopSet = {
-  yourTurn: new Set<Step>(['precombatMain', 'postcombatMain']),
+  yourTurn: new Set<Step>(['precombatMain', 'declareBlockers', 'postcombatMain']),
   theirTurn: new Set<Step>(['declareAttackers', 'declareBlockers', 'end']),
 };
 
@@ -279,7 +273,8 @@ export function holdsOwnTopOfStack(state: GameState, decision: Decision): boolea
  */
 export function canRespond(decision: Decision): boolean {
   return decision.options.some(
-    (option) => option.type !== 'passPriority' && option.type !== 'activateManaAbility',
+    (option) =>
+      option.type !== 'passPriority' && option.type !== 'activateManaAbility' && option.type !== 'concede',
   );
 }
 
@@ -417,8 +412,10 @@ function stackWantsAnAnswer(state: GameState, decision: Decision): boolean {
 export function settledChoice(decision: Decision, settings: AutoPassSettings): number | null {
   if (!settings.enabled) return null;
   if (!decision.complete) return null;
-  if (decision.options.length !== 1) return null;
-  return 0;
+  const choices = decision.options
+    .map((option, index) => ({ option, index }))
+    .filter(({ option }) => option.type !== 'concede');
+  return choices.length === 1 ? (choices[0]?.index ?? null) : null;
 }
 
 /**

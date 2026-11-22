@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "zen",
+  "archetypes": [
+    {
+      "id": "kor-armory",
+      "name": "Kor Armory",
+      "colors": ["W"],
+      "signpost": {
+        "name": "Armament Master",
+        "physicalId": "zen-printed-v1:0001:975f7752-e981-4046-ae9b-90b20db6b23a"
+      },
+      "plan": "Equip a wide Kor battlefield, use Armament Master to amplify every equipped creature, and finish with an aerial attack."
+    },
+    {
+      "id": "pumped-up",
+      "name": "Pumped Up",
+      "colors": ["U", "R"],
+      "signpost": {
+        "name": "Rite of Replication",
+        "physicalId": "zen-printed-v1:0061:4530fe45-8a3d-48e9-a7a5-abf8fb1485e3"
+      },
+      "plan": "Pressure through the air, preserve tempo with efficient spells, and use kicker for a decisive late game."
+    },
+    {
+      "id": "rise-of-the-vampires",
+      "name": "Rise of the Vampires",
+      "colors": ["B"],
+      "signpost": {
+        "name": "Vampire Nighthawk",
+        "physicalId": "zen-printed-v1:0116:44f19fe3-7a17-4c45-adfa-590f73dfebfa"
+      },
+      "plan": "Build a Vampire force, trade life and creatures profitably, and let the tribe's removal and evasion close the game."
+    },
+    {
+      "id": "the-adventurers",
+      "name": "The Adventurers",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Kazuul Warlord",
+        "physicalId": "zen-printed-v1:0134:da42df13-eded-48e2-ad1a-ff74d718ce3c"
+      },
+      "plan": "Chain Allies to grow the expedition, trigger their arrival abilities, and attack with a reinforced party."
+    },
+    {
+      "id": "unstable-terrain",
+      "name": "Unstable Terrain",
+      "colors": ["U", "G"],
+      "signpost": {
+        "name": "Roil Elemental",
+        "physicalId": "zen-printed-v1:0062:66139c73-8e14-433d-bcb6-ae3e518bcdfb"
+      },
+      "plan": "Accelerate lands onto the battlefield, multiply landfall triggers, and overwhelm the opponent with large threats."
+    }
+  ]
+}

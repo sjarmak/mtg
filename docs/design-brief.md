@@ -10,7 +10,7 @@ A laboratory for Magic: The Gathering set design and play:
 - Build decks and cubes from prompt-driven structured criteria — an *informed* deck builder grounded in real card data, synergy structure, and format statistics, not generic agent guesswork.
 - Playtest generated sets with agent players against learned playability criteria, calibrated on real human play data where it exists.
 - Draft against bots (custom sets and cubes), with optional human multiplayer or hybrid pods later.
-- Play the results as a human: vs bots and local hotseat first.
+- Play the results as a human: vs bots, and against another person over a network.
 
 Flagship validation: a full set with custom art, designed, playtested, drafted, and played end to end in the lab.
 
@@ -21,7 +21,7 @@ Flagship validation: a full set with custom art, designed, playtested, drafted, 
 3. **Set generator** — desired mechanics → design skeleton (color pie, curve, rarity distribution, draft archetypes) → full set emitted in an enforceable card DSL.
 4. **Playtesting lab** — mass bot-vs-bot simulation; playability metrics (win-rate bands, game length, mana screw rates, interaction density, archetype balance) asserted CI-style; calibrated against 17lands human baselines.
 5. **Draft lab** — drafts vs bots over custom sets/cubes; draft-bot pick models.
-6. **Play surface** — headless logs → web replay viewer → interactive playable board; hotseat + vs-bot.
+6. **Play surface** — headless logs → web replay viewer → interactive playable board; vs-bot, then over a network.
 7. **Art pipeline** — ported from the prior project: fal.ai + ComfyUI behind one contract, LoRA style-lock per set, typed art-spec validation, deterministic post-processing repair.
 
 ## Locked decisions (grill, 2026-08-09)
@@ -35,7 +35,7 @@ Flagship validation: a full set with custom art, designed, playtested, drafted, 
 | Bot players | Tiered: scripted/heuristic bots for mass in-game sim; LLM agents for drafting, deck construction, mulligans, deep-play reviews |
 | Playability data | 17lands public data (calibration baseline) + self-play statistics (the only signal custom sets will have) |
 | Interface sequence | Headless → replay viewer → playable board (board UI grows out of replay components) |
-| Multiplayer | Local hotseat + vs-bots first; networked play deferred |
+| Multiplayer | Vs-bots first; two people play over a network, each on their own device |
 
 ## Design principles
 

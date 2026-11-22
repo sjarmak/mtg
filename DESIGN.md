@@ -2,137 +2,137 @@
 name: MTG Set Generation & Playing Lab
 description: A laboratory for designing Magic sets, proving them out against simulated play, and playing the result.
 colors:
-  accent: "oklch(0.470 0.104 266)"
-  accent-hover: "oklch(0.415 0.108 266)"
-  accent-soft: "oklch(0.936 0.030 266)"
-  accent-ink: "oklch(0.985 0.004 266)"
-  surface-page: "oklch(0.973 0.006 85)"
-  surface-raised: "oklch(0.995 0.003 85)"
-  surface-sunken: "oklch(0.941 0.008 80)"
-  surface-rail: "oklch(0.955 0.007 80)"
-  surface-inset: "oklch(0.918 0.009 80)"
-  ink: "oklch(0.24 0.014 60)"
-  ink-muted: "oklch(0.460 0.013 65)"
-  ink-faint: "oklch(0.66 0.010 70)"
-  ink-inverse: "oklch(0.98 0.004 85)"
-  line: "oklch(0.884 0.010 75)"
-  line-strong: "oklch(0.795 0.013 72)"
-  positive: "oklch(0.520 0.096 152)"
-  negative: "oklch(0.540 0.150 27)"
-  pending: "oklch(0.640 0.086 78)"
-  color-w: "oklch(0.845 0.045 88)"
-  color-u: "oklch(0.545 0.085 250)"
-  color-b: "oklch(0.395 0.042 305)"
-  color-r: "oklch(0.545 0.110 31)"
-  color-g: "oklch(0.505 0.078 145)"
-  color-c: "oklch(0.700 0.018 85)"
-  color-m: "oklch(0.730 0.078 92)"
+  accent: 'oklch(0.470 0.104 266)'
+  accent-hover: 'oklch(0.415 0.108 266)'
+  accent-soft: 'oklch(0.936 0.030 266)'
+  accent-ink: 'oklch(0.985 0.004 266)'
+  surface-page: 'oklch(0.973 0.006 85)'
+  surface-raised: 'oklch(0.995 0.003 85)'
+  surface-sunken: 'oklch(0.941 0.008 80)'
+  surface-rail: 'oklch(0.955 0.007 80)'
+  surface-inset: 'oklch(0.918 0.009 80)'
+  ink: 'oklch(0.24 0.014 60)'
+  ink-muted: 'oklch(0.460 0.013 65)'
+  ink-faint: 'oklch(0.66 0.010 70)'
+  ink-inverse: 'oklch(0.98 0.004 85)'
+  line: 'oklch(0.884 0.010 75)'
+  line-strong: 'oklch(0.795 0.013 72)'
+  positive: 'oklch(0.520 0.096 152)'
+  negative: 'oklch(0.540 0.150 27)'
+  pending: 'oklch(0.640 0.086 78)'
+  color-w: 'oklch(0.845 0.045 88)'
+  color-u: 'oklch(0.545 0.085 250)'
+  color-b: 'oklch(0.395 0.042 305)'
+  color-r: 'oklch(0.545 0.110 31)'
+  color-g: 'oklch(0.505 0.078 145)'
+  color-c: 'oklch(0.700 0.018 85)'
+  color-m: 'oklch(0.730 0.078 92)'
 typography:
   headline:
     fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
-    fontSize: "1.3125rem"
+    fontSize: '1.3125rem'
     fontWeight: 600
     lineHeight: 1.2
-    letterSpacing: "-0.01em"
+    letterSpacing: '-0.01em'
   title:
     fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
-    fontSize: "0.8125rem"
+    fontSize: '0.8125rem'
     fontWeight: 600
     lineHeight: 1.45
-    letterSpacing: "0.01em"
+    letterSpacing: '0.01em'
   body:
     fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
-    fontSize: "0.9375rem"
+    fontSize: '0.9375rem'
     fontWeight: 400
     lineHeight: 1.45
-    letterSpacing: "normal"
+    letterSpacing: 'normal'
   card:
     fontFamily: "'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif"
-    fontSize: "0.8125rem"
+    fontSize: '0.8125rem'
     fontWeight: 700
     lineHeight: 1.2
-    letterSpacing: "normal"
+    letterSpacing: 'normal'
   label:
     fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
-    fontSize: "0.6875rem"
+    fontSize: '0.6875rem'
     fontWeight: 600
     lineHeight: 1.45
-    letterSpacing: "0.06em"
+    letterSpacing: '0.06em'
   figure:
     fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace"
-    fontSize: "0.8125rem"
+    fontSize: '0.8125rem'
     fontWeight: 400
     lineHeight: 1.45
-    fontFeature: "tabular-nums"
+    fontFeature: 'tabular-nums'
 rounded:
-  sm: "3px"
-  md: "6px"
-  lg: "10px"
-  card: "12px"
-  pill: "999px"
+  sm: '3px'
+  md: '6px'
+  lg: '10px'
+  card: '12px'
+  pill: '999px'
 spacing:
-  "1": "0.25rem"
-  "2": "0.5rem"
-  "3": "0.75rem"
-  "4": "1rem"
-  "5": "1.5rem"
-  "6": "2rem"
-  "7": "3rem"
+  '1': '0.25rem'
+  '2': '0.5rem'
+  '3': '0.75rem'
+  '4': '1rem'
+  '5': '1.5rem'
+  '6': '2rem'
+  '7': '3rem'
 components:
   button:
-    backgroundColor: "{colors.surface-raised}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-    padding: "0.25rem 0.75rem"
-    typography: "{typography.title}"
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.md}'
+    padding: '0.25rem 0.75rem'
+    typography: '{typography.title}'
   button-hover:
-    backgroundColor: "{colors.surface-raised}"
-    textColor: "{colors.ink}"
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.ink}'
   button-primary:
-    backgroundColor: "{colors.accent}"
-    textColor: "{colors.accent-ink}"
-    rounded: "{rounded.md}"
-    padding: "0.25rem 0.75rem"
+    backgroundColor: '{colors.accent}'
+    textColor: '{colors.accent-ink}'
+    rounded: '{rounded.md}'
+    padding: '0.25rem 0.75rem'
   button-primary-hover:
-    backgroundColor: "{colors.accent-hover}"
-    textColor: "{colors.accent-ink}"
+    backgroundColor: '{colors.accent-hover}'
+    textColor: '{colors.accent-ink}'
   button-pressed:
-    backgroundColor: "{colors.accent-soft}"
-    textColor: "{colors.ink}"
+    backgroundColor: '{colors.accent-soft}'
+    textColor: '{colors.ink}'
   panel:
-    backgroundColor: "{colors.surface-raised}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.lg}"
-    padding: "1rem"
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.lg}'
+    padding: '1rem'
   empty:
-    backgroundColor: "{colors.surface-sunken}"
-    textColor: "{colors.ink-muted}"
-    rounded: "{rounded.lg}"
-    padding: "2rem 1.5rem"
+    backgroundColor: '{colors.surface-sunken}'
+    textColor: '{colors.ink-muted}'
+    rounded: '{rounded.lg}'
+    padding: '2rem 1.5rem'
   badge:
-    backgroundColor: "{colors.surface-inset}"
-    textColor: "{colors.ink-muted}"
-    rounded: "{rounded.pill}"
-    padding: "1px 0.5rem"
-    typography: "{typography.label}"
+    backgroundColor: '{colors.surface-inset}'
+    textColor: '{colors.ink-muted}'
+    rounded: '{rounded.pill}'
+    padding: '1px 0.5rem'
+    typography: '{typography.label}'
   code:
-    backgroundColor: "{colors.surface-inset}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.sm}"
-    padding: "1px 0.25rem"
+    backgroundColor: '{colors.surface-inset}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.sm}'
+    padding: '1px 0.25rem'
   card:
-    backgroundColor: "{colors.surface-raised}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.card}"
-    typography: "{typography.card}"
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.card}'
+    typography: '{typography.card}'
   choice:
-    backgroundColor: "{colors.surface-raised}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-    padding: "0.5rem 0.75rem"
+    backgroundColor: '{colors.surface-raised}'
+    textColor: '{colors.ink}'
+    rounded: '{rounded.md}'
+    padding: '0.5rem 0.75rem'
   choice-hover:
-    backgroundColor: "{colors.accent-soft}"
-    textColor: "{colors.ink}"
+    backgroundColor: '{colors.accent-soft}'
+    textColor: '{colors.ink}'
 ---
 
 # Design System: MTG Set Generation & Playing Lab
@@ -153,7 +153,7 @@ The system runs two vocabularies on purpose. Chrome recedes: single-pixel
 outlines, five tonal surface steps doing the work that borders and shadows do
 elsewhere, one accent reserved for focus, selection and the current mode. Cards
 do not recede. They carry shadow, they lift on hover, and they behave like
-physical objects, because on the Play and Cards routes the card *is* the thing
+physical objects, because on the Play and Cards routes the card _is_ the thing
 the person came for. On the Play route one other thing does: the mat they lie
 on, which is a printed object with the zones debossed into it rather than a
 container drawn around them.
@@ -244,6 +244,19 @@ Stock over it. It is a four-sided edge and never a stripe — the ban on a color
 `border-left` or `border-right` above 1px stands, and `test/polish.test.ts`
 still fails the build on one. Every other border in the system is 1px.
 
+**And its outer third is black** (`--mtg-card-edge`, `oklch(0.175 0.008 60)`,
+the same ink in both palettes because a card's edge is the card's material
+rather than a surface of the page). `CARD_EDGE_MM` is 0.9 mm of the band's 2.6,
+so the identity keeps the inner 1.7 and no content inset moves. Both faces draw
+it: the DOM face by dividing its box model, the border carrying the black and
+the padding under it carrying the identity through a background clipped to the
+padding box (a ring on `::before` painted correctly and counted toward the
+face's own scrollable overflow, which two hand rigs measure); the printed face
+as the outermost of two rounded rects, with the bleed past the
+cut painted in the same ink so a drifted blade widens the edge instead of
+leaving a colored hairline down one side. `card-edge.browser.test.ts` and
+`@mtg/card-render`'s `card-edge.test.ts` hold the share, the ink and the inset.
+
 ### Named Rules
 
 **The Tinted Neutral Rule.** No neutral is achromatic. Light neutrals sit at hue
@@ -312,10 +325,16 @@ the turn owner all qualify. It is always 0.6875rem at 600 weight in faint or
 muted ink, and the tracking is **0.06em**. One label is exempt on the ink axis,
 and only that one: the art-pending pill is `--mtg-pending` amber, because amber
 is this system's semantic for withheld and unfinished everywhere else and the
-pending slot exists to say the art is not there yet. It also sits on
-`--mtg-surface-raised` inside a hatched frame, which is the one place faint ink
-would disappear. Uppercase buttons, uppercase headings, uppercase body text and
-uppercase card text are prohibited.
+pending slot exists to say the art is not there yet. It was rendered all three
+ways before it stayed, which is how the tracking decision on the same label was
+settled: `mtg-bc2.104`, `packages/ui/tools/pending-ink.ts`. On the pill's own
+`--mtg-surface-raised` ground the amber reads 3.33:1 and faint ink 3.07:1, so
+faint does not disappear inside the hatched frame — it costs 0.26, with both
+inks already under AA. Muted would more than double it at 7.01:1, and that is a
+change to this rule rather than an exception under it. The type size costs
+nothing either: the strokes reach the declared color at the board face's 8px
+clamp exactly as they do at 11px. Uppercase buttons, uppercase headings,
+uppercase body text and uppercase card text are prohibited.
 
 Ten selectors carry this role and all ten now track at 0.06em. Five of them
 sat at 0.08em or 0.10em until `mtg-90x.3` converged them; the art-pending
@@ -323,6 +342,21 @@ label, the one case where tighter tracking might have cost legibility inside
 the hatched frame, was rendered both ways before it moved. `test/polish.test.ts`
 sweeps every uppercase rule in the emitted sheet, so a new selector cannot
 reintroduce the drift.
+
+It sweeps **scoped overrides of those selectors too**, and it did not until
+`mtg-bc2.155`. Every check there filtered the sheet to blocks declaring
+`text-transform: uppercase`, and an override does not restate it: it inherits the
+role and changes one property. So the art tile — the size the board draws every
+land at — retracked the pending pill to 0.03em, half this rule, and the sweep
+built to stop exactly this drift read past it, as it would have past the next
+one. The override is deleted rather than made an exception, because the fit it
+could have been buying is not there: rendered over the crowded board at all six
+combat viewports, 0.03em and 0.06em differ by 2.3px on the widest pill and change
+no fit outcome anywhere — nothing overflows at five of the six, and at 1440x560
+the same eight tiles overflow under both. A block naming a class the sheet has
+already made a micro-label is now held to 0.06em whether or not it restates the
+role, and asked about nothing else, since changing the size or the padding is
+what an override is for.
 
 All three axes have now converged, the other two under `mtg-90x.4`. On weight
 the sheet said three things for one role: the art-pending pill, the zone label
@@ -365,8 +399,8 @@ wells themselves are tonal, one step down from the mat and keylined in Mat Edge,
 because a debossed inset shadow would have been a fourth vocabulary for depth
 the surface steps already carry.
 
-**The Audit Test.** If a screen has more than one kind of shadow *at the same
-level* visible at once, one of them is wrong. Cards on the mat are two levels,
+**The Audit Test.** If a screen has more than one kind of shadow _at the same
+level_ visible at once, one of them is wrong. Cards on the mat are two levels,
 not two opinions: the card sits on the mat and the mat sits on the page, and
 that is the whole hierarchy the play surface has.
 
@@ -387,7 +421,7 @@ one applies is decided by whether the element is chrome or content.
 
 ### Chips
 
-- **Badge:** pill (999px), `surface-inset` ground, muted ink, 0.6875rem at 600 with 0.02em tracking. Tone variants recolor the *text* only, never the ground: positive, negative, pending.
+- **Badge:** pill (999px), `surface-inset` ground, muted ink, 0.6875rem at 600 with 0.02em tracking. Tone variants recolor the _text_ only, never the ground: positive, negative, pending.
 - **Code span:** 3px radius, `surface-inset` ground, mono at 0.9em. Wraps any command or path a person is expected to type. Produced by `renderCopy`, never hand-built.
 
 ### Cards / Containers
@@ -395,7 +429,7 @@ one applies is decided by whether the element is chrome or content.
 - **Panel corner:** 10px (`--mtg-radius-lg`). **Card corner:** 12px (`--mtg-radius-card`), dropping to 6px at compact size.
 - **Panel:** `surface-raised` on a 1px `line` rule, with a head separated by a second rule. Body padding 1rem. Flat, always.
 - **Empty state:** `surface-sunken` behind a 1px **dashed** `line-strong` rule, 2rem by 1.5rem padding, capped at 68ch. The dash is the signal: this container is waiting for something.
-- **Card face:** the identity's band (`--mtg-frame-*`) as the ground, inside a 7px border in the identity's own color (5px at compact size), with the identity's edge channel on every keyline within it, the Card shadow, and a 2px lift on hover when interactive. Selection is a 2px Proof Ink outline at 2px offset, never a fill. Everything printed on the ground is a box in `--mtg-frame-*-panel` — title bar, type bar, rules box, P/T badge, collector bar — except the art window, which is `--mtg-frame-*-well`. The band sits at least 0.12 in OKLCH lightness under the box, which is what makes a frame read as a frame rather than as one flat wash, and it is the reason **no text is set on the band**: body ink clears 7:1 only above lightness 0.735 on paper and the box has to stay above 0.848 for muted ink to clear AA, so a band 0.12 below it cannot carry a word. `card-surfaces.test.ts` holds the box and the window to those ratios and asserts the collector line is on a box.
+- **Card face:** the identity's band (`--mtg-frame-*`) as the ground, inside a 7px border in the identity's own color (5px at compact size) whose outer third is the black card edge, with the identity's edge channel on every keyline within it, the Card shadow, and a 2px lift on hover when interactive. Selection is a 2px Proof Ink outline at 2px offset, never a fill. Everything printed on the ground is a box in `--mtg-frame-*-panel` — title bar, type bar, rules box, P/T badge, collector bar — except the art window, which is `--mtg-frame-*-well`. The band sits at least 0.12 in OKLCH lightness under the box, which is what makes a frame read as a frame rather than as one flat wash, and it is the reason **no text is set on the band**: body ink clears 7:1 only above lightness 0.735 on paper and the box has to stay above 0.848 for muted ink to clear AA, so a band 0.12 below it cannot carry a word. `card-surfaces.test.ts` holds the box and the window to those ratios and asserts the collector line is on a box.
 - **Card slot:** a permanent sits in a square slot the height of the card, so a tapped permanent rotates inside its own footprint and nothing else in the row moves. A hand slot keeps the card's portrait shape. Both are drawn when empty — a 1px dashed Mat Edge on the mat, `surface-sunken` on a hand's paper — because a hand of two in a rail of seven is a hand of two, not a broken layout. The face inside a slot is card-shaped and carries three regions and no art window, so those regions divide the height between them, growing equally: spread to the ends of the face instead, they leave a hole in the middle of every card where a full face has its art, and one region grown into that hole would be a panel standing in for art the face does not have. The hand is the one zone laid out as a rail — a single row that scrolls rather than wrapping — because seven slots are wider than the mat.
 - **Artifact keyline:** an artifact face takes `ink-muted` as its edge channel in place of the identity's, so every keyline on it (bars, rules box, P/T badge, art window, seal stroke) moves to muted ink at the same 1px. The printed border is not one of them and keeps the identity: an artifact still has one, and cost validation already forces most of them colorless. A plate is a change of material, not of weight. The channel that has to move is lightness: `ink-muted` sits at least 0.08 from every identity edge — over the blue, black, red and green edges on paper and under the bone, stone and gold ones, over all seven in the dark — so the keyline gains definition against the card ground in both palettes. That separation is asserted in `card.test.ts`, because the first version of this rule reached for `line-strong`, which sat within 0.005 of the colorless edge of the day and painted nothing visible on the only artifacts a set can contain. It is not the hatch: the hatch already means pending art and face down, and one texture meaning two things is not a signal. Declared after the identity rules, where source order is what makes it win.
 - **Nested cards are prohibited.**

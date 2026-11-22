@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "nph",
+  "name": "New Phyrexia",
+  "sourceCodes": ["NPH"],
+  "products": [{ "id": "nph-draft", "setCode": "NPH", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["nph-draft", "nph-draft", "nph-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["nph-draft", "nph-draft", "nph-draft", "nph-draft", "nph-draft", "nph-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

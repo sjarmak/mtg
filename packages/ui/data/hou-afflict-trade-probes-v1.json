@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "khenra-combat-trade-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0066:abbdc277-4a76-44a9-aeda-edabab1f579e"],
+      "decisionFamilies": ["afflict-one-then-exact-blocked-combat-trade"],
+      "assertions": [
+        "Khenra Eternal trades with 1 exact blocker after Afflict and preserves the unblocked copy"
+      ],
+      "testFile": "packages/forge-export/test/observed-hou-afflict-trade.integration.test.ts"
+    },
+    {
+      "id": "khenra-combat-survival-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0066:abbdc277-4a76-44a9-aeda-edabab1f579e"],
+      "decisionFamilies": ["afflict-one-then-blocked-combat-survival-and-lifelink"],
+      "assertions": ["Forge Khenra kills its Cat blocker after Afflict and survives with one damage"],
+      "testFile": "packages/forge-export/test/observed-hou-afflict-combat-bot.integration.test.ts"
+    }
+  ]
+}

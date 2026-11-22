@@ -14,6 +14,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { Card as DslCard, Color } from '@mtg/dsl';
 import { BASIC_LANDS, EXAMPLE_CARDS, mana, parseCard, renderOracleText, renderTypeLine } from '@mtg/dsl';
 import { Card } from '../src/card/Card';
+import { PrintedCardFace } from '../src/card/PrintedCardFace';
+import type { PrintedCardPresentation } from '../src/card/printed-card-art';
 import {
   RULES_FIT_STEPS,
   collectorLine,
@@ -186,6 +188,15 @@ const WARDEN: DslCard = parseCard({
   ],
 });
 
+const LEGACY_CUBE_CATALOG = (await import('../../data/data/legacy-cube-2021-card-catalog-v1.json'))
+  .default as { readonly cards: readonly PrintedCardPresentation[] };
+
+const VIVIEN: PrintedCardPresentation = (() => {
+  const card = LEGACY_CUBE_CATALOG.cards.find((candidate) => candidate.name === "Vivien, Monsters' Advocate");
+  if (card === undefined) throw new Error("the pinned Legacy Cube catalog has no Vivien, Monsters' Advocate");
+  return card;
+})();
+
 /** One card per frame identity, built off a real example card. */
 function cardForIdentity(identity: ColorIdentity): DslCard {
   const base = baseCreature();
@@ -299,19 +310,23 @@ describe('Card', () => {
    * A row with no cost on it, which is a real row of a planeswalker's box and
    * not a missing one: it draws no badge and states no `data-loyalty`, and the
    * sheet's two-column rule is keyed off that attribute so the row sets across
-   * the whole box. Flavor text is the reachable case today — @mtg/dsl refuses a
-   * static or triggered ability on a planeswalker — and it is the same shape
-   * the printed card's uncosted ability would arrive in.
+   * the whole box. Vivien comes from the pinned official catalog and opens with
+   * two passive rules rows before her costed abilities, so this exercises the
+   * imported printed-card path rather than manufacturing the shape from flavor.
    */
   it('draws an uncosted row across the box with no badge on it', () => {
-    const flavored: DslCard = { ...WARDEN, flavorText: 'The vigil keeps what tides lose.' };
-    const view = render(h(Card, { card: flavored }));
+    const view = render(h(PrintedCardFace, { card: VIVIEN, size: 'full' }));
     const container = view.container as unknown as ElementLike;
     const rows = Array.from(container.querySelectorAll('.mtg-card__line'));
     const uncosted = rows.filter((row) => row.getAttribute('data-loyalty') === null);
-    expect(uncosted).toHaveLength(1);
-    expect(uncosted[0]?.textContent).toBe('The vigil keeps what tides lose.');
-    expect(Array.from(uncosted[0]?.querySelectorAll('.mtg-card__loyalty') ?? [])).toHaveLength(0);
+    expect(uncosted).toHaveLength(2);
+    expect(uncosted.map((row) => row.textContent)).toStrictEqual([
+      'You may look at the top card of your library any time.',
+      'You may cast creature spells from the top of your library.',
+    ]);
+    for (const row of uncosted) {
+      expect(Array.from(row.querySelectorAll('.mtg-card__loyalty'))).toHaveLength(0);
+    }
     view.unmount();
   });
 
@@ -462,8 +477,15 @@ describe('Card', () => {
 
     const face = /\n\.mtg-card \{[^}]*\}/.exec(sheet)?.[0] ?? '';
     expect(face).not.toBe('');
-    expect(face, 'the face does not spend the identity channel on its border').toContain(
-      'border: var(--frame-band) solid var(--identity)',
+    // The band is border plus padding since mtg-d4g: the border is the black
+    // card edge and the padding under it is the identity, painted by a
+    // background clipped to the padding box. Both halves are asserted, because
+    // either one alone is a card that is all edge or all color.
+    expect(face, 'the face does not spend its border on the black card edge').toContain(
+      'border: var(--card-edge-band) solid var(--mtg-card-edge)',
+    );
+    expect(face, 'the identity ring is not the rest of the band').toContain(
+      '--pad: calc(var(--frame-band) - var(--card-edge-band))',
     );
     // A printed edge, not a keyline, and a *share* of the card rather than a
     // pixel count (mtg-iqyc): the band is FRAME_BAND_MM of the trim's width, so
@@ -473,7 +495,12 @@ describe('Card', () => {
     const band = /--frame-band: calc\(var\(--card-w\) \* ([\d.]+)\)/.exec(face);
     expect(band, 'the border width is not a share of the card').not.toBeNull();
     expect(Number(band?.[1] ?? 0)).toBeGreaterThan(0.02);
-    expect(face, 'the ground is neutral paper again').toContain('background: var(--frame)');
+    expect(face, 'the ground is neutral paper again').toContain(
+      'linear-gradient(var(--frame), var(--frame)) content-box',
+    );
+    expect(face, 'the identity ring is not painted').toContain(
+      'linear-gradient(var(--identity), var(--identity)) padding-box',
+    );
   });
 
   it('labels the pending art state', () => {
@@ -547,9 +574,11 @@ describe('Card', () => {
   it('renders a land with its tap ability', () => {
     const land = BASIC_LANDS[0];
     if (land === undefined) throw new Error('no basic lands in the DSL set');
+    const markup = renderToStaticMarkup(h(Card, { card: land }));
     render(h(Card, { card: land }));
     expect(printedLines(land)).toEqual([renderOracleText(land)]);
     expect(screen.queryByRole('img', { name: /^Mana cost/ })).toBeNull();
+    expect(markup).toContain('data-land="true"');
   });
 });
 
@@ -709,7 +738,7 @@ describe('the full face is the trim', () => {
     expect(RULES_FIT_STEPS[0], 'the ladder does not start at full size').toBe(1);
     for (const [step, scale] of RULES_FIT_STEPS.entries()) {
       expect(SHEET_TRIM, `no rule for step ${String(step)}`).toContain(
-        `.mtg-card__text[data-fit='${String(step)}'] { font-size: calc(var(--mtg-text-sm) * ${String(scale)}); }`,
+        `.mtg-card__text[data-fit='${String(step)}'] { font-size: calc(var(--rules-type) * ${String(scale)}); }`,
       );
       if (step > 0) {
         const previous = RULES_FIT_STEPS[step - 1];
@@ -741,7 +770,7 @@ describe('the full face is the trim', () => {
    * would not fit.
    */
   it('draws the zoom larger and sets its rules text back to full size', () => {
-    const zoom = /\.mtg-zoom > \.mtg-card \{ --card-w: ([\d.]+)rem;/.exec(SHEET_TRIM)?.[1];
+    const zoom = /\.mtg-zoom > \.mtg-card \{\s*--card-w: ([\d.]+)rem;/.exec(SHEET_TRIM)?.[1];
     const face = /\.mtg-card \{[^}]*--card-w: ([\d.]+)rem;/.exec(SHEET_TRIM)?.[1];
     const floor = RULES_FIT_STEPS[RULES_FIT_STEPS.length - 1];
     if (zoom === undefined) throw new Error('the zoom declares no width');
@@ -751,7 +780,14 @@ describe('the full face is the trim', () => {
     // Room enough to undo the ladder: the panel has to be at least as much
     // wider than the face as the floor is smaller than full size.
     expect(Number(zoom)).toBeGreaterThanOrEqual(Number(face) / floor);
-    expect(SHEET_TRIM).toContain('.mtg-zoom > .mtg-card .mtg-card__text { font-size: var(--mtg-text-sm); }');
+    // Through the face's own channel, which the zoom pins back to the token in
+    // the block above: mtg-dcxg.13 made that channel a share of --card-w, and a
+    // zoom is the one face whose extra width is meant to buy room rather than
+    // bigger letters.
+    expect(SHEET_TRIM).toContain(
+      ".mtg-zoom > .mtg-card:not([data-presentation='printed-card']) .mtg-card__text {",
+    );
+    expect(SHEET_TRIM).toContain('--rules-type: var(--mtg-text-sm);');
   });
 
   /**

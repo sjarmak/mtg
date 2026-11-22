@@ -259,8 +259,9 @@ describe('a discard wider than the enumeration cap', () => {
     // answer, in the order `combinations` has always produced.
     expect(asksInSteps(decision)).toBe(false);
     expect(decision.complete).toBe(true);
-    expect(decision.options.length).toBe(subsetsOf(decision.hand, decision.count).length);
-    for (const option of decision.options) {
+    const choices = decision.options.filter((option) => option.type === 'discard');
+    expect(choices.length).toBe(subsetsOf(decision.hand, decision.count).length);
+    for (const option of choices) {
       expect(option.type).toBe('discard');
       if (option.type === 'discard') expect(option.oids.length).toBe(decision.count);
     }
@@ -347,9 +348,7 @@ describe('a mulligan wider than the enumeration cap', () => {
     expect(subsetsOf(decision.hand, decision.count).length).toBeGreaterThan(DEFAULT_ENUMERATION_CAP);
     expect(decision.complete).toBe(true);
     expect(asksInSteps(decision)).toBe(true);
-    // CR 103.4's other answer stays last, at every step, so the ordering claim
-    // in `mulliganDecision`'s docblock holds at both widths.
-    expect(decision.options[decision.options.length - 1]?.type).toBe('mulligan');
+    expect(decision.options.filter((option) => option.type !== 'concede').at(-1)?.type).toBe('mulligan');
     expect(decision.options.filter((option) => option.type === 'mulligan').length).toBe(1);
   });
 
@@ -390,6 +389,6 @@ describe('a mulligan wider than the enumeration cap', () => {
     for (const keep of keeps) {
       if (keep.type === 'keepHand') expect(keep.bottom.length).toBe(decision.count);
     }
-    expect(decision.options[decision.options.length - 1]?.type).toBe('mulligan');
+    expect(decision.options.filter((option) => option.type !== 'concede').at(-1)?.type).toBe('mulligan');
   });
 });

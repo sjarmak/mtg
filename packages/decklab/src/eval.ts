@@ -30,6 +30,7 @@ import type { LlmProvider } from '@mtg/llm';
 import { auditDeck, type DeckAudit, type DeckEntry } from './audit';
 import { buildBaselineDeck } from './baseline';
 import { buildInformedDeck } from './build';
+import { storeDeckPool } from './pool';
 import type { DeckCriteria, DeckCriteriaInput } from './criteria';
 import { DeckCriteriaSchema } from './criteria';
 import { judgeBlind, type JudgeResult } from './judge';
@@ -131,7 +132,7 @@ export async function runEval(input: RunEvalInput): Promise<EvalResult> {
     let informedError: string | undefined;
     try {
       const built = await buildInformedDeck({
-        store: input.store,
+        pool: storeDeckPool(input.store, criteria),
         provider: input.provider,
         criteria: scenario.criteria,
       });

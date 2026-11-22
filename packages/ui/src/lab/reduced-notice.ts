@@ -196,23 +196,23 @@ export function readReduction(raw: unknown): SetReduction | null {
 }
 
 /**
- * The one line the shell shows: which set, how much of it, and what a drop is.
+ * The one line the shell shows, or `null` when the build dropped nothing: which set, how much of it, and what a drop is.
  *
  * Composed from the counts rather than read out of the document. A producer that
  * wrote its own prose could write a comforting one, and prose is not checkable;
- * a count of dropped positions can be held against the card list. The last
- * clause is the part a person actually needs before they deal a pool — a card
- * that is missing here is missing, not stood in for by something similar.
+ * a count of dropped positions can be held against the card list. The second
+ * clause is the part a person actually needs — a card that is missing here is
+ * missing, not stood in for by something similar — and it is one clause rather
+ * than the two it was, because on a 844px screen the sentence is the tallest
+ * thing between the header and the cards and it says the same thing every
+ * time.
  */
-export function reducedNoticeText(reduction: SetReduction): string {
-  const refused =
-    reduction.dropped === 0
-      ? 'No collector position was refused'
-      : `The other ${String(reduction.dropped)} were refused by the translation gate ` +
-        'and are not in this set';
+export function reducedNoticeText(reduction: SetReduction): string | null {
+  // A build that refused nothing is the whole printing, and says nothing extra.
+  if (reduction.dropped === 0) return null;
   return (
-    `Reduced build: ${String(reduction.kept)} of ${reduction.sourceName}'s ` +
-    `${String(reduction.sourcePositions)} collector positions. ${refused}; ` +
-    'nothing was approximated or substituted.'
+    `Partial set: ${String(reduction.kept)} of ${reduction.sourceName}'s ` +
+    `${String(reduction.sourcePositions)} cards. ` +
+    `The other ${String(reduction.dropped)} are missing rather than approximated.`
   );
 }

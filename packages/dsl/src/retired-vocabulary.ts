@@ -1,6 +1,6 @@
 /**
  * Every name this DSL's vocabulary used to declare and no longer does, mapped
- * to the member that carries its meaning now.
+ * to the member that carries its meaning now or to `null` when it was removed.
  *
  * ## What this table is for
  *
@@ -33,13 +33,13 @@
  * Outer key: the exported tuple's name, exactly as `@mtg/dsl` exports it
  * (`COUNTER_KINDS`, not `CounterKind`), because that is what the snapshot is
  * keyed by. Inner key: the retired name. Inner value: the live member that means
- * what it meant. `vocabulary-snapshot.test.ts` holds both ends to the live
- * vocabulary — an outer key that names no exported tuple, or a value that is not
- * a current member, is a stale entry and fails there rather than rotting.
+ * what it meant, or `null` when no member replaced it.
+ * `vocabulary-snapshot.test.ts` holds replacement values to the live vocabulary
+ * and accepts `null` only as the explicit removal state.
  */
 
-/** Retired names of one enum, mapped to the live member each became. */
-export type RetiredNames = Readonly<Record<string, string>>;
+/** Retired names of one enum: replacement member, or `null` for removal. */
+export type RetiredNames = Readonly<Record<string, string | null>>;
 
 /**
  * The whole record of narrowed DSL vocabulary, by enum name.
@@ -58,17 +58,16 @@ export type RetiredNames = Readonly<Record<string, string>>;
  * with no mana at all (`kernel/test/free-spell.test.ts`): the sentence was about
  * what the *generator* may print, and the generator states it itself, in every
  * slot's cost window. So a card that reported this code reports nothing today —
- * it is legal. The value names `MANA_COST_OUT_OF_RANGE` because this table's
- * shape requires a live member and that is the nearest true one: it still guards
- * the ceiling of the range whose floor this code was, so a reader chasing an old
- * report lands on the check that survived rather than on nothing.
+ * it is legal. Its `null` says exactly that; no surviving violation is presented
+ * as its replacement.
  */
 export const RETIRED_VOCABULARY: Readonly<Record<string, RetiredNames>> = {
   COUNTER_KINDS: {
     saberHorn: 'horn',
   },
   VIOLATION_CODES: {
-    MANA_COST_ZERO: 'MANA_COST_OUT_OF_RANGE',
+    MANA_COST_ZERO: null,
+    TOKEN_COLOR_OFF_IDENTITY: null,
   },
 };
 

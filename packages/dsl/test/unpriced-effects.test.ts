@@ -22,13 +22,17 @@ import { describe, expect, it } from 'vitest';
 import type { AnyEffectKind, CardInput, Effect } from '../src/index';
 import {
   ALL_EFFECT_KINDS,
+  DECLARED_PARTIAL_EFFECT_KINDS,
   EFFECT_KINDS,
   isPricedEffectKind,
   legalTargetsFor,
   MODEL_EFFECT_KINDS,
+  ModelEffectSchema,
+  PartBearingModelEffectSchema,
   renderOracleText,
   UNPRICED_EFFECT_KINDS,
   validateCard,
+  ZoneReachingModelEffectSchema,
 } from '../src/index';
 import { parseCard } from '../src/parse';
 
@@ -85,17 +89,46 @@ describe('the unpriced half of the effect vocabulary', () => {
     }
     // Two kinds on one row because `scope` splits the primitive in two;
     // `effect-scope.test.ts` holds the rule that decides which half a card is.
-    // The last two are unscoped and name a permanent: Altar's Light, and the
-    // filtered whole-board space this era's exile spells draw from.
+    // The next five are unscoped and name an object: Altar's Light, the
+    // filtered whole-board space this era's exile spells draw from,
+    // Mystifying Maze's opponent-controlled creature slot, and the two
+    // three ownership spaces for a graveyard card. The last is Mass Polymorph's
+    // targetless, scoped creature sweep.
     expect(legalTargetsFor('exileTarget')).toEqual([
       'targetCreature',
       'targetOpponent',
       'targetArtifactOrEnchantment',
       'targetPermanent',
+      'targetCreatureOpponentControls',
+      'targetCardInYourGraveyard',
+      'targetCardInOpponentsGraveyard',
+      'targetCardInAGraveyard',
+      'noTarget',
     ]);
     // A hand is somebody's, and narrowly an opponent's: "reveal your own hand"
     // is a clause no card here wants.
-    expect(legalTargetsFor('revealHand')).toEqual(['targetOpponent']);
+    expect(legalTargetsFor('revealHand')).toEqual(['targetOpponent', 'targetPlayer']);
+  });
+});
+
+describe('the declared-partial landing tier', () => {
+  it('names only unpriced effects and reaches no model-facing effect union', () => {
+    const unpriced: readonly string[] = UNPRICED_EFFECT_KINDS;
+    const modelSchemas = [
+      ModelEffectSchema,
+      PartBearingModelEffectSchema,
+      ZoneReachingModelEffectSchema,
+    ] as const;
+
+    for (const kind of DECLARED_PARTIAL_EFFECT_KINDS) {
+      expect(unpriced, kind).toContain(kind);
+      for (const schema of modelSchemas) {
+        expect(
+          schema.options.map((option) => option.shape.kind.value),
+          kind,
+        ).not.toContain(kind);
+      }
+    }
   });
 });
 

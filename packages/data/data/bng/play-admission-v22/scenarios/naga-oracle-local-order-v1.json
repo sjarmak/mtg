@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-scenario-probe-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "266c365eebfa3023207d91f00e942926483cfe74f4c7f6382527816bef0855fb",
+    "adapterSha256": "c35761829bb2a2273aeebc963d5bc3a54ebca474c3dd2dec0902d3436d483083",
+    "protocolVersion": 2
+  },
+  "result": {
+    "id": "naga-oracle-local-order-v1",
+    "scope": "scenario",
+    "controller": "local",
+    "sourceName": "Naga Oracle",
+    "sourceSeat": 0,
+    "decisionFamilies": [
+      "ordering"
+    ],
+    "assertions": [
+      "AKH/HOU remaining controller contracts lets the local Naga Oracle pilot split and order the exact top cards"
+    ],
+    "status": "passed"
+  },
+  "sourceScript": {
+    "path": "n/naga_oracle.txt",
+    "sha256": "e10a45b221d773886f51427918be2acb13070da2e421a9fc5ea516d65b7122ef"
+  },
+  "sources": [
+    {
+      "path": "packages/forge-export/test/bridge-akh-hou-alternative-costs.integration.test.ts",
+      "sha256": "86db9ad71c11920b4cb0065c381e7e4661c65d935909b883f8aab3645a6dcf2d"
+    },
+    {
+      "path": "packages/forge-export/test/bridge-akh-hou-exert-semantics.integration.test.ts",
+      "sha256": "935579a930091b3436d958152a78eaae7270aba16450852de4312aff3185615a"
+    },
+    {
+      "path": "packages/forge-export/test/bridge-akh-hou-haste-scenario.integration.test.ts",
+      "sha256": "cd2f7b24a55df6e96479d486e5a168167fbbc607e7c6fcc10c9c0d9e74b89c0a"
+    },
+    {
+      "path": "packages/forge-export/test/bridge-exert-bot-scenario.integration.test.ts",
+      "sha256": "4823015d9265af7f2d91b581dff28631f4f71d6256e72af155d77a4e90f1f56a"
+    },
+    {
+      "path": "packages/forge-export/test/bridge-exert-contract.integration.test.ts",
+      "sha256": "26329c204bc2fd8362eabb0f1986d56f6716801c6bc4e68f0e25a364e214cc9e"
+    },
+    {
+      "path": "packages/forge-export/test/observed-akh-hou-contract-families.integration.test.ts",
+      "sha256": "4cd72326281b3ec8b932dd28416b6e76f4200c0b76643925d653ab39f9bcecb4"
+    },
+    {
+      "path": "packages/forge-export/test/observed-hou-doomfall.integration.test.ts",
+      "sha256": "6768fae4ad95c95071151bdebe00987e786a576416bae9d5e8300b6fd569a221"
+    },
+    {
+      "path": "packages/forge-export/test/support/exert-scenarios.ts",
+      "sha256": "91502d7d0dd90d99bcbd67535d561d153cd71558aac8657c0f659629b749935b"
+    },
+    {
+      "path": "packages/forge-export/test/support/isd-match-fixture.ts",
+      "sha256": "e5c0767437e824d6f40669c75a2e9ac0438b2173d4676f4902923b669ac8e66e"
+    },
+    {
+      "path": "packages/forge-export/test/support/printed-match-probes.ts",
+      "sha256": "246653ef7d2bb516e89b58429f2bbdc2cf490242d7aa452ed504894bb6b8d5e0"
+    },
+    {
+      "path": "packages/forge-export/test/support/scd-match-fixture.ts",
+      "sha256": "954cbe53d0f5cdffb47f46cf9be64507d3559b8387490d1e61576b14d88136af"
+    },
+    {
+      "path": "packages/forge-export/test/support/snapshot-backend.ts",
+      "sha256": "56c29208bc9980e74efec42b19447162f49b2568041e07184fe311607d8aa353"
+    },
+    {
+      "path": "packages/forge-export/test/support/textless-blocking.ts",
+      "sha256": "1ea2cba3671c2304881f1c36fb02df22a5f388747a20806fc4323fc7f5cb3a93"
+    }
+  ],
+  "cases": [
+    {
+      "testFile": "packages/forge-export/test/observed-akh-hou-contract-families.integration.test.ts",
+      "testIdentity": {
+        "id": "1995887211_0_5",
+        "ancestorTitles": [
+          "AKH/HOU remaining controller contracts"
+        ],
+        "title": "lets the local Naga Oracle pilot split and order the exact top cards"
+      },
+      "formatId": "akh-hou",
+      "stateSha256": "3c80fd038ae6a7c72234420d0925e5d5ad135e7c020c0c3312e369caf45fe266",
+      "seed": "akh-naga-oracle-local-v1",
+      "maximumTurns": 3
+    }
+  ],
+  "evidence": {
+    "report": {
+      "path": "vitest.json",
+      "sha256": "7a63ce4febd1e86a5ed2061230057db0e7cba47b072b162491851390b49b1c86"
+    },
+    "usage": {
+      "path": "snapshot-usage.jsonl",
+      "sha256": "c00170a407a0d1c29a2ae2bd7f4d71e7962853197487d98c50e3de467a32dc64"
+    }
+  }
+}

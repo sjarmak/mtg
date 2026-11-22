@@ -27,12 +27,13 @@ import {
   censusTriggerConditions,
   critiqueFindings,
   slotsNeedingRetry,
-  summariseArchetypes,
+  summarizeArchetypes,
   totalUsage,
 } from './report';
 import { substitutionNotes } from './roles';
 import type { Slot } from './slot';
 import type { SetValidation } from './validate/index';
+import type { GenerationSemanticsVersion } from './generation-semantics';
 import {
   checkSlotFillability,
   errors,
@@ -81,6 +82,8 @@ export interface GenerateOptions {
    */
   readonly flavor?: boolean;
   readonly flavorMaxTokens?: number;
+  /** Historical control-flow semantics, used only when replaying a recorded run. */
+  readonly semanticsVersion?: GenerationSemanticsVersion;
 }
 
 export interface GenerationResult {
@@ -155,7 +158,14 @@ export async function generateSet(options: GenerateOptions): Promise<GenerationR
     }
   };
 
-  const validate = (): SetValidation => validateGeneratedSet({ allocation, cards, rejected, tertiaryBudget });
+  const validate = (): SetValidation =>
+    validateGeneratedSet({
+      allocation,
+      cards,
+      rejected,
+      tertiaryBudget,
+      ...(options.semanticsVersion === undefined ? {} : { semanticsVersion: options.semanticsVersion }),
+    });
 
   await runFill(0, allocation.slots, NO_CORRECTIONS, NO_REVISIONS);
 
@@ -257,7 +267,7 @@ export async function generateSet(options: GenerateOptions): Promise<GenerationR
     triggerConditions: censusTriggerConditions(printedCards),
     retryRounds,
     critique: critiqueRecord,
-    archetypes: summariseArchetypes(allocation.archetypes, validation.archetypes),
+    archetypes: summarizeArchetypes(allocation.archetypes, validation.archetypes),
     // Three sources, one list. The deterministic validators, the authored-card
     // check, and the design reviewer's asks this set does not carry — the last
     // as warnings, so the critique annotates the run rather than failing it

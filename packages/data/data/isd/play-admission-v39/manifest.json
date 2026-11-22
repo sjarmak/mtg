@@ -1,0 +1,1786 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-bundle",
+  "evidence": "scenario-probes",
+  "qualifications": [
+    {
+      "sourceScript": {
+        "path": "a/abattoir_ghoul.txt",
+        "sha256": "2b1e44b8034df828c5c6a54b5c48c7afccd74dbb4b31c8fa87a9cfb7b8d1c40b"
+      },
+      "path": "qualifications/2b1e44b8034df828c5c6a54b5c48c7afccd74dbb4b31c8fa87a9cfb7b8d1c40b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/abbey_griffin.txt",
+        "sha256": "82991c06727f7d312ad24b6549624873e3f6dbc43fae153a881a1580baf66c0c"
+      },
+      "path": "qualifications/82991c06727f7d312ad24b6549624873e3f6dbc43fae153a881a1580baf66c0c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/altars_reap.txt",
+        "sha256": "9eebbe1e9cec3b0424c8f6df7bd4280799b61e5d773523507d10b8145b8b2e2d"
+      },
+      "path": "qualifications/9eebbe1e9cec3b0424c8f6df7bd4280799b61e5d773523507d10b8145b8b2e2d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/ambush_viper.txt",
+        "sha256": "373c8b3ade2da49482734c9cdb44dc0caaae5ab351fe5570c3d6a65d7bb1e42e"
+      },
+      "path": "qualifications/373c8b3ade2da49482734c9cdb44dc0caaae5ab351fe5570c3d6a65d7bb1e42e.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/ancient_grudge.txt",
+        "sha256": "7fff8613cc307636bcab3804a3bd5cb74af872488a88e5a5505a8af40145e381"
+      },
+      "path": "qualifications/7fff8613cc307636bcab3804a3bd5cb74af872488a88e5a5505a8af40145e381.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/angel_of_flight_alabaster.txt",
+        "sha256": "493825871147f5da486005e6bf3a8f679b69efd9fc3cd6ccca480ef941d7a161"
+      },
+      "path": "qualifications/493825871147f5da486005e6bf3a8f679b69efd9fc3cd6ccca480ef941d7a161.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/angelic_overseer.txt",
+        "sha256": "f4364576c2eabae0377bd74d37845de2a01783407cac54ba1ea4956507e6bbcb"
+      },
+      "path": "qualifications/f4364576c2eabae0377bd74d37845de2a01783407cac54ba1ea4956507e6bbcb.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/armored_skaab.txt",
+        "sha256": "f8a9c613e35710ab1c8a7532e846aa519ae5ed19c05bcbe7266bb1c945e99857"
+      },
+      "path": "qualifications/f8a9c613e35710ab1c8a7532e846aa519ae5ed19c05bcbe7266bb1c945e99857.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/army_of_the_damned.txt",
+        "sha256": "8b2492e6f178b6efdb454539f3e53717b2d4f12e891a8891695aae2036842bf9"
+      },
+      "path": "qualifications/8b2492e6f178b6efdb454539f3e53717b2d4f12e891a8891695aae2036842bf9.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/ashmouth_hound.txt",
+        "sha256": "ef02ec284b2f107212dc3febce978459d6fe56417df2ede04fd477db15763856"
+      },
+      "path": "qualifications/ef02ec284b2f107212dc3febce978459d6fe56417df2ede04fd477db15763856.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/avacynian_priest.txt",
+        "sha256": "669db8cc00b23226407d62f6a66cce1f293f161aa1f02e87a9a835a83de4b064"
+      },
+      "path": "qualifications/669db8cc00b23226407d62f6a66cce1f293f161aa1f02e87a9a835a83de4b064.json"
+    },
+    {
+      "sourceScript": {
+        "path": "a/avacyns_pilgrim.txt",
+        "sha256": "fd3e9354c8fafe9ce48f5f0836804be5e0cda8d8e02bcd1b0ae6aad001285123"
+      },
+      "path": "qualifications/fd3e9354c8fafe9ce48f5f0836804be5e0cda8d8e02bcd1b0ae6aad001285123.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/back_from_the_brink.txt",
+        "sha256": "52e931a4a128609306c3ba217f9fba86ad2d0635ee77a4574d2f2df048f0f758"
+      },
+      "path": "qualifications/52e931a4a128609306c3ba217f9fba86ad2d0635ee77a4574d2f2df048f0f758.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/balefire_dragon.txt",
+        "sha256": "ff168a9f8d0cd33f30899e61a9f9744a6cb2f4b10b54ca6710b68ee2fb0100c1"
+      },
+      "path": "qualifications/ff168a9f8d0cd33f30899e61a9f9744a6cb2f4b10b54ca6710b68ee2fb0100c1.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/battleground_geist.txt",
+        "sha256": "2796cfade81e60fb2e21fe9d8908a6c00cdc4cb0429d2ac44f0a666488d3a25f"
+      },
+      "path": "qualifications/2796cfade81e60fb2e21fe9d8908a6c00cdc4cb0429d2ac44f0a666488d3a25f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/bitterheart_witch.txt",
+        "sha256": "318b23768e23e2bf3329f4dcb93b3443b6f4ebf6daaf76e21dddf3f5cc152a73"
+      },
+      "path": "qualifications/318b23768e23e2bf3329f4dcb93b3443b6f4ebf6daaf76e21dddf3f5cc152a73.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/blasphemous_act.txt",
+        "sha256": "1eaa0e236047f2536c60b684d3c1768d8b2dd18b38dff5b0c199c2f070d8e674"
+      },
+      "path": "qualifications/1eaa0e236047f2536c60b684d3c1768d8b2dd18b38dff5b0c199c2f070d8e674.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/blazing_torch.txt",
+        "sha256": "26a17858169a8ffb07fa587489b09b940cd9abf8e27c76fe0b040b20c9bcca05"
+      },
+      "path": "qualifications/26a17858169a8ffb07fa587489b09b940cd9abf8e27c76fe0b040b20c9bcca05.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/bloodcrazed_neonate.txt",
+        "sha256": "4d4cacaf360801f68f4d87c07ca93ad315b8beb2cbf9cbc65c0df1c2ffb31a1f"
+      },
+      "path": "qualifications/4d4cacaf360801f68f4d87c07ca93ad315b8beb2cbf9cbc65c0df1c2ffb31a1f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/bloodgift_demon.txt",
+        "sha256": "9fd35eb17d1fc2f6d0039fcbef95fd9c59e71ed4aecf91103d7a85df887751d3"
+      },
+      "path": "qualifications/9fd35eb17d1fc2f6d0039fcbef95fd9c59e71ed4aecf91103d7a85df887751d3.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/bloodline_keeper_lord_of_lineage.txt",
+        "sha256": "618c825cc4f192bd45cf57f0739192cc8a2802e589827e6c34e291ae6c632132"
+      },
+      "path": "qualifications/618c825cc4f192bd45cf57f0739192cc8a2802e589827e6c34e291ae6c632132.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/bonds_of_faith.txt",
+        "sha256": "bbe654c057c92e38c552c93b62b49ee80055d5d19c4f523ebdc32f02c8fe7931"
+      },
+      "path": "qualifications/bbe654c057c92e38c552c93b62b49ee80055d5d19c4f523ebdc32f02c8fe7931.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/boneyard_wurm.txt",
+        "sha256": "13cdc4c81ec9f26233bb3ce6288fbf1a282790be07cc81ff4b38005863d0aac4"
+      },
+      "path": "qualifications/13cdc4c81ec9f26233bb3ce6288fbf1a282790be07cc81ff4b38005863d0aac4.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/brain_weevil.txt",
+        "sha256": "b36e87180173d818175dd22f1bd1c569a05f69824545ac9311f956c1c90a5b4f"
+      },
+      "path": "qualifications/b36e87180173d818175dd22f1bd1c569a05f69824545ac9311f956c1c90a5b4f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/bramblecrush.txt",
+        "sha256": "a7a17b97302548447158e683130a0b950bdefb65fb9e293e4ca7f663a6598719"
+      },
+      "path": "qualifications/a7a17b97302548447158e683130a0b950bdefb65fb9e293e4ca7f663a6598719.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/brimstone_volley.txt",
+        "sha256": "943ab412bba001bd4f5663570bb6c052c474ec84e2d0a26051759d0333636887"
+      },
+      "path": "qualifications/943ab412bba001bd4f5663570bb6c052c474ec84e2d0a26051759d0333636887.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/bump_in_the_night.txt",
+        "sha256": "30d4da5ac4419b61ff2f8ccd025eff882bfa90225a3c0def0c21de1564da2e44"
+      },
+      "path": "qualifications/30d4da5ac4419b61ff2f8ccd025eff882bfa90225a3c0def0c21de1564da2e44.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/burning_vengeance.txt",
+        "sha256": "8cc33886b818e3d081bd514ce93c818891282870dd554a5cfb5a72c346c9e1af"
+      },
+      "path": "qualifications/8cc33886b818e3d081bd514ce93c818891282870dd554a5cfb5a72c346c9e1af.json"
+    },
+    {
+      "sourceScript": {
+        "path": "b/butchers_cleaver.txt",
+        "sha256": "6e42f261f8cb74e1a1e6eec067b94efed986a2d6e3d5245d5a6b315ebd37864f"
+      },
+      "path": "qualifications/6e42f261f8cb74e1a1e6eec067b94efed986a2d6e3d5245d5a6b315ebd37864f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/cackling_counterpart.txt",
+        "sha256": "a0f5b8dc6e91d16f83dd6343356e1a7f633a2c583d93285c843a303882b1b479"
+      },
+      "path": "qualifications/a0f5b8dc6e91d16f83dd6343356e1a7f633a2c583d93285c843a303882b1b479.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/caravan_vigil.txt",
+        "sha256": "bb8b737c2f790d84d9c63eaa970d7f5794d9f92a660176c88479d2677204b5c4"
+      },
+      "path": "qualifications/bb8b737c2f790d84d9c63eaa970d7f5794d9f92a660176c88479d2677204b5c4.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/cellar_door.txt",
+        "sha256": "df27cf53e648d85b5f9304e06070092c300e3f6eb0909fa39f0054891e561c80"
+      },
+      "path": "qualifications/df27cf53e648d85b5f9304e06070092c300e3f6eb0909fa39f0054891e561c80.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/champion_of_the_parish.txt",
+        "sha256": "c7802a3b3b7ac7f9cc8b938b9d07c5744ca13bbbba67b364fead31c45dc8b50a"
+      },
+      "path": "qualifications/c7802a3b3b7ac7f9cc8b938b9d07c5744ca13bbbba67b364fead31c45dc8b50a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/chapel_geist.txt",
+        "sha256": "245d3d3afca5c88cd34da7a7e0de6b6a58e7b72e5e2bca4c8fb4fa5e69c38a96"
+      },
+      "path": "qualifications/245d3d3afca5c88cd34da7a7e0de6b6a58e7b72e5e2bca4c8fb4fa5e69c38a96.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/charmbreaker_devils.txt",
+        "sha256": "e4426ffad60b9159147eaff07a3dbf1491f2dc8bf758ad57cb8af18337a32b0f"
+      },
+      "path": "qualifications/e4426ffad60b9159147eaff07a3dbf1491f2dc8bf758ad57cb8af18337a32b0f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/civilized_scholar_homicidal_brute.txt",
+        "sha256": "59f986c5b25e99c199d8d9af1a1182ffad83918df712f057448081f16653b15d"
+      },
+      "path": "qualifications/59f986c5b25e99c199d8d9af1a1182ffad83918df712f057448081f16653b15d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/claustrophobia.txt",
+        "sha256": "a877b6bb6bb67d1597f64755951a432d8a2a43639ee2842ffe849d67e763eb27"
+      },
+      "path": "qualifications/a877b6bb6bb67d1597f64755951a432d8a2a43639ee2842ffe849d67e763eb27.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/clifftop_retreat.txt",
+        "sha256": "92112f1f076c7974d12cdc258d489c1631ec2084eaece49cae8c390d5a6a062e"
+      },
+      "path": "qualifications/92112f1f076c7974d12cdc258d489c1631ec2084eaece49cae8c390d5a6a062e.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/cloistered_youth_unholy_fiend.txt",
+        "sha256": "39fa28498208d15db17bb8334158ea1791ef752c4ca2cef55b5087f62ca4ab21"
+      },
+      "path": "qualifications/39fa28498208d15db17bb8334158ea1791ef752c4ca2cef55b5087f62ca4ab21.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/cobbled_wings.txt",
+        "sha256": "15458db6ab3b66a7ba9113d6507e7821ce82d04b06cf939aba0ede04260a4c43"
+      },
+      "path": "qualifications/15458db6ab3b66a7ba9113d6507e7821ce82d04b06cf939aba0ede04260a4c43.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/corpse_lunge.txt",
+        "sha256": "af06d6489193aa5a46c4e0a55f17cf230a227b9c67ac6803d6e65a6675e08c5d"
+      },
+      "path": "qualifications/af06d6489193aa5a46c4e0a55f17cf230a227b9c67ac6803d6e65a6675e08c5d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/creeping_renaissance.txt",
+        "sha256": "b7f7278607eb561b29fe2a5365efb7a31318b1d41fd74bd7ac6117aeb580795c"
+      },
+      "path": "qualifications/b7f7278607eb561b29fe2a5365efb7a31318b1d41fd74bd7ac6117aeb580795c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/creepy_doll.txt",
+        "sha256": "023e0ed19969630721166b78bf497b893bb0ab7d441ae6a2ac277256b65cd964"
+      },
+      "path": "qualifications/023e0ed19969630721166b78bf497b893bb0ab7d441ae6a2ac277256b65cd964.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/crossway_vampire.txt",
+        "sha256": "79b6cd7fb48c3f61d2e9b4f7367e715509ab0f81a52e7f4fa6f2aebc18d31713"
+      },
+      "path": "qualifications/79b6cd7fb48c3f61d2e9b4f7367e715509ab0f81a52e7f4fa6f2aebc18d31713.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/curiosity.txt",
+        "sha256": "9338a6d6ec20389be8237fcce8a61409a73bdd9ba821ecc91cb427de3de1f621"
+      },
+      "path": "qualifications/9338a6d6ec20389be8237fcce8a61409a73bdd9ba821ecc91cb427de3de1f621.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/curse_of_deaths_hold.txt",
+        "sha256": "981d7794d460539b35af265147cb19f05743c809bea072050d1ddbb8bc156f85"
+      },
+      "path": "qualifications/981d7794d460539b35af265147cb19f05743c809bea072050d1ddbb8bc156f85.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/curse_of_oblivion.txt",
+        "sha256": "8c59806d38da5d3ff148680edc2cc10fb9f3cb89668d2dd5d3756adfc28eef1e"
+      },
+      "path": "qualifications/8c59806d38da5d3ff148680edc2cc10fb9f3cb89668d2dd5d3756adfc28eef1e.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/curse_of_stalked_prey.txt",
+        "sha256": "2c5d884b5b4177013c8ff49f35bbaba2dd0fd9c37d6b0fb0aaf492cfc0b8de91"
+      },
+      "path": "qualifications/2c5d884b5b4177013c8ff49f35bbaba2dd0fd9c37d6b0fb0aaf492cfc0b8de91.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/curse_of_the_bloody_tome.txt",
+        "sha256": "d1d0b380ada69f16110266c6be293173dbb1ab20dbf5e0abb26ef1b7813b6259"
+      },
+      "path": "qualifications/d1d0b380ada69f16110266c6be293173dbb1ab20dbf5e0abb26ef1b7813b6259.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/curse_of_the_nightly_hunt.txt",
+        "sha256": "85abf80d5da8c8e7f049aa26925a0eed693552f34126bc7b0580775e0c22de31"
+      },
+      "path": "qualifications/85abf80d5da8c8e7f049aa26925a0eed693552f34126bc7b0580775e0c22de31.json"
+    },
+    {
+      "sourceScript": {
+        "path": "c/curse_of_the_pierced_heart.txt",
+        "sha256": "5d62a3be6fc1efc37c710ee20a7119ed1fc2fce6bc3fb56e7747d5bbaa36f258"
+      },
+      "path": "qualifications/5d62a3be6fc1efc37c710ee20a7119ed1fc2fce6bc3fb56e7747d5bbaa36f258.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/darkthicket_wolf.txt",
+        "sha256": "0a828a0e74f2ac1c398f513e70c000d3b38359f8920e448f047301eb8240ee8b"
+      },
+      "path": "qualifications/0a828a0e74f2ac1c398f513e70c000d3b38359f8920e448f047301eb8240ee8b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/daybreak_ranger_nightfall_predator.txt",
+        "sha256": "a276e1d3dc7b4272445dade753c4c90baf95ef767c03d94515b2ed414d6876a6"
+      },
+      "path": "qualifications/a276e1d3dc7b4272445dade753c4c90baf95ef767c03d94515b2ed414d6876a6.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/dead_weight.txt",
+        "sha256": "4878352f4f33b0b66d9b8b07f1d98233662692a50f9808f01653fd51e33500ff"
+      },
+      "path": "qualifications/4878352f4f33b0b66d9b8b07f1d98233662692a50f9808f01653fd51e33500ff.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/dearly_departed.txt",
+        "sha256": "f131d699d17c4a4e59510c70d02ae239cc4612cb10b522e1c6506dc9fa6b3de1"
+      },
+      "path": "qualifications/f131d699d17c4a4e59510c70d02ae239cc4612cb10b522e1c6506dc9fa6b3de1.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/delver_of_secrets_insectile_aberration.txt",
+        "sha256": "f2b6dee32bcf9b9864b99856ec92a224992b746464bbbfb40e69dbd6567ac753"
+      },
+      "path": "qualifications/f2b6dee32bcf9b9864b99856ec92a224992b746464bbbfb40e69dbd6567ac753.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/demonmail_hauberk.txt",
+        "sha256": "33e5afb813961036547f1b07cc48daa7263df6572c5b8c4b230d2277344851dc"
+      },
+      "path": "qualifications/33e5afb813961036547f1b07cc48daa7263df6572c5b8c4b230d2277344851dc.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/deranged_assistant.txt",
+        "sha256": "478efbdcba17bc328fab85b4e2e46857f2b6b1403e7c1222ba835d943e5bcef9"
+      },
+      "path": "qualifications/478efbdcba17bc328fab85b4e2e46857f2b6b1403e7c1222ba835d943e5bcef9.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/desperate_ravings.txt",
+        "sha256": "853774b997cd2fd1222f4c54e9bcd5b1bdd13b745c4aab5243d7add425f0e18b"
+      },
+      "path": "qualifications/853774b997cd2fd1222f4c54e9bcd5b1bdd13b745c4aab5243d7add425f0e18b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/devils_play.txt",
+        "sha256": "3e574a1fcbfbf0b4593988e53ec756c65108c2d0bda2bd3064bd8a18f1ca0ca1"
+      },
+      "path": "qualifications/3e574a1fcbfbf0b4593988e53ec756c65108c2d0bda2bd3064bd8a18f1ca0ca1.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/diregraf_ghoul.txt",
+        "sha256": "c4caa09f21e76b728db286ec90273b82cd4b06b076e210b73f325603491b63e1"
+      },
+      "path": "qualifications/c4caa09f21e76b728db286ec90273b82cd4b06b076e210b73f325603491b63e1.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/disciple_of_griselbrand.txt",
+        "sha256": "70b60c5647996e537943b782360ba7dbee7b4e214938b490ca6807c7b1293018"
+      },
+      "path": "qualifications/70b60c5647996e537943b782360ba7dbee7b4e214938b490ca6807c7b1293018.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/dissipate.txt",
+        "sha256": "a05e9121ce6f152ba2fc53e8ab0204bec3107690fafe02c41158e7e35ad99882"
+      },
+      "path": "qualifications/a05e9121ce6f152ba2fc53e8ab0204bec3107690fafe02c41158e7e35ad99882.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/divine_reckoning.txt",
+        "sha256": "7634394b825a5d82ed6e18e5605c526d489c90c37ef6e5342c10a4c305d50765"
+      },
+      "path": "qualifications/7634394b825a5d82ed6e18e5605c526d489c90c37ef6e5342c10a4c305d50765.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/doomed_traveler.txt",
+        "sha256": "17868f251e05a7d95ae9de48c6b1e5de88b533788e14c1499aefe42817d26047"
+      },
+      "path": "qualifications/17868f251e05a7d95ae9de48c6b1e5de88b533788e14c1499aefe42817d26047.json"
+    },
+    {
+      "sourceScript": {
+        "path": "d/dream_twist.txt",
+        "sha256": "6c44a3071377b869a2510f76ffad4f341665d92a417eacfa9115fa34f3f64cbd"
+      },
+      "path": "qualifications/6c44a3071377b869a2510f76ffad4f341665d92a417eacfa9115fa34f3f64cbd.json"
+    },
+    {
+      "sourceScript": {
+        "path": "e/elder_cathar.txt",
+        "sha256": "512d118d37b28c88f7302dc3425c795c1cbc059d26feb5e1b341149988c76033"
+      },
+      "path": "qualifications/512d118d37b28c88f7302dc3425c795c1cbc059d26feb5e1b341149988c76033.json"
+    },
+    {
+      "sourceScript": {
+        "path": "e/elder_of_laurels.txt",
+        "sha256": "cec03dfabfd5a14da6fbd2b7ee9e3f1fc1da875bf0064e4f4b393533195a2dc0"
+      },
+      "path": "qualifications/cec03dfabfd5a14da6fbd2b7ee9e3f1fc1da875bf0064e4f4b393533195a2dc0.json"
+    },
+    {
+      "sourceScript": {
+        "path": "e/elite_inquisitor.txt",
+        "sha256": "66da22e188ed47ed3c38cf9671b0ed50c0ada0b45e502b40e7b81c7d97735c89"
+      },
+      "path": "qualifications/66da22e188ed47ed3c38cf9671b0ed50c0ada0b45e502b40e7b81c7d97735c89.json"
+    },
+    {
+      "sourceScript": {
+        "path": "e/endless_ranks_of_the_dead.txt",
+        "sha256": "12ac9d774bbcbfdd15687c0ea8a0def296ec55288502d93704919b5bd3f973d7"
+      },
+      "path": "qualifications/12ac9d774bbcbfdd15687c0ea8a0def296ec55288502d93704919b5bd3f973d7.json"
+    },
+    {
+      "sourceScript": {
+        "path": "e/essence_of_the_wild.txt",
+        "sha256": "8ab4becd769df3427ce63b024ced6046d91d0ded359eec57e63ca2f2424fd632"
+      },
+      "path": "qualifications/8ab4becd769df3427ce63b024ced6046d91d0ded359eec57e63ca2f2424fd632.json"
+    },
+    {
+      "sourceScript": {
+        "path": "e/evil_twin.txt",
+        "sha256": "c1278c041c84f0b2d5f03e8a1e52cf97214b0e7334f68a891d7bc9913a3855a9"
+      },
+      "path": "qualifications/c1278c041c84f0b2d5f03e8a1e52cf97214b0e7334f68a891d7bc9913a3855a9.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/falkenrath_marauders.txt",
+        "sha256": "565308e8510969ef2b36d99d2a6d9b5355b40dffd2e9e9e0f6205754d6e0dd30"
+      },
+      "path": "qualifications/565308e8510969ef2b36d99d2a6d9b5355b40dffd2e9e9e0f6205754d6e0dd30.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/falkenrath_noble.txt",
+        "sha256": "1f8742d32727585eb3000ccbf33fc364c156465b5bbd261aeea8006ae198891a"
+      },
+      "path": "qualifications/1f8742d32727585eb3000ccbf33fc364c156465b5bbd261aeea8006ae198891a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/feeling_of_dread.txt",
+        "sha256": "855dc688eb37fded45d945153161ada22b72f296ee24f6d6f220a7092e48cf3e"
+      },
+      "path": "qualifications/855dc688eb37fded45d945153161ada22b72f296ee24f6d6f220a7092e48cf3e.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/feral_ridgewolf.txt",
+        "sha256": "24937b20b99595750575df41117fc7463c1e5baa07c23b5e2053a3c26601cb35"
+      },
+      "path": "qualifications/24937b20b99595750575df41117fc7463c1e5baa07c23b5e2053a3c26601cb35.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/festerhide_boar.txt",
+        "sha256": "b27ae86b83343d013ad89b1d08d5cc05f15fe5e2a315ba8eabb3264c0f445967"
+      },
+      "path": "qualifications/b27ae86b83343d013ad89b1d08d5cc05f15fe5e2a315ba8eabb3264c0f445967.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/fiend_hunter.txt",
+        "sha256": "aabcb53d038f31107f2478ed1d2ea7da6fe15232f482739fa82bcfb6797ca181"
+      },
+      "path": "qualifications/aabcb53d038f31107f2478ed1d2ea7da6fe15232f482739fa82bcfb6797ca181.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/forbidden_alchemy.txt",
+        "sha256": "42188a642fe3d4438220450aedfc537ad688244c3751b435b37c783a57d78184"
+      },
+      "path": "qualifications/42188a642fe3d4438220450aedfc537ad688244c3751b435b37c783a57d78184.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/forest.txt",
+        "sha256": "9a574ea2a8136e588ab77ff8bf260075a94572d8099a7d0d98c62590479aa5a6"
+      },
+      "path": "qualifications/9a574ea2a8136e588ab77ff8bf260075a94572d8099a7d0d98c62590479aa5a6.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/fortress_crab.txt",
+        "sha256": "c302e2a1128b36fafb8362fe372932c81c6fc9829d7f543c0f6fde1ce8da33b5"
+      },
+      "path": "qualifications/c302e2a1128b36fafb8362fe372932c81c6fc9829d7f543c0f6fde1ce8da33b5.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/frightful_delusion.txt",
+        "sha256": "23074ebeddf14715e772c4df0f117d782a46324082c45f76fef7ce34d934915b"
+      },
+      "path": "qualifications/23074ebeddf14715e772c4df0f117d782a46324082c45f76fef7ce34d934915b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/full_moons_rise.txt",
+        "sha256": "2543b5c369076d409211139236e707756ddd1b04969ae955cb8ba89b0bb98828"
+      },
+      "path": "qualifications/2543b5c369076d409211139236e707756ddd1b04969ae955cb8ba89b0bb98828.json"
+    },
+    {
+      "sourceScript": {
+        "path": "f/furor_of_the_bitten.txt",
+        "sha256": "495712d76ce30785e2b32d3c7b96d7cfbfa40b5eae8f726fae76df14ef87105c"
+      },
+      "path": "qualifications/495712d76ce30785e2b32d3c7b96d7cfbfa40b5eae8f726fae76df14ef87105c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/gallows_warden.txt",
+        "sha256": "04ab0b1c3376749912a2c464e2e9c008e63973a0e8355d9d17c21e94bbdd3f4a"
+      },
+      "path": "qualifications/04ab0b1c3376749912a2c464e2e9c008e63973a0e8355d9d17c21e94bbdd3f4a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/galvanic_juggernaut.txt",
+        "sha256": "2fb4271f51c86000859dec2121bfffcc122c95cc745a1e0ffc91c80f2577ff0f"
+      },
+      "path": "qualifications/2fb4271f51c86000859dec2121bfffcc122c95cc745a1e0ffc91c80f2577ff0f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/garruk_relentless_garruk_the_veil_cursed.txt",
+        "sha256": "3f6ce88ddcc5bfc56f135c7adafb0abe1966b2ecb7b812dd166025420b1000cd"
+      },
+      "path": "qualifications/3f6ce88ddcc5bfc56f135c7adafb0abe1966b2ecb7b812dd166025420b1000cd.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/gatstaf_shepherd_gatstaf_howler.txt",
+        "sha256": "286673563aeac47a3541f4e3cd777924b5caf30eaee0ad5adf9953eb46155372"
+      },
+      "path": "qualifications/286673563aeac47a3541f4e3cd777924b5caf30eaee0ad5adf9953eb46155372.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/gavony_township.txt",
+        "sha256": "a87385b75a0865b40817273763328aea445ec86236f7d0f77768b509987d8fa1"
+      },
+      "path": "qualifications/a87385b75a0865b40817273763328aea445ec86236f7d0f77768b509987d8fa1.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/geist_honored_monk.txt",
+        "sha256": "d354adafe39dc3af07bdb6beccc83242517478ba533349e2f96c2ec2384d0354"
+      },
+      "path": "qualifications/d354adafe39dc3af07bdb6beccc83242517478ba533349e2f96c2ec2384d0354.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/geist_of_saint_traft.txt",
+        "sha256": "5b2eab2710709d8d95c39fc2c50553b45a929af360bbe6f6519516c74984a720"
+      },
+      "path": "qualifications/5b2eab2710709d8d95c39fc2c50553b45a929af360bbe6f6519516c74984a720.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/geistcatchers_rig.txt",
+        "sha256": "8807a475c36dece7559a93ec9d28a4ca5b66872733bb922434a03784f71af334"
+      },
+      "path": "qualifications/8807a475c36dece7559a93ec9d28a4ca5b66872733bb922434a03784f71af334.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/geistflame.txt",
+        "sha256": "05692eab01400c827483b1cb99b172e025fb786e6ad6699e1969da06f91ae930"
+      },
+      "path": "qualifications/05692eab01400c827483b1cb99b172e025fb786e6ad6699e1969da06f91ae930.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/ghost_quarter.txt",
+        "sha256": "6e860db9679660a28b9c7fe34e40ec2d5d7e83ef4a91bf48c9f7c575728f487c"
+      },
+      "path": "qualifications/6e860db9679660a28b9c7fe34e40ec2d5d7e83ef4a91bf48c9f7c575728f487c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/ghostly_possession.txt",
+        "sha256": "868d741a6ffa675e542b58fc9a09ff1a9bc30101c9f00f857edf7408a4d4a7ac"
+      },
+      "path": "qualifications/868d741a6ffa675e542b58fc9a09ff1a9bc30101c9f00f857edf7408a4d4a7ac.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/ghoulcallers_bell.txt",
+        "sha256": "b59d1fa44807b201593f9f0d9fc60e88df22339fbed90081a130730c46dab06b"
+      },
+      "path": "qualifications/b59d1fa44807b201593f9f0d9fc60e88df22339fbed90081a130730c46dab06b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/ghoulcallers_chant.txt",
+        "sha256": "2a046611b9783f42720f7fbae7c92ff2cbf0bc723fd061ef4813ad322a09d493"
+      },
+      "path": "qualifications/2a046611b9783f42720f7fbae7c92ff2cbf0bc723fd061ef4813ad322a09d493.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/ghoulraiser.txt",
+        "sha256": "05005b35662c36119d2a71dd29e226d8e9393bff9a12c6a3633a046a8f548bc0"
+      },
+      "path": "qualifications/05005b35662c36119d2a71dd29e226d8e9393bff9a12c6a3633a046a8f548bc0.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/gnaw_to_the_bone.txt",
+        "sha256": "b248607214ee50b2b199d6fb837aa662ebfa433065e1fc55d013732d1b81efb1"
+      },
+      "path": "qualifications/b248607214ee50b2b199d6fb837aa662ebfa433065e1fc55d013732d1b81efb1.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/grasp_of_phantoms.txt",
+        "sha256": "3dee16f48d84e54f71e2f83a0e7ebcf2f554b7209df98dabc282c2d629230b79"
+      },
+      "path": "qualifications/3dee16f48d84e54f71e2f83a0e7ebcf2f554b7209df98dabc282c2d629230b79.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/grave_bramble.txt",
+        "sha256": "1ef253fadf07f776dc00ea19eca8a702091ea09f47385e4eba9f6dc265b2b9e9"
+      },
+      "path": "qualifications/1ef253fadf07f776dc00ea19eca8a702091ea09f47385e4eba9f6dc265b2b9e9.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/graveyard_shovel.txt",
+        "sha256": "98a66047d2452ea4ffa357d4c01296f3dc8f052ad88ca2d250819dda9c87491c"
+      },
+      "path": "qualifications/98a66047d2452ea4ffa357d4c01296f3dc8f052ad88ca2d250819dda9c87491c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/grimgrin_corpse_born.txt",
+        "sha256": "09d0b61a2fd7208dc8c5d2c881568876bd43d684b0c6fa609a6d2e2f31a8827d"
+      },
+      "path": "qualifications/09d0b61a2fd7208dc8c5d2c881568876bd43d684b0c6fa609a6d2e2f31a8827d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/grimoire_of_the_dead.txt",
+        "sha256": "ac5967b429acaec93b833654d98a3013a438de4353a8fc82f28d75d3c7e4ce66"
+      },
+      "path": "qualifications/ac5967b429acaec93b833654d98a3013a438de4353a8fc82f28d75d3c7e4ce66.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/grizzled_outcasts_krallenhorde_wantons.txt",
+        "sha256": "615fdc077257d2993847024a6f2d849b7b4345c58ab66824ec5781b13837b22b"
+      },
+      "path": "qualifications/615fdc077257d2993847024a6f2d849b7b4345c58ab66824ec5781b13837b22b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/gruesome_deformity.txt",
+        "sha256": "b48f95fa93718cd84f0d6c67bd3ef10479843e3e46084dd4e27a6edcb3fd7034"
+      },
+      "path": "qualifications/b48f95fa93718cd84f0d6c67bd3ef10479843e3e46084dd4e27a6edcb3fd7034.json"
+    },
+    {
+      "sourceScript": {
+        "path": "g/gutter_grime.txt",
+        "sha256": "13bedf63a79adf50c1f40fd14c6558a2cab34b1d33272392cf59ca06d36cfbbf"
+      },
+      "path": "qualifications/13bedf63a79adf50c1f40fd14c6558a2cab34b1d33272392cf59ca06d36cfbbf.json"
+    },
+    {
+      "sourceScript": {
+        "path": "h/hamlet_captain.txt",
+        "sha256": "f5b06c8101d2b9887956549e39fd2fdfe6e2cfd75be4779ee345e0ad650a0cdf"
+      },
+      "path": "qualifications/f5b06c8101d2b9887956549e39fd2fdfe6e2cfd75be4779ee345e0ad650a0cdf.json"
+    },
+    {
+      "sourceScript": {
+        "path": "h/hanweir_watchkeep_bane_of_hanweir.txt",
+        "sha256": "b2bdf0fbb9115d7fd3c969020b5fb4b4ad346aa80728f1f6fa5886ce273ffc2b"
+      },
+      "path": "qualifications/b2bdf0fbb9115d7fd3c969020b5fb4b4ad346aa80728f1f6fa5886ce273ffc2b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "h/harvest_pyre.txt",
+        "sha256": "c92c898d9765c778d10449aca55036487aef51a48b5e8744003e37c5bcf7152a"
+      },
+      "path": "qualifications/c92c898d9765c778d10449aca55036487aef51a48b5e8744003e37c5bcf7152a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "h/heartless_summoning.txt",
+        "sha256": "262a6cefe4124a45963ca5ca345a137d947297e8862a2bb7a22cfb17f84a794b"
+      },
+      "path": "qualifications/262a6cefe4124a45963ca5ca345a137d947297e8862a2bb7a22cfb17f84a794b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "h/heretics_punishment.txt",
+        "sha256": "85616b115e92374a0a3a1780a4e62a551886c638d253314107e9ef3e8c6a83ea"
+      },
+      "path": "qualifications/85616b115e92374a0a3a1780a4e62a551886c638d253314107e9ef3e8c6a83ea.json"
+    },
+    {
+      "sourceScript": {
+        "path": "h/hinterland_harbor.txt",
+        "sha256": "88f61458995264eeaf4785307974f3f1641e73db211783ee31c0f2e24f344a32"
+      },
+      "path": "qualifications/88f61458995264eeaf4785307974f3f1641e73db211783ee31c0f2e24f344a32.json"
+    },
+    {
+      "sourceScript": {
+        "path": "h/hollowhenge_scavenger.txt",
+        "sha256": "5a8565da328145cca8f56d855b112bec34c94a754aa5a962a6793c2eae17f937"
+      },
+      "path": "qualifications/5a8565da328145cca8f56d855b112bec34c94a754aa5a962a6793c2eae17f937.json"
+    },
+    {
+      "sourceScript": {
+        "path": "h/hysterical_blindness.txt",
+        "sha256": "efdce8de7d99c83f45e972d942bf1693115a5cf74be1dadf2984360094878e7b"
+      },
+      "path": "qualifications/efdce8de7d99c83f45e972d942bf1693115a5cf74be1dadf2984360094878e7b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "i/infernal_plunge.txt",
+        "sha256": "2fbe88a4bf4a068e7bccd5c67890de529e6f1c43adca5ed748f4b0ba3f357662"
+      },
+      "path": "qualifications/2fbe88a4bf4a068e7bccd5c67890de529e6f1c43adca5ed748f4b0ba3f357662.json"
+    },
+    {
+      "sourceScript": {
+        "path": "i/inquisitors_flail.txt",
+        "sha256": "f72f2290c462b580f2e1d26fd12208e3b12cbef7542d6e442ed28d63bcf73329"
+      },
+      "path": "qualifications/f72f2290c462b580f2e1d26fd12208e3b12cbef7542d6e442ed28d63bcf73329.json"
+    },
+    {
+      "sourceScript": {
+        "path": "i/instigator_gang_wildblood_pack.txt",
+        "sha256": "4187a4245e58ed4b8b30445f08a15ae075fe4046b3b19997b8c45d0f63ac523f"
+      },
+      "path": "qualifications/4187a4245e58ed4b8b30445f08a15ae075fe4046b3b19997b8c45d0f63ac523f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "i/intangible_virtue.txt",
+        "sha256": "8eef65aa187c2bc69e6e66b76d525aceaa8cad7fe38160ec0f76e04cdc9943c6"
+      },
+      "path": "qualifications/8eef65aa187c2bc69e6e66b76d525aceaa8cad7fe38160ec0f76e04cdc9943c6.json"
+    },
+    {
+      "sourceScript": {
+        "path": "i/into_the_maw_of_hell.txt",
+        "sha256": "8a1323946023de2378d18534f20661999f2f28ce6b362d9ff43f88d7e5f97f81"
+      },
+      "path": "qualifications/8a1323946023de2378d18534f20661999f2f28ce6b362d9ff43f88d7e5f97f81.json"
+    },
+    {
+      "sourceScript": {
+        "path": "i/invisible_stalker.txt",
+        "sha256": "6907c4351f59e48d46645677e780278865947936618d803c094cd709c19b9a2f"
+      },
+      "path": "qualifications/6907c4351f59e48d46645677e780278865947936618d803c094cd709c19b9a2f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "i/island.txt",
+        "sha256": "e590434de75aa3e39a03555d0c91788cdabe37f5fdf91ce7c1a189c79f4cade6"
+      },
+      "path": "qualifications/e590434de75aa3e39a03555d0c91788cdabe37f5fdf91ce7c1a189c79f4cade6.json"
+    },
+    {
+      "sourceScript": {
+        "path": "i/isolated_chapel.txt",
+        "sha256": "8747e0017ff4769a710eb8a4f75381ecd916bc5a59446e14d99a86fdd548bbce"
+      },
+      "path": "qualifications/8747e0017ff4769a710eb8a4f75381ecd916bc5a59446e14d99a86fdd548bbce.json"
+    },
+    {
+      "sourceScript": {
+        "path": "k/kessig_cagebreakers.txt",
+        "sha256": "59adc55f6657642e14b6813feaf1d2a204367b1f502be7c29dae4da8daede98c"
+      },
+      "path": "qualifications/59adc55f6657642e14b6813feaf1d2a204367b1f502be7c29dae4da8daede98c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "k/kessig_wolf.txt",
+        "sha256": "5a1522997e593c0079ceea8623802c5e8fdf3088d0af6395762f5a8032f3d026"
+      },
+      "path": "qualifications/5a1522997e593c0079ceea8623802c5e8fdf3088d0af6395762f5a8032f3d026.json"
+    },
+    {
+      "sourceScript": {
+        "path": "k/kessig_wolf_run.txt",
+        "sha256": "24ce049c7882cb31f15fcd666d19451b5d6cf47decb9cf0641477d5a691ed9ae"
+      },
+      "path": "qualifications/24ce049c7882cb31f15fcd666d19451b5d6cf47decb9cf0641477d5a691ed9ae.json"
+    },
+    {
+      "sourceScript": {
+        "path": "k/kindercatch.txt",
+        "sha256": "b0b25cf3688ead5a4c257e4bddee68a239bdb1657f5a2f4a4d03200947c9e266"
+      },
+      "path": "qualifications/b0b25cf3688ead5a4c257e4bddee68a239bdb1657f5a2f4a4d03200947c9e266.json"
+    },
+    {
+      "sourceScript": {
+        "path": "k/kruin_outlaw_terror_of_kruin_pass.txt",
+        "sha256": "8986d5092eee87a8a0f7465d2e02316a47013c905b3b3d8640a20052dd254167"
+      },
+      "path": "qualifications/8986d5092eee87a8a0f7465d2e02316a47013c905b3b3d8640a20052dd254167.json"
+    },
+    {
+      "sourceScript": {
+        "path": "l/laboratory_maniac.txt",
+        "sha256": "56df8bcec3d826ec7795590857757ccea390a0da3611d36b2af5327fb8896e15"
+      },
+      "path": "qualifications/56df8bcec3d826ec7795590857757ccea390a0da3611d36b2af5327fb8896e15.json"
+    },
+    {
+      "sourceScript": {
+        "path": "l/lantern_spirit.txt",
+        "sha256": "391ed1eb8613613d6767c6aabb7481c7bcb3974a66efc86e158c6ef130de6832"
+      },
+      "path": "qualifications/391ed1eb8613613d6767c6aabb7481c7bcb3974a66efc86e158c6ef130de6832.json"
+    },
+    {
+      "sourceScript": {
+        "path": "l/liliana_of_the_veil.txt",
+        "sha256": "dcaceb483db5a3ed16960ba564028d8a605abdfd2d0ac9b894b61ca02acd5db2"
+      },
+      "path": "qualifications/dcaceb483db5a3ed16960ba564028d8a605abdfd2d0ac9b894b61ca02acd5db2.json"
+    },
+    {
+      "sourceScript": {
+        "path": "l/lost_in_the_mist.txt",
+        "sha256": "d3adb673ca5587e1a6a913b224cd6a508431d1ce3b97e1c4c621d777a34dc84d"
+      },
+      "path": "qualifications/d3adb673ca5587e1a6a913b224cd6a508431d1ce3b97e1c4c621d777a34dc84d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "l/ludevics_test_subject_ludevics_abomination.txt",
+        "sha256": "c757781469e760eabc3567d3eb74191afcc2806d1950757f660f26663deb3225"
+      },
+      "path": "qualifications/c757781469e760eabc3567d3eb74191afcc2806d1950757f660f26663deb3225.json"
+    },
+    {
+      "sourceScript": {
+        "path": "l/lumberknot.txt",
+        "sha256": "e8a6a06de6abb098a5d8ea862805826d63d2aec653a13815a89c2783a3312f9a"
+      },
+      "path": "qualifications/e8a6a06de6abb098a5d8ea862805826d63d2aec653a13815a89c2783a3312f9a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/make_a_wish.txt",
+        "sha256": "dfc62ed0c05556f058ec272452a4c3c9a97192b89de204553a0e66cb1b7ac397"
+      },
+      "path": "qualifications/dfc62ed0c05556f058ec272452a4c3c9a97192b89de204553a0e66cb1b7ac397.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/makeshift_mauler.txt",
+        "sha256": "b2a7ab101a086809e29b9f0ef3c02e2eabbfdd68f97b543d81af071c31242a17"
+      },
+      "path": "qualifications/b2a7ab101a086809e29b9f0ef3c02e2eabbfdd68f97b543d81af071c31242a17.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/manor_gargoyle.txt",
+        "sha256": "a672b60e94bf41b58a9456d34ae6aa95d48c6a4cad2f56a8c560eaddbab47085"
+      },
+      "path": "qualifications/a672b60e94bf41b58a9456d34ae6aa95d48c6a4cad2f56a8c560eaddbab47085.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/manor_skeleton.txt",
+        "sha256": "18353b841fb96ff5bfb52af2f659cf572ff2e5af14a2a737e86b1f555e194b7b"
+      },
+      "path": "qualifications/18353b841fb96ff5bfb52af2f659cf572ff2e5af14a2a737e86b1f555e194b7b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/markov_patrician.txt",
+        "sha256": "1c4f3c58adb33095977c195009f6a2e0de8bdec53785f3e23dcd633c7535fcea"
+      },
+      "path": "qualifications/1c4f3c58adb33095977c195009f6a2e0de8bdec53785f3e23dcd633c7535fcea.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/mask_of_avacyn.txt",
+        "sha256": "284ce71be1fce0705146039ca445fc3a808c2e2a812df18e0dc081b969901726"
+      },
+      "path": "qualifications/284ce71be1fce0705146039ca445fc3a808c2e2a812df18e0dc081b969901726.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/mausoleum_guard.txt",
+        "sha256": "f9e1ede4bb13e2cafc69250e0209bd8a75d299b1d32b80c465545b281ab6c88a"
+      },
+      "path": "qualifications/f9e1ede4bb13e2cafc69250e0209bd8a75d299b1d32b80c465545b281ab6c88a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/maw_of_the_mire.txt",
+        "sha256": "c30bae0d5a7927b8e715a3d1b9dd5e941a57c6bd36266541cd05ccfbac48f768"
+      },
+      "path": "qualifications/c30bae0d5a7927b8e715a3d1b9dd5e941a57c6bd36266541cd05ccfbac48f768.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/mayor_of_avabruck_howlpack_alpha.txt",
+        "sha256": "45bee48a3e573aad2d920cc70dce6689f955ed02487596e2174a3a2830b3b79c"
+      },
+      "path": "qualifications/45bee48a3e573aad2d920cc70dce6689f955ed02487596e2174a3a2830b3b79c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/memorys_journey.txt",
+        "sha256": "bd5a97d4b9ae625395837cc55109e79ca3139722418565e69db876efdcc1f946"
+      },
+      "path": "qualifications/bd5a97d4b9ae625395837cc55109e79ca3139722418565e69db876efdcc1f946.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/mentor_of_the_meek.txt",
+        "sha256": "24df68731b464b9edb2fc8e1907abd0be18554625a02571dbcaee9f57fa3ee6c"
+      },
+      "path": "qualifications/24df68731b464b9edb2fc8e1907abd0be18554625a02571dbcaee9f57fa3ee6c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/midnight_haunting.txt",
+        "sha256": "e9ce6bea63159f8c675b4a9d1b9c60da7af33d23a294513b879505e2e0dffcea"
+      },
+      "path": "qualifications/e9ce6bea63159f8c675b4a9d1b9c60da7af33d23a294513b879505e2e0dffcea.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/mikaeus_the_lunarch.txt",
+        "sha256": "e4d0dc1718a22d38be102afc08407c6f149773b5ba9d8d95077b420fdcfd0b65"
+      },
+      "path": "qualifications/e4d0dc1718a22d38be102afc08407c6f149773b5ba9d8d95077b420fdcfd0b65.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/mindshrieker.txt",
+        "sha256": "31a77d60bf0f8d746163fec783e1d5547fe30d65c5b1edaadc33c138c4226c9a"
+      },
+      "path": "qualifications/31a77d60bf0f8d746163fec783e1d5547fe30d65c5b1edaadc33c138c4226c9a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/mirror_mad_phantasm.txt",
+        "sha256": "3915e272921353678bb911373322f48b08057c5a2dc056e2b8516d1f36b56676"
+      },
+      "path": "qualifications/3915e272921353678bb911373322f48b08057c5a2dc056e2b8516d1f36b56676.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/moan_of_the_unhallowed.txt",
+        "sha256": "a7b886efe93ef0b8e60e2e34f66987cafad76d4e7fdc3a3f7ac9a3927e7354a3"
+      },
+      "path": "qualifications/a7b886efe93ef0b8e60e2e34f66987cafad76d4e7fdc3a3f7ac9a3927e7354a3.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/moldgraf_monstrosity.txt",
+        "sha256": "b43e41d4e2c1ba3ec5475798c5fb917d9f213e4cfea004e305a920bcf87e607a"
+      },
+      "path": "qualifications/b43e41d4e2c1ba3ec5475798c5fb917d9f213e4cfea004e305a920bcf87e607a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/moment_of_heroism.txt",
+        "sha256": "f3f6f568c036560aa288aacfd5878574104b11ac0db117b270fa47e7008989bc"
+      },
+      "path": "qualifications/f3f6f568c036560aa288aacfd5878574104b11ac0db117b270fa47e7008989bc.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/moon_heron.txt",
+        "sha256": "2d8306d1ca43ebaa5f68eac26235147fd5dcbd0725bd46f8f0eedf5d16ad5fc8"
+      },
+      "path": "qualifications/2d8306d1ca43ebaa5f68eac26235147fd5dcbd0725bd46f8f0eedf5d16ad5fc8.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/moonmist.txt",
+        "sha256": "b4e56239c843fe718c3dbdf721ae41a15ec4f13a78f18994840d5df6f4fdc8a6"
+      },
+      "path": "qualifications/b4e56239c843fe718c3dbdf721ae41a15ec4f13a78f18994840d5df6f4fdc8a6.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/moorland_haunt.txt",
+        "sha256": "1d91682470b612bc58a41d0e64263b344bb2546e702ba5e35fe3dec0e08c16b5"
+      },
+      "path": "qualifications/1d91682470b612bc58a41d0e64263b344bb2546e702ba5e35fe3dec0e08c16b5.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/morkrut_banshee.txt",
+        "sha256": "23ef9637e6e63ee1bb92f05df708b1bfad693b7e12a08f3e59312675dca4a178"
+      },
+      "path": "qualifications/23ef9637e6e63ee1bb92f05df708b1bfad693b7e12a08f3e59312675dca4a178.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/mountain.txt",
+        "sha256": "d421d9639d7b7f2a8c4ed04fa2fa8526cbc768733a92b0a1a453535ee99a3799"
+      },
+      "path": "qualifications/d421d9639d7b7f2a8c4ed04fa2fa8526cbc768733a92b0a1a453535ee99a3799.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/mulch.txt",
+        "sha256": "a92dd88221b515f91c8f77f7c59b70c031392a1e10cd751f3c01edd4a9cdd689"
+      },
+      "path": "qualifications/a92dd88221b515f91c8f77f7c59b70c031392a1e10cd751f3c01edd4a9cdd689.json"
+    },
+    {
+      "sourceScript": {
+        "path": "m/murder_of_crows.txt",
+        "sha256": "2ac5664ca2be1cc5f656124430f5aa57b0cd0bff8076e66f84498f285755709f"
+      },
+      "path": "qualifications/2ac5664ca2be1cc5f656124430f5aa57b0cd0bff8076e66f84498f285755709f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "n/naturalize.txt",
+        "sha256": "2dcadf53e5b98565938da031bb5ea6414a0a9a42bf5bc5b6d4d372d8cdc5fdc9"
+      },
+      "path": "qualifications/2dcadf53e5b98565938da031bb5ea6414a0a9a42bf5bc5b6d4d372d8cdc5fdc9.json"
+    },
+    {
+      "sourceScript": {
+        "path": "n/nephalia_drownyard.txt",
+        "sha256": "43b7b3c97c36524acc12168b4592ad9f2c449bdd052f34a12ee7223cb8ac4e58"
+      },
+      "path": "qualifications/43b7b3c97c36524acc12168b4592ad9f2c449bdd052f34a12ee7223cb8ac4e58.json"
+    },
+    {
+      "sourceScript": {
+        "path": "n/nevermore.txt",
+        "sha256": "0efa26bf896f8e946bc3a2588bcbe77fae591c466e8678437333bac830d8a95b"
+      },
+      "path": "qualifications/0efa26bf896f8e946bc3a2588bcbe77fae591c466e8678437333bac830d8a95b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "n/night_revelers.txt",
+        "sha256": "c5a318552892b5044f9818d740aef068c2c98f9bcfb279a4bb344062608f2a9e"
+      },
+      "path": "qualifications/c5a318552892b5044f9818d740aef068c2c98f9bcfb279a4bb344062608f2a9e.json"
+    },
+    {
+      "sourceScript": {
+        "path": "n/night_terrors.txt",
+        "sha256": "6d27b10aef1b453bc896147bcf08401eea9a55f8e30b35c5b74c9e6c31391986"
+      },
+      "path": "qualifications/6d27b10aef1b453bc896147bcf08401eea9a55f8e30b35c5b74c9e6c31391986.json"
+    },
+    {
+      "sourceScript": {
+        "path": "n/nightbirds_clutches.txt",
+        "sha256": "ecd41097993ad2c19705bc51c02fc140782770eacab61f5437f91c449783b82d"
+      },
+      "path": "qualifications/ecd41097993ad2c19705bc51c02fc140782770eacab61f5437f91c449783b82d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "o/olivia_voldaren.txt",
+        "sha256": "e49bf9704d59be815d3c35c89c4de7b97401821d8c968862c1f8ac8de906d352"
+      },
+      "path": "qualifications/e49bf9704d59be815d3c35c89c4de7b97401821d8c968862c1f8ac8de906d352.json"
+    },
+    {
+      "sourceScript": {
+        "path": "o/one_eyed_scarecrow.txt",
+        "sha256": "5679f175d73b7a1fdfc80305d1cae4af299df48b5778abbc3ccabfa5c80e9213"
+      },
+      "path": "qualifications/5679f175d73b7a1fdfc80305d1cae4af299df48b5778abbc3ccabfa5c80e9213.json"
+    },
+    {
+      "sourceScript": {
+        "path": "o/orchard_spirit.txt",
+        "sha256": "9645ef8658f265d68e168e18d30cf003036c84fa2320369c06b9919e9e67522b"
+      },
+      "path": "qualifications/9645ef8658f265d68e168e18d30cf003036c84fa2320369c06b9919e9e67522b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "p/parallel_lives.txt",
+        "sha256": "e87e169f5468dfc14bdbc08123b25b1f7ada0466292589ef6166dfe26edb497b"
+      },
+      "path": "qualifications/e87e169f5468dfc14bdbc08123b25b1f7ada0466292589ef6166dfe26edb497b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "p/paraselene.txt",
+        "sha256": "2477287701052a031a8a971eee456a9a9b2f1de60958dc613ac8b56b3d616ead"
+      },
+      "path": "qualifications/2477287701052a031a8a971eee456a9a9b2f1de60958dc613ac8b56b3d616ead.json"
+    },
+    {
+      "sourceScript": {
+        "path": "p/past_in_flames.txt",
+        "sha256": "0c5084337eaae9bb4687b8db844e60603f92c47b15f7503dc5b1133b44feeb19"
+      },
+      "path": "qualifications/0c5084337eaae9bb4687b8db844e60603f92c47b15f7503dc5b1133b44feeb19.json"
+    },
+    {
+      "sourceScript": {
+        "path": "p/pitchburn_devils.txt",
+        "sha256": "98a7fb7e5a4b85780584a68ac831d5033cfe66def8404e6c82d586b899afc247"
+      },
+      "path": "qualifications/98a7fb7e5a4b85780584a68ac831d5033cfe66def8404e6c82d586b899afc247.json"
+    },
+    {
+      "sourceScript": {
+        "path": "p/plains.txt",
+        "sha256": "7b72280280cf668427e25283026a88ebcf3c67963e1097eda39ed6433c228f9c"
+      },
+      "path": "qualifications/7b72280280cf668427e25283026a88ebcf3c67963e1097eda39ed6433c228f9c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "p/prey_upon.txt",
+        "sha256": "026e8b842d72087c4c50bb4075b60f7e0c8942e456f4380e2ba16c55b95493c9"
+      },
+      "path": "qualifications/026e8b842d72087c4c50bb4075b60f7e0c8942e456f4380e2ba16c55b95493c9.json"
+    },
+    {
+      "sourceScript": {
+        "path": "p/purify_the_grave.txt",
+        "sha256": "85ba5edc12a5133bba71a037ff1aa1f0edb9e71a567ec32ad424add2d0db2b52"
+      },
+      "path": "qualifications/85ba5edc12a5133bba71a037ff1aa1f0edb9e71a567ec32ad424add2d0db2b52.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/rage_thrower.txt",
+        "sha256": "448fd530310fda94ba42d6ef3319289d1abe3b19f50d69e4139b20bf1eef029e"
+      },
+      "path": "qualifications/448fd530310fda94ba42d6ef3319289d1abe3b19f50d69e4139b20bf1eef029e.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/rakish_heir.txt",
+        "sha256": "82e3c398337115517af251500da05d5e244f02cf468c7d0781e7dce7fcfda5a9"
+      },
+      "path": "qualifications/82e3c398337115517af251500da05d5e244f02cf468c7d0781e7dce7fcfda5a9.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/rally_the_peasants.txt",
+        "sha256": "515dee88232817a85e63b2a44d1400db9d41ed5b644b532c892e3944e82a5657"
+      },
+      "path": "qualifications/515dee88232817a85e63b2a44d1400db9d41ed5b644b532c892e3944e82a5657.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/rangers_guile.txt",
+        "sha256": "ba901396cc8531fac70e6313e47606c04331f6ff28bca922e1f98dd67d2a24eb"
+      },
+      "path": "qualifications/ba901396cc8531fac70e6313e47606c04331f6ff28bca922e1f98dd67d2a24eb.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/reaper_from_the_abyss.txt",
+        "sha256": "dce639b5a7cd6b1d583c8a8253e682911bf466413fa7425857ca144d3b449810"
+      },
+      "path": "qualifications/dce639b5a7cd6b1d583c8a8253e682911bf466413fa7425857ca144d3b449810.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/rebuke.txt",
+        "sha256": "695177f0360039f852c1091ed06449ccda07fe991e5c431ffcb70ea0e27a488c"
+      },
+      "path": "qualifications/695177f0360039f852c1091ed06449ccda07fe991e5c431ffcb70ea0e27a488c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/reckless_waif_merciless_predator.txt",
+        "sha256": "d51078cdcd13c0cb51467e26a243bf3246d1d949f042765683fb3f701f06900f"
+      },
+      "path": "qualifications/d51078cdcd13c0cb51467e26a243bf3246d1d949f042765683fb3f701f06900f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/riot_devils.txt",
+        "sha256": "572b8dbe339aa481c66aeb4a5e498139188e195faa55f1b1d94176557bca54a2"
+      },
+      "path": "qualifications/572b8dbe339aa481c66aeb4a5e498139188e195faa55f1b1d94176557bca54a2.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/rolling_temblor.txt",
+        "sha256": "37eed7320e922a10bddd155381dff89590ed4e60b724a6b4c5809cdb380c8382"
+      },
+      "path": "qualifications/37eed7320e922a10bddd155381dff89590ed4e60b724a6b4c5809cdb380c8382.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/rooftop_storm.txt",
+        "sha256": "5d90f31c392cf069a7fc3bffa8aa809a5c0d2b442f05805da8a0edda065fd7ad"
+      },
+      "path": "qualifications/5d90f31c392cf069a7fc3bffa8aa809a5c0d2b442f05805da8a0edda065fd7ad.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/rotting_fensnake.txt",
+        "sha256": "8f0907162c105a42591e70695f2a0ac1d19b0124419ec810be7157bfaea65ce3"
+      },
+      "path": "qualifications/8f0907162c105a42591e70695f2a0ac1d19b0124419ec810be7157bfaea65ce3.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/runechanters_pike.txt",
+        "sha256": "c1f767ed8f0080ad74744edd42b407de5940d4a63963b5b98da7012b388c0461"
+      },
+      "path": "qualifications/c1f767ed8f0080ad74744edd42b407de5940d4a63963b5b98da7012b388c0461.json"
+    },
+    {
+      "sourceScript": {
+        "path": "r/runic_repetition.txt",
+        "sha256": "28f4869b523cc2f184345ce68964e795104471316353524d01b89bbfa2dc1acb"
+      },
+      "path": "qualifications/28f4869b523cc2f184345ce68964e795104471316353524d01b89bbfa2dc1acb.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/scourge_of_geier_reach.txt",
+        "sha256": "eed468d40f1543ae90f2537f604f53290d3f5789274092a7cfaf1d2da6a78df5"
+      },
+      "path": "qualifications/eed468d40f1543ae90f2537f604f53290d3f5789274092a7cfaf1d2da6a78df5.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/screeching_bat_stalking_vampire.txt",
+        "sha256": "58a9024d5634e7706e831fe425c63ed081b55ad15e0de6113f3d9abdf1b953dc"
+      },
+      "path": "qualifications/58a9024d5634e7706e831fe425c63ed081b55ad15e0de6113f3d9abdf1b953dc.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/selfless_cathar.txt",
+        "sha256": "13d82a5f1ce9c6066dab031f05ea8cb791719cb132ced50479dfb067b92a306d"
+      },
+      "path": "qualifications/13d82a5f1ce9c6066dab031f05ea8cb791719cb132ced50479dfb067b92a306d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/selhoff_occultist.txt",
+        "sha256": "1faf4d6391882bac7878f620636f952edf956754fd20b4a3822317191bf8989d"
+      },
+      "path": "qualifications/1faf4d6391882bac7878f620636f952edf956754fd20b4a3822317191bf8989d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/sensory_deprivation.txt",
+        "sha256": "2e4f0abdfe8416042b4819da47973bef2beefb7bb968f9ca59139c57bce29a4e"
+      },
+      "path": "qualifications/2e4f0abdfe8416042b4819da47973bef2beefb7bb968f9ca59139c57bce29a4e.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/sever_the_bloodline.txt",
+        "sha256": "08c0317d5fa71a92e55b0f67f562e49d20bc6bb65bf45c143abc17da93b4f348"
+      },
+      "path": "qualifications/08c0317d5fa71a92e55b0f67f562e49d20bc6bb65bf45c143abc17da93b4f348.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/sharpened_pitchfork.txt",
+        "sha256": "dd3b4b06efab8a6fdcd9d5c7e404f43cbab89aec239804cdeb5046241d4389ef"
+      },
+      "path": "qualifications/dd3b4b06efab8a6fdcd9d5c7e404f43cbab89aec239804cdeb5046241d4389ef.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/shimmering_grotto.txt",
+        "sha256": "21a4e819ceca64f5f5527910a80193b61930a1b115ae5995f3243de635e3c8ee"
+      },
+      "path": "qualifications/21a4e819ceca64f5f5527910a80193b61930a1b115ae5995f3243de635e3c8ee.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/silent_departure.txt",
+        "sha256": "80fed89d29056ed502bb3f25ff09686cb2d0652cdeb8e3430b5311d93f86b860"
+      },
+      "path": "qualifications/80fed89d29056ed502bb3f25ff09686cb2d0652cdeb8e3430b5311d93f86b860.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/silver_inlaid_dagger.txt",
+        "sha256": "e928c9846733a3c8db89b81bdee47d119824c830f66a60ac30db868754397afb"
+      },
+      "path": "qualifications/e928c9846733a3c8db89b81bdee47d119824c830f66a60ac30db868754397afb.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/silverchase_fox.txt",
+        "sha256": "48f354db0ad639e3ce217642bbf40e3c8a8a57e49ffdee893c42553c1477760f"
+      },
+      "path": "qualifications/48f354db0ad639e3ce217642bbf40e3c8a8a57e49ffdee893c42553c1477760f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/skaab_goliath.txt",
+        "sha256": "8c135eba3ce6741c69c922be6bf6e5a5850e6f04c4530251526f974856d097ef"
+      },
+      "path": "qualifications/8c135eba3ce6741c69c922be6bf6e5a5850e6f04c4530251526f974856d097ef.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/skaab_ruinator.txt",
+        "sha256": "f080252cca920c0232a20375967d5ce84f1502bc9001ced2b6a60f20668dd2f5"
+      },
+      "path": "qualifications/f080252cca920c0232a20375967d5ce84f1502bc9001ced2b6a60f20668dd2f5.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/skeletal_grimace.txt",
+        "sha256": "1e4b4b91bbfe88c34b6304141a60a0e15c35ad311fe8402c2a5fa8bdb811913f"
+      },
+      "path": "qualifications/1e4b4b91bbfe88c34b6304141a60a0e15c35ad311fe8402c2a5fa8bdb811913f.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/skirsdag_cultist.txt",
+        "sha256": "bdd2dfdea3dbea11b8d5d7f93335f2fa3ff8f6458acda4ff10b6ef3d5838f97d"
+      },
+      "path": "qualifications/bdd2dfdea3dbea11b8d5d7f93335f2fa3ff8f6458acda4ff10b6ef3d5838f97d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/skirsdag_high_priest.txt",
+        "sha256": "ad34036114d5a6920da51e92c3362865b339aee21ff58cb7ca7b5d432893e8fb"
+      },
+      "path": "qualifications/ad34036114d5a6920da51e92c3362865b339aee21ff58cb7ca7b5d432893e8fb.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/slayer_of_the_wicked.txt",
+        "sha256": "5d2324a6a2ba5fd93ee77a350b126596e3d0a2e3d77a7799d2854882df55ec98"
+      },
+      "path": "qualifications/5d2324a6a2ba5fd93ee77a350b126596e3d0a2e3d77a7799d2854882df55ec98.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/smite_the_monstrous.txt",
+        "sha256": "2ab8604673f0cc3926a12d57ad276e0477dfa865f216022a036301009782a909"
+      },
+      "path": "qualifications/2ab8604673f0cc3926a12d57ad276e0477dfa865f216022a036301009782a909.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/snapcaster_mage.txt",
+        "sha256": "baeaa65d543eee29a0bdec92a1efc339bc6fa5d2d8c009b67773b737b4c06abd"
+      },
+      "path": "qualifications/baeaa65d543eee29a0bdec92a1efc339bc6fa5d2d8c009b67773b737b4c06abd.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/somberwald_spider.txt",
+        "sha256": "2abdcde20860d61ae493d35209b4507c5709e73d42d7d89d93a4fc714558f87b"
+      },
+      "path": "qualifications/2abdcde20860d61ae493d35209b4507c5709e73d42d7d89d93a4fc714558f87b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/spare_from_evil.txt",
+        "sha256": "d970510a017420f887208187291c418ca225dcce49928fd0bbd53e3816eeb769"
+      },
+      "path": "qualifications/d970510a017420f887208187291c418ca225dcce49928fd0bbd53e3816eeb769.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/spectral_flight.txt",
+        "sha256": "b1cce55da66ce8e3b664cc1107512a9b80862f9bc5fe79e40c53cc62245ac2bf"
+      },
+      "path": "qualifications/b1cce55da66ce8e3b664cc1107512a9b80862f9bc5fe79e40c53cc62245ac2bf.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/spectral_rider.txt",
+        "sha256": "eb76af454fcd47148a5d50e5f3c23a0046dc6ac48528af86f441e1843e99af84"
+      },
+      "path": "qualifications/eb76af454fcd47148a5d50e5f3c23a0046dc6ac48528af86f441e1843e99af84.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/spider_spawning.txt",
+        "sha256": "ac77966939257ef8ba19cf123d91dea322a2e2573e1a8bf177b683b8f113194c"
+      },
+      "path": "qualifications/ac77966939257ef8ba19cf123d91dea322a2e2573e1a8bf177b683b8f113194c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/spidery_grasp.txt",
+        "sha256": "7015991ab2f77255a243a99c49ab26ca0048bc77209ac5c55ab1064862c79f32"
+      },
+      "path": "qualifications/7015991ab2f77255a243a99c49ab26ca0048bc77209ac5c55ab1064862c79f32.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/splinterfright.txt",
+        "sha256": "8f10b8fb62c2077ba105f83d0f9e89feeb30fc79423f86fd006354d21640763c"
+      },
+      "path": "qualifications/8f10b8fb62c2077ba105f83d0f9e89feeb30fc79423f86fd006354d21640763c.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/stensia_bloodhall.txt",
+        "sha256": "46a59d644329bffa4e723d0aaf8684f53125b7a477df935f218bc6de302a62b1"
+      },
+      "path": "qualifications/46a59d644329bffa4e723d0aaf8684f53125b7a477df935f218bc6de302a62b1.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/stitched_drake.txt",
+        "sha256": "6327f7b7f6aceeebec21ad4cc3da04863c2e070d88d40dce436d65ffda8564d8"
+      },
+      "path": "qualifications/6327f7b7f6aceeebec21ad4cc3da04863c2e070d88d40dce436d65ffda8564d8.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/stitchers_apprentice.txt",
+        "sha256": "3013b74030cf039ee6e2ba82e6455041818e9691865c89350a34d1ce9bad1d3a"
+      },
+      "path": "qualifications/3013b74030cf039ee6e2ba82e6455041818e9691865c89350a34d1ce9bad1d3a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/stony_silence.txt",
+        "sha256": "468fbdb10d3bf9b5c48c7a018717ff300fbbc33e9070bb1c7a55d866aa886a79"
+      },
+      "path": "qualifications/468fbdb10d3bf9b5c48c7a018717ff300fbbc33e9070bb1c7a55d866aa886a79.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/stromkirk_noble.txt",
+        "sha256": "1e998df21e9d4b66e1f69d4905cdc41f41abcfddb914428d82c7de93445a62f3"
+      },
+      "path": "qualifications/1e998df21e9d4b66e1f69d4905cdc41f41abcfddb914428d82c7de93445a62f3.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/stromkirk_patrol.txt",
+        "sha256": "84113d4656ea201044b47aee47adc717925cfdc563b8b89fe84364da634188cf"
+      },
+      "path": "qualifications/84113d4656ea201044b47aee47adc717925cfdc563b8b89fe84364da634188cf.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/sturmgeist.txt",
+        "sha256": "1a85f02f1a73789becd8dffc666dce640b557234d83bf5e1bb5c1b8c04698074"
+      },
+      "path": "qualifications/1a85f02f1a73789becd8dffc666dce640b557234d83bf5e1bb5c1b8c04698074.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/sulfur_falls.txt",
+        "sha256": "3c67998543a501cb0c014b68678cc3a0be7a49c40817c965831b689c402776f3"
+      },
+      "path": "qualifications/3c67998543a501cb0c014b68678cc3a0be7a49c40817c965831b689c402776f3.json"
+    },
+    {
+      "sourceScript": {
+        "path": "s/swamp.txt",
+        "sha256": "96a473942577dee4fffe52906874ef343a7e8d1413872334baa576066112d252"
+      },
+      "path": "qualifications/96a473942577dee4fffe52906874ef343a7e8d1413872334baa576066112d252.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/think_twice.txt",
+        "sha256": "c95bb884f07ce019578237b7f78e016ea8e961ae8fd1b5f63f1ae146f65c477a"
+      },
+      "path": "qualifications/c95bb884f07ce019578237b7f78e016ea8e961ae8fd1b5f63f1ae146f65c477a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/thraben_purebloods.txt",
+        "sha256": "be75b549d57a6c0c589fb1aa77b6cd02fdf520390d3fe9b1355b033893206b6d"
+      },
+      "path": "qualifications/be75b549d57a6c0c589fb1aa77b6cd02fdf520390d3fe9b1355b033893206b6d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/thraben_sentry_thraben_militia.txt",
+        "sha256": "e3004dff726f7b9fcc16030b480e3de08eb6ccf7f39cf13ee52a2ee8446851c6"
+      },
+      "path": "qualifications/e3004dff726f7b9fcc16030b480e3de08eb6ccf7f39cf13ee52a2ee8446851c6.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/tormented_pariah_rampaging_werewolf.txt",
+        "sha256": "dc357bbbe60a0c0148d3e68c02b8d452777178df378dc07c64853edbb78ac80a"
+      },
+      "path": "qualifications/dc357bbbe60a0c0148d3e68c02b8d452777178df378dc07c64853edbb78ac80a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/traitorous_blood.txt",
+        "sha256": "e1d591f29f531fb33e0777c3fe34435f935ea9f48ae073f8d4dfc83bf8e13887"
+      },
+      "path": "qualifications/e1d591f29f531fb33e0777c3fe34435f935ea9f48ae073f8d4dfc83bf8e13887.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/travel_preparations.txt",
+        "sha256": "bca7d3132372f809efa21d76db76698acd592a33865fac5eabfed98056c0efad"
+      },
+      "path": "qualifications/bca7d3132372f809efa21d76db76698acd592a33865fac5eabfed98056c0efad.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/travelers_amulet.txt",
+        "sha256": "b6c092b62aa8472eb1995e75e43a95cae4b5c57b0956b4a114d0e952274fb31d"
+      },
+      "path": "qualifications/b6c092b62aa8472eb1995e75e43a95cae4b5c57b0956b4a114d0e952274fb31d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/tree_of_redemption.txt",
+        "sha256": "5e9a32904658ee1609023f415f622d5bc38cfdaed882525cc72766aeef29bdee"
+      },
+      "path": "qualifications/5e9a32904658ee1609023f415f622d5bc38cfdaed882525cc72766aeef29bdee.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/trepanation_blade.txt",
+        "sha256": "317bf7954489190ccea199aaeda0bf05ec5c42a05805e5165519b32f012c786b"
+      },
+      "path": "qualifications/317bf7954489190ccea199aaeda0bf05ec5c42a05805e5165519b32f012c786b.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/tribute_to_hunger.txt",
+        "sha256": "0b31fd964b7af0154d3ae724a4a2a6a2e319b9029dd74d0126c50302afd8bcd1"
+      },
+      "path": "qualifications/0b31fd964b7af0154d3ae724a4a2a6a2e319b9029dd74d0126c50302afd8bcd1.json"
+    },
+    {
+      "sourceScript": {
+        "path": "t/typhoid_rats.txt",
+        "sha256": "cf6fc0f31c7447409100c307a71ba2300c74eca15bc134666ae927c0d01f5d17"
+      },
+      "path": "qualifications/cf6fc0f31c7447409100c307a71ba2300c74eca15bc134666ae927c0d01f5d17.json"
+    },
+    {
+      "sourceScript": {
+        "path": "u/ulvenwald_mystics_ulvenwald_primordials.txt",
+        "sha256": "f89c9e18f9354f08dda0278d3006da3f4745932c56ca226697b28fda14657482"
+      },
+      "path": "qualifications/f89c9e18f9354f08dda0278d3006da3f4745932c56ca226697b28fda14657482.json"
+    },
+    {
+      "sourceScript": {
+        "path": "u/unbreathing_horde.txt",
+        "sha256": "53d721c7c529f9d8606dfa130c988c004e24dc0d273c25a7584df7feaa63db9d"
+      },
+      "path": "qualifications/53d721c7c529f9d8606dfa130c988c004e24dc0d273c25a7584df7feaa63db9d.json"
+    },
+    {
+      "sourceScript": {
+        "path": "u/unburial_rites.txt",
+        "sha256": "56c96a89be07d9c663a5b3837174677c49bf023da905bce094a8c1d980c5813e"
+      },
+      "path": "qualifications/56c96a89be07d9c663a5b3837174677c49bf023da905bce094a8c1d980c5813e.json"
+    },
+    {
+      "sourceScript": {
+        "path": "u/undead_alchemist.txt",
+        "sha256": "e2b100c5a357aa50b9f04ee24dc6132d76a678ce193d57c30c17a21bd25996f3"
+      },
+      "path": "qualifications/e2b100c5a357aa50b9f04ee24dc6132d76a678ce193d57c30c17a21bd25996f3.json"
+    },
+    {
+      "sourceScript": {
+        "path": "u/unruly_mob.txt",
+        "sha256": "53cf676097e1047fcb37f42c19ff09221ec3a490412fadc1071523aa9a183060"
+      },
+      "path": "qualifications/53cf676097e1047fcb37f42c19ff09221ec3a490412fadc1071523aa9a183060.json"
+    },
+    {
+      "sourceScript": {
+        "path": "u/urgent_exorcism.txt",
+        "sha256": "217f2242b05a4940fdc84aa6136f2795126b52de8b7a0290bda3d04d648d0f99"
+      },
+      "path": "qualifications/217f2242b05a4940fdc84aa6136f2795126b52de8b7a0290bda3d04d648d0f99.json"
+    },
+    {
+      "sourceScript": {
+        "path": "v/vampire_interloper.txt",
+        "sha256": "d1f9c6e8fd57c64c23ac9489399de4aaf9383f7bea7fa462cf90d94163157b54"
+      },
+      "path": "qualifications/d1f9c6e8fd57c64c23ac9489399de4aaf9383f7bea7fa462cf90d94163157b54.json"
+    },
+    {
+      "sourceScript": {
+        "path": "v/vampiric_fury.txt",
+        "sha256": "07e98c400acf426c5cd81cad0df629428e0e4844b2047e7dec6641124dd37be0"
+      },
+      "path": "qualifications/07e98c400acf426c5cd81cad0df629428e0e4844b2047e7dec6641124dd37be0.json"
+    },
+    {
+      "sourceScript": {
+        "path": "v/victim_of_night.txt",
+        "sha256": "f7abe88ce2b06f4efccae413b72502492027b7a271566b0be092ccfdabcded0e"
+      },
+      "path": "qualifications/f7abe88ce2b06f4efccae413b72502492027b7a271566b0be092ccfdabcded0e.json"
+    },
+    {
+      "sourceScript": {
+        "path": "v/village_bell_ringer.txt",
+        "sha256": "93a6846a761d4a35fb4d3f402614706855e0890adf604f11871fda40c3dbe022"
+      },
+      "path": "qualifications/93a6846a761d4a35fb4d3f402614706855e0890adf604f11871fda40c3dbe022.json"
+    },
+    {
+      "sourceScript": {
+        "path": "v/village_cannibals.txt",
+        "sha256": "26b7c18a14b9c777a45835fed0c55df946aaac2a89d58c506af0fa689f463694"
+      },
+      "path": "qualifications/26b7c18a14b9c777a45835fed0c55df946aaac2a89d58c506af0fa689f463694.json"
+    },
+    {
+      "sourceScript": {
+        "path": "v/village_ironsmith_ironfang.txt",
+        "sha256": "5bfb3d251780581baec53cefe0270c5c61200bbb7241231038f7b3b51abc95f7"
+      },
+      "path": "qualifications/5bfb3d251780581baec53cefe0270c5c61200bbb7241231038f7b3b51abc95f7.json"
+    },
+    {
+      "sourceScript": {
+        "path": "v/villagers_of_estwald_howlpack_of_estwald.txt",
+        "sha256": "f0188ab9c97abd0ee8c5fea951778368047cc117fabd7af53e85f099c004ae52"
+      },
+      "path": "qualifications/f0188ab9c97abd0ee8c5fea951778368047cc117fabd7af53e85f099c004ae52.json"
+    },
+    {
+      "sourceScript": {
+        "path": "v/voiceless_spirit.txt",
+        "sha256": "e511aa2a9d22299c2e302593967e53464ae004fbec209d65501b9954cd989690"
+      },
+      "path": "qualifications/e511aa2a9d22299c2e302593967e53464ae004fbec209d65501b9954cd989690.json"
+    },
+    {
+      "sourceScript": {
+        "path": "w/walking_corpse.txt",
+        "sha256": "248c024d9dc13c7abfd51efdc61f49c1c0af976f572fcc53c23136ea0726b47a"
+      },
+      "path": "qualifications/248c024d9dc13c7abfd51efdc61f49c1c0af976f572fcc53c23136ea0726b47a.json"
+    },
+    {
+      "sourceScript": {
+        "path": "w/witchbane_orb.txt",
+        "sha256": "0a10b3a0034d5ac0436323fde5d8be0b7c5b33dd01499b4037363bae2f8a46f9"
+      },
+      "path": "qualifications/0a10b3a0034d5ac0436323fde5d8be0b7c5b33dd01499b4037363bae2f8a46f9.json"
+    },
+    {
+      "sourceScript": {
+        "path": "w/wooden_stake.txt",
+        "sha256": "de16991d0b3da46534d495c74e719a8f1f9215e97dae171bf836bfc477b93351"
+      },
+      "path": "qualifications/de16991d0b3da46534d495c74e719a8f1f9215e97dae171bf836bfc477b93351.json"
+    },
+    {
+      "sourceScript": {
+        "path": "w/woodland_cemetery.txt",
+        "sha256": "5b84dd941d323069bfa8e06d31a6a15b71f9eb50bbf9340d1b87d1c0875b9a61"
+      },
+      "path": "qualifications/5b84dd941d323069bfa8e06d31a6a15b71f9eb50bbf9340d1b87d1c0875b9a61.json"
+    },
+    {
+      "sourceScript": {
+        "path": "w/woodland_sleuth.txt",
+        "sha256": "9fbdcb89c2ad61e49087f91d8beb9e7a03bad38c9a373239be9dd6ee552846aa"
+      },
+      "path": "qualifications/9fbdcb89c2ad61e49087f91d8beb9e7a03bad38c9a373239be9dd6ee552846aa.json"
+    },
+    {
+      "sourceScript": {
+        "path": "w/wreath_of_geists.txt",
+        "sha256": "a9b7c0ae823ff17fd24510710005ff8b6c5eb850c56f6968d9518cef7a639ad3"
+      },
+      "path": "qualifications/a9b7c0ae823ff17fd24510710005ff8b6c5eb850c56f6968d9518cef7a639ad3.json"
+    }
+  ],
+  "residualScripts": []
+}

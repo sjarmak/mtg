@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "sets": [
+    {
+      "code": "TSOM",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atsom+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "8505f4cc60c9cc90695dfa871224f90107f83cb7ffacbef7cd50e58e76596eeb",
+      "fetchedAt": "2026-09-18T20:23:12.322Z"
+    }
+  ],
+  "engine": {
+    "name": "forge",
+    "version": "2.0.14"
+  },
+  "tokens": [
+    {
+      "physicalId": "tsom-token:0001:5252ab51-43e8-4b24-9830-de0ad9b9d3dc",
+      "position": 1,
+      "setCode": "TSOM",
+      "name": "Cat",
+      "observedNames": ["Cat Token"],
+      "oracleId": "6788478d-e157-4483-be09-9edb3f841431",
+      "scryfallId": "5252ab51-43e8-4b24-9830-de0ad9b9d3dc",
+      "typeLine": "Token Creature — Cat",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Cat",
+          "manaCost": null,
+          "typeLine": "Token Creature — Cat",
+          "oracleText": "",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "5252ab51-43e8-4b24-9830-de0ad9b9d3dc",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/2/5252ab51-43e8-4b24-9830-de0ad9b9d3dc.jpg?1783941682"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tsom-token:0002:7a563df7-7b9d-4692-ab1b-578be1887b62",
+      "position": 2,
+      "setCode": "TSOM",
+      "name": "Soldier",
+      "observedNames": ["Soldier Token"],
+      "oracleId": "eac25f12-6459-438c-a09e-93e23d2cf80d",
+      "scryfallId": "7a563df7-7b9d-4692-ab1b-578be1887b62",
+      "typeLine": "Token Creature — Soldier",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Soldier",
+          "manaCost": null,
+          "typeLine": "Token Creature — Soldier",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "7a563df7-7b9d-4692-ab1b-578be1887b62",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/7/a/7a563df7-7b9d-4692-ab1b-578be1887b62.jpg?1783941682"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tsom-token:0003:b37f4fdb-1533-4c38-a654-f715fbef6abf",
+      "position": 3,
+      "setCode": "TSOM",
+      "name": "Goblin",
+      "observedNames": ["Goblin Token"],
+      "oracleId": "4465eff4-5851-4721-a248-866c686c2ab8",
+      "scryfallId": "b37f4fdb-1533-4c38-a654-f715fbef6abf",
+      "typeLine": "Token Creature — Goblin",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["R"],
+      "faces": [
+        {
+          "name": "Goblin",
+          "manaCost": null,
+          "typeLine": "Token Creature — Goblin",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["R"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "b37f4fdb-1533-4c38-a654-f715fbef6abf",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/b/3/b37f4fdb-1533-4c38-a654-f715fbef6abf.jpg?1783941681"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tsom-token:0004:85f9e977-f718-41b2-b30b-77a9a17e9733",
+      "position": 4,
+      "setCode": "TSOM",
+      "name": "Insect",
+      "observedNames": ["Insect Token"],
+      "oracleId": "5769718d-6781-4919-bc9b-245e9e0cb507",
+      "scryfallId": "85f9e977-f718-41b2-b30b-77a9a17e9733",
+      "typeLine": "Token Creature — Insect",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Insect",
+          "manaCost": null,
+          "typeLine": "Token Creature — Insect",
+          "oracleText": "Infect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "85f9e977-f718-41b2-b30b-77a9a17e9733",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/8/5/85f9e977-f718-41b2-b30b-77a9a17e9733.jpg?1783941681"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tsom-token:0005:5cde8b3e-c006-41fd-a926-8746c794e149",
+      "position": 5,
+      "setCode": "TSOM",
+      "name": "Wolf",
+      "observedNames": ["Wolf Token"],
+      "oracleId": "b2224843-8274-4872-a7ca-2adf69cc066b",
+      "scryfallId": "5cde8b3e-c006-41fd-a926-8746c794e149",
+      "typeLine": "Token Creature — Wolf",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Wolf",
+          "manaCost": null,
+          "typeLine": "Token Creature — Wolf",
+          "oracleText": "",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "5cde8b3e-c006-41fd-a926-8746c794e149",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/c/5cde8b3e-c006-41fd-a926-8746c794e149.jpg?1783941681"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tsom-token:0006:c705b843-ca62-47bb-95dd-f303c60088bb",
+      "position": 6,
+      "setCode": "TSOM",
+      "name": "Golem",
+      "observedNames": ["Golem Token"],
+      "oracleId": "9859c54d-695b-4bb1-940e-cfd1c3301e89",
+      "scryfallId": "c705b843-ca62-47bb-95dd-f303c60088bb",
+      "typeLine": "Token Artifact Creature — Golem",
+      "power": "3",
+      "toughness": "3",
+      "loyalty": null,
+      "colors": [],
+      "faces": [
+        {
+          "name": "Golem",
+          "manaCost": null,
+          "typeLine": "Token Artifact Creature — Golem",
+          "oracleText": "",
+          "power": "3",
+          "toughness": "3",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "c705b843-ca62-47bb-95dd-f303c60088bb",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/c/7/c705b843-ca62-47bb-95dd-f303c60088bb.jpg?1783941680"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tsom-token:0007:182308b3-86e0-46d8-9104-95576a3d3921",
+      "position": 7,
+      "setCode": "TSOM",
+      "name": "Myr",
+      "observedNames": ["Myr Token"],
+      "oracleId": "bf690282-125f-431c-a363-39f6772324c8",
+      "scryfallId": "182308b3-86e0-46d8-9104-95576a3d3921",
+      "typeLine": "Token Artifact Creature — Myr",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": [],
+      "faces": [
+        {
+          "name": "Myr",
+          "manaCost": null,
+          "typeLine": "Token Artifact Creature — Myr",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "182308b3-86e0-46d8-9104-95576a3d3921",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/1/8/182308b3-86e0-46d8-9104-95576a3d3921.jpg?1783941681"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tsom-token:0008:3e46e703-2157-41e5-9c21-c17af43e0d3f",
+      "position": 8,
+      "setCode": "TSOM",
+      "name": "Wurm",
+      "observedNames": ["Phyrexian Wurm Token"],
+      "oracleId": "5e3f41f7-9b42-437a-a9f9-f09250b083db",
+      "scryfallId": "3e46e703-2157-41e5-9c21-c17af43e0d3f",
+      "typeLine": "Token Artifact Creature — Wurm",
+      "power": "3",
+      "toughness": "3",
+      "loyalty": null,
+      "colors": [],
+      "faces": [
+        {
+          "name": "Wurm",
+          "manaCost": null,
+          "typeLine": "Token Artifact Creature — Wurm",
+          "oracleText": "Deathtouch",
+          "power": "3",
+          "toughness": "3",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "3e46e703-2157-41e5-9c21-c17af43e0d3f",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/3/e/3e46e703-2157-41e5-9c21-c17af43e0d3f.jpg?1783941680"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tsom-token:0009:ee53b9a0-8e07-404d-87ae-ff8397a0ba29",
+      "position": 9,
+      "setCode": "TSOM",
+      "name": "Wurm",
+      "observedNames": ["Phyrexian Wurm Token"],
+      "oracleId": "1b9ccdd7-4935-45e2-bb16-b09870dd965d",
+      "scryfallId": "ee53b9a0-8e07-404d-87ae-ff8397a0ba29",
+      "typeLine": "Token Artifact Creature — Wurm",
+      "power": "3",
+      "toughness": "3",
+      "loyalty": null,
+      "colors": [],
+      "faces": [
+        {
+          "name": "Wurm",
+          "manaCost": null,
+          "typeLine": "Token Artifact Creature — Wurm",
+          "oracleText": "Lifelink",
+          "power": "3",
+          "toughness": "3",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "ee53b9a0-8e07-404d-87ae-ff8397a0ba29",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/e/e/ee53b9a0-8e07-404d-87ae-ff8397a0ba29.jpg?1783941680"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -19,8 +19,14 @@
  * from balance CI entirely.
  */
 
-export { compileDownBacklog, formatBacklog } from './backlog';
-export type { CompileDownEntry } from './backlog';
+export {
+  compileDownBacklog,
+  compileDownDecision,
+  compileDownTitle,
+  diffCompileDownBacklog,
+  formatBacklog,
+} from './backlog';
+export type { BacklogAction, BacklogVerdict, CompileDownEntry, TrackedBead } from './backlog';
 
 export { exampleBlockingPosition } from './example';
 

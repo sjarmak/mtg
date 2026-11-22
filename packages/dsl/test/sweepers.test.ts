@@ -112,11 +112,14 @@ describe('the sweeping half of each priced primitive', () => {
    * permanent. They are asserted here so the sweeper widening and the
    * board-answer widening cannot be confused for each other.
    */
-  it('admits both player slots on every sweeper and no other new one', () => {
+  it('admits the measured player and single-permanent slots on destroy', () => {
     expect([...legalTargetsFor('destroyPermanent')].sort()).toEqual([
       'noTarget',
+      'selfPermanent',
       'targetArtifactOrEnchantment',
+      'targetArtifactYouDontControl',
       'targetCreature',
+      'targetCreatureOpponentControls',
       'targetOpponent',
       'targetPermanent',
       'targetPlayer',
@@ -127,30 +130,44 @@ describe('the sweeping half of each priced primitive', () => {
     // is the one place the row's full membership is stated.
     expect([...legalTargetsFor('tapPermanent')].sort()).toEqual([
       'targetCreature',
+      'targetCreatureYouDontControl',
       'targetOpponent',
+      'targetPermanent',
       'targetPlayer',
       'thatCreature',
     ]);
-    // `selfCreature` on this row predates the sweeper widening and is
-    // unrelated to it: it is the retained-referent kind that means "this
-    // creature" (`self-creature-target.test.ts`), asserted here only because
-    // this is the one place the row's full membership is pinned.
+    // `selfCreature` means the source body. `thatCreature` is the retained
+    // creature handle Traitorous Instinct pumps after taking and untapping its
+    // one chosen creature. `thatCreaturesController` is the retained player
+    // handle Public Execution reads after destroying its one chosen creature.
+    // All three remain hand-authored and are pinned here because this is the
+    // one place the row's full membership is stated.
     expect([...legalTargetsFor('pumpUntilEndOfTurn')].sort()).toEqual([
+      'enchantedCreature',
       'noTarget',
       'selfCreature',
       'targetCreature',
       'targetCreatureDefendingPlayerControls',
+      'targetCreatureYouControl',
+      'targetCreatureYouDontControl',
       'targetOpponent',
       'targetPlayer',
+      'thatCreature',
+      'thatCreaturesController',
     ]);
     expect([...legalTargetsFor('dealDamage')].sort()).toEqual([
       'anyTarget',
+      'chosenPlayer',
       'noTarget',
+      'selfPermanent',
       'targetCreature',
+      'targetCreatureDefendingPlayerControls',
+      'targetCreatureYouDontControl',
       'targetOpponent',
       'targetPlayer',
       'targetPlayerOrPlaneswalker',
       'thatCreaturesController',
+      'triggeringPlayer',
     ]);
   });
 

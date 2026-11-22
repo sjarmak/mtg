@@ -1,7 +1,7 @@
 /**
  * The seam between this page and the server that holds its game.
  *
- * Two rules, and both of them fail silently if nobody looks.
+ * Three rules, and all of them fail silently if nobody looks.
  *
  * **1. `@mtg/ui`'s `src/` may name `@mtg/netplay` only in a type position.**
  * That package's barrel exports `serveTable`, which reaches `node:http`, and
@@ -13,7 +13,11 @@
  * rather than remembered. `tools/` is exempt and imports the package outright,
  * because a launcher is Node.
  *
- * **2. The two ends of the wire agree.** They meet at a shape and a version
+ * **2. Browser source never imports Node or Forge implementations.** The HTTP
+ * adapter owns validation and identity, while the gateway process owns the
+ * concrete backend.
+ *
+ * **3. The two ends of the wire agree.** They meet at a shape and a version
  * number rather than a shared import, which is the same bargain
  * `lab/deck-artifact.ts` strikes with `@mtg/decklab` and `lab/art-manifest.ts`
  * strikes with the art pipeline. So the check is the one that pipeline's own
@@ -27,7 +31,16 @@ import type { Card } from '@mtg/dsl';
 import { exampleCard } from '@mtg/dsl';
 import type { DeckList } from '@mtg/kernel';
 import { DEFAULT_AUTO_PASS, humanSeat } from '@mtg/kernel';
-import { createTable, MAX_NETPLAY_DECISIONS, NETPLAY_PROTOCOL, toWireAutoPass } from '@mtg/netplay';
+import {
+  BACKEND_GATEWAY_PROTOCOL,
+  createTable,
+  MAX_NETPLAY_DECISIONS,
+  NETPLAY_PROTOCOL,
+  OBSERVED_TABLE_PROTOCOL,
+  toWireAutoPass,
+} from '@mtg/netplay';
+import { BROWSER_BACKEND_PROTOCOL } from '../../src/net/backend-gateway';
+import { OBSERVED_CLIENT_PROTOCOL } from '../../src/net/observed-table';
 import { CLIENT_PROTOCOL, MAX_SNAPSHOT_DECISIONS, readSnapshot, sessionViewOf } from '../../src/net/snapshot';
 
 const SRC = new URL('../../src/', import.meta.url).pathname;
@@ -49,6 +62,20 @@ function valueImports(): readonly string[] {
       if (!line.includes("from '@mtg/netplay'")) continue;
       if (line.trimStart().startsWith('import type ')) continue;
       offenders.push(`${path}: ${line.trim()}`);
+    }
+  }
+  return offenders;
+}
+
+/** Imports that would pull a Node or Forge implementation into Vite. */
+function implementationImports(): readonly string[] {
+  const offenders: string[] = [];
+  for (const path of sources(SRC)) {
+    for (const line of readFileSync(path, 'utf8').split('\n')) {
+      const node = /from ['"]node:/.test(line);
+      const forgeValue =
+        line.includes("from '@mtg/forge-export'") && !line.trimStart().startsWith('import type ');
+      if (node || forgeValue) offenders.push(`${path}: ${line.trim()}`);
     }
   }
   return offenders;
@@ -84,12 +111,24 @@ describe('the browser half of netplay', () => {
     const naming = sources(SRC).filter((path) => readFileSync(path, 'utf8').includes("from '@mtg/netplay'"));
     expect(naming.length).toBeGreaterThan(0);
   });
+
+  it('imports neither Node built-ins nor Forge implementation values', () => {
+    expect(implementationImports()).toEqual([]);
+  });
 });
 
 describe('the two ends of the wire', () => {
   it('agree about the protocol version', () => {
     expect(NETPLAY_PROTOCOL).toBe(3);
     expect(CLIENT_PROTOCOL).toBe(NETPLAY_PROTOCOL);
+  });
+
+  it('agrees with the observed backend gateway protocol independently', () => {
+    expect(BROWSER_BACKEND_PROTOCOL).toBe(BACKEND_GATEWAY_PROTOCOL);
+  });
+
+  it('agrees with the observed table protocol independently', () => {
+    expect(OBSERVED_CLIENT_PROTOCOL).toBe(OBSERVED_TABLE_PROTOCOL);
   });
 
   it('agrees on the bounded decision count without allocating dummy choices', () => {

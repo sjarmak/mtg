@@ -96,7 +96,7 @@ describe('scry in a post-hoc replay', () => {
       record: 'header',
       schema: EVENT_LOG_SCHEMA_VERSION,
     });
-    expect(EVENT_LOG_SCHEMA_VERSION).toBe('mtg-ui/event-log/8');
+    expect(EVENT_LOG_SCHEMA_VERSION).toBe('mtg-ui/event-log/10');
     const read = readEventLog(written);
     const game = read.games[0];
     if (game === undefined) throw new Error('the replay reader returned no game');

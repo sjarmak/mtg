@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "wwk",
+  "formatSha256": "87d0e8fe14c021df08b5381f1886930ce3d975b9f7c20f3658886c37cb9b9eb7",
+  "sourceSha256": "ab12f3660d514cdd1cb89434a92973a0a02baacfb7cec5d574784f1e1459903e",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "ab12f3660d514cdd1cb89434a92973a0a02baacfb7cec5d574784f1e1459903e",
+    "recipe.json": "47d85298fa95487cc0d1814e530637bdace1ffc73baa15a130526decf7eea20e",
+    "wwk-printed-catalog-v1.json": "9c0ffb3c952bfb5f7065c5779f8bac0285a9c6ebb6a860e4e923c62311c113fa",
+    "zen-printed-catalog-v1.json": "95e1d8e2a6e4e5619806f8041417093c6f44629d814a6e37205a2258b07c05f4",
+    "wwk-limited-format-v1.json": "ce939812dc371f6e1a144cc247111ee3c81dd87c51b88c50478c3a28674967b1"
+  },
+  "catalogs": [
+    {
+      "code": "WWK",
+      "cards": 145,
+      "contentSha256": "2e12f15c19c867e5508b276f5565eaa734cd2ed93be9c2fd42542d8a44691eab"
+    },
+    {
+      "code": "ZEN",
+      "cards": 269,
+      "contentSha256": "a83df5125b9e8f026ed19876cfae14ac7089451fa07237b27d9c1f549942f37d"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1972.1116170000003,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 379,
+    "printings": 414
+  }
+}

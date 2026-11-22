@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "bng",
+  "name": "Born of the Gods",
+  "sources": [
+    {
+      "code": "BNG",
+      "catalogFormat": "bng-printed-v1",
+      "catalogSha256": "fab9bfa843fc533ef7b53ebe8d002c6af11646da80509189ca2efe54f0d261eb",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/BNG.json",
+        "sha256": "4ab38cf829345a63bd623b2a146e8e05df3ed1f6e3ac091a391d026e28f62cd4",
+        "version": "5.3.0+20260919"
+      }
+    },
+    {
+      "code": "THS",
+      "catalogFormat": "ths-printed-v1",
+      "catalogSha256": "f5c3657836d8912c232e46fc83966fd6f4559e5d6aeaed7a5922097b20776e71",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/THS.json",
+        "sha256": "ce27f9e1b51a4d938ae959d7c0a505d4b6163f6ecd84374583bf5adf4ef2d5b2",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "blue-black-inspired",
+      "name": "Blue-Black Inspired",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "bng-printed-v1:0155:990f4438-aa74-4460-8bac-93480d0bb0dc",
+          "name": "Siren of the Silent Song",
+          "count": 4
+        },
+        {
+          "physicalId": "bng-printed-v1:0080:8ce8891f-b44c-4be4-878e-9fc45a9dc9cb",
+          "name": "Pain Seer",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0039:ba104245-0483-407f-971b-ad6d8efd9733",
+          "name": "Aqueous Form",
+          "count": 3
+        },
+        {
+          "physicalId": "bng-printed-v1:0161:cfeca720-3163-4391-b90d-5f7aa5f5987b",
+          "name": "Siren Song Lyre",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0066:d6876c7a-8bbe-484e-b733-70229fa336cd",
+          "name": "Thassa, God of the Sea",
+          "count": 1
+        },
+        {
+          "physicalId": "ths-printed-v1:0188:599c3c9f-dfb7-4357-9d9c-9a1a4616b103",
+          "name": "Ashiok, Nightmare Weaver",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0107:65b7275a-5305-42e6-b5c3-8b88568b4e28",
+          "name": "Thoughtseize",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0090:596822f6-dbd4-4cc8-aa50-9331ff42544e",
+          "name": "Hero's Downfall",
+          "count": 4
+        },
+        {
+          "physicalId": "bng-printed-v1:0061:3ca11057-e50a-4817-924a-5bb504d0780f",
+          "name": "Bile Blight",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0225:686559d7-8ac1-496b-a5a6-1467bf8fc7c5",
+          "name": "Temple of Deceit",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0234:d851b88b-6ce6-4889-83c2-e191307bcee6",
+          "name": "Island",
+          "count": 13
+        },
+        {
+          "physicalId": "ths-printed-v1:0238:8b153bb8-f9d9-44dc-ae19-d0eb2ea26ba1",
+          "name": "Swamp",
+          "count": 17
+        }
+      ]
+    },
+    {
+      "id": "red-green-tribute",
+      "name": "Red-Green Tribute",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "bng-printed-v1:0147:3687799c-81bd-4c49-902a-2a96863629c3",
+          "name": "Fanatic of Xenagos",
+          "count": 4
+        },
+        {
+          "physicalId": "bng-printed-v1:0113:c28fa4f8-4b87-41dc-802d-dfd160ccf1a8",
+          "name": "Thunder Brute",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0180:d40b65c1-b24d-492d-81b9-d8474ebdc08c",
+          "name": "Sylvan Caryatid",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0152:f50c12c4-5565-449a-b30e-7cd896da7735",
+          "name": "Boon Satyr",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0127:bbb03f2e-2b92-4aa1-afae-301ed5d151d3",
+          "name": "Lightning Strike",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0172:4979cc1b-9c1a-47e4-ae37-7c41798eb89a",
+          "name": "Polukranos, World Eater",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0209:3aecfe99-9c4b-4087-84ee-fb208fd22820",
+          "name": "Xenagos, the Reveler",
+          "count": 2
+        },
+        {
+          "physicalId": "bng-printed-v1:0156:3184b138-1109-4195-9d96-4f190164e98b",
+          "name": "Xenagos, God of Revels",
+          "count": 1
+        },
+        {
+          "physicalId": "ths-printed-v1:0224:46febc5d-1625-4e48-bb3f-31ee06fc13dd",
+          "name": "Temple of Abandon",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0242:e78801a7-af8c-4f1d-b29e-7a36676b6818",
+          "name": "Mountain",
+          "count": 14
+        },
+        {
+          "physicalId": "ths-printed-v1:0246:ddfd1469-94b9-4964-ada6-4fb43b0b9282",
+          "name": "Forest",
+          "count": 18
+        }
+      ]
+    },
+    {
+      "id": "green-white-heroic",
+      "name": "Green-White Heroic",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ths-printed-v1:0013:251015ed-9408-4941-894a-158551ed2613",
+          "name": "Favored Hoplite",
+          "count": 4
+        },
+        {
+          "physicalId": "bng-printed-v1:0017:7917f2ee-f093-4ffb-83ed-a181b14b5957",
+          "name": "Hero of Iroas",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0026:0c6c2458-edb7-4822-866b-ca1b2ea7a8e8",
+          "name": "Phalanx Leader",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0012:642d9a5c-5697-4747-adce-5a71bcf1c086",
+          "name": "Fabled Hero",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0179:3485eb83-f83c-4776-b164-abd72f3c9547",
+          "name": "Staunch-Hearted Warrior",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0016:abafabb3-b2e7-4d78-b4b7-d8f701d3ee8b",
+          "name": "Gods Willing",
+          "count": 4
+        },
+        {
+          "physicalId": "bng-printed-v1:0154:120babed-841f-4bf1-ac2d-3ab097c0760b",
+          "name": "Reap What Is Sown",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0152:f50c12c4-5565-449a-b30e-7cd896da7735",
+          "name": "Boon Satyr",
+          "count": 3
+        },
+        {
+          "physicalId": "bng-printed-v1:0165:b0830054-b140-49c3-90cb-24e2502757be",
+          "name": "Temple of Plenty",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0230:18013a78-d156-42bf-89b7-72e7070872c0",
+          "name": "Plains",
+          "count": 16
+        },
+        {
+          "physicalId": "ths-printed-v1:0246:ddfd1469-94b9-4964-ada6-4fb43b0b9282",
+          "name": "Forest",
+          "count": 14
+        }
+      ]
+    }
+  ],
+  "contentSha256": "e9df1ef6ece14d870bbb903924e4b7b2ce3ce81c463a2b0e03e39a326e3b44ac"
+}

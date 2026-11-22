@@ -109,6 +109,7 @@ import { deriveSkeletonLite } from '@mtg/design-data';
 import { resolveSet } from './resolve-set';
 import type { ResolvedSet } from './resolve-set';
 import { flagshipOnly, SET_CANDIDATES } from './set-candidates';
+import { readRunClaims } from '../src/routes/analysis/read';
 import { buildAnalysisRun, skeletonTargets } from './analysis-run';
 import type { AnalysisDocument } from './analysis-run';
 import type { PreconAnalysisDeck, PreconSeatOrderRun } from './analysis-run';
@@ -139,6 +140,14 @@ interface Args {
   readonly seed: string;
   readonly id: string | undefined;
   readonly label: string | undefined;
+  /**
+   * A claims block written by `packages/cube/tools/analysis-claims.ts`.
+   *
+   * A path rather than criteria, because measuring them needs `@mtg/cube`,
+   * which reaches `better-sqlite3` and cannot be imported from a package Vite
+   * bundles. The file crosses the boundary; the module does not.
+   */
+  readonly claimsPath: string | undefined;
   readonly help: boolean;
 }
 
@@ -150,6 +159,7 @@ npm run analyze -- [set.json] [options]
   --seed <s>      run seed (default ${DEFAULT_SEED})
   --id <s>        document id; the same id replaces, a new one accumulates
   --label <s>     how the run is named in the picker
+  --claims <path> a claims block from packages/cube/tools/analysis-claims.ts
   --help
 
 Writes packages/ui/public/${ANALYSIS_FILENAME} and prints whether the set is fair.
@@ -175,6 +185,7 @@ export function parseArgs(argv: readonly string[]): Args {
   let seed = DEFAULT_SEED;
   let id: string | undefined;
   let label: string | undefined;
+  let claimsPath: string | undefined;
   let help = false;
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -216,11 +227,14 @@ export function parseArgs(argv: readonly string[]): Args {
       case '--label':
         label = value;
         break;
+      case '--claims':
+        claimsPath = value;
+        break;
       default:
         throw new Error(`unknown flag ${token}`);
     }
   }
-  return { setPath, games, preconGames, seed, id, label, help };
+  return { setPath, games, preconGames, seed, id, label, claimsPath, help };
 }
 
 function poolOf(set: ResolvedSet): readonly Card[] {
@@ -372,6 +386,13 @@ async function main(argv: readonly string[]): Promise<number> {
   }
   const elapsed = (Date.now() - started) / 1000;
 
+  // Validated here with the same function the dashboard reads it with, so a
+  // block the surface would reject fails this run rather than a later fetch.
+  const claims =
+    args.claimsPath === undefined
+      ? undefined
+      : readRunClaims(JSON.parse(readFileSync(args.claimsPath, 'utf8')), args.claimsPath);
+
   const id = args.id ?? `${setRef.code.toLowerCase()}-${args.seed.replace(/[^a-z0-9]+/gi, '-')}`;
   const label = args.label ?? `${setRef.code} — ${String(run.games)} games`;
   const document = buildAnalysisRun({
@@ -384,10 +405,17 @@ async function main(argv: readonly string[]): Promise<number> {
     decks,
     logs: run.logs,
     targets: skeletonTargets(deriveSkeletonLite()),
+    // Written for a reader rather than for the pipeline. It used to name the
+    // bot tier and the package that built the decks — "greedy v0 bots on The
+    // flagship set, decks built by @mtg/deckbuild" — which is developer copy,
+    // and it rode onto the Analysis tab's page head where a player reads it.
+    // What survives is the shape of the sweep, which is the part that changes
+    // what the numbers mean.
     healthLabel:
-      `${String(decks.length)} color pairs, ${String(run.matchups)} matchups x ${String(run.gamesPerMatchup)} games, ` +
-      `greedy v0 bots on ${setRef.name}, decks built by @mtg/deckbuild`,
+      `${String(decks.length)} color pairs, ${String(run.matchups)} matchups of ` +
+      `${String(run.gamesPerMatchup)} games each on ${setRef.name}`,
     ...(precons === undefined ? {} : { precons }),
+    ...(claims === undefined ? {} : { claims }),
   });
 
   const publicDir = join(UI_ROOT, 'public');
@@ -414,4 +442,9 @@ async function main(argv: readonly string[]): Promise<number> {
   return document.fairness.verdict === 'unfair' ? 1 : 0;
 }
 
-process.exitCode = await main(process.argv.slice(2));
+// Guarded rather than bare: this module exports `parseArgs`, and a bare
+// top-level call means importing it to test a flag runs a 2,700-game analysis
+// and overwrites the staged document. Same guard the claims tool carries.
+if (process.argv[1]?.endsWith('analyze.ts') === true) {
+  process.exitCode = await main(process.argv.slice(2));
+}

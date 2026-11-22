@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "formatId": "rav",
+  "archetypes": [
+    {
+      "id": "boros-tempo",
+      "name": "Boros Tempo",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Boros Guildmage",
+        "physicalId": "rav-printed-v1:0242:072a1ff1-9c50-426a-a83c-817bde5beab7"
+      },
+      "plan": "Build a disciplined creature curve, grant haste to maintain pressure, and use first strike to control combat."
+    },
+    {
+      "id": "dimir-control",
+      "name": "Dimir Control",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Dimir Guildmage",
+        "physicalId": "rav-printed-v1:0245:69b822aa-4144-400a-b993-f146cbeed54f"
+      },
+      "plan": "Trade resources early, then use repeatable card draw and discard to dominate a long game."
+    },
+    {
+      "id": "golgari-graveyard",
+      "name": "Golgari Graveyard",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Golgari Guildmage",
+        "physicalId": "rav-printed-v1:0248:d91b994b-3cf2-43f7-8af6-7925e882208f"
+      },
+      "plan": "Fill the graveyard through trades and dredge, recur the best creatures, and grow the threats that remain."
+    },
+    {
+      "id": "selesnya-tokens",
+      "name": "Selesnya Tokens",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Selesnya Guildmage",
+        "physicalId": "rav-printed-v1:0252:21061ce3-d098-4057-b341-c5db6ee1b6d4"
+      },
+      "plan": "Create a wide Saproling board, convoke larger spells ahead of curve, and finish with a team-wide boost."
+    }
+  ]
+}

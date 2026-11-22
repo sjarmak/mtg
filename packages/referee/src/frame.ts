@@ -150,6 +150,8 @@ function questionFor(state: GameState, decision: Decision): string {
         `so keeping puts ${String(decision.count)} card(s) on the bottom of your library. ` +
         'Do you keep this hand, and which cards go to the bottom?'
       );
+    case 'openingHandAction':
+      return 'You may begin the game with an eligible card on the battlefield, or finish your opening-hand actions. Which do you choose?';
     case 'priority':
       return (
         `You hold priority in the ${state.turn.step} step of turn ${String(state.turn.number)}. ` +
@@ -168,6 +170,8 @@ function questionFor(state: GameState, decision: Decision): string {
       );
     case 'orderBlockers':
       return 'Order the blockers for damage assignment (CR 509.2). Which order do you choose?';
+    case 'orderAttackers':
+      return 'Order the attackers for damage assignment (CR 509.3). Which order do you choose?';
     case 'discard':
       return `You are over your maximum hand size and must discard ${String(decision.count)} card(s). Which do you discard?`;
     case 'triggerTargets':
@@ -175,6 +179,10 @@ function questionFor(state: GameState, decision: Decision): string {
         'A triggered ability you control is being put on the stack and chooses its targets now (CR 603.3d). ' +
         'Which targets do you choose?'
       );
+    case 'pluralTargets':
+      return `You have chosen ${String(decision.selected.length)} target(s). Choose another legal target or finish this target list.`;
+    case 'damageAllocation':
+      return `Divide ${String(decision.total)} damage among the chosen targets. Assign the next positive share.`;
     case 'optionalTrigger':
       return (
         'A triggered ability you control says "you may" and is resolving (CR 603.3b). ' +
@@ -192,16 +200,58 @@ function questionFor(state: GameState, decision: Decision): string {
         `You control ${String(decision.candidates.length)} legendary permanents named ${decision.name} ` +
         "(CR 704.5j). Which one do you keep? The rest go to their owners' graveyards."
       );
+    case 'cardName':
+      return decision.chosen.length === 0
+        ? 'A resolving effect asks each player to choose a card name (CR 201.4). Which card name do you choose?'
+        : `A resolving effect asks each player to choose a card name (CR 201.4). Earlier choices are ${decision.chosen
+            .map((choice) => `${describeSeat(choice.player)}: ${choice.name}`)
+            .join(', ')}. Which card name do you choose?`;
+    case 'namedZoneExile':
+      return `You found ${String(decision.cards.length)} remaining card(s) named ${decision.name} across the target opponent's graveyard, hand, and library. Which do you exile, or do you stop?`;
     case 'scry':
       return `You looked at ${String(decision.cards.length)} card(s). Which stay on top, which go to the bottom, and in what order?`;
+    case 'manaColor':
+      return `A resolving mana effect offers ${decision.colors.map((color) => `{${color}}`).join(', ')}. Which color do you choose?`;
+    case 'topLibraryOrder':
+      return `You looked at ${String(decision.cards.length)} cards. In what order do you put them back?`;
+    case 'topLibrarySelect':
+      return `You looked at ${String(decision.cards.length)} cards. Which eligible card do you take, and how do you order the rest?`;
+    case 'topLibraryPartition':
+      return `Separate the ${String(decision.cards.length)} revealed cards into two piles.`;
+    case 'topLibraryPile':
+      return 'Which pile do you put into your hand?';
     case 'searchLibrary':
       return `You searched your library and ${String(decision.cards.length)} card(s) match. Which do you take, or do you find nothing?`;
+    case 'searchDestination':
+      return `You found ${String(decision.cards.length)} cards. Which one goes to the search's one-card destination?`;
     // "in a graveyard", not "in your graveyard", because `whose: 'each'` reads
     // both — and no CR 701.19 cite, because this is not a search: a graveyard
     // is a public zone (CR 400.2), so nothing was revealed and nothing is
     // shuffled afterwards.
     case 'graveyardChoice':
       return `${String(decision.cards.length)} card(s) in a graveyard match a resolving effect. Which do you take, or do you take none?`;
+    case 'battlefieldChoice':
+      return `${String(decision.permanents.length)} permanent(s) you control match a mandatory resolving effect. Which do you choose?`;
+    case 'populate':
+      return `${String(decision.tokens.length)} creature token(s) you control may be copied by Populate (CR 701.30). Which do you choose?`;
+    case 'entryCopy':
+      return `${String(decision.creatures.length)} creature(s) may supply this permanent's copiable values. Which do you copy, or does it enter normally?`;
+    case 'entryCounter':
+      return `${String(decision.permanents.length)} controlled permanent(s) may receive this mandatory entry counter. Which one receives it?`;
+    case 'entryAura':
+      return `${String(decision.permanents.length)} permanent(s) may legally host this non-targeted Aura entry. Which one does it enter attached to?`;
+    case 'entryTimestampOrder':
+      return `${String(decision.remaining.length)} simultaneous entrants you control still need relative timestamps. Which receives the next timestamp?`;
+    case 'entryCharacteristics':
+      return `This creature has ${String(decision.modes.length)} complete characteristic forms as it enters. Which form do you choose?`;
+    case 'entryOptionalCounter':
+      return 'Do you have this permanent enter with its optional +1/+1 counter?';
+    case 'entryPayLife':
+      return `Do you pay ${String(decision.life)} life as ${state.objects[decision.oid]?.card.name ?? decision.oid} enters?`;
+    case 'entryPlayer':
+      return 'Which player do you choose as this permanent enters?';
+    case 'entryColors':
+      return 'Which two colors do you choose as this permanent enters?';
     case 'handDiscard':
       // Two questions off one decision, and the frame has to pick the right one
       // outright rather than hedge: a model told "you must discard" about an
@@ -212,11 +262,27 @@ function questionFor(state: GameState, decision: Decision): string {
         ? `A resolving effect makes you discard ${String(decision.count)} card(s) (CR 701.8). Which do you discard?`
         : `A resolving effect revealed ${describeSeat(decision.owner)}'s hand (CR 701.16a) and you choose ` +
             `${String(decision.count)} card(s) for them to discard (CR 701.8). Which do you choose?`;
+    case 'revealedHandChoice':
+      return decision.options.some(
+        (action) => action.type === 'chooseFromRevealedHand' && action.chosen === null,
+      )
+        ? `${describeSeat(decision.owner)} revealed their hand. Which eligible card do you choose, or do you choose none?`
+        : `${describeSeat(decision.owner)} revealed their hand. Which eligible card do you choose?`;
     // "control", not "own", because CR 701.17a fixes the choice with the
     // permanent's controller, and no CR 701.19 cite for the same reason
     // `graveyardChoice` above has none: the battlefield is a public zone (CR
     // 403.2), so nothing here was revealed either.
     case 'permanentSacrifice':
       return `A resolving effect makes you sacrifice a creature you control (CR 701.17a). Which do you sacrifice?`;
+    case 'permanentUntap':
+      return `A resolving effect lets you choose up to ${String(decision.remaining)} more permanent(s) to untap. Which do you choose, or do you stop?`;
+    case 'spellTargets':
+      return `A resolving effect lets you keep or replace any legal subset of the targets of spell ${decision.oid}. Which target tuple do you choose?`;
+    case 'freeCast':
+      return decision.optional
+        ? `A resolving effect lets you cast card ${decision.oid} transformed without paying its mana cost, or leave it in exile. Which do you choose?`
+        : `A resolving effect requires you to cast revealed card ${decision.oid} without paying its mana cost. Which complete declaration do you choose?`;
+    case 'damagePrevention':
+      return `A finite prevention shield has ${String(decision.remaining)} damage left to allocate among simultaneous sources (CR 615.7). How much prevents damage from ${describePermanent(state, decision.source.sourceOid)}?`;
   }
 }

@@ -15,7 +15,7 @@ import { enumerateCriteria } from './criteria';
 import type { LandPlan } from './land-plan';
 import { describeLandCount } from './land-plan';
 import type { SelectionStop } from './select';
-import type { Rejection } from './verify';
+import type { Adjustment, Rejection } from './verify';
 import { deckPrice } from './verify';
 
 export interface DeckReportInput {
@@ -25,6 +25,8 @@ export interface DeckReportInput {
   readonly landPlan: LandPlan;
   readonly plan: string;
   readonly rejections: readonly Rejection[];
+  /** Counts trimmed to the stated limit; kept cards, so not rejections. */
+  readonly adjustments: readonly Adjustment[];
   /** Spells the selection loop never filled; 0 when it met the spell target. */
   readonly shortBy: number;
   /** Which bound ended card selection; the shortfall line names that one. */
@@ -38,7 +40,12 @@ export function formatConstructedDeckReport(input: DeckReportInput): string {
 
   lines.push(`# Deck: ${criteria.prompt}`, '');
   lines.push(
-    `Format ${criteria.format} · ${deck.totalCards} cards · $${deckPrice([...deck.spells, ...deck.lands]).toFixed(2)}`,
+    // A set-backed deck has no format and no price: its cards were never
+    // printed. Saying "Format undefined · $0.00" states two facts that are not
+    // true about it, so the line names the pool it does have instead.
+    criteria.format === undefined
+      ? `${(criteria.sets ?? []).join(', ')} · ${deck.totalCards} cards`
+      : `Format ${criteria.format} · ${deck.totalCards} cards · $${deckPrice([...deck.spells, ...deck.lands]).toFixed(2)}`,
   );
   lines.push(`Chosen from ${input.universeSize} cards the criteria allow.`, '');
 
@@ -124,6 +131,16 @@ export function formatConstructedDeckReport(input: DeckReportInput): string {
     lines.push('');
   }
 
+  // Its own section, under its own heading. A trimmed card is in the deck, and
+  // listing it beside the refusals would read as a card the deck does not have.
+  if (input.adjustments.length > 0) {
+    lines.push('## Adjusted proposals', '');
+    for (const adjustment of input.adjustments) {
+      lines.push(`- \`${adjustment.code}\` ${adjustment.detail}`);
+    }
+    lines.push('');
+  }
+
   return lines.join('\n');
 }
 
@@ -137,8 +154,14 @@ export function formatConstructedDeckReport(input: DeckReportInput): string {
  * and with no rejections at all it asserts the model stopped proposing cards
  * when the model proposed a fresh one on every round including the last. Either
  * sends the reader hunting for a problem that is not there.
+ *
+ * Exported because the markdown report is not the only reader. A build shown on
+ * a surface rather than printed to a terminal owes the same sentence, and the
+ * workbench had `deck.shortfalls` without it: the playtester's Vessari-v1 said "3 cards
+ * against a target of 60" and never said the selection had stopped at its spend
+ * ceiling, which is the half that names what to change (`mtg-yp33.6`).
  */
-function describeUnfilled(
+export function describeUnfilled(
   shortBy: number,
   stop: SelectionStop,
   rejections: readonly Rejection[],

@@ -14,12 +14,22 @@ import {
   ActivationCostSchema,
   OptionalTriggerSchema,
   StaticModificationSchema,
+  staticModificationsWithTriggeredAbility,
 } from './ability-shape';
-import { AmountSchema, ComputedAmountSchema, PumpAmountSchema } from './amount';
-import { CounterKindSchema } from './counters';
+import {
+  AmountSchema,
+  ChosenXSchema,
+  ComputedAmountSchema,
+  PumpAmountSchema,
+  SharedAmountSchema,
+} from './amount';
+import { CounterKindSchema, ModelCounterKindSchema } from './counters';
+import { CardFilterSchema } from './card-filter';
+import { CharacteristicPowerToughnessSchema } from './characteristic-values';
 import { ManaCostSchema } from './mana';
 import {
-  CardKindSchema,
+  CARD_ID_PATTERN,
+  COLORS,
   ColorSchema,
   EFFECT_KINDS,
   EffectScopeSchema,
@@ -27,18 +37,20 @@ import {
   KeywordSchema,
   ManaColorSchema,
   PlayerScopeSchema,
-  SupertypeSchema,
 } from './vocabulary';
 import {
   isReferentTarget,
+  isMultipleTargetSpec,
+  isSourceAttachmentTarget,
   isSourceBodyOnlyTarget,
   ModelTargetSpecSchema,
   referentSourceSpace,
-  targetCountOf,
   TargetFilterSchema,
   TargetSpecSchema,
+  type TargetSpec,
   targetKindNamesACreature,
   targetKindNamesAPlayer,
+  targetKindNamesAPlayerOrPlaneswalker,
 } from './targets';
 
 /**
@@ -104,8 +116,9 @@ const SWEEP_FIELD = {
  * Its own field rather than a seventh `EffectScope`, because every reader of
  * that vocabulary asks it which zone and which bodies and "each player" answers
  * neither. A separate field also keeps the two orthogonal where they have to be
- * orthogonal: this one says *whom*, `scope` says *what*, and the one primitive
- * that carries this carries no `scope` at all.
+ * orthogonal: this one says *whom* at the table and `scope` says *what* on the
+ * battlefield. Most carriers use only one. Damage may carry both because one
+ * source can deal one simultaneous batch to permanents and players.
  *
  * Withheld from the model for `scope`'s reason at the same seam: a fixture key
  * hashes the answer schema (`packages/llm/src/schema.ts`), so a field appearing
@@ -169,7 +182,11 @@ const PLAYER_SWEEP_FIELD = { players: PlayerScopeSchema.optional() };
  * are what layer 6 carries.
  */
 const NO_PUMP_KEYWORD = {};
-const PUMP_KEYWORD_FIELD = { keyword: KeywordSchema.optional() };
+const PUMP_KEYWORD_FIELD = {
+  keyword: KeywordSchema.optional(),
+  /** Chorus of Might leads with the shared duration. Text only; semantics are unchanged. */
+  printedDurationFirst: z.literal(true).optional(),
+};
 
 /**
  * The rider that makes tapping cost the opponent a turn instead of a blocker.
@@ -221,6 +238,75 @@ const STASIS_FIELD = { doesNotUntap: z.literal(true).optional() };
 const NO_SPELL_FILTER = {};
 const SPELL_FILTER_FIELD = { spellFilter: TargetFilterSchema.optional() };
 
+/**
+ * A fixed CR 118.8 toll attached to one hand-authored counter instruction.
+ *
+ * This is deliberately wider than `SPELL_FILTER_FIELD` only in the full card
+ * unions. The model union still passes `NO_SPELL_FILTER`, so teaching the
+ * reference vocabulary to represent Mana Leak and Izzet Charm does not teach
+ * the generator a new output shape.
+ */
+const COUNTER_FIELDS = {
+  ...SPELL_FILTER_FIELD,
+  /** A fixed toll, or the X the counterspell's caster announced. Hand-authored only. */
+  unlessCost: z.union([ManaCostSchema, z.strictObject({ kind: z.literal('chosenX') })]).optional(),
+  /** CR 701.5a destination replacement used by Syncopate. Hand-authored only. */
+  destination: z.literal('exile').optional(),
+  /**
+   * A second instruction that reads the targeted creature spell before the
+   * counter attempt, then has this source damage that spell's controller.
+   * Hand-authored only: stack-object referents are outside the model target
+   * vocabulary, and `counterSpell` deliberately owns that target seam.
+   */
+  dealDamageToControllerEqualToSpellPower: z.literal(true).optional(),
+};
+
+/** Hand-authored CR 615 exception carried only by the full effect unions. */
+const NO_DAMAGE_PREVENTION_RULE = {};
+const DAMAGE_PREVENTION_RULE_FIELD = { preventable: z.literal(false).optional() };
+
+/** Hand-authored division instructions carried only by the full effect unions. */
+export const DamageDivisionSchema = z.discriminatedUnion('kind', [
+  z.strictObject({ kind: z.literal('each') }),
+  z.strictObject({ kind: z.literal('evenlyRoundedDown') }),
+  z.strictObject({ kind: z.literal('asYouChoose') }),
+]);
+const NO_DAMAGE_DIVISION = {};
+const DAMAGE_DIVISION_FIELD = { division: DamageDivisionSchema.optional() };
+
+const NO_DAMAGE_RIDERS = {};
+const DAMAGE_RIDER_FIELDS = {
+  additionalScopeFilter: TargetFilterSchema.optional(),
+  scopeAmount: AmountSchema.optional(),
+  tapScopeGroup: z.literal(true).optional(),
+  /** Hand-authored, resolution-linked death replacement; never model-facing. */
+  exileDamagedCreatureIfItWouldDieThisTurn: z.literal(true).optional(),
+  /** Hand-authored cohort members become the damage sources and hit their own controllers. */
+  eachScopedPermanentDealsToItsController: z.literal(true).optional(),
+  /** Hand-authored routing whose player branch is opponent-only; any planeswalker remains legal. */
+  opponentPlayerOrPlaneswalkerOnly: z.literal(true).optional(),
+};
+
+const NO_REFERENT_EXCLUSION = {};
+/** Hand-authored “other” relationship carried only by the full card-effect union. */
+const REFERENT_EXCLUSION_FIELD = { excludeReferent: z.literal(true).optional() };
+const NO_GAIN_LIFE_AMOUNT_SOURCE = {};
+/** Hand-authored live amount source for Search Warrant's linked life gain. */
+const GAIN_LIFE_AMOUNT_SOURCE_FIELD = {
+  amountFrom: z.literal('thatPlayersHandSize').optional(),
+};
+const NO_MILL_PRESENTATION = {};
+/** Hand-authored current Oracle may name a computed mill count as X or retain mill's one-card reminder. */
+const MILL_PRESENTATION_FIELD = {
+  printedVariable: z.literal('X').optional(),
+  printedOneCardReminder: z.literal(true).optional(),
+};
+const NO_DESTROY_CONTROLLER_LIBRARY_FOLLOWUP = {};
+/** Hand-authored retained-controller rider used only by Destroy the Evidence. */
+const DESTROY_CONTROLLER_LIBRARY_FOLLOWUP_FIELD = {
+  controllerLibraryFollowup: z.literal('revealUntilLandToGraveyard').optional(),
+};
+
 function effectsBeforeTokens<
   T extends ZodType,
   A extends ZodType,
@@ -228,7 +314,13 @@ function effectsBeforeTokens<
   S extends Record<string, ZodType> = typeof NO_SWEEP,
   C extends Record<string, ZodType> = typeof NO_SPELL_FILTER,
   P extends Record<string, ZodType> = typeof NO_PLAYER_SWEEP,
+  N extends Record<string, ZodType> = typeof NO_DAMAGE_PREVENTION_RULE,
   R extends Record<string, ZodType> = typeof NO_PUMP_KEYWORD,
+  V extends Record<string, ZodType> = typeof NO_DAMAGE_DIVISION,
+  W extends Record<string, ZodType> = typeof NO_DAMAGE_RIDERS,
+  X extends Record<string, ZodType> = typeof NO_REFERENT_EXCLUSION,
+  G extends Record<string, ZodType> = typeof NO_GAIN_LIFE_AMOUNT_SOURCE,
+  H extends Record<string, ZodType> = typeof NO_DESTROY_CONTROLLER_LIBRARY_FOLLOWUP,
 >(
   target: T,
   amount: A,
@@ -236,11 +328,31 @@ function effectsBeforeTokens<
   sweep: S = NO_SWEEP as S,
   counter: C = NO_SPELL_FILTER as C,
   playerSweep: P = NO_PLAYER_SWEEP as P,
+  damagePrevention: N = NO_DAMAGE_PREVENTION_RULE as N,
   pumpKeyword: R = NO_PUMP_KEYWORD as R,
+  division: V = NO_DAMAGE_DIVISION as V,
+  damageRiders: W = NO_DAMAGE_RIDERS as W,
+  referentExclusion: X = NO_REFERENT_EXCLUSION as X,
+  gainLifeAmountSource: G = NO_GAIN_LIFE_AMOUNT_SOURCE as G,
+  destroyControllerLibraryFollowup: H = NO_DESTROY_CONTROLLER_LIBRARY_FOLLOWUP as H,
 ) {
   return [
-    z.strictObject({ kind: z.literal('dealDamage'), amount, target, ...sweep }),
-    z.strictObject({ kind: z.literal('destroyPermanent'), target, ...sweep }),
+    z.strictObject({
+      kind: z.literal('dealDamage'),
+      amount,
+      target,
+      ...sweep,
+      ...playerSweep,
+      ...damagePrevention,
+      ...division,
+      ...damageRiders,
+    }),
+    z.strictObject({
+      kind: z.literal('destroyPermanent'),
+      target,
+      ...sweep,
+      ...destroyControllerLibraryFollowup,
+    }),
     z.strictObject({
       kind: z.literal('pumpUntilEndOfTurn'),
       power: pumpMagnitude,
@@ -248,9 +360,10 @@ function effectsBeforeTokens<
       target,
       ...sweep,
       ...pumpKeyword,
+      ...referentExclusion,
     }),
     z.strictObject({ kind: z.literal('drawCards'), count: amount, target, ...playerSweep }),
-    z.strictObject({ kind: z.literal('gainLife'), amount, target }),
+    z.strictObject({ kind: z.literal('gainLife'), amount, target, ...gainLifeAmountSource }),
     // Countering targets a spell on the stack, which is outside the pinned
     // targeting vocabulary, so this primitive carries no TargetSpec at all.
     z.strictObject({ kind: z.literal('counterSpell'), ...counter }),
@@ -262,11 +375,18 @@ function effectsAfterTokens<
   A extends ZodType,
   S extends Record<string, ZodType> = typeof NO_SWEEP,
   D extends Record<string, ZodType> = typeof NO_STASIS,
->(target: T, amount: A, sweep: S = NO_SWEEP as S, stasis: D = NO_STASIS as D) {
+  P extends Record<string, ZodType> = typeof NO_MILL_PRESENTATION,
+>(
+  target: T,
+  amount: A,
+  sweep: S = NO_SWEEP as S,
+  stasis: D = NO_STASIS as D,
+  millPresentation: P = NO_MILL_PRESENTATION as P,
+) {
   return [
     z.strictObject({ kind: z.literal('tapPermanent'), target, ...sweep, ...stasis }),
     z.strictObject({ kind: z.literal('returnToHand'), target }),
-    z.strictObject({ kind: z.literal('millCards'), count: amount, target }),
+    z.strictObject({ kind: z.literal('millCards'), count: amount, target, ...millPresentation }),
   ] as const;
 }
 
@@ -315,7 +435,18 @@ function effectsAfterTokens<
  * `checkSpaceScope` refuses either one printed without the other. Spreading the
  * pair is what keeps this primitive's sweeping half spelled the way the other
  * four sweepers spell theirs.
+ *
+ * `recipientCondition` is the one live, hand-authored recipient predicate. It
+ * is checked at resolution after the retained Equipment host is resolved;
+ * `checkEffectParams` confines it to that unscoped shape. `putCounters` itself
+ * remains absent from `ModelEffectSchema`, so the generator boundary stays
+ * unchanged.
  */
+const CounterRecipientConditionSchema = z.strictObject({
+  kind: z.literal('hasColor'),
+  color: ColorSchema,
+});
+
 function putCountersEffect<T extends ZodType, A extends ZodType>(target: T, amount: A) {
   return z.strictObject({
     kind: z.literal('putCounters'),
@@ -323,6 +454,21 @@ function putCountersEffect<T extends ZodType, A extends ZodType>(target: T, amou
     count: amount,
     ...SWEEP_FIELD,
     target,
+  });
+}
+
+/** Hand-authored counter extensions; never model-facing. */
+function handAuthoredPutCountersEffect<T extends ZodType, A extends ZodType>(target: T, amount: A) {
+  return z.strictObject({
+    kind: z.literal('putCounters'),
+    counter: CounterKindSchema,
+    count: amount,
+    ...SWEEP_FIELD,
+    target,
+    recipientCondition: CounterRecipientConditionSchema.optional(),
+    keyword: KeywordSchema.optional(),
+    /** Hand-authored delayed placement; the model-facing counter effect omits it. */
+    timing: z.literal('nextEndStep').optional(),
   });
 }
 
@@ -337,9 +483,11 @@ function putCountersEffect<T extends ZodType, A extends ZodType>(target: T, amou
  *
  * ## Four decisions, and what settled each
  *
- * **Whose graveyard.** The targeted player's, read off the same `EffectScope`
- * machinery `exileTarget` reads its group off. So the card says whose, out loud,
- * in the one slot it targets.
+ * **Whose graveyard.** The scope supplies the answer. The original
+ * `creatureCardsInPlayerGraveyard` reads one targeted player;
+ * `creatureCardsInAllGraveyards` reads the stable seat-order union and targets
+ * nobody. Keeping both in the subject table means neither execution nor
+ * rendering guesses from the effect kind.
  *
  * **What comes back.** Creature cards. `EFFECT_SCOPES` already carries
  * `creatureCardsInPlayerGraveyard` — it was added for a scoped exile and reads
@@ -347,26 +495,23 @@ function putCountersEffect<T extends ZodType, A extends ZodType>(target: T, amou
  * primitive needed no new way to say which cards, and stating a narrower filter
  * would be a vocabulary nothing in the set exercises.
  *
- * **Where to, and under whose control.** The battlefield, under each card's
- * *owner's* control. That is Animate Dead's zone with Raise Dead's ownership,
- * and it is the pair the flavor asks for: the moon raises the dead, and it does
- * not care whose they were. It is also the pair the kernel already performs —
- * `moveObject` sets a returning object's controller from its owner, so nothing
- * here needs a control-change mechanism the rest of the DSL has no word for.
- * The printed text says "under their owner's control" rather than leaving it to
- * Magic's default, which for a return-to-battlefield effect is the *caster*.
+ * **Where to, and under whose control.** Absent fields mean the battlefield
+ * under each card's owner's control, preserving every card written before the
+ * widening. `destination: 'hand'` is mass Raise Dead. `control: 'you'` is the
+ * independent battlefield clause for an effect that reanimates opponents'
+ * cards under its resolving controller while ownership stays unchanged; the
+ * validator refuses it beside the hand destination, where control has no
+ * meaning.
  *
- * **Whether it targets.** The player, and only the player (CR 115.1). Choosing
- * *which* card comes back is a player decision mid-resolution, which in this
- * kernel means the interruptible runner `scry` uses; and no target kind names a
- * card in a graveyard, so a targeted single reanimation would need a widening of
- * `Target` itself. A scope needs neither, and mass reanimation is the beat the
- * set is actually asking for.
- *
- * `scope` is required rather than optional, unlike `exileTarget`'s. An unscoped
- * exile still means something — exile the permanent you named — and an unscoped
- * return has nothing to name at all, because the space it draws from is a zone
- * no `TargetSpec` reaches.
+ * **Whether it targets.** The subject answers this too. A one-player graveyard
+ * scope targets that player and not the cards (CR 115.1); an all-graveyards
+ * scope uses `noTarget`. Neither form asks which card comes back because the
+ * whole scoped cohort moves during one resolution. With no scope, the target
+ * must name one card in a graveyard and the same primitive becomes a targeted
+ * reanimation. Those two
+ * group sizes share the zone move, destination, and control rule; keeping them
+ * in one row avoids a second effect kind whose implementation differs only by
+ * whether it receives one oid or a scope-derived list.
  */
 /**
  * Where the returned cards land, when the card says anywhere but the
@@ -390,8 +535,12 @@ export type ReturnDestination = z.infer<typeof ReturnDestinationSchema>;
 function returnFromGraveyardEffect<T extends ZodType>(target: T) {
   return z.strictObject({
     kind: z.literal('returnFromGraveyard'),
-    scope: EffectScopeSchema,
+    scope: EffectScopeSchema.optional(),
+    /** Faith's Reward's exact owner-relative cohort; deliberately hand-authored only. */
+    fromBattlefieldThisTurn: z.literal(true).optional(),
     destination: ReturnDestinationSchema.optional(),
+    control: GraveyardChoiceControlSchema.optional(),
+    alsoBecomes: GraveyardArrivalGrantSchema.optional(),
     target,
   });
 }
@@ -415,14 +564,49 @@ function returnFromGraveyardEffect<T extends ZodType>(target: T) {
  * in an exile slot for as long as the set has existed. The objection is that
  * admitting it costs a sourced color-pie row and a prompt line that re-records
  * every fixture, which is a generation run's decision and not a kernel one.
+ *
+ * The hand-authored shape also carries the shared scope/filter pair. Targeted
+ * player scopes name their own creature-card group and take no filter; a board
+ * region such as Mass Polymorph's permanents-you-control scope needs the filter
+ * to say which permanents move. The validator holds those halves together.
  */
 function exileTargetEffect<T extends ZodType>(target: T) {
-  return z.strictObject({ kind: z.literal('exileTarget'), scope: EffectScopeSchema.optional(), target });
+  return z.strictObject({
+    kind: z.literal('exileTarget'),
+    scope: EffectScopeSchema.optional(),
+    scopeFilter: TargetFilterSchema.optional(),
+    target,
+    /** Retain the exact exiled incarnation on this source incarnation. */
+    linkToSource: z.literal(true).optional(),
+    /**
+     * Detention Sphere's atomic target-plus-name-cohort exile.
+     *
+     * The excluded name lives inside the effect-specific bundle rather than
+     * widening every target filter with a negative name predicate. Card-level
+     * validation admits it only with the matching optional enters trigger and
+     * plural source-linked return.
+     */
+    sameNameCohort: z.strictObject({ excludedName: z.string().min(1) }).optional(),
+    /**
+     * Angel of Serenity's closed mixed-zone plural selector. The exact card
+     * bundle validator pins the target, trigger, link, and departure reader;
+     * the model-facing exile schema never sees this field.
+     */
+    creatureBattlefieldOrGraveyard: z.literal(true).optional(),
+    /**
+     * Create one delayed return for the exact exile incarnation this effect
+     * moved. The literal fields are the one native schedule currently proven:
+     * the next end step, tapped, under owner control. Keeping the rider off
+     * `modelExileTargetEffect` makes it hand-authored without changing the
+     * generator's recorded answer schema.
+     */
+    returnAtNextEndStep: z.strictObject({ tapped: z.literal(true), under: z.literal('owner') }).optional(),
+  });
 }
 
 /**
- * The same primitive with `scope` taken away, which is the whole of what the
- * generator may answer with.
+ * The same primitive with `scope` and `scopeFilter` taken away, which is the
+ * whole of what the generator may answer with.
  *
  * Omitted rather than offered-and-discouraged, for `target.distinct`'s reason
  * one file over: a field the prompt does not teach is a field the model fills in
@@ -451,13 +635,10 @@ function modelExileTargetEffect<T extends ZodType>(target: T) {
  * is not a card anybody prints and `overEffectScope` would have to read a power
  * per member of the group.
  *
- * One target, like every other effect here, and that is the whole reason the
- * template is "it fights target creature you don't control" rather than Prey
- * Upon's "target creature you control fights target creature you don't
- * control". `targetChoicesForEffects` returns one target-space slot per effect;
- * a two-target primitive would reshape that return type through kernel legal-
- * action, resolution, the bots and the UI. The source is the other fighter, and
- * the trigger is what puts a body under it.
+ * The source-body form has one target and reads the trigger's source as the
+ * other fighter. The Prey Upon form is an ordered pair with exactly the two
+ * selectors that card family prints; the kernel's plural-target side channel
+ * carries the pair without widening the ordinary one-slot target contract.
  *
  * There is no model half. `putCountersEffect` is the standing precedent for a
  * primitive that is expressible by hand and unreachable from the generator, and
@@ -465,7 +646,16 @@ function modelExileTargetEffect<T extends ZodType>(target: T) {
  * `RoleProfile.effectKinds` cannot name it either.
  */
 function fightEffect<T extends ZodType>(target: T) {
-  return z.strictObject({ kind: z.literal('fight'), target });
+  return z.strictObject({
+    kind: z.literal('fight'),
+    fighter: z.strictObject({ kind: z.literal('targetCreatureYouControl') }).optional(),
+    target,
+  });
+}
+
+/** Xathrid Gorgon's one permanent effect bundle, hand-authored and unpriced. */
+function petrifyCreatureEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('petrifyCreature'), target });
 }
 
 /**
@@ -509,6 +699,23 @@ function revealHandEffect<T extends ZodType>(target: T) {
 }
 
 /**
+ * CR 701.16a after the rules, rather than a player, select one card at random.
+ *
+ * A separate primitive from `revealHand` keeps the two actions canonical:
+ * whole-hand reveal consumes no randomness, while this one advances the
+ * replayable RNG exactly when a nonempty hand supplies a card. Its only legal
+ * target is an event-retained player, enforced by the effect rule table.
+ */
+function revealRandomCardFromHandEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('revealRandomCardFromHand'), target });
+}
+
+/** Reveal and conditionally play one random card from the retained hand. */
+function playRandomHandCardWithoutPayingManaCostEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('playRandomHandCardWithoutPayingManaCost'), target });
+}
+
+/**
  * Largest scry value this source-bound primitive admits.
  *
  * The M11/M13 identities need one through four. Keeping that bound in the
@@ -521,6 +728,30 @@ export const MAX_SCRY_COUNT = 4;
 
 function scryEffect() {
   return z.strictObject({ kind: z.literal('scry'), count: z.int().min(1).max(MAX_SCRY_COUNT) });
+}
+
+/** Hand-authored, bounded questions over the top of the controller's library. */
+function reorderTopLibraryEffect() {
+  return z.strictObject({ kind: z.literal('reorderTopLibrary'), count: z.literal(5) });
+}
+
+function selectFromTopLibraryEffect() {
+  return z.strictObject({
+    kind: z.literal('selectFromTopLibrary'),
+    count: z.union([z.literal(3), z.literal(5)]),
+    filter: CardFilterSchema,
+    optional: z.literal(true),
+    reveal: z.literal(true),
+    destination: z.literal('hand'),
+    rest: z.enum(['bottom', 'graveyard']),
+    /** Atomic hand-authored profile; validation binds every neighboring field. */
+    grislySalvageProfile: z.literal(true).optional(),
+    revealAll: z.literal(true).optional(),
+  });
+}
+
+function separateTopLibraryIntoPilesEffect() {
+  return z.strictObject({ kind: z.literal('separateTopLibraryIntoPiles'), count: z.literal(5) });
 }
 
 /**
@@ -578,7 +809,30 @@ function addManaEffect() {
     kind: z.literal('addMana'),
     produces: z.array(ManaColorSchema).min(1).max(MAX_MANA_PRODUCED),
     amount: AmountSchema,
+    /** Engine-only CR 106.3 distribution bundle; validation fixes its current count and colors. */
+    distribution: z.literal('anyCombinationOfColors').optional(),
   });
+}
+
+/** A persistent emblem granting one reusable tap-for-mana ability by live type. */
+export const EmblemManaGrantSchema = z.strictObject({
+  filter: z.strictObject({
+    cardTypes: z.tuple([z.literal('land')]),
+    subtypes: z.tuple([z.string().min(1)]),
+  }),
+  produces: z.tuple([ManaColorSchema]),
+  amount: z.int().min(1).max(MAX_MANA_PRODUCED),
+});
+
+export const EmblemSpecSchema = z.strictObject({
+  name: z.string().min(1).max(128),
+  grantsManaAbility: EmblemManaGrantSchema,
+});
+
+export type EmblemSpec = z.infer<typeof EmblemSpecSchema>;
+
+function createEmblemEffect() {
+  return z.strictObject({ kind: z.literal('createEmblem'), emblem: EmblemSpecSchema });
 }
 
 /**
@@ -635,6 +889,37 @@ function revealTopCardsEffect() {
 }
 
 /**
+ * Reveal the top card of your library and put that exact card into your hand.
+ *
+ * One primitive holds the hidden-zone read and its consumer together for the
+ * same reason `revealUntilCreatureCards` does below. A bare reveal followed by
+ * a generic move would need a target kind for a concealed library card or an
+ * authored object id, and either would turn a resolution-local fact into
+ * lasting card data. This effect asks no question and always moves at most one
+ * card, so an empty library is the ordinary no-op rather than a failed draw.
+ */
+function revealTopCardToHandEffect() {
+  return z.strictObject({ kind: z.literal('revealTopCardToHand') });
+}
+
+/**
+ * Reveal the shortest top prefix containing `count` creature cards, put every
+ * creature card in that prefix onto the battlefield, then shuffle the rest.
+ *
+ * One primitive holds the reveal and its consumers together. Splitting it into
+ * a bare reveal followed by a move would require a lasting "revealed" flag or
+ * a global register for the second effect to read, neither of which exists in
+ * Magic. The count remains an `Amount`, so the library operation composes with
+ * a preceding resolution tally without learning which effect produced it.
+ */
+function revealUntilCreatureCardsEffect() {
+  return z.strictObject({
+    kind: z.literal('revealUntilCreatureCards'),
+    count: AmountSchema,
+  });
+}
+
+/**
  * Which end of the library a tuck puts the card on.
  *
  * Two members and both are printed regularly — the top is Condemn's answer and
@@ -670,7 +955,25 @@ function putOnLibraryEffect<T extends ZodType>(target: T) {
 }
 
 /**
- * Whose graveyard an `exileGraveyard` empties.
+ * Put the resolving permanent ability's exact source and one target on top of
+ * their owners' libraries, then shuffle each library that actually received
+ * an object.
+ *
+ * This is intentionally atomic. Two `putOnLibrary` effects followed by the
+ * controller-only `shuffleLibrary` cannot name a target's owner, and a generic
+ * player field would ask authors to restate ownership the objects already
+ * carry. It is hand-authored only and therefore cannot widen the generator's
+ * model schema.
+ */
+function putSourceAndTargetOnOwnersLibrariesThenShuffleEffect<T extends ZodType>(target: T) {
+  return z.strictObject({
+    kind: z.literal('putSourceAndTargetOnOwnersLibrariesThenShuffle'),
+    target,
+  });
+}
+
+/**
+ * Whose graveyard a legacy untargeted `exileGraveyard` empties.
  *
  * A three-member enum rather than a `TargetSpec`, and the reason is that the
  * third member has no target to name. "Exile all graveyards" (Rest in Peace)
@@ -678,12 +981,11 @@ function putOnLibraryEffect<T extends ZodType>(target: T) {
  * meaning "everyone" — a widening of `TARGET_KINDS` that every other effect in
  * the vocabulary would then have to be told to refuse.
  *
- * Untargeted also costs nothing here that a target would buy. CR 115.1's point
- * is that a target can be made illegal in response; a player never can, no
- * printed card protects a graveyard, and in a two-player game `'opponent'`
- * names exactly the seat `targetOpponent` would have. So the enum says what the
- * card says and the kernel resolves it against the effect's own controller, the
- * way `cardsInGraveyard`'s `whose` already does one file over.
+ * These owner words remain distinct from the hand-authored target-player form:
+ * CR 115.1 lets player hexproof remove Tormod's Crypt's chosen target before
+ * resolution, while Bojuka Bog's fixed opponent and an each-player sweep never
+ * target. Keeping both forms preserves that rules difference without inventing
+ * a plural target kind.
  */
 export const GRAVEYARD_OWNERS = ['you', 'opponent', 'each'] as const;
 export const GraveyardOwnerSchema = z.enum(GRAVEYARD_OWNERS);
@@ -697,10 +999,78 @@ export type GraveyardOwner = z.infer<typeof GraveyardOwnerSchema>;
  * `EFFECT_SCOPES` narrows by card type; this one narrows by nothing, which is
  * the entire card. Bojuka Bog and Tormod's Crypt are answers to a graveyard
  * *strategy*, and a version that left the noncreature cards behind would be a
- * different, worse card wearing the same name.
+ * different, worse card wearing the same name. Exactly one of `whose` and
+ * `target` is present: the former preserves fixed-owner sweeps, while the latter
+ * is restricted to hand-authored target-player effects.
  */
-function exileGraveyardEffect() {
-  return z.strictObject({ kind: z.literal('exileGraveyard'), whose: GraveyardOwnerSchema });
+function exileGraveyardEffect<T extends ZodType>(target: T) {
+  return z
+    .strictObject({
+      kind: z.literal('exileGraveyard'),
+      whose: GraveyardOwnerSchema.optional(),
+      target: target.optional(),
+    })
+    .refine(
+      (effect) => (effect.whose === undefined) !== (effect.target === undefined),
+      'exileGraveyard requires exactly one of whose or target',
+    );
+}
+
+/**
+ * Haunting Echoes' linked graveyard exile and same-name library search.
+ *
+ * One effect rather than `exileGraveyard` followed by `searchLibrary`, because
+ * the second filter is not printed data: it is derived from the cards the
+ * first move actually put into exile and exists only for this resolution. A
+ * general remembered-name register would expose an intermediate value other
+ * effects could read after its rules lifetime, while two independent effects
+ * could not express the link at all.
+ *
+ * The target is real (CR 115.1a), like `exileGraveyard`'s hand-authored target
+ * form rather than its fixed owner form. Haunting Echoes may name either
+ * player, and CR 608.2b must be able to take the whole operation when that
+ * target is illegal. `validate/effects.ts` narrows the hand-authored slot to
+ * `targetPlayer`; accepting `targetOpponent` would print a smaller choice than
+ * the card has.
+ *
+ * The hidden-zone choice remains in the kernel's interruptible search runner.
+ * Current CR 701.23b permits the searching player to find zero, some, or all
+ * matching cards even though the instruction says “all,” so a synchronous
+ * mass move would be observably wrong.
+ */
+function exileNonbasicGraveyardAndMatchingLibraryEffect<T extends ZodType>(target: T) {
+  return z.strictObject({
+    kind: z.literal('exileNonbasicGraveyardAndMatchingLibrary'),
+    target,
+  });
+}
+
+/**
+ * Conundrum Sphinx's one-resolution name choices and linked top-card result.
+ *
+ * The name is runtime input rather than schema data: CR 201.4 permits any
+ * Oracle card name, including one outside the format, so a card list here would
+ * either leak hidden deck construction or narrow the printed choice. One
+ * composite keeps the choices tied to the reveals that consume them and gives
+ * no unrelated effect a resolution-local name register to read.
+ */
+function eachPlayerNamesCardThenRevealsTopEffect() {
+  return z.strictObject({ kind: z.literal('eachPlayerNamesCardThenRevealsTop') });
+}
+
+/**
+ * Slaughter Games' resolution-local name and fixed three-zone operation.
+ *
+ * The target, nonland restriction, searched zones, exile destination, and
+ * shuffle are one capability. Exposing any of them as independent fields
+ * would create combinations no source card attests and widen hand-authored
+ * effects without widening what the kernel can safely execute.
+ */
+function nameNonlandCardAndExileMatchingOpponentZonesEffect<T extends ZodType>(target: T) {
+  return z.strictObject({
+    kind: z.literal('nameNonlandCardAndExileMatchingOpponentZones'),
+    target,
+  });
 }
 
 /**
@@ -729,9 +1099,94 @@ function exileGraveyardEffect() {
  * says which cards a search may take, and Farseek's tapped clause applies to
  * the land it took regardless of which land that was.
  */
-export const SEARCH_DESTINATIONS = ['hand', 'battlefield', 'battlefieldTapped'] as const;
+const ZONE_CHANGE_SEARCH_DESTINATIONS = ['hand', 'battlefield', 'battlefieldTapped', 'exile'] as const;
+
+/**
+ * `libraryTop` is a direct destination rather than a zone change: its searched
+ * card stays in the library while the rest is shuffled, then becomes the first
+ * object in library order. It is therefore excluded from `oneAndRest` below,
+ * whose two arms move found cards into zones after one shared search.
+ */
+export const SEARCH_DESTINATIONS = [...ZONE_CHANGE_SEARCH_DESTINATIONS, 'libraryTop'] as const;
 export const SearchDestinationSchema = z.enum(SEARCH_DESTINATIONS);
 export type SearchDestination = z.infer<typeof SearchDestinationSchema>;
+
+/**
+ * Exile reached by a search and remembered by the permanent whose ability
+ * performed it.
+ *
+ * This is not an ordinary `SearchDestination`. A card in a hand or on a
+ * battlefield has arrived and the search is finished with it; this card also
+ * leaves a relation behind, because a later ability on the same source can say
+ * "the exiled card". Keeping that relation in the discriminant makes an
+ * unlinked exile impossible to author accidentally and keeps one-and-rest
+ * searches from assigning a source link to only half of their result.
+ */
+export const SOURCE_LINKED_EXILE_DESTINATION = 'sourceLinkedExile' as const;
+export const SourceLinkedExileDestinationSchema = z.literal(SOURCE_LINKED_EXILE_DESTINATION);
+export type SourceLinkedExileDestination = z.infer<typeof SourceLinkedExileDestinationSchema>;
+
+/**
+ * Put one of the cards found into `one` and every other card found into
+ * `rest`, with the searching player choosing which card is the one.
+ *
+ * This is a destination plan rather than two `searchLibrary` effects. Cultivate
+ * searches once, reveals the whole found group once, assigns the two zones,
+ * and shuffles once. Two effects would expose two independent fail-to-find
+ * choices and shuffle between them, which is observably a different card.
+ *
+ * The plan generalizes the real distinction without making selection order
+ * carry hidden meaning: the kernel first finishes the unordered search, then
+ * asks which found card receives `one`. Applying destinations in selection or
+ * library order would let library order decide a game choice the card gives to
+ * its controller.
+ */
+export const OneAndRestSearchDestinationSchema = z.strictObject({
+  kind: z.literal('oneAndRest'),
+  one: z.enum(ZONE_CHANGE_SEARCH_DESTINATIONS),
+  rest: z.enum(ZONE_CHANGE_SEARCH_DESTINATIONS),
+});
+
+export type OneAndRestSearchDestination = z.infer<typeof OneAndRestSearchDestinationSchema>;
+
+/**
+ * Jarad's Orders' atomic split of one searched creature into hand and the
+ * other into the graveyard.
+ *
+ * This is a capability bundle rather than a `graveyard` member added to
+ * `SearchDestination`. A general member would also authorize a tutor whose
+ * only destination is a graveyard, and every one-and-rest pairing with that
+ * zone, although the reviewed source proves exactly one profile: a revealed
+ * two-card search whose controller assigns one result to hand and sends the
+ * remainder to the graveyard. The literal `one` arm keeps the existing
+ * destination question's interface; the rest is carried by the discriminant
+ * itself, so `graveyard` never becomes a generally authorable destination.
+ */
+export const OneToHandRestToGraveyardSearchDestinationSchema = z.strictObject({
+  kind: z.literal('oneToHandRestToGraveyard'),
+  one: z.literal('hand'),
+});
+
+export type OneToHandRestToGraveyardSearchDestination = z.infer<
+  typeof OneToHandRestToGraveyardSearchDestinationSchema
+> & {
+  /** Type-only common interface; the discriminant carries this fixed destination. */
+  readonly rest?: never;
+};
+
+/** The existing single destination or the one-and-rest split a card prints. */
+export const SearchDestinationPlanSchema = z.union([
+  SearchDestinationSchema,
+  OneAndRestSearchDestinationSchema,
+  OneToHandRestToGraveyardSearchDestinationSchema,
+  SourceLinkedExileDestinationSchema,
+]);
+
+export type SearchDestinationPlan =
+  | SearchDestination
+  | OneAndRestSearchDestination
+  | OneToHandRestToGraveyardSearchDestination
+  | SourceLinkedExileDestination;
 
 /**
  * Which cards a search may find, in printed characteristics only.
@@ -751,15 +1206,11 @@ export type SearchDestination = z.infer<typeof SearchDestinationSchema>;
  * Keywords are absent for `CountFilterSchema`'s stated reason — no card has
  * asked, and `PrintedFilter` has room the day one does.
  *
- * `colors` is the field that was added the day a card did ask.
- * `chooseFromGraveyard` reads this same filter, and Revive (M13 187) is
- * "return target *green* card from your graveyard to your hand" — a clause with
- * no type in it at all, so a type-only filter renders it as "a card" and hands
- * the choosing seat their whole graveyard. `PrintedFilter` already carried
- * `colors`, so nothing in the kernel had to learn a new predicate; the DSL was
- * simply narrower than the selector underneath it. It widens no fixture key,
- * because no model-facing union reaches a `CardFilter` — `searchLibrary` and
- * `chooseFromGraveyard` are both hand-authored-only.
+ * `colors` serves the same printed-card predicate for a library search or a
+ * genuinely non-targeted graveyard choice. Printed graveyard targets use
+ * `TargetFilter` instead, because their card is selected before resolution and
+ * rechecked under CR 608.2b. No model-facing union reaches a `CardFilter` —
+ * `searchLibrary` and `chooseFromGraveyard` are both hand-authored-only.
  *
  * `maxManaValue` is the field that is not a list, and the shape difference is
  * the point. The four above are "any of these", which is why they concatenate
@@ -831,16 +1282,8 @@ export type SearchDestination = z.infer<typeof SearchDestinationSchema>;
  * filter and finds anything. That is a real card (Demonic Tutor), not a
  * degenerate case to defend against.
  */
-export const CardFilterSchema = z.strictObject({
-  cardTypes: z.array(CardKindSchema).min(1).optional(),
-  excludeCardTypes: z.array(CardKindSchema).min(1).optional(),
-  subtypes: z.array(z.string().min(1)).min(1).optional(),
-  supertypes: z.array(SupertypeSchema).min(1).optional(),
-  colors: z.array(ColorSchema).min(1).optional(),
-  names: z.array(z.string().min(1)).min(1).optional(),
-  maxManaValue: z.number().int().min(0).max(16).optional(),
-});
-export type CardFilter = z.infer<typeof CardFilterSchema>;
+export { CardFilterSchema } from './card-filter';
+export type { CardFilter } from './card-filter';
 
 /**
  * CR 701.19: look through your library for a card matching a filter, take it,
@@ -858,12 +1301,12 @@ export type CardFilter = z.infer<typeof CardFilterSchema>;
  * hold a closure and stop being serializable, which is the whole determinism
  * story.
  *
- * **Optional by construction, not by a field.** CR 701.19b says a search may
- * find nothing even when a legal card is there, so the kernel enumerates a
- * "found nothing" option beside every match and there is no `optional` flag to
- * get wrong. A card that reads "search your library for a Forest" and one that
- * reads "you may search" are the same effect; the difference lives in whether a
- * player would decline, which is a policy and not a rule.
+ * **Failure is derived, not a field.** CR 701.19b permits failing to find when
+ * the search states a card quality, and a count above one renders as "up to",
+ * so either shape gets a "found nothing" answer. An unrestricted one-card
+ * search states no quality and must find a card from a nonempty library. The
+ * filter and count already determine which rule applies, so an `optional` flag
+ * would be a second answer that could disagree with the printed effect.
  *
  * No target and no player field, for `shuffleLibraryEffect`'s reason: it is
  * always the controller's own library. Searching an opponent's library is a
@@ -957,16 +1400,88 @@ function shuffleGraveyardIntoLibraryEffect() {
   return z.strictObject({
     kind: z.literal('shuffleGraveyardIntoLibrary'),
     includeSelf: z.literal(true).optional(),
+    /** Psychic Spiral's current Oracle wording, distinct from Elixir's graveyard shorthand. */
+    printedAllCardsFromYourGraveyard: z.literal(true).optional(),
   });
 }
 
+/**
+ * Time Reversal's one atomic action over every player (CR 701.22).
+ *
+ * This is not a `whose` widening of `shuffleGraveyardIntoLibrary`: that
+ * primitive moves one graveyard and may carry its permanent source, while
+ * this one moves two zones for every seat and never carries the resolving
+ * spell. The plural discriminant states the only reviewed scope without a
+ * redundant field whose other values no card has exercised.
+ */
+function shuffleHandsAndGraveyardsIntoLibrariesEffect() {
+  return z.strictObject({ kind: z.literal('shuffleHandsAndGraveyardsIntoLibraries') });
+}
+
+/** Worldfire's atomic pre-move cohort of every hand and graveyard card. */
+function exileHandsAndGraveyardsEffect() {
+  return z.strictObject({ kind: z.literal('exileHandsAndGraveyards') });
+}
+
+/**
+ * A resolving spell changes its own normal destination to exile.
+ *
+ * Kept as an ordered effect rather than card metadata because Oracle text and
+ * Forge both print it as the last instruction, after the other effects have
+ * happened. Structural validation keeps it off permanent abilities.
+ */
+function exileThisSpellEffect() {
+  return z.strictObject({ kind: z.literal('exileThisSpell') });
+}
+
+export const SearchFilterQuotaSchema = z.strictObject({
+  filter: CardFilterSchema,
+  count: z.int().min(1).max(MAX_SEARCH_COUNT),
+});
+
+export type SearchFilterQuota = z.infer<typeof SearchFilterQuotaSchema>;
+
 function searchLibraryEffect() {
+  return z
+    .strictObject({
+      kind: z.literal('searchLibrary'),
+      filter: CardFilterSchema.optional(),
+      filterQuotas: z.array(SearchFilterQuotaSchema).min(2).max(MAX_SEARCH_COUNT).optional(),
+      destination: SearchDestinationPlanSchema,
+      count: z.union([z.int().min(1).max(MAX_SEARCH_COUNT), ComputedAmountSchema]).optional(),
+      reveal: z.boolean().optional(),
+    })
+    .refine(
+      (effect) =>
+        (effect.filter === undefined) !== (effect.filterQuotas === undefined) &&
+        !(effect.filterQuotas !== undefined && effect.count !== undefined),
+      'a library search needs exactly one of filter or filterQuotas, and only a homogeneous search names count',
+    )
+    .refine(
+      (effect) =>
+        effect.destination !== 'libraryTop' ||
+        effect.filterQuotas === undefined ||
+        effect.filterQuotas.reduce((total, quota) => total + quota.count, 0) === 1,
+      'the library-top search destination places one chosen card on top; use a one-card search',
+    );
+}
+
+/**
+ * Move the cards this source permanently linked in exile.
+ *
+ * Forge's `ExiledWith` relation and XMage's
+ * `ExileTargetForSourceEffect`/`ReturnFromExileForSourceEffect` are the two
+ * independent prior-art implementations behind the shape. The link belongs
+ * to one source incarnation rather than to a resolution, so an enters trigger
+ * can write it and that incarnation's later departure trigger can read it.
+ * Each destination is backed by an exact source-attested card.
+ */
+function moveSourceLinkedExileEffect() {
   return z.strictObject({
-    kind: z.literal('searchLibrary'),
-    filter: CardFilterSchema,
-    destination: SearchDestinationSchema,
-    count: z.union([z.int().min(1).max(MAX_SEARCH_COUNT), ComputedAmountSchema]).optional(),
-    reveal: z.boolean().optional(),
+    kind: z.literal('moveSourceLinkedExile'),
+    destination: z.enum(['hand', 'battlefieldUnderOwner']),
+    /** Print and validate the all-card reader paired with a cohort writer. */
+    plural: z.literal(true).optional(),
   });
 }
 
@@ -1015,7 +1530,7 @@ export type GraveyardChoiceDestination = z.infer<typeof GraveyardChoiceDestinati
  *
  * Only a battlefield destination may carry it. A card in a hand or in exile
  * has an owner and no controller, so `'you'` on either is a sentence about
- * nothing, and `checkGraveyardChoiceParams` refuses it rather than letting it
+ * nothing, and `checkGraveyardArrivalParams` refuses it rather than letting it
  * sit unread.
  */
 export const GRAVEYARD_CHOICE_CONTROLLERS = ['owner', 'you'] as const;
@@ -1054,35 +1569,29 @@ export const GraveyardArrivalGrantSchema = z.strictObject({
 export type GraveyardArrivalGrant = z.infer<typeof GraveyardArrivalGrantSchema>;
 
 /**
- * One named card leaves a graveyard, chosen by a player rather than by a scope.
+ * One card leaves a graveyard through a genuine resolution-time choice.
  *
- * `returnFromGraveyard` is the *mass* form and reaches its cards through an
- * `EffectScope`, which names a set and applies the effect to every member of
- * it: that is Living Death, and it is not Gravedigger. Every single-card
- * recursion M11 and M13 print is this other shape — Disentomb,
- * Call to Mind, Archaeomancer, Nature's Spiral, Revive, Gravedigger, Vile
- * Rebirth — and all seven say *one* card and leave the choosing to a player.
- * Neither half of that sentence is reachable by narrowing a scope.
+ * `returnFromGraveyard` covers both targeted single-card movement and scoped
+ * mass movement. This separate primitive is only for text that really tells a
+ * player to choose during resolution. It must not encode printed "target card"
+ * text: doing so removes the response window and makes the resolving object
+ * silently substitute a different card after the intended one leaves.
  *
  * **It stops the resolution**, which is what keeps it unpriced and out of the
  * generator: `searchLibraryEffect`'s paragraph on the same point applies word
  * for word, and admitting it to the model would hand a batch a card whose cost
  * is a decision space rather than a number.
  *
- * **Optional by construction, for `searchLibraryEffect`'s reason and with one
- * difference worth stating.** The kernel enumerates "take nothing" beside every
- * match, so "you may return target creature card" and "return target creature
- * card" are the same effect here and no `optional` flag can be set wrong. The
- * difference from a search is that a graveyard is public (CR 400.2), so
- * declining reveals nothing the opponent could not already read off the table —
- * a search needs CR 701.19c's license to fail to find, and this does not.
+ * **Optional by construction.** The kernel enumerates "take nothing" beside
+ * every match. A mandatory targeted card therefore belongs on a graveyard-card
+ * `TargetSpec`, never here. The graveyard is public (CR 400.2), so declining
+ * reveals nothing the opponent could not already read off the table.
  *
- * `whose` is `exileGraveyard`'s enum for `exileGraveyard`'s reason: the
- * graveyard is named rather than targeted, no printed card protects one, and in
- * a two-player game `'opponent'` names exactly the seat a target would have.
- * The cards inside it are not targeted either, which is a deliberate divergence
- * from the printed wording and is argued where the kind is declared
- * (`UNPRICED_EFFECT_KINDS`, `vocabulary.ts`).
+ * `whose` reuses `exileGraveyard`'s fixed-owner enum: the graveyard is named
+ * rather than targeted, and in a two-player game `'opponent'` names exactly the
+ * other seat without creating a target.
+ * The cards inside it are not targeted; callers must preserve that distinction
+ * rather than treating this as shorthand for a target.
  *
  * `control` and `alsoBecomes` are the two clauses a reanimation prints beyond the
  * move itself, both optional and both argued at their own schemas above. They
@@ -1103,24 +1612,79 @@ function chooseFromGraveyardEffect() {
 }
 
 /**
+ * Choose one permanent the resolving object's controller currently controls
+ * and move it to its owner's hand.
+ *
+ * This is a resolution-time choice, not a target: the eligible set is read
+ * when the effect resolves and no object is named while the spell or ability
+ * goes on the stack. The controller is implicit because every source-attested
+ * clause in this family says "you control"; an opponent-board arm would add an
+ * interaction no card here exercises. `destination` has only the implemented
+ * hand member so the typed record still says what the move does without
+ * claiming an untested battlefield or graveyard variant.
+ */
+function chooseFromBattlefieldEffect() {
+  return z.strictObject({
+    kind: z.literal('chooseFromBattlefield'),
+    filter: TargetFilterSchema,
+    destination: z.literal('hand'),
+  });
+}
+
+/** The two source-attested destinations for a card returning itself. */
+export const RETURN_SOURCE_DESTINATIONS = ['hand', 'battlefieldTapped'] as const;
+export const ReturnSourceDestinationSchema = z.enum(RETURN_SOURCE_DESTINATIONS);
+export type ReturnSourceDestination = z.infer<typeof ReturnSourceDestinationSchema>;
+
+/**
+ * Move the exact card whose activated ability is resolving out of its owner's
+ * graveyard. This is not a target or a mid-resolution choice: the source oid
+ * is already on the stack entry, and another card with the same name is not a
+ * legal substitute. `validate/abilities.ts` confines the effect to an ability
+ * that explicitly activates from a graveyard.
+ */
+function returnSourceFromGraveyardEffect() {
+  return z.strictObject({
+    kind: z.literal('returnSourceFromGraveyard'),
+    destination: ReturnSourceDestinationSchema,
+  });
+}
+
+/** Return the exact source incarnation retained by a battlefield-to-graveyard trigger. */
+function returnDepartedSourceToOwnerHandEffect() {
+  return z.strictObject({ kind: z.literal('returnDepartedSourceToOwnerHand') });
+}
+
+/** Put the exact departed source incarnation on top of its owner's library. */
+function putDepartedSourceOnTopOfOwnerLibraryEffect() {
+  return z.strictObject({ kind: z.literal('putDepartedSourceOnTopOfOwnerLibrary') });
+}
+
+/** Shuffle the exact source incarnation retained when it entered a graveyard. */
+function shuffleSourceIntoOwnerLibraryEffect() {
+  return z.strictObject({ kind: z.literal('shuffleSourceIntoOwnerLibrary') });
+}
+
+/** Return this Aura source from its owner's graveyard attached to one target. */
+function returnSourceAuraAttachedEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('returnSourceAuraAttached'), target });
+}
+
+/**
  * Largest number of cards one printed discard takes, whoever chooses them.
  *
  * `MAX_SCRY_COUNT`'s argument at the other pausing primitive, with a different
- * arithmetic behind the same conclusion. The M11/M13 identities print one and
- * two (Duress and Distress take one, Mind Rot takes two); four leaves a rare
- * room without opening the question, because the space a discard enumerates is
- * `C(hand, count)` and the binomial peaks in the middle — seven cards choosing
- * four is 35, and seven choosing two is 21, both far inside the kernel's option
- * ceiling. Past that ceiling the set-selection protocol asks one card at a time
- * rather than truncating, so this bound is about what a card face should print
- * rather than about what the enumerator survives.
+ * arithmetic behind the same conclusion. Nicol Bolas, Planeswalker prints
+ * seven, the largest count in the pinned M11/M13 population. The set-selection
+ * protocol asks one card at a time, so this bound is about what a card face may
+ * print rather than about the size of a binomial choice space.
  *
  * A printed number larger than the hand is not out of range, it is CR 701.8a:
  * a player who cannot discard that many discards as many as they can. The
  * kernel bounds the pending count by the hand it is asked of, and this constant
  * bounds only what the card may say.
  */
-export const MAX_DISCARD_COUNT = 4;
+export const MAX_DISCARD_COUNT = 7;
 
 /**
  * CR 701.8: a player puts cards from their hand into their graveyard, choosing
@@ -1168,8 +1732,12 @@ export const MAX_DISCARD_COUNT = 4;
 function discardCardsEffect<T extends ZodType, P extends object>(target: T, playerSweep: P) {
   return z.strictObject({
     kind: z.literal('discardCards'),
-    count: z.int().min(1).max(MAX_DISCARD_COUNT),
+    count: z.union([z.int().min(1).max(MAX_DISCARD_COUNT), z.literal('all')]),
+    /** Rakdos's Return links the count to the X announced for the spell. */
+    countFrom: z.literal('chosenX').optional(),
     target,
+    /** CR 701.8b: the game chooses from the hand through its seeded RNG. */
+    random: z.literal(true).optional(),
     ...playerSweep,
   });
 }
@@ -1231,6 +1799,35 @@ function chooseDiscardEffect<T extends ZodType>(target: T) {
 }
 
 /**
+ * Reveal one player's hand, let the resolving controller choose from a printed
+ * subset, and keep that exact choice linked to one of the two operations that
+ * consume it in M13.
+ *
+ * The choice is not a CR 115 target. It happens during resolution, after the
+ * hand is revealed, so the candidate object belongs in the pending decision
+ * rather than in `TargetSpec`. Keeping reveal, choice, and outcome in one
+ * primitive also prevents an unrelated effect from observing a generic
+ * remembered-card register after its rules lifetime.
+ *
+ * The outcome discriminant carries the rules difference rather than an
+ * optional flag that could be paired with the wrong operation. Mindclaw's
+ * outcome offers declining as one answer and retains the chosen object for the
+ * existing free-cast pipeline. Shimian's mandatory outcome retains only the
+ * printed name needed by its same-name cross-zone move.
+ */
+function chooseFromRevealedHandEffect<T extends ZodType>(target: T) {
+  return z.strictObject({
+    kind: z.literal('chooseFromRevealedHand'),
+    target,
+    filter: CardFilterSchema,
+    outcome: z.discriminatedUnion('kind', [
+      z.strictObject({ kind: z.literal('mayCastWithoutPayingManaCost') }),
+      z.strictObject({ kind: z.literal('exileAllCardsWithSameNameThenShuffle') }),
+    ]),
+  });
+}
+
+/**
  * CR 118.2's other direction: life taken away by something that is not damage.
  *
  * Shaped exactly like `gainLife` — an `Amount` and a `TargetSpec` — because it
@@ -1282,7 +1879,14 @@ function loseLifeEffect<T extends ZodType, A extends ZodType, P extends object>(
   amount: A,
   playerSweep: P,
 ) {
-  return z.strictObject({ kind: z.literal('loseLife'), amount, target, ...playerSweep });
+  return z.strictObject({
+    kind: z.literal('loseLife'),
+    amount,
+    target,
+    ...playerSweep,
+    /** Havoc Festival's live retained-player quantity; hand-authored only. */
+    amountFrom: z.literal('triggeringPlayerLifeHalfRoundedUp').optional(),
+  });
 }
 
 /**
@@ -1295,17 +1899,29 @@ function loseLifeEffect<T extends ZodType, A extends ZodType, P extends object>(
  * Elderscale Wurm and a life-gain doubler doubles what it gained, both of which
  * are what the printed cards do.
  *
- * No target: every card that prints this line says "your" or "each player's"
- * (Elderscale Wurm, Touch of the Eternal, Worldfire), never "target". So it
- * takes the controller, which `ApplyContext` already carries, and a widening
- * arrives with the card that needs it. "Each player's" is not that widening and
- * is not expressible here.
+ * No target: every card that prints this line says "your" or names a player
+ * group (Elderscale Wurm, Touch of the Eternal, Worldfire), never "target".
+ * Absence means the controller; `players` is the shared APNAP sweep vocabulary.
  *
  * `Amount` rather than an integer, for Touch of the Eternal: the number is
  * "the number of artifacts you control" as often as it is seven.
  */
 function setLifeEffect<A extends ZodType>(amount: A) {
-  return z.strictObject({ kind: z.literal('setLife'), amount });
+  return z.strictObject({
+    kind: z.literal('setLife'),
+    amount,
+    players: PlayerScopeSchema.optional(),
+  });
+}
+
+/** CR 104.3's instruction that one targeted player loses the game. */
+function loseGameEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('loseGame'), target });
+}
+
+/** CR 104.2a: this effect's controller wins the game. */
+function winGameEffect() {
+  return z.strictObject({ kind: z.literal('winGame') });
 }
 
 /**
@@ -1329,6 +1945,32 @@ function preventCombatDamageEffect() {
 }
 
 /**
+ * Druid's Deliverance's one-sided Fog: all combat damage to the resolving
+ * effect's controller, and no damage to any other recipient.
+ *
+ * This is a sibling rather than a parameter on `preventCombatDamage`. The
+ * blanket Fog has no recipient at all, while this printed sentence has one
+ * fixed by the resolving controller and still targets nothing. Safe Passage's
+ * live controller scope is wider in the other direction because it includes
+ * creatures and noncombat damage. Keeping the three shapes separate prevents
+ * an author from combining knobs into an effect no printed card or kernel path
+ * has proved.
+ */
+function preventCombatDamageToYouEffect() {
+  return z.strictObject({ kind: z.literal('preventCombatDamageToYou') });
+}
+
+/** CR 701.29: detain a chosen permanent incarnation until the controller's next turn. */
+function detainPermanentEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('detainPermanent'), target });
+}
+
+/** The resolving ability's controller makes the legal block declaration this combat. */
+function chooseBlockersThisCombatEffect() {
+  return z.strictObject({ kind: z.literal('chooseBlockersThisCombat') });
+}
+
+/**
  * CR 615.1, aimed rather than blanket: Dawn Charm's first mode, "prevent all
  * damage that would be dealt to target creature this turn."
  *
@@ -1336,17 +1978,17 @@ function preventCombatDamageEffect() {
  * and none of that argument applies here — this is not a wider Fog, it is the
  * *other* printed shape CR 615 has, and the two primitives cover different
  * cards on purpose rather than one growing a field. Safe Passage's "you and
- * creatures you control" is still unreachable (`ReplacementTrigger` has no
- * word for a group of that shape) and a depleting amount is still Holy Day's
- * partial shield rather than this card's whole one, so neither knob is smuggled
- * in through the target. What changes is the *recipient*: one named creature
- * instead of every combat participant, and `combatOnly` dropped to `false`
- * rather than `true` — the printed line says "all damage", not "all combat
- * damage", so a burn spell aimed at the shielded creature is stopped exactly as
- * a blocker's would be. That is Dawn Charm's second-clause promise and the
- * reason the two primitives are not the same effect pointed differently: a
- * Fog cannot stop a bolt and this can, because the printed cards disagree about
- * that on purpose.
+ * creatures you control" is a separate untargeted sibling below, because its
+ * live controller-defined group is not this effect's one chosen creature. A
+ * depleting amount is still a partial shield rather than this card's whole one,
+ * so that knob is not smuggled in through the target. What changes is the
+ * *recipient*: one named creature instead of every combat participant, and
+ * `combatOnly` dropped to `false` rather than `true` — the printed line says
+ * "all damage", not "all combat damage", so a burn spell aimed at the shielded
+ * creature is stopped exactly as a blocker's would be. That is Dawn Charm's
+ * second-clause promise and the reason the two primitives are not the same
+ * effect pointed differently: a Fog cannot stop a bolt and this can, because
+ * the printed cards disagree about that on purpose.
  *
  * It resolves into `state.replacements` as an `endOfTurn` record naming the
  * target's own object id in `toPermanent`, which is the one field
@@ -1367,6 +2009,60 @@ function preventCombatDamageEffect() {
  */
 function preventAllDamageToTargetEffect<T extends ZodType>(target: T) {
   return z.strictObject({ kind: z.literal('preventAllDamageToTarget'), target });
+}
+
+/**
+ * Safe Passage's untargeted CR 615 scope: its controller and creatures that
+ * player controls when damage would be dealt, for the rest of the turn.
+ *
+ * This is not a wider Fog: it prevents noncombat damage but only to one side.
+ * It is also not `preventAllDamageToTarget` repeated over the current board:
+ * the printed spell targets nothing, and a creature that changes controller
+ * after resolution moves into or out of the protected group. The kernel keeps
+ * that state-aware question on the replacement trigger rather than freezing
+ * object ids into this serialized card value.
+ */
+function preventAllDamageToYouAndCreaturesYouControlEffect() {
+  return z.strictObject({ kind: z.literal('preventAllDamageToYouAndCreaturesYouControl') });
+}
+
+/**
+ * A depleting controller shield, optionally linked to Vengeful Archon's
+ * retaliation target. The `noTarget` arm is Security Blockade's plain numeric
+ * shield; the strict union keeps the linked and unlinked shapes distinct.
+ */
+function preventNextDamageToYouAndRetaliateEffect<T extends ZodType>(target: T) {
+  return z.strictObject({
+    kind: z.literal('preventNextDamageToYouAndRetaliate'),
+    amount: AmountSchema,
+    target,
+  });
+}
+
+/** Silence's turn-scoped rule for every opponent of the resolving controller. */
+function cantCastSpellsThisTurnEffect() {
+  return z.strictObject({
+    kind: z.literal('cantCastSpellsThisTurn'),
+    players: z.literal('eachOpponent'),
+  });
+}
+
+/**
+ * Autumn's Veil's one resolving effect and two turn-long rules.
+ *
+ * The list is ordered because Oracle and Forge preserve the printed color
+ * order. It is unique because a repeated color names no additional rule and
+ * would let two structurally different cards mean the same thing.
+ */
+function protectSpellsAndCreaturesFromSpellColorsThisTurnEffect() {
+  return z.strictObject({
+    kind: z.literal('protectSpellsAndCreaturesFromSpellColorsThisTurn'),
+    colors: z
+      .array(ColorSchema)
+      .min(1)
+      .max(COLORS.length)
+      .refine((colors) => new Set(colors).size === colors.length, 'spell colors must be unique'),
+  });
 }
 
 /**
@@ -1421,6 +2117,162 @@ function untapPermanentEffect<T extends ZodType>(target: T) {
   return z.strictObject({ kind: z.literal('untapPermanent'), target });
 }
 
+/** Destroy every currently attached permanent matching one live filter. */
+function destroyAttachedPermanentsEffect<T extends ZodType>(target: T) {
+  return z.strictObject({
+    kind: z.literal('destroyAttachedPermanents'),
+    target,
+    filter: TargetFilterSchema,
+  });
+}
+
+/** Largest literal group untap currently required by the pinned corpus. */
+export const MAX_UNTAP_PERMANENTS = 4;
+
+/**
+ * Choose up to `upTo` matching permanents, then untap the chosen group.
+ *
+ * Unlike `untapPermanent`, this instruction carries no `TargetSpec`: Rewind's
+ * lands are chosen while the spell resolves and are not CR 115 targets. The
+ * explicit filter keeps the primitive honest about which battlefield objects
+ * it can offer, while the bounded count gives the kernel a finite sequential
+ * choice without requiring it to enumerate every subset of a large board.
+ *
+ * Hand-authored only. The value of an untap depends on live board state, so the
+ * generator is not shown this primitive any more than the targeted sibling.
+ */
+function untapPermanentsEffect() {
+  return z.strictObject({
+    kind: z.literal('untapPermanents'),
+    upTo: z.int().min(1).max(MAX_UNTAP_PERMANENTS),
+    filter: TargetFilterSchema,
+  });
+}
+
+/**
+ * Make one permanent miss its controller's next untap step without tapping it
+ * now. The separation from `tapPermanent` is semantic, not cosmetic: Wall of
+ * Frost marks the creature it blocked, and a vigilant attacker must remain
+ * untapped until some later action taps it. The kernel consumes the resulting
+ * debt at the named untap step whether or not it prevented an untap.
+ *
+ * Hand-authored only. This helper is appended only to `CardEffectSchema`, so
+ * none of the model-facing unions or their recorded schema hashes move.
+ */
+function skipNextUntapEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('skipNextUntap'), target });
+}
+
+/**
+ * A target spell on the stack receives a replacement target tuple as this
+ * effect resolves. The spell itself is the effect's CR 115 target; the tuple
+ * is a later player decision and therefore is not represented by TargetSpec.
+ *
+ * Hand-authored only. Target replacement is a board-sized decision space, so
+ * neither this effect nor its optional stack filter belongs in the model's
+ * fixed answer vocabulary.
+ */
+function changeSpellTargetsEffect() {
+  return z.strictObject({ kind: z.literal('changeSpellTargets'), ...SPELL_FILTER_FIELD });
+}
+
+/**
+ * Copy one target spell on the stack, retaining its copiable choices and
+ * optionally replacing its targets. `spellFilter` supplies the instant-or-
+ * sorcery restriction printed by Reverberate without creating a card-shaped
+ * primitive.
+ *
+ * Hand-authored for the same decision-space reason as
+ * `changeSpellTargetsEffect`.
+ */
+function copySpellEffect() {
+  return z.strictObject({
+    kind: z.literal('copySpell'),
+    ...SPELL_FILTER_FIELD,
+    /** Hand-authored CR 115 selector used by Nivix Guildmage. */
+    spellSelection: z.literal('targetSpellYouControl').optional(),
+  });
+}
+
+/**
+ * Install Chandra's one-shot, turn-scoped trigger for the next instant or
+ * sorcery the effect's controller casts. The later copy retains the cast
+ * spell's copiable values and may choose new targets.
+ *
+ * Hand-authored only. Its value depends on a later spell and on timing the
+ * activation, information an isolated generator effect slot cannot price.
+ */
+function copyNextInstantOrSorceryThisTurnEffect() {
+  return z.strictObject({ kind: z.literal('copyNextInstantOrSorceryThisTurn') });
+}
+
+/**
+ * Copy every card moved from a graveyard to exile earlier in this resolution,
+ * then cast each copy without its mana cost if a complete legal declaration
+ * exists. The copies are transient game objects; the exiled cards never move.
+ *
+ * Hand-authored only. It pauses on full cast declarations and therefore stays
+ * outside every model-facing schema.
+ */
+function castCopiesOfCardsExiledThisResolutionWithoutPayingManaCostsEffect() {
+  return z.strictObject({
+    kind: z.literal('castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts'),
+    /** Epic Experiment's atomic top-X originals, eligibility, and cleanup profile. */
+    topXOriginalsProfile: z.literal(true).optional(),
+  });
+}
+
+/**
+ * CR 613.1b, layer 2, until cleanup: gain control of one chosen creature.
+ *
+ * This carries no untap or haste riders. Act of Treason composes those through
+ * `untapPermanent` and `grantKeywordUntilEndOfTurn` with `thatCreature`
+ * referents, which keeps each reusable rules action in one primitive and lets
+ * other control spells choose the clauses they actually print.
+ *
+ * Hand-authored and absent from `ModelEffectSchema`; `vocabulary.ts` records
+ * why the board-dependent exchange has no honest isolated generator price.
+ */
+function gainControlUntilEndOfTurnEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('gainControlUntilEndOfTurn'), target });
+}
+
+/** CR 611.2a and layer 2: control one creature for this battlefield incarnation. */
+function gainControlEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('gainControl'), target });
+}
+
+/**
+ * CR 701.10: exchange the controllers of exactly two targeted creatures.
+ *
+ * The ordinary counted-target channel already represents the two choices and
+ * independently rechecks them at resolution. The execution stays one effect,
+ * because two sequential `gainControl` instructions would both give a
+ * creature to the resolving object's controller and could not express the
+ * all-or-nothing exchange rule.
+ *
+ * Hand-authored only. Which side benefits depends on the two live permanents,
+ * so an isolated model effect slot cannot price it honestly.
+ */
+function exchangeControlEffect<T extends ZodType>(target: T) {
+  return z.strictObject({
+    kind: z.literal('exchangeControl'),
+    target,
+    /** Atomic Conjured Currency profile: exchange the source with the one target. */
+    exchangeSource: z.literal(true).optional(),
+  });
+}
+
+/** CR 205.3 and layer 4: add one subtype for this battlefield incarnation. */
+function addSubtypeEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('addSubtype'), subtype: z.string(), target });
+}
+
+/** A targeted player gains control of the permanent whose ability is resolving. */
+function targetPlayerGainsControlOfSelfPermanentEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('targetPlayerGainsControlOfSelfPermanent'), target });
+}
+
 /**
  * CR 613.1f, layer 6, for one turn: "Target creature gains flying until end of
  * turn."
@@ -1469,10 +2321,12 @@ function untapPermanentEffect<T extends ZodType>(target: T) {
  * makes that split with `isGrantableKeywordAbilityKind`, the one reader
  * `abilities.ts` uses for the printed half.
  *
- * One keyword rather than a list, because that is what a printed card says.
- * Two grants on one spell are two effects, which the effect list already
- * supports and which `checkDuplicateModifications`' sibling rule does not
- * refuse — and a list here would be a second way to spell the same card.
+ * `keyword` remains the single-keyword spelling every existing card uses.
+ * `additionalKeywords` is the conjunction printed by cards such as Ajani,
+ * Caller of the Pride: one target gains several abilities under one duration.
+ * It cannot be represented by several effects, because several effects create
+ * several independent target slots. The additional list is hand-authored and
+ * therefore does not widen any model-facing schema.
  *
  * ## The group, and why it arrived late
  *
@@ -1507,8 +2361,32 @@ function grantKeywordUntilEndOfTurnEffect<
   return z.strictObject({
     kind: z.literal('grantKeywordUntilEndOfTurn'),
     keyword: GrantableKeywordSchema,
+    additionalKeywords: z.array(GrantableKeywordSchema).min(1).optional(),
+    /**
+     * Gargoyle Sentinel's layer-6 exchange. Defender is deliberately the only
+     * member until another parameterless keyword ability is requested by a
+     * real card; payload-bearing landwalk and protection cannot fit this name.
+     * The effect kind is hand-authored, so this never reaches ModelEffectSchema.
+     */
+    removeKeywordAbility: z.literal('defender').optional(),
     target,
     ...sweep,
+  });
+}
+
+/** CR 701.15: create one destruction-replacement shield per retained permanent. */
+function regeneratePermanentEffect<T extends ZodType, S extends Record<string, ZodType> = typeof NO_SWEEP>(
+  target: T,
+  sweep: S = NO_SWEEP as S,
+) {
+  return z.strictObject({ kind: z.literal('regeneratePermanent'), target, ...sweep });
+}
+
+/** Double one counter kind on the current incarnation of this ability's source. */
+function doubleSourceCountersEffect() {
+  return z.strictObject({
+    kind: z.literal('doubleSourceCounters'),
+    counter: CounterKindSchema,
   });
 }
 
@@ -1535,6 +2413,25 @@ function cantBeBlockedThisTurnEffect<T extends ZodType>(target: T) {
   return z.strictObject({ kind: z.literal('cantBeBlockedThisTurn'), target });
 }
 
+/** CR 509.1b for one turn: the chosen creature cannot block. */
+function cantBlockThisTurnEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('cantBlockThisTurn'), target });
+}
+
+/**
+ * CR 509.1c for one turn, over either one chosen creature or one board group.
+ *
+ * The scope is fixed at resolution by the kernel, exactly like a scoped pump:
+ * Predatory Rampage constrains the opposing creatures present then, not bodies
+ * that enter later. Both fields stay off every model-facing union.
+ */
+function blocksThisTurnIfAbleEffect<T extends ZodType, S extends Record<string, ZodType> = typeof NO_SWEEP>(
+  target: T,
+  sweep: S = NO_SWEEP as S,
+) {
+  return z.strictObject({ kind: z.literal('blocksThisTurnIfAble'), target, ...sweep });
+}
+
 /**
  * CR 508.1d for one turn, with the defender named: "Target creature attacks you
  * this turn if able."
@@ -1547,14 +2444,27 @@ function cantBeBlockedThisTurnEffect<T extends ZodType>(target: T) {
  * every restriction in the vocabulary, so this kind only ever removes the
  * hold-back answer and never adds an attack that some rule forbids.
  *
- * "You" is the controller of the ability that resolved this, read live off the
- * imposing permanent rather than baked in as a `PlayerId`, so the requirement
- * still names the right seat after a control change. `vocabulary.ts` argues why
- * the defender is in the kind's name rather than a field, and why the two
- * sibling lines Courtly Provocateur prints are not here.
+ * "You" is the controller of the ability that resolved this, fixed when the
+ * effect resolves rather than re-read from the source later. `vocabulary.ts`
+ * argues why the defender is in this kind's name; the defender-neutral sibling
+ * is `attacksThisTurnIfAble` below.
  */
 function attacksYouThisTurnIfAbleEffect<T extends ZodType>(target: T) {
   return z.strictObject({ kind: z.literal('attacksYouThisTurnIfAble'), target });
+}
+
+/** CR 613.1e: overwrite the target's colors until the turn ends. */
+function setColorsUntilEndOfTurnEffect<T extends ZodType>(target: T) {
+  return z.strictObject({
+    kind: z.literal('setColorsUntilEndOfTurn'),
+    colors: z.array(ColorSchema).min(1).max(5),
+    target,
+  });
+}
+
+/** CR 508.1d: require an attack this turn without constraining its defender. */
+function attacksThisTurnIfAbleEffect<T extends ZodType>(target: T) {
+  return z.strictObject({ kind: z.literal('attacksThisTurnIfAble'), target });
 }
 
 /**
@@ -1601,22 +2511,30 @@ function sacrificeSelfEffect<T extends ZodType>(target: T) {
  * stops at for the identical reason (CR 701.8's chooser is the hand's owner,
  * never the caster).
  *
- * No filter and no count, deliberately. Every printed edict in the yardstick
- * this bead measured against says "a creature" and nothing narrower, so a
- * `CardFilter` field would be vocabulary the acceptance criteria never asked
- * for and no card in this checkout would use; "sacrifice two creatures" or
- * "sacrifice a creature with power 2 or less" are real printed shapes and are
- * left for whichever card first needs one, the same YAGNI cut `unless.ts`
- * makes for its own cost.
+ * `count`, `filter`, and `players` are the widening Destructive Force makes
+ * real: five lands, chosen by every player. They stay optional so the original
+ * edict has one canonical short form — omitted means one creature named by the
+ * target slot — while an explicit filter is read against current battlefield
+ * characteristics, the same `TargetFilter` every scoped permanent effect uses.
+ * The whole primitive remains hand-authored only, so none of these fields
+ * reaches `ModelEffectSchema` or changes a recorded generator fixture.
  *
- * `target` is restricted to the two player kinds by `EFFECT_RULES` rather
- * than by this schema, exactly as `discardCardsEffect` is: `targetPlayer` and
- * `targetOpponent` are the two English subjects a printed edict ever names,
- * and `noTarget` plus a player sweep ("each opponent sacrifices a creature")
- * are a second card this one does not have to be.
+ * `target` is restricted by `EFFECT_RULES`, exactly as `discardCardsEffect`
+ * is: `targetPlayer` and `targetOpponent` are the targeted forms, while
+ * `noTarget` is legal only beside `players`. That exclusion is structural
+ * validation rather than a union of two objects so the effect keeps one
+ * discriminant and every exhaustive consumer keeps one arm.
  */
 function sacrificePermanentEffect<T extends ZodType>(target: T) {
-  return z.strictObject({ kind: z.literal('sacrificePermanent'), target });
+  return z.strictObject({
+    kind: z.literal('sacrificePermanent'),
+    count: z.int().optional(),
+    filter: TargetFilterSchema.optional(),
+    /** Excludes the resolving source from the sacrifice candidates ("another"). */
+    excludeSource: z.literal(true).optional(),
+    players: PlayerScopeSchema.optional(),
+    target,
+  });
 }
 
 /**
@@ -1645,50 +2563,36 @@ function setBasePtUntilEndOfTurnEffect<T extends ZodType>(target: T) {
 }
 
 /**
- * What a token's own printed abilities may do: everything a card's ability may
- * do, except make another token.
- *
- * The exclusion is not taste. `createToken` carries a `TokenSpec`, a `TokenSpec`
- * carries abilities, and an ability carries effects, so allowing it would make
- * the schema infinitely deep and the Forge export unable to finish declaring a
- * card's tokens — `collectTokenFiles` walks the tokens a *card* declares, and a
- * token declared only by another token has nowhere in that walk to be found. No
- * card in the flagship set asks a part to make a part; a Chest that yields a
- * part is a printed artifact card, not a token.
- *
- * Everything else is shared with a card, including all three ability kinds. A
- * token is a permanent, `createToken` builds it a real `Card`, and the kernel
- * reads `GameObject.card.abilities` with no branch for tokens — so a narrower
- * ability *shape* here would be a vocabulary the engine would honor anyway,
- * which is the drift this package exists to prevent. The per-kind rules that do
- * differ are already per-card-kind rules and land for free: `checkAbilities`
- * refuses a `self` static on the artifact token's card exactly as it refuses one
- * on a printed artifact.
- *
- * That is why the token's ability union carries CR 603.3b's `optional` while
- * the generator's two do not: a part token's printed line is "When this dies,
- * you may put a +1/+1 counter on target creature", so the word has to be
- * expressible exactly where the mechanic lives.
+ * Turn a targeted land into a creature while this ability's exact battlefield
+ * source remains. The land and its existing subtypes are retained; colors are
+ * set rather than added, matching "becomes green" rather than "is green in
+ * addition to its other colors."
  */
-export const TokenEffectSchema = z.discriminatedUnion('kind', [
-  ...effectsBeforeTokens(TargetSpecSchema, AmountSchema, AmountSchema, SWEEP_FIELD, SPELL_FILTER_FIELD),
-  ...effectsAfterTokens(TargetSpecSchema, AmountSchema, SWEEP_FIELD, STASIS_FIELD),
-  putCountersEffect(TargetSpecSchema, AmountSchema),
-]);
+function animateLandWhileSourceOnBattlefieldEffect<T extends ZodType>(target: T) {
+  return z.strictObject({
+    kind: z.literal('animateLandWhileSourceOnBattlefield'),
+    power: z.int(),
+    toughness: z.int(),
+    colors: z.array(ColorSchema).min(1).max(5),
+    subtypes: z.array(z.string().min(1)).min(1),
+    target,
+  });
+}
 
-export type TokenEffect = z.infer<typeof TokenEffectSchema>;
-
-export const TokenAbilitySchema = abilitiesOver(
-  TokenEffectSchema,
-  ActivationCostSchema,
-  {},
-  {
-    optional: OptionalTriggerSchema,
-  },
-  {},
-  StaticModificationSchema,
-);
-export type TokenAbility = z.infer<typeof TokenAbilitySchema>;
+/** Turn the resolving activated ability's artifact source into a creature until cleanup. */
+function animateSourceUntilEndOfTurnEffect<T extends ZodType>(target: T) {
+  return z.strictObject({
+    kind: z.literal('animateSourceUntilEndOfTurn'),
+    power: z.int(),
+    toughness: z.int(),
+    colors: z.array(ColorSchema).min(1).max(5),
+    subtypes: z.array(z.string().min(1)).min(1),
+    keywords: z.array(KeywordSchema).max(9),
+    /** Izzet Keyrune prints its duration clause first. This changes text only. */
+    printedDurationFirst: z.literal(true).optional(),
+    target,
+  });
+}
 
 /**
  * A token the engine may create (CR 111).
@@ -1708,6 +2612,23 @@ export type TokenAbility = z.infer<typeof TokenAbilitySchema>;
  * `checkEffects` reads it the same way: stating one without the other is a
  * coded violation, not a silent 0.
  *
+ * ## Why `identity` is separate from `name`
+ *
+ * A token's name is printed rules data, not a unique key. Mitotic Slime creates
+ * both a 2/2 Ooze and a 1/1 Ooze; changing either printed name would change the
+ * card. `identity` is the optional, nonprinted suffix `tokenCard` uses when the
+ * name-derived default would collide. It is hand-authored only: the model's
+ * token schema below does not offer the field, so existing generated cards and
+ * fixture hashes do not move.
+ *
+ * ## Why `quoteAbilities` is nonprinted metadata
+ *
+ * Most creators name a token's body and let the token script carry its rules.
+ * Mitotic Slime instead quotes the created token's dies ability in the creating
+ * card's own sentence. `quoteAbilities` tells renderers and exporters to use
+ * that printed form without changing what the token executes. Like `identity`,
+ * it is absent from the model schema and cannot expand generated output.
+ *
  * ## Why `abilities` is optional rather than defaulted
  *
  * Every other list on this record defaults to `[]` and is therefore required in
@@ -1718,15 +2639,126 @@ export type TokenAbility = z.infer<typeof TokenAbilitySchema>;
  * answer schema). Teaching the generator to design a token's abilities is a
  * setgen slice with a re-record behind it.
  */
-export const TokenSpecSchema = z.strictObject({
-  name: z.string().min(1).max(80),
-  power: z.int().optional(),
-  toughness: z.int().optional(),
-  colors: z.array(ColorSchema).default([]),
-  subtypes: z.array(z.string()).default([]),
-  keywords: z.array(KeywordSchema).default([]),
-  abilities: z.array(TokenAbilitySchema).max(2).optional(),
-});
+function tokenSpecSchema<T extends ZodType>(ability: T) {
+  return z.strictObject({
+    identity: z.string().regex(CARD_ID_PATTERN, 'token identity must be a lowercase slug').optional(),
+    quoteAbilities: z.literal(true).optional(),
+    name: z.string().min(1).max(80),
+    power: z.int().optional(),
+    toughness: z.int().optional(),
+    /** A value fixed as the token is created, withheld from the model token schema. */
+    creationPowerToughness: ChosenXSchema.optional(),
+    /** Existing card CDA vocabulary, withheld from the independently declared model token schema. */
+    characteristicPowerToughness: CharacteristicPowerToughnessSchema.optional(),
+    colors: z.array(ColorSchema).default([]),
+    subtypes: z.array(z.string()).default([]),
+    keywords: z.array(KeywordSchema).default([]),
+    /** Hand-authored source text may repeat one of the token's keywords as a reminder. */
+    printedKeywordReminder: z.literal('vigilance').optional(),
+    /** Hand-authored source text may introduce quoted token rules with "with". */
+    inlineQuotedAbilities: z.literal(true).optional(),
+    abilities: z.array(ability).max(2).optional(),
+  });
+}
+
+/**
+ * The terminal token tier. Its abilities have the same vocabulary the old
+ * token schema exposed and cannot create another token.
+ */
+const LeafTokenEffectSchema = z.discriminatedUnion('kind', [
+  ...effectsBeforeTokens(
+    TargetSpecSchema,
+    SharedAmountSchema,
+    SharedAmountSchema,
+    SWEEP_FIELD,
+    SPELL_FILTER_FIELD,
+  ),
+  ...effectsAfterTokens(TargetSpecSchema, SharedAmountSchema, SWEEP_FIELD, STASIS_FIELD),
+  putCountersEffect(TargetSpecSchema, SharedAmountSchema),
+  loseGameEffect(TargetSpecSchema),
+]);
+
+const LeafTokenAbilityWithoutTriggeredGrantSchema = abilitiesOver(
+  LeafTokenEffectSchema,
+  ActivationCostSchema,
+  {},
+  { optional: OptionalTriggerSchema },
+  {},
+  StaticModificationSchema,
+);
+
+const LeafTokenStaticModificationSchema = staticModificationsWithTriggeredAbility(
+  LeafTokenAbilityWithoutTriggeredGrantSchema.options[1],
+);
+
+const LeafTokenAbilitySchema = abilitiesOver(
+  LeafTokenEffectSchema,
+  ActivationCostSchema,
+  {},
+  { optional: OptionalTriggerSchema },
+  {},
+  LeafTokenStaticModificationSchema,
+);
+
+const LeafTokenSpecSchema = tokenSpecSchema(LeafTokenAbilitySchema);
+
+/**
+ * What a token's own printed abilities may do.
+ *
+ * One `createToken` tier is admitted for Mitotic Slime: a card can create a
+ * token whose ability creates a leaf token. The leaf schema above excludes the
+ * same member, making the input depth finite by construction. This is a data
+ * boundary rather than a kernel limitation — tokens are real card objects and
+ * execute the ordinary ability/effect paths — and it leaves the model-facing
+ * schemas untouched.
+ *
+ * Everything else remains shared with the former token union, including all
+ * three object ability kinds and CR 603.3b's optional trigger field.
+ */
+export const TokenEffectSchema = z.discriminatedUnion('kind', [
+  ...effectsBeforeTokens(
+    TargetSpecSchema,
+    SharedAmountSchema,
+    SharedAmountSchema,
+    SWEEP_FIELD,
+    SPELL_FILTER_FIELD,
+  ),
+  z.strictObject({
+    kind: z.literal('createToken'),
+    count: SharedAmountSchema,
+    token: LeafTokenSpecSchema,
+  }),
+  ...effectsAfterTokens(TargetSpecSchema, SharedAmountSchema, SWEEP_FIELD, STASIS_FIELD),
+  putCountersEffect(TargetSpecSchema, SharedAmountSchema),
+  loseGameEffect(TargetSpecSchema),
+]);
+
+export type TokenEffect = z.infer<typeof TokenEffectSchema>;
+
+const TokenAbilityWithoutTriggeredGrantSchema = abilitiesOver(
+  TokenEffectSchema,
+  ActivationCostSchema,
+  {},
+  { optional: OptionalTriggerSchema },
+  {},
+  StaticModificationSchema,
+);
+
+const TokenStaticModificationSchema = staticModificationsWithTriggeredAbility(
+  TokenAbilityWithoutTriggeredGrantSchema.options[1],
+);
+
+export const TokenAbilitySchema = abilitiesOver(
+  TokenEffectSchema,
+  ActivationCostSchema,
+  {},
+  { optional: OptionalTriggerSchema },
+  {},
+  TokenStaticModificationSchema,
+);
+export type TokenAbility = z.infer<typeof TokenAbilitySchema>;
+
+export const TokenSpecSchema = tokenSpecSchema(TokenAbilitySchema);
 
 export type TokenSpec = z.infer<typeof TokenSpecSchema>;
 export type TokenSpecInput = z.input<typeof TokenSpecSchema>;
@@ -1793,7 +2825,10 @@ export const ModelTokenSpecSchema = z.strictObject({
 export const FuseAbilitySchema = z.strictObject({
   kind: z.literal('activated'),
   cost: z.strictObject({
-    mana: ManaCostSchema,
+    // Fuse is model-facing through `PartTokenSpecSchema`. Keep the exact
+    // pre-hybrid answer shape so adding an engine capability cannot silently
+    // widen the generator's output space or invalidate recorded completions.
+    mana: ManaCostSchema.omit({ hybrid: true }),
     tapSelf: z.literal(false).default(false),
     sacrificeSelf: z.literal(true),
   }),
@@ -1801,7 +2836,7 @@ export const FuseAbilitySchema = z.strictObject({
     .array(
       z.strictObject({
         kind: z.literal('putCounters'),
-        counter: CounterKindSchema,
+        counter: ModelCounterKindSchema,
         count: z.int(),
         target: z.strictObject({ kind: z.literal('targetCreatureYouControl') }),
       }),
@@ -1886,7 +2921,14 @@ function generatableEffects<
   D extends Record<string, ZodType> = typeof NO_STASIS,
   C extends Record<string, ZodType> = typeof NO_SPELL_FILTER,
   P extends Record<string, ZodType> = typeof NO_PLAYER_SWEEP,
+  N extends Record<string, ZodType> = typeof NO_DAMAGE_PREVENTION_RULE,
   R extends Record<string, ZodType> = typeof NO_PUMP_KEYWORD,
+  V extends Record<string, ZodType> = typeof NO_DAMAGE_DIVISION,
+  W extends Record<string, ZodType> = typeof NO_DAMAGE_RIDERS,
+  X extends Record<string, ZodType> = typeof NO_REFERENT_EXCLUSION,
+  Y extends Record<string, ZodType> = typeof NO_MILL_PRESENTATION,
+  Z extends Record<string, ZodType> = typeof NO_GAIN_LIFE_AMOUNT_SOURCE,
+  H extends Record<string, ZodType> = typeof NO_DESTROY_CONTROLLER_LIBRARY_FOLLOWUP,
 >(
   target: T,
   amount: A,
@@ -1896,27 +2938,51 @@ function generatableEffects<
   stasis: D = NO_STASIS as D,
   counter: C = NO_SPELL_FILTER as C,
   playerSweep: P = NO_PLAYER_SWEEP as P,
+  damagePrevention: N = NO_DAMAGE_PREVENTION_RULE as N,
   pumpKeyword: R = NO_PUMP_KEYWORD as R,
+  division: V = NO_DAMAGE_DIVISION as V,
+  damageRiders: W = NO_DAMAGE_RIDERS as W,
+  referentExclusion: X = NO_REFERENT_EXCLUSION as X,
+  millPresentation: Y = NO_MILL_PRESENTATION as Y,
+  gainLifeAmountSource: Z = NO_GAIN_LIFE_AMOUNT_SOURCE as Z,
+  destroyControllerLibraryFollowup: H = NO_DESTROY_CONTROLLER_LIBRARY_FOLLOWUP as H,
 ) {
   return [
-    ...effectsBeforeTokens(target, amount, pumpMagnitude, sweep, counter, playerSweep, pumpKeyword),
+    ...effectsBeforeTokens(
+      target,
+      amount,
+      pumpMagnitude,
+      sweep,
+      counter,
+      playerSweep,
+      damagePrevention,
+      pumpKeyword,
+      division,
+      damageRiders,
+      referentExclusion,
+      gainLifeAmountSource,
+      destroyControllerLibraryFollowup,
+    ),
     z.strictObject({ kind: z.literal('createToken'), count: amount, token }),
-    ...effectsAfterTokens(target, amount, sweep, stasis),
+    ...effectsAfterTokens(target, amount, sweep, stasis, millPresentation),
   ] as const;
 }
 
 export const EffectSchema = z.discriminatedUnion('kind', [
   ...generatableEffects(
     TargetSpecSchema,
-    AmountSchema,
+    SharedAmountSchema,
     TokenSpecSchema,
-    AmountSchema,
+    SharedAmountSchema,
     SWEEP_FIELD,
     STASIS_FIELD,
     SPELL_FILTER_FIELD,
     PLAYER_SWEEP_FIELD,
+    DAMAGE_PREVENTION_RULE_FIELD,
+    NO_PUMP_KEYWORD,
+    DAMAGE_DIVISION_FIELD,
   ),
-  putCountersEffect(TargetSpecSchema, AmountSchema),
+  putCountersEffect(TargetSpecSchema, SharedAmountSchema),
 ]);
 
 /**
@@ -1935,51 +3001,233 @@ export const EffectSchema = z.discriminatedUnion('kind', [
  * primitives a spell's is, and a second, narrower ability vocabulary would be a
  * rule about where an effect is printed rather than about what it does.
  */
-export const CardEffectSchema = z.discriminatedUnion('kind', [
-  ...generatableEffects(
-    TargetSpecSchema,
-    AmountSchema,
-    TokenSpecSchema,
-    PumpAmountSchema,
-    SWEEP_FIELD,
-    STASIS_FIELD,
-    SPELL_FILTER_FIELD,
-    PLAYER_SWEEP_FIELD,
-    PUMP_KEYWORD_FIELD,
-  ),
-  putCountersEffect(TargetSpecSchema, AmountSchema),
-  exileTargetEffect(TargetSpecSchema),
-  revealHandEffect(TargetSpecSchema),
-  scryEffect(),
-  returnFromGraveyardEffect(TargetSpecSchema),
-  fightEffect(TargetSpecSchema),
-  addManaEffect(),
-  shuffleLibraryEffect(),
-  revealTopCardsEffect(),
-  putOnLibraryEffect(TargetSpecSchema),
-  exileGraveyardEffect(),
-  shuffleGraveyardIntoLibraryEffect(),
-  searchLibraryEffect(),
-  discardCardsEffect(TargetSpecSchema, PLAYER_SWEEP_FIELD),
-  chooseDiscardEffect(TargetSpecSchema),
-  loseLifeEffect(TargetSpecSchema, AmountSchema, PLAYER_SWEEP_FIELD),
-  setLifeEffect(AmountSchema),
-  preventCombatDamageEffect(),
-  chooseFromGraveyardEffect(),
-  preventAllDamageToTargetEffect(TargetSpecSchema),
-  untapPermanentEffect(TargetSpecSchema),
-  grantKeywordUntilEndOfTurnEffect(TargetSpecSchema, SWEEP_FIELD),
-  cantBeBlockedThisTurnEffect(TargetSpecSchema),
-  attacksYouThisTurnIfAbleEffect(TargetSpecSchema),
-  sacrificeSelfEffect(TargetSpecSchema),
-  sacrificePermanentEffect(TargetSpecSchema),
-  setBasePtUntilEndOfTurnEffect(TargetSpecSchema),
-]);
+function cardEffectOptions() {
+  return [
+    ...generatableEffects(
+      TargetSpecSchema,
+      AmountSchema,
+      TokenSpecSchema,
+      PumpAmountSchema,
+      SWEEP_FIELD,
+      STASIS_FIELD,
+      COUNTER_FIELDS,
+      PLAYER_SWEEP_FIELD,
+      DAMAGE_PREVENTION_RULE_FIELD,
+      PUMP_KEYWORD_FIELD,
+      DAMAGE_DIVISION_FIELD,
+      DAMAGE_RIDER_FIELDS,
+      REFERENT_EXCLUSION_FIELD,
+      MILL_PRESENTATION_FIELD,
+      GAIN_LIFE_AMOUNT_SOURCE_FIELD,
+      DESTROY_CONTROLLER_LIBRARY_FOLLOWUP_FIELD,
+    ),
+    handAuthoredPutCountersEffect(TargetSpecSchema, AmountSchema),
+    exileTargetEffect(TargetSpecSchema),
+    revealHandEffect(TargetSpecSchema),
+    revealRandomCardFromHandEffect(TargetSpecSchema),
+    playRandomHandCardWithoutPayingManaCostEffect(TargetSpecSchema),
+    scryEffect(),
+    z.strictObject({ kind: z.literal('populate') }),
+    z.strictObject({ kind: z.literal('createTokenCopyOfSelf') }),
+    reorderTopLibraryEffect(),
+    selectFromTopLibraryEffect(),
+    separateTopLibraryIntoPilesEffect(),
+    returnFromGraveyardEffect(TargetSpecSchema),
+    fightEffect(TargetSpecSchema),
+    petrifyCreatureEffect(TargetSpecSchema),
+    addManaEffect(),
+    createEmblemEffect(),
+    shuffleLibraryEffect(),
+    revealTopCardsEffect(),
+    putOnLibraryEffect(TargetSpecSchema),
+    exileGraveyardEffect(TargetSpecSchema),
+    shuffleGraveyardIntoLibraryEffect(),
+    searchLibraryEffect(),
+    discardCardsEffect(TargetSpecSchema, PLAYER_SWEEP_FIELD),
+    chooseDiscardEffect(TargetSpecSchema),
+    loseLifeEffect(TargetSpecSchema, AmountSchema, PLAYER_SWEEP_FIELD),
+    setLifeEffect(AmountSchema),
+    loseGameEffect(TargetSpecSchema),
+    winGameEffect(),
+    preventCombatDamageEffect(),
+    preventCombatDamageToYouEffect(),
+    detainPermanentEffect(TargetSpecSchema),
+    chooseBlockersThisCombatEffect(),
+    chooseFromGraveyardEffect(),
+    preventAllDamageToTargetEffect(TargetSpecSchema),
+    untapPermanentEffect(TargetSpecSchema),
+    untapPermanentsEffect(),
+    skipNextUntapEffect(TargetSpecSchema),
+    grantKeywordUntilEndOfTurnEffect(TargetSpecSchema, SWEEP_FIELD),
+    cantBeBlockedThisTurnEffect(TargetSpecSchema),
+    cantBlockThisTurnEffect(TargetSpecSchema),
+    blocksThisTurnIfAbleEffect(TargetSpecSchema, SWEEP_FIELD),
+    attacksYouThisTurnIfAbleEffect(TargetSpecSchema),
+    sacrificeSelfEffect(TargetSpecSchema),
+    sacrificePermanentEffect(TargetSpecSchema),
+    setBasePtUntilEndOfTurnEffect(TargetSpecSchema),
+    animateLandWhileSourceOnBattlefieldEffect(TargetSpecSchema),
+    animateSourceUntilEndOfTurnEffect(TargetSpecSchema),
+    returnSourceFromGraveyardEffect(),
+    returnDepartedSourceToOwnerHandEffect(),
+    putDepartedSourceOnTopOfOwnerLibraryEffect(),
+    shuffleSourceIntoOwnerLibraryEffect(),
+    setColorsUntilEndOfTurnEffect(TargetSpecSchema),
+    attacksThisTurnIfAbleEffect(TargetSpecSchema),
+    shuffleHandsAndGraveyardsIntoLibrariesEffect(),
+    exileThisSpellEffect(),
+    moveSourceLinkedExileEffect(),
+    exileNonbasicGraveyardAndMatchingLibraryEffect(TargetSpecSchema),
+    eachPlayerNamesCardThenRevealsTopEffect(),
+    nameNonlandCardAndExileMatchingOpponentZonesEffect(TargetSpecSchema),
+    revealUntilCreatureCardsEffect(),
+    gainControlUntilEndOfTurnEffect(TargetSpecSchema),
+    gainControlEffect(TargetSpecSchema),
+    addSubtypeEffect(TargetSpecSchema),
+    targetPlayerGainsControlOfSelfPermanentEffect(TargetSpecSchema),
+    preventAllDamageToYouAndCreaturesYouControlEffect(),
+    cantCastSpellsThisTurnEffect(),
+    protectSpellsAndCreaturesFromSpellColorsThisTurnEffect(),
+    changeSpellTargetsEffect(),
+    copySpellEffect(),
+    copyNextInstantOrSorceryThisTurnEffect(),
+    revealTopCardToHandEffect(),
+    preventNextDamageToYouAndRetaliateEffect(TargetSpecSchema),
+    returnSourceAuraAttachedEffect(TargetSpecSchema),
+    regeneratePermanentEffect(TargetSpecSchema, SWEEP_FIELD),
+    doubleSourceCountersEffect(),
+    destroyAttachedPermanentsEffect(TargetSpecSchema),
+    exchangeControlEffect(TargetSpecSchema),
+    chooseFromBattlefieldEffect(),
+    putSourceAndTargetOnOwnersLibrariesThenShuffleEffect(TargetSpecSchema),
+    exileHandsAndGraveyardsEffect(),
+    chooseFromRevealedHandEffect(TargetSpecSchema),
+    castCopiesOfCardsExiledThisResolutionWithoutPayingManaCostsEffect(),
+  ] as const;
+}
+
+/**
+ * A coin result gates ordinary effects rather than creating a second effect
+ * vocabulary. The nested union intentionally excludes `flipCoin` itself: one
+ * random branch may contain the existing instruction language, while recursive
+ * random trees wait for a printed card that needs them.
+ */
+// Build this tuple once. The coin-flip branch and the outer card-effect union
+// deliberately share the same 92 option schemas; preserving that identity lets
+// JSON Schema transports state those options once under `$defs` instead of
+// serializing two nearly identical 24 KB unions.
+const CARD_EFFECT_OPTIONS = cardEffectOptions();
+const CoinFlipBranchEffectSchema = z.discriminatedUnion('kind', CARD_EFFECT_OPTIONS);
+
+function flipCoinEffect() {
+  return z.strictObject({
+    kind: z.literal('flipCoin'),
+    winEffects: z.array(CoinFlipBranchEffectSchema).min(1).max(2).optional(),
+    loseEffects: z.array(CoinFlipBranchEffectSchema).min(1).max(2).optional(),
+  });
+}
+
+export const CardEffectSchema = z.discriminatedUnion('kind', [...CARD_EFFECT_OPTIONS, flipCoinEffect()]);
 
 export const ModelEffectSchema = z.discriminatedUnion(
   'kind',
   generatableEffects(ModelTargetSpecSchema, z.int(), ModelTokenSpecSchema, z.int()),
 );
+
+/**
+ * The reviewed generator capability "grant one keyword to a creature you
+ * control until end of turn".
+ *
+ * This is deliberately a complete effect schema rather than one more member in
+ * either model vocabulary tuple. The engine has wider versions of both halves:
+ * the effect can carry additional grants, remove defender, or address a group,
+ * and the target kind is useful to other hand-authored effects. Generation has
+ * reviewed only their intersection, so that intersection is the type exported
+ * here. Consumers opt into this schema as one capability bundle.
+ */
+export const KeywordGrantToControlledCreatureModelEffectSchema = z.strictObject({
+  kind: z.literal('grantKeywordUntilEndOfTurn'),
+  keyword: GrantableKeywordSchema,
+  target: z.strictObject({ kind: z.literal('targetCreatureYouControl') }),
+});
+
+export type KeywordGrantToControlledCreatureModelEffect = z.infer<
+  typeof KeywordGrantToControlledCreatureModelEffectSchema
+>;
+
+/** Compile-time containment proof: every promoted answer is engine-runnable. */
+export type KeywordGrantToControlledCreatureModelEffectIsEffect =
+  KeywordGrantToControlledCreatureModelEffect extends Effect ? true : never;
+
+/** The reviewed source-creature fight capability, including its sole target. */
+export const FightOpposingCreatureModelEffectSchema = z.strictObject({
+  kind: z.literal('fight'),
+  target: z.strictObject({ kind: z.literal('targetCreatureYouDontControl') }),
+});
+
+export type FightOpposingCreatureModelEffect = z.infer<typeof FightOpposingCreatureModelEffectSchema>;
+
+/** Compile-time containment proof: every promoted answer is engine-runnable. */
+export type FightOpposingCreatureModelEffectIsEffect = FightOpposingCreatureModelEffect extends Effect
+  ? true
+  : never;
+
+/** The reviewed creature-only, controller-only untap capability. */
+export const UntapControlledCreatureModelEffectSchema = z.strictObject({
+  kind: z.literal('untapPermanent'),
+  target: z.strictObject({ kind: z.literal('targetCreatureYouControl') }),
+});
+
+export type UntapControlledCreatureModelEffect = z.infer<typeof UntapControlledCreatureModelEffectSchema>;
+
+/** Compile-time containment proof: every promoted answer is engine-runnable. */
+export type UntapControlledCreatureModelEffectIsEffect = UntapControlledCreatureModelEffect extends Effect
+  ? true
+  : never;
+
+/** Color-neutral artifact/enchantment routing for the reviewed bounce effect. */
+export const ReturnArtifactOrEnchantmentToHandModelEffectSchema = z.strictObject({
+  kind: z.literal('returnToHand'),
+  target: z.strictObject({ kind: z.literal('targetArtifactOrEnchantment') }),
+});
+
+export type ReturnArtifactOrEnchantmentToHandModelEffect = z.infer<
+  typeof ReturnArtifactOrEnchantmentToHandModelEffectSchema
+>;
+
+/** Compile-time containment proof: every promoted answer is engine-runnable. */
+export type ReturnArtifactOrEnchantmentToHandModelEffectIsEffect =
+  ReturnArtifactOrEnchantmentToHandModelEffect extends Effect ? true : never;
+
+/** The two reviewed graveyard-return filter families. */
+const OwnGraveyardCardToHandModelFilterSchema = z.union([
+  z.strictObject({
+    cardTypes: z.tuple([z.literal('creature')]),
+    maxManaValue: z.int().min(0).max(16).optional(),
+  }),
+  z.strictObject({
+    cardTypes: z.tuple([z.literal('instant'), z.literal('sorcery')]),
+    maxManaValue: z.int().min(0).max(16).optional(),
+  }),
+]);
+
+/**
+ * Select one reviewed card family from your own graveyard and move it to hand.
+ * Battlefield destinations and opponent graveyards are separate capabilities.
+ */
+export const OwnGraveyardCardToHandModelEffectSchema = z.strictObject({
+  kind: z.literal('chooseFromGraveyard'),
+  whose: z.literal('you'),
+  filter: OwnGraveyardCardToHandModelFilterSchema,
+  destination: z.literal('hand'),
+});
+
+export type OwnGraveyardCardToHandModelEffect = z.infer<typeof OwnGraveyardCardToHandModelEffectSchema>;
+
+/** Compile-time containment proof: every promoted answer is engine-runnable. */
+export type OwnGraveyardCardToHandModelEffectIsEffect = OwnGraveyardCardToHandModelEffect extends Effect
+  ? true
+  : never;
 
 /**
  * The same generatable vocabulary, over a token that may be a part.
@@ -2045,6 +3293,14 @@ export type PartBearingModelEffectIsEffect = PartBearingModelEffect extends Effe
 
 export type Effect = z.infer<typeof CardEffectSchema>;
 
+/** True when an effect writes this source incarnation's exact exile relation. */
+export function isSourceLinkedExileWriter(effect: Effect): boolean {
+  return (
+    (effect.kind === 'searchLibrary' && effect.destination === 'sourceLinkedExile') ||
+    (effect.kind === 'exileTarget' && effect.linkToSource === true)
+  );
+}
+
 /** What the set generator is allowed to answer with: a subset of `Effect`. */
 export type ModelEffect = z.infer<typeof ModelEffectSchema>;
 export type ModelEffectKind = ModelEffect['kind'];
@@ -2096,12 +3352,34 @@ export type AnyEffectKind = Effect['kind'];
 /** Narrows to the effect variant carrying a given kind. */
 export type EffectOf<K extends AnyEffectKind> = Extract<Effect, { kind: K }>;
 
-/** Effects that carry a TargetSpec field (all but `counterSpell` and `createToken`). */
-export type TargetedEffect = Extract<Effect, { target: unknown }>;
+/** Effects that carry a TargetSpec field. */
+export type TargetedEffect =
+  | Extract<Effect, { target: unknown }>
+  | (Extract<Effect, { kind: 'exileGraveyard' }> & { readonly target: TargetSpec });
+
+/** Effects whose target is a spell stack entry rather than a TargetSpec. */
+export type SpellTargetEffect = Extract<
+  Effect,
+  { kind: 'counterSpell' | 'changeSpellTargets' | 'copySpell' }
+>;
 
 /** Runtime guard for the targeted subset; keeps validators free of casts. */
 export function hasTarget(effect: Effect): effect is TargetedEffect {
-  return 'target' in effect;
+  return 'target' in effect && effect.target !== undefined;
+}
+
+/** A fight whose two creatures are both CR 115 targets of the resolving object. */
+export function isTargetedFight(
+  effect: Effect,
+): effect is EffectOf<'fight'> & { readonly fighter: { readonly kind: 'targetCreatureYouControl' } } {
+  return effect.kind === 'fight' && effect.fighter !== undefined;
+}
+
+/** Runtime guard for the three primitives that choose a spell on the stack. */
+export function isSpellTargetEffect(effect: Effect): effect is SpellTargetEffect {
+  return (
+    effect.kind === 'counterSpell' || effect.kind === 'changeSpellTargets' || effect.kind === 'copySpell'
+  );
 }
 
 /**
@@ -2120,11 +3398,13 @@ export function hasTarget(effect: Effect): effect is TargetedEffect {
  * ability is removed for having no legal target.
  */
 export function effectChoosesTarget(effect: Effect): boolean {
-  if (effect.kind === 'counterSpell') return true;
+  if (isSpellTargetEffect(effect)) return true;
   return (
     hasTarget(effect) &&
     effect.target.kind !== 'noTarget' &&
     effect.target.kind !== 'triggeringCreature' &&
+    effect.target.kind !== 'triggeringPlayer' &&
+    effect.target.kind !== 'chosenPlayer' &&
     // The source-body kinds are the other retained referents
     // (packages/dsl/src/targets.ts), and they owe CR 603.3d nothing for the
     // same reason `triggeringCreature` three lines up does not: the ability's
@@ -2135,6 +3415,9 @@ export function effectChoosesTarget(effect: Effect): boolean {
     // rather than of one literal, so `selfPermanent` (`mtg-rji`) inherited
     // this the day it was appended instead of the day somebody remembered.
     !isSourceBodyOnlyTarget(effect.target.kind) &&
+    // An Aura's live attachment is retained by the source and is no more a
+    // CR 115 choice than the source body itself.
+    !isSourceAttachmentTarget(effect.target.kind) &&
     // A back-reference (`REFERENT_TARGETS`) is the third retained referent and
     // owes CR 603.3d nothing for the third time: what it names was chosen by an
     // earlier slot of the same list, at the same moment, by the same player, so
@@ -2174,15 +3457,190 @@ export function referentSourceIndex(effects: readonly Effect[], index: number): 
   if (effect === undefined || !hasTarget(effect)) return null;
   const space = referentSourceSpace(effect.target.kind);
   if (space === null) return null;
-  const namesTheSpace = space === 'creature' ? targetKindNamesACreature : targetKindNamesAPlayer;
+  const namesTheSpace =
+    space === 'creature'
+      ? targetKindNamesACreature
+      : space === 'player'
+        ? targetKindNamesAPlayer
+        : targetKindNamesAPlayerOrPlaneswalker;
   let found: number | null = null;
   for (let earlier = 0; earlier < index; earlier += 1) {
     const candidate = effects[earlier];
     if (candidate === undefined || !hasTarget(candidate)) continue;
     if (!effectChoosesTarget(candidate)) continue;
-    if (targetCountOf(candidate.target) !== null) continue;
+    if (isMultipleTargetSpec(candidate.target)) continue;
     if (!namesTheSpace(candidate.target.kind)) continue;
     if (found !== null) return null;
+    found = earlier;
+  }
+  return found;
+}
+
+/** Whether this instruction reads the toughness of an earlier creature target. */
+export function effectUsesThatCreatureToughness(effect: Effect): boolean {
+  return Object.values(effect).some(
+    (value) =>
+      typeof value === 'object' &&
+      value !== null &&
+      'kind' in value &&
+      value.kind === 'thatCreatureToughness',
+  );
+}
+
+/** Whether this instruction reads the live hand of an earlier player target. */
+export function effectUsesThatPlayersHandSize(effect: Effect): boolean {
+  return effect.kind === 'gainLife' && effect.amountFrom === 'thatPlayersHandSize';
+}
+
+/** Whether this instruction reads the creature retained by its trigger event. */
+export function effectUsesTriggeringCreaturePower(effect: Effect): boolean {
+  return Object.values(effect).some(
+    (value) =>
+      typeof value === 'object' &&
+      value !== null &&
+      'kind' in value &&
+      value.kind === 'triggeringCreaturePower',
+  );
+}
+
+/** Whether this instruction reads the toughness of the creature retained by its trigger event. */
+export function effectUsesTriggeringCreatureToughness(effect: Effect): boolean {
+  return Object.values(effect).some(
+    (value) =>
+      typeof value === 'object' &&
+      value !== null &&
+      'kind' in value &&
+      value.kind === 'triggeringCreatureToughness',
+  );
+}
+
+/** Whether this instruction reads the card an earlier top-card move revealed. */
+export function effectUsesRevealedCardManaValue(effect: Effect): boolean {
+  return Object.values(effect).some(
+    (value) =>
+      typeof value === 'object' &&
+      value !== null &&
+      'kind' in value &&
+      value.kind === 'revealedCardManaValueThisResolution',
+  );
+}
+
+/** Whether this instruction reads the LKI power of an earlier sacrificed permanent. */
+export function effectUsesSacrificedPermanentPower(effect: Effect): boolean {
+  return Object.values(effect).some(
+    (value) =>
+      typeof value === 'object' &&
+      value !== null &&
+      'kind' in value &&
+      value.kind === 'sacrificedPermanentPowerThisResolution',
+  );
+}
+
+/** Whether this instruction reads the LKI power of the sole permanent paid as a cost. */
+export function effectUsesPaidSacrificePower(effect: Effect): boolean {
+  const contains = (value: unknown): boolean => {
+    if (Array.isArray(value)) return value.some(contains);
+    if (typeof value !== 'object' || value === null) return false;
+    if ('kind' in value && (value as { readonly kind?: unknown }).kind === 'paidSacrificePower') {
+      return true;
+    }
+    return Object.values(value).some(contains);
+  };
+  return contains(effect);
+}
+
+/** Whether this instruction reads the LKI toughness of the sole permanent paid as a cost. */
+export function effectUsesPaidSacrificeToughness(effect: Effect): boolean {
+  const contains = (value: unknown): boolean => {
+    if (Array.isArray(value)) return value.some(contains);
+    if (typeof value !== 'object' || value === null) return false;
+    if ('kind' in value && (value as { readonly kind?: unknown }).kind === 'paidSacrificeToughness') {
+      return true;
+    }
+    return Object.values(value).some(contains);
+  };
+  return contains(effect);
+}
+
+/** Whether this instruction reads the mana value of the sole card paid as a discard cost. */
+export function effectUsesPaidDiscardManaValue(effect: Effect): boolean {
+  const contains = (value: unknown): boolean => {
+    if (Array.isArray(value)) return value.some(contains);
+    if (typeof value !== 'object' || value === null) return false;
+    if ('kind' in value && (value as { readonly kind?: unknown }).kind === 'paidDiscardManaValue') {
+      return true;
+    }
+    return Object.values(value).some(contains);
+  };
+  return contains(effect);
+}
+
+/** The unique earlier top-card reveal-and-move instruction this amount reads. */
+export function revealedCardAmountSourceIndex(effects: readonly Effect[], index: number): number | null {
+  const effect = effects[index];
+  if (effect === undefined || !effectUsesRevealedCardManaValue(effect)) return null;
+  let found: number | null = null;
+  for (let earlier = 0; earlier < index; earlier += 1) {
+    if (effects[earlier]?.kind !== 'revealTopCardToHand') continue;
+    if (found !== null) return null;
+    found = earlier;
+  }
+  return found;
+}
+
+/**
+ * The unique earlier creature-target slot an amount on `effects[index]` reads.
+ *
+ * This is the amount-side twin of `referentSourceIndex`: both derive the
+ * antecedent from the printed list rather than trusting an authored index, and
+ * both return `null` for either zero or several candidates so validation and
+ * resolution cannot choose different creatures.
+ */
+export function referentAmountSourceIndex(effects: readonly Effect[], index: number): number | null {
+  const effect = effects[index];
+  if (effect === undefined || !effectUsesThatCreatureToughness(effect)) return null;
+  let found: number | null = null;
+  for (let earlier = 0; earlier < index; earlier += 1) {
+    const candidate = effects[earlier];
+    if (candidate === undefined || !hasTarget(candidate)) continue;
+    if (!effectChoosesTarget(candidate)) continue;
+    if (isMultipleTargetSpec(candidate.target)) continue;
+    if (!targetKindNamesACreature(candidate.target.kind)) continue;
+    if (found !== null) return null;
+    found = earlier;
+  }
+  return found;
+}
+
+/** The unique earlier single player-target slot a hand-size amount reads. */
+export function playerReferentAmountSourceIndex(effects: readonly Effect[], index: number): number | null {
+  const effect = effects[index];
+  if (effect === undefined || !effectUsesThatPlayersHandSize(effect)) return null;
+  let found: number | null = null;
+  for (let earlier = 0; earlier < index; earlier += 1) {
+    const candidate = effects[earlier];
+    if (candidate === undefined || !hasTarget(candidate)) continue;
+    if (!effectChoosesTarget(candidate)) continue;
+    if (isMultipleTargetSpec(candidate.target)) continue;
+    if (!targetKindNamesAPlayer(candidate.target.kind)) continue;
+    if (found !== null) return null;
+    found = earlier;
+  }
+  return found;
+}
+
+/** The unique earlier one-permanent sacrifice a resolution-local power reads. */
+export function sacrificedPermanentAmountSourceIndex(
+  effects: readonly Effect[],
+  index: number,
+): number | null {
+  const effect = effects[index];
+  if (effect === undefined || !effectUsesSacrificedPermanentPower(effect)) return null;
+  let found: number | null = null;
+  for (let earlier = 0; earlier < index; earlier += 1) {
+    const candidate = effects[earlier];
+    if (candidate?.kind !== 'sacrificePermanent') continue;
+    if (found !== null || (candidate.count ?? 1) !== 1 || candidate.players !== undefined) return null;
     found = earlier;
   }
   return found;
@@ -2204,7 +3662,7 @@ export function referentSourceIndex(effects: readonly Effect[], index: number): 
  * instant, inside a `selfEnters` trigger, and inside an activated ability — and
  * a corpus card the validator refuses lands as `invalidDsl`, which reads as
  * "the model was sloppy" rather than "the DSL is narrow". Same shape and same
- * reason as `isAttackTriggerOnlyTarget`, one level up: that one names a target
+ * reason as `isSourceAttackTarget`, one level up: that one names a target
  * kind, this one names an effect kind.
  */
 export const SOURCE_BODY_EFFECT_KINDS: readonly AnyEffectKind[] = ['fight'];
@@ -2243,21 +3701,39 @@ export function isManaEffect(kind: AnyEffectKind): boolean {
  * Effects whose target slot may carry `TargetSpec.count` ("up to N target
  * <kind>"), added for `mtg-kg44`.
  *
- * One member, kept beside `SOURCE_BODY_EFFECT_KINDS` and `MANA_EFFECT_KINDS`
+ * These members are kept beside `SOURCE_BODY_EFFECT_KINDS` and `MANA_EFFECT_KINDS`
  * for the same reason: a count is meaningful only where the kernel already
  * knows how to fold N chosen objects into one effect application at
- * resolution, and today that is `tapPermanent` alone — `EFFECT_EXECUTION`
- * (`@mtg/kernel`) taps every surviving member of a `{kind:'multiple'}`
- * target, and no other effect's `apply` has an analogous fold. A count on
+ * resolution. `tapPermanent` applies to every surviving member of a
+ * `{kind:'multiple'}` target, while `dealDamage` retains one allocation per
+ * chosen target and applies the divided total. A count on
  * `destroyPermanent` or `bouncePermanent` would print a sentence the kernel
  * cannot run identically to how it reads, which is exactly the gap this
  * table exists to close before the validator lets a card ship with it.
  * Widening this list is a kernel change first, a table entry second, never
  * the other way around.
  */
-export const TARGET_COUNT_EFFECT_KINDS: readonly AnyEffectKind[] = ['tapPermanent'];
+export const TARGET_COUNT_EFFECT_KINDS: readonly AnyEffectKind[] = [
+  'dealDamage',
+  'tapPermanent',
+  'exchangeControl',
+  'detainPermanent',
+  'exileTarget',
+];
 
 /** True when this effect's target slot may carry a `count`. */
 export function effectAllowsTargetCount(kind: AnyEffectKind): boolean {
   return TARGET_COUNT_EFFECT_KINDS.includes(kind);
+}
+
+/** Effects with native resolution for an `anyNumber` target slot. */
+export const ANY_NUMBER_TARGET_EFFECT_KINDS: readonly AnyEffectKind[] = [
+  'dealDamage',
+  'drawCards',
+  'gainLife',
+];
+
+/** True when this effect may choose zero through every legal target in one slot. */
+export function effectAllowsAnyNumberTargets(kind: AnyEffectKind): boolean {
+  return ANY_NUMBER_TARGET_EFFECT_KINDS.includes(kind);
 }

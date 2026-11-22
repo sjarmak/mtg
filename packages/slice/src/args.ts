@@ -26,6 +26,7 @@ const VALUE_FLAGS = new Set([
   'provider',
   'brief',
   'fixtures',
+  'run-manifest',
   'out',
   'forge-home',
   'store',
@@ -42,6 +43,7 @@ export const USAGE = `usage: npm run slice -- [options]
   --provider <name>        LLM provider: ${PROVIDER_NAMES.join(' | ')} (default fixture)
   --brief <path>           set brief JSON (default packages/setgen/briefs/tideglass-reach.json)
   --fixtures <dir>         recorded LLM responses (default packages/setgen/fixtures/llm)
+  --run-manifest <path>    recorded run manifest (default Tideglass Reach recording)
   --out <dir>              run artifacts (default out/slice)
   --metrics-gate <mode>    ${METRICS_GATES.join(' | ')} (default strict)
   --skip-forge             do not run the Forge boot gate at all
@@ -153,6 +155,7 @@ export function parseSliceArgs(argv: readonly string[]): ParsedArgs {
   for (const [flag, field] of [
     ['brief', 'briefPath'],
     ['fixtures', 'fixtureDir'],
+    ['run-manifest', 'fixtureManifestPath'],
     ['out', 'outDir'],
     ['forge-home', 'forgeHome'],
     ['store', 'storePath'],

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "dka",
+  "formatSha256": "7ad14328b958d27e2bc1a1c7a436345a32e21809f519c47ef052ee8bf905c75e",
+  "sourceSha256": "22b8d5061fad9cb43fde7a376b08b68e2da0f490797bbe3333bb68f36b813659",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "22b8d5061fad9cb43fde7a376b08b68e2da0f490797bbe3333bb68f36b813659",
+    "recipe.json": "6eb99c625f280bfc86c431308e802ce867beb0fce80e48f972a03dcce03a4fe7",
+    "dka-printed-catalog-v1.json": "be9f99b8b7c4cd66c2605d598777444829c51e3fbcf2ddb25d1107d4c338e29b",
+    "isd-printed-catalog-v1.json": "71ad9580ffb155fb452459e1b088dd21120a8eebb40a95d7f91e3cb4a5c280e1",
+    "dka-limited-format-v1.json": "fa0e849547010608553d290c7e632cb05359cf2db3ca680d74992f056494db20"
+  },
+  "catalogs": [
+    {
+      "code": "DKA",
+      "cards": 158,
+      "contentSha256": "76b2f918d69578928e0cfb8c328bebfba9c714ec1c51dc37cd499934681e3c5d"
+    },
+    {
+      "code": "ISD",
+      "cards": 264,
+      "contentSha256": "63879d480bd704b6428145523372eac6a7e8abf7fc6f5b71a7e8315ab9074604"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 4592.9229350000005,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 412,
+    "printings": 422
+  }
+}

@@ -21,17 +21,47 @@
 export { App } from './app/App';
 export type { AppProps, UiView, UiViews } from './app/App';
 export { SHELL_NOTICE_LABEL, Shell } from './app/Shell';
-export type { ShellProps } from './app/Shell';
+export type { ShellAt, ShellProps } from './app/Shell';
 export {
   DEFAULT_MODE,
+  DEFAULT_SUBS,
+  MODE_ALIASES,
   MODE_LABELS,
+  SUB_LABELS,
   UI_MODES,
+  UI_SUBS,
   hashSource,
   parseHash,
+  routeAt,
   routeHash,
+  tokenSub,
   useHashRoute,
 } from './app/router';
-export type { HashSource, UiMode, UiRoute, UiRouter } from './app/router';
+export type { HashSource, HashTarget, RouteAt, SubOf, UiMode, UiRoute, UiRouter, UiSub } from './app/router';
+
+export type { HttpObservedBackendOptions } from './net/backend-gateway';
+export { BROWSER_BACKEND_PROTOCOL, httpObservedBackend } from './net/backend-gateway';
+export {
+  HIDDEN_DECK_NAME,
+  OBSERVED_CLIENT_PROTOCOL,
+  OBSERVED_SEAT_BACKEND,
+  lanForgeAvailability,
+  observedSeatBackend,
+  observedTableOf,
+  readObservedFrame,
+  readObservedStart,
+  startObservedTable,
+} from './net/observed-table';
+export type {
+  LanForgeAvailability,
+  ObservedFrameResult,
+  ObservedSeatClient,
+  ObservedSeatOptions,
+  ObservedSeatState,
+  ObservedTableStart,
+} from './net/observed-table';
+export { readObservedFormats } from './net/invite';
+export type { InviteRoute } from './net/invite';
 
 export { renderCopy } from './copy';
 
@@ -41,7 +71,12 @@ export {
   COLOR_IDENTITIES,
   IDENTITY_LABELS,
   MAT_TOKEN_CSS,
+  ROUTE_SCOPE_ATTRIBUTE,
+  SUB_SCOPE_ATTRIBUTE,
   TOKEN_CSS,
+  routeScope,
+  subScope,
+  viewScope,
 } from './styles/tokens';
 export type { ColorIdentity } from './styles/tokens';
 
@@ -60,6 +95,7 @@ export {
   LOYALTY_SHIELD_FLAT,
   LOYALTY_SHIELD_POINTS,
   LOYALTY_SHIELD_SHARE,
+  LAND_ART_WINDOW,
   NAME_FIT_STEPS,
   PLANESWALKER_ART_WINDOW,
   PIP_GLYPHS,
@@ -129,6 +165,16 @@ export {
 } from './card/symbols';
 export type { OracleChunk, OracleSymbolChunk, OracleTextChunk, SymbolArt, SymbolSet } from './card/symbols';
 export { SYMBOL_CLASS, symbolElement, symbolizeLine } from './card/SymbolText';
+export {
+  LOCAL_SET_ICON_BASE,
+  SCRYFALL_SET_ICON_BASE,
+  SET_ICON_DIR,
+  STAGED_SET_ICONS,
+  setIconAssetName,
+  setIconHref,
+  setIconSourceUrl,
+  stagedSetIconsFrom,
+} from './card/set-icon';
 export { cardColorIdentity, cardColors, colorToIdentity, colorsToIdentity } from './card/identity';
 
 export { Board } from './board/Board';
@@ -239,8 +285,6 @@ export type {
   CurationIndex,
   CurationIndexResult,
 } from './lab/curation-index';
-export { ReplayRoute } from './routes/ReplayRoute';
-export type { ReplayRouteProps } from './routes/ReplayRoute';
 
 // The decision-level replay: a recorded event log, stepped one kernel decision
 // at a time. `routes/replay/index.ts` is the whole surface and says what the
@@ -325,14 +369,64 @@ export {
 // reason `PlaySetState` is: a consumer that fetches the deck lists has to say
 // which of the four states it is in, and cannot hand over decks it has not read.
 export type { PlayPrecons, PreconState } from './routes/PlayRoute';
-export { BuilderSwitch, PRECON_TAB_LABEL, SEALED_TAB_LABEL } from './routes/play/BuilderSwitch';
-export type { BuilderKind, BuilderSwitchProps } from './routes/play/BuilderSwitch';
+export { PLAY_DECKS_LABEL, PLAY_NO_DECKS_NOTE, PlayChooser } from './routes/play/PlayChooser';
+export type { PlayChooserProps, SealedStart } from './routes/play/PlayChooser';
+// The landing every Play section draws, and the two sections shared between the
+// staged set and a printed format.
+export { PLAY_UNNAMED_SET, PlayLanding } from './routes/play/PlayLanding';
+export type { PlayLandingProps } from './routes/play/PlayLanding';
+export {
+  PLAY_GENERATE_LABEL,
+  PLAY_RESUME_LABEL,
+  PLAY_SEALED_LABEL,
+  SealedChooser,
+} from './routes/play/SealedChooser';
+export type { SealedChooserProps, SealedOffer } from './routes/play/SealedChooser';
+export { SOURCE_CHOICE_LABEL, SourceChoice } from './routes/play/SourceChoice';
+export type { SourceChoiceProps } from './routes/play/SourceChoice';
+export { playSources, resolvePlaySource } from './routes/play/sources';
+export type { PlaySource, StagedSources } from './routes/play/sources';
+// The bot-or-network choice over every Play section, and the one rule that
+// lights its cells. `availability` and `opponentOf` go out under longer names
+// because `@mtg/cube` measures an archetype's `availability` and `@mtg/kernel`
+// names the other seat `opponentOf`, and a barrel may not repeat either
+// (`packages/slice/test/package-surfaces.test.ts`).
+export {
+  AGAINST_PARAM,
+  availability as playAvailability,
+  COMMANDER_UNAVAILABLE_REASON,
+  LAN_UNWIRED_REASON,
+  opponentOf as opponentFromParams,
+  READY,
+  VS_PARAM,
+} from './routes/play/availability';
+export type {
+  Availability,
+  AvailabilityFacts,
+  Opponent,
+  PlayFormat,
+  SetKind,
+} from './routes/play/availability';
+export {
+  OPPONENT_BOT_LABEL,
+  OPPONENT_CHOICE_LABEL,
+  OPPONENT_LAN_LABEL,
+  OpponentChoice,
+  useOpponent,
+} from './routes/play/OpponentChoice';
+export type { OpponentChoiceProps } from './routes/play/OpponentChoice';
+export {
+  clearSealedSession,
+  readSealedSession,
+  resumeSealed,
+  writeSealedSession,
+} from './routes/play/sealed-session';
+export type { SealedSession } from './routes/play/sealed-session';
 export { PreconGame } from './routes/play/PreconGame';
 export type { PreconGameProps, PreconSelection } from './routes/play/PreconGame';
 export {
   chooseTheirsLabel,
   chooseYoursLabel,
-  PRECON_HOTSEAT_LABEL,
   PRECON_LABEL,
   PRECON_PLAY_LABEL,
   PreconPicker,
@@ -341,6 +435,7 @@ export type { PreconPickerProps } from './routes/play/PreconPicker';
 export { preconFacts, preconProblem } from './routes/play/precon-facts';
 export type { PreconFacts } from './routes/play/precon-facts';
 export { readReduction, reducedNoticeText } from './lab/reduced-notice';
+export { MISSING_CARDS_ID, missingCards, missingCardsSummary } from './routes/cards/MissingCards';
 export type { ReductionDrop, SetReduction } from './lab/reduced-notice';
 export { readStagedCollation } from './lab/staged-collation';
 export type { StagedCollation } from './lab/staged-collation';
@@ -359,15 +454,78 @@ export { CLIENT_PROTOCOL, readSnapshot, sessionViewOf } from './net/snapshot';
 export type { SnapshotResult } from './net/snapshot';
 export { useRemoteTable } from './net/remote-table';
 export type { RemoteTableHandle } from './net/remote-table';
+// The half of a LAN game that happens before there is one: the host's browser
+// asks what it may hand out, and draws it as a link and a code to scan.
+export { readInvite, useInvite, useTableRunning } from './net/invite';
+export type { InviteHandle, InviteResult, TableRunning } from './net/invite';
+export { readTableStart, startTable } from './net/start-table';
+export type { TableStart } from './net/start-table';
+export { encodeQr, renderQr } from './net/qr';
+export type { QrMatrix } from './net/qr';
+export { canCopy, copyText } from './clipboard';
 export {
+  LAN_COPIED_LABEL,
+  LAN_COPY_LABEL,
+  LAN_INVITE_LABEL,
+  LAN_QR_TOO_LONG,
+  LAN_WAITING_NOTE,
+  LanInvite,
+  LanPanel,
+} from './routes/play/LanInvite';
+export type { LanInviteProps, LanPanelProps } from './routes/play/LanInvite';
+export {
+  LanSection,
+  lanNotOffered,
+  PLAY_LAN_BLURB,
+  PLAY_LAN_COMMAND,
+  PLAY_LAN_COPIED_LABEL,
+  PLAY_LAN_COPY_LABEL,
+  PLAY_LAN_DEALING_LABEL,
+  PLAY_LAN_LABEL,
+  PLAY_LAN_RUNNING,
+  PLAY_LAN_START_BLURB,
+  PLAY_LAN_START_LABEL,
+} from './routes/play/LanSection';
+export type { LanKind, LanSectionProps } from './routes/play/LanSection';
+export {
+  LAN_FORGE_BLURB,
+  LAN_FORGE_LABEL,
+  LAN_FORGE_NO_LAB,
+  LAN_FORGE_START_LABEL,
+  LAN_FORGE_STARTING_LABEL,
+  LanForgeStart,
+  lanForgeSection,
+} from './routes/play/LanForgeStart';
+export type { LanForgeStartProps, ObservedTableOpened } from './routes/play/LanForgeStart';
+export {
+  OBSERVED_BACK_LABEL,
+  OBSERVED_BUILD_LABEL,
+  OBSERVED_ENDED_LABEL,
+  OBSERVED_LEAVE_LABEL,
+  OBSERVED_OPENING_LABEL,
+  OBSERVED_SUBMIT_DECK_LABEL,
+  OBSERVED_SUBMITTED_LABEL,
+  OBSERVED_TOKEN_PREFIX,
+  OBSERVED_WAITING_LABEL,
+  ObservedSeat,
+  observedSeatLink,
+  seatingStatus,
+} from './routes/play/ObservedSeat';
+export type { ObservedSeatLink, ObservedSeatProps, ObservedSeating } from './routes/play/ObservedSeat';
+export type { SessionFeed } from './routes/play/session-controller';
+export {
+  BackendGame,
+  CLOSED_SESSION_LABEL,
+  CLOSE_GAME_LABEL,
   CONNECTING_LABEL,
-  HOTSEAT_LABEL,
   LEGAL_MOVES_LABEL,
   LiveGame,
   PASS_LABEL,
+  OPENING_SESSION_LABEL,
   PlayView,
   RemoteGame,
   SEALED_POOL_LABEL,
+  UNDO_LABEL,
   WAITING_LABEL,
   SealedBuilder,
   SealedGame,
@@ -375,7 +533,6 @@ export {
   buildPrompt,
   chosenCards,
   clearSelection,
-  dealMirrorGame,
   dealSealedGame,
   deckFor,
   describeStep,
@@ -385,17 +542,21 @@ export {
   playableFromHand,
   resuggest,
   suggestSelection,
+  SUBMITTING_MOVE_LABEL,
   toggle,
+  createPlaySessionController,
   usePlaySession,
 } from './routes/play/index';
 export type {
+  BackendGameProps,
   DealOptions,
   DealtGame,
   LiveGameProps,
-  OpponentKind,
   PlayChoice,
   PlayConfig,
   PlayPrompt,
+  PlaySessionController,
+  PlaySessionControllerState,
   PlaySessionHandle,
   PlayViewProps,
   RemoteGameProps,
@@ -404,6 +565,21 @@ export type {
   SealedGameProps,
   SeatNames,
 } from './routes/play/index';
+
+export { LegacyCubeRoute } from './routes/legacy-cube/LegacyCubeRoute';
+export type { LegacyCubeCatalogState, LegacyCubeRouteProps } from './routes/legacy-cube/LegacyCubeRoute';
+export {
+  LEGACY_CUBE_FORMAT,
+  LEGACY_CUBE_HUMAN_SEAT,
+  LEGACY_CUBE_OPPONENT_SEAT,
+  buildLegacyCubeDeck,
+  decodeLegacyCubePicks,
+  encodeLegacyCubePicks,
+  legacyCubeSessionSpec,
+  readLegacyCubeCatalog,
+  runLegacyCubeDraft,
+} from './routes/legacy-cube/model';
+export type { LegacyCubeDeckBuild, LegacyCubePickRead } from './routes/legacy-cube/model';
 
 export { LabApp } from './dev/LabApp';
 export type { LabAppProps } from './dev/LabApp';

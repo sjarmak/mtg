@@ -25,8 +25,10 @@ import { AnalysisStyles, Stat } from './chart';
 import { RARITY_ANY, CardPerformancePanel } from './card-performance';
 import { CompositionPanel } from './composition';
 import { RevisionDiffPanel } from './diff';
+import { ClaimsPanel } from './claims';
 import { FairnessPanel } from './fairness';
 import { RunSummaryPanels } from '../AnalysisRoute';
+import { GameDetailPanels } from './game-detail';
 import type { AnalysisLogState } from '../AnalysisRoute';
 import { duplicateTone, integer, percent } from './evidence';
 import { GameShapePanel } from './game-shape';
@@ -34,6 +36,8 @@ import { PreconMatchupPanel } from './precon-matchups';
 import { CalibrationEvidencePanel, RetuneEvidencePanel } from './calibration';
 import { REFERENCE_CODES } from './calibration-model';
 import type { CalibrationState, ReferenceCode, RetuneState } from './calibration-model';
+import { EVIDENCE_SECTION_LABEL, EvidencePanel } from './evidence-panel';
+import type { EvidenceState } from './evidence-record';
 import type { AnalysisRun, RunGate, SetDocument } from './model';
 
 /**
@@ -49,6 +53,7 @@ import type { AnalysisRun, RunGate, SetDocument } from './model';
 export const ANALYSIS_SECTIONS = [
   'calibration',
   'fairness',
+  'claims',
   'composition',
   'archetypes',
   'shape',
@@ -56,6 +61,7 @@ export const ANALYSIS_SECTIONS = [
   'precons',
   'games',
   'diff',
+  'evidence',
 ] as const;
 export type AnalysisSection = (typeof ANALYSIS_SECTIONS)[number];
 export const DEFAULT_SECTION: AnalysisSection = 'fairness';
@@ -63,6 +69,7 @@ export const DEFAULT_SECTION: AnalysisSection = 'fairness';
 export const SECTION_LABELS: Readonly<Record<AnalysisSection, string>> = {
   calibration: 'Reference calibration',
   fairness: 'Is it fair',
+  claims: 'Does it do what it claims',
   composition: 'Set composition',
   archetypes: 'Archetype health',
   shape: 'Game shape',
@@ -70,6 +77,7 @@ export const SECTION_LABELS: Readonly<Record<AnalysisSection, string>> = {
   precons: 'Precon matchups',
   games: 'Games played',
   diff: 'Revision diff',
+  evidence: EVIDENCE_SECTION_LABEL,
 };
 
 /** One run and, when it is available, the set file the run measured. */
@@ -107,10 +115,28 @@ export interface AnalysisSurfaceProps {
   readonly calibration?: CalibrationState;
   /** Optional exact before/after proposal; absent until retuning writes one. */
   readonly retune?: RetuneState;
+  /** The staged ledger snapshot for the `evidence` section; absent until `npm run play` scans one. */
+  readonly evidence?: EvidenceState;
+  /** The selected set, format or cube's join key, scoping the `evidence` section; null lists everything. */
+  readonly subjectKey?: string | null;
   readonly route: UiRoute;
   readonly onSetParams: (params: Readonly<Record<string, string>>) => void;
   /** Where a run document would come from, shown when there are none. */
   readonly sourceHint?: string;
+}
+
+/**
+ * An integer route param, or the fallback when it is absent or unparseable.
+ *
+ * A junk `?turn=x` opens the default turn rather than an error page: the
+ * address bar is a surface a person types into, and the drill-down clamps
+ * whatever it is handed.
+ */
+function intParam(route: UiRoute, key: string): number | null {
+  const raw = route.params[key];
+  if (raw === undefined || raw === '') return null;
+  const value = Number.parseInt(raw, 10);
+  return Number.isInteger(value) ? value : null;
 }
 
 export function sectionFromRoute(route: UiRoute): AnalysisSection {
@@ -267,11 +293,21 @@ function header(view: AnalysisRunView): ReactElement {
   const insideNoise = health.gates.filter((gate) => gate.status === 'withinNoise');
   const passed =
     health.gates.length - failed.length - under.length - notApplicable.length - insideNoise.length;
+  // Only the abstentions this run actually has. A zero is not an abstention,
+  // and printing it as one is how "25 pass · 0 fail" came to sit over "0
+  // under-sampled, which is not a pass" — a sentence that reads as a
+  // qualification of the green number above it and qualifies nothing. A run
+  // with no abstention at all says so instead, because "every gate judged" is
+  // the fact that makes the census complete.
   const abstentions: readonly string[] = [
-    `${integer(under.length)} under-sampled`,
+    ...(under.length === 0 ? [] : [`${integer(under.length)} under-sampled`]),
     ...(notApplicable.length === 0 ? [] : [`${integer(notApplicable.length)} with nothing to measure`]),
     ...(insideNoise.length === 0 ? [] : [`${integer(insideNoise.length)} inside the seed noise`]),
   ];
+  const note =
+    abstentions.length === 0
+      ? `every one of the ${integer(health.gates.length)} gates was judged`
+      : `${abstentions.join(', ')}, ${abstentions.length === 1 ? 'which is not a pass' : 'none of which is a pass'}`;
   return createElement(
     'div',
     { className: 'mtg-stats' },
@@ -279,7 +315,7 @@ function header(view: AnalysisRunView): ReactElement {
       key: 'gates',
       label: 'Gates',
       value: `${integer(passed)} pass · ${integer(failed.length)} fail`,
-      note: `${abstentions.join(', ')}, ${abstentions.length === 1 ? 'which is not a pass' : 'none of which is a pass'}`,
+      note,
       tone: gateTone(passed, failed.length),
     }),
     createElement(Stat, {
@@ -295,12 +331,31 @@ function header(view: AnalysisRunView): ReactElement {
       note: 'seeded games that replayed another game move for move',
       tone: duplicateTone(health.duplicateShare),
     }),
-    createElement(Stat, {
-      key: 'seed',
-      label: 'Run seed',
-      value: view.run.seed,
-      note: view.run.producedBy,
-    }),
+  );
+}
+
+/**
+ * The run's technical identity, folded shut.
+ *
+ * It used to be a fourth headline tile — `Run seed` over `mtg-analysis/v0`,
+ * with an absolute command line under it — beside three tiles that answer a
+ * question somebody has. A seed and the command that produced it are what you
+ * want *after* the numbers surprise you, and only then, so they read here
+ * behind a summary rather than in the same size as the verdict.
+ */
+function runDetails(view: AnalysisRunView): ReactElement {
+  return createElement(
+    'details',
+    { className: 'mtg-rundetails' },
+    createElement('summary', null, 'Run details'),
+    createElement(
+      'dl',
+      { className: 'mtg-rundetails__list' },
+      createElement('dt', { key: 'seed-term' }, 'Seed'),
+      createElement('dd', { key: 'seed-value' }, view.run.seed),
+      createElement('dt', { key: 'by-term' }, 'Produced by'),
+      createElement('dd', { key: 'by-value' }, view.run.producedBy),
+    ),
   );
 }
 
@@ -317,13 +372,27 @@ function sectionBody(
       // Rendered before a run is selected in `AnalysisSurface`, because static
       // calibration remains useful in a checkout with no simulation document.
       return null;
+    case 'evidence':
+      // Likewise: the staged ledgers are about the selected set whether or not
+      // a run measured it.
+      return null;
     case 'fairness':
       return createElement(FairnessPanel, {
         fairness: view.run.fairness,
-        about: view.run.label,
         games: view.run.health.games,
         distinctGames: view.run.health.distinctGames,
       });
+    case 'claims':
+      return view.run.claims === null
+        ? createElement(
+            'div',
+            { 'aria-label': SECTION_LABELS.claims },
+            emptyState(
+              'This format states no capabilities',
+              'Nothing was claimed, so there is nothing to measure. State them as cube criteria and analyze again; a capability nobody stated is never invented here.',
+            ),
+          )
+        : createElement(ClaimsPanel, { claims: view.run.claims });
     case 'composition':
       return view.set === null
         ? emptyState(
@@ -355,13 +424,30 @@ function sectionBody(
           )
         : createElement(PreconMatchupPanel, { matchups: view.run.precons });
     case 'games':
-      // The per-game rows behind the summary. The turn-by-turn drill-down of
-      // one of them is `ReplayRoute`, and it belongs directly under this
-      // (`mtg-2ayr`); it is not mounted yet.
+      // The run summarized, then one game of it walked turn by turn. Both read
+      // `@mtg/sim`'s statistics log, and the drill-down draws only when that
+      // log is ready — the other three states are `RunSummaryPanels`' to say,
+      // and saying them twice on one screen is worse than saying them once.
       return createElement(
         'div',
         { className: 'mtg-analysis', 'aria-label': SECTION_LABELS.games },
         createElement(RunSummaryPanels, { state: games }),
+        games.status !== 'ready'
+          ? null
+          : createElement(GameDetailPanels, {
+              log: games.log,
+              gameIndex: intParam(route, 'game') ?? 0,
+              turn: intParam(route, 'turn'),
+              onSelectGame: (index: number) => {
+                // The turn number is addressed within a game, so carrying it
+                // across a game change lands on a turn of a different game or
+                // on none at all. Clearing it opens the new game at its end.
+                onSetParams({ game: String(index), turn: '' });
+              },
+              onSelectTurn: (turn: number) => {
+                onSetParams({ turn: String(turn) });
+              },
+            }),
       );
     case 'diff':
       return baseline === null
@@ -445,6 +531,19 @@ export function AnalysisSurface(props: AnalysisSurfaceProps): ReactElement {
       createElement(RetuneEvidencePanel, { state: retune }),
     );
   }
+  if (section === 'evidence') {
+    return createElement(
+      'div',
+      { className: 'mtg-analysis' },
+      createElement(AnalysisStyles, null),
+      pageHead,
+      navigation,
+      createElement(EvidencePanel, {
+        state: props.evidence ?? { status: 'absent' },
+        subjectKey: props.subjectKey ?? null,
+      }),
+    );
+  }
   const blocked = nonRunState(props.runs, props.sourceHint);
   if (blocked !== null) {
     return createElement('div', null, createElement(AnalysisStyles, null), pageHead, navigation, blocked);
@@ -490,11 +589,30 @@ export function AnalysisSurface(props: AnalysisSurfaceProps): ReactElement {
       'div',
       { className: 'mtg-page-head' },
       createElement('h1', { className: 'mtg-page-title' }, 'Set analysis'),
-      createElement('span', { className: 'mtg-page-note' }, current.run.health.label),
+      // The games count reads here and nowhere else. It used to ride in the app
+      // header on every route — `XMP · 2,700 games analyzed` over a deck you
+      // were building — where it was a number with no page to be about. This is
+      // the page it is about, and the run it measured is named in the toolbar a
+      // line below.
+      createElement(
+        'span',
+        { className: 'mtg-page-note' },
+        `${integer(current.run.health.games)} games analyzed`,
+      ),
+      // And nothing else. `health.label` used to read here: a sentence the
+      // producing tool writes about its own machinery — "10 color pairs, 45
+      // matchups x 60 games, greedy v0 bots on the flagship set, decks built
+      // by @mtg/deckbuild" is the staged run's — which named two internal tools
+      // and a version marker on a screen a player opens, cost a wrapped line of
+      // a 390px phone's first screen, and repeated the game count printed
+      // beside it and the set named in the toolbar below. The sweep shape it
+      // carries that nothing else does is on the run itself, and `analyze`
+      // writes it in the units a reader has.
     ),
     toolbar,
     navigation,
     header(current),
+    runDetails(current),
     failures(current.run.health.gates),
     sectionBody(section, current, baseline, props.games, props.route, props.onSetParams),
   );
@@ -511,6 +629,8 @@ export function analysisView(
   games: AnalysisLogState,
   calibration: CalibrationState = { status: 'absent' },
   retune: RetuneState = { status: 'absent' },
+  evidence: EvidenceState = { status: 'absent' },
+  subjectKey: string | null = null,
   sourceHint?: string,
 ): (router: UiRouter) => ReactNode {
   return (router: UiRouter): ReactNode =>
@@ -519,6 +639,8 @@ export function analysisView(
       games,
       calibration,
       retune,
+      evidence,
+      subjectKey,
       route: router.route,
       onSetParams: router.setParams,
       ...(sourceHint === undefined ? {} : { sourceHint }),

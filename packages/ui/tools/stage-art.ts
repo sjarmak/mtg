@@ -26,7 +26,7 @@
  * pending frame, which is exactly the state that existed before this file. The
  * launcher reports what it could not fetch rather than swallowing it.
  */
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { cacheImage } from '@mtg/image-cache';
 import type { CacheImageOptions } from '@mtg/image-cache';
@@ -34,6 +34,50 @@ import type { DeckArt, DeckArtifact, DeckArtifactEntry } from '../src/lab/deck-a
 
 /** Directory under `public/`, and therefore also the URL prefix. */
 export const ART_DIR = 'art';
+
+/**
+ * Remove a flat art directory an earlier launcher staged, and say what it held.
+ *
+ * `mtg-cax8`, 2026-08-23. `npm run play` stages per-set bundles and clears the
+ * flat `public/art.json` beside them, because a stale manifest is another set's
+ * art under this set's card ids. It never cleared the directory that manifest
+ * named. Nothing reads those files once the manifest is gone, nothing overwrites
+ * them because the bundles write elsewhere, and every run of the older flat
+ * launcher left another copy: 11 GB of orphaned rasters on this machine, found
+ * while building a static server.
+ *
+ * It is the same decision `clearStagedDeck` makes about `deck.json`, and it is
+ * made for the same reason: `npm run lab` restages what it needs on its next
+ * run, from a cache that still holds every byte, so the cost of being wrong
+ * here is one re-copy and the cost of being right is gigabytes.
+ *
+ * Returns the count and the bytes rather than a boolean, because a launcher
+ * that says it removed 1,248 files totaling 11 GB is telling the reader
+ * something they want to know about their disk.
+ */
+export function clearStagedFlatArt(publicDir: string): { readonly files: number; readonly bytes: number } {
+  const directory = join(publicDir, ART_DIR);
+  if (!existsSync(directory)) return { files: 0, bytes: 0 };
+  let files = 0;
+  let bytes = 0;
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    files += 1;
+    bytes += statSync(join(directory, entry.name)).size;
+  }
+  rmSync(directory, { recursive: true, force: true });
+  return { files, bytes };
+}
+
+/** The launcher's line, or nothing when there was nothing to clear. */
+export function describeClearedFlatArt(cleared: { readonly files: number; readonly bytes: number }): string {
+  if (cleared.files === 0) return '';
+  const mb = Math.round(cleared.bytes / 1_000_000);
+  return (
+    `Cleared ${String(cleared.files)} illustration(s) (${String(mb)} MB) staged by an older launcher ` +
+    'into public/art; this run serves per-set bundles and nothing reads them.'
+  );
+}
 
 export interface StagedArt {
   readonly deck: DeckArtifact;
@@ -55,8 +99,20 @@ export interface StageArtOptions {
   readonly publish?: (from: string, to: string) => void;
 }
 
+/**
+ * Every entry the page will draw a tile for, the sideboard included.
+ *
+ * The sideboard was missing here until 2026-09-03, and it is the one field that
+ * can be absent rather than empty, so it read as three lists rather than four
+ * and nothing pointed at the gap. `../src/routes/deck/OpenDeckScreen.ts` draws a
+ * sideboard pane whenever the document carries the field, with tiles that carry
+ * art like any other -- so a deck built with one served that pane's
+ * illustrations from Scryfall while the other three panes came off this origin,
+ * which is the split this file exists to close. Nothing in the committed
+ * fixtures has a sideboard, which is why it went unseen.
+ */
 function entriesOf(deck: DeckArtifact): readonly DeckArtifactEntry[] {
-  return [...deck.spells, ...deck.lands, ...deck.basics];
+  return [...deck.spells, ...deck.lands, ...deck.basics, ...(deck.sideboard ?? [])];
 }
 
 /** Every distinct illustration the deck references, with a card name for each. */
@@ -120,6 +176,13 @@ export async function stageDeckArt(deck: DeckArtifact, options: StageArtOptions)
       spells: deck.spells.map((entry) => rewrite(entry, local)),
       lands: deck.lands.map((entry) => rewrite(entry, local)),
       basics: deck.basics.map((entry) => rewrite(entry, local)),
+      // Spread rather than assigned, because absent and empty are different
+      // claims about a sideboard and `../src/lab/deck-artifact.ts` draws them
+      // differently. Writing `sideboard: undefined` would turn a deck that was
+      // never asked about one into a deck that set nothing aside.
+      ...(deck.sideboard === undefined
+        ? {}
+        : { sideboard: deck.sideboard.map((entry) => rewrite(entry, local)) }),
     },
     fetched,
     reused,

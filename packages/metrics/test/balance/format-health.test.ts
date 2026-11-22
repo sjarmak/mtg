@@ -46,7 +46,14 @@ import type { FormatHealth, GateResult } from '@mtg/metrics';
 import { abilityPool, formatGates, formatHealth, report, verifyJoinCompatibility } from '@mtg/metrics';
 import { COLOR_PAIRS, decksFor, gamesPerMatchup, runRoundRobin } from './round-robin';
 import type { RoundRobinRun } from './round-robin';
-import { DRIFT_TOLERANCE, spreadDrift, unwaivedAbstentions, unwaivedFailures, waiverFor } from './baseline';
+import {
+  DRIFT_TOLERANCE,
+  spreadDrift,
+  spreadDriftReading,
+  unwaivedAbstentions,
+  unwaivedFailures,
+  waiverFor,
+} from './baseline';
 import type { BalanceSet } from './set';
 import { loadSet } from './set';
 import type { BalanceSubject } from './subjects';
@@ -76,8 +83,19 @@ function describeSubject(subject: BalanceSubject): void {
       process.stdout.write(`\n${subject.id}: ${set.path}\n${report(health)}\n`);
       process.stdout.write(
         `run: ${run.logs.length} games in ${(run.elapsedMillis / 1000).toFixed(1)}s ` +
-          `(${run.gamesPerSecond.toFixed(0)} games/s)\n\n`,
+          `(${run.gamesPerSecond.toFixed(0)} games/s)\n`,
       );
+      // How far the pinned reading has traveled, printed whatever the verdict.
+      // The assertion below is silent inside the tolerance, so a pin that has
+      // spent 98% of it and one that has spent none look identical in a passing
+      // run; this is the line that tells them apart while re-measuring is still
+      // cheap. Absent only for an env subject, which pins nothing.
+      const pinned = subject.spread;
+      const [spread] = health.gates.filter((gate) => gate.id === 'balance.spread');
+      if (pinned !== null && spread !== undefined) {
+        process.stdout.write(`${spreadDriftReading(pinned, spread)}\n`);
+      }
+      process.stdout.write('\n');
     });
 
     function gatesMatching(predicate: (gate: GateResult) => boolean): readonly GateResult[] {
@@ -247,11 +265,11 @@ function describeSubject(subject: BalanceSubject): void {
         // this read correctly against the fifth status: a waived gate that came
         // back `withinNoise` has not started passing, it has stopped being
         // decidable, and deleting its waiver on that basis would drop a
-        // known-red gate on the strength of a sample. Now that an entry covers
-        // an abstention too, that case is the flagship's actual state rather
-        // than a hypothetical, and it is the reason this filter must stay
-        // exact: `!== 'fail'` here would delete the one waiver in the file on
-        // every run. What still ends a waiver is the gate going green, and the
+        // known-red gate on the strength of a sample. Every entry in the file
+        // covers an abstention as of `mtg-ijl6`, so that case is all three
+        // declared subjects' actual state rather than a hypothetical, and it is
+        // the reason this filter must stay exact: `!== 'fail'` here would
+        // delete every waiver in the file on every run. What still ends a waiver is the gate going green, and the
         // drift test below is what catches it going further red — a waiver is
         // not a license for the number to keep moving.
         const stale = subject.waivers.filter((waiver) => {

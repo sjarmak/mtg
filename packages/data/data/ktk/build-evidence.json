@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "ktk",
+  "formatSha256": "fe4e7bcdcb42abecf44a07ecb2cdda7bc5991290e1863530784725d8d604c0e5",
+  "sourceSha256": "deeecd4c2d91946a70384a8ec668c302ccdb30448e796ae27592d4cf7d0e7e0c",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "deeecd4c2d91946a70384a8ec668c302ccdb30448e796ae27592d4cf7d0e7e0c",
+    "recipe.json": "56ee8a53c68bed171a9e9b7a50893f67eb8c78aca7fd376e9855adb97cbbf00c",
+    "ktk-printed-catalog-v1.json": "c43b2920f710ccec1c0f2f41be816e559e0987d7203a2c703c099f80a3dae39e",
+    "ktk-limited-format-v1.json": "f13d8d5b52756692ba33d0140be39ac7affcc8ca3e899c404a626009a38c04ae"
+  },
+  "catalogs": [
+    {
+      "code": "KTK",
+      "cards": 293,
+      "contentSha256": "1d3991ff0440b1e55e1f63b8069fce8ff185ca08ee3276197b5df67ed3235713"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1086.8350560000001,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 254,
+    "printings": 293
+  }
+}

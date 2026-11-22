@@ -39,7 +39,7 @@
 import { describe, expect, it } from 'vitest';
 import type { AbilityInput } from '@mtg/dsl';
 import type { Action, GameState, ObjectId, ReduceResult, StackEntry } from '@mtg/kernel';
-import { eventsOfType, legalActions, pendingDecision, reduce, scenario } from '@mtg/kernel';
+import { abilityObjectId, eventsOfType, legalActions, pendingDecision, reduce, scenario } from '@mtg/kernel';
 import { creature, instant, ISLAND, MOUNTAIN, PLAINS } from './cards';
 import { apply, handOidOf, oidOf, playCombat } from './helpers';
 
@@ -429,12 +429,16 @@ describe('the id an ability object is minted with', () => {
       type: 'passPriority',
       player: 1,
     });
-    const firstOid = abilitiesOnStack(first.state)[0]?.oid ?? '';
+    const firstAbility = abilitiesOnStack(first.state)[0];
+    const firstOid = firstAbility?.oid ?? '';
+    const firstSource = firstAbility?.ability?.sourceOid ?? '';
     expect(firstOid).not.toBe('');
-    // The counter moved by exactly the one id this ability took. Leaving it
-    // where it was costs nothing until the next mint, and then hands out an id
-    // that is already in play.
-    expect(first.state.nextId).toBe(start.nextId + 1);
+    // The permanent's battlefield incarnation and the ability object each take
+    // one id. Leaving either allocation behind costs nothing until the next
+    // mint, and then hands out an id that is already in play.
+    expect(first.state.objects[firstSource]?.battlefieldTimestamp).toBe(start.nextId);
+    expect(firstOid).toBe(abilityObjectId(start.nextId + 1));
+    expect(first.state.nextId).toBe(start.nextId + 2);
 
     const settled = apply(apply(first, { type: 'passPriority', player: 0 }), {
       type: 'passPriority',
@@ -446,10 +450,14 @@ describe('the id an ability object is minted with', () => {
       apply(castFromHand(settled.state, 0, 'Tide Herald'), { type: 'passPriority', player: 0 }),
       { type: 'passPriority', player: 1 },
     );
-    const secondOid = abilitiesOnStack(second.state)[0]?.oid ?? '';
+    const secondAbility = abilitiesOnStack(second.state)[0];
+    const secondOid = secondAbility?.oid ?? '';
+    const secondSource = secondAbility?.ability?.sourceOid ?? '';
     expect(secondOid).not.toBe('');
     expect(secondOid).not.toBe(firstOid);
-    expect(second.state.nextId).toBe(settled.state.nextId + 1);
+    expect(second.state.objects[secondSource]?.battlefieldTimestamp).toBe(settled.state.nextId);
+    expect(secondOid).toBe(abilityObjectId(settled.state.nextId + 1));
+    expect(second.state.nextId).toBe(settled.state.nextId + 2);
   });
 });
 

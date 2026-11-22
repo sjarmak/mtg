@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "formatId": "ths",
+  "archetypes": [
+    {
+      "id": "white-black-lifegain",
+      "name": "White-Black Lifegain",
+      "colors": ["W", "B"],
+      "signpost": {
+        "name": "Scholar of Athreos",
+        "physicalId": "ths-printed-v1:0028:95a36e06-39f3-47d0-b6a9-43728afceb4a"
+      },
+      "plan": "Build around Scholar of Athreos: Trade resources and gain life incrementally, then convert that life buffer into repeated drain and inevitability."
+    },
+    {
+      "id": "green-white-heroic",
+      "name": "Green-White Heroic",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Setessan Griffin",
+        "physicalId": "ths-printed-v1:0030:35d2ae77-b16c-4a01-84ce-5c78be5a54d8"
+      },
+      "plan": "Build around Setessan Griffin: Target heroic creatures with efficient tricks, spread counters across the team, and win creature combat through growth."
+    },
+    {
+      "id": "white-blue-heroic",
+      "name": "White-Blue Heroic",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Coastline Chimera",
+        "physicalId": "ths-printed-v1:0044:01320a31-25fa-4324-8225-d150c6aa58a1"
+      },
+      "plan": "Build around Coastline Chimera: Target heroic creatures with Auras and tricks, protect the invested threat, and use evasion to close quickly."
+    },
+    {
+      "id": "blue-red-spells",
+      "name": "Blue-Red Spells",
+      "colors": ["U", "R"],
+      "signpost": {
+        "name": "Crackling Triton",
+        "physicalId": "ths-printed-v1:0045:8d6bb19c-3610-4609-b23c-21d4d80e4582"
+      },
+      "plan": "Build around Crackling Triton: Cast cheap instants and sorceries to trigger spell payoffs while bounce and burn keep attackers connecting."
+    },
+    {
+      "id": "black-green-graveyard",
+      "name": "Black-Green Graveyard",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Loathsome Catoblepas",
+        "physicalId": "ths-printed-v1:0095:4a8cff2f-ba52-4d22-83e8-13c56368f1df"
+      },
+      "plan": "Build around Loathsome Catoblepas: Trade creatures and mill selectively so graveyard payoffs turn spent cards into a late-game advantage."
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Returned Phalanx",
+        "physicalId": "ths-printed-v1:0104:93613e23-b363-4bcb-8f63-8f1d25f7f174"
+      },
+      "plan": "Build around Returned Phalanx: Trade one-for-one early, defend with high-toughness creatures, and win after card advantage exhausts the opponent."
+    },
+    {
+      "id": "black-red-minotaurs",
+      "name": "Black-Red Minotaurs",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Deathbellow Raider",
+        "physicalId": "ths-printed-v1:0117:b29fc64e-297e-4e10-8f4e-289dc1c3ebfd"
+      },
+      "plan": "Build around Deathbellow Raider: Curve Minotaurs into Rageblood Shaman and Kragma Warcaller, then use trample, haste, and attack bonuses to overwhelm blockers."
+    },
+    {
+      "id": "red-white-heroic",
+      "name": "Red-White Heroic",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Priest of Iroas",
+        "physicalId": "ths-printed-v1:0134:013ec9f5-8bf3-4067-a942-d535d011af82"
+      },
+      "plan": "Build around Priest of Iroas: Target heroic attackers with tricks, remove key blockers, and turn one protected creature into a fast clock."
+    },
+    {
+      "id": "green-blue-monstrosity",
+      "name": "Green-Blue Monstrosity",
+      "colors": ["U", "G"],
+      "signpost": {
+        "name": "Agent of Horizons",
+        "physicalId": "ths-printed-v1:0148:cc08576f-1d48-4db4-9bb9-e039f75c98b8"
+      },
+      "plan": "Build around Agent of Horizons: Ramp and defend until large creatures can become monstrous, then use their upgraded bodies to overwhelm combat."
+    },
+    {
+      "id": "red-green-monsters",
+      "name": "Red-Green Monsters",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Satyr Hedonist",
+        "physicalId": "ths-printed-v1:0174:88c67e15-833c-406a-b75f-8de97fbacf5a"
+      },
+      "plan": "Build around Satyr Hedonist: Curve mana acceleration into oversized threats, then grant trample or remove blockers to convert size into lethal damage."
+    }
+  ]
+}

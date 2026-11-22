@@ -70,12 +70,29 @@ const BASIC_LAND: CardFilter = { cardTypes: ['land'], supertypes: ['basic'] };
 
 describe('a search destination that arrives tapped', () => {
   it('is a member of the destination enum, so an untappable destination cannot claim it', () => {
-    expect([...SEARCH_DESTINATIONS]).toEqual(['hand', 'battlefield', 'battlefieldTapped']);
+    expect([...SEARCH_DESTINATIONS]).toEqual([
+      'hand',
+      'battlefield',
+      'battlefieldTapped',
+      'exile',
+      'libraryTop',
+    ]);
     expect(
       CardEffectSchema.safeParse({
         kind: 'searchLibrary',
         filter: BASIC_LAND,
         destination: 'handTapped',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('keeps post-shuffle library placement out of a split destination plan', () => {
+    expect(
+      CardEffectSchema.safeParse({
+        kind: 'searchLibrary',
+        filter: BASIC_LAND,
+        count: 2,
+        destination: { kind: 'oneAndRest', one: 'libraryTop', rest: 'hand' },
       }).success,
     ).toBe(false);
   });
@@ -131,9 +148,9 @@ describe('a search that names a count', () => {
   });
 
   /**
-   * "Up to", because CR 701.19b lets any search find fewer cards than it names
-   * and the kernel offers the take-nothing answer at every question. Both lines
-   * below are their printed cards word for word.
+   * "Up to", because a counted search is represented by optional successive
+   * finds and the kernel offers the take-nothing answer at every question. Both
+   * lines below are their printed cards word for word.
    */
   it('prints the constant and the computed count as Magic prints them', () => {
     const path = sorcery("Ranger's Path", [

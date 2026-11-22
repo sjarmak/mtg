@@ -26,6 +26,7 @@ import type { AbilityInput, Card, CardInput, Effect } from '@mtg/dsl';
 import { basicLand, parseCard } from '@mtg/dsl';
 import type { Action, AgentView, DeckList, GameState, ObjectId, PlayerAgent, PlayerId } from '@mtg/kernel';
 import { pendingDecision, reduce, scenario, validateAction } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import {
   DEFAULT_GREEDY_CONFIG,
   agentSeed,
@@ -34,6 +35,7 @@ import {
   gameSeed,
   greedySpec,
   playSimGame,
+  scoreEffectTargets,
   FIXTURE_DECK_RW,
 } from '@mtg/sim';
 import { creature, instant, FOREST } from './cards';
@@ -77,16 +79,69 @@ function dier(name: string, effect: Effect, optional = false): Card {
 const PUMPER = dier('Rooted Sprout', PUMP_TARGET);
 const BURNER = dier('Ember Sprout', BURN_TARGET);
 const MAY_PUMPER = dier('Choosy Sprout', PUMP_TARGET, true);
-
 const KILL: readonly Effect[] = [{ kind: 'destroyPermanent', target: { kind: 'targetCreature' } }];
 const VERDICT = instant('Mortal Verdict', KILL, { generic: 1 }, []);
+
+/** A body whose optional enters trigger recovers one targeted graveyard card. */
+function recoverer(name: string, effect: Effect): Card {
+  collectorNumber += 1;
+  return parseCard({
+    kind: 'creature',
+    id: `tst-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+    name,
+    rarity: 'uncommon',
+    set: { code: 'TST', collectorNumber },
+    manaCost: { G: 1 },
+    colors: ['G'],
+    power: 2,
+    toughness: 2,
+    abilities: [
+      {
+        kind: 'triggered',
+        condition: 'selfEnters',
+        optional: true,
+        effects: [effect],
+      },
+    ],
+  } satisfies CardInput);
+}
+
+const MEMORY_RECOVERER = recoverer('Recall Post', {
+  kind: 'returnToHand',
+  target: {
+    kind: 'targetCardInYourGraveyard',
+    filter: { cardTypes: ['instant', 'sorcery'] },
+  },
+});
+const CREATURE_RECOVERER = recoverer('Grave Lifter', {
+  kind: 'returnToHand',
+  target: { kind: 'targetCardInYourGraveyard', filter: { cardTypes: ['creature'] } },
+});
+const PERMANENT_RECOVERER = recoverer('Titan Lifter', {
+  kind: 'returnFromGraveyard',
+  target: {
+    kind: 'targetCardInYourGraveyard',
+    filter: { cardTypes: ['artifact'], maxManaValue: 3 },
+  },
+});
+const BURIED_MEMORY = VERDICT;
+const BURIED_CREATURE = creature('Buried Rival', 2, 2);
+const BURIED_RELIC = parseCard({
+  kind: 'artifact',
+  id: 'tst-buried-relic',
+  name: 'Buried Relic',
+  rarity: 'common',
+  set: { code: 'TST', collectorNumber: 706 },
+  manaCost: { generic: 2 },
+  colors: [],
+} satisfies CardInput);
 
 /**
  * A creature whose enters trigger fights, which is the only shape a fight is
  * legal in (`checkSourceBodyEffectInTrigger`) and the only aim in this file
  * whose score reads the trigger's *source* rather than only its target.
  */
-function fighter(name: string, power: number, toughness: number): Card {
+function fighter(name: string, power: number, toughness: number, optional = false): Card {
   collectorNumber += 1;
   return parseCard({
     kind: 'creature',
@@ -102,6 +157,7 @@ function fighter(name: string, power: number, toughness: number): Card {
       {
         kind: 'triggered',
         condition: 'selfEnters',
+        ...(optional ? { optional: true } : {}),
         effects: [{ kind: 'fight', target: { kind: 'targetCreatureYouDontControl' } }],
       },
     ],
@@ -168,7 +224,10 @@ function twoBodies(dying: Card): { state: GameState } {
 function ask(state: GameState, player: PlayerId = 0): Action {
   const decision = pendingDecision(state, 512);
   if (decision === null) throw new Error('no decision pending');
-  const action = decideGreedy({ state, player, decision }, config);
+  const action = decideGreedy(
+    { state: observeState(state, player, 'test/bot-trigger-targets.test.ts:224'), player, decision },
+    config,
+  );
   expect(validateAction(state, action)).toBeNull();
   return action;
 }
@@ -264,6 +323,66 @@ describe('where the greedy bot aims a fight, which is scored off the body it fig
   });
 });
 
+describe('a fight whose own body is gone before the trigger resolves', () => {
+  const MAY_FIGHTER = fighter('Patient Charger', 3, 3, true);
+
+  function fighterKilledInResponse(): GameState {
+    const board = scenario({
+      seed: 'sim/trigger/fight-source-gone',
+      battlefield: [
+        { card: creature('Weakling', 2, 2), controller: 1 },
+        { card: FOREST, controller: 0 },
+        { card: FOREST, controller: 1 },
+      ],
+      hands: [[MAY_FIGHTER], [VERDICT]],
+    });
+    const inHand = board.state.players[0].hand[0];
+    const verdict = board.state.players[1].hand[0];
+    if (inHand === undefined || verdict === undefined) throw new Error('a hand is missing its card');
+    const targetStop = passUntilStop(
+      step(board.state, { type: 'castSpell', player: 0, oid: inHand, targets: [] }),
+    );
+    const aimed = step(targetStop, ask(targetStop));
+    const held = step(aimed, { type: 'passPriority', player: 0 });
+    const answered = step(held, {
+      type: 'castSpell',
+      player: 1,
+      oid: verdict,
+      targets: [{ kind: 'permanent', oid: oidOf(held, 'Patient Charger') }],
+    });
+    return passUntilStop(answered);
+  }
+
+  it('scores a fight zero when its source is not an object this seat can see', () => {
+    const board = scenario({
+      seed: 'sim/trigger/fight-source-unseen',
+      battlefield: [{ card: creature('Weakling', 2, 2), controller: 1 }],
+      hands: [[], []],
+    });
+    const score = (): number =>
+      scoreEffectTargets(
+        board.state,
+        0,
+        [{ kind: 'fight', target: { kind: 'targetCreatureYouDontControl' } }],
+        [{ kind: 'permanent', oid: oidOf(board.state, 'Weakling') }],
+        config.cast,
+        config.target,
+        config.race,
+        0,
+        'o-never-made',
+      );
+    expect(score).not.toThrow();
+    expect(score()).toBe(0);
+  });
+
+  it('declines, because a fight with one body deals no damage', () => {
+    const action = ask(fighterKilledInResponse());
+    expect(action.type).toBe('answerOptionalTrigger');
+    if (action.type !== 'answerOptionalTrigger') return;
+    expect(action.accept).toBe(false);
+  });
+});
+
 describe('whether the greedy bot takes an optional trigger', () => {
   it('takes it when the counter can go on its own creature', () => {
     const { state } = untilTriggerStop(twoBodies(MAY_PUMPER), 'Choosy Sprout');
@@ -302,6 +421,29 @@ describe('whether the greedy bot takes an optional trigger', () => {
     expect(action.type).toBe('answerOptionalTrigger');
     if (action.type !== 'answerOptionalTrigger') return;
     expect(action.accept).toBe(false);
+  });
+
+  it.each([
+    ['an instant with a memory-recovery trigger', MEMORY_RECOVERER, BURIED_MEMORY],
+    ['a creature with a creature-recovery trigger', CREATURE_RECOVERER, BURIED_CREATURE],
+    ['a noncreature permanent with a small-permanent-recovery trigger', PERMANENT_RECOVERER, BURIED_RELIC],
+  ] as const)('takes a free targeted return of %s', (_label, host, buried) => {
+    const board = scenario({
+      seed: `sim/trigger/recover/${host.id}`,
+      battlefield: [{ card: FOREST, controller: 0 }],
+      hands: [[host], []],
+      graveyards: [[buried], []],
+    });
+    const inHand = board.state.players[0].hand[0];
+    if (inHand === undefined) throw new Error('no recoverer in hand');
+    const targetStop = passUntilStop(
+      step(board.state, { type: 'castSpell', player: 0, oid: inHand, targets: [] }),
+    );
+    const optionalStop = passUntilStop(step(targetStop, ask(targetStop)));
+    const action = ask(optionalStop);
+    expect(action.type).toBe('answerOptionalTrigger');
+    if (action.type !== 'answerOptionalTrigger') return;
+    expect(action.accept).toBe(true);
   });
 });
 

@@ -11,9 +11,9 @@ import { join } from 'node:path';
 import type { Card } from '@mtg/dsl';
 import { validateCard, validateSetUniqueness } from '@mtg/dsl';
 import type { LlmProvider } from '@mtg/llm';
-import { createBudgetGuard, resolveProvider } from '@mtg/llm';
+import { createBudgetGuard, readRunManifest, resolveProvider } from '@mtg/llm';
 import type { GenerationReport, SetBrief } from '@mtg/setgen';
-import { formatReport, generateSet, parseBrief, writeSetOutput } from '@mtg/setgen';
+import { formatReport, generateSet, generationSemanticsFor, parseBrief, writeSetOutput } from '@mtg/setgen';
 import { failStage } from '../errors';
 import type { SliceOptions } from '../options';
 
@@ -60,7 +60,16 @@ export async function runSetgenStage(options: SliceOptions): Promise<SetgenStage
   const brief = readBrief(options.briefPath);
   const provider = buildProvider(options);
 
-  const result = await generateSet({ provider, brief, critique: options.critique });
+  const semanticsVersion =
+    options.provider === 'fixture' && options.fixtureManifestPath !== null
+      ? generationSemanticsFor(readRunManifest(options.fixtureManifestPath))
+      : undefined;
+  const result = await generateSet({
+    provider,
+    brief,
+    critique: options.critique,
+    ...(semanticsVersion === undefined ? {} : { semanticsVersion }),
+  });
   const { cards, report } = result;
 
   if (cards.length !== brief.targetSize) {

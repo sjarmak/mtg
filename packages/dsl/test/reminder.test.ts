@@ -144,6 +144,14 @@ describe('an ability line that is not a flat keyword', () => {
     expect(abilityLineReminder('Whenever this creature attacks, draw a card.')).toBeNull();
   });
 
+  it('derives lifelink reminder presentation for an activated self-grant line', () => {
+    const line = '{2}{B}: This creature gains lifelink until end of turn.';
+    expect(abilityLineReminder(line)).toEqual({
+      keyword: line,
+      gloss: '(Damage dealt by this creature also causes you to gain that much life.)',
+    });
+  });
+
   /**
    * mtg-josx: Defender, Hexproof and Indestructible are the three fixed-line
    * `KeywordAbility` kinds that printed with no reminder at all before this
@@ -153,7 +161,7 @@ describe('an ability line that is not a flat keyword', () => {
    * `../src/reminder.ts` explains why the older wording, which also stated the
    * 0-toughness case, is not the one a card printed today gets.
    */
-  it('reminds Defender, Hexproof and Indestructible the way it reminds Exalted', () => {
+  it('reminds Defender, Hexproof, Indestructible and Shroud the way it reminds Exalted', () => {
     expect(abilityLineReminder('Defender')).toEqual({
       keyword: 'Defender',
       gloss: "(This creature can't attack.)",
@@ -166,17 +174,21 @@ describe('an ability line that is not a flat keyword', () => {
       keyword: 'Indestructible',
       gloss: '(Damage and effects that say "destroy" don\'t destroy this creature.)',
     });
+    expect(abilityLineReminder('Shroud')).toEqual({
+      keyword: 'Shroud',
+      gloss: "(This creature can't be the target of spells or abilities.)",
+    });
   });
 
   /**
-   * `mtg-rji`: the same two lines, on the noncreature permanents that may now
+   * `mtg-rji`, `mtg-nhyv.90`: the same three lines, on the noncreature permanents that may now
    * carry them. The gloss names the card's own type (CR 205.1a), and the
    * creature wording above is the `('creature')` case of the same substitution
    * rather than a second literal — that is what the last assertion pins, so a
    * reworded artifact gloss cannot silently leave the measured creature gloss
    * behind.
    */
-  it("names the card's own type in the two reminders a permanent can carry", () => {
+  it("names the card's own type in the three reminders a permanent can carry", () => {
     expect(abilityLineReminder('Indestructible', 'artifact')).toEqual({
       keyword: 'Indestructible',
       gloss: '(Damage and effects that say "destroy" don\'t destroy this artifact.)',
@@ -186,7 +198,10 @@ describe('an ability line that is not a flat keyword', () => {
     );
     expect(abilityLineReminder('Hexproof', 'land')?.gloss).toContain('This land');
     expect(abilityLineReminder('Indestructible', 'planeswalker')?.gloss).toContain('this planeswalker');
-    for (const line of ['Hexproof', 'Indestructible'] as const) {
+    expect(abilityLineReminder('Shroud', 'artifact')?.gloss).toBe(
+      "(This artifact can't be the target of spells or abilities.)",
+    );
+    for (const line of ['Hexproof', 'Indestructible', 'Shroud'] as const) {
       expect(abilityLineReminder(line, 'creature')).toEqual(abilityLineReminder(line));
       expect(abilityLineReminder(line)?.gloss).toBe(`(${ABILITY_LINE_REMINDER_TEXT[line] ?? ''})`);
     }
@@ -275,6 +290,31 @@ describe('an ability line that is not a flat keyword', () => {
       expect(reminder.endsWith('.'), `${line} reminder ends in a full stop`).toBe(true);
       expect(reminder.includes('('), `${line} reminder carries its own parentheses`).toBe(false);
     }
+  });
+});
+
+describe('Populate reminder text', () => {
+  const copyReminder = "(Create a token that's a copy of a creature token you control.)";
+
+  it('derives the two source wordings from the printed line', () => {
+    expect(
+      abilityLineReminder('Populate. Creatures you control gain indestructible until end of turn.'),
+    ).toEqual({
+      keyword: 'Populate. Creatures you control gain indestructible until end of turn.',
+      gloss: `(To populate, create a token that's a copy of a creature token you control.)`,
+    });
+    for (const line of [
+      'Create a 1/1 white Bird creature token with flying, then populate.',
+      'Exile target creature, then populate.',
+      '{2}{G}{W}: Populate.',
+      'At the beginning of your upkeep, populate.',
+    ]) {
+      expect(abilityLineReminder(line)).toEqual({ keyword: line, gloss: copyReminder });
+    }
+  });
+
+  it('does not treat prose that merely contains the letters as the mechanic', () => {
+    expect(abilityLineReminder('The village is populated by Birds.')).toBeNull();
   });
 });
 

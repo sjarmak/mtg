@@ -1,7 +1,6 @@
 /**
- * `anotherControlledPermanentEnters` and `anotherControlledCreatureEnters`:
- * CR 603.6e's "another permanent" trigger, printed, and its
- * creature-filtered sibling.
+ * Controlled-permanent entry conditions: the broad creature form plus the
+ * two source-excluding "another" forms.
  *
  * The kernel's half is `packages/kernel/test/another-permanent-enters.test.ts`;
  * this file is what the card says. Both are hand-authored only, for the same
@@ -50,14 +49,19 @@ function creatureInput(condition: TriggerCondition): Record<string, unknown> {
 
 describe.each([
   {
+    condition: 'controlledCreatureEnters' as const,
+    printed: 'Whenever a creature you control enters,',
+    oracle: 'Whenever a creature you control enters, you gain 1 life.',
+  },
+  {
     condition: 'anotherControlledPermanentEnters' as const,
     printed: 'Whenever another permanent you control enters the battlefield,',
     oracle: 'Whenever another permanent you control enters the battlefield, you gain 1 life.',
   },
   {
     condition: 'anotherControlledCreatureEnters' as const,
-    printed: 'Whenever another creature you control enters the battlefield,',
-    oracle: 'Whenever another creature you control enters the battlefield, you gain 1 life.',
+    printed: 'Whenever another creature you control enters,',
+    oracle: 'Whenever another creature you control enters, you gain 1 life.',
   },
 ])('$condition', ({ condition, printed, oracle }) => {
   it('is a condition the engine knows and the generator may not choose', () => {
@@ -83,7 +87,7 @@ describe.each([
   });
 });
 
-describe('the two conditions', () => {
+describe('the source-excluding conditions', () => {
   it('print different sentences from each other', () => {
     expect(TRIGGER_PRINT_TEMPLATES.anotherControlledPermanentEnters).not.toBe(
       TRIGGER_PRINT_TEMPLATES.anotherControlledCreatureEnters,

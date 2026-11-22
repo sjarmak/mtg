@@ -90,15 +90,26 @@ export function setCodesIn(pool: readonly Card[]): readonly string[] {
  * a color and a word means both.
  */
 export function filterPool(entries: readonly PoolEntry[], filter: PoolFilter): readonly PoolEntry[] {
+  return entries.filter((entry) => admits(entry, filter));
+}
+
+/**
+ * Whether one entry passes, which is what a caller holding something other than
+ * a list of entries asks.
+ *
+ * The sealed pool is a list of *indexes* into a pool with duplicates in it
+ * (`../play/sealed.ts`), so filtering it through `filterPool` would hand back
+ * cards that can no longer be told apart from their other copies. The predicate
+ * is the shared half; the collection each screen filters is its own.
+ */
+export function admits(entry: PoolEntry, filter: PoolFilter): boolean {
   const needle = filter.text.trim().toLowerCase();
-  return entries.filter((entry) => {
-    if (needle !== '' && !entry.haystack.includes(needle)) return false;
-    if (filter.colors.length > 0 && !filter.colors.some((facet) => entry.facets.includes(facet))) {
-      return false;
-    }
-    if (filter.sets.length > 0 && !filter.sets.includes(entry.card.set.code)) return false;
-    return true;
-  });
+  if (needle !== '' && !entry.haystack.includes(needle)) return false;
+  if (filter.colors.length > 0 && !filter.colors.some((facet) => entry.facets.includes(facet))) {
+    return false;
+  }
+  if (filter.sets.length > 0 && !filter.sets.includes(entry.card.set.code)) return false;
+  return true;
 }
 
 function toggled<T>(values: readonly T[], value: T): readonly T[] {

@@ -53,8 +53,20 @@ export interface BrowserCard {
 }
 
 export interface ZoneBrowserProps {
-  /** The zone's name, spoken and printed: "Your graveyard". */
+  /** The zone's name, spoken: "Wield the Obliterator's graveyard". */
   readonly label: string;
+  /**
+   * What the strip prints, when that is shorter than what it is called.
+   *
+   * `mtg-dcxg.10`. A pile is named off its owner and drawn in that seat's own
+   * column, which is 46px wide on a phone and not much more beside a mat: the
+   * 2026-08-23 sweep photographed "WIELD THE OBLITERATOR'S GRAVEYAR", clipped,
+   * on a 1440px desk. The pod directly above the pile is what says whose seat it
+   * is (`./Board.ts`), so the printed word is the zone and the spoken name keeps
+   * the owner and the count — a reader who cannot see the pod above it loses
+   * nothing.
+   */
+  readonly drawnLabel?: string;
   /**
    * Every card in the zone, in the order the browser draws them, first at the
    * top. The caller owns that order and owes it a written contract; see
@@ -120,7 +132,10 @@ export function ZoneBrowser(props: ZoneBrowserProps): ReactElement {
   const count = props.cards.length;
   const newest = props.cards[0];
 
-  const label = createElement('span', { className: 'mtg-zone__label' }, props.label);
+  const label = createElement('span', { className: 'mtg-zone__label' }, props.drawnLabel ?? props.label);
+  // The empty head below draws no count: the sentence in it is the count, and
+  // the sweep photographed the pair as "THE SKY ISLANDS' GRAVEYARD 0 graveyard
+  // is empty" in a 46px column (`mtg-dcxg.10`).
   const total = createElement('span', { className: 'mtg-zone__count' }, String(count));
 
   // An empty zone has nothing to open, so it draws no control at all rather
@@ -132,7 +147,6 @@ export function ZoneBrowser(props: ZoneBrowserProps): ReactElement {
           'div',
           { className: 'mtg-browser__head' },
           label,
-          total,
           createElement('span', { className: 'mtg-zone__empty' }, props.emptyText),
         )
       : createElement(

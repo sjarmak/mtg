@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "desert-cycle-payment-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0172:7d42aa0c-0408-4b0d-bec5-9861dbcf9ee1"],
+      "decisionFamilies": ["desert-native-two-green-source-cycling-payment-and-single-draw"],
+      "assertions": [
+        "Forge AI cycles 'Desert of the Indomitable' using two prior untapped green sources and draws once"
+      ],
+      "testFile": "packages/forge-export/test/observed-hou-desert-cycle-payment.integration.test.ts"
+    }
+  ]
+}

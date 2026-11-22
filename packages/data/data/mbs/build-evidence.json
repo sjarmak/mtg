@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "mbs",
+  "formatSha256": "bc4efe372feee7509b56ff7bde6afb38ef55b6102b98014e07c957aeeeab2ed8",
+  "sourceSha256": "be3ad46332067cd2eb505cd8632b2d8dc227b3a39c05119537e2a02f35ed2ed6",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "be3ad46332067cd2eb505cd8632b2d8dc227b3a39c05119537e2a02f35ed2ed6",
+    "recipe.json": "11ac2351b856c6ff0611aba0d6f1dc8224d8066eba6522a482acfa39cd6a8ba9",
+    "mbs-printed-catalog-v1.json": "986378eedbf153f40b4b918c90b8c1e1a5140a736881cbb5a61b0f45ff1dfc5d",
+    "mbs-limited-format-v1.json": "2388dd58d682d941d40815ef00b8c1e09500b668c245357656e3ae1ee3c576cd"
+  },
+  "catalogs": [
+    {
+      "code": "MBS",
+      "cards": 155,
+      "contentSha256": "d2c50838a04a14b260842f4dc2eac02a6bb1e70199278cf06ccd69d57a3131c0"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 2446.873723,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 150,
+    "printings": 155
+  }
+}

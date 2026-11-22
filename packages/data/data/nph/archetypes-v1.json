@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "nph",
+  "archetypes": [
+    {
+      "id": "red-white-artifacts",
+      "name": "Red-White Artifacts",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Porcelain Legionnaire",
+        "physicalId": "nph-printed-v1:0019:2616aa0e-8413-4e63-877c-bffd5263f552"
+      },
+      "plan": "Build around Porcelain Legionnaire: Deploy artifacts and equipment early, reward their presence with efficient threats, and attack before value decks stabilize."
+    },
+    {
+      "id": "blue-black-infect",
+      "name": "Blue-Black Infect",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Blighted Agent",
+        "physicalId": "nph-printed-v1:0029:cddaebde-a060-4510-8c97-68432d931987"
+      },
+      "plan": "Build around Blighted Agent: Protect evasive infect creatures with counters and removal, then proliferate to finish the poison race."
+    },
+    {
+      "id": "green-blue-proliferate",
+      "name": "Green-Blue Proliferate",
+      "colors": ["U", "G"],
+      "signpost": {
+        "name": "Viral Drake",
+        "physicalId": "nph-printed-v1:0049:d89b312b-cc90-4f08-ae2e-043a79e51156"
+      },
+      "plan": "Build around Viral Drake: Establish useful counters on creatures or artifacts, then proliferate while evasive threats maintain pressure."
+    },
+    {
+      "id": "black-red-infect-control",
+      "name": "Black-Red Infect Control",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Fallen Ferromancer",
+        "physicalId": "nph-printed-v1:0082:7b200986-f553-4156-8f5e-37678db09687"
+      },
+      "plan": "Build around Fallen Ferromancer: Use removal to clear lanes for infect threats and proliferate or equipment to shorten the poison clock."
+    },
+    {
+      "id": "green-white-golems",
+      "name": "Green-White Golems",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Vital Splicer",
+        "physicalId": "nph-printed-v1:0126:273b982d-bca2-4418-8618-c711d28fc901"
+      },
+      "plan": "Build around Vital Splicer: Produce artifact creatures and Golems, then use shared bonuses to turn the assembled board into a decisive attack."
+    }
+  ]
+}

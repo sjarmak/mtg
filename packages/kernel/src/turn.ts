@@ -9,14 +9,18 @@
 import { assertNever } from '@mtg/dsl';
 import type { PlayerId } from './ids';
 import { opponentOf } from './ids';
-import { hasAuraModification } from './attach';
+import { expireDetentionsBeforeTurn } from './detention';
+import { expireDamageRetaliationsBeforeTurn } from './damage-retaliation';
+import { expireAttackDebuffsBeforeTurn } from './attack-debuff';
+import { hasAuraModification, hasAuraOtherPlayerUntap } from './attach';
 import { combatNeedsFirstStrikeStep, dealCombatDamage, eligibleAttackers, eligibleBlockers } from './combat';
 import { controllerOf } from './layers';
 import { emptyManaPools } from './mana';
+import { cleanupDiscardCount } from './player-rules';
 import type { AwaitKind, GameState, Step, TurnState } from './state';
 import { EMPTY_COMBAT } from './state';
 import type { Trace } from './trace';
-import { emit, playerOf, withState } from './trace';
+import { emit, updatePlayer, withState } from './trace';
 import { drawCard, getObject } from './zones';
 
 export function withTurn(state: GameState, patch: Partial<TurnState>): GameState {
@@ -32,6 +36,16 @@ export function givePriority(trace: Trace, player: PlayerId): Trace {
 function awaitDecision(trace: Trace, kind: AwaitKind, player: PlayerId): Trace {
   const state = withTurn(trace.state, { priority: null, awaiting: kind, awaitingPlayer: player });
   return withState(trace, state);
+}
+
+/** Grants post-damage priority now, or records where a CR 615.7 stop resumes. */
+function priorityAfterDamage(trace: Trace, player: PlayerId): Trace {
+  const pending = trace.state.pendingDamagePrevention;
+  if (pending === undefined) return givePriority(trace, player);
+  return withState(trace, {
+    ...trace.state,
+    pendingDamagePrevention: { ...pending, resumePriority: player },
+  });
 }
 
 /** The step that follows `step`, or `'endTurn'` when the turn is over. */
@@ -74,7 +88,24 @@ function untapStep(trace: Trace): Trace {
   let current = trace;
   for (const oid of [...current.state.battlefield]) {
     const object = getObject(current.state, oid);
-    if (controllerOf(current.state, oid) !== active) continue;
+    const controller = controllerOf(current.state, oid);
+    if (controller !== active) {
+      // Urban Burgeoning grants a turn-based-action permission rather than a
+      // trigger: the enchanted land untaps during every *other* player's
+      // untap step. This branch does not consume a next-controller-untap debt
+      // or consult a controller-step prohibition, because neither names this
+      // player's step. The attachment query keeps departure and control
+      // changes live.
+      if (!object.tapped || !hasAuraOtherPlayerUntap(current.state, oid)) {
+        continue;
+      }
+      current = withState(current, {
+        ...current.state,
+        objects: { ...current.state.objects, [oid]: { ...object, tapped: false } },
+      });
+      current = emit(current, { type: 'permanentUntapped', oid });
+      continue;
+    }
     // CR 302.6 read off the attachment relation rather than off the permanent:
     // an Aura printing `doesNotUntap` holds its host down for as long as it
     // stays attached, and it is spent by nothing. Checked before the one-shot
@@ -124,6 +155,7 @@ function drawStep(trace: Trace): Trace {
 /** Removes damage and end-of-turn continuous effects; CR 514.2. */
 export function cleanupTurnEffects(trace: Trace): Trace {
   const state = trace.state;
+  const { delayedSpellCopies: _expiredSpellCopies, ...withoutDelayedSpellCopies } = state;
   const expiring = state.continuous.filter((effect) => effect.duration === 'endOfTurn');
   const objects = Object.fromEntries(
     Object.entries(state.objects).map(([oid, object]) => [
@@ -132,7 +164,7 @@ export function cleanupTurnEffects(trace: Trace): Trace {
     ]),
   );
   const cleaned: GameState = {
-    ...state,
+    ...withoutDelayedSpellCopies,
     objects,
     continuous: state.continuous.filter((effect) => effect.duration !== 'endOfTurn'),
     replacements: state.replacements.filter((effect) => effect.duration !== 'endOfTurn'),
@@ -140,6 +172,16 @@ export function cleanupTurnEffects(trace: Trace): Trace {
     // exists precisely because CR 508/509 rules with a duration have nowhere
     // else to live — so cleanup empties it rather than filtering it.
     turnCombatRules: [],
+    // The player-rule array has the same construction: every member lasts
+    // through this turn and no longer, so no duration field can disagree.
+    turnPlayerRules: [],
+    turn: {
+      ...state.turn,
+      damageSourcesThisTurn: [],
+      playersWhoCastSpellThisTurn: [],
+      playersWhoAttackedWithCreatureThisTurn: [],
+      battlefieldToGraveyardThisTurn: [],
+    },
   };
   let current = emit(withState(trace, cleaned), { type: 'damageCleared', turn: state.turn.number });
   if (expiring.length > 0) {
@@ -155,13 +197,30 @@ export function cleanupTurnEffects(trace: Trace): Trace {
 export function finishCleanup(trace: Trace): Trace {
   const cleaned = cleanupTurnEffects(trace);
   const ended = emit(cleaned, { type: 'stepEnded', turn: cleaned.state.turn.number, step: 'cleanup' });
-  return beginTurn(ended, opponentOf(cleaned.state.turn.active));
+  return beginQueuedOrOrdinaryTurn(ended);
+}
+
+/** Consume inserted turns, then resume the ordinary successor they displaced. */
+function beginQueuedOrOrdinaryTurn(trace: Trace): Trace {
+  const sequence = trace.state.extraTurnSequence;
+  if (sequence === undefined) return beginTurn(trace, opponentOf(trace.state.turn.active));
+  const [extra, ...remaining] = sequence.queue;
+  if (extra !== undefined) {
+    return beginTurn(
+      withState(trace, {
+        ...trace.state,
+        extraTurnSequence: { ...sequence, queue: remaining },
+      }),
+      extra,
+    );
+  }
+  const { extraTurnSequence: _consumed, ...state } = trace.state;
+  return beginTurn(withState(trace, state), sequence.resume);
 }
 
 function cleanupStep(trace: Trace): Trace {
   const active = trace.state.turn.active;
-  const hand = playerOf(trace.state, active).hand;
-  if (hand.length > trace.state.config.maximumHandSize) {
+  if (cleanupDiscardCount(trace.state, active) > 0) {
     return awaitDecision(trace, 'discard', active);
   }
   return finishCleanup(trace);
@@ -201,14 +260,14 @@ export function enterStep(trace: Trace, step: Step): Trace {
     case 'declareBlockers': {
       const defender = opponentOf(active);
       if (eligibleBlockers(current.state).length === 0) return givePriority(current, active);
-      return awaitDecision(current, 'blockers', defender);
+      return awaitDecision(current, 'blockers', current.state.combat.blockDeclarationAuthority ?? defender);
     }
     case 'firstStrikeDamage':
       current = dealCombatDamage(current, true);
-      return givePriority(current, active);
+      return priorityAfterDamage(current, active);
     case 'combatDamage':
       current = dealCombatDamage(current, false);
-      return givePriority(current, active);
+      return priorityAfterDamage(current, active);
     case 'cleanup':
       return cleanupStep(current);
     case 'upkeep':
@@ -231,7 +290,7 @@ export function advanceStep(trace: Trace): Trace {
   if (next === 'endTurn') {
     // Only reachable if cleanup granted priority, which it never does; kept so
     // the transition table stays total.
-    return beginTurn(ended, opponentOf(ended.state.turn.active));
+    return beginQueuedOrOrdinaryTurn(ended);
   }
   const leavingCombat = step === 'endCombat';
   const cleared = leavingCombat ? withState(ended, { ...ended.state, combat: EMPTY_COMBAT }) : ended;
@@ -252,8 +311,16 @@ export function beginTurn(trace: Trace, active: PlayerId): Trace {
       turn: state.turn.number,
     });
   }
+  const expired = expireAttackDebuffsBeforeTurn(
+    expireDamageRetaliationsBeforeTurn(expireDetentionsBeforeTurn(trace.state, active), active),
+    active,
+  );
+  const withHistory = updatePlayer(expired, active, (seat) => ({
+    ...seat,
+    turnsBegun: seat.turnsBegun + 1,
+  }));
   const state: GameState = {
-    ...trace.state,
+    ...withHistory,
     combat: EMPTY_COMBAT,
     turn: {
       number,
@@ -262,7 +329,12 @@ export function beginTurn(trace: Trace, active: PlayerId): Trace {
       priority: null,
       passes: 0,
       landsPlayed: 0,
-      damagedPlayers: [],
+      lifeLostThisTurn: [0, 0],
+      playersDealtDamageThisTurn: [],
+      damageSourcesThisTurn: [],
+      playersWhoCastSpellThisTurn: [],
+      playersWhoAttackedWithCreatureThisTurn: [],
+      battlefieldToGraveyardThisTurn: [],
       awaiting: null,
       awaitingPlayer: null,
     },

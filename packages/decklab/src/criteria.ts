@@ -64,11 +64,73 @@ export const BudgetSchema = z
 
 export type Budget = z.infer<typeof BudgetSchema>;
 
+const OpponentPopulationMemberSchema = z
+  .object({
+    /** Stable deck or archetype identity used by later gameplay comparisons. */
+    id: z.string().min(1),
+    /** Expected fraction of games against this member. */
+    share: z.number().positive().max(1),
+    /** What the opposing deck is trying to do, supplied to the model as context. */
+    strategy: z.string().min(1),
+  })
+  .strict();
+
+export const OpponentPopulationSchema = z
+  .object({
+    id: z.string().min(1),
+    members: z.array(OpponentPopulationMemberSchema).min(1),
+  })
+  .strict()
+  .superRefine((population, context) => {
+    const ids = new Set<string>();
+    for (const [index, member] of population.members.entries()) {
+      if (ids.has(member.id)) {
+        context.addIssue({
+          code: 'custom',
+          path: ['members', index, 'id'],
+          message: `duplicate opponent id ${member.id}`,
+        });
+      }
+      ids.add(member.id);
+    }
+    const total = population.members.reduce((sum, member) => sum + member.share, 0);
+    if (Math.abs(total - 1) > 1e-9) {
+      context.addIssue({
+        code: 'custom',
+        path: ['members'],
+        message: `opponent shares must sum to 1; received ${String(total)}`,
+      });
+    }
+  });
+
+export type OpponentPopulation = z.infer<typeof OpponentPopulationSchema>;
+
 export const DeckCriteriaSchema = z
   .object({
     /** The human's own words. Carried verbatim to the model, never parsed by code. */
     prompt: z.string().min(1),
-    format: z.enum(DECK_FORMATS),
+    /**
+     * The format the deck must be legal in, when the pool is the card store.
+     *
+     * Optional because a deck can also be built over a staged set's own cards,
+     * and a generated set has no format legality at all: nothing in it is legal
+     * or illegal in Modern, so a stated format would be a criterion the pool
+     * cannot enforce and a line in the report nothing checked. Exactly one of
+     * `format` and `sets` is stated, and `pool.ts` is what refuses the other
+     * three combinations — refused rather than ignored, because a false
+     * statement to the model is worse than a missing one.
+     */
+    format: z.enum(DECK_FORMATS).optional(),
+    /**
+     * The staged sets the pool was drawn from, by set code, when the deck is
+     * built over cards this kernel can actually run.
+     *
+     * Present exactly when `format` is absent. It is a structural criterion an
+     * inclusion may cite for the same reason `format` is one: it is a fact about
+     * where a card came from, and a card outside it does not exist for this
+     * build.
+     */
+    sets: z.array(z.string().min(1)).optional(),
     /** Deck's color identity. Empty means the model may choose. */
     colors: z.array(ColorSchema).max(5).default([]),
     /** Total cards including lands. */
@@ -100,6 +162,12 @@ export const DeckCriteriaSchema = z
      * the project's ZFC rule forbids.
      */
     powerBand: z.string().optional(),
+    /**
+     * The field this deck is intended to face. This is strategic context for
+     * construction, not evidence that the resulting deck beats that field;
+     * outcome evidence records the frozen gauntlet separately.
+     */
+    opponentPopulation: OpponentPopulationSchema.optional(),
   })
   .strict();
 
@@ -148,6 +216,10 @@ export class ResolvedCriteria implements DeckCriteria {
     return this.#stated.format;
   }
 
+  get sets(): DeckCriteria['sets'] {
+    return this.#stated.sets;
+  }
+
   get colors(): DeckCriteria['colors'] {
     return this.#stated.colors;
   }
@@ -185,6 +257,10 @@ export class ResolvedCriteria implements DeckCriteria {
     return this.#stated.powerBand;
   }
 
+  get opponentPopulation(): DeckCriteria['opponentPopulation'] {
+    return this.#stated.opponentPopulation;
+  }
+
   /** What a JSON round trip sees: the record, never the holder. */
   toJSON(): DeckCriteria {
     return { ...this.#stated, landCount: this.#landCount };
@@ -209,7 +285,20 @@ export interface Criterion {
  * the build, but they are not things an inclusion may cite as its reason.
  */
 export function enumerateCriteria(criteria: DeckCriteria): readonly Criterion[] {
-  const out: Criterion[] = [{ id: 'format', kind: 'structural', statement: `legal in ${criteria.format}` }];
+  const out: Criterion[] = [];
+
+  // One of the two always fires: `pool.ts` refuses criteria that state neither,
+  // so the list is never left without the criterion that says what may enter it.
+  if (criteria.format !== undefined) {
+    out.push({ id: 'format', kind: 'structural', statement: `legal in ${criteria.format}` });
+  }
+  if (criteria.sets !== undefined && criteria.sets.length > 0) {
+    out.push({
+      id: 'sets',
+      kind: 'structural',
+      statement: `printed in ${criteria.sets.join(', ')}`,
+    });
+  }
 
   if (criteria.colors.length > 0) {
     out.push({
@@ -249,6 +338,18 @@ export function enumerateCriteria(criteria: DeckCriteria): readonly Criterion[] 
       id: 'powerBand',
       kind: 'semantic',
       statement: `fits the ${criteria.powerBand} power band`,
+    });
+  }
+  if (criteria.opponentPopulation !== undefined) {
+    const members = criteria.opponentPopulation.members
+      .map(
+        (member) => `${member.id} (${String(Number((member.share * 100).toFixed(2)))}% — ${member.strategy})`,
+      )
+      .join('; ');
+    out.push({
+      id: 'opponents',
+      kind: 'semantic',
+      statement: `targets ${criteria.opponentPopulation.id}: ${members}`,
     });
   }
   return out;

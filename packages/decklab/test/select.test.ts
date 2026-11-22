@@ -66,7 +66,11 @@ const FIELDS: readonly FakeCard[] = Array.from({ length: 3 }, (_unused, index) =
 
 const POOL: readonly FakeCard[] = [...fillerSpells(20), ...FIELDS];
 
-function criteriaFor(size: number, landCount: number): ResolvedCriteria {
+function criteriaFor(
+  size: number,
+  landCount: number,
+  overrides: Record<string, unknown> = {},
+): ResolvedCriteria {
   const parsed = DeckCriteriaSchema.parse({
     prompt: 'aggressive red deck',
     format: 'modern',
@@ -74,6 +78,7 @@ function criteriaFor(size: number, landCount: number): ResolvedCriteria {
     archetype: 'aggro',
     size,
     landCount,
+    ...overrides,
   });
   return resolveCriteria(parsed, { count: landCount, source: 'stated', reason: 'as the player stated' });
 }
@@ -97,13 +102,64 @@ async function select(
   const provider = scriptedProvider(answers, { costUsd });
   const result = await selectCards(
     provider,
-    universe,
+    { kind: 'store', universe, knownNames: loadKnownNames(store) },
     criteria,
     { knownNames: loadKnownNames(store) },
     options,
   );
   return { provider, result };
 }
+
+describe('the prompt states every limit the answer is checked against', () => {
+  it('states the declared opponent population as strategic construction context', async () => {
+    const { provider } = await select(
+      [proposing(['Ember Bolt 1'], 1)],
+      criteriaFor(40, 20, {
+        opponentPopulation: {
+          id: 'held-out-field',
+          members: [
+            { id: 'tokens', share: 0.75, strategy: 'make a wide battlefield' },
+            { id: 'control', share: 0.25, strategy: 'trade resources and win late' },
+          ],
+        },
+      }),
+    );
+
+    expect(provider.prompts[0]).toContain(
+      'opponents — targets held-out-field: tokens (75% — make a wide battlefield); control (25% — trade resources and win late)',
+    );
+  });
+
+  it('states the copy limit, which the verifier enforces on every proposal', async () => {
+    // `mtg-yp33.6`, found on the playtester's Vessari-v1: `maxCopies` was enforced by
+    // `verifyProposals` and appeared in no line of the prompt and in no stated
+    // criterion, so a model asked for a 60-card singleton deck proposed the
+    // ordinary four-of spread and lost 57 of 60 cards to a rule nobody told it.
+    const { provider } = await select(
+      [proposing(['Ember Bolt 1'], 1)],
+      criteriaFor(40, 20, { maxCopies: 1 }),
+    );
+
+    expect(provider.prompts[0]).toContain('At most 1 copy of any one card');
+  });
+
+  it('says four when four is the limit, and says it in the plural', async () => {
+    const { provider } = await select([proposing(['Ember Bolt 1'], 1)], criteriaFor(40, 20));
+
+    expect(provider.prompts[0]).toContain('At most 4 copies of any one card');
+  });
+
+  it('tells the model to skip a card too weak for constructed play, every round', async () => {
+    const { provider } = await select(
+      [proposing(['Ember Bolt 1'], 1), proposing(['Ember Bolt 2'], 1)],
+      criteriaFor(40, 20),
+    );
+
+    for (const system of provider.systems) {
+      expect(system).toContain('too weak to earn a slot in a real constructed deck');
+    }
+  });
+});
 
 describe('the repair loop cannot stop short while it is making progress', () => {
   it('runs past the guaranteed rounds while every round adds spells', async () => {
@@ -342,7 +398,7 @@ describe('the repair loop cannot stop short while it is making progress', () => 
 
     const result = await selectCards(
       provider,
-      universe,
+      { kind: 'store', universe, knownNames: loadKnownNames(store) },
       criteria,
       { knownNames: loadKnownNames(store) },
       { maxSpendUsd: 2.5 },
@@ -374,5 +430,55 @@ describe('the repair loop cannot stop short while it is making progress', () => 
     expect(result.rounds).toBe(stated);
     expect(result.shortBy).toBe(36 - stated);
     expect(result.stop).toEqual({ kind: 'budget', limit: stated });
+  });
+});
+
+describe('a finished selection says what it spent', () => {
+  // `mtg-yp33.7`. The spend was measured on every round and thrown away with the
+  // run: `stop` named it only when the dollars were what ended the loop, so a
+  // build that finished comfortably recorded nothing at all. On a surface whose
+  // whole safety story is a stated ceiling, the one number nobody could read
+  // afterwards was dollars.
+  it('records the dollars a finished loop spent against the ceiling it ran under', async () => {
+    const criteria = criteriaFor(60, 24);
+    const { result } = await select(
+      [proposing(['Ember Bolt 1', 'Ember Bolt 2', 'Ember Bolt 3'], 4)],
+      criteria,
+      { maxSpendUsd: 9 },
+      1.25,
+    );
+
+    expect(result.spend.maxSpendUsd).toBe(9);
+    expect(result.spend.spentUsd).toBeCloseTo(result.rounds * 1.25, 10);
+  });
+
+  it('names the ceiling the loop actually ran under when the caller stated none', async () => {
+    // The default is derived from the deck's size, so a variation that recorded
+    // the stated ceiling and nothing else would record `undefined` for every
+    // build that took the default — which is every build the CLI makes.
+    const criteria = criteriaFor(60, 24);
+    const { result } = await select([proposing(['Ember Bolt 1'], 4)], criteria);
+
+    expect(result.spend.maxSpendUsd).toBe(defaultMaxSpendUsd(36));
+  });
+
+  it('measures its spend from where the build found the guard, not from zero', async () => {
+    // Same reason the `spend` stop does: the guard counts the whole process, so
+    // a second build in it must not report the first one's bill as its own.
+    const criteria = criteriaFor(60, 24);
+    store = createFakeStore(POOL);
+    const universe = selectUniverse(store, criteria);
+    const provider = scriptedProvider([proposing(['Ember Bolt 1'], 4)], { costUsd: 1 });
+    provider.budget.record({ costUsd: 40, usage: ZERO_USAGE });
+
+    const result = await selectCards(
+      provider,
+      { kind: 'store', universe, knownNames: loadKnownNames(store) },
+      criteria,
+      { knownNames: loadKnownNames(store) },
+      { maxSpendUsd: 9 },
+    );
+
+    expect(result.spend.spentUsd).toBe(result.rounds);
   });
 });

@@ -24,6 +24,7 @@ import {
   simpleAgent,
   stateFingerprint,
 } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import type { Card } from '@mtg/dsl';
 import { exampleCard } from '@mtg/dsl';
 import { lands, MOUNTAIN } from './cards';
@@ -67,7 +68,11 @@ function pending(session: GameSession): GameSession['pending'] & object {
 function asBotWould(agent: PlayerAgent): (session: GameSession) => Action {
   return (session: GameSession): Action => {
     const decision = pending(session);
-    return agent.decide({ state: session.state, player: decision.player, decision });
+    return agent.decide({
+      state: observeState(session.state, decision.player, 'test/choose-action.test.ts:70'),
+      player: decision.player,
+      decision,
+    });
   };
 }
 
@@ -151,32 +156,13 @@ describe('a refused action', () => {
     expect(() => chooseAction(botOnly, { type: 'passPriority', player: 0 })).toThrow(/after the game ended/);
   });
 
-  /**
-   * The one legal action the kernel never enumerates, kept as a test because it
-   * is a real hole rather than a hypothetical one.
-   *
-   * `validateAction` returns `null` for a concession from any decision at any
-   * time, and `priorityDecision` leaves it out of the options deliberately, so
-   * an agent sampling uniformly cannot resign by accident. Both are right on
-   * their own terms and together they mean a concession has no index, and a
-   * move with no index has no recording. So this door refuses it and says which
-   * fault it is: the enumeration ran to completion and this was not in it.
-   *
-   * A concede button on the play surface therefore needs the enumeration to
-   * offer one, not a weakening here.
-   */
-  it('refuses a concession, because it is legal everywhere and enumerated nowhere', () => {
+  it('accepts a concession through the indexed recording path', () => {
     const session = createSession(SETUP, seats());
-    let thrown: unknown = null;
-    try {
-      chooseAction(session, { type: 'concede', player: 0 });
-    } catch (cause: unknown) {
-      thrown = cause;
-    }
-    expect(thrown).toBeInstanceOf(Error);
-    expect((thrown as Error).name).toBe('ActionNotEnumeratedError');
-    expect((thrown as Error).message).toMatch(/legal but the "mulligan" enumeration does not contain it/);
-    expect((thrown as { complete?: boolean }).complete).toBe(true);
+    const index = session.pending?.options.findIndex((option) => option.type === 'concede');
+    if (index === undefined || index < 0) throw new Error('the concession was not enumerated');
+    const finished = chooseAction(session, { type: 'concede', player: 0 });
+    expect(finished.choices).toEqual([index]);
+    expect(finished.result).toMatchObject({ loser: 0, reason: 'concede' });
   });
 });
 

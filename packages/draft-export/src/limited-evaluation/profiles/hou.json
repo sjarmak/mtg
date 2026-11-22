@@ -1,0 +1,1474 @@
+{
+  "Act of Heroism": {
+    "quality": 2.2,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": [
+      {
+        "tag": "exert",
+        "weight": 0.7,
+        "target": 5
+      }
+    ]
+  },
+  "Adorned Pouncer": {
+    "quality": 4.0,
+    "roles": [],
+    "tags": ["embalm", "zombie"],
+    "payoffs": []
+  },
+  "Angel of Condemnation": {
+    "quality": 4.5,
+    "roles": ["interaction"],
+    "tags": ["exert"],
+    "payoffs": []
+  },
+  "Angel of the God-Pharaoh": {
+    "quality": 2.5,
+    "roles": [],
+    "tags": ["cycling"],
+    "payoffs": []
+  },
+  "Aven of Enduring Hope": {
+    "quality": 2.8,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Crested Sunmare": {
+    "quality": 4.5,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Dauntless Aven": {
+    "quality": 2.8,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "exert",
+        "weight": 0.7,
+        "target": 5
+      }
+    ]
+  },
+  "Desert's Hold": {
+    "quality": 3.6,
+    "roles": ["interaction"],
+    "tags": ["noncreature"],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.2,
+        "target": 3
+      }
+    ]
+  },
+  "Disposal Mummy": {
+    "quality": 2.0,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": []
+  },
+  "Djeru, With Eyes Open": {
+    "quality": 2.8,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Djeru's Renunciation": {
+    "quality": 1.8,
+    "roles": [],
+    "tags": ["cycling", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Dutiful Servants": {
+    "quality": 1.3,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": []
+  },
+  "Gideon's Defeat": {
+    "quality": 1.2,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "God-Pharaoh's Faithful": {
+    "quality": 0.6,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Hour of Revelation": {
+    "quality": 3.7,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Mummy Paramount": {
+    "quality": 2.2,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": [
+      {
+        "tag": "zombie",
+        "weight": 0.7,
+        "target": 6
+      }
+    ]
+  },
+  "Oketra's Avenger": {
+    "quality": 2.6,
+    "roles": [],
+    "tags": ["exert"],
+    "payoffs": []
+  },
+  "Oketra's Last Mercy": {
+    "quality": 0.5,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Overwhelming Splendor": {
+    "quality": 3.1,
+    "roles": ["interaction"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Sandblast": {
+    "quality": 3.0,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Saving Grace": {
+    "quality": 1.4,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Solemnity": {
+    "quality": 0.3,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Solitary Camel": {
+    "quality": 2.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.6,
+        "target": 3
+      }
+    ]
+  },
+  "Steadfast Sentinel": {
+    "quality": 2.2,
+    "roles": [],
+    "tags": ["embalm", "zombie"],
+    "payoffs": []
+  },
+  "Steward of Solidarity": {
+    "quality": 3.0,
+    "roles": [],
+    "tags": ["exert"],
+    "payoffs": []
+  },
+  "Sunscourge Champion": {
+    "quality": 3.5,
+    "roles": [],
+    "tags": ["embalm", "zombie"],
+    "payoffs": []
+  },
+  "Unconventional Tactics": {
+    "quality": 2.2,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": [
+      {
+        "tag": "zombie",
+        "weight": 0.7,
+        "target": 6
+      }
+    ]
+  },
+  "Vizier of the True": {
+    "quality": 3.1,
+    "roles": ["interaction"],
+    "tags": ["exert"],
+    "payoffs": [
+      {
+        "tag": "exert",
+        "weight": 0.7,
+        "target": 5
+      }
+    ]
+  },
+  "Aerial Guide": {
+    "quality": 3.2,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Aven Reedstalker": {
+    "quality": 2.3,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Champion of Wits": {
+    "quality": 3.6,
+    "roles": [],
+    "tags": ["embalm", "zombie"],
+    "payoffs": []
+  },
+  "Countervailing Winds": {
+    "quality": 2.1,
+    "roles": ["interaction"],
+    "tags": ["cycling", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Cunning Survivor": {
+    "quality": 1.8,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "cycling",
+        "weight": 0.7,
+        "target": 5
+      }
+    ]
+  },
+  "Eternal of Harsh Truths": {
+    "quality": 2.6,
+    "roles": ["draw"],
+    "tags": ["zombie"],
+    "payoffs": []
+  },
+  "Fraying Sanity": {
+    "quality": 0.4,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Hour of Eternity": {
+    "quality": 2.7,
+    "roles": [],
+    "tags": ["zombie", "spell", "noncreature"],
+    "payoffs": [],
+    "planningCost": "{4}{U}{U}{U}"
+  },
+  "Imaginary Threats": {
+    "quality": 1.5,
+    "roles": [],
+    "tags": ["cycling", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Jace's Defeat": {
+    "quality": 1.0,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Kefnet's Last Word": {
+    "quality": 3.8,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Nimble Obstructionist": {
+    "quality": 3.7,
+    "roles": ["interaction"],
+    "tags": ["cycling"],
+    "payoffs": []
+  },
+  "Ominous Sphinx": {
+    "quality": 3.2,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "cycling",
+        "weight": 0.7,
+        "target": 5
+      }
+    ]
+  },
+  "Proven Combatant": {
+    "quality": 1.0,
+    "roles": [],
+    "tags": ["embalm", "zombie"],
+    "payoffs": []
+  },
+  "Riddleform": {
+    "quality": 2.1,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": [
+      {
+        "tag": "noncreature",
+        "weight": 0.7,
+        "target": 8
+      }
+    ]
+  },
+  "Seer of the Last Tomorrow": {
+    "quality": 1.2,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Sinuous Striker": {
+    "quality": 2.6,
+    "roles": [],
+    "tags": ["embalm", "zombie"],
+    "payoffs": []
+  },
+  "Spellweaver Eternal": {
+    "quality": 2.8,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": [
+      {
+        "tag": "noncreature",
+        "weight": 0.7,
+        "target": 8
+      }
+    ]
+  },
+  "Strategic Planning": {
+    "quality": 1.8,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Striped Riverwinder": {
+    "quality": 2.6,
+    "roles": [],
+    "tags": ["cycling"],
+    "payoffs": []
+  },
+  "Supreme Will": {
+    "quality": 3.2,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Swarm Intelligence": {
+    "quality": 0.6,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": [
+      {
+        "tag": "spell",
+        "weight": 0.7,
+        "target": 7
+      }
+    ]
+  },
+  "Tragic Lesson": {
+    "quality": 2.2,
+    "roles": ["draw"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Unesh, Criosphinx Sovereign": {
+    "quality": 4.6,
+    "roles": ["draw"],
+    "tags": [],
+    "payoffs": []
+  },
+  "Unquenchable Thirst": {
+    "quality": 2.9,
+    "roles": ["interaction"],
+    "tags": ["noncreature"],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.6,
+        "target": 3
+      }
+    ]
+  },
+  "Unsummon": {
+    "quality": 2.5,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Vizier of the Anointed": {
+    "quality": 2.6,
+    "roles": ["draw"],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "embalm",
+        "weight": 1,
+        "target": 5
+      }
+    ]
+  },
+  "Accursed Horde": {
+    "quality": 2.4,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": [
+      {
+        "tag": "zombie",
+        "weight": 0.7,
+        "target": 6
+      }
+    ]
+  },
+  "Ammit Eternal": {
+    "quality": 3.6,
+    "roles": [],
+    "tags": ["counter", "zombie"],
+    "payoffs": []
+  },
+  "Apocalypse Demon": {
+    "quality": 1.5,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Banewhip Punisher": {
+    "quality": 3.9,
+    "roles": ["interaction"],
+    "tags": ["counter"],
+    "payoffs": [
+      {
+        "tag": "counter",
+        "weight": 0.6,
+        "target": 5
+      }
+    ]
+  },
+  "Bontu's Last Reckoning": {
+    "quality": 3.0,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Carrion Screecher": {
+    "quality": 2.6,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": []
+  },
+  "Doomfall": {
+    "quality": 3.0,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Dreamstealer": {
+    "quality": 3.3,
+    "roles": ["interaction"],
+    "tags": ["embalm", "zombie"],
+    "payoffs": []
+  },
+  "Grisly Survivor": {
+    "quality": 1.7,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "cycling",
+        "weight": 0.7,
+        "target": 5
+      }
+    ]
+  },
+  "Hour of Glory": {
+    "quality": 4.0,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Khenra Eternal": {
+    "quality": 2.3,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": []
+  },
+  "Lethal Sting": {
+    "quality": 3.2,
+    "roles": ["interaction"],
+    "tags": ["counter", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Liliana's Defeat": {
+    "quality": 1.3,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Lurching Rotbeast": {
+    "quality": 2.2,
+    "roles": [],
+    "tags": ["cycling", "zombie"],
+    "payoffs": []
+  },
+  "Marauding Boneslasher": {
+    "quality": 2.1,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": [
+      {
+        "tag": "zombie",
+        "weight": 0.7,
+        "target": 6
+      }
+    ]
+  },
+  "Merciless Eternal": {
+    "quality": 2.8,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": []
+  },
+  "Moaning Wall": {
+    "quality": 1.3,
+    "roles": [],
+    "tags": ["cycling", "zombie"],
+    "payoffs": []
+  },
+  "Razaketh, the Foulblooded": {
+    "quality": 3.7,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Razaketh's Rite": {
+    "quality": 1.6,
+    "roles": [],
+    "tags": ["cycling", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Ruin Rat": {
+    "quality": 2.2,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Scrounger of Souls": {
+    "quality": 2.4,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Torment of Hailfire": {
+    "quality": 2.7,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": [],
+    "planningCost": "{4}{B}{B}"
+  },
+  "Torment of Scarabs": {
+    "quality": 1.3,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Torment of Venom": {
+    "quality": 3.4,
+    "roles": ["interaction"],
+    "tags": ["counter", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Vile Manifestation": {
+    "quality": 1.5,
+    "roles": [],
+    "tags": ["cycling"],
+    "payoffs": [
+      {
+        "tag": "cycling",
+        "weight": 1.4,
+        "target": 7
+      }
+    ]
+  },
+  "Without Weakness": {
+    "quality": 1.8,
+    "roles": [],
+    "tags": ["cycling", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Wretched Camel": {
+    "quality": 1.7,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.6,
+        "target": 3
+      }
+    ]
+  },
+  "Abrade": {
+    "quality": 3.8,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Blur of Blades": {
+    "quality": 1.8,
+    "roles": ["interaction"],
+    "tags": ["counter", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Burning-Fist Minotaur": {
+    "quality": 3.2,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Chandra's Defeat": {
+    "quality": 1.3,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Chaos Maw": {
+    "quality": 3.3,
+    "roles": ["interaction"],
+    "tags": [],
+    "payoffs": []
+  },
+  "Crash Through": {
+    "quality": 1.2,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Defiant Khenra": {
+    "quality": 1.9,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Earthshaker Khenra": {
+    "quality": 3.9,
+    "roles": [],
+    "tags": ["embalm", "zombie"],
+    "payoffs": []
+  },
+  "Fervent Paincaster": {
+    "quality": 3.1,
+    "roles": ["interaction"],
+    "tags": ["exert"],
+    "payoffs": []
+  },
+  "Firebrand Archer": {
+    "quality": 2.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "noncreature",
+        "weight": 0.7,
+        "target": 8
+      }
+    ]
+  },
+  "Frontline Devastator": {
+    "quality": 2.3,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": []
+  },
+  "Gilded Cerodon": {
+    "quality": 2.5,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.6,
+        "target": 3
+      }
+    ]
+  },
+  "Granitic Titan": {
+    "quality": 2.2,
+    "roles": [],
+    "tags": ["cycling"],
+    "payoffs": []
+  },
+  "Hazoret's Undying Fury": {
+    "quality": 0.8,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Hour of Devastation": {
+    "quality": 4.1,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Imminent Doom": {
+    "quality": 0.3,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Inferno Jet": {
+    "quality": 1.6,
+    "roles": [],
+    "tags": ["cycling", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Khenra Scrapper": {
+    "quality": 2.9,
+    "roles": [],
+    "tags": ["exert"],
+    "payoffs": []
+  },
+  "Kindled Fury": {
+    "quality": 1.6,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Magmaroth": {
+    "quality": 1.8,
+    "roles": [],
+    "tags": ["counter"],
+    "payoffs": [
+      {
+        "tag": "noncreature",
+        "weight": 0.7,
+        "target": 8
+      }
+    ]
+  },
+  "Manticore Eternal": {
+    "quality": 3.0,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": []
+  },
+  "Neheb, the Eternal": {
+    "quality": 3.9,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Open Fire": {
+    "quality": 3.2,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Puncturing Blow": {
+    "quality": 3.3,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Sand Strangler": {
+    "quality": 2.8,
+    "roles": ["interaction"],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 1.4,
+        "target": 3
+      }
+    ]
+  },
+  "Thorned Moloch": {
+    "quality": 2.1,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "noncreature",
+        "weight": 0.7,
+        "target": 8
+      }
+    ]
+  },
+  "Wildfire Eternal": {
+    "quality": 2.7,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": [
+      {
+        "tag": "spell",
+        "weight": 0.7,
+        "target": 7
+      }
+    ]
+  },
+  "Ambuscade": {
+    "quality": 3.8,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Beneath the Sands": {
+    "quality": 2.3,
+    "roles": ["fixing"],
+    "tags": ["cycling", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Bitterbow Sharpshooters": {
+    "quality": 3.1,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Devotee of Strength": {
+    "quality": 3.2,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Dune Diviner": {
+    "quality": 1.6,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.2,
+        "target": 3
+      }
+    ]
+  },
+  "Feral Prowler": {
+    "quality": 1.9,
+    "roles": ["draw"],
+    "tags": [],
+    "payoffs": []
+  },
+  "Frilled Sandwalla": {
+    "quality": 2.2,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Gift of Strength": {
+    "quality": 2.0,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Harrier Naga": {
+    "quality": 2.3,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Hope Tender": {
+    "quality": 2.3,
+    "roles": [],
+    "tags": ["exert"],
+    "payoffs": []
+  },
+  "Hour of Promise": {
+    "quality": 2.7,
+    "roles": ["fixing"],
+    "tags": ["zombie", "spell", "noncreature"],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 1.4,
+        "target": 3
+      }
+    ]
+  },
+  "Life Goes On": {
+    "quality": 0.4,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Majestic Myriarch": {
+    "quality": 4.3,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Nissa's Defeat": {
+    "quality": 0.5,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Oasis Ritualist": {
+    "quality": 3.2,
+    "roles": ["fixing"],
+    "tags": ["exert"],
+    "payoffs": []
+  },
+  "Overcome": {
+    "quality": 3.5,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Pride Sovereign": {
+    "quality": 4.0,
+    "roles": [],
+    "tags": ["exert"],
+    "payoffs": [],
+    "planningCost": "{2}{G}{W}"
+  },
+  "Quarry Beetle": {
+    "quality": 2.5,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.2,
+        "target": 3
+      }
+    ]
+  },
+  "Rampaging Hippo": {
+    "quality": 2.7,
+    "roles": [],
+    "tags": ["cycling"],
+    "payoffs": []
+  },
+  "Ramunap Excavator": {
+    "quality": 2.7,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.6,
+        "target": 3
+      }
+    ]
+  },
+  "Ramunap Hydra": {
+    "quality": 3.2,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.6,
+        "target": 3
+      }
+    ]
+  },
+  "Resilient Khenra": {
+    "quality": 3.7,
+    "roles": [],
+    "tags": ["embalm", "zombie"],
+    "payoffs": []
+  },
+  "Rhonas's Last Stand": {
+    "quality": 2.5,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Rhonas's Stalwart": {
+    "quality": 2.7,
+    "roles": [],
+    "tags": ["exert"],
+    "payoffs": []
+  },
+  "Sidewinder Naga": {
+    "quality": 2.3,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.6,
+        "target": 3
+      }
+    ]
+  },
+  "Sifter Wurm": {
+    "quality": 3.4,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Tenacious Hunter": {
+    "quality": 3.1,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "counter",
+        "weight": 0.6,
+        "target": 5
+      }
+    ]
+  },
+  "Uncage the Menagerie": {
+    "quality": 1.7,
+    "roles": ["draw"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": [],
+    "planningCost": "{3}{G}{G}"
+  },
+  "Bloodwater Entity": {
+    "quality": 2.6,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "spell",
+        "weight": 0.7,
+        "target": 7
+      },
+      {
+        "tag": "noncreature",
+        "weight": 0.7,
+        "target": 8
+      }
+    ]
+  },
+  "The Locust God": {
+    "quality": 5.0,
+    "roles": ["draw"],
+    "tags": [],
+    "payoffs": []
+  },
+  "Nicol Bolas, God-Pharaoh": {
+    "quality": 4.8,
+    "roles": ["interaction", "draw"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Obelisk Spider": {
+    "quality": 2.8,
+    "roles": [],
+    "tags": ["counter"],
+    "payoffs": [
+      {
+        "tag": "counter",
+        "weight": 0.6,
+        "target": 5
+      }
+    ]
+  },
+  "Resolute Survivors": {
+    "quality": 3.2,
+    "roles": [],
+    "tags": ["exert"],
+    "payoffs": [
+      {
+        "tag": "exert",
+        "weight": 0.7,
+        "target": 5
+      }
+    ]
+  },
+  "River Hoopoe": {
+    "quality": 3.4,
+    "roles": ["draw"],
+    "tags": [],
+    "payoffs": []
+  },
+  "Samut, the Tested": {
+    "quality": 3.6,
+    "roles": ["interaction"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "The Scarab God": {
+    "quality": 5.0,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": [
+      {
+        "tag": "zombie",
+        "weight": 0.7,
+        "target": 6
+      }
+    ]
+  },
+  "The Scorpion God": {
+    "quality": 5.0,
+    "roles": ["interaction", "draw"],
+    "tags": ["counter"],
+    "payoffs": [
+      {
+        "tag": "counter",
+        "weight": 0.6,
+        "target": 5
+      }
+    ]
+  },
+  "Unraveling Mummy": {
+    "quality": 2.9,
+    "roles": [],
+    "tags": ["zombie"],
+    "payoffs": [
+      {
+        "tag": "zombie",
+        "weight": 0.7,
+        "target": 6
+      }
+    ]
+  },
+  "Farm // Market": {
+    "quality": 3.2,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Consign // Oblivion": {
+    "quality": 2.6,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Claim // Fame": {
+    "quality": 1.6,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Struggle // Survive": {
+    "quality": 3.4,
+    "roles": ["interaction"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Appeal // Authority": {
+    "quality": 2.4,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Leave // Chance": {
+    "quality": 0.8,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Reason // Believe": {
+    "quality": 1.3,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Grind // Dust": {
+    "quality": 2.8,
+    "roles": ["interaction"],
+    "tags": ["counter", "spell", "noncreature"],
+    "payoffs": []
+  },
+  "Refuse // Cooperate": {
+    "quality": 0.7,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Driven // Despair": {
+    "quality": 2.5,
+    "roles": ["draw"],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Abandoned Sarcophagus": {
+    "quality": 0.8,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": [
+      {
+        "tag": "cycling",
+        "weight": 1.4,
+        "target": 7
+      }
+    ]
+  },
+  "Crook of Condemnation": {
+    "quality": 0.6,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Dagger of the Worthy": {
+    "quality": 1.4,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "God-Pharaoh's Gift": {
+    "quality": 4.3,
+    "roles": [],
+    "tags": ["zombie", "noncreature"],
+    "payoffs": []
+  },
+  "Graven Abomination": {
+    "quality": 1.5,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Hollow One": {
+    "quality": 2.4,
+    "roles": [],
+    "tags": ["cycling"],
+    "payoffs": [
+      {
+        "tag": "cycling",
+        "weight": 0.7,
+        "target": 5
+      }
+    ]
+  },
+  "Manalith": {
+    "quality": 1.9,
+    "roles": ["fixing"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Mirage Mirror": {
+    "quality": 3.5,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Sunset Pyramid": {
+    "quality": 2.6,
+    "roles": ["draw"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Traveler's Amulet": {
+    "quality": 1.8,
+    "roles": ["fixing"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Wall of Forgotten Pharaohs": {
+    "quality": 1.9,
+    "roles": [],
+    "tags": [],
+    "payoffs": [
+      {
+        "tag": "desert",
+        "weight": 0.6,
+        "target": 3
+      }
+    ]
+  },
+  "Crypt of the Eternals": {
+    "quality": 1.2,
+    "roles": ["fixing"],
+    "tags": [],
+    "payoffs": [],
+    "landSources": []
+  },
+  "Desert of the Fervent": {
+    "quality": 2.5,
+    "roles": [],
+    "tags": ["cycling", "desert"],
+    "payoffs": [],
+    "landValue": 0.08
+  },
+  "Desert of the Glorified": {
+    "quality": 2.5,
+    "roles": [],
+    "tags": ["cycling", "desert"],
+    "payoffs": [],
+    "landValue": 0.08
+  },
+  "Desert of the Indomitable": {
+    "quality": 2.5,
+    "roles": [],
+    "tags": ["cycling", "desert"],
+    "payoffs": [],
+    "landValue": 0.08
+  },
+  "Desert of the Mindful": {
+    "quality": 2.5,
+    "roles": [],
+    "tags": ["cycling", "desert"],
+    "payoffs": [],
+    "landValue": 0.08
+  },
+  "Desert of the True": {
+    "quality": 2.5,
+    "roles": [],
+    "tags": ["cycling", "desert"],
+    "payoffs": [],
+    "landValue": 0.08
+  },
+  "Dunes of the Dead": {
+    "quality": 1.4,
+    "roles": [],
+    "tags": ["zombie", "desert"],
+    "payoffs": [],
+    "landValue": 0.03
+  },
+  "Endless Sands": {
+    "quality": 1.3,
+    "roles": [],
+    "tags": ["desert"],
+    "payoffs": [],
+    "landValue": 0.04
+  },
+  "Hashep Oasis": {
+    "quality": 2.8,
+    "roles": [],
+    "tags": ["desert"],
+    "payoffs": [],
+    "landValue": 0.15
+  },
+  "Hostile Desert": {
+    "quality": 1.5,
+    "roles": [],
+    "tags": ["desert"],
+    "payoffs": [],
+    "landValue": 0.08
+  },
+  "Ifnir Deadlands": {
+    "quality": 3.2,
+    "roles": ["interaction"],
+    "tags": ["counter", "desert"],
+    "payoffs": [],
+    "landValue": 0.25
+  },
+  "Ipnu Rivulet": {
+    "quality": 2.2,
+    "roles": [],
+    "tags": ["desert"],
+    "payoffs": [],
+    "landValue": 0.03
+  },
+  "Ramunap Ruins": {
+    "quality": 2.6,
+    "roles": [],
+    "tags": ["desert"],
+    "payoffs": [],
+    "landValue": 0.1
+  },
+  "Scavenger Grounds": {
+    "quality": 1.2,
+    "roles": [],
+    "tags": ["desert"],
+    "payoffs": [],
+    "landValue": 0.02
+  },
+  "Shefet Dunes": {
+    "quality": 2.8,
+    "roles": [],
+    "tags": ["desert"],
+    "payoffs": [],
+    "landValue": 0.15
+  },
+  "Survivors' Encampment": {
+    "quality": 1.5,
+    "roles": ["fixing"],
+    "tags": ["desert"],
+    "payoffs": [],
+    "landValue": 0.02,
+    "landSources": []
+  },
+  "Plains": {
+    "quality": 0.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Island": {
+    "quality": 0.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Swamp": {
+    "quality": 0.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Mountain": {
+    "quality": 0.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Forest": {
+    "quality": 0.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Nissa, Genesis Mage": {
+    "quality": 2.8,
+    "roles": [],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Avid Reclaimer": {
+    "quality": 2.3,
+    "roles": ["fixing"],
+    "tags": [],
+    "payoffs": []
+  },
+  "Brambleweft Behemoth": {
+    "quality": 2.3,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Nissa's Encouragement": {
+    "quality": 0.7,
+    "roles": [],
+    "tags": ["spell", "noncreature"],
+    "payoffs": []
+  },
+  "Woodland Stream": {
+    "quality": 2.2,
+    "roles": ["fixing"],
+    "tags": [],
+    "payoffs": []
+  },
+  "Nicol Bolas, the Deceiver": {
+    "quality": 3.8,
+    "roles": ["interaction", "draw"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Wasp of the Bitter End": {
+    "quality": 2.4,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Zealot of the God-Pharaoh": {
+    "quality": 2.0,
+    "roles": [],
+    "tags": [],
+    "payoffs": []
+  },
+  "Visage of Bolas": {
+    "quality": 1.2,
+    "roles": ["fixing"],
+    "tags": ["noncreature"],
+    "payoffs": []
+  },
+  "Cinder Barrens": {
+    "quality": 2.2,
+    "roles": ["fixing"],
+    "tags": [],
+    "payoffs": []
+  }
+}

@@ -76,13 +76,7 @@ function ruleYs(svg: string): readonly number[] {
 }
 
 describe('the planeswalker frame', () => {
-  it('takes its extra rules height from the art window and nowhere else', () => {
-    // The playtester's rule for every other card is that the window does not move
-    // ("the dimensions of the card art should be consistent across cards but we
-    // can adjust the text size within the box"), and a walker is where the text
-    // has run out of room to give: three ruled rows in a narrowed column ask
-    // for more lines than any creature in the set. So the picture pays, which
-    // is what a printed walker does, and every other box keeps its size.
+  it('keeps the shared art window and reserves the shield below the rules', () => {
     const gift = CARD_GEOMETRY.art.height - PLANESWALKER_GEOMETRY.art.height;
     // What the foot of the box gives back, so the last row cannot be printed
     // behind the shield. The box nets the difference, and stating it as
@@ -91,11 +85,10 @@ describe('the planeswalker frame', () => {
       CARD_GEOMETRY.rules.y +
       CARD_GEOMETRY.rules.height -
       (PLANESWALKER_GEOMETRY.rules.y + PLANESWALKER_GEOMETRY.rules.height);
-    expect(gift).toBeGreaterThan(0);
+    expect(gift).toBe(0);
     expect(given).toBeGreaterThan(0);
-    expect(gift).toBeGreaterThan(given);
     expect(PLANESWALKER_GEOMETRY.rules.height - CARD_GEOMETRY.rules.height).toBeCloseTo(gift - given, 6);
-    expect(PLANESWALKER_GEOMETRY.rules.height).toBeGreaterThan(CARD_GEOMETRY.rules.height);
+    expect(PLANESWALKER_GEOMETRY.rules.height).toBeLessThan(CARD_GEOMETRY.rules.height);
     for (const region of ['card', 'frame', 'title', 'powerToughness', 'loyalty'] as const) {
       expect(PLANESWALKER_GEOMETRY[region], region).toEqual(CARD_GEOMETRY[region]);
     }

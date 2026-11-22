@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-29T23:55:14.071Z",
+  "sources": [
+    {
+      "code": "ZEN",
+      "mtgjson": {
+        "file": "ZEN-324985398b7946dc2dde3d2fa799e0aa605b0664b0c6eb6d608e9074ed61f322.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/ZEN.json",
+        "sha256": "324985398b7946dc2dde3d2fa799e0aa605b0664b0c6eb6d608e9074ed61f322",
+        "meta": {
+          "date": "2026-09-29",
+          "version": "5.3.0+20260929"
+        }
+      },
+      "scryfall": {
+        "file": "ZEN-228822267b31fd22732f7d36d5921de7c071a53334aa3e9f497bd50cfeedc527.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Azen+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "228822267b31fd22732f7d36d5921de7c071a53334aa3e9f497bd50cfeedc527",
+        "cards": 269
+      }
+    }
+  ]
+}

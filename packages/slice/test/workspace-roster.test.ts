@@ -57,6 +57,11 @@ const NUMBER_WORDS = [
   'Twenty-one',
   'Twenty-two',
   'Twenty-three',
+  'Twenty-four',
+  'Twenty-five',
+  'Twenty-six',
+  'Twenty-seven',
+  'Twenty-eight',
 ] as const;
 
 function rosterSentence(): { readonly count: string; readonly names: readonly string[] } {

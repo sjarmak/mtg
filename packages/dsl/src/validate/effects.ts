@@ -15,18 +15,35 @@
  * the vocabulary is one row here rather than a targeting entry and a `switch`
  * arm a reader has to know to write in two places.
  */
-import type { PumpAmount } from '../amount';
+import type { ComputedAmount, PumpAmount } from '../amount';
 import { isLiteralAmount, isRateAmount } from '../amount';
 import type { Card } from '../card';
-import type { AnyEffectKind, CardFilter, Effect, TargetedEffect, TokenSpec } from '../effects';
+import type {
+  AnyEffectKind,
+  CardFilter,
+  Effect,
+  GraveyardArrivalGrant,
+  TargetedEffect,
+  TokenSpec,
+} from '../effects';
 import {
+  effectAllowsAnyNumberTargets,
   effectAllowsTargetCount,
   effectChoosesTarget,
+  effectUsesPaidSacrificePower,
+  effectUsesPaidSacrificeToughness,
+  effectUsesPaidDiscardManaValue,
+  playerReferentAmountSourceIndex,
   hasTarget,
   isCreatureTokenSpec,
   isSourceBodyEffect,
+  isTargetedFight,
+  isSourceLinkedExileWriter,
   MAX_MANA_PRODUCED,
+  referentAmountSourceIndex,
   referentSourceIndex,
+  sacrificedPermanentAmountSourceIndex,
+  revealedCardAmountSourceIndex,
 } from '../effects';
 import { tokenCard } from '../token';
 import { canonicalJson } from '../canonical-json';
@@ -37,18 +54,24 @@ import type { TargetFilter, TargetKind, TargetSpec } from '../targets';
 import {
   cardTypeFilterFitsTargetKind,
   filterFitsTargetKind,
-  isAttackTriggerOnlyTarget,
+  isGraveyardCardTargetKind,
+  isSourceAttackTarget,
+  isSourceAttachmentTarget,
   isSourceBodyOnlyTarget,
+  isMultipleTargetSpec,
   referentSourceSpace,
   requiresDistinctTarget,
   restrictionFitsTargetKind,
   targetCountOf,
+  targetMinimumOf,
   targetFilterIsEmpty,
   targetFilterOf,
   targetKindNamesACreature,
   targetKindNamesAPlayer,
+  targetKindNamesAPlayerOrPlaneswalker,
   targetKindsCanCollide,
   targetRestrictionOf,
+  targetsAnyNumber,
 } from '../targets';
 import type { Violation, ViolationCode } from '../violations';
 import { violation } from '../violations';
@@ -58,6 +81,7 @@ import type { CardKind, Color } from '../vocabulary';
 import type { EffectScope } from '../vocabulary';
 import {
   ALL_EFFECT_KINDS,
+  BASIC_LAND_TYPES,
   CARD_KINDS,
   EFFECT_SCOPE_SUBJECT,
   PERMANENT_CARD_KINDS,
@@ -65,11 +89,179 @@ import {
   SUBTYPE_PATTERN,
   TOKEN_NAME_MAX_LENGTH,
   TOKEN_NAME_PATTERN,
-  sortColors,
 } from '../vocabulary';
+
+function checkGrantKeywordParams(effect: EffectOf<'grantKeywordUntilEndOfTurn'>, path: string): Violation[] {
+  const keywords = [effect.keyword, ...(effect.additionalKeywords ?? [])];
+  const duplicate = keywords.find((keyword, index) => keywords.indexOf(keyword) !== index);
+  if (duplicate !== undefined) {
+    return [
+      violation(
+        'DUPLICATE_KEYWORD',
+        `${path}.additionalKeywords`,
+        `the temporary grant names ${duplicate} more than once`,
+      ),
+    ];
+  }
+  return [];
+}
 
 /** The one effect the union carries for a given kind. */
 type EffectOf<K extends AnyEffectKind> = Extract<Effect, { readonly kind: K }>;
+
+/** The structural contract shared by even division and chosen allocations. */
+function checkDamageDivision(effect: EffectOf<'dealDamage'>, path: string): Violation[] {
+  const plural = isMultipleTargetSpec(effect.target);
+  if (effect.division === undefined) {
+    return plural
+      ? [
+          violation(
+            'INVALID_DAMAGE_DIVISION',
+            `${path}.division`,
+            'damage with a plural target slot must state how its amount is divided',
+          ),
+        ]
+      : [];
+  }
+  if (!plural) {
+    return [
+      violation(
+        'INVALID_DAMAGE_DIVISION',
+        `${path}.division`,
+        'damage division needs one plural target slot; use count or anyNumber on the target',
+      ),
+    ];
+  }
+  if (effect.division.kind === 'asYouChoose' && !isLiteralAmount(effect.amount)) {
+    return [
+      violation(
+        'INVALID_DAMAGE_DIVISION',
+        `${path}.amount`,
+        'a chosen allocation needs a fixed positive total when targets are chosen',
+      ),
+    ];
+  }
+  if (
+    effect.division.kind === 'asYouChoose' &&
+    isLiteralAmount(effect.amount) &&
+    targetMinimumOf(effect.target) > effect.amount
+  ) {
+    return [
+      violation(
+        'INVALID_DAMAGE_DIVISION',
+        `${path}.target.minimum`,
+        'a positive allocation cannot satisfy more required targets than the fixed damage total',
+      ),
+    ];
+  }
+  return [];
+}
+
+/** Validates the three narrow, hand-authored riders used by M13 damage cohorts. */
+function checkDamageCohortRiders(effect: EffectOf<'dealDamage'>, path: string): Violation[] {
+  const found: Violation[] = [];
+  if (effect.eachScopedPermanentDealsToItsController === true) {
+    const exactCohortSourceShape =
+      effect.scope !== undefined &&
+      EFFECT_SCOPE_SUBJECT[effect.scope] === 'resolvingController' &&
+      effect.target.kind === 'noTarget' &&
+      effect.players === undefined &&
+      effect.division === undefined &&
+      effect.additionalScopeFilter === undefined &&
+      effect.scopeAmount === undefined &&
+      effect.tapScopeGroup !== true &&
+      effect.exileDamagedCreatureIfItWouldDieThisTurn !== true;
+    if (!exactCohortSourceShape) {
+      found.push(
+        violation(
+          'ILLEGAL_EFFECT_SCOPE',
+          `${path}.eachScopedPermanentDealsToItsController`,
+          'cohort-source damage requires one untargeted resolving-controller scope with no second recipient or post-damage rider',
+        ),
+      );
+    }
+  }
+  if (effect.exileDamagedCreatureIfItWouldDieThisTurn === true) {
+    const hasExactLinkedShape =
+      effect.target.kind === 'anyTarget' &&
+      effect.scope === undefined &&
+      effect.players === undefined &&
+      effect.division === undefined &&
+      effect.preventable !== false &&
+      effect.additionalScopeFilter === undefined &&
+      effect.scopeAmount === undefined &&
+      effect.tapScopeGroup !== true;
+    if (!hasExactLinkedShape) {
+      found.push(
+        violation(
+          'ILLEGAL_EFFECT_SCOPE',
+          `${path}.exileDamagedCreatureIfItWouldDieThisTurn`,
+          'the damage-linked death replacement is source-attested only on one preventable any-target damage instruction',
+        ),
+      );
+    }
+  }
+  const additional = effect.additionalScopeFilter;
+  if (additional !== undefined) {
+    if (effect.scope !== 'allPermanents' || effect.scopeFilter === undefined) {
+      found.push(
+        violation(
+          'ILLEGAL_EFFECT_SCOPE',
+          `${path}.additionalScopeFilter`,
+          'an additional damage cohort is legal only beside an allPermanents scope and its primary scopeFilter',
+        ),
+      );
+    }
+    found.push(
+      ...checkFilterLists(additional, `${path}.additionalScopeFilter`, PERMANENT_CARD_KINDS, 'a permanent'),
+    );
+    const missed = unreachableSweepBodies(additional, DAMAGEABLE_CARD_KINDS);
+    if (missed !== null) {
+      found.push(
+        violation(
+          'ILLEGAL_EFFECT_SCOPE',
+          `${path}.additionalScopeFilter.${missed.field}`,
+          `damage is dealt only to ${DAMAGEABLE_CARD_KINDS.join(' and ')} permanents, and this branch names ${describeSweepBodies(missed)}`,
+        ),
+      );
+    }
+    if (effect.scopeFilter !== undefined && canonicalJson(additional) === canonicalJson(effect.scopeFilter)) {
+      found.push(
+        violation(
+          'ILLEGAL_EFFECT_SCOPE',
+          `${path}.additionalScopeFilter`,
+          'the additional damage cohort repeats the primary scopeFilter; drop the duplicate branch',
+        ),
+      );
+    }
+  }
+  if (effect.scopeAmount !== undefined) {
+    if (effect.scope !== 'targetAndPermanentsItsPlayerControls') {
+      found.push(
+        violation(
+          'ILLEGAL_EFFECT_SCOPE',
+          `${path}.scopeAmount`,
+          'a distinct cohort amount is legal only on targetAndPermanentsItsPlayerControls damage',
+        ),
+      );
+    }
+    found.push(...checkAmountRange(effect.scopeAmount, LIMITS.damage, `${path}.scopeAmount`, 'damage'));
+  }
+  if (effect.tapScopeGroup === true) {
+    const creatureOnly =
+      effect.scopeFilter?.cardTypes?.length === 1 && effect.scopeFilter.cardTypes[0] === 'creature';
+    if (effect.scope === undefined || !creatureOnly || additional !== undefined) {
+      found.push(
+        violation(
+          'ILLEGAL_EFFECT_SCOPE',
+          `${path}.tapScopeGroup`,
+          'tapping the retained damage cohort requires one scoped, creature-only permanent group',
+        ),
+      );
+    }
+  }
+  return found;
+}
 
 /**
  * The target kinds a `pumpUntilEndOfTurn` keyword rider may ride on.
@@ -89,6 +281,7 @@ const PUMP_KEYWORD_RIDER_TARGETS: readonly TargetKind[] = [
   'targetCreature',
   'targetCreatureDefendingPlayerControls',
   'selfCreature',
+  'thatCreature',
 ];
 
 /**
@@ -131,6 +324,21 @@ function checkPumpKeywordRider(effect: EffectOf<'pumpUntilEndOfTurn'>, path: str
   return found;
 }
 
+/** Chorus of Might's source-attested word order, withheld from every model-facing union. */
+function checkPumpPresentation(effect: EffectOf<'pumpUntilEndOfTurn'>, path: string): readonly Violation[] {
+  if (effect.printedDurationFirst !== true) return [];
+  if (effect.keyword !== undefined && isRateAmount(effect.power) && isRateAmount(effect.toughness)) {
+    return [];
+  }
+  return [
+    violation(
+      'PUMP_PRESENTATION_INVALID',
+      `${path}.printedDurationFirst`,
+      'duration-first pump text is legal only for a rate-bearing pump with a same-target keyword rider',
+    ),
+  ];
+}
+
 /**
  * Everything the pump's two magnitudes have to be, including the three ways a
  * rate can be written down that no card can print.
@@ -169,6 +377,118 @@ function checkBasePtParams(effect: EffectOf<'setBasePtUntilEndOfTurn'>, path: st
     ...checkRange(effect.power, LIMITS.basePower, `${path}.power`, 'base power'),
     ...checkRange(effect.toughness, LIMITS.baseToughness, `${path}.toughness`, 'base toughness'),
   ];
+}
+
+function checkLandAnimationParams(
+  effect: EffectOf<'animateLandWhileSourceOnBattlefield'>,
+  path: string,
+): Violation[] {
+  const found = [
+    ...checkRange(effect.power, LIMITS.basePower, `${path}.power`, 'base power'),
+    ...checkRange(effect.toughness, LIMITS.baseToughness, `${path}.toughness`, 'base toughness'),
+  ];
+  const filter = effect.target.filter;
+  const guaranteesLand =
+    filter?.cardTypes?.every((kind) => kind === 'land') === true ||
+    filter?.allCardTypes?.includes('land') === true ||
+    filter?.subtypes?.every((subtype) => BASIC_LAND_TYPES.some((landType) => landType === subtype)) === true;
+  if (effect.target.kind === 'targetPermanent' && !guaranteesLand) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_FILTER',
+        `${path}.target.filter`,
+        'animateLandWhileSourceOnBattlefield says the target is still a land, so its filter must select only lands or basic land types',
+      ),
+    );
+  }
+  return found;
+}
+
+/** The two source-attested attachment sweeps currently executable end to end. */
+function checkDestroyAttachedPermanentsParams(
+  effect: EffectOf<'destroyAttachedPermanents'>,
+  path: string,
+): Violation[] {
+  const attachmentFilter = canonicalJson(effect.filter);
+  const targetFilter = canonicalJson(targetFilterOf(effect.target));
+  const turnToSlag =
+    effect.target.kind === 'thatCreature' && attachmentFilter === '{"subtypes":["Equipment"]}';
+  const streetSweeper =
+    effect.target.kind === 'targetPermanent' &&
+    targetFilter === '{"cardTypes":["land"]}' &&
+    attachmentFilter === '{"subtypes":["Aura"]}';
+  if (turnToSlag || streetSweeper) return [];
+  return [
+    violation(
+      'ILLEGAL_TARGET_FILTER',
+      path,
+      'attached-permanent destruction supports only Equipment on the retained creature or Auras on a land-filtered permanent target',
+    ),
+  ];
+}
+
+/** Locks the Destroy the Evidence rider to its one source-attested profile. */
+function checkDestroyPermanentParams(effect: EffectOf<'destroyPermanent'>, path: string): Violation[] {
+  if (effect.controllerLibraryFollowup === undefined) return [];
+  const exactLandTarget =
+    effect.scope === undefined &&
+    effect.target.kind === 'targetPermanent' &&
+    canonicalJson(targetFilterOf(effect.target)) === '{"cardTypes":["land"]}';
+  return exactLandTarget
+    ? []
+    : [
+        violation(
+          'ILLEGAL_TARGET_FILTER',
+          path,
+          'the retained-controller library follow-up is source-attested only after destroying exactly one land-filtered permanent target',
+        ),
+      ];
+}
+
+function checkSourceAnimationParams(
+  effect: EffectOf<'animateSourceUntilEndOfTurn'>,
+  path: string,
+): Violation[] {
+  const found = [
+    ...checkRange(effect.power, LIMITS.basePower, `${path}.power`, 'base power'),
+    ...checkRange(effect.toughness, LIMITS.baseToughness, `${path}.toughness`, 'base toughness'),
+  ];
+  for (const [index, subtype] of effect.subtypes.entries()) {
+    if (!SUBTYPE_PATTERN.test(subtype)) {
+      found.push(
+        violation(
+          'INVALID_SUBTYPE',
+          `${path}.subtypes[${String(index)}]`,
+          `animation subtype "${subtype}" must start with an uppercase letter and contain only letters, digits, spaces, apostrophes, or hyphens`,
+        ),
+      );
+    }
+  }
+  const duplicateSubtype = effect.subtypes.find(
+    (subtype, index) => effect.subtypes.indexOf(subtype) !== index,
+  );
+  if (duplicateSubtype !== undefined) {
+    found.push(
+      violation(
+        'DUPLICATE_SUBTYPE',
+        `${path}.subtypes`,
+        `animation subtype "${duplicateSubtype}" is listed more than once`,
+      ),
+    );
+  }
+  const duplicateKeyword = effect.keywords.find(
+    (keyword, index) => effect.keywords.indexOf(keyword) !== index,
+  );
+  if (duplicateKeyword !== undefined) {
+    found.push(
+      violation(
+        'DUPLICATE_KEYWORD',
+        `${path}.keywords`,
+        `animation keyword "${duplicateKeyword}" is listed more than once`,
+      ),
+    );
+  }
+  return found;
 }
 
 function checkPumpParams(effect: EffectOf<'pumpUntilEndOfTurn'>, path: string): Violation[] {
@@ -212,7 +532,21 @@ function checkPumpParams(effect: EffectOf<'pumpUntilEndOfTurn'>, path: string): 
       violation('EFFECT_PARAM_OUT_OF_RANGE', path, 'a +0/+0 pump is a no-op; give it a nonzero delta'),
     );
   }
-  return [...found, ...checkPumpKeywordRider(effect, path)];
+  return [...found, ...checkPumpKeywordRider(effect, path), ...checkPumpPresentation(effect, path)];
+}
+
+/**
+ * The generator's ordinary draw ceiling remains six. Hand-authored player
+ * sweeps reach seven for Time Reversal, and plural player targets reach twenty
+ * for Jace, Memory Adept. Both carriers are absent from every model-facing
+ * effect union, so these branches widen the engine without widening what a
+ * generated slot may propose.
+ */
+function checkDrawParams(effect: EffectOf<'drawCards'>, path: string): Violation[] {
+  const maximum =
+    effect.players !== undefined ? 7 : isMultipleTargetSpec(effect.target) ? 20 : LIMITS.draw.max;
+  const range = { min: LIMITS.draw.min, max: maximum };
+  return checkAmountRange(effect.count, range, `${path}.count`, 'card count');
 }
 
 /**
@@ -291,6 +625,96 @@ type EffectRulesRow = EffectRulesTable[AnyEffectKind];
 /** Nothing to check: the effect carries no parameters of its own. */
 const noParams = (): Violation[] => [];
 
+function checkAddedSubtype(effect: EffectOf<'addSubtype'>, path: string): Violation[] {
+  return SUBTYPE_PATTERN.test(effect.subtype)
+    ? []
+    : [
+        violation(
+          'INVALID_SUBTYPE',
+          `${path}.subtype`,
+          `subtype "${effect.subtype}" must be a capitalized word such as "Vampire"`,
+        ),
+      ];
+}
+
+function checkCoinFlipParams(effect: EffectOf<'flipCoin'>, path: string): Violation[] {
+  const branches = [['winEffects', effect.winEffects] as const, ['loseEffects', effect.loseEffects] as const];
+  const found: Violation[] = [];
+  if (branches.every(([, effects]) => effects === undefined)) {
+    found.push(
+      violation(
+        'RANDOM_BRANCH_INVALID',
+        path,
+        'a coin flip with neither a win nor a loss branch changes no outcome; provide at least one branch',
+      ),
+    );
+  }
+  for (const [field, effects] of branches) {
+    for (const [index, nested] of (effects ?? []).entries()) {
+      const target = hasTarget(nested) ? nested.target.kind : null;
+      if (
+        effectChoosesTarget(nested) ||
+        (target !== null && target !== 'noTarget' && !isSourceBodyOnlyTarget(target))
+      ) {
+        found.push(
+          violation(
+            'RANDOM_BRANCH_INVALID',
+            `${path}.${field}[${index}]`,
+            'a coin-flip branch may use no target or its ability source; a separately chosen or externally retained target needs a nested target-binding contract',
+          ),
+        );
+      }
+    }
+  }
+  return found;
+}
+
+/** Switcheroo's one exact CR 701.10 target shape. */
+function checkExchangeControlParams(effect: EffectOf<'exchangeControl'>, path: string): Violation[] {
+  const switcheroo =
+    effect.exchangeSource === undefined &&
+    canonicalJson(effect.target) === '{"count":2,"kind":"targetCreature","minimum":2}';
+  const conjuredCurrency =
+    effect.exchangeSource === true &&
+    canonicalJson(effect.target) === '{"kind":"targetPermanentYouNeitherOwnNorControl"}';
+  return switcheroo || conjuredCurrency
+    ? []
+    : [
+        violation(
+          'ILLEGAL_TARGET_FOR_EFFECT',
+          `${path}.target`,
+          'exchange control requires exactly two target creatures unless using the exact source-and-permanent profile',
+        ),
+      ];
+}
+
+/** Keeps Augur's legacy selector and Grisly Salvage's new bundle indivisible. */
+function checkSelectFromTopLibraryParams(
+  effect: EffectOf<'selectFromTopLibrary'>,
+  path: string,
+): Violation[] {
+  const grisly =
+    effect.grislySalvageProfile === true &&
+    effect.count === 5 &&
+    effect.rest === 'graveyard' &&
+    effect.revealAll === true &&
+    canonicalJson(effect.filter) === '{"cardTypes":["creature","land"]}';
+  const legacy =
+    effect.grislySalvageProfile === undefined &&
+    effect.count === 3 &&
+    effect.rest === 'bottom' &&
+    effect.revealAll === undefined;
+  return grisly || legacy
+    ? []
+    : [
+        violation(
+          'EFFECT_CONDITION_INVALID',
+          path,
+          'selectFromTopLibrary admits only the legacy three-card bottom profile or the atomic Grisly Salvage five-card creature-or-land graveyard profile',
+        ),
+      ];
+}
+
 export const EFFECT_RULES: EffectRulesTable = {
   dealDamage: {
     generatableTargets: ['anyTarget', 'targetCreature', 'targetPlayer'],
@@ -301,11 +725,11 @@ export const EFFECT_RULES: EffectRulesTable = {
     // fixture is keyed to those bytes. Lava Axe and Chandra's Fury are the M13
     // cards that read it.
     //
-    // `noTarget` is the board sweep's slot and only the board sweep's: Pyroclasm
-    // and Rain of Blades choose nothing (CR 115.1) and read a region of the
-    // board instead, so the target spec has to be able to say "nobody".
-    // `checkEffectScope` refuses the pairing this opens up — an unscoped damage
-    // aimed at nobody, which would resolve into no game action at all.
+    // `noTarget` is both a board sweep's slot and the source-controller slot:
+    // Pyroclasm chooses nothing and reads a region of the board, while Jinxed
+    // Idol chooses nobody and damages the controller fixed on its stack entry.
+    // Both are hand-authored, so generated burn retains its narrower target
+    // vocabulary.
     //
     // `thatCreaturesController` is Chandra's Outrage (M11 #128), the card this
     // whole referent lane exists for: "deals 4 damage to target creature and 2
@@ -315,13 +739,36 @@ export const EFFECT_RULES: EffectRulesTable = {
     // this one of the three referents, because no card in M11 or M13 deals
     // damage to a creature an earlier slot already chose, and a widening
     // arrives with the card that needs it.
+    //
+    // `triggeringPlayer` is Ash Zealot's retained caster. It is not a chosen
+    // target and remains hand-authored; `checkAbilityEffectTarget` admits it
+    // only when the surrounding trigger is in `TRIGGERING_PLAYER_CONDITIONS`.
     handAuthoredTargets: [
       'targetOpponent',
       'targetPlayerOrPlaneswalker',
       'noTarget',
       'thatCreaturesController',
+      'targetCreatureDefendingPlayerControls',
+      'targetCreatureYouDontControl',
+      'chosenPlayer',
+      'selfPermanent',
+      'triggeringPlayer',
     ],
-    checkParams: (effect, path) => checkAmountRange(effect.amount, LIMITS.damage, `${path}.amount`, 'damage'),
+    checkParams: (effect, path) => [
+      ...checkAmountRange(effect.amount, LIMITS.damage, `${path}.amount`, 'damage'),
+      ...checkDamageDivision(effect, path),
+      ...checkDamageCohortRiders(effect, path),
+      ...(effect.opponentPlayerOrPlaneswalkerOnly === true &&
+      effect.target.kind !== 'targetPlayerOrPlaneswalker'
+        ? [
+            violation(
+              'ILLEGAL_TARGET_FOR_EFFECT',
+              `${path}.opponentPlayerOrPlaneswalkerOnly`,
+              'opponentPlayerOrPlaneswalkerOnly requires targetPlayerOrPlaneswalker',
+            ),
+          ]
+        : []),
+    ],
   },
   destroyPermanent: {
     generatableTargets: ['targetCreature'],
@@ -350,11 +797,14 @@ export const EFFECT_RULES: EffectRulesTable = {
     handAuthoredTargets: [
       'targetPlayer',
       'targetOpponent',
+      'targetCreatureOpponentControls',
       'targetArtifactOrEnchantment',
+      'targetArtifactYouDontControl',
       'targetPermanent',
       'noTarget',
+      'selfPermanent',
     ],
-    checkParams: noParams,
+    checkParams: checkDestroyPermanentParams,
   },
   pumpUntilEndOfTurn: {
     generatableTargets: ['targetCreature'],
@@ -372,7 +822,7 @@ export const EFFECT_RULES: EffectRulesTable = {
     // (exalted, or `selfDealsCombatDamageToCreature`), so it bypasses this list
     // entirely through `checkAbilityEffectTarget`'s own permission check.
     // `selfCreature` needs only a fact about the *card* (`card.kind ===
-    // 'creature'`), which `checkSelfCreatureTarget` (`validate/abilities.ts`)
+    // 'creature'`), which `checkSourceReferentTarget` (`validate/abilities.ts`)
     // checks independently of this list rather than instead of it — so this
     // row still has to say the kind is targeting-legal on `pumpUntilEndOfTurn`
     // at all, the same statement every other member of this array makes.
@@ -381,21 +831,35 @@ export const EFFECT_RULES: EffectRulesTable = {
     // the reason `destroyPermanent`'s row gives at the same field.
     handAuthoredTargets: [
       'targetCreatureDefendingPlayerControls',
+      'targetCreatureYouControl',
+      'targetCreatureYouDontControl',
       'targetPlayer',
       'targetOpponent',
       'selfCreature',
+      'enchantedCreature',
       'noTarget',
+      // Traitorous Instinct retains the creature chosen by its temporary-
+      // control effect. This is a reference, not another target choice, and
+      // remains hand-authored so the model-visible target surface is unchanged.
+      'thatCreature',
+      'thatCreaturesController',
     ],
     checkParams: (effect, path) => checkPumpParams(effect, path),
   },
   drawCards: {
     generatableTargets: ['noTarget', 'targetPlayer'],
-    checkParams: (effect, path) => checkAmountRange(effect.count, LIMITS.draw, `${path}.count`, 'card count'),
+    // Righteous Authority's retained active player. Whole-ability validation
+    // admits this only inside the atomic enchanted-controller draw-step bundle.
+    handAuthoredTargets: ['triggeringPlayer'],
+    checkParams: checkDrawParams,
   },
   gainLife: {
     generatableTargets: ['noTarget', 'targetPlayer'],
+    handAuthoredTargets: ['thatCreaturesController'],
     checkParams: (effect, path) =>
-      checkAmountRange(effect.amount, LIMITS.life, `${path}.amount`, 'life amount'),
+      effect.amountFrom === 'thatPlayersHandSize'
+        ? []
+        : checkAmountRange(effect.amount, LIMITS.life, `${path}.amount`, 'life amount'),
   },
   counterSpell: {
     generatableTargets: [],
@@ -403,13 +867,67 @@ export const EFFECT_RULES: EffectRulesTable = {
     // primitive that narrows its target without carrying a `TargetSpec`: a
     // spell on the stack is outside the pinned targeting vocabulary, so Essence
     // Scatter and Negate say which spell through `spellFilter` instead.
+    checkParams: (effect, path) => {
+      const found = checkSpellFilter(effect.spellFilter, `${path}.spellFilter`);
+      if (effect.unlessCost !== undefined && !('kind' in effect.unlessCost) && effect.unlessCost.hasX) {
+        found.push(
+          violation(
+            'UNLESS_COST_IS_VARIABLE',
+            `${path}.unlessCost`,
+            'an {X} counter toll names no value chosen by the player being charged; state a fixed price',
+          ),
+        );
+      } else if (
+        effect.unlessCost !== undefined &&
+        !('kind' in effect.unlessCost) &&
+        manaValue(effect.unlessCost) === 0
+      ) {
+        found.push(
+          violation(
+            'UNLESS_COST_IS_FREE',
+            `${path}.unlessCost`,
+            'a counter toll of {0} never changes resolution; state a price or remove the toll',
+          ),
+        );
+      }
+      if (
+        effect.dealDamageToControllerEqualToSpellPower === true &&
+        !(
+          effect.spellFilter?.cardTypes?.length === 1 &&
+          effect.spellFilter.cardTypes[0] === 'creature' &&
+          Object.keys(effect.spellFilter).length === 1
+        )
+      ) {
+        found.push(
+          violation(
+            'ILLEGAL_REFERENT_AMOUNT',
+            `${path}.dealDamageToControllerEqualToSpellPower`,
+            'spell power is defined here only for a counter instruction restricted exactly to creature spells',
+          ),
+        );
+      }
+      return found;
+    },
+  },
+  changeSpellTargets: {
+    generatableTargets: [],
     checkParams: (effect, path) => checkSpellFilter(effect.spellFilter, `${path}.spellFilter`),
   },
+  copySpell: {
+    generatableTargets: [],
+    checkParams: (effect, path) => checkCopySpellFilter(effect.spellFilter, `${path}.spellFilter`),
+  },
+  copyNextInstantOrSorceryThisTurn: {
+    generatableTargets: [],
+    checkParams: noParams,
+  },
+  populate: { generatableTargets: [], checkParams: noParams },
+  createTokenCopyOfSelf: { generatableTargets: [], checkParams: noParams },
   createToken: {
     generatableTargets: [],
-    checkParams: (effect, path, cardColors) => [
+    checkParams: (effect, path) => [
       ...checkAmountRange(effect.count, LIMITS.tokenCount, `${path}.count`, 'token count'),
-      ...checkTokenSpec(effect.token, `${path}.token`, cardColors),
+      ...checkTokenSpec(effect.token, `${path}.token`),
     ],
   },
   tapPermanent: {
@@ -426,7 +944,13 @@ export const EFFECT_RULES: EffectRulesTable = {
     // one this kind reads (`referentSourceIndex`), and it needed no permission
     // of its own — a back-reference widens the row it is printed on, never the
     // row it points at.
-    handAuthoredTargets: ['targetPlayer', 'targetOpponent', 'thatCreature'],
+    handAuthoredTargets: [
+      'targetPlayer',
+      'targetOpponent',
+      'targetPermanent',
+      'targetCreatureYouDontControl',
+      'thatCreature',
+    ],
     checkParams: noParams,
   },
   returnToHand: {
@@ -436,7 +960,15 @@ export const EFFECT_RULES: EffectRulesTable = {
     // no answer to an artifact at all, which is a hole in the pie rather than a
     // deliberate weakness. Hand-authored because the prompt prints the
     // generatable half verbatim and every recorded fixture is keyed to it.
-    handAuthoredTargets: ['targetArtifactOrEnchantment'],
+    handAuthoredTargets: [
+      'targetArtifactOrEnchantment',
+      'targetNonlandPermanentOpponentControls',
+      'targetNonlandPermanentYouDontControl',
+      'targetCreatureDefendingPlayerControls',
+      'targetCardInYourGraveyard',
+      'targetCardInAGraveyard',
+      'selfPermanent',
+    ],
     checkParams: noParams,
   },
   millCards: {
@@ -448,8 +980,12 @@ export const EFFECT_RULES: EffectRulesTable = {
     // reason — `MODEL_TARGET_KINDS` is the frozen four and has no
     // `targetOpponent`, so the narrow kind is stated here where it costs
     // nothing rather than in the prompt where it would re-record every fixture.
-    handAuthoredTargets: ['targetOpponent'],
-    checkParams: (effect, path) => checkAmountRange(effect.count, LIMITS.mill, `${path}.count`, 'mill count'),
+    // Crosstown Courier retains the player its source dealt combat damage to;
+    // that event referent is not a CR 115 target and is available only inside
+    // a trigger whose condition supplies it. The ability validator enforces
+    // that second half, while keeping this widening outside the generator.
+    handAuthoredTargets: ['targetOpponent', 'triggeringPlayer'],
+    checkParams: checkMillParams,
   },
   putCounters: {
     // Fuse reads "target creature you control", and this is the only row that
@@ -477,11 +1013,11 @@ export const EFFECT_RULES: EffectRulesTable = {
     // it, so a menu that offered "the source itself" would put the word on
     // spells, where `checkEffectTarget` refuses it.
     //
-    // Deliberately not paired with `selfCreature` here. A creature that pumps
-    // itself or grants itself a keyword says `selfCreature`; a permanent that
-    // puts a counter on itself says `selfPermanent`; and the three effect kinds
-    // involved partition cleanly, so no effect kind admits both and there is
-    // never a card with two spellings of one sentence.
+    // `selfCreature` is Quirion Dryad's exact current wording. It is distinct
+    // from `selfPermanent`: the creature-only kind prints "this creature" and
+    // `checkSourceReferentTarget` refuses it on noncreatures, while the broader
+    // kind lets artifacts such as the Trisigil cycle print "this permanent".
+    // Both stay hand-authored so the generator's target menu remains unchanged.
     //
     // `noTarget` is Steel Overseer's slot (M11 214, `mtg-hfex`), and it arrives
     // with `permanentsYouControl` in `SCOPES_LEGAL_ON` below for the reason
@@ -499,21 +1035,53 @@ export const EFFECT_RULES: EffectRulesTable = {
     // put a -1/-1 counter on target creature defending player controls" is the
     // standard attack-trigger template, and it was the one shape the set's
     // gloom vocabulary could not print.
+    //
+    // `thatCreature` is Mark of Mutiny (M13 141): the control effect chooses
+    // one creature and the following counter instruction refers to that same
+    // object without targeting it again. The shared referent validator proves
+    // there is exactly one earlier creature target, so this adds no choice and
+    // does not widen the generator-facing target menu.
     handAuthoredTargets: [
       'targetOpponent',
+      'thatCreature',
+      'selfCreature',
       'selfPermanent',
       'noTarget',
       'targetCreatureDefendingPlayerControls',
+      'enchantedCreature',
+      'equippedCreature',
     ],
-    checkParams: (effect, path) =>
-      checkAmountRange(effect.count, LIMITS.counterCount, `${path}.count`, 'counter count'),
+    checkParams: (effect, path) => [
+      ...checkAmountRange(effect.count, LIMITS.counterCount, `${path}.count`, 'counter count'),
+      ...(effect.timing === 'nextEndStep' &&
+      (effect.target.kind !== 'selfPermanent' || effect.scope !== undefined || effect.keyword !== undefined)
+        ? [
+            violation(
+              'DELAYED_COUNTER_PLACEMENT_INVALID',
+              path,
+              'next-end-step counter placement must name only the source permanent, with no scope or keyword rider',
+            ),
+          ]
+        : []),
+      ...(effect.recipientCondition !== undefined &&
+      (effect.target.kind !== 'equippedCreature' || effect.scope !== undefined)
+        ? [
+            violation(
+              'EFFECT_CONDITION_INVALID',
+              `${path}.recipientCondition`,
+              'a counter recipient condition is legal only on one live equippedCreature referent',
+            ),
+          ]
+        : []),
+    ],
   },
   exileTarget: {
-    // Two rows in one, split by `scope`. Unscoped, this is `destroyPermanent`'s
-    // row with one word changed and answers a creature. Scoped, the *player* is
-    // what the spell targets and the creatures are not targets at all (CR 115.1),
-    // so the row has to admit a player kind as well and `checkEffectScope` below
-    // is what stops the two halves being mixed.
+    // Three forms split by `scope`. Unscoped, this is `destroyPermanent`'s row
+    // with one word changed and answers a creature. A targeted-player scope
+    // targets the player and not the creatures (CR 115.1). A board-region scope
+    // targets nothing and uses `scopeFilter` to name the permanents. The row has
+    // to admit all three target shapes, and `checkEffectScope` below is what
+    // stops them being mixed.
     //
     // Which of those the *generator* may reach was settled the moment `mtg-q5yg`
     // priced this kind, because a priced kind's generatable list is printed
@@ -529,18 +1097,114 @@ export const EFFECT_RULES: EffectRulesTable = {
     // `targetPermanent` is Celestial Purge, "exile target black or red
     // permanent", and it joins for `destroyPermanent`'s reason at the same
     // field: one space and a filter, rather than a kind per printed selector.
-    handAuthoredTargets: ['targetOpponent', 'targetArtifactOrEnchantment', 'targetPermanent'],
-    checkParams: noParams,
+    // `noTarget` is Mass Polymorph's board-region sweep; the scope/filter pair
+    // makes "all creatures you control" complete without choosing anything.
+    handAuthoredTargets: [
+      'targetOpponent',
+      'targetArtifactOrEnchantment',
+      'targetPermanent',
+      'targetCreatureOpponentControls',
+      'targetCardInYourGraveyard',
+      'targetCardInOpponentsGraveyard',
+      'targetCardInAGraveyard',
+      'noTarget',
+    ],
+    checkParams: (effect, path) => {
+      const cohort = effect.sameNameCohort;
+      const mixedCreatures = effect.creatureBattlefieldOrGraveyard === true;
+      const exactCohortTarget =
+        effect.target.kind === 'targetPermanent' &&
+        canonicalJson(effect.target) === '{"filter":{"excludeCardTypes":["land"]},"kind":"targetPermanent"}';
+      return [
+        ...(mixedCreatures &&
+        (effect.linkToSource !== true ||
+          effect.scope !== undefined ||
+          effect.returnAtNextEndStep !== undefined ||
+          cohort !== undefined ||
+          canonicalJson(effect.target) !==
+            '{"count":3,"excludeSource":true,"filter":{"cardTypes":["creature"]},"kind":"targetPermanent"}')
+          ? [
+              violation(
+                'SOURCE_LINKED_EXILE_INVALID',
+                path,
+                'creatureBattlefieldOrGraveyard is exactly the source-linked up-to-three other-creature target with no other exile riders',
+              ),
+            ]
+          : []),
+        ...(cohort !== undefined &&
+        (effect.linkToSource !== true ||
+          effect.scope !== undefined ||
+          effect.returnAtNextEndStep !== undefined ||
+          !exactCohortTarget)
+          ? [
+              violation(
+                'SOURCE_LINKED_EXILE_INVALID',
+                path,
+                'sameNameCohort is exactly the unscoped source-linked nonland-permanent target with no other target riders',
+              ),
+            ]
+          : []),
+        ...(effect.linkToSource !== true
+          ? []
+          : [
+              ...(effect.scope !== undefined || effect.returnAtNextEndStep !== undefined
+                ? [
+                    violation(
+                      'SOURCE_LINKED_EXILE_INVALID',
+                      path,
+                      'a source-linked targeted exile is unscoped and has no delayed return; its paired source trigger owns the return',
+                    ),
+                  ]
+                : []),
+              ...(effect.target.kind !== 'targetPermanent' ||
+              (cohort === undefined && effect.target.excludeSource !== true) ||
+              (cohort !== undefined && effect.target.excludeSource === true)
+                ? [
+                    violation(
+                      'SOURCE_LINKED_EXILE_INVALID',
+                      `${path}.target`,
+                      cohort === undefined
+                        ? 'a source-linked targeted exile names another target permanent so the source cannot enter its own relation'
+                        : 'the same-name cohort excludes every permanent with the printed forbidden name rather than only the source object',
+                    ),
+                  ]
+                : []),
+            ]),
+      ];
+    },
   },
   revealHand: {
-    // A hand is somebody's, so this reaches a player and nothing else. Narrow to
-    // an opponent rather than any player, because "reveal your own hand" is a
-    // clause no card in this vocabulary wants and a widening arrives with the
-    // card that needs it.
+    // A hand is somebody's, so this reaches a player and nothing else. The
+    // generator retains the opponent-only shape it was priced around; the
+    // hand-authored widening is Search Warrant's source-attested "target
+    // player", which may legally name its caster too.
     generatableTargets: ['targetOpponent'],
+    handAuthoredTargets: ['targetPlayer'],
+    checkParams: noParams,
+  },
+  revealRandomCardFromHand: {
+    // Merfolk Spy names the player its combat-damage event already supplied.
+    // No CR 115 target is chosen, and admitting an ordinary player target here
+    // would silently turn "that player" into a different card.
+    generatableTargets: [],
+    handAuthoredTargets: ['triggeringPlayer'],
+    checkParams: noParams,
+  },
+  playRandomHandCardWithoutPayingManaCost: {
+    // The upkeep event supplies the affected player. Keeping ordinary targets
+    // out prevents hand-authored cards from redirecting the retained random
+    // choice after the trigger has fired.
+    generatableTargets: [],
+    handAuthoredTargets: ['triggeringPlayer'],
     checkParams: noParams,
   },
   scry: { generatableTargets: [], checkParams: noParams },
+  reorderTopLibrary: { generatableTargets: [], checkParams: noParams },
+  selectFromTopLibrary: {
+    generatableTargets: [],
+    checkParams: checkSelectFromTopLibraryParams,
+  },
+  separateTopLibraryIntoPiles: { generatableTargets: [], checkParams: noParams },
   returnFromGraveyard: {
     // A graveyard is somebody's, so this reaches a player and nothing else —
     // `revealHand`'s reasoning one row up, with the opposite width. Both kinds
@@ -556,8 +1220,13 @@ export const EFFECT_RULES: EffectRulesTable = {
     // readily as it reaches you, and which one a given card should aim at is the
     // model's decision rather than the vocabulary's.
     generatableTargets: ['targetPlayer'],
-    handAuthoredTargets: ['targetOpponent'],
-    checkParams: noParams,
+    handAuthoredTargets: [
+      'targetOpponent',
+      'noTarget',
+      'targetCardInYourGraveyard',
+      'targetCardInAGraveyard',
+    ],
+    checkParams: checkReturnFromGraveyardParams,
   },
   addMana: {
     // No target at all, `scry`'s shape: mana goes to the ability's own
@@ -567,6 +1236,7 @@ export const EFFECT_RULES: EffectRulesTable = {
     checkParams: (effect, path) =>
       checkAmountRange(effect.amount, LIMITS.manaAmount, `${path}.amount`, 'mana amount'),
   },
+  createEmblem: { generatableTargets: [], checkParams: noParams },
   fight: {
     // Stated as generatable rather than hand-authored, and the generator still
     // cannot reach it. `LEGAL_TARGETS` is built from this half alone, and
@@ -578,6 +1248,17 @@ export const EFFECT_RULES: EffectRulesTable = {
     // `RoleProfile.effectKinds`, which is `readonly EffectKind[]` and so cannot
     // name an unpriced kind.
     generatableTargets: ['targetCreatureYouDontControl'],
+    // Cyclops Gladiator's attack trigger names CR 506.2's defending player.
+    // The target kind is hand-authored because it is legal only inside a
+    // `selfAttacks` trigger, a placement constraint the generator schema does
+    // not express; `checkAbilityEffectTarget` enforces that boundary.
+    handAuthoredTargets: ['targetCreatureDefendingPlayerControls'],
+    checkParams: noParams,
+  },
+  petrifyCreature: {
+    // The primitive itself is absent from ModelEffectSchema; this nonempty row
+    // states that its one target-bearing shape is a creature.
+    generatableTargets: ['targetCreature'],
     checkParams: noParams,
   },
   // The library and graveyard block. Four of the five state no targets at all,
@@ -587,6 +1268,7 @@ export const EFFECT_RULES: EffectRulesTable = {
   // fourth. There is nothing left for a `TargetSpec` to name.
   shuffleLibrary: { generatableTargets: [], checkParams: noParams },
   revealTopCards: { generatableTargets: [], checkParams: noParams },
+  revealTopCardToHand: { generatableTargets: [], checkParams: noParams },
   putOnLibrary: {
     // The one targeted member, and it points where `returnToHand` points: at a
     // permanent, which is the only card a `TargetKind` can name outside a
@@ -599,12 +1281,34 @@ export const EFFECT_RULES: EffectRulesTable = {
     handAuthoredTargets: ['targetArtifactOrEnchantment'],
     checkParams: noParams,
   },
-  exileGraveyard: { generatableTargets: [], checkParams: noParams },
+  putSourceAndTargetOnOwnersLibrariesThenShuffle: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetCreature'],
+    checkParams: noParams,
+  },
+  exileGraveyard: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetPlayer'],
+    checkParams: noParams,
+  },
   shuffleGraveyardIntoLibrary: { generatableTargets: [], checkParams: noParams },
   searchLibrary: {
     generatableTargets: [],
-    checkParams: (effect, path) => checkCardFilterLists(effect.filter, `${path}.filter`),
+    checkParams: checkSearchLibraryParams,
   },
+  moveSourceLinkedExile: { generatableTargets: [], checkParams: noParams },
+  exileNonbasicGraveyardAndMatchingLibrary: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetPlayer'],
+    checkParams: noParams,
+  },
+  eachPlayerNamesCardThenRevealsTop: { generatableTargets: [], checkParams: noParams },
+  nameNonlandCardAndExileMatchingOpponentZones: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetOpponent'],
+    checkParams: noParams,
+  },
+  revealUntilCreatureCards: { generatableTargets: [], checkParams: noParams },
   // The hand block. Both reach a *player*, because a hand is somebody's, and
   // both stop the resolution to ask which cards leave it — so neither names a
   // card, and there is nothing here for a second `TargetSpec` slot to hold.
@@ -613,34 +1317,37 @@ export const EFFECT_RULES: EffectRulesTable = {
   // has nothing left to check; the one thing `discardCards` checks is the pair
   // its `noTarget` slot belongs to.
   discardCards: {
-    // Both player kinds, and the wider one is the generatable half for
+    // Both choosing player kinds, and the wider one is the generatable half for
     // `returnFromGraveyard`'s stated reason: `MODEL_TARGET_KINDS` has
     // `targetPlayer` and no `targetOpponent`. A discard aimed at yourself is a
     // real card rather than a degenerate one — every looting and madness
     // enabler is exactly that — so nothing is lost by offering the wide kind.
     //
-    // `noTarget` is hand-authored and it is the *sweep's* slot: `players`
-    // (Liliana's Specter) names the seats, and `checkPlayerSweep` requires the
-    // target slot beside it be empty. It stays off `generatableTargets` for the
-    // reason the field itself is off `ModelEffectSchema` — the generator has no
-    // word for a sweep, so a slot menu offering the empty spec would be
-    // offering half a card.
+    // `noTarget` is hand-authored for both untargeted controller discards
+    // (Thoughtflare) and player sweeps (Liliana's Specter). `players`, when
+    // present, replaces the controller with its named seats; when absent, the
+    // resolving controller owns the hand. It stays off `generatableTargets`
+    // because the whole effect kind remains outside `ModelEffectSchema`.
+    // `thatCreaturesController` is the retained, non-choosing projection used
+    // when an earlier effect targeted a creature; admitting it here adds no
+    // second target slot and no model-visible shape.
     generatableTargets: ['targetPlayer'],
-    handAuthoredTargets: ['targetOpponent', 'noTarget'],
-    // The other half of the pair `checkPlayerSweep` states. That check refuses
-    // a sweep beside a live target; this one refuses the empty slot without a
-    // sweep, and both are needed because the two fields are only meaningful
-    // together. CR 701.8 takes cards out of a *named* hand, and a discard that
-    // names none would fall through to the controller's own — "You discards a
-    // card" is the sentence the renderer would build, and no printed discard
-    // reaches its controller's hand without saying so.
+    handAuthoredTargets: [
+      'targetOpponent',
+      'noTarget',
+      // Rakdos Ringleader's combat-damage event supplies the damaged player;
+      // this is a retained referent, not a second CR 115 choice.
+      'triggeringPlayer',
+      'thatCreaturesController',
+      'thatPlayerOrPlaneswalkerController',
+    ],
     checkParams: (effect, path) =>
-      effect.target.kind === 'noTarget' && effect.players === undefined
+      effect.countFrom === 'chosenX' && effect.count !== 1
         ? [
             violation(
-              'ILLEGAL_EFFECT_SCOPE',
-              `${path}.target`,
-              'a discard names whose hand it takes from, and a "noTarget" slot names nobody; add a "players" sweep, or point the slot at a player',
+              'ILLEGAL_REFERENT_AMOUNT',
+              `${path}.count`,
+              'countFrom chosenX supplies the whole discard count, so the literal count sentinel must be 1',
             ),
           ]
         : [],
@@ -657,6 +1364,15 @@ export const EFFECT_RULES: EffectRulesTable = {
     // ask whether there is anything to check at all.
     checkParams: (effect, path) =>
       effect.filter === undefined ? [] : checkCardFilterLists(effect.filter, `${path}.filter`),
+  },
+  chooseFromRevealedHand: {
+    // Mindclaw chooses a target opponent when its trigger is stacked; Shimian
+    // reads the damaged player retained by its combat-damage trigger. Those are
+    // the two source-attested player slots and no permanent-shaped slot is
+    // admitted merely because every object has an owner.
+    generatableTargets: ['targetOpponent'],
+    handAuthoredTargets: ['triggeringPlayer'],
+    checkParams: (effect, path) => checkCardFilterLists(effect.filter, `${path}.filter`),
   },
   loseLife: {
     // `gainLife`'s two slots plus the one that says whose loss it is. All three
@@ -684,9 +1400,23 @@ export const EFFECT_RULES: EffectRulesTable = {
     // rather than generatable for the reason `dealDamage`'s referent row is:
     // the fill prompt prints the generatable list verbatim and the recorded
     // fixtures are keyed to those bytes.
-    handAuthoredTargets: ['thatPlayer'],
+    // `thatCreaturesController` is Launch Party (RTR #69): the destroy effect
+    // chooses the creature and the following life loss projects its controller
+    // without adding another target. Like the other retained slots, it stays
+    // hand-authored so this exact card does not widen the generator menu.
+    handAuthoredTargets: ['thatPlayer', 'thatCreaturesController', 'triggeringPlayer'],
     checkParams: (effect, path) =>
-      checkAmountRange(effect.amount, LIMITS.life, `${path}.amount`, 'life amount'),
+      effect.amountFrom === 'triggeringPlayerLifeHalfRoundedUp'
+        ? effect.amount === 0
+          ? []
+          : [
+              violation(
+                'ILLEGAL_REFERENT_AMOUNT',
+                `${path}.amount`,
+                'triggeringPlayerLifeHalfRoundedUp supplies the whole live amount, so the literal amount field must be 0',
+              ),
+            ]
+        : checkAmountRange(effect.amount, LIMITS.life, `${path}.amount`, 'life amount'),
   },
   setLife: {
     // No target at all, `scry`'s shape and `addMana`'s reason: the life total
@@ -702,7 +1432,49 @@ export const EFFECT_RULES: EffectRulesTable = {
     checkParams: (effect, path) =>
       checkAmountRange(effect.amount, LIMITS.life, `${path}.amount`, 'life total'),
   },
+  loseGame: {
+    generatableTargets: [],
+    // Vraska's Assassin token retains the player it dealt combat damage to;
+    // this is a trigger referent, not a second CR 115 choice.
+    handAuthoredTargets: ['targetPlayer', 'triggeringPlayer'],
+    checkParams: noParams,
+  },
+  winGame: { generatableTargets: [], checkParams: noParams },
   preventCombatDamage: { generatableTargets: [], checkParams: noParams },
+  preventCombatDamageToYou: { generatableTargets: [], checkParams: noParams },
+  detainPermanent: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetCreatureOpponentControls', 'targetNonlandPermanentOpponentControls'],
+    checkParams: noParams,
+  },
+  chooseBlockersThisCombat: { generatableTargets: [], checkParams: noParams },
+  preventAllDamageToYouAndCreaturesYouControl: { generatableTargets: [], checkParams: noParams },
+  preventNextDamageToYouAndRetaliate: {
+    generatableTargets: ['targetPlayerOrPlaneswalker'],
+    handAuthoredTargets: ['noTarget'],
+    checkParams: (effect, path) => {
+      const found = checkAmountRange(effect.amount, LIMITS.damage, `${path}.amount`, 'prevention amount');
+      if (
+        effect.target.kind !== 'noTarget' &&
+        (isLiteralAmount(effect.amount) || effect.amount.kind !== 'chosenX')
+      ) {
+        found.push(
+          violation(
+            'EFFECT_CONDITION_INVALID',
+            `${path}.amount`,
+            'the retaliation arm reads the X announced by its activation; only the untargeted shield arm may state another amount',
+          ),
+        );
+      }
+      return found;
+    },
+  },
+  cantCastSpellsThisTurn: { generatableTargets: [], checkParams: noParams },
+  protectSpellsAndCreaturesFromSpellColorsThisTurn: {
+    generatableTargets: [],
+    checkParams: noParams,
+  },
+  flipCoin: { generatableTargets: [], checkParams: checkCoinFlipParams },
   // The sibling CR 615 shape: not a wider Fog, the *other* printed card
   // (Dawn Charm's first mode). Stated as generatable rather than
   // hand-authored, `fight`'s and `putCounters`' reason exactly: the target
@@ -721,6 +1493,10 @@ export const EFFECT_RULES: EffectRulesTable = {
   // battlefield destination, and Zod cannot say that about a sibling field
   // without turning the object into a union the generator would have to read.
   chooseFromGraveyard: { generatableTargets: [], checkParams: checkGraveyardChoiceParams },
+  chooseFromBattlefield: {
+    generatableTargets: [],
+    checkParams: (effect, path) => checkPermanentFilterLists(effect.filter, `${path}.filter`),
+  },
   // Three kinds and no `handAuthoredTargets`, `preventAllDamageToTarget`'s
   // arrangement one row up and for its reason: the whole of this kind is off
   // `EFFECT_KINDS` and `MODEL_EFFECT_KINDS`, so there is no generatable row for
@@ -736,12 +1512,23 @@ export const EFFECT_RULES: EffectRulesTable = {
   // says, not because the space needs them: "untap target creature you control"
   // is a different English clause from "untap target permanent" aimed at the
   // same board, and a card that means the first should not have to print the
-  // second. What is still out of reach is "untap *it*" — a slot that names
-  // whatever an earlier effect on the same card named. Two effects with
-  // identical specs choose independently in `targetChoicesForEffects`, so the
-  // linkage is a targeting feature rather than a widening here (`mtg-2qyk`).
+  // second. `thatCreature` is Act of Treason's second clause. The shared
+  // referent machinery validates and resolves its one earlier creature slot,
+  // so it creates no second choice.
   untapPermanent: {
     generatableTargets: ['targetPermanent', 'targetCreature', 'targetCreatureYouControl'],
+    handAuthoredTargets: ['selfCreature', 'thatCreature'],
+    checkParams: noParams,
+  },
+  // A resolution-time battlefield choice, not a CR 115 target. The schema
+  // bounds the count and requires the filter; no target mode is legal here.
+  untapPermanents: { generatableTargets: [], checkParams: noParams },
+  // The unpriced one-shot hold reaches a permanent directly when a spell
+  // chooses one. An ability may project a retained `triggeringCreature` into
+  // either of these unrestricted permanent spaces, but only after its trigger
+  // grants the referent; `checkAbilityEffectTarget` checks both halves.
+  skipNextUntap: {
+    generatableTargets: ['targetPermanent', 'targetCreature'],
     checkParams: noParams,
   },
   // Every creature slot the combat trick beside it reaches, and no wider.
@@ -776,6 +1563,12 @@ export const EFFECT_RULES: EffectRulesTable = {
   // unscoped grant aimed at nothing lands on nobody.
   grantKeywordUntilEndOfTurn: {
     generatableTargets: ['targetCreature', 'targetCreatureYouControl', 'selfCreature', 'noTarget'],
+    handAuthoredTargets: ['thatCreature', 'equippedCreature'],
+    checkParams: (effect, path) => checkGrantKeywordParams(effect, path),
+  },
+  regeneratePermanent: {
+    generatableTargets: [],
+    handAuthoredTargets: ['equippedCreature', 'noTarget'],
     checkParams: noParams,
   },
   // One creature, whoever controls it. The whole list sits in
@@ -790,6 +1583,19 @@ export const EFFECT_RULES: EffectRulesTable = {
   // permanent can't be blocked" is a sentence with no referent.
   cantBeBlockedThisTurn: {
     generatableTargets: ['targetCreature'],
+    handAuthoredTargets: ['targetCreatureYouControl', 'selfCreature', 'thatCreature'],
+    checkParams: noParams,
+  },
+  // The blocker-side restriction names exactly one creature. It is
+  // hand-authored by containment, so this row changes no model prompt.
+  cantBlockThisTurn: {
+    generatableTargets: ['targetCreature'],
+    checkParams: noParams,
+  },
+  // Courtly names one creature; Predatory Rampage names a controller-relative
+  // board region and therefore carries `noTarget` plus a creature filter.
+  blocksThisTurnIfAble: {
+    generatableTargets: ['targetCreature', 'noTarget'],
     checkParams: noParams,
   },
   // One creature, and only one an opponent controls. The requirement names the
@@ -808,13 +1614,10 @@ export const EFFECT_RULES: EffectRulesTable = {
   // print the noun the card prints — "sacrifice this creature" — without a
   // card-kind parameter reaching `renderEffect`.
   //
-  // `selfPermanent` is deliberately absent. It would let one creature card be
-  // written two ways for one behavior, which is the ambiguity
-  // `self-permanent-target.test.ts` pins shut for `putCounters` and
-  // `pumpUntilEndOfTurn`; the rule the rest of this table follows is that a
-  // widening arrives with the card that needs it, and the card that asked for
-  // this kind is Arc Runner, a creature. An artifact that sacrifices itself on
-  // a trigger is the card that would move this line.
+  // `selfPermanent` is the noncreature source spelling Sorcerer's Strongbox
+  // needs. `checkSourceReferentTarget` keeps a creature on `selfCreature`, so
+  // the wider row does not let one creature card spell the same behavior two
+  // ways.
   //
   // Nothing generatable, which is a stronger statement than the empty rows
   // above it: `scry` and `addMana` state `[]` because they name no target at
@@ -823,7 +1626,7 @@ export const EFFECT_RULES: EffectRulesTable = {
   // prompt whose printed list this narrows and nothing keyed to those bytes.
   sacrificeSelf: {
     generatableTargets: [],
-    handAuthoredTargets: ['selfCreature'],
+    handAuthoredTargets: ['selfCreature', 'selfPermanent'],
     checkParams: noParams,
   },
   // The two player kinds, `discardCards`' exact split and for the same
@@ -834,14 +1637,19 @@ export const EFFECT_RULES: EffectRulesTable = {
   // is the row a future generator lane finds already correct rather than
   // still to write.
   //
-  // No `noTarget` and no player sweep: "each opponent sacrifices a creature"
-  // is a real printed sentence and a second card, deliberately left for
-  // whoever needs it, the same cut `sacrificePermanentEffect`'s docblock
-  // states.
+  // `noTarget` is the player sweep's slot, Destructive Force's addition. It is
+  // hand-authored for the same containment reason as the whole primitive, and
+  // `checkSacrificePermanentParams` refuses it without `players` while the
+  // shared `checkPlayerSweep` refuses the inverse mismatch.
   sacrificePermanent: {
     generatableTargets: ['targetPlayer'],
-    handAuthoredTargets: ['targetOpponent'],
-    checkParams: noParams,
+    handAuthoredTargets: [
+      'targetOpponent',
+      'triggeringPlayer',
+      'noTarget',
+      'thatPlayerOrPlaneswalkerController',
+    ],
+    checkParams: checkSacrificePermanentParams,
   },
   // `sacrificeSelf`'s empty generatable half, for the same reason stated one
   // different way: this kind is off `EFFECT_KINDS`, so no fill prompt prints
@@ -852,6 +1660,81 @@ export const EFFECT_RULES: EffectRulesTable = {
     generatableTargets: [],
     handAuthoredTargets: ['targetCreature'],
     checkParams: checkBasePtParams,
+  },
+  animateLandWhileSourceOnBattlefield: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetPermanent'],
+    checkParams: checkLandAnimationParams,
+  },
+  animateSourceUntilEndOfTurn: {
+    generatableTargets: [],
+    handAuthoredTargets: ['selfPermanent'],
+    checkParams: checkSourceAnimationParams,
+  },
+  returnSourceFromGraveyard: { generatableTargets: [], checkParams: noParams },
+  returnDepartedSourceToOwnerHand: { generatableTargets: [], checkParams: noParams },
+  putDepartedSourceOnTopOfOwnerLibrary: { generatableTargets: [], checkParams: noParams },
+  shuffleSourceIntoOwnerLibrary: { generatableTargets: [], checkParams: noParams },
+  setColorsUntilEndOfTurn: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetCreature'],
+    checkParams: noParams,
+  },
+  attacksThisTurnIfAble: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetCreature', 'thatCreature'],
+    checkParams: noParams,
+  },
+  shuffleHandsAndGraveyardsIntoLibraries: { generatableTargets: [], checkParams: noParams },
+  exileHandsAndGraveyards: { generatableTargets: [], checkParams: noParams },
+  exileThisSpell: { generatableTargets: [], checkParams: noParams },
+  castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts: {
+    generatableTargets: [],
+    checkParams: noParams,
+  },
+  // Act of Treason's first clause and nothing wider. Later effects retain this
+  // slot through `thatCreature`; this effect itself is the one real choice.
+  gainControlUntilEndOfTurn: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetCreature'],
+    checkParams: noParams,
+  },
+  gainControl: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetCreature'],
+    checkParams: noParams,
+  },
+  exchangeControl: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetCreature', 'targetPermanentYouNeitherOwnNorControl'],
+    checkParams: checkExchangeControlParams,
+  },
+  addSubtype: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetCreature', 'thatCreature'],
+    checkParams: checkAddedSubtype,
+  },
+  // The opponent is the target; the affected permanent is the ability source.
+  // This is Jinxed Idol's exact hand-authored envelope rather than a wider
+  // player-selection primitive the corpus has not established.
+  targetPlayerGainsControlOfSelfPermanent: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetOpponent'],
+    checkParams: noParams,
+  },
+  returnSourceAuraAttached: {
+    generatableTargets: [],
+    handAuthoredTargets: ['targetCreatureYouDontControl'],
+    checkParams: noParams,
+  },
+  doubleSourceCounters: {
+    generatableTargets: [],
+    checkParams: noParams,
+  },
+  destroyAttachedPermanents: {
+    generatableTargets: [],
+    handAuthoredTargets: ['thatCreature', 'targetPermanent'],
+    checkParams: checkDestroyAttachedPermanentsParams,
   },
 };
 
@@ -918,6 +1801,7 @@ export const LIMITS = {
   draw: { min: 1, max: 6 },
   life: { min: 1, max: 20 },
   mill: { min: 1, max: 20 },
+  sacrificeCount: { min: 1, max: 20 },
   tokenCount: { min: 1, max: 8 },
   tokenPower: { min: 0, max: 12 },
   tokenToughness: { min: 1, max: 12 },
@@ -936,7 +1820,9 @@ export const LIMITS = {
    */
   basePower: { min: 0, max: 12 },
   baseToughness: { min: 1, max: 12 },
-  counterCount: { min: 1, max: 4 },
+  // Five is source-attested by RTR's fixed-power scavenge creatures. The
+  // primitive remains hand-authored-only, so this does not widen model output.
+  counterCount: { min: 1, max: 5 },
   /**
    * `controlsSubtype`'s floor. A threshold above roughly a deck's worth of one
    * subtype is unreachable on any board this generator can build, so it is a
@@ -944,20 +1830,6 @@ export const LIMITS = {
    * number is decorative because the game the card describes never happens.
    */
   conditionThreshold: { min: 1, max: 20 },
-  /**
-   * `lifeAtLeast`'s floor, and a separate entry from `conditionThreshold`
-   * because the two numbers measure different things. That one bounds a count
-   * of permanents and reads a deck's worth of one subtype as the ceiling; this
-   * one bounds a life total, which starts at 20 and moves in both directions
-   * every game. Serra Ascendant's printed 30 is above the permanent-count
-   * ceiling and nowhere near unreachable.
-   *
-   * 50 is the top because Test of Endurance prints "if you have 50 or more
-   * life" and no printed card of this shape names a higher number. A threshold
-   * above it would be decorative in `conditionThreshold`'s sense: the game the
-   * card describes never happens.
-   */
-  lifeThreshold: { min: 1, max: 50 },
   /**
    * How much mana one `addMana` may add.
    *
@@ -1028,10 +1900,70 @@ function checkAmountRange(
   return isRateAmount(amount) ? checkRange(amount.rate, range, `${path}.rate`, `${label} rate`, code) : [];
 }
 
-export function effectUsesChosenX(effect: Effect): boolean {
+function checkMillParams(effect: EffectOf<'millCards'>, path: string): Violation[] {
+  const found = [...checkAmountRange(effect.count, LIMITS.mill, `${path}.count`, 'mill count')];
+  if (effect.printedVariable === 'X' && isLiteralAmount(effect.count)) {
+    found.push(
+      violation(
+        'MILL_PRESENTATION_INVALID',
+        `${path}.printedVariable`,
+        'the printed X form needs a computed count to define X; use the literal count directly',
+      ),
+    );
+  }
+  if (
+    effect.printedOneCardReminder === true &&
+    (effect.count !== 1 || (effect.target.kind !== 'targetPlayer' && effect.target.kind !== 'targetOpponent'))
+  ) {
+    found.push(
+      violation(
+        'MILL_PRESENTATION_INVALID',
+        `${path}.printedOneCardReminder`,
+        'the one-card mill reminder is legal only on a one-card effect targeting a player',
+      ),
+    );
+  }
+  if (
+    !isLiteralAmount(effect.count) &&
+    effect.count.kind === 'halfTargetLibraryRoundedDown' &&
+    effect.target.kind !== 'targetPlayer' &&
+    effect.target.kind !== 'targetOpponent'
+  ) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_FOR_EFFECT',
+        `${path}.count.kind`,
+        'halfTargetLibraryRoundedDown reads the chosen player library, so the mill effect needs a player target',
+      ),
+    );
+  }
+  return found;
+}
+
+/** The canonical sacrifice forms: one targeted seat, this controller, or a player sweep. */
+function checkSacrificePermanentParams(effect: EffectOf<'sacrificePermanent'>, path: string): Violation[] {
+  const found =
+    effect.count === undefined
+      ? []
+      : checkRange(effect.count, LIMITS.sacrificeCount, `${path}.count`, 'sacrifice count');
+  if (effect.filter !== undefined) {
+    // Unlike an ordinary target filter, an empty sacrifice filter is not a
+    // second spelling of omission: omission is the canonical one-creature
+    // edict, while `{}` explicitly means every permanent.
+    if (!targetFilterIsEmpty(effect.filter)) {
+      found.push(...checkPermanentFilterLists(effect.filter, `${path}.filter`));
+    }
+  }
+  return found;
+}
+
+export function effectUsesChosenX(effect: unknown): boolean {
   const contains = (value: unknown): boolean => {
     if (Array.isArray(value)) return value.some(contains);
     if (typeof value !== 'object' || value === null) return false;
+    if ('countFrom' in value && (value as { readonly countFrom?: unknown }).countFrom === 'chosenX') {
+      return true;
+    }
     if ('kind' in value && (value as { readonly kind?: unknown }).kind === 'chosenX') return true;
     return Object.values(value).some(contains);
   };
@@ -1051,6 +1983,35 @@ export function effectUsesChosenX(effect: Effect): boolean {
  * an instant carrying a power.
  */
 function checkTokenBody(token: TokenSpec, path: string): Violation[] {
+  if (token.creationPowerToughness !== undefined) {
+    if (
+      token.characteristicPowerToughness !== undefined ||
+      !isCreatureTokenSpec(token) ||
+      token.power !== 0 ||
+      token.toughness !== 0
+    ) {
+      return [
+        violation(
+          'CREATION_POWER_TOUGHNESS_CONFLICT',
+          `${path}.creationPowerToughness`,
+          'a creation-defined token is a creature and uses canonical 0/0 storage with no characteristic-defining value',
+        ),
+      ];
+    }
+    return [];
+  }
+  if (token.characteristicPowerToughness !== undefined) {
+    if (!isCreatureTokenSpec(token) || token.power !== 0 || token.toughness !== 0) {
+      return [
+        violation(
+          'CHARACTERISTIC_POWER_TOUGHNESS_CONFLICT',
+          `${path}.characteristicPowerToughness`,
+          'a characteristic-defining token is a creature and uses canonical 0/0 storage rather than fixed printed stats',
+        ),
+      ];
+    }
+    return [];
+  }
   if (isCreatureTokenSpec(token)) {
     return [
       ...checkRange(token.power, LIMITS.tokenPower, `${path}.power`, 'token power'),
@@ -1165,14 +2126,20 @@ function checkTokenName(token: TokenSpec, path: string): Violation[] {
  * the empty set while reading as though it selects, which is exactly the class
  * of card this lane was opened to stop shipping.
  */
-function checkCardFilterLists(filter: CardFilter, path: string): Violation[] {
+export function checkCardFilterLists(filter: CardFilter, path: string): Violation[] {
   const found: Violation[] = [];
+  if (filter.anyOf !== undefined) {
+    return filter.anyOf.flatMap((alternative, index) =>
+      checkCardFilterLists(alternative, `${path}.anyOf[${String(index)}]`),
+    );
+  }
   const lists: readonly (readonly [string, readonly string[] | undefined])[] = [
     ['cardTypes', filter.cardTypes],
     ['excludeCardTypes', filter.excludeCardTypes],
     ['subtypes', filter.subtypes],
     ['supertypes', filter.supertypes],
     ['colors', filter.colors],
+    ['keywords', filter.keywords],
     ['names', filter.names],
   ];
   for (const [field, list] of lists) {
@@ -1196,29 +2163,95 @@ function checkCardFilterLists(filter: CardFilter, path: string): Violation[] {
   return found;
 }
 
-function checkGraveyardChoiceParams(effect: EffectOf<'chooseFromGraveyard'>, path: string): Violation[] {
-  const found: Violation[] = [...checkCardFilterLists(effect.filter, `${path}.filter`)];
-  if (effect.destination !== 'battlefield') {
-    if (effect.control !== undefined) {
+function checkSearchLibraryParams(effect: EffectOf<'searchLibrary'>, path: string): Violation[] {
+  const filterQuotas = effect.filterQuotas;
+  const found =
+    filterQuotas !== undefined
+      ? filterQuotas.flatMap((quota, index) =>
+          checkCardFilterLists(quota.filter, `${path}.filterQuotas[${String(index)}].filter`),
+        )
+      : effect.filter === undefined
+        ? [violation('ILLEGAL_CARD_FILTER', `${path}.filter`, 'a homogeneous search needs a card filter')]
+        : checkCardFilterLists(effect.filter, `${path}.filter`);
+  if (
+    effect.destination === 'libraryTop' &&
+    ((filterQuotas !== undefined && filterQuotas.reduce((sum, quota) => sum + quota.count, 0) !== 1) ||
+      (filterQuotas === undefined && effect.count !== undefined && effect.count !== 1))
+  ) {
+    found.push(
+      violation(
+        'EFFECT_PARAM_OUT_OF_RANGE',
+        `${path}.count`,
+        'the library-top search destination places one chosen card on top; use a one-card search',
+      ),
+    );
+  }
+  if (
+    effect.destination === 'sourceLinkedExile' &&
+    ((filterQuotas !== undefined && filterQuotas.reduce((sum, quota) => sum + quota.count, 0) !== 1) ||
+      (filterQuotas === undefined && effect.count !== undefined && effect.count !== 1))
+  ) {
+    found.push(
+      violation(
+        'SOURCE_LINKED_EXILE_INVALID',
+        `${path}.count`,
+        'the current linked return says "the exiled card" and therefore needs a one-card search; add plural linked-return vocabulary before widening this count',
+      ),
+    );
+  }
+  if (typeof effect.destination === 'string') return found;
+  if (effect.destination.kind === 'oneAndRest' && effect.destination.one === effect.destination.rest) {
+    found.push(
+      violation(
+        'EFFECT_PARAM_OUT_OF_RANGE',
+        `${path}.destination`,
+        'a one-and-rest search must name two different destinations; use the single destination form otherwise',
+      ),
+    );
+  }
+  if (
+    filterQuotas !== undefined ||
+    effect.count === undefined ||
+    (typeof effect.count === 'number' && effect.count < 2)
+  ) {
+    found.push(
+      violation(
+        'EFFECT_PARAM_OUT_OF_RANGE',
+        `${path}.count`,
+        'a one-and-rest search needs a count that can find at least two cards so both destinations are reachable',
+      ),
+    );
+  }
+  return found;
+}
+
+function checkGraveyardArrivalParams(
+  destination: 'battlefield' | 'hand' | 'exile',
+  control: 'you' | 'owner' | undefined,
+  grant: GraveyardArrivalGrant | undefined,
+  path: string,
+): Violation[] {
+  const found: Violation[] = [];
+  if (destination !== 'battlefield') {
+    if (control !== undefined) {
       found.push(
         violation(
           'EFFECT_PARAM_OUT_OF_RANGE',
           `${path}.control`,
-          `control is a property of a permanent, and a card put into a ${effect.destination} has an owner and no controller; drop the field or send the card to the battlefield`,
+          `control is a property of a permanent, and a card put into a ${destination} has an owner and no controller; drop the field or send the card to the battlefield`,
         ),
       );
     }
-    if (effect.alsoBecomes !== undefined) {
+    if (grant !== undefined) {
       found.push(
         violation(
           'EFFECT_PARAM_OUT_OF_RANGE',
           `${path}.alsoBecomes`,
-          `an added color or type is read off a permanent, and a card put into a ${effect.destination} shows neither; drop the field or send the card to the battlefield`,
+          `an added color or type is read off a permanent, and a card put into a ${destination} shows neither; drop the field or send the card to the battlefield`,
         ),
       );
     }
   }
-  const grant = effect.alsoBecomes;
   if (grant === undefined) return found;
   if (grant.colors === undefined && grant.subtypes === undefined) {
     found.push(
@@ -1243,8 +2276,100 @@ function checkGraveyardChoiceParams(effect: EffectOf<'chooseFromGraveyard'>, pat
   return found;
 }
 
-function checkTokenSpec(token: TokenSpec, path: string, cardColors: readonly Color[]): Violation[] {
+function checkReturnFromGraveyardParams(effect: EffectOf<'returnFromGraveyard'>, path: string): Violation[] {
+  const found = [
+    ...checkGraveyardArrivalParams(
+      effect.destination ?? 'battlefield',
+      effect.control,
+      effect.alsoBecomes,
+      path,
+    ),
+    ...(effect.scope !== undefined && effect.alsoBecomes !== undefined
+      ? [
+          violation(
+            'EFFECT_PARAM_OUT_OF_RANGE',
+            `${path}.alsoBecomes`,
+            'an arrival grant refers to the one targeted card; a scoped graveyard return moves a group and cannot supply that singular referent',
+          ),
+        ]
+      : []),
+  ];
+  if (effect.fromBattlefieldThisTurn !== true) return found;
+  if (effect.scope !== undefined) {
+    found.push(
+      violation(
+        'EFFECT_PARAM_OUT_OF_RANGE',
+        `${path}.scope`,
+        'the battlefield-this-turn selector already defines the complete graveyard cohort',
+      ),
+    );
+  }
+  if (effect.destination === 'hand') {
+    found.push(
+      violation(
+        'EFFECT_PARAM_OUT_OF_RANGE',
+        `${path}.destination`,
+        'the battlefield-this-turn cohort returns to the battlefield',
+      ),
+    );
+  }
+  if (effect.control !== undefined) {
+    found.push(
+      violation(
+        'EFFECT_PARAM_OUT_OF_RANGE',
+        `${path}.control`,
+        'the battlefield-this-turn cohort returns each card under its ordinary controller',
+      ),
+    );
+  }
+  if (effect.alsoBecomes !== undefined) {
+    found.push(
+      violation(
+        'EFFECT_PARAM_OUT_OF_RANGE',
+        `${path}.alsoBecomes`,
+        'the battlefield-this-turn cohort grants no arrival characteristics',
+      ),
+    );
+  }
+  if (effect.target.kind !== 'noTarget') {
+    found.push(
+      violation(
+        'EFFECT_PARAM_OUT_OF_RANGE',
+        `${path}.target`,
+        "the battlefield-this-turn cohort is untargeted and reads the resolving controller's graveyard",
+      ),
+    );
+  }
+  return found;
+}
+
+function checkGraveyardChoiceParams(effect: EffectOf<'chooseFromGraveyard'>, path: string): Violation[] {
+  return [
+    ...checkCardFilterLists(effect.filter, `${path}.filter`),
+    ...checkGraveyardArrivalParams(effect.destination, effect.control, effect.alsoBecomes, path),
+  ];
+}
+
+function checkTokenSpec(token: TokenSpec, path: string): Violation[] {
   const found: Violation[] = [...checkTokenName(token, path), ...checkTokenBody(token, path)];
+  if (token.inlineQuotedAbilities === true && token.quoteAbilities !== true) {
+    found.push(
+      violation(
+        'EFFECT_CONDITION_INVALID',
+        `${path}.inlineQuotedAbilities`,
+        'inlineQuotedAbilities is a presentation of quoted token rules and requires quoteAbilities',
+      ),
+    );
+  }
+  if (token.printedKeywordReminder !== undefined && !token.keywords.includes(token.printedKeywordReminder)) {
+    found.push(
+      violation(
+        'EFFECT_CONDITION_INVALID',
+        `${path}.printedKeywordReminder`,
+        `the printed ${token.printedKeywordReminder} reminder requires the token to have that keyword`,
+      ),
+    );
+  }
   for (const [index, subtype] of token.subtypes.entries()) {
     if (!SUBTYPE_PATTERN.test(subtype)) {
       found.push(
@@ -1255,16 +2380,6 @@ function checkTokenSpec(token: TokenSpec, path: string, cardColors: readonly Col
         ),
       );
     }
-  }
-  const offIdentity = token.colors.filter((color) => !cardColors.includes(color));
-  if (offIdentity.length > 0) {
-    found.push(
-      violation(
-        'TOKEN_COLOR_OFF_IDENTITY',
-        `${path}.colors`,
-        `token colours [${sortColors(offIdentity).join('')}] are outside the card's colour identity [${sortColors(cardColors).join('') || 'colourless'}]`,
-      ),
-    );
   }
   // A token's keywords and printed abilities are legal exactly where the same
   // keywords and abilities are legal on the card the token becomes, so they go
@@ -1283,7 +2398,12 @@ function checkTokenSpec(token: TokenSpec, path: string, cardColors: readonly Col
  * spell does (`validate/abilities.ts`), and two hand-maintained copies of the
  * damage range are two chances to widen one of them.
  */
-export function checkEffectParams(effect: Effect, path: string, cardColors: readonly Color[]): Violation[] {
+export function checkEffectParams(
+  effect: Effect,
+  path: string,
+  cardColors: readonly Color[],
+  allowSourceExclusion = false,
+): Violation[] {
   const rules: EffectRulesRow = EFFECT_RULES[effect.kind];
   // The one place this file narrows by assertion rather than by control flow.
   // `rules` is the union of rows and `effect` is the union of effects, and
@@ -1291,7 +2411,39 @@ export function checkEffectParams(effect: Effect, path: string, cardColors: read
   // read; the mapped table above is what makes the pairing true for every key,
   // so the assertion restates a fact the type of `EFFECT_RULES` proves.
   const check = rules.checkParams as (e: Effect, p: string, c: readonly Color[]) => Violation[];
-  return check(effect, path, cardColors);
+  const sourceExclusionInvalid =
+    hasTarget(effect) &&
+    effect.target.excludeSource === true &&
+    !isSourceLinkedExileWriter(effect) &&
+    !allowSourceExclusion;
+  const sourceExclusion = !sourceExclusionInvalid
+    ? []
+    : effect.target.kind === 'targetPermanent'
+      ? [
+          violation(
+            'SOURCE_LINKED_EXILE_INVALID',
+            `${path}.target.excludeSource`,
+            'excludeSource on a permanent target is legal only on the reviewed source-linked targeted exile shape',
+          ),
+        ]
+      : [
+          violation(
+            'SOURCE_EXCLUSION_INVALID',
+            `${path}.target.excludeSource`,
+            'excludeSource is legal only when the containing ability supplies a reviewed source-relative target context',
+          ),
+        ];
+  const targetedFightShape =
+    isTargetedFight(effect) && canonicalJson(effect.target) !== '{"kind":"targetCreatureYouDontControl"}'
+      ? [
+          violation(
+            'ILLEGAL_TARGET_FOR_EFFECT',
+            `${path}.target`,
+            'the targeted fight form requires exactly targetCreatureYouDontControl with no riders',
+          ),
+        ]
+      : [];
+  return [...sourceExclusion, ...targetedFightShape, ...check(effect, path, cardColors)];
 }
 
 function checkEffectTarget(effect: Effect, path: string): Violation[] {
@@ -1302,6 +2454,24 @@ function checkEffectTarget(effect: Effect, path: string): Violation[] {
         'ILLEGAL_TARGET_FOR_EFFECT',
         `${path}.target.kind`,
         'triggeringCreature is a retained trigger referent, not a target a spell may choose',
+      ),
+    ];
+  }
+  if (effect.target.kind === 'triggeringPlayer') {
+    return [
+      violation(
+        'ILLEGAL_TARGET_FOR_EFFECT',
+        `${path}.target.kind`,
+        'triggeringPlayer is a retained trigger referent, not a target a spell may choose',
+      ),
+    ];
+  }
+  if (effect.target.kind === 'chosenPlayer') {
+    return [
+      violation(
+        'ILLEGAL_TARGET_FOR_EFFECT',
+        `${path}.target.kind`,
+        'chosenPlayer is retained by a linked permanent trigger, not a target a spell may choose',
       ),
     ];
   }
@@ -1326,7 +2496,16 @@ function checkEffectTarget(effect: Effect, path: string): Violation[] {
       ),
     ];
   }
-  if (isAttackTriggerOnlyTarget(effect.target.kind)) {
+  if (isSourceAttachmentTarget(effect.target.kind)) {
+    return [
+      violation(
+        'ILLEGAL_TARGET_FOR_EFFECT',
+        `${path}.target.kind`,
+        `${effect.target.kind} names the permanent attached to an ability's source, not a target a spell may choose`,
+      ),
+    ];
+  }
+  if (isSourceAttackTarget(effect.target.kind)) {
     // "Defending player" is CR 506.2, a role that exists only inside a combat
     // this source is attacking in. A spell has no such combat to read, so this
     // is refused here for the same reason `triggeringCreature` is one clause
@@ -1335,7 +2514,7 @@ function checkEffectTarget(effect: Effect, path: string): Violation[] {
       violation(
         'ILLEGAL_TARGET_FOR_EFFECT',
         `${path}.target.kind`,
-        'targetCreatureDefendingPlayerControls is legal only on a triggered ability whose condition is selfAttacks, never on a spell',
+        'targetCreatureDefendingPlayerControls needs an ability whose source is attacking and is never legal on a spell',
       ),
     ];
   }
@@ -1352,7 +2531,7 @@ function checkEffectTarget(effect: Effect, path: string): Violation[] {
   return [
     ...checkTargetRestriction(effect.target, path),
     ...checkTargetFilter(effect.target, path),
-    ...checkTargetCount(effect, path),
+    ...checkTargetCardinality(effect, path),
   ];
 }
 
@@ -1467,6 +2646,7 @@ function checkFilterLists(
     ['colors', filter.colors],
     ['excludeColors', filter.excludeColors],
     ['keywords', filter.keywords],
+    ['excludeKeywords', filter.excludeKeywords],
   ];
   for (const [field, list] of lists) {
     if (list === undefined) continue;
@@ -1481,6 +2661,7 @@ function checkFilterLists(
       ['card type', filter.cardTypes, filter.excludeCardTypes],
       ['card type', filter.allCardTypes, filter.excludeCardTypes],
       ['color', filter.colors, filter.excludeColors],
+      ['keyword', filter.keywords, filter.excludeKeywords],
     ];
   for (const [what, wanted, excluded] of pairs) {
     if (wanted === undefined || excluded === undefined) continue;
@@ -1512,6 +2693,11 @@ function checkFilterLists(
     }
   }
   return found;
+}
+
+/** Validates a current-characteristic filter read over battlefield permanents. */
+export function checkPermanentFilterLists(filter: TargetFilter, path: string): Violation[] {
+  return checkFilterLists(filter, path, PERMANENT_CARD_KINDS, 'a permanent');
 }
 
 /**
@@ -1546,6 +2732,7 @@ function checkTargetFilter(target: TargetSpec, path: string): Violation[] {
     ];
   }
   const found: Violation[] = [];
+  const graveyardTarget = isGraveyardCardTargetKind(target.kind);
   const namesACardType =
     filter.cardTypes !== undefined ||
     filter.allCardTypes !== undefined ||
@@ -1555,7 +2742,7 @@ function checkTargetFilter(target: TargetSpec, path: string): Violation[] {
       violation(
         'ILLEGAL_TARGET_FILTER',
         at,
-        `"${target.kind}" has already fixed its card types by being the kind it is; only "targetPermanent" leaves that question open`,
+        `"${target.kind}" has already fixed its card types by being the kind it is; only "targetPermanent" and graveyard-card targets leave that question open`,
       ),
     );
   }
@@ -1577,8 +2764,22 @@ function checkTargetFilter(target: TargetSpec, path: string): Violation[] {
       ),
     );
   }
+  if (filter.excludeKeywords !== undefined) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_FILTER',
+        `${at}.excludeKeywords`,
+        `a target slot names a missing keyword with the "withoutKeyword" restriction; write { restriction: { kind: "withoutKeyword", keyword: "${filter.excludeKeywords[0] ?? 'flying'}" } } instead, so one card has one encoding`,
+      ),
+    );
+  }
   const wanted = filter.cardTypes ?? [];
-  if (wanted.length === 2 && wanted.includes('artifact') && wanted.includes('enchantment')) {
+  if (
+    !graveyardTarget &&
+    wanted.length === 2 &&
+    wanted.includes('artifact') &&
+    wanted.includes('enchantment')
+  ) {
     found.push(
       violation(
         'ILLEGAL_TARGET_FILTER',
@@ -1587,7 +2788,33 @@ function checkTargetFilter(target: TargetSpec, path: string): Violation[] {
       ),
     );
   }
-  return [...found, ...checkFilterLists(filter, at, PERMANENT_CARD_KINDS, 'a permanent')];
+  if (graveyardTarget && filter.combat !== undefined) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_FILTER',
+        `${at}.combat`,
+        'a card in a graveyard is not attacking or blocking, so a combat-role filter can never match it',
+      ),
+    );
+  }
+  if (graveyardTarget && filter.dealtDamageThisTurn !== undefined) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_FILTER',
+        `${at}.dealtDamageThisTurn`,
+        'damage-source history names a live battlefield incarnation, not a card in a graveyard',
+      ),
+    );
+  }
+  return [
+    ...found,
+    ...checkFilterLists(
+      filter,
+      at,
+      graveyardTarget ? CARD_KINDS : PERMANENT_CARD_KINDS,
+      graveyardTarget ? 'a card in a graveyard' : 'a permanent',
+    ),
+  ];
 }
 
 /**
@@ -1616,6 +2843,15 @@ function checkSpellFilter(filter: TargetFilter | undefined, path: string): Viola
       ),
     );
   }
+  if (filter.excludeKeywords !== undefined) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_FILTER',
+        `${path}.excludeKeywords`,
+        'a keyword absence on a spell is a printed-value query, while this filter dimension is defined against live battlefield characteristics; no reviewed stack effect has this shape',
+      ),
+    );
+  }
   if (filter.combat !== undefined) {
     found.push(
       violation(
@@ -1625,7 +2861,45 @@ function checkSpellFilter(filter: TargetFilter | undefined, path: string): Viola
       ),
     );
   }
+  if (filter.dealtDamageThisTurn !== undefined) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_FILTER',
+        `${path}.dealtDamageThisTurn`,
+        'damage-source history names a live battlefield incarnation, not a spell on the stack',
+      ),
+    );
+  }
   return [...found, ...checkFilterLists(filter, path, SPELL_CASTABLE_CARD_KINDS, 'a spell on the stack')];
+}
+
+/**
+ * The executable subset of CR 707 spell copies.
+ *
+ * A copied instant or sorcery resolves entirely from its retained card and
+ * stack choices. A copied permanent spell instead becomes a token as it
+ * resolves, which is a distinct kernel path this primitive does not yet own.
+ * Requiring the positive type filter keeps every accepted hand-authored card
+ * inside the engine's enforceable space while leaving that future extension
+ * explicit rather than failing only after a copied permanent reaches the top.
+ */
+function checkCopySpellFilter(filter: TargetFilter | undefined, path: string): Violation[] {
+  const found = checkSpellFilter(filter, path);
+  const cardTypes = filter?.cardTypes;
+  if (
+    cardTypes === undefined ||
+    cardTypes.length === 0 ||
+    cardTypes.some((kind) => kind !== 'instant' && kind !== 'sorcery')
+  ) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_FILTER',
+        `${path}.cardTypes`,
+        'copySpell currently supports only a positive instant-or-sorcery spell filter; copied permanent spells need their own token-resolution path',
+      ),
+    );
+  }
+  return found;
 }
 
 /**
@@ -1642,46 +2916,67 @@ function checkSpellFilter(filter: TargetFilter | undefined, path: string): Viola
 function checkTargetRestriction(target: TargetSpec, path: string): Violation[] {
   const restriction = targetRestrictionOf(target);
   if (restriction === null) return [];
-  if (restrictionFitsTargetKind(target.kind)) return [];
+  if (restrictionFitsTargetKind(target.kind, restriction)) return [];
+  const expected = restriction.kind === 'playerLostLifeThisTurn' ? 'players' : 'creatures';
   return [
     violation(
       'ILLEGAL_TARGET_RESTRICTION',
       `${path}.target.restriction`,
-      `a "${restriction.kind}" restriction narrows a choice among creatures; "${target.kind}" names no creature to narrow`,
+      `a "${restriction.kind}" restriction narrows a choice among ${expected}; "${target.kind}" names no ${expected.slice(0, -1)} to narrow`,
     ),
   ];
 }
 
 /**
- * `count` turns "target creature" into "up to two target creatures", and three
- * things have to hold for that sentence to mean what it prints.
+ * Plural cardinality turns one target slot into either "up to N target
+ * creatures" or "any number of target players". The chosen spelling, target
+ * kind, effect execution, and sibling constraints must agree.
  *
- * It is legal only on `targetCreature`: "up to two target players" and "up to
- * two target permanents" are not templates this vocabulary has a printed card
- * for, and widening the space a counted slot draws from is a second decision
- * this check should not make silently by leaving it unchecked. It is legal
+ * A bounded `count` greater than one is legal on `targetCreature`, or on
+ * `anyTarget` for divided damage. A count of one is the generic optional form
+ * of an otherwise legal singular slot: every effect already knows how to
+ * apply itself to its one chosen object, so it needs no plural execution arm.
+ * "Up to two target players" and "up to two target permanents" are not
+ * templates this vocabulary has a printed card for, and widening the space a
+ * counted slot draws from is a second decision this check should not make
+ * silently by leaving it unchecked. It is legal
  * only where `effectAllowsTargetCount` says the effect kind's resolution
  * already knows how to fold N objects into one application — see that table's
  * docblock in `@mtg/dsl`'s `effects.ts` for why the gate is per-effect rather
  * than per-target-kind. And it is mutually exclusive with `distinct`: the two
  * fields answer the same question, how many objects does this slot pick, and
  * `distinct` already answers it by being on a second, independent effect —
- * see `TargetSpecSchema`'s docblock.
+ * see `TargetSpecSchema`'s docblock. `anyNumber` has parallel kind and effect
+ * gates because its maximum is the live legal-candidate population.
  */
-function checkTargetCount(effect: TargetedEffect, path: string): Violation[] {
+export function checkTargetCardinality(effect: TargetedEffect, path: string): Violation[] {
   const count = targetCountOf(effect.target);
-  if (count === null) return [];
+  const minimum = targetMinimumOf(effect.target);
+  const anyNumber = targetsAnyNumber(effect.target);
+  if (count === null && !anyNumber && minimum === 0) return [];
   const found: Violation[] = [];
-  if (effect.target.kind !== 'targetCreature') {
+  const countKindIsLegal =
+    effect.target.kind === 'targetCreature' ||
+    (effect.kind === 'exileTarget' && effect.creatureBattlefieldOrGraveyard === true) ||
+    (effect.kind === 'detainPermanent' &&
+      (effect.target.kind === 'targetCreatureOpponentControls' ||
+        effect.target.kind === 'targetNonlandPermanentOpponentControls')) ||
+    (effect.kind === 'dealDamage' && effect.target.kind === 'anyTarget');
+  if (count !== null && !countKindIsLegal) {
     found.push(
       violation(
         'ILLEGAL_TARGET_COUNT',
         `${path}.target.count`,
-        `"up to ${count}" is printed only on "targetCreature"; "${effect.target.kind}" has no such template`,
+        `a counted ${effect.kind} slot cannot use "${effect.target.kind}"`,
       ),
     );
   }
-  if (!effectAllowsTargetCount(effect.kind)) {
+  if (
+    count !== null &&
+    count > 1 &&
+    (!effectAllowsTargetCount(effect.kind) ||
+      (effect.kind === 'exileTarget' && effect.creatureBattlefieldOrGraveyard !== true))
+  ) {
     found.push(
       violation(
         'ILLEGAL_TARGET_COUNT',
@@ -1690,12 +2985,69 @@ function checkTargetCount(effect: TargetedEffect, path: string): Violation[] {
       ),
     );
   }
+  const anyNumberKindIsLegal =
+    effect.target.kind === 'targetPlayer' ||
+    (effect.kind === 'dealDamage' && effect.target.kind === 'anyTarget');
+  if (anyNumber && !anyNumberKindIsLegal) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_COUNT',
+        `${path}.target.anyNumber`,
+        `"any number" is printed only on "targetPlayer"; "${effect.target.kind}" has no such template`,
+      ),
+    );
+  }
+  if (anyNumber && !effectAllowsAnyNumberTargets(effect.kind)) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_COUNT',
+        `${path}.target.anyNumber`,
+        `${effect.kind} has no native way to apply itself to any number of chosen targets at once`,
+      ),
+    );
+  }
+  if (count !== null && anyNumber) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_COUNT',
+        `${path}.target.anyNumber`,
+        '"count" and "anyNumber" are two different maximums for one target slot; choose one cardinality',
+      ),
+    );
+  }
+  if (minimum > 0 && count === null) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_COUNT',
+        `${path}.target.minimum`,
+        'a minimum needs a bounded count that states the same slot maximum',
+      ),
+    );
+  }
+  if (count !== null && minimum > count) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_COUNT',
+        `${path}.target.minimum`,
+        `the minimum ${String(minimum)} cannot exceed the maximum ${String(count)}`,
+      ),
+    );
+  }
+  if (count === 1 && minimum === 1) {
+    found.push(
+      violation(
+        'ILLEGAL_TARGET_COUNT',
+        `${path}.target.minimum`,
+        'a one-target minimum is the ordinary mandatory target slot; omit both cardinality fields for its canonical spelling',
+      ),
+    );
+  }
   if (requiresDistinctTarget(effect.target)) {
     found.push(
       violation(
         'ILLEGAL_TARGET_COUNT',
-        `${path}.target.count`,
-        '"count" and "distinct" both answer how many objects this slot picks; a slot cannot answer that twice',
+        `${path}.target.${anyNumber ? 'anyNumber' : 'count'}`,
+        'plural target cardinality and "distinct" both answer how many objects this slot picks; a slot cannot answer that twice',
       ),
     );
   }
@@ -1707,15 +3059,14 @@ function checkTargetCount(effect: TargetedEffect, path: string): Violation[] {
  * halves are held to each other.
  *
  * `scope` changes what the slot is *for*. Unscoped, `exileTarget` names the
- * creature it exiles. Scoped, it names the player whose creatures it exiles, and
- * the creatures are not targets (CR 115.1) — which is the whole reason the group
- * can be larger than one and can include hexproof bodies. Nothing in the schema
- * can say that, because `scope` is one optional field and `target` is another,
- * so `{ scope: 'creaturesThatPlayerControls', target: targetCreature }` parses
- * and means nothing: the kernel would read a player off a permanent target and
- * exile an empty group. Coded rather than silently ignored, for the reason every
- * check in this file is coded — a card whose text and behavior disagree is the
- * failure the vocabulary exists to prevent.
+ * creature it exiles. A targeted-player scope names the player whose creatures
+ * it exiles; a board-region scope chooses nothing and lets its filter select
+ * the group. In both scoped forms the creatures are not targets (CR 115.1), so
+ * the group may contain hexproof bodies. Nothing in the schema can relate
+ * these optional fields, so `{ scope: 'creaturesThatPlayerControls', target:
+ * targetCreature }` parses and means nothing. Coded rather than silently
+ * ignored, because a card whose text and behavior disagree is the failure the
+ * vocabulary exists to prevent.
  */
 /**
  * The kinds that carry a `scope` field, read off the union rather than listed.
@@ -1732,7 +3083,7 @@ type ScopedEffectKind = {
  * Which scopes each scoped primitive admits, and the answers are not the same
  * because the zones a scope names are not all zones the primitive can act on.
  *
- * `exileTarget` takes all three: exile is a zone change and `moveObject`'s
+ * `exileTarget` takes the three targeted-player zone scopes: exile is a zone change and `moveObject`'s
  * switches are total over `ZoneId`, so a card leaving a hand or a graveyard is
  * as ordinary as a permanent leaving the battlefield.
  *
@@ -1772,11 +3123,10 @@ type ScopedEffectKind = {
  * counter on a whole board or on the other side of one, and the two rows that
  * would say so stayed where they were.
  *
- * `exileTarget`'s row names its three outright rather than spreading
- * `EFFECT_SCOPES`. It used to spread, which was correct when every member read
- * a targeted player; the untargeted three would have widened the zone-move
- * primitive silently, and "exile all creatures" is a sentence no card in this
- * population prints.
+ * `exileTarget` names those three scopes outright and adds one reviewed space
+ * scope for Mass Polymorph: `permanentsYouControl` plus a creature filter.
+ * Spreading `EFFECT_SCOPES` would silently admit other board regions no card in
+ * the measured population asks this zone move to reach.
  *
  * `grantKeywordUntilEndOfTurn` takes one scope, and it is the narrowest row in
  * this table for the census reason the paragraph above gives. Every printed
@@ -1789,10 +3139,21 @@ type ScopedEffectKind = {
  * does.
  */
 const SCOPES_LEGAL_ON = {
-  exileTarget: ['creaturesThatPlayerControls', 'creatureCardsInPlayerHand', 'creatureCardsInPlayerGraveyard'],
+  exileTarget: [
+    'creaturesThatPlayerControls',
+    'creatureCardsInPlayerHand',
+    'creatureCardsInPlayerGraveyard',
+    'permanentsYouControl',
+    'allPermanents',
+  ],
   putCounters: ['creaturesThatPlayerControls', 'permanentsYouControl'],
-  returnFromGraveyard: ['creatureCardsInPlayerGraveyard'],
-  dealDamage: ['creaturesThatPlayerControls', 'allPermanents'],
+  returnFromGraveyard: ['creatureCardsInPlayerGraveyard', 'creatureCardsInAllGraveyards'],
+  dealDamage: [
+    'creaturesThatPlayerControls',
+    'allPermanents',
+    'permanentsOpponentsControl',
+    'targetAndPermanentsItsPlayerControls',
+  ],
   destroyPermanent: ['creaturesThatPlayerControls', 'allPermanents'],
   pumpUntilEndOfTurn: [
     'creaturesThatPlayerControls',
@@ -1802,6 +3163,8 @@ const SCOPES_LEGAL_ON = {
   ],
   tapPermanent: ['creaturesThatPlayerControls'],
   grantKeywordUntilEndOfTurn: ['permanentsYouControl'],
+  regeneratePermanent: ['permanentsYouControl'],
+  blocksThisTurnIfAble: ['permanentsOpponentsControl'],
 } as const satisfies Readonly<Record<ScopedEffectKind, readonly EffectScope[]>>;
 
 /**
@@ -1882,6 +3245,8 @@ const UNSCOPED_MAY_NAME_A_PLAYER: Readonly<Record<ScopedEffectKind, boolean>> = 
   pumpUntilEndOfTurn: false,
   tapPermanent: false,
   grantKeywordUntilEndOfTurn: false,
+  regeneratePermanent: false,
+  blocksThisTurnIfAble: false,
 };
 
 /** True when this primitive carries a `scope` field at all. */
@@ -1893,13 +3258,11 @@ function isScopedEffect(effect: Effect): effect is EffectOf<ScopedEffectKind> {
  * The `scopeFilter` a primitive carries, or `undefined` when it carries no such
  * field.
  *
- * Six of the eight scoped primitives have one and two do not, so the field is
- * read through a guard rather than off the narrowed union: `exileTarget` and
- * `returnFromGraveyard` take only scopes that name their own objects, and a
- * filter on them is a sentence with two answers to one question. `putCounters`
- * left that pair when it gained `permanentsYouControl` (`mtg-hfex`), because a
- * scope naming a region of the board names no objects and the filter is the
- * only thing that can.
+ * Seven of the eight scoped primitives have one and `returnFromGraveyard` does
+ * not, so the field is read through a guard rather than off the narrowed
+ * union. `exileTarget` joined the filtered group for Mass Polymorph: a scope
+ * naming a region of the board names no objects and the filter is the only
+ * thing that can.
  * Reading it here rather than per-arm is what lets `checkEffectScope` state that
  * rule once for every primitive that could break it.
  */
@@ -1918,9 +3281,66 @@ function scopeFilterOf(effect: EffectOf<ScopedEffectKind>): TargetFilter | undef
  * by `checkAbilityEffectTarget`, which reads `legalTargetsFor` and so sees only
  * that the player slot is legal on the row.
  */
-export function checkEffectScope(effect: Effect, path: string): Violation[] {
+export function checkEffectScope(
+  effect: Effect,
+  path: string,
+  allowSourceReferentExclusion = false,
+): Violation[] {
+  if (
+    effect.kind === 'pumpUntilEndOfTurn' &&
+    effect.excludeReferent === true &&
+    !allowSourceReferentExclusion &&
+    (effect.scope !== 'creaturesThatPlayerControls' || effect.target.kind !== 'thatCreaturesController')
+  ) {
+    return [
+      violation(
+        'ILLEGAL_EFFECT_SCOPE',
+        `${path}.excludeReferent`,
+        'excludeReferent spells “other creatures” only on a controller cohort read from an earlier creature target',
+      ),
+    ];
+  }
+  if (effect.kind === 'putCounters' && effect.keyword !== undefined && effect.scope === undefined) {
+    return [
+      violation(
+        'ILLEGAL_EFFECT_SCOPE',
+        `${path}.keyword`,
+        'a counter-placement keyword rider refers to “those creatures”; add a scope that binds the affected group',
+      ),
+    ];
+  }
+  if (
+    effect.kind === 'exileTarget' &&
+    effect.returnAtNextEndStep !== undefined &&
+    effect.scope !== undefined
+  ) {
+    return [
+      violation(
+        'ILLEGAL_EFFECT_SCOPE',
+        `${path}.returnAtNextEndStep`,
+        'a delayed return retains one exiled card incarnation; a scoped exile may move a group and cannot supply that one referent',
+      ),
+    ];
+  }
+  if (
+    effect.kind === 'exileTarget' &&
+    effect.returnAtNextEndStep !== undefined &&
+    isGraveyardCardTargetKind(effect.target.kind)
+  ) {
+    return [
+      violation(
+        'ILLEGAL_EFFECT_SCOPE',
+        `${path}.returnAtNextEndStep`,
+        'a delayed return retains one battlefield permanent exiled by this effect; a graveyard card target was never on the battlefield',
+      ),
+    ];
+  }
+  if (effect.kind === 'returnFromGraveyard' && effect.fromBattlefieldThisTurn === true) return [];
   if (!isScopedEffect(effect)) return [];
-  const namesAPlayer = targetKindNamesAPlayer(effect.target.kind);
+  const resolvesToPlayer =
+    targetKindNamesAPlayer(effect.target.kind) ||
+    effect.target.kind === 'thatPlayer' ||
+    effect.target.kind === 'thatCreaturesController';
   const legalScopes: readonly EffectScope[] = SCOPES_LEGAL_ON[effect.kind];
   const filter = scopeFilterOf(effect);
   if (effect.scope === undefined) {
@@ -1934,6 +3354,16 @@ export function checkEffectScope(effect: Effect, path: string): Violation[] {
       ];
     }
     if (effect.target.kind === 'noTarget') {
+      // A source may deal damage to its own controller without targeting them.
+      // The kernel reads the controller fixed on the resolving stack entry,
+      // and Forge spells the same relation as `Defined$ You`.
+      if (effect.kind === 'dealDamage') return [];
+      // A player sweep supplies the recipients that an ordinary unscoped
+      // effect reads from its target. Damage is the first scoped primitive to
+      // carry both fields: it may hit players alone, or combine those players
+      // with a battlefield scope in one simultaneous batch. `checkPlayerSweep`
+      // still refuses a live target beside the player sweep.
+      if ('players' in effect && effect.players !== undefined) return [];
       // The other half of the missing-scope rule, and it exists because the
       // untargeted scopes put `noTarget` on three of these rows. A scoped
       // primitive acts on objects; with no scope it acts on the one object it
@@ -1948,7 +3378,7 @@ export function checkEffectScope(effect: Effect, path: string): Violation[] {
         ),
       ];
     }
-    if (!namesAPlayer || UNSCOPED_MAY_NAME_A_PLAYER[effect.kind]) return [];
+    if (!resolvesToPlayer || UNSCOPED_MAY_NAME_A_PLAYER[effect.kind]) return [];
     return [
       violation(
         'ILLEGAL_EFFECT_SCOPE',
@@ -1976,7 +3406,7 @@ export function checkEffectScope(effect: Effect, path: string): Violation[] {
         ),
       ];
     }
-    if (namesAPlayer) return [];
+    if (resolvesToPlayer) return [];
     return [
       violation(
         'ILLEGAL_EFFECT_SCOPE',
@@ -1985,7 +3415,70 @@ export function checkEffectScope(effect: Effect, path: string): Violation[] {
       ),
     ];
   }
+  if (EFFECT_SCOPE_SUBJECT[effect.scope] === 'targetedPlayerOrPermanentController') {
+    return checkTargetOrControllerScope(effect, effect.scope, filter, path);
+  }
+  if (EFFECT_SCOPE_SUBJECT[effect.scope] === 'allPlayers') {
+    if (effect.target.kind !== 'noTarget') {
+      return [
+        violation(
+          'ILLEGAL_EFFECT_SCOPE',
+          `${path}.scope`,
+          `scope "${effect.scope}" reads every player's zone and this effect targets "${effect.target.kind}"; give it a "noTarget" slot`,
+        ),
+      ];
+    }
+    return filter === undefined
+      ? []
+      : [
+          violation(
+            'ILLEGAL_EFFECT_SCOPE',
+            `${path}.scopeFilter`,
+            `scope "${effect.scope}" already names the cards it reaches, so a scopeFilter beside it would be a second, competing answer`,
+          ),
+        ];
+  }
   return checkSpaceScope(effect, effect.scope, filter, path);
+}
+
+/** A targeted player/planeswalker plus a group read from that target's seat. */
+function checkTargetOrControllerScope(
+  effect: EffectOf<ScopedEffectKind>,
+  scope: EffectScope,
+  filter: TargetFilter | undefined,
+  path: string,
+): Violation[] {
+  if (effect.target.kind !== 'targetPlayerOrPlaneswalker') {
+    return [
+      violation(
+        'ILLEGAL_EFFECT_SCOPE',
+        `${path}.scope`,
+        `scope "${scope}" needs a target player or planeswalker whose controller names the group`,
+      ),
+    ];
+  }
+  if (filter === undefined || Object.keys(filter).length === 0) {
+    return [
+      violation(
+        'ILLEGAL_EFFECT_SCOPE',
+        `${path}.scopeFilter`,
+        `scope "${scope}" needs a scopeFilter saying which permanents that player controls`,
+      ),
+    ];
+  }
+  const lists = checkFilterLists(filter, `${path}.scopeFilter`, PERMANENT_CARD_KINDS, 'a permanent');
+  if (effect.kind !== 'dealDamage') return lists;
+  const missed = unreachableSweepBodies(filter, DAMAGEABLE_CARD_KINDS);
+  return missed === null
+    ? lists
+    : [
+        ...lists,
+        violation(
+          'ILLEGAL_EFFECT_SCOPE',
+          `${path}.scopeFilter.${missed.field}`,
+          `damage is dealt only to ${DAMAGEABLE_CARD_KINDS.join(' and ')} permanents, and this scope names ${describeSweepBodies(missed)}`,
+        ),
+      ];
 }
 
 /**
@@ -2020,6 +3513,15 @@ function checkSpaceScope(
   filter: TargetFilter | undefined,
   path: string,
 ): Violation[] {
+  if (effect.kind === 'grantKeywordUntilEndOfTurn' && effect.removeKeywordAbility !== undefined) {
+    return [
+      violation(
+        'ILLEGAL_EFFECT_SCOPE',
+        `${path}.removeKeywordAbility`,
+        'a temporary keyword removal is measured only on one source creature; no reviewed card or executor proves a mass removal spelling',
+      ),
+    ];
+  }
   if (effect.target.kind !== 'noTarget') {
     return [
       violation(
@@ -2030,6 +3532,7 @@ function checkSpaceScope(
     ];
   }
   if (filter === undefined || Object.keys(filter).length === 0) {
+    if (effect.kind === 'exileTarget' && scope === 'allPermanents') return [];
     return [
       violation(
         'ILLEGAL_EFFECT_SCOPE',
@@ -2047,7 +3550,11 @@ function checkSpaceScope(
   // this filter gained a field whose *only* legal site is this one — a field
   // validated nowhere is a field that means whatever the first author types.
   const lists = checkFilterLists(filter, `${path}.scopeFilter`, PERMANENT_CARD_KINDS, 'a permanent');
-  if (effect.kind === 'grantKeywordUntilEndOfTurn') {
+  if (
+    effect.kind === 'grantKeywordUntilEndOfTurn' ||
+    effect.kind === 'blocksThisTurnIfAble' ||
+    (effect.kind === 'putCounters' && effect.keyword !== undefined)
+  ) {
     const missed = unreachableSweepBodies(filter, KEYWORD_BEARING_CARD_KINDS);
     if (missed === null) return lists;
     return [
@@ -2055,7 +3562,7 @@ function checkSpaceScope(
       violation(
         'ILLEGAL_EFFECT_SCOPE',
         `${path}.scopeFilter.${missed.field}`,
-        `a granted keyword is a fact about combat and only a ${KEYWORD_BEARING_CARD_KINDS.join(' or a ')} takes part in one, and this sweep names ${describeSweepBodies(missed)}; narrow the filter to the permanents a keyword can reach`,
+        `${effect.kind === 'blocksThisTurnIfAble' ? 'a block requirement' : 'a granted keyword'} is a fact about combat and only a ${KEYWORD_BEARING_CARD_KINDS.join(' or a ')} takes part in one, and this sweep names ${describeSweepBodies(missed)}; narrow the filter to the permanents the combat rule can reach`,
       ),
     ];
   }
@@ -2134,7 +3641,7 @@ function describeSweepBodies(missed: { readonly unreachable: readonly string[] }
  */
 export function checkPlayerSweep(effect: Effect, path: string): Violation[] {
   if (!('players' in effect) || effect.players === undefined) return [];
-  if (effect.target.kind === 'noTarget') return [];
+  if (!hasTarget(effect) || effect.target.kind === 'noTarget') return [];
   return [
     violation(
       'ILLEGAL_EFFECT_SCOPE',
@@ -2221,17 +3728,35 @@ export function checkReferentTargets(effects: readonly Effect[], pathPrefix: str
     const kind = effect.target.kind;
     const space = referentSourceSpace(kind);
     if (space === null) continue;
-    if (referentSourceIndex(effects, index) !== null) continue;
+    const sourceIndex = referentSourceIndex(effects, index);
+    if (sourceIndex !== null) {
+      if (
+        effect.kind === 'pumpUntilEndOfTurn' &&
+        effect.excludeReferent === true &&
+        effects[sourceIndex]?.kind !== 'destroyPermanent'
+      ) {
+        found.push(
+          violation(
+            'ILLEGAL_REFERENT_TARGET',
+            `${pathPrefix}[${index}].excludeReferent`,
+            'the proven retained-controller exclusion protocol requires the earlier creature target to be destroyed',
+          ),
+        );
+      }
+      continue;
+    }
     const earlierChoosers = effects
       .slice(0, index)
       .filter(
         (earlier) =>
           hasTarget(earlier) &&
           effectChoosesTarget(earlier) &&
-          targetCountOf(earlier.target) === null &&
+          !isMultipleTargetSpec(earlier.target) &&
           (space === 'creature'
             ? targetKindNamesACreature(earlier.target.kind)
-            : targetKindNamesAPlayer(earlier.target.kind)),
+            : space === 'player'
+              ? targetKindNamesAPlayer(earlier.target.kind)
+              : targetKindNamesAPlayerOrPlaneswalker(earlier.target.kind)),
       ).length;
     found.push(
       violation(
@@ -2246,20 +3771,218 @@ export function checkReferentTargets(effects: readonly Effect[], pathPrefix: str
   return found;
 }
 
+function fieldsUsingAmountKind(effect: Effect, kind: ComputedAmount['kind']): string[] {
+  return Object.entries(effect)
+    .filter(
+      ([, value]) => typeof value === 'object' && value !== null && 'kind' in value && value.kind === kind,
+    )
+    .map(([field]) => field);
+}
+
+/** Every resolution-local amount has exactly one earlier writer it can read. */
+export function checkReferentAmounts(
+  effects: readonly Effect[],
+  pathPrefix: string,
+  allowTriggeringCreatureAmounts = false,
+  triggeringDamageUse: 'none' | 'dealtDamage' | 'combatDamageMill' | 'combatDamageCounters' = 'none',
+  allowTriggeringSpellChosenColorCount = false,
+): Violation[] {
+  const found: Violation[] = [];
+  for (const [index, effect] of effects.entries()) {
+    const triggeringPowerFields = fieldsUsingAmountKind(effect, 'triggeringCreaturePower');
+    if (!allowTriggeringCreatureAmounts) {
+      for (const field of triggeringPowerFields) {
+        found.push(
+          violation(
+            'ILLEGAL_REFERENT_AMOUNT',
+            `${pathPrefix}[${index}].${field}.kind`,
+            'triggeringCreaturePower is legal only on a triggered ability whose event retains a creature',
+          ),
+        );
+      }
+    }
+    const triggeringToughnessFields = fieldsUsingAmountKind(effect, 'triggeringCreatureToughness');
+    if (!allowTriggeringCreatureAmounts) {
+      for (const field of triggeringToughnessFields) {
+        found.push(
+          violation(
+            'ILLEGAL_REFERENT_AMOUNT',
+            `${pathPrefix}[${index}].${field}.kind`,
+            'triggeringCreatureToughness is legal only on a triggered ability whose event retains a creature',
+          ),
+        );
+      }
+    }
+    const damageFields = fieldsUsingAmountKind(effect, 'triggeringDamageAmount');
+    for (const field of damageFields) {
+      const legalDealtDamage =
+        triggeringDamageUse === 'dealtDamage' && effect.kind === 'dealDamage' && field === 'amount';
+      const legalCombatMill =
+        triggeringDamageUse === 'combatDamageMill' && effect.kind === 'millCards' && field === 'count';
+      const legalCombatCounters =
+        triggeringDamageUse === 'combatDamageCounters' && effect.kind === 'putCounters' && field === 'count';
+      if (legalDealtDamage || legalCombatMill || legalCombatCounters) continue;
+      found.push(
+        violation(
+          'ILLEGAL_REFERENT_AMOUNT',
+          `${pathPrefix}[${index}].${field}.kind`,
+          triggeringDamageUse === 'dealtDamage'
+            ? 'triggeringDamageAmount is legal only in dealDamage.amount'
+            : triggeringDamageUse === 'combatDamageMill'
+              ? 'triggeringDamageAmount is legal only in millCards.count'
+              : triggeringDamageUse === 'combatDamageCounters'
+                ? 'triggeringDamageAmount is legal only in putCounters.count'
+                : 'triggeringDamageAmount is legal only in dealDamage.amount on a selfIsDealtDamage trigger, millCards.count on a selfDealsCombatDamageToPlayer trigger, or putCounters.count on a controlledCreatureDealsCombatDamageToPlayer trigger',
+        ),
+      );
+    }
+    const chosenColorFields = fieldsUsingAmountKind(effect, 'triggeringSpellChosenColorCount');
+    if (!allowTriggeringSpellChosenColorCount) {
+      for (const field of chosenColorFields) {
+        found.push(
+          violation(
+            'ILLEGAL_REFERENT_AMOUNT',
+            `${pathPrefix}[${index}].${field}.kind`,
+            'triggeringSpellChosenColorCount is legal only in the gainLife amount of the closed chosen-color cast trigger',
+          ),
+        );
+      }
+    }
+    const fields = fieldsUsingAmountKind(effect, 'thatCreatureToughness');
+    if (fields.length > 0 && referentAmountSourceIndex(effects, index) === null) {
+      const earlierChoosers = effects
+        .slice(0, index)
+        .filter(
+          (earlier) =>
+            hasTarget(earlier) &&
+            effectChoosesTarget(earlier) &&
+            !isMultipleTargetSpec(earlier.target) &&
+            targetKindNamesACreature(earlier.target.kind),
+        ).length;
+      for (const field of fields) {
+        found.push(
+          violation(
+            'ILLEGAL_REFERENT_AMOUNT',
+            `${pathPrefix}[${index}].${field}.kind`,
+            earlierChoosers === 0
+              ? '"thatCreatureToughness" reads what an earlier effect chose, and no effect before this one chooses a creature; give an earlier effect a creature slot or use another amount'
+              : `"thatCreatureToughness" reads what an earlier effect chose, and ${String(earlierChoosers)} earlier effects each choose a creature, so the amount has more than one reading; split the card`,
+          ),
+        );
+      }
+    }
+
+    if (effect.kind === 'gainLife' && effect.amountFrom === 'thatPlayersHandSize') {
+      const earlierChoosers = effects
+        .slice(0, index)
+        .filter(
+          (earlier) =>
+            hasTarget(earlier) &&
+            effectChoosesTarget(earlier) &&
+            !isMultipleTargetSpec(earlier.target) &&
+            targetKindNamesAPlayer(earlier.target.kind),
+        ).length;
+      if (effect.amount !== 0) {
+        found.push(
+          violation(
+            'ILLEGAL_REFERENT_AMOUNT',
+            `${pathPrefix}[${index}].amount`,
+            'thatPlayersHandSize supplies the whole live amount, so the literal amount field must be 0',
+          ),
+        );
+      }
+      if (playerReferentAmountSourceIndex(effects, index) === null) {
+        found.push(
+          violation(
+            'ILLEGAL_REFERENT_AMOUNT',
+            `${pathPrefix}[${index}].amountFrom`,
+            earlierChoosers === 0
+              ? 'thatPlayersHandSize reads an earlier player target, but no instruction before this one chooses a player'
+              : `thatPlayersHandSize has ${String(earlierChoosers)} earlier player targets, so "that player" has more than one reading; split the card`,
+          ),
+        );
+      }
+    }
+
+    const revealedFields = fieldsUsingAmountKind(effect, 'revealedCardManaValueThisResolution');
+    if (revealedFields.length > 0 && revealedCardAmountSourceIndex(effects, index) === null) {
+      const earlierWriters = effects
+        .slice(0, index)
+        .filter((earlier) => earlier.kind === 'revealTopCardToHand').length;
+      for (const field of revealedFields) {
+        found.push(
+          violation(
+            'ILLEGAL_REFERENT_AMOUNT',
+            `${pathPrefix}[${index}].${field}.kind`,
+            earlierWriters === 0
+              ? '"revealedCardManaValueThisResolution" reads a card an earlier effect revealed and moved, but no revealTopCardToHand effect precedes it'
+              : `"revealedCardManaValueThisResolution" has ${String(earlierWriters)} earlier revealTopCardToHand writers, so "its" has more than one reading; split the card`,
+          ),
+        );
+      }
+    }
+
+    const shuffledFields = fieldsUsingAmountKind(effect, 'cardsShuffledFromGraveyardThisResolution');
+    if (shuffledFields.length > 0) {
+      const earlierWriters = effects
+        .slice(0, index)
+        .filter((earlier) => earlier.kind === 'shuffleGraveyardIntoLibrary').length;
+      if (earlierWriters !== 1 || effect.kind !== 'millCards' || effect.target.kind !== 'targetPlayer') {
+        for (const field of shuffledFields) {
+          found.push(
+            violation(
+              'ILLEGAL_REFERENT_AMOUNT',
+              `${pathPrefix}[${index}].${field}.kind`,
+              'cardsShuffledFromGraveyardThisResolution is legal only as the count of a target-player mill after exactly one graveyard shuffle-back',
+            ),
+          );
+        }
+      }
+    }
+
+    const sacrificedPowerFields = fieldsUsingAmountKind(effect, 'sacrificedPermanentPowerThisResolution');
+    if (sacrificedPowerFields.length > 0 && sacrificedPermanentAmountSourceIndex(effects, index) === null) {
+      const earlierSacrifices = effects
+        .slice(0, index)
+        .filter((earlier) => earlier.kind === 'sacrificePermanent');
+      const onePermanentSacrifices = earlierSacrifices.filter((earlier) => (earlier.count ?? 1) === 1);
+      for (const field of sacrificedPowerFields) {
+        let message =
+          'sacrificedPermanentPowerThisResolution needs an earlier sacrifice instruction affecting one player';
+        if (earlierSacrifices.length === 0) {
+          message = 'sacrificedPermanentPowerThisResolution has no earlier sacrifice to read';
+        } else if (earlierSacrifices.length > 1) {
+          message = `sacrificedPermanentPowerThisResolution has ${String(earlierSacrifices.length)} earlier sacrifices, so the power has more than one possible writer; split the card`;
+        } else if (onePermanentSacrifices.length === 0) {
+          message =
+            'sacrificedPermanentPowerThisResolution needs an earlier sacrifice of exactly one permanent';
+        }
+        found.push(violation('ILLEGAL_REFERENT_AMOUNT', `${pathPrefix}[${index}].${field}.kind`, message));
+      }
+    }
+  }
+  return found;
+}
+
 /**
- * The same effect object twice is not two effects.
+ * The same effect object twice is usually not two effects.
  *
- * The kernel resolves an effects list index by index and picks a target per
- * index, so `[destroyPermanent, destroyPermanent]` enumerates a cast that aims
- * both copies at the same creature and destroys one. The card prints "Destroy
- * target creature. Destroy target creature." and is priced as double removal,
- * which is a card whose text and behavior disagree: exactly what the
- * generator's output space must not contain. A repeat is a slip, a design that
- * wants a real primitive (`drawCards` with a count, a token count), or a design
- * that wants a second *body* — and that last one now has an answer, so it is
- * still not a second identical entry: it is `target.distinct` on the second,
- * which prints "another target creature" and which the kernel refuses to
- * resolve against the first slot's choice.
+ * The kernel resolves an effects list index by index, so a byte-identical pair
+ * creates two independently chosen slots even when the author meant one
+ * counted effect. A repeat is ordinarily a slip, a design that wants a real
+ * primitive (`drawCards` with a count, a token count), or a design that wants
+ * a second *body* — and that last one has an answer, so it is still not a
+ * second identical entry: it is `target.distinct` on the second, which prints
+ * "another target creature" and which the kernel refuses to resolve against
+ * the first slot's choice.
+ *
+ * Common Bond is the narrow exception. Its two independently targeted
+ * `putCounters` instructions are byte-identical, and Magic permits both target
+ * slots to name either the same creature or different creatures. Collapsing
+ * them to `count: 2` would force one target; adding `distinct` would forbid the
+ * same target. `putCounters` is hand-authored-only, so admitting this exact
+ * targeted primitive does not widen the generator output space or weaken the
+ * guard for generated effects.
  *
  * Compared by `canonicalJson` so key order cannot hide a duplicate.
  */
@@ -2273,11 +3996,12 @@ function checkDuplicateEffects(effects: readonly Effect[]): Violation[] {
       firstSeen.set(key, index);
       continue;
     }
+    if (effects.length === 2 && effect.kind === 'putCounters' && effectChoosesTarget(effect)) continue;
     found.push(
       violation(
         'DUPLICATE_EFFECT',
         `effects[${index}]`,
-        `this ${effect.kind} repeats effects[${earlier}] exactly; the kernel would resolve both against the same target, so delete it, express the intent as one effect, or — when the design wants a second body — set target.distinct on this entry`,
+        `this ${effect.kind} repeats effects[${earlier}] exactly; delete it, express the intent as one effect, or — when the design wants a second body — set target.distinct on this entry`,
       ),
     );
   }
@@ -2301,7 +4025,142 @@ function checkDuplicateEffects(effects: readonly Effect[]): Violation[] {
  * self-regeneration creature-only rule, which is the same shape.
  */
 function checkSourceBodyEffect(effect: Effect, path: string): Violation[] {
-  if (!isSourceBodyEffect(effect.kind)) return [];
+  if (effect.kind === 'copyNextInstantOrSorceryThisTurn') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'copyNextInstantOrSorceryThisTurn retains its permanent source through a delayed trigger and is legal only inside a permanent ability',
+      ),
+    ];
+  }
+  if (effect.kind === 'doubleSourceCounters') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'doubleSourceCounters reads counters from its battlefield source and is legal only inside a permanent ability',
+      ),
+    ];
+  }
+  if (effect.kind === 'chooseBlockersThisCombat') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'chooseBlockersThisCombat is legal only inside a creature selfAndThreeOthersAttack trigger',
+      ),
+    ];
+  }
+  if (effect.kind === 'preventNextDamageToYouAndRetaliate' && effect.target.kind !== 'noTarget') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'preventNextDamageToYouAndRetaliate reads X from its own activation cost and is legal only inside an activated ability',
+      ),
+    ];
+  }
+  if (effect.kind === 'flipCoin') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'flipCoin currently carries deterministic outcome branches only on an activated ability',
+      ),
+    ];
+  }
+  if (effect.kind === 'createTokenCopyOfSelf') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'createTokenCopyOfSelf is legal only in the closed Pack Rat activated-ability bundle',
+      ),
+    ];
+  }
+  if (isSourceLinkedExileWriter(effect) || effect.kind === 'moveSourceLinkedExile') {
+    return [
+      violation(
+        'SOURCE_LINKED_EXILE_INVALID',
+        path,
+        'source-linked exile belongs to a permanent whose enters trigger writes the relation and whose matching departure trigger reads it; a resolving spell has no battlefield source',
+      ),
+    ];
+  }
+  if (effect.kind === 'returnSourceFromGraveyard') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'returnSourceFromGraveyard reads the exact card whose ability is on the stack; print it inside an activated ability whose activationZone is "graveyard"',
+      ),
+    ];
+  }
+  if (effect.kind === 'returnDepartedSourceToOwnerHand') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'returnDepartedSourceToOwnerHand reads departure provenance retained by a permanent trigger; a spell has no departed permanent source',
+      ),
+    ];
+  }
+  if (effect.kind === 'putDepartedSourceOnTopOfOwnerLibrary') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'putDepartedSourceOnTopOfOwnerLibrary reads departure provenance retained by a dies trigger; a spell has no departed permanent source',
+      ),
+    ];
+  }
+  if (effect.kind === 'shuffleSourceIntoOwnerLibrary') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'shuffleSourceIntoOwnerLibrary reads graveyard provenance retained by a source trigger; a spell has no departed source',
+      ),
+    ];
+  }
+  if (effect.kind === 'targetPlayerGainsControlOfSelfPermanent') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'targetPlayerGainsControlOfSelfPermanent reads the battlefield permanent whose ability is resolving, and a spell on the stack has no such source incarnation; print it inside a permanent ability',
+      ),
+    ];
+  }
+  if (effect.kind === 'putSourceAndTargetOnOwnersLibrariesThenShuffle') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'putSourceAndTargetOnOwnersLibrariesThenShuffle reads a battlefield permanent source incarnation and is legal only inside a permanent ability',
+      ),
+    ];
+  }
+  if (effect.kind === 'animateLandWhileSourceOnBattlefield') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        'animateLandWhileSourceOnBattlefield reads the exact battlefield source retained by a selfEnters trigger; a resolving spell has no battlefield source incarnation',
+      ),
+    ];
+  }
+  if (effect.kind === 'animateSourceUntilEndOfTurn') {
+    return [
+      violation(
+        'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path,
+        "animateSourceUntilEndOfTurn reads a battlefield artifact source incarnation and is legal only inside that permanent's activated ability",
+      ),
+    ];
+  }
+  if (!isSourceBodyEffect(effect.kind) || isTargetedFight(effect)) return [];
   return [
     violation(
       'EFFECT_ILLEGAL_ON_CARD_TYPE',
@@ -2325,8 +4184,29 @@ function checkEffectList(
   cardColors: readonly Color[],
 ): Violation[] {
   const found: Violation[] = [];
+  const tolledCounter = effects.find(
+    (effect) => effect.kind === 'counterSpell' && effect.unlessCost !== undefined,
+  );
+  if (tolledCounter !== undefined && effects.length !== 1) {
+    found.push(
+      violation(
+        'UNLESS_NEEDS_ONE_EFFECT',
+        pathPrefix,
+        'a mode-local counter toll modifies exactly one counter instruction; put it in a single-effect spell or mode',
+      ),
+    );
+  }
   for (const [index, effect] of effects.entries()) {
     const path = `${pathPrefix}[${index}]`;
+    if (effect.kind === 'loseLife' && effect.amountFrom === 'triggeringPlayerLifeHalfRoundedUp') {
+      found.push(
+        violation(
+          'EFFECT_ILLEGAL_ON_CARD_TYPE',
+          `${path}.amountFrom`,
+          'triggeringPlayerLifeHalfRoundedUp requires an each-player upkeep trigger that retains the affected player',
+        ),
+      );
+    }
     found.push(...checkEffectParams(effect, path, cardColors));
     found.push(...checkEffectTarget(effect, path));
     found.push(...checkEffectScope(effect, path));
@@ -2335,6 +4215,7 @@ function checkEffectList(
   }
   found.push(...checkDistinctTargets(effects));
   found.push(...checkReferentTargets(effects, pathPrefix));
+  found.push(...checkReferentAmounts(effects, pathPrefix));
   found.push(...checkDuplicateEffects(effects));
   return found;
 }
@@ -2343,6 +4224,45 @@ export function checkEffects(card: Card): Violation[] {
   const found: Violation[] = [];
   const isSpell = card.kind === 'instant' || card.kind === 'sorcery';
   const modes = card.modes ?? [];
+  const topXOriginalProfiles = [...card.effects, ...modes.flatMap((mode) => mode.effects)].filter(
+    (effect) =>
+      effect.kind === 'castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts' &&
+      effect.topXOriginalsProfile === true,
+  );
+  if (topXOriginalProfiles.length > 0) {
+    if (!isSpell || !card.manaCost.hasX) {
+      found.push(
+        violation(
+          'CHOSEN_X_WITHOUT_X_COST',
+          'effects',
+          'the top-X original-card cast profile is legal only on a spell whose own mana cost contains X',
+        ),
+      );
+    }
+    if (
+      topXOriginalProfiles.length !== 1 ||
+      card.effects.length !== 1 ||
+      card.effects[0] !== topXOriginalProfiles[0] ||
+      modes.length !== 0
+    ) {
+      found.push(
+        violation(
+          'EFFECT_ILLEGAL_ON_CARD_TYPE',
+          'effects',
+          'the top-X exile, optional cast window, and remainder cleanup are one closed single-effect spell profile',
+        ),
+      );
+    }
+  }
+  if (card.kind === 'land' && card.cannotBeCountered === true) {
+    found.push(
+      violation(
+        'CASTING_RULE_ILLEGAL_ON_CARD_TYPE',
+        'cannotBeCountered',
+        'a land is played rather than cast as a spell, so it cannot carry a rule about being countered',
+      ),
+    );
+  }
   if (!isSpell && card.effects.length > 0) {
     found.push(
       violation(
@@ -2379,6 +4299,19 @@ export function checkEffects(card: Card): Violation[] {
       ),
     );
   }
+  if (isSpell) {
+    for (const [index, effectIndex] of (card.printedEffectParagraphBreaks ?? []).entries()) {
+      if (effectIndex >= card.effects.length) {
+        found.push(
+          violation(
+            'EFFECT_PARAM_OUT_OF_RANGE',
+            `printedEffectParagraphBreaks[${String(index)}]`,
+            `paragraph break ${String(effectIndex)} must name an effect after the first and before ${String(card.effects.length)}`,
+          ),
+        );
+      }
+    }
+  }
   if (!isSpell && card.may !== undefined) {
     found.push(
       violation(
@@ -2397,12 +4330,42 @@ export function checkEffects(card: Card): Violation[] {
       ),
     );
   }
+  const hasEffectLocalCounterToll = [...card.effects, ...modes.flatMap((mode) => mode.effects)].some(
+    (effect) => effect.kind === 'counterSpell' && effect.unlessCost !== undefined,
+  );
+  const hasChosenXCounterToll = [...card.effects, ...modes.flatMap((mode) => mode.effects)].some(
+    (effect) =>
+      effect.kind === 'counterSpell' &&
+      effect.unlessCost !== undefined &&
+      'kind' in effect.unlessCost &&
+      effect.unlessCost.kind === 'chosenX',
+  );
+  if (hasChosenXCounterToll && (card.kind === 'land' || !card.manaCost.hasX)) {
+    found.push(
+      violation(
+        'UNLESS_CHOSEN_X_WITHOUT_X_COST',
+        'effects',
+        'a chosen-X counter toll needs an {X} in this spell cost for its caster to announce',
+      ),
+    );
+  }
+  if (card.unless !== undefined && hasEffectLocalCounterToll) {
+    found.push(
+      violation(
+        'UNLESS_DUPLICATED',
+        'unless',
+        'a spell cannot carry both a card-level "unless" clause and an effect-local counter toll; keep the clause that belongs to the counter instruction',
+      ),
+    );
+  }
   found.push(...checkUnless(card, isSpell, modes.length > 0));
   found.push(...checkEffectList(card.effects, 'effects', card.colors));
   found.push(...checkChosenXOnSpell(card, card.effects, 'effects'));
+  found.push(...checkPaidSacrificePowerOnSpell(card, card.effects, 'effects'));
   for (const [modeIndex, mode] of modes.entries()) {
     found.push(...checkEffectList(mode.effects, `modes[${modeIndex}].effects`, card.colors));
     found.push(...checkChosenXOnSpell(card, mode.effects, `modes[${modeIndex}].effects`));
+    found.push(...checkPaidSacrificePowerOnSpell(card, mode.effects, `modes[${modeIndex}].effects`));
   }
   return found;
 }
@@ -2482,7 +4445,9 @@ function checkUnless(card: Card, isSpell: boolean, hasModes: boolean): Violation
   const legal = UNLESS_PAYER_TARGETS[clause.payer];
   const only = card.effects[0];
   const aimed = only !== undefined && hasTarget(only) ? only.target.kind : undefined;
-  if (aimed === undefined || !legal.includes(aimed)) {
+  const payerIsCounteredSpellController =
+    clause.payer === 'targetController' && only?.kind === 'counterSpell';
+  if (!payerIsCounteredSpellController && (aimed === undefined || !legal.includes(aimed))) {
     found.push(
       violation(
         'UNLESS_PAYER_HAS_NO_TARGET',
@@ -2509,6 +4474,42 @@ function checkChosenXOnSpell(card: Card, effects: readonly Effect[], pathPrefix:
         'CHOSEN_X_WITHOUT_X_COST',
         `${pathPrefix}[${index}]`,
         'a chosen-X amount is legal only on a spell whose own mana cost contains X',
+      ),
+    );
+  }
+  return found;
+}
+
+/** A paid-sacrifice amount needs exactly one additional-cost permanent. */
+function checkPaidSacrificePowerOnSpell(
+  card: Card,
+  effects: readonly Effect[],
+  pathPrefix: string,
+): Violation[] {
+  const count =
+    card.kind === 'instant' || card.kind === 'sorcery'
+      ? card.additionalCost !== undefined && 'sacrificeMatching' in card.additionalCost
+        ? card.additionalCost.sacrificeMatching.count
+        : undefined
+      : undefined;
+  if (count === 1) return [];
+  const found: Violation[] = [];
+  for (const [index, effect] of effects.entries()) {
+    if (effectUsesPaidDiscardManaValue(effect)) {
+      found.push(
+        violation(
+          'ILLEGAL_REFERENT_AMOUNT',
+          `${pathPrefix}[${index}]`,
+          'a paid-discard-mana-value amount is legal only on an activated ability whose cost discards exactly one card',
+        ),
+      );
+    }
+    if (!effectUsesPaidSacrificePower(effect) && !effectUsesPaidSacrificeToughness(effect)) continue;
+    found.push(
+      violation(
+        'ILLEGAL_REFERENT_AMOUNT',
+        `${pathPrefix}[${index}]`,
+        'a paid-sacrifice-power or paid-sacrifice-toughness amount needs an additional cost that sacrifices exactly one permanent',
       ),
     );
   }

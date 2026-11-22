@@ -29,7 +29,6 @@ function panel(run: AnalysisRun): void {
   render(
     h(FairnessPanel, {
       fairness: run.fairness,
-      about: run.label,
       games: run.health.games,
       distinctGames: run.health.distinctGames,
     }),
@@ -40,7 +39,6 @@ function markup(run: AnalysisRun): string {
   return renderToStaticMarkup(
     h(FairnessPanel, {
       fairness: run.fairness,
-      about: run.label,
       games: run.health.games,
       distinctGames: run.health.distinctGames,
     }),
@@ -143,7 +141,6 @@ describe('the four readings', () => {
     render(
       h(FairnessPanel, {
         fairness: { ...CLEAN.fairness, readings: [silent] },
-        about: CLEAN.label,
         games: CLEAN.health.games,
         distinctGames: CLEAN.health.distinctGames,
       }),
@@ -168,7 +165,7 @@ describe('a miss is a number in the units the gate measures', () => {
   });
 
   it('says when the miss is smaller than the dice move the statistic', () => {
-    // 0.003 against a per-pair seed deviation of 0.02: a real gate failure,
+    // 0.003 against a per-pair seed deviation of 0.019: a real gate failure,
     // and one another seed could put on the other side of the line.
     expect(finding?.withinNoise).toBe(true);
     panel(UNFAIR);
@@ -193,6 +190,20 @@ describe('a miss is a number in the units the gate measures', () => {
   });
 });
 
+describe('the verdict states its evidence', () => {
+  it('counts the games rather than restating the run label', () => {
+    // A run label is producer-written text and usually states its own game
+    // count, so the note that named it read "XMP - 2700 games - 2,700 games,
+    // 2,700 distinct trajectories." The picker two rows above names the run.
+    const sentence = `${CLEAN.health.games.toLocaleString('en-US')} games, ${CLEAN.health.distinctGames.toLocaleString('en-US')} distinct trajectories.`;
+    panel(CLEAN);
+    expect(screen.getByText(sentence)).toBeTruthy();
+    // The markup, because the run label is what must NOT be in it and an
+    // absent element is not something `getByText` can be asked about.
+    expect(markup(CLEAN)).not.toContain(CLEAN.label);
+  });
+});
+
 describe('a gate no question reads', () => {
   it('costs the run its verdict rather than being tidied away', () => {
     // Hand-built: no producer in this repository emits an unclaimed gate, which
@@ -204,7 +215,6 @@ describe('a gate no question reads', () => {
     render(
       h(FairnessPanel, {
         fairness: stranger.fairness,
-        about: stranger.label,
         games: stranger.health.games,
         distinctGames: stranger.health.distinctGames,
       }),

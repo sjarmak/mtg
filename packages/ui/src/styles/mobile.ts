@@ -33,15 +33,42 @@
 import { CARD_TRIM_MM } from '../card/anatomy';
 import { SPOKEN_NOT_DRAWN } from './base';
 import { cssNumber } from './number';
+import { FLYOUT_MAX_PERCENT } from './board/ask-flyout';
+import { SHORT_COMMAND_FACE_MIN_REM } from './board/command';
 import { PLAY, SHORT_VIEWPORT_QUERY, TABLE } from './board/geometry';
 import { SHORT_TABLE_SPELLS_MIN_REM } from './board/fit';
-import { COMBAT_HAND_FACE_MAX_REM } from './board/hand';
+import { COMBAT_HAND_FACE_MAX_REM, CROWDED_HAND_FACE_MAX_REM } from './board/hand';
 import { SHORT_TABLE_LAND_TILE_REM } from './board/lands';
+import { TRANSPORT_CLASS } from './replay';
 import { RAIL_WIDTH_VAR, SHORT_TABLE_ASK_SHUT_REM, SHORT_TABLE_RAIL_SHUT_PX } from './board/rail';
 import { ZOOM_FACE_WIDTH_REM } from './card';
-import { WCAG_TARGET_PX } from './touch';
+import { TOUCH_TARGET_PX, WCAG_TARGET_PX } from './touch';
 
 export const PHONE_MAX_REM = 40;
+
+/**
+ * The most of a seat's well the mana base may take, side by side, as a percent.
+ *
+ * `mtg-aqxi.6`. The band is `flex: 0 1 auto`, so at every ordinary board size it
+ * asks for exactly the width its tiles need and this number decides nothing:
+ * measured at 844x390 with six lands a side, two of them tapped, it asks for
+ * 373px of a 724px well, and the three creatures beside it take the other 347.
+ *
+ * The cap is what happens past that. A seat with a dozen lands out keeps asking,
+ * and because the row beside it is the child carrying `flex-shrink`, the
+ * permanents you are deciding with are what would pay for the mana base. Over
+ * the cap the band scrolls inside itself instead, which is what it already did
+ * on the height axis.
+ *
+ * Not half. Half reads fairest and is the number that bites first: this very
+ * position, six lands and three creatures, is over it by 11px, so the cap would
+ * have fired on a board nobody would call crowded — and fired by clipping the
+ * sixth land, because a `max-width` that cuts a flex line does not hand it a
+ * scrollbar. The row's own share is defended by its slot floor
+ * (`./board/fit.ts`'s `MIN_SLOT_WIDTH_REM`) rather than by this number, which is
+ * what lets this one be the backstop it is named for.
+ */
+export const SHORT_TABLE_BAND_MAX_SHARE = 60;
 
 /**
  * How much of the step bar's row the turn may take on a phone (`mtg-rgc.13`).
@@ -78,50 +105,204 @@ export const PHONE_MAX_REM = 40;
  */
 export const PHONE_HEAD_MAX_REM = 3.5;
 
+/**
+ * The height the bottom navigation reserves at the foot of a phone screen,
+ * before the safe-area inset under it.
+ *
+ * `./touch.ts` puts a 44px floor on `.mtg-modes__item` and the bar is that plus
+ * its own two-pixel frame, so this is a measurement of the control rather than a
+ * number chosen to look right. `../../test/lab/bottom-nav.browser.test.ts`
+ * measures the rendered bar against it in a real Chrome.
+ */
+export const BOTTOM_NAV_REM = 3;
+
+/**
+ * What the page has to leave clear at its foot. A string rather than a custom
+ * property: `./tokens.ts` owns the `--mtg-` vocabulary and every name in it is
+ * a design token, and this is a layout measurement with two uses in one media
+ * block.
+ */
+const BOTTOM_NAV_SPACE = `calc(${String(BOTTOM_NAV_REM)}rem + env(safe-area-inset-bottom))`;
+
+const SHORT_COMMAND_FACE_HEIGHT = `calc(${cssNumber(SHORT_COMMAND_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)})`;
+
+const SHORT_RAIL_TABLE_QUERY = `${SHORT_VIEWPORT_QUERY} and (min-width: ${cssNumber(PHONE_MAX_REM + 1 / 16)}rem)`;
+
+const SHORT_TABLE_STEPS_AND_HAND_REM = 8.25;
+
+const SHORT_TABLE_FLYOUT_MAX_PERCENT = 60;
+
 export const MOBILE_CSS = `
 @media (max-width: ${String(PHONE_MAX_REM)}rem) {
-  .mtg-shell${PLAY} { overflow: hidden; }
-  .mtg-shell${PLAY} .mtg-shell__bar {
+  /* The five destinations move to the bottom of the screen (\`mtg-tewc.3\`).
+
+     One nav, moved rather than duplicated: the same \`.mtg-modes\` element the
+     desktop bar draws, re-laid-out here. A second bottom bar in the markup would
+     be a second tab row in the accessibility tree and two lists to keep in step,
+     and the standing instruction on this lane is that the two breakpoints do not
+     get different information architecture.
+
+     Bottom because of where a thumb is. The top of a 844px-tall phone held in
+     one hand is the part of the screen a thumb does not reach, and the tab row
+     is the control a person uses most and reaches for without looking.
+
+     Every rule that hides the whole bar still hides this: the nav is inside
+     \`.mtg-shell__bar\`, so \`display: none\` on the bar takes its fixed child
+     with it. That is what keeps a board and a draft screen free of it, which is
+     the measured requirement this repository already holds — "I want the table
+     to basically take up the full landscape screen". */
+  .mtg-modes {
+    position: fixed; inset-inline: 0; bottom: 0; z-index: 3;
+    display: flex; justify-content: space-between; gap: 0;
+    padding: 0; padding-block-end: env(safe-area-inset-bottom);
+    padding-inline-start: env(safe-area-inset-left);
+    padding-inline-end: env(safe-area-inset-right);
+    border-radius: 0; border-top: 1px solid var(--mtg-line);
+    background: var(--mtg-surface-rail);
+  }
+  /* Seven equal columns, and a label small enough to sit inside one.
+
+     \`mtg-dcxg.6\`, 2026-08-23. The columns were already equal — \`flex: 1 1 0\`
+     hands each of the seven 55.71px of a 390px screen — but the label was still
+     the desktop's \`--mtg-text-sm\`, 13px, and at 13px *Analysis* measures
+     53.63px against the 47.71px its column has left after \`--mtg-space-1\` on
+     each side. A word wider than its own content box does not wrap and does not
+     clip; it bleeds outward, which is why the row read as one continuous strip
+     of touching words and why *Design*, the last of them, ended 6.64px from the
+     right edge of the glass with nothing between it and the bezel.
+
+     \`--mtg-text-xs\` is 11px, and it is the fix rather than a tweak: *Analysis*
+     comes to 45.38px, which clears the column's 47.71px, and *Design* ends
+     9.91px in. Every one of the seven now sits inside the box it is drawn in,
+     which is what \`../../test/lab/bottom-nav.browser.test.ts\` reads. 11px is
+     also what a bottom tab bar's label is on the platforms this imitates; it is
+     the smallest type in the app and it is a one-word noun read at a glance, not
+     prose.
+
+     Two other fixes were available and both cost more than this one.
+
+     A scrollable strip — \`overflow-x: auto\` with the current tab scrolled into
+     view — keeps 13px and fits any label. It also hides destinations: at 55.71px
+     a column and 390px of screen, two of the seven would be off the edge at all
+     times, and the tab row is the one control on a phone that must say where
+     everything is without being operated first. It would also need script to
+     keep the selected tab visible, which is a second thing to keep in step with
+     the router for a problem that is 2px of type.
+
+     Shorter labels — *Sets* for *Analysis* — fit at 13px and were refused
+     because the labels are the route names. \`MODE_LABELS\` feeds the bar at both
+     breakpoints, the accessible name of every tab, and the \`aria-label\` on the
+     mark; renaming a route so it fits a 390px viewport makes the 1440px window
+     worse and makes the spoken name of the tab a different word from the page it
+     opens.
+
+     Nothing clips here on purpose. \`overflow: hidden\` on the item would hide
+     the next label that outgrows its column instead of showing it overflowing,
+     and a silently truncated tab is harder to find than an ugly one — the test
+     is the guard, not the clip. */
+  .mtg-modes__item {
+    flex: 1 1 0; min-width: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 0; padding-inline: var(--mtg-space-1);
+    font-size: var(--mtg-text-xs);
+  }
+  /* The pressed key reads as a lit tab here rather than as a raised one: a
+     shadow under a control sitting on the edge of the glass has nothing to cast
+     onto, and the desktop's \`--mtg-shadow-raised\` drew a gray smear. */
+  .mtg-modes__item[aria-current='page'] {
+    box-shadow: inset 0 2px 0 0 var(--mtg-accent);
+  }
+  /* And the page ends above it rather than under it. */
+  .mtg-shell__main { padding-block-end: ${BOTTOM_NAV_SPACE}; }
+  /* The section row stays at the top, where the bar is, and takes the whole
+     width: on a 390px screen four sections at desktop padding overflow, and
+     equal columns are what the bottom bar already does for the modes. */
+  .mtg-subs { padding-inline: var(--mtg-space-2); gap: 0; }
+  .mtg-subs__item {
+    flex: 1 1 0; min-width: 0; text-align: center;
+    padding-inline: var(--mtg-space-1); font-size: var(--mtg-text-xs);
+  }
+  /* The reflow itself is scoped to \`TABLE\` rather than to \`PLAY\`, which is
+     where \`mtg-dcxg.1\` found it.
+
+     Every rule from here to the phase bar answers one question — what a board
+     laid out as three fixed tracks does on a 390px screen — and the answer has
+     nothing to do with whether anybody is taking a turn on it. \`PLAY\` is play
+     and draft; the replay viewer is the third route on \`./board/geometry.ts\`'s
+     \`FITTED_MODES\` and it kept the desktop tracks. Measured at 390x844 in
+     chrome-headless-shell over \`../../test/replay/support/log-fixture.ts\` at
+     seq 0: \`grid-template-columns\` read \`88px 0px 272px\`. The pods had 88, the
+     rail took 272 and ran 7px past the right edge of the screen, and the lanes —
+     both battlefields, both hands, every card in the game being watched — were a
+     column zero pixels wide whose children painted over the two beside it.
+
+     So the split is by what the rule is about. The one-column reflow, the
+     scroller the main region takes over, and the prompt that grows with its
+     content are about a fitted board on a phone; the far seat's face-down track,
+     the phase bar and the priority buttons are about playing, and stay where
+     they were. \`./replay-mobile.ts\` carries what is left over that is
+     the replay's own, and carries it in a later sheet so it can re-answer these
+     rules rather than tie with them. */
+  .mtg-shell${TABLE} { overflow: hidden; }
+  .mtg-shell${TABLE} .mtg-shell__bar {
     min-width: 0;
     padding-block-start: max(var(--mtg-space-3), env(safe-area-inset-top));
     padding-inline-start: max(var(--mtg-space-3), env(safe-area-inset-left));
     padding-inline-end: max(var(--mtg-space-3), env(safe-area-inset-right));
   }
-  .mtg-shell${PLAY} .mtg-modes {
+  .mtg-shell${TABLE} .mtg-modes {
     max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain;
   }
-  ${PLAY} .mtg-shell__main {
+  .mtg-shell${TABLE}:has(.mtg-board) > .mtg-subs,
+  .mtg-shell${TABLE}:has(.mtg-screen) > .mtg-subs { display: none; }
+  ${TABLE} .mtg-shell__main {
     position: relative;
     overflow-x: hidden; overflow-y: auto;
     padding-inline-start: max(var(--mtg-space-1), env(safe-area-inset-left));
     padding-inline-end: max(var(--mtg-space-1), env(safe-area-inset-right));
-    padding-block-end: max(var(--mtg-space-1), env(safe-area-inset-bottom));
+    padding-block-end: ${BOTTOM_NAV_SPACE};
   }
   ${PLAY} .mtg-play, ${PLAY} .mtg-play__table { flex: none; min-height: auto; }
-  ${PLAY} .mtg-board {
+  ${TABLE} .mtg-board {
     flex: none; height: auto; min-height: 0; width: 100%;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto auto;
     align-items: stretch; overflow: visible;
   }
-  ${PLAY} .mtg-board__pods,
-  ${PLAY} .mtg-board__lanes,
-  ${PLAY} .mtg-board__rail { width: 100%; min-width: 0; }
-  ${PLAY} .mtg-board__pods {
+  ${TABLE} .mtg-board__pods,
+  ${TABLE} .mtg-board__lanes,
+  ${TABLE} .mtg-board__rail { width: 100%; min-width: 0; }
+  ${TABLE} .mtg-board__pods {
     min-height: 16rem; max-height: none;
   }
   /* The desktop rail clips a bounded prompt and scrolls its move list. On a
      one-column phone the main region owns that axis, so the prompt grows with
      its choices instead of asking for a second vertical gesture inside it. */
-  ${PLAY} .mtg-board__pods > .mtg-prompt {
+  ${TABLE} .mtg-board__pods > .mtg-prompt {
     flex: none; min-height: 0; overflow: visible;
   }
-  ${PLAY} .mtg-board__pods > .mtg-prompt .mtg-panel__body {
+  ${TABLE} .mtg-board__pods > .mtg-prompt .mtg-panel__body {
     flex: none; min-height: 0; overflow-y: visible;
     scrollbar-width: auto; background: none;
   }
   ${PLAY} .mtg-board__lanes { min-height: 46rem; }
-  ${PLAY} .mtg-board__side { min-height: 0; }
+  ${TABLE} .mtg-board__side { min-height: 0; }
+  /* A portrait-phone hand is a labeled thumbnail rail by decision, not a
+     full-size card row that happened to lose a sizing contest. Seven 100px
+     faces cannot fit a 390px viewport; the fixed zoom is the reading surface,
+     and the rail stays at the 48px slot floor at every width in this tier. */
+  ${TABLE} .mtg-board { --hand-face-cap: ${cssNumber(CROWDED_HAND_FACE_MAX_REM)}rem; }
+  ${TABLE} .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] {
+    position: relative;
+  }
+  ${TABLE} .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] > .mtg-zone__head {
+    display: flex;
+    position: absolute; inset-block-start: 0; inset-inline-start: var(--mtg-space-2);
+    translate: 0 -50%; z-index: 1;
+    padding-inline: var(--mtg-space-1);
+    background: var(--mtg-surface-rail);
+    font-size: var(--mtg-text-xs);
+  }
   ${PLAY} .mtg-board__side[data-seat='opponent'] {
     display: flex; flex-direction: column;
   }
@@ -132,11 +313,11 @@ export const MOBILE_CSS = `
   ${PLAY} .mtg-phasebar > .mtg-turnstops .mtg-turnstops__head,
   ${PLAY} .mtg-phasebar > .mtg-badge { max-width: ${cssNumber(PHONE_HEAD_MAX_REM)}rem; }
   ${PLAY} .mtg-phasebar__steps { overscroll-behavior-inline: contain; }
-  ${PLAY} .mtg-board__rail {
+  ${TABLE} .mtg-board__rail {
     min-height: 28rem; max-height: none; overflow: visible;
   }
-  ${PLAY} .mtg-board__rail > .mtg-zone { max-height: none; }
-  ${PLAY} .mtg-zoom {
+  ${TABLE} .mtg-board__rail > .mtg-zone { max-height: none; }
+  ${TABLE} .mtg-zoom {
     inset-inline-start: max(var(--mtg-space-3), env(safe-area-inset-left));
     inset-inline-end: max(var(--mtg-space-3), env(safe-area-inset-right));
     max-width: calc(100vw - max(var(--mtg-space-3), env(safe-area-inset-left)) - max(var(--mtg-space-3), env(safe-area-inset-right)));
@@ -144,11 +325,69 @@ export const MOBILE_CSS = `
 }
 @media (max-width: ${String(PHONE_MAX_REM)}rem) and (pointer: coarse) {
   ${PLAY} .mtg-phasebar__node { flex: 0 0 44px; min-width: 44px; }
-  ${PLAY} .mtg-phasebar__beats { min-width: 44px; min-height: 44px; justify-content: center; }
+  ${PLAY} .mtg-phasebar__beats,
+  ${PLAY} .mtg-phasebar__pace { min-width: 44px; min-height: 44px; justify-content: center; }
   ${PLAY} .mtg-priority .mtg-btn { min-height: 44px; }
+}
+@media (max-width: ${String(PHONE_MAX_REM)}rem) and ${SHORT_VIEWPORT_QUERY} {
+  ${PLAY} .mtg-board__lanes { min-height: 0; }
+}
+@media not all and (max-width: ${String(PHONE_MAX_REM)}rem) {
+  .mtg-shell {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
 }
 
 @media ${SHORT_VIEWPORT_QUERY} {
+  /* The bar keeps the two controls and drops the two labels, on every route.
+
+     \`mtg-aqxi.11\`. Measured at 844x390 with four sets staged, on a route with
+     no board: the bar is 100.38px of a 390px screen. It does not wrap — nothing
+     tells it to above 720px — so that height is the set name and the subtitle
+     breaking onto three lines each inside a flex item the mode switch and the
+     picker have squeezed to nothing. What the 100px buys is the phrase
+     "Magic 2011 (reduced)" and the phrase "2,700 games analyzed", one of which
+     the picker beside it already draws.
+
+     So the mark and the aside go to the readers and the bar stands at the
+     height of the tallest control in it. Spoken and not drawn, the way
+     \`.mtg-page-title\` above is and for the same reason: neither is focusable,
+     so hiding them outright would cost the accessibility tree two facts and buy
+     nothing back.
+
+     What stays is the mode switch and the set picker, which is the answer to
+     the second half of what the playtester asked for here — a phone in landscape on
+     any route that is not a board or a pack can still see which set it is
+     showing and choose another one. \`../app/SetPicker.ts\` is that control; it
+     draws a \`<select>\` as soon as the launcher has staged more than one set,
+     and the reason it is in the bar at all is that every tab reads the staged
+     set.
+
+     Amended for \`mtg-aqxi.17\`: the mark stays. It used to be the set's name,
+     which is what the paragraph above is measuring and what the picker beside it
+     already draws; it is now the word \`MTG Lab\` and a link to Play. It used to
+     carry a subtitle and the bar used to carry a statistic beside it, and both
+     were taken off every viewport rather than hidden on this one — a header that
+     says \`PLAY, ANALYZE, REPLAY\` and \`XMP · 2,700 games analyzed\` is a header
+     describing the application to somebody already inside it. The row is
+     therefore two controls and a mark on a phone the same way it is on a desk.
+     A control cannot be spoken-and-not-drawn — that is the focus-visible defect
+     WCAG 2.4.7 names — so nothing here hides one. */
+  /* The row is padded like a strip rather than like a page header, which is
+     the same trade \`./base.ts\` already makes on the play route and
+     \`./panel.ts\` makes on a screen. 12px above and below a 48px control is 24
+     of a 390px viewport spent on air; 4px is 8. Measured: 100.38 -> 73 from the
+     two labels, 73 -> 57 from this. */
+  .mtg-shell__bar { padding-block: var(--mtg-space-1); }
+  /* And the picker is a finger-sized target rather than a 30px one.
+
+     \`./touch.ts\`'s \`COARSE_TARGETS\` floors the controls a table draws and
+     this control is not one of them, so it kept the desktop select's 30px on a
+     phone — under both floors, on the one control that changes what every tab
+     is showing. Height only: the width is whatever the bar has left after the
+     mode switch, and a 105px select holding a 60-character option label is a
+     truncated label rather than a missed tap. */
+  .mtg-setpick__select { min-block-size: ${String(TOUCH_TARGET_PX)}px; }
   /* The step bar is one line here, and the thirteen steps scroll sideways.
 
      It wraps everywhere else, and \`./views.ts\` argues that at length: thirteen
@@ -170,12 +409,62 @@ export const MOBILE_CSS = `
      distribute: each step is as wide as its word, and the row overflows by the
      difference. The scrollbar stays \`thin\` and visible rather than hidden,
      because a scroller nobody can see is the defect \`./board/hand.ts\` names
-     about the hand row, and it is the same defect here. */
+     about the hand row, and it is the same defect here.
+
+     The bar's own two controls are inside this scroller now (\`mtg-t9n7\`), and
+     that is why \`./views.ts\` pins them with \`position: sticky; right: 0\`
+     over an opaque field. Beside the row they were \`flex: none\` against a
+     \`flex: 1 1 0\` steps row, so on every tier that wraps they took their width
+     off each wrapped line rather than off one, and the 32px of table that cost
+     at 1024x768 is what four browser gates measured. Inside the row they cost a
+     wrapping tier nothing and cost this one a pin: the steps pass under the two
+     controls rather than around them, so the tail of the last step is behind
+     them until the row is scrolled its own overflow — 8.4px of CLEANUP at
+     1440x560, measured. That is the price of keeping a bar-level control where
+     it was on every table, and it is smaller than the one the other
+     arrangement charged. */
   ${TABLE} .mtg-phasebar__steps {
     flex-wrap: nowrap;
     overscroll-behavior-inline: contain;
   }
   ${TABLE} .mtg-phasebar__node { flex: 0 0 auto; }
+  /* And the bar stands at the height its content asks for, not at a finger's.
+
+     \`mtg-aqxi.8\`, and it is the playtester's sentence from a phone: the phase bar can
+     be a lot thinner, it shouldn't take up so much space. Measured at 844x390 it
+     was 44px tall and so was every one of its thirteen nodes, which is
+     \`../touch.ts\`'s coarse-pointer floor exactly — the content wants 33.9. The
+     bar sits between the two battlefields, so those ten pixels are ten pixels of
+     board.
+
+     \`WCAG_TARGET_PX\` and not zero: this is a lowering of a floor to the
+     conformance minimum (2.5.8, 24px) rather than the removal of one. The 44 it
+     replaces is Apple's HIG, which is a good default and not a requirement, and
+     the step bar is level-2 information under the brief's hierarchy — you read
+     it every turn and press it rarely, and the press it takes is setting a stop,
+     which is undoable by pressing again. Nothing else on the table gives up its
+     44.
+
+     The name line is tightened with it, because the node is three lines and the
+     middle one is the only one carrying type: at the sheet's default leading a
+     12px word occupies about 18px, and the two pip rows either side of it are 8
+     apiece. That is where the last few pixels are, and 1.15 keeps the descenders
+     of a word like \`UPKEEP\` inside the box.
+
+     **The turn badge is in the list because it is the thing that was pinning
+     the bar**, which the first version of this rule got wrong: the nodes were
+     lowered, the bar stayed at 44, and the nodes went on measuring 44 because a
+     flex row is as tall as its tallest child and \`align-items: stretch\` hands
+     that height back down. The tallest child is the turn disclosure at the
+     left-hand end, floored to 44 by \`../touch.ts\` over 19px of content. A bar
+     is one control strip; either the whole strip stands at the conformance
+     minimum here or none of it does. */
+  ${TABLE} .mtg-phasebar__node,
+  ${TABLE} .mtg-phasebar__beats,
+  ${TABLE} .mtg-phasebar__pace,
+  ${TABLE} .mtg-phasebar > .mtg-turnstops .mtg-turnstops__head,
+  ${TABLE} .mtg-phasebar > .mtg-badge { min-height: ${String(WCAG_TARGET_PX)}px; }
+  ${TABLE} .mtg-phasebar__name { line-height: 1.15; }
   /* Your hand is capped at the size combat already caps it to, for the same
      reason and permanently.
 
@@ -194,23 +483,21 @@ export const MOBILE_CSS = `
      stubby desktop window that were drawing a 100px card in hand over a 61px
      card on the table. */
   ${TABLE} .mtg-board { --hand-face-cap: ${cssNumber(COMBAT_HAND_FACE_MAX_REM)}rem; }
-  /* Restated for a crowded board, which is where the cap above would otherwise
-     be undone by a rule meant to lower it.
-
-     \`./board/hand.ts\` drops the cap from 7.5rem to 7rem once a battlefield row
-     holds eight permanents, and it does that on a
-     \`:has(.mtg-board__spells > .mtg-slot:nth-child(8))\` compound, which outranks
-     the bare \`.mtg-board\` above. A media query adds no specificity, so on a
-     landscape phone the eighth permanent raised the hand face from 3.5rem to
-     7rem — a rule that only ever narrows a desktop board widening a phone one,
-     and the busier the table the larger the cards it drew over it.
-
-     Same selector, same value as the uncrowded landscape case: there is nothing
-     further to give here, since 3.5rem is already the floor combat drops to. It
-     wins on order rather than on weight, which is what \`./index.ts\` puts this
-     sheet last for. */
-  ${TABLE} .mtg-board:has(.mtg-board__spells > .mtg-slot:nth-child(8)) {
-    --hand-face-cap: ${cssNumber(COMBAT_HAND_FACE_MAX_REM)}rem;
+  ${TABLE} .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] > .mtg-zone__head {
+    display: flex;
+    position: absolute; inset-block-start: 0; inset-inline-start: var(--mtg-space-2);
+    translate: 0 -50%; z-index: 1;
+    padding-inline: var(--mtg-space-1);
+    background: var(--mtg-surface-rail);
+    font-size: var(--mtg-text-xs);
+  }
+  ${TABLE} .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] { position: relative; }
+  /* A crowded phone takes the narrower of the two approved thumbnail modes:
+     48px for crowding rather than combat's 56px. The row publishes crowding
+     from represented permanents before exact-state copies collapse, so neither
+     a pile nor an attachment can make this decision disappear from the DOM. */
+  ${TABLE} .mtg-board:has(.mtg-board__spells[data-crowded='true']) {
+    --hand-face-cap: ${cssNumber(CROWDED_HAND_FACE_MAX_REM)}rem;
   }
   /* And the word over the tab you pressed to get here goes to the screen
      readers only.
@@ -224,8 +511,19 @@ export const MOBILE_CSS = `
 
      Hidden the way \`./base.ts\` hides a live region rather than with
      \`display: none\`, so the heading stays in the accessibility tree and a reader
-     navigating by headings still finds the route it is on. */
-  ${TABLE} .mtg-page-title { ${SPOKEN_NOT_DRAWN} }
+     navigating by headings still finds the route it is on.
+
+     \`[data-live]\` is the exception the argument above names without meaning to:
+     all of it turns on the title being the word over a tab that is on screen
+     saying it already. The replay caption wears the same class and is the frame
+     you are looking at — \`Turn 7 · main 1 · Wield the Obliterator\`, different
+     every step and on no tab anywhere. Hidden, its band drew the note alone, and
+     an opening frame's note is an em dash: measured at 844x390, 19px of table
+     spent on one character. Marked at the element
+     (\`../routes/replay/ReplayViewer.ts\`) rather than scoped to the replay mode
+     here, because what earns the exception is what the text *is*, not which
+     route drew it. */
+  ${TABLE} .mtg-page-title:not([data-live='true']) { ${SPOKEN_NOT_DRAWN} }
   /* And the seat you act from outgrows the seat you only read.
 
      \`./board/fit.ts\` gives both bands \`flex: 1 1 auto\` and argues that an
@@ -286,10 +584,38 @@ export const MOBILE_CSS = `
      keep their strip, and \`../routes/play/LiveGame.ts\`'s handoff card — "Pass
      the device to X", whose only control is the button that takes the turn —
      draws a \`.mtg-toolbar\` and no board, so it keeps the one press that gets
-     the game going again. */
+     the game going again.
+
+     And the replay transport is exempt by name (\`mtg-aqxi.18\`). \`TABLE\` is
+     play, draft *and* replay, and on replay the toolbar is not chrome around the
+     game — it is First, Prev, Play, Next, Last and the two selects, the whole of
+     how a watcher moves through one. Taking it left a landscape phone holding a
+     replay it could not advance. \`./replay.ts\` owns the class and the
+     argument; the head band above it still goes.
+
+     And \`mtg-aqxi.17\` stops at the edge of this rule rather than crossing it.
+     That lane put the mark and the set picker back into a band two other tiers
+     had emptied — \`./base.ts\`'s \`barCollapsedToMark\`, which
+     \`./panel.ts\` interpolates over a draft screen — because the playtester asked
+     for both by name. A board is the one surface where it does not follow: the
+     sentence that produced this rule is "I want the table to basically take up
+     the full landscape screen", and it is measured, at 95% of the viewport in
+     \`../../test/play/landscape-phone.browser.test.ts\`. A 45px band on a
+     390px screen is 11.5% of it, spent on a picker nobody uses mid-game and a
+     way out of a game in progress. Turning the phone is still that way out, and
+     on a table it is the only one.
+
+     The section row goes with the bar. \`mtg-a982g.1\` put a second band under
+     it, and the phone-width block above takes that band out beside a board at
+     40rem and under; a landscape phone is 844px wide, so the only block it
+     reaches is this one, and the row stayed in the drawing at 29.84px while
+     the bar above it went. \`../../../slice/test/ui-phone-scroll.browser.test.ts\`
+     lists everything drawn above the mat at 844x390 and expects nothing. */
   .mtg-shell${TABLE}:has(.mtg-board) > .mtg-shell__bar,
+  .mtg-shell${TABLE}:has(.mtg-board) > .mtg-subs,
   .mtg-shell${TABLE}:has(.mtg-board) > .mtg-shell__notice,
-  ${TABLE} .mtg-shell__main:has(.mtg-board) .mtg-toolbar {
+  ${TABLE} .mtg-shell__main:has(.mtg-board) .mtg-page-note,
+  ${TABLE} .mtg-shell__main:has(.mtg-board) .mtg-toolbar:not(.${TRANSPORT_CLASS}) {
     display: none;
   }
   /* And the gutter either side of the table is a quarter of what a page gets.
@@ -344,31 +670,67 @@ export const MOBILE_CSS = `
   ${TABLE} .mtg-lands > .mtg-slot[data-slot='play'] {
     height: ${cssNumber(SHORT_TABLE_LAND_TILE_REM)}rem; max-height: none;
   }
+  /* The crowded-lane padding \`./board/lands.ts\` drops is not this row's
+     rule: here the band sits *beside* the spells row (\`flex-direction: row\`
+     below) and stretches to the row's own height, so its own 2px of
+     block padding costs it nothing the row needed back. Restated at the
+     same selector as \`./board/lands.ts\`'s crowded rule, so this wins on
+     order rather than on weight. */
+  ${TABLE} .mtg-zone__body[data-layout='board']:has(> .mtg-board__spells[data-crowded='true']) > .mtg-lands {
+    padding-block: 2px;
+  }
 
-  /* And the band cannot be the thing that goes under the fold, which is the half
-     of the paragraph above that was left to arithmetic.
+  /* And the mana base moves *beside* the cards in play, not under them.
 
-     Two declarations, and they answer two different sizes. The floor is
-     \`./board/fit.ts\`'s \`SHORT_TABLE_SPELLS_MIN_REM\`, and it makes the row the
-     child that gives: the lane is a column of a row and a band, the band is
-     \`flex: none\` at a stated tile, and until now the row's 4.5rem floor meant
-     neither of them could shrink, so a lane 12px short at 932x430 put 12px of
-     mana base past the bottom edge rather than 12px of card. With the floor at
-     3rem the row absorbs it and nothing overflows at all.
+     \`mtg-aqxi.6\`, and it is the whole of what a landscape phone has that a
+     laptop does not: width. Measured at 844x390 on the stated dense position,
+     each seat's well was 738 x 106.4 and spent 40 of that height on a row of
+     land tiles, leaving the spells row 48px — a 27.5 x 38.4 card, against the
+     56 x 78.2 card the same screen drew in that player's hand. The row those
+     cards sat in was 728px wide and they spanned 290 of it. So the seat was
+     paying in the axis it had none of for something the axis beside it was
+     throwing away, and the playtester's report of it was that the board was empty
+     and the cards were unreadable, which are the same sentence.
 
-     The sticky is for the sizes where even 3rem does not fit — 932x400 and
-     844x390 are 3px and 8px short of it, and a 330px-tall table is 39px short.
-     There the body still overflows, and \`bottom: 0\` glues the band to the
-     bottom of the scrollport so what the overflow costs is the bottom edge of a
-     card instead of the whole mana base. The background is the zone's own
-     (\`./board/zone.ts\`), because a transparent sticky band draws the cards it is
-     covering straight through itself.
+     Side by side the whole of the well's inside height reaches both children:
+     the row goes 48 to about 96 and its face roughly doubles on each axis, and
+     the band keeps the stated tile it already had, vertically centered instead of
+     stacked. Both children keep their own inline scroller, so a crowded seat
+     spends width rather than pushing anything off the well.
+
+     The band is \`flex: 0 1 auto\` against the row's \`1 1 auto\`: it asks for the
+     width its tiles need and never more, every spare pixel in the well goes to
+     the cards you are deciding with, and when the two together do not fit the
+     band is the child that gives. The cap is the backstop for that last case —
+     a mana base wide enough to reach it scrolls inside itself rather than
+     pushing the permanents off the well. Measured at 844x390 with six lands a
+     side, two of them tapped: the band asks for 373px of the well's 724 and the
+     cap, at 434, does not bind. At half it would have — by 11px, clipping the
+     sixth land rather than scrolling to it, which is why the number is not the
+     one that reads fairest.
+
+     The sticky bottom this replaces belonged to the column: it glued the band to
+     the foot of the scrollport at the sizes where the lane was a few px short,
+     so the overflow cost a card's bottom edge rather than the whole mana base
+     (the playtester, 2026-08-22, "I'm still not seeing lands once I play them"). Off
+     the height axis the band cannot be the thing that goes under the fold, so
+     the rule that decided which child paid has nothing left to decide.
+
+     The row's floor stays: \`./board/fit.ts\`'s \`SHORT_TABLE_SPELLS_MIN_REM\` is
+     what keeps the row the child that gives on the *height* axis, which is still
+     how the well and the lane above it settle.
 
      Restated at the same specificity as the declarations one file over, so this
      wins on order rather than on weight. */
   ${TABLE} .mtg-board__spells { min-height: ${cssNumber(SHORT_TABLE_SPELLS_MIN_REM)}rem; }
+  ${TABLE} .mtg-zone__body[data-layout='board'] {
+    flex-direction: row; align-items: stretch; gap: var(--mtg-space-2);
+  }
+  ${TABLE} .mtg-zone__body[data-layout='board'] > .mtg-board__spells {
+    flex: 1 1 auto; min-width: 0;
+  }
   ${TABLE} .mtg-zone__body[data-layout='board'] > .mtg-lands {
-    position: sticky; bottom: 0; background: var(--mtg-mat-well);
+    position: static; flex: 0 1 auto; min-width: 0; max-width: ${cssNumber(SHORT_TABLE_BAND_MAX_SHARE)}%;
   }
 
   /* The ask column stops scrolling, because everything in it that was said
@@ -406,17 +768,60 @@ export const MOBILE_CSS = `
      read down. Two numbers side by side is the same pair in half the height, and
      the pod is 97px wide here, which is room for both. 15.59px.
 
+     **The dot between them comes off here, and \`flex-wrap\` goes back to
+     \`nowrap\`.** \`./board/status.ts\` draws the pair as one centered sentence
+     with a middle dot between the chips, which is the right drawing where the
+     column is 176px wide; at 97px "hand 7 \u00B7 library 52" wants more row than
+     there is and wraps, and the pod went 15.59px to 45.05 and took the whole
+     column 35px past its scroller with it. Justified to the two ends of the pod
+     the gap between them is the separator, so the dot is a third thing competing
+     for the width it was drawn to organize.
+
      \`.mtg-prompt__explain\` restates \`.mtg-priority\`'s sentence inside the
      panel. It does not shorten the column — the prompt is the flexible block —
      but it is 75.38px of the prompt's own scroller, which is where the moves
-     are. */
+     are.
+
+     \`.mtg-priority__land\` is the sentence behind the highlighted Pass
+     control. On this short table the control keeps the visual warning and the
+     separately named live region still announces the sentence. Drawing it as
+     well costs three lines in the open column; shut, its widest word is 49px
+     inside the 48px strip. In either state it takes room from the action it
+     describes without adding another usable action. */
+  ${TABLE} .mtg-priority__land,
   ${TABLE} .mtg-play-meta,
   ${TABLE} .mtg-board__pods .mtg-pod__tags,
   ${TABLE} .mtg-board__pods .mtg-pod__name,
   ${TABLE} .mtg-board__pods .mtg-prompt__explain { display: none; }
   ${TABLE} .mtg-board__pods .mtg-pod__chips {
-    flex-direction: row; justify-content: space-between; gap: var(--mtg-space-2);
+    flex-flow: row nowrap; justify-content: space-between; gap: var(--mtg-space-1);
   }
+  /* And the two gaps inside the row go with the one between them.
+
+     \`./board/status.ts\` ellipsizes a chip's label so the row can shrink, which
+     is the right last resort and a bad first one: an ellipsis eats three
+     characters to save one, so a shortfall of a pixel costs a word. Measured on
+     the replay board at 844x390, where the pod is 107px and the chips row is
+     97.4: the pair wants 99.9px, is 2.5px over, and the 2.5px came out as
+     \`Ha… 7\` and \`Libra… 53\` — both labels destroyed to save two and a half
+     pixels of air. \`--mtg-space-2\` between the chips and 4px inside each is
+     8px of gap on a row with 97 to spend; at \`--mtg-space-1\` and 2px the pair
+     lays out at 87.9 and the words finish, with room for a library count that
+     reaches three digits. The ellipsis stays, for the seat this does not save. */
+  ${TABLE} .mtg-board__pods .mtg-pod__chip { gap: 2px; }
+  ${TABLE} .mtg-board__pods .mtg-pod__chip + .mtg-pod__chip::before { content: none; }
+  /* And the stack strip stops saying which end of itself you are looking at.
+
+     \`./board/stack.ts\` draws each entry as name, controller, cost, target and
+     then \`resolves next\` or \`waiting\`. Measured at 844x390 with two objects on
+     the stack, that sentence wants 345px in a 214px row, and the closing word is
+     68 of the 345 to repeat two things the strip already draws: the top entry
+     carries the accent keyline, and it is the only entry with a Resolve button
+     next to it. Off, the target keeps the room instead. */
+  ${TABLE} .mtg-stack__state { display: none; }
+  ${TABLE} .mtg-stack__entry { gap: var(--mtg-space-1); padding-inline: 0; }
+  ${TABLE} .mtg-stack__resolve { padding-inline: 0; }
+  ${TABLE} .mtg-stack__mode { min-width: var(--mtg-space-1); }
   /* And the pod's own top and bottom margin halves, which is the last 6px and
      the only one of these that is not a duplicate.
 
@@ -535,7 +940,36 @@ export const MOBILE_CSS = `
   .mtg-zoom > .mtg-card {
     --card-w: min(
       ${cssNumber(ZOOM_FACE_WIDTH_REM)}rem,
-      calc((100vh - 2 * var(--mtg-space-4)) * ${cssNumber(CARD_TRIM_MM.width)} / ${cssNumber(CARD_TRIM_MM.height)})
+      calc((100dvh - 2 * var(--mtg-space-4)) * ${cssNumber(CARD_TRIM_MM.width)} / ${cssNumber(CARD_TRIM_MM.height)})
+    );
+  }
+
+  ${TABLE} .mtg-board__side[data-side-panel='true'] > .mtg-command {
+    min-height: calc(${SHORT_COMMAND_FACE_HEIGHT} + 2 * var(--mtg-space-2));
+  }
+  ${TABLE} .mtg-command > .mtg-zone {
+    min-height: calc(${SHORT_COMMAND_FACE_HEIGHT} + 2 * var(--mtg-space-2));
+  }
+  ${TABLE} .mtg-command .mtg-zone:not([data-empty='true']) > .mtg-zone__head {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  ${TABLE} .mtg-command .mtg-zone__body { flex-direction: row; flex-wrap: wrap; align-items: center; overflow: visible; }
+  ${TABLE} .mtg-command__entry { flex-direction: row; align-items: center; }
+  ${TABLE} .mtg-command__ledger { align-items: flex-start; text-align: start; }
+  ${TABLE} .mtg-command__casts, ${TABLE} .mtg-command__cost { white-space: normal; }
+  ${TABLE} .mtg-command .mtg-slot[data-slot='hand']:not([data-empty='true']) {
+    flex: none; min-width: 0; min-height: 0; aspect-ratio: auto;
+    width: ${cssNumber(SHORT_COMMAND_FACE_MIN_REM)}rem;
+    height: ${SHORT_COMMAND_FACE_HEIGHT};
+    max-width: none; max-height: none;
+  }
+}
+@media ${SHORT_RAIL_TABLE_QUERY} {
+  ${TABLE} .mtg-ask-flyout {
+    max-block-size: clamp(
+      ${cssNumber(FLYOUT_MAX_PERCENT)}%,
+      calc(100% - ${cssNumber(SHORT_TABLE_STEPS_AND_HAND_REM)}rem),
+      ${cssNumber(SHORT_TABLE_FLYOUT_MAX_PERCENT)}%
     );
   }
 }

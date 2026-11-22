@@ -1,16 +1,13 @@
 /**
- * `chooseFromGraveyard`: the single-card half of graveyard recursion, kept out
- * of the generator and printed as the choice it is.
+ * `chooseFromGraveyard`: a genuine non-targeted, resolution-time graveyard
+ * choice, kept out of the generator and printed as the choice it is.
  *
- * `returnFromGraveyard` is the mass form and reaches a graveyard through an
- * `EffectScope`, so every card it can print raises a whole class at once. The
- * seven M11/M13 identities that recur one card — Disentomb, Call to Mind,
- * Archaeomancer, Nature's Spiral, Revive, Gravedigger, Vile Rebirth — say *one*
- * card and leave the choosing to a player, and neither half of that is reachable
- * by narrowing a scope. These assertions pin the three things that were easy to
- * get wrong: the destination set, the colors field that Revive alone needed, and
- * an oracle line that says "a card" rather than "target card", because the
- * kernel asks a mid-resolution question and does not target.
+ * Printed "target card" recursion uses graveyard-card targets on
+ * `returnFromGraveyard`, `returnToHand`, or `exileTarget`; this effect must not
+ * stand in for those cards. These assertions pin the destination set, the
+ * printed-color filter, and an Oracle line that says "a card" rather than
+ * "target card", because this primitive really does ask a mid-resolution
+ * question.
  */
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
@@ -26,7 +23,7 @@ import {
   ZoneReachingModelEffectSchema,
 } from '@mtg/dsl';
 
-const DISENTOMB = {
+const NON_TARGETED_RECALL = {
   kind: 'chooseFromGraveyard',
   whose: 'you',
   filter: { cardTypes: ['creature'] },
@@ -38,36 +35,44 @@ describe('chooseFromGraveyard schema', () => {
     expect(GRAVEYARD_CHOICE_DESTINATIONS).toEqual(['hand', 'battlefield', 'exile']);
     for (const destination of GRAVEYARD_CHOICE_DESTINATIONS) {
       for (const whose of ['you', 'opponent', 'each'] as const) {
-        const effect = { ...DISENTOMB, whose, destination };
+        const effect = { ...NON_TARGETED_RECALL, whose, destination };
         expect(CardEffectSchema.parse(effect)).toEqual(effect);
       }
     }
   });
 
   it('refuses a destination no printed card names', () => {
-    expect(CardEffectSchema.safeParse({ ...DISENTOMB, destination: 'library' }).success).toBe(false);
-    expect(CardEffectSchema.safeParse({ ...DISENTOMB, destination: 'graveyard' }).success).toBe(false);
+    expect(CardEffectSchema.safeParse({ ...NON_TARGETED_RECALL, destination: 'library' }).success).toBe(
+      false,
+    );
+    expect(CardEffectSchema.safeParse({ ...NON_TARGETED_RECALL, destination: 'graveyard' }).success).toBe(
+      false,
+    );
   });
 
   it('takes an empty filter, which is a real card and not a degenerate case', () => {
-    const anything = { ...DISENTOMB, filter: {} };
+    const anything = { ...NON_TARGETED_RECALL, filter: {} };
     expect(CardEffectSchema.parse(anything)).toEqual(anything);
   });
 
-  it('filters on printed color, which is the field Revive needed', () => {
-    const revive = { ...DISENTOMB, filter: { colors: ['G'] } };
-    expect(CardEffectSchema.parse(revive)).toEqual(revive);
-    expect(CardEffectSchema.safeParse({ ...DISENTOMB, filter: { colors: ['Q'] } }).success).toBe(false);
-    expect(CardEffectSchema.safeParse({ ...DISENTOMB, filter: { colors: [] } }).success).toBe(false);
+  it('filters a non-targeted choice on printed color', () => {
+    const greenChoice = { ...NON_TARGETED_RECALL, filter: { colors: ['G'] } };
+    expect(CardEffectSchema.parse(greenChoice)).toEqual(greenChoice);
+    expect(CardEffectSchema.safeParse({ ...NON_TARGETED_RECALL, filter: { colors: ['Q'] } }).success).toBe(
+      false,
+    );
+    expect(CardEffectSchema.safeParse({ ...NON_TARGETED_RECALL, filter: { colors: [] } }).success).toBe(
+      false,
+    );
   });
 
   it('stays out of every model-facing union', () => {
-    expect(ModelEffectSchema.safeParse(DISENTOMB).success).toBe(false);
-    expect(ZoneReachingModelEffectSchema.safeParse(DISENTOMB).success).toBe(false);
+    expect(ModelEffectSchema.safeParse(NON_TARGETED_RECALL).success).toBe(false);
+    expect(ZoneReachingModelEffectSchema.safeParse(NON_TARGETED_RECALL).success).toBe(false);
   });
 });
 
-function sorceryText(effect: unknown, name = 'Disentomb'): string {
+function sorceryText(effect: unknown, name = 'Grave Recall'): string {
   return renderOracleText(
     parseCard({
       kind: 'sorcery',
@@ -83,45 +88,45 @@ function sorceryText(effect: unknown, name = 'Disentomb'): string {
 }
 
 describe('chooseFromGraveyard oracle text', () => {
-  it('prints Disentomb without the word "target"', () => {
-    expect(sorceryText(DISENTOMB)).toBe('Return a creature card from your graveyard to your hand.');
+  it('prints a genuine choice without the word "target"', () => {
+    expect(sorceryText(NON_TARGETED_RECALL)).toBe('Return a creature card from your graveyard to your hand.');
   });
 
-  it('prints Revive off the color filter alone', () => {
-    expect(sorceryText({ ...DISENTOMB, filter: { colors: ['G'] } }, 'Revive')).toBe(
+  it('prints a color-only filter', () => {
+    expect(sorceryText({ ...NON_TARGETED_RECALL, filter: { colors: ['G'] } }, 'Green Recall')).toBe(
       'Return a green card from your graveyard to your hand.',
     );
   });
 
-  it('prints Call to Mind with both card types joined by "or"', () => {
-    expect(sorceryText({ ...DISENTOMB, filter: { cardTypes: ['instant', 'sorcery'] } }, 'Call to Mind')).toBe(
-      'Return an instant or sorcery card from your graveyard to your hand.',
-    );
+  it('prints multiple card types joined by "or"', () => {
+    expect(
+      sorceryText({ ...NON_TARGETED_RECALL, filter: { cardTypes: ['instant', 'sorcery'] } }, 'Spell Recall'),
+    ).toBe('Return an instant or sorcery card from your graveyard to your hand.');
   });
 
-  it('prints Vile Rebirth reaching either graveyard', () => {
-    expect(sorceryText({ ...DISENTOMB, whose: 'each', destination: 'exile' }, 'Vile Rebirth')).toBe(
+  it('prints a choice reaching either graveyard', () => {
+    expect(sorceryText({ ...NON_TARGETED_RECALL, whose: 'each', destination: 'exile' }, 'Grave Feast')).toBe(
       'Exile a creature card from a graveyard.',
     );
   });
 
   it("says whose the reanimated permanent is, because it is its owner's", () => {
-    expect(sorceryText({ ...DISENTOMB, whose: 'each', destination: 'battlefield' }, 'Raise')).toBe(
+    expect(sorceryText({ ...NON_TARGETED_RECALL, whose: 'each', destination: 'battlefield' }, 'Raise')).toBe(
       "Return a creature card from a graveyard to the battlefield under its owner's control.",
     );
-    expect(sorceryText({ ...DISENTOMB, destination: 'battlefield' }, 'Raise')).toBe(
+    expect(sorceryText({ ...NON_TARGETED_RECALL, destination: 'battlefield' }, 'Raise')).toBe(
       'Return a creature card from your graveyard to the battlefield under your control.',
     );
   });
 
   it("names an opponent's graveyard without targeting it", () => {
-    expect(sorceryText({ ...DISENTOMB, whose: 'opponent', destination: 'exile' }, 'Rob')).toBe(
+    expect(sorceryText({ ...NON_TARGETED_RECALL, whose: 'opponent', destination: 'exile' }, 'Rob')).toBe(
       "Exile a creature card from an opponent's graveyard.",
     );
   });
 });
 
-const RISE_FROM_THE_GRAVE = {
+const NON_TARGETED_REANIMATION = {
   kind: 'chooseFromGraveyard',
   whose: 'each',
   filter: { cardTypes: ['creature'] },
@@ -130,7 +135,7 @@ const RISE_FROM_THE_GRAVE = {
   alsoBecomes: { colors: ['B'], subtypes: ['Zombie'] },
 } as const;
 
-function sorceryWith(effect: unknown, name = 'Rise from the Grave') {
+function sorceryWith(effect: unknown, name = 'Grave Conscript') {
   return {
     kind: 'sorcery',
     id: 'test-graveyard-grant',
@@ -144,31 +149,31 @@ function sorceryWith(effect: unknown, name = 'Rise from the Grave') {
 }
 
 describe("chooseFromGraveyard under the chooser's control", () => {
-  it('takes the control clause and the arrival grant Rise from the Grave prints', () => {
+  it('takes a control clause and arrival grant for a non-targeted choice', () => {
     expect(GRAVEYARD_CHOICE_CONTROLLERS).toEqual(['owner', 'you']);
-    expect(CardEffectSchema.parse(RISE_FROM_THE_GRAVE)).toEqual(RISE_FROM_THE_GRAVE);
+    expect(CardEffectSchema.parse(NON_TARGETED_REANIMATION)).toEqual(NON_TARGETED_REANIMATION);
   });
 
   it('leaves both fields optional, so every card written before them still parses', () => {
-    expect(CardEffectSchema.parse(DISENTOMB)).toEqual(DISENTOMB);
-    expect(CardEffectSchema.parse(DISENTOMB)).not.toHaveProperty('control');
-    expect(CardEffectSchema.parse(DISENTOMB)).not.toHaveProperty('alsoBecomes');
+    expect(CardEffectSchema.parse(NON_TARGETED_RECALL)).toEqual(NON_TARGETED_RECALL);
+    expect(CardEffectSchema.parse(NON_TARGETED_RECALL)).not.toHaveProperty('control');
+    expect(CardEffectSchema.parse(NON_TARGETED_RECALL)).not.toHaveProperty('alsoBecomes');
   });
 
   it('prints the whole card, in addition rather than instead', () => {
-    expect(renderOracleText(parseCard(sorceryWith(RISE_FROM_THE_GRAVE)))).toBe(
+    expect(renderOracleText(parseCard(sorceryWith(NON_TARGETED_REANIMATION)))).toBe(
       'Return a creature card from a graveyard to the battlefield under your control.' +
         ' That creature is a black Zombie in addition to its other colors and types.',
     );
   });
 
   it('prints a color-only grant and a type-only grant in their own words', () => {
-    const colorOnly = { ...RISE_FROM_THE_GRAVE, alsoBecomes: { colors: ['B', 'R'] } };
+    const colorOnly = { ...NON_TARGETED_REANIMATION, alsoBecomes: { colors: ['B', 'R'] } };
     expect(renderOracleText(parseCard(sorceryWith(colorOnly)))).toBe(
       'Return a creature card from a graveyard to the battlefield under your control.' +
         ' That creature is black and red in addition to its other colors.',
     );
-    const typeOnly = { ...RISE_FROM_THE_GRAVE, alsoBecomes: { subtypes: ['Zombie'] } };
+    const typeOnly = { ...NON_TARGETED_REANIMATION, alsoBecomes: { subtypes: ['Zombie'] } };
     expect(renderOracleText(parseCard(sorceryWith(typeOnly)))).toBe(
       'Return a creature card from a graveyard to the battlefield under your control.' +
         ' That creature is a Zombie in addition to its other types.',
@@ -176,7 +181,7 @@ describe("chooseFromGraveyard under the chooser's control", () => {
   });
 
   it("still says under its owner's control when the effect does not claim it", () => {
-    const owned = { ...RISE_FROM_THE_GRAVE, control: 'owner', alsoBecomes: { subtypes: ['Zombie'] } };
+    const owned = { ...NON_TARGETED_REANIMATION, control: 'owner', alsoBecomes: { subtypes: ['Zombie'] } };
     expect(renderOracleText(parseCard(sorceryWith(owned)))).toBe(
       "Return a creature card from a graveyard to the battlefield under its owner's control." +
         ' That creature is a Zombie in addition to its other types.',
@@ -184,7 +189,7 @@ describe("chooseFromGraveyard under the chooser's control", () => {
   });
 
   it('refuses a control clause or a grant on a destination that is not the battlefield', () => {
-    const toHand = { ...RISE_FROM_THE_GRAVE, destination: 'hand' };
+    const toHand = { ...NON_TARGETED_REANIMATION, destination: 'hand' };
     const codes = validateCard(sorceryWith(toHand)).map((found) => found.code);
     expect(codes.filter((code) => code === 'EFFECT_PARAM_OUT_OF_RANGE')).toHaveLength(2);
     const paths = validateCard(sorceryWith(toHand)).map((found) => found.path);
@@ -193,19 +198,19 @@ describe("chooseFromGraveyard under the chooser's control", () => {
   });
 
   it('refuses a grant that grants nothing', () => {
-    const empty = { ...RISE_FROM_THE_GRAVE, alsoBecomes: {} };
+    const empty = { ...NON_TARGETED_REANIMATION, alsoBecomes: {} };
     expect(validateCard(sorceryWith(empty)).map((found) => found.code)).toContain(
       'EFFECT_PARAM_OUT_OF_RANGE',
     );
   });
 
   it('refuses a subtype that is not one', () => {
-    const lowercase = { ...RISE_FROM_THE_GRAVE, alsoBecomes: { subtypes: ['zombie'] } };
+    const lowercase = { ...NON_TARGETED_REANIMATION, alsoBecomes: { subtypes: ['zombie'] } };
     expect(validateCard(sorceryWith(lowercase)).map((found) => found.code)).toContain('INVALID_SUBTYPE');
   });
 
   it('passes clean on the card it was written for', () => {
-    expect(validateCard(sorceryWith(RISE_FROM_THE_GRAVE))).toEqual([]);
+    expect(validateCard(sorceryWith(NON_TARGETED_REANIMATION))).toEqual([]);
   });
 
   /**

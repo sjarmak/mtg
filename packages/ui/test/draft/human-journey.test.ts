@@ -51,6 +51,7 @@ interface ElementLike {
   };
   readonly getAttribute: (name: string) => string | null;
   readonly closest: (selector: string) => ElementLike | null;
+  readonly textContent: string | null;
 }
 
 interface ActiveDocument {
@@ -67,23 +68,86 @@ function Journey(props: { readonly initial?: DraftRouteParams }): ReturnType<typ
 }
 
 describe('one human drafts with seven bots', () => {
-  it('shows pack and passing context, then records a keyboard-operable choice in the route', () => {
+  it('shows pack and passing context, and inspects a card without committing to it', () => {
     render(h(Journey));
 
     expect(screen.getByRole('heading', { name: 'Draft' })).toBeTruthy();
-    expect(screen.getByText(/Pack 1 · pick 1/i)).toBeTruthy();
+    expect(screen.getByText('Pack 1 · Pick 1')).toBeTruthy();
     const pack = screen.getByRole('group', { name: /draft pack/i }) as unknown as ElementLike;
     const choices = pack.querySelectorAll('button');
     expect(choices.length).toBeGreaterThan(1);
     expect(choices[0]?.getAttribute('tabindex')).not.toBe('-1');
     expect(choices[0]?.getAttribute('data-size')).toBe('full');
 
+    // Nothing is chosen yet, so the one irreversible control on the surface is
+    // present and refuses to act. Present, because a control that appears when
+    // a card is tapped moves every control beside it on a phone.
+    const idle = screen.getByRole('button', { name: 'Pick a card' });
+    expect((idle as unknown as ElementLike).getAttribute('disabled')).not.toBeNull();
+
     fireEvent.click(choices[0] as never);
 
-    expect(screen.getByText(/Pack 1 · pick 2/i)).toBeTruthy();
-    expect(screen.getByText(/1 pick recorded/i)).toBeTruthy();
+    // The tap read the card into the rail. It did not draft it: this is the
+    // whole of `mtg-aqxi.3`, and the regression it guards is a single tap on a
+    // touch screen taking a card the player was only trying to scroll past.
+    expect(screen.getByText('Pack 1 · Pick 1')).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Card' })).toBeTruthy();
+    const commit = screen.getByRole('button', { name: /^Pick .+/ }) as unknown as ElementLike;
+    expect(commit.getAttribute('disabled')).toBeNull();
+
+    fireEvent.click(commit as never);
+
+    expect(screen.getByText('Pack 1 · Pick 2')).toBeTruthy();
     const document = (globalThis as { readonly document?: ActiveDocument }).document;
     expect(document?.activeElement?.getAttribute('aria-label')).toBeTruthy();
+  });
+
+  /**
+   * The strip is what a player reads between picks, and a seed is not one of
+   * the things they read: the hash carries it whether or not it is printed, so
+   * a draft is still reproduced from a link with nothing on screen to say so.
+   */
+  it('prints no seed above the pack, and says what is left of it instead', () => {
+    const { container } = render(h(Journey, { initial: { seed: 'journey/quiet' } }));
+    const text = (container as unknown as ElementLike).textContent ?? '';
+    expect(text).not.toContain('journey/quiet');
+    expect(text.toLowerCase()).not.toContain('seed');
+    expect(screen.getByText(/^\d+ cards remaining · passing left$/u)).toBeTruthy();
+  });
+
+  /**
+   * `mtg-3apk`. The pool used to be a rail section, 17rem wide and two columns
+   * of thumbnails deep; it is now the deck editor's own count-headed columns,
+   * under the pack, in the same box at pick 1 and pick 45.
+   */
+  it('draws the drafted pool under the pack, in the columns the deck editor draws', () => {
+    render(h(Journey, { initial: { seed: 'journey/pool' } }));
+
+    // Nothing drafted: no region, and no head counting to zero above an empty
+    // box. The pack has the whole column until there is something to put under
+    // it.
+    expect(screen.queryByRole('group', { name: 'Pool' })).toBeNull();
+
+    const pack = screen.getByRole('group', { name: /draft pack/i }) as unknown as ElementLike;
+    const first = pack.querySelector('button') as unknown as ElementLike;
+    fireEvent.click(first as never);
+    fireEvent.click(screen.getByRole('button', { name: /^Pick .+/ }) as never);
+
+    const shown = screen.getByRole('group', { name: 'Pool' }) as unknown as ElementLike;
+    expect(shown.querySelectorAll('.mtg-strips__card').length).toBe(1);
+    expect(screen.getByText('1 card')).toBeTruthy();
+
+    // And a strip reads its card into the rail without committing anything: the
+    // one irreversible action on the surface is bound to the pack and stays
+    // where it was, disabled, until a card in the new pack is chosen.
+    const strip = shown.querySelector('.mtg-strips__card') as unknown as ElementLike;
+    const named = (strip.getAttribute('aria-label') ?? '').split(',')[0] ?? '';
+    expect(named).not.toBe('');
+    fireEvent.click(strip as never);
+    const rail = screen.getByRole('group', { name: 'Card' }) as unknown as ElementLike;
+    expect(rail.textContent ?? '').toContain(named);
+    const commit = screen.getByRole('button', { name: 'Pick a card' }) as unknown as ElementLike;
+    expect(commit.getAttribute('disabled')).not.toBeNull();
   });
 
   it('completes the critical journey, builds 40 cards, and starts the kernel game', () => {
@@ -95,6 +159,7 @@ describe('one human drafts with seven bots', () => {
       const choice = pack.querySelector('button');
       if (choice === null) throw new Error(`draft pack ${String(guard + 1)} has no choice`);
       fireEvent.click(choice);
+      fireEvent.click(screen.getByRole('button', { name: /^Pick .+/ }) as never);
     }
 
     expect(screen.getByText(/Draft finished/i)).toBeTruthy();

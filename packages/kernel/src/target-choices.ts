@@ -14,13 +14,17 @@
  * kind of object it is looking at. `legal.ts` turns these spaces into actions,
  * `effects.ts` rechecks a chosen target on resolution, and the bots score them.
  */
-import type { ActivatedAbility, Card, Effect } from '@mtg/dsl';
+import type { ActivatedAbility, Card, Effect, TargetRestriction } from '@mtg/dsl';
 import {
+  assertNever,
   effectsFor,
+  effectsForActivatedAbility,
   hasTarget,
+  isMultipleTargetSpec,
+  isTargetedFight,
   isAttachingAbility,
   isAuraCard,
-  targetCountOf,
+  isSpellTargetEffect,
   targetFilterOf,
   targetRestrictionOf,
 } from '@mtg/dsl';
@@ -28,11 +32,47 @@ import type { ObjectId, PlayerId } from './ids';
 import type { ProtectionSource } from './keyword-abilities';
 import { opponentOf } from './ids';
 import type { GameState, Target } from './state';
-import { hasCardType } from './layers';
-import { creaturesControlledBy, creaturesOnBattlefield } from './zones';
-import { canBeTargetedBy } from './keyword-abilities';
+import { characteristicsOf, controllerOf, hasCardType } from './layers';
+import { creaturesControlledBy, creaturesOnBattlefield, tryObject } from './zones';
+import { canBeTargetedBy, canPlayerBeTargetedBy } from './keyword-abilities';
 import { satisfiesTargetRestriction } from './target-restrictions';
-import { satisfiesTargetFilter, spellSatisfiesFilter } from './target-filter';
+import { graveyardCardSatisfiesFilter, satisfiesTargetFilter, spellSatisfiesFilter } from './target-filter';
+import { isLegalAuraHost } from './attach';
+import { graveyardMembers } from './zone-filter';
+import { canGraveyardCardsBeTargeted } from './game-rules';
+
+/** Both seats, narrowed by live player-target restrictions for this controller. */
+function targetablePlayers(
+  state: GameState,
+  controller: PlayerId,
+  restriction: TargetRestriction | null = null,
+): readonly Target[] {
+  return [controller, opponentOf(controller)]
+    .filter((player) => canPlayerBeTargetedBy(state, player, controller))
+    .filter((player) => restriction === null || satisfiesTargetRestriction(state, player, restriction))
+    .map((player): Target => ({ kind: 'player', player }));
+}
+
+type OpponentPermanentTargetKind =
+  'targetCreatureOpponentControls' | 'targetNonlandPermanentOpponentControls';
+
+/** The opponent-controlled permanent spaces shared by singular and plural Detain slots. */
+function opponentPermanentCandidates(
+  state: GameState,
+  kind: OpponentPermanentTargetKind,
+  controller: PlayerId,
+  source?: ProtectionSource,
+): readonly Target[] {
+  const candidates =
+    kind === 'targetCreatureOpponentControls'
+      ? creaturesControlledBy(state, opponentOf(controller)).map((object) => object.oid)
+      : state.battlefield
+          .filter((oid) => controllerOf(state, oid) === opponentOf(controller))
+          .filter((oid) => !hasCardType(state, oid, 'land'));
+  return candidates
+    .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
+    .map((oid): Target => ({ kind: 'permanent', oid }));
+}
 
 /**
  * Targets legal for each effect in a list, parallel to it.
@@ -55,6 +95,9 @@ export function targetChoicesForEffects(
   return effects.map((effect) => {
     const restriction = hasTarget(effect) ? targetRestrictionOf(effect.target) : null;
     const filter = hasTarget(effect) ? targetFilterOf(effect.target) : null;
+    const excludedSource =
+      hasTarget(effect) && effect.target.excludeSource === true && typeof source === 'string' ? source : null;
+    const excludedName = effect.kind === 'exileTarget' ? (effect.sameNameCohort?.excludedName ?? null) : null;
     // Applied to the assembled space rather than inside each branch: every
     // branch that can produce a creature produces it the same way, and a filter
     // per branch is four chances to forget one. A slot with no restriction and
@@ -66,16 +109,20 @@ export function targetChoicesForEffects(
     // printed, and CR 608.2b rechecks all of it — and `isTargetStillLegal`
     // applies the same pair in the same order at the other end.
     const narrow = (targets: readonly (Target | null)[]): readonly (Target | null)[] =>
-      restriction === null && filter === null
+      restriction === null && filter === null && excludedSource === null && excludedName === null
         ? targets
         : targets.filter(
             (target) =>
               target === null ||
-              target.kind !== 'permanent' ||
-              ((restriction === null || satisfiesTargetRestriction(state, target.oid, restriction)) &&
-                (filter === null || satisfiesTargetFilter(state, target.oid, filter))),
+              (target.kind === 'player'
+                ? restriction === null || satisfiesTargetRestriction(state, target.player, restriction)
+                : target.kind !== 'permanent' ||
+                  (target.oid !== excludedSource &&
+                    (excludedName === null || characteristicsOf(state, target.oid).name !== excludedName) &&
+                    (restriction === null || satisfiesTargetRestriction(state, target.oid, restriction)) &&
+                    (filter === null || satisfiesTargetFilter(state, target.oid, filter)))),
           );
-    if (effect.kind === 'counterSpell') {
+    if (isSpellTargetEffect(effect)) {
       // "Counter target spell" is what the card says, and a triggered ability
       // is not a spell (CR 113.7a). Offering one would be a card whose text and
       // behavior disagree, which is the failure this vocabulary exists to stop.
@@ -88,6 +135,15 @@ export function targetChoicesForEffects(
       const spellFilter = effect.spellFilter;
       return state.stack
         .filter((entry) => entry.ability === null)
+        .filter((entry) =>
+          effect.kind === 'counterSpell' &&
+          'spellSelection' in effect &&
+          effect.spellSelection === 'targetSpellYouDontControl'
+            ? entry.controller !== controller
+            : effect.kind === 'copySpell' && effect.spellSelection === 'targetSpellYouControl'
+              ? entry.controller === controller
+              : true,
+        )
         .filter((entry) => spellFilter === undefined || spellSatisfiesFilter(state, entry.oid, spellFilter))
         .map((entry): Target => ({ kind: 'spell', oid: entry.oid }));
     }
@@ -103,14 +159,14 @@ export function targetChoicesForEffects(
     // fails silently when it does not — the missing kind falls into the switch
     // below and reads `.target` off an effect that has none.
     if (!hasTarget(effect)) return [null];
-    if (targetCountOf(effect.target) !== null) {
-      // A `TargetSpec.count` slot ("up to two target creatures", `mtg-kg44`)
+    if (isMultipleTargetSpec(effect.target) || isTargetedFight(effect)) {
+      // A plural target slot (`count` or `anyNumber`)
       // is chosen through `Action.multiTargets`, a side channel parallel to
       // this per-slot `Target | null` enumeration — see `StackEntry
       // .multiTargets`' docblock for why it stayed a side channel instead of
       // widening `Target` itself. This function only answers what a single
       // `targets[i]` slot may hold, and "no single target" is the only
-      // correct answer for a counted slot regardless of how many creatures
+      // correct answer for a plural slot regardless of how many candidates
       // are on the board: returning the individual creature list here would
       // make castability depend on there being at least one legal creature,
       // defeating the "up to" wording `mtg-kg44` was filed to make castable
@@ -120,13 +176,14 @@ export function targetChoicesForEffects(
     const creatures = creaturesOnBattlefield(state)
       .filter((object) => source === undefined || canBeTargetedBy(state, object.oid, source, controller))
       .map((object): Target => ({ kind: 'permanent', oid: object.oid }));
-    const players: readonly Target[] = [
-      { kind: 'player', player: controller },
-      { kind: 'player', player: opponentOf(controller) },
-    ];
+    const players = targetablePlayers(state, controller, restriction);
     const creatureOids = new Set(creatures.map((target) => (target?.kind === 'permanent' ? target.oid : '')));
     const planeswalkers = state.battlefield
       .filter((oid) => hasCardType(state, oid, 'planeswalker') && !creatureOids.has(oid))
+      .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
+      .map((oid): Target => ({ kind: 'permanent', oid }));
+    const battles = state.battlefield
+      .filter((oid) => hasCardType(state, oid, 'battle') && !creatureOids.has(oid))
       .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
       .map((oid): Target => ({ kind: 'permanent', oid }));
     // Read through `hasCardType` rather than off `object.card.kind`, so an
@@ -163,13 +220,16 @@ export function targetChoicesForEffects(
       case 'targetPlayer':
         return players;
       case 'targetOpponent':
-        // CR 115.4, and the one place this vocabulary is cheaper than it looks:
-        // a two-player game has exactly one opponent, so the slot offers one
-        // choice and the cast enumeration does not widen. The negative
-        // assertion is the interesting one — the controller is not in this
-        // list, so no move a player can make aims a punisher at themselves.
-        return [{ kind: 'player', player: opponentOf(controller) }];
+        // CR 115.4. A two-player game has exactly one opponent, so this slot
+        // offers that player or nobody when a live rule such as hexproof makes
+        // them illegal; it never widens the cast enumeration beyond one choice.
+        return players.filter(
+          (target) => target.kind === 'player' && target.player === opponentOf(controller),
+        );
       case 'triggeringCreature':
+        // Filled from the triggering event; it is not a CR 115 choice.
+        return [];
+      case 'triggeringPlayer':
         // Filled from the triggering event; it is not a CR 115 choice.
         return [];
       case 'targetCreatureDefendingPlayerControls':
@@ -216,6 +276,26 @@ export function targetChoicesForEffects(
             )
             .map((object): Target => ({ kind: 'permanent', oid: object.oid })),
         );
+      case 'targetCreatureOpponentControls':
+        return narrow(opponentPermanentCandidates(state, effect.target.kind, controller, source));
+      case 'targetNonlandPermanentOpponentControls':
+        return narrow(opponentPermanentCandidates(state, effect.target.kind, controller, source));
+      case 'targetNonlandPermanentYouDontControl':
+        return narrow(
+          state.battlefield
+            .filter((oid) => !hasCardType(state, oid, 'land'))
+            .filter((oid) => controllerOf(state, oid) !== controller)
+            .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
+            .map((oid): Target => ({ kind: 'permanent', oid })),
+        );
+      case 'targetPermanentYouNeitherOwnNorControl':
+        return narrow(
+          state.battlefield
+            .filter((oid) => controllerOf(state, oid) !== controller)
+            .filter((oid) => tryObject(state, oid)?.owner !== controller)
+            .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
+            .map((oid): Target => ({ kind: 'permanent', oid })),
+        );
       case 'targetArtifactOrEnchantment':
         // `narrow` now, where before this kind skipped it. The restriction half
         // is still inapplicable — `restrictionFitsTargetKind` refuses one on any
@@ -224,6 +304,14 @@ export function targetChoicesForEffects(
         // says "target black enchantment" has to be narrowed rather than
         // silently widened back to the whole space.
         return narrow(artifactsAndEnchantments);
+      case 'targetArtifactYouDontControl':
+        return narrow(
+          state.battlefield
+            .filter((oid) => hasCardType(state, oid, 'artifact'))
+            .filter((oid) => controllerOf(state, oid) !== controller)
+            .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
+            .map((oid): Target => ({ kind: 'permanent', oid })),
+        );
       case 'targetPermanent':
         // Every permanent on the battlefield, which is the widest object space
         // this vocabulary names and the one the filter exists to cut down.
@@ -241,11 +329,35 @@ export function targetChoicesForEffects(
         // reason `targetPlayer` skips it: `filterFitsTargetKind` and
         // `restrictionFitsTargetKind` both refuse a slot that draws from a
         // player, so a spec reaching here carries neither.
-        return [...players, ...planeswalkers];
+        return effect.kind === 'dealDamage' && effect.opponentPlayerOrPlaneswalkerOnly === true
+          ? [
+              ...players.filter(
+                (target) => target.kind === 'player' && target.player === opponentOf(controller),
+              ),
+              ...planeswalkers,
+            ]
+          : [...players, ...planeswalkers];
+      case 'targetCardInYourGraveyard':
+        if (!canGraveyardCardsBeTargeted(state)) return [];
+        return state.players[controller].graveyard
+          .filter((oid) => filter === null || graveyardCardSatisfiesFilter(state, oid, filter))
+          .map((oid): Target => ({ kind: 'card', oid }));
+      case 'targetCardInAGraveyard':
+        if (!canGraveyardCardsBeTargeted(state)) return [];
+        return graveyardMembers(state, 'each')
+          .filter((oid) => filter === null || graveyardCardSatisfiesFilter(state, oid, filter))
+          .map((oid): Target => ({ kind: 'card', oid }));
+      case 'targetCardInOpponentsGraveyard':
+        if (!canGraveyardCardsBeTargeted(state)) return [];
+        return graveyardMembers(state, opponentOf(controller))
+          .filter((oid) => filter === null || graveyardCardSatisfiesFilter(state, oid, filter))
+          .map((oid): Target => ({ kind: 'card', oid }));
       case 'anyTarget':
-        return [...players, ...creatures, ...planeswalkers];
+        return [...players, ...creatures, ...planeswalkers, ...battles];
       case 'selfCreature':
       case 'selfPermanent':
+      case 'enchantedCreature':
+      case 'equippedCreature':
         // `[null]`, `noTarget`'s own placeholder, and deliberately not the `[]`
         // `triggeringCreature` returns three cases up. That kind is refused on
         // every activated ability (`checkSelfCreatureTarget`'s sibling gate has
@@ -263,6 +375,8 @@ export function targetChoicesForEffects(
       case 'thatCreature':
       case 'thatPlayer':
       case 'thatCreaturesController':
+      case 'thatPlayerOrPlaneswalkerController':
+      case 'chosenPlayer':
         // `[null]` for the reason the two source-body kinds one case up return
         // it, and this is the arm the whole lane turns on (`mtg-nhyv.75`).
         // Before it, a card that printed "that creature" carried an ordinary
@@ -281,33 +395,99 @@ export function targetChoicesForEffects(
         // `entry.targets[referentSourceIndex(...)]`, so what this slot holds is
         // never read as data — the same contract the source-body arm has.
         return [null];
+      default:
+        return assertNever(effect.target.kind, 'targetChoicesForEffects');
     }
   });
 }
 
 /**
- * The individually-legal creatures for one `TargetSpec.count` slot's member
- * choices ("up to two target creatures", `mtg-kg44`) — `[]` for an effect
- * that carries no counted slot.
+ * The individually legal generic targets for one plural slot — `[]` for an
+ * effect that carries no such slot.
  *
- * The same restriction-and-filter narrowing `targetChoicesForEffects`'s own
- * `targetCreature` case applies to a single-target slot of the same kind, and
- * nothing more: `checkTargetCount` (`@mtg/dsl`) refuses `count` on any kind
- * but `targetCreature`, so there is no second shape this has to answer for.
- * Separate from `targetChoicesForEffects` because that function's contract is
- * one `Target | null` per slot and a counted slot's own answer to that
+ * Creature members receive the same restriction-and-filter narrowing as an
+ * ordinary creature slot; player members are the currently targetable seats
+ * the ordinary `targetPlayer` slot exposes. Separate from
+ * `targetChoicesForEffects` because
+ * that function's contract is
+ * one `Target | null` per slot and a plural slot's own answer to that
  * question is always `[null]` (see its inline comment there) — the list of
  * *candidates* the side-channel choice draws from is a different question,
  * asked only by `castOptions` when it builds `Action.multiTargets`
  * combinations.
  */
-export function countedSlotCandidates(
+export function multipleTargetCandidates(
   state: GameState,
   effect: Effect,
   controller: PlayerId,
   source?: ProtectionSource,
-): readonly ObjectId[] {
-  if (!hasTarget(effect) || targetCountOf(effect.target) === null) return [];
+  position = 0,
+): readonly Target[] {
+  if (isTargetedFight(effect)) {
+    const targetController = position === 0 ? controller : opponentOf(controller);
+    return creaturesControlledBy(state, targetController)
+      .filter((object) => source === undefined || canBeTargetedBy(state, object.oid, source, controller))
+      .map((object): Target => ({ kind: 'permanent', oid: object.oid }));
+  }
+  if (!hasTarget(effect) || !isMultipleTargetSpec(effect.target)) return [];
+  if (effect.kind === 'exileTarget' && effect.creatureBattlefieldOrGraveyard === true) {
+    const battlefield = creaturesOnBattlefield(state)
+      .filter((object) => object.oid !== source)
+      .filter((object) => source === undefined || canBeTargetedBy(state, object.oid, source, controller))
+      .map((object): Target => ({ kind: 'permanent', oid: object.oid }));
+    const graveyards = canGraveyardCardsBeTargeted(state)
+      ? graveyardMembers(state, 'each')
+          .filter((oid) => graveyardCardSatisfiesFilter(state, oid, effect.target.filter!))
+          .map((oid): Target => ({ kind: 'card', oid }))
+      : [];
+    return [...battlefield, ...graveyards];
+  }
+  if (effect.target.kind === 'targetPlayer') {
+    return targetablePlayers(state, controller, targetRestrictionOf(effect.target));
+  }
+  if (effect.target.kind === 'anyTarget') {
+    const creatures = creaturesOnBattlefield(state)
+      .filter((object) => source === undefined || canBeTargetedBy(state, object.oid, source, controller))
+      .map((object): Target => ({ kind: 'permanent', oid: object.oid }));
+    const creatureOids = new Set(creatures.map((target) => (target.kind === 'permanent' ? target.oid : '')));
+    const planeswalkers = state.battlefield
+      .filter((oid) => hasCardType(state, oid, 'planeswalker') && !creatureOids.has(oid))
+      .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
+      .map((oid): Target => ({ kind: 'permanent', oid }));
+    const battles = state.battlefield
+      .filter((oid) => hasCardType(state, oid, 'battle') && !creatureOids.has(oid))
+      .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
+      .map((oid): Target => ({ kind: 'permanent', oid }));
+    return [...targetablePlayers(state, controller), ...creatures, ...planeswalkers, ...battles];
+  }
+  if (effect.target.kind === 'targetCreatureOpponentControls') {
+    return opponentPermanentCandidates(state, effect.target.kind, controller, source);
+  }
+  if (effect.target.kind === 'targetNonlandPermanentOpponentControls') {
+    return opponentPermanentCandidates(state, effect.target.kind, controller, source);
+  }
+  if (effect.target.kind === 'targetNonlandPermanentYouDontControl') {
+    return state.battlefield
+      .filter((oid) => !hasCardType(state, oid, 'land'))
+      .filter((oid) => controllerOf(state, oid) !== controller)
+      .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
+      .map((oid): Target => ({ kind: 'permanent', oid }));
+  }
+  if (effect.target.kind === 'targetPermanentYouNeitherOwnNorControl') {
+    return state.battlefield
+      .filter((oid) => controllerOf(state, oid) !== controller)
+      .filter((oid) => tryObject(state, oid)?.owner !== controller)
+      .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
+      .map((oid): Target => ({ kind: 'permanent', oid }));
+  }
+  if (effect.target.kind === 'targetArtifactYouDontControl') {
+    return state.battlefield
+      .filter((oid) => hasCardType(state, oid, 'artifact'))
+      .filter((oid) => controllerOf(state, oid) !== controller)
+      .filter((oid) => source === undefined || canBeTargetedBy(state, oid, source, controller))
+      .map((oid): Target => ({ kind: 'permanent', oid }));
+  }
+  if (effect.target.kind !== 'targetCreature') return [];
   const restriction = targetRestrictionOf(effect.target);
   const filter = targetFilterOf(effect.target);
   return creaturesOnBattlefield(state)
@@ -317,7 +497,7 @@ export function countedSlotCandidates(
         (restriction === null || satisfiesTargetRestriction(state, object.oid, restriction)) &&
         (filter === null || satisfiesTargetFilter(state, object.oid, filter)),
     )
-    .map((object) => object.oid);
+    .map((object): Target => ({ kind: 'permanent', oid: object.oid }));
 }
 
 /**
@@ -336,9 +516,10 @@ export function targetChoicesForActivation(
   ability: ActivatedAbility,
   controller: PlayerId,
   sourceOid?: ObjectId,
+  mode: number | null = null,
 ): readonly (readonly (Target | null)[])[] {
   if (!isAttachingAbility(ability)) {
-    return targetChoicesForEffects(state, ability.effects, controller, sourceOid);
+    return targetChoicesForEffects(state, effectsForActivatedAbility(ability, mode), controller, sourceOid);
   }
   return [
     creaturesControlledBy(state, controller)
@@ -377,9 +558,9 @@ export function targetChoicesFor(
   if (isAuraCard(card)) {
     const source = sourceOid ?? card;
     return [
-      creaturesOnBattlefield(state)
-        .filter((object) => canBeTargetedBy(state, object.oid, source, controller))
-        .map((object): Target => ({ kind: 'permanent', oid: object.oid })),
+      state.battlefield
+        .filter((oid) => isLegalAuraHost(state, card, oid) && canBeTargetedBy(state, oid, source, controller))
+        .map((oid): Target => ({ kind: 'permanent', oid })),
     ];
   }
   return targetChoicesForEffects(state, effectsFor(card, null), controller, sourceOid ?? card);

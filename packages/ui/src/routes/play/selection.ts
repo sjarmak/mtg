@@ -79,9 +79,9 @@
  */
 import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { Action, Decision, GameState, ObjectId } from '@mtg/kernel';
+import type { Action, Decision, GameState, ObjectId, PlayerId, Target } from '@mtg/kernel';
 import { castStage } from './cast';
-import type { CastPick, CastPlan, CastStage, CastTargetStage } from './cast';
+import type { CastPick, CastPlan, CastTargetStage } from './cast';
 import { castPanel } from './cast-panel';
 import { unfoldedName } from './choice-button';
 import { declarationChoice, declarationPlan, declarationStage, rosterPress, withAssignment } from './declare';
@@ -97,7 +97,7 @@ import { pickerPanel } from './picker';
 import type { SeatNames } from './position';
 import { choiceText } from './prompt';
 import type { PlayChoice } from './prompt';
-import { aimableTargets } from './targeting';
+import { aimablePlayers, aimableSpells, aimableTargets } from './targeting';
 
 /**
  * Which gesture opened the menu, which is the one thing the two openings differ
@@ -126,6 +126,133 @@ interface OpenPicker {
   readonly via: OpenVia;
 }
 
+interface StagedSelection {
+  /** Whether this object opens a staged flow instead of submitting immediately. */
+  readonly has: (key: string) => boolean;
+  /** Clears answers held by the staged flow whenever its object opens or closes. */
+  readonly reset: () => void;
+  /** Draws the staged flow in the same card-local slot as an ordinary picker. */
+  readonly render: (key: string, dismiss: () => void) => ReactNode;
+}
+
+export interface EnumeratedSelectionInput {
+  readonly decisions: number;
+  readonly byObject: ReadonlyMap<string, readonly PlayChoice[]>;
+  readonly onChoose: (index: number) => void;
+  readonly staged?: StagedSelection | undefined;
+  readonly coarse: boolean;
+}
+
+export interface EnumeratedSelection {
+  readonly openKey: string | null;
+  /** Submits one already-enumerated choice without inventing a gesture-specific path. */
+  readonly choose: (index: number) => void;
+  readonly select: (key: string) => void;
+  readonly activate: (key: string) => void;
+  readonly openMenu: (key: string) => void;
+  readonly dismiss: () => void;
+  readonly pickerFor: (key: string, cardName: string) => ReactNode;
+}
+
+/**
+ * The one card-gesture controller used by kernel and observed play.
+ *
+ * Both adapters supply the enumeration and receive its exact index. This hook
+ * owns the meaning of click, double click, context menu, Escape, focus return,
+ * and decision-scoped picker state, so a backend cannot accidentally invent a
+ * second interaction vocabulary while reusing the same board components.
+ */
+export function useEnumeratedSelection(input: EnumeratedSelectionInput): EnumeratedSelection {
+  const { decisions, byObject, onChoose, staged, coarse } = input;
+  const [picking, setPicking] = useState<OpenPicker | null>(null);
+  const openedBy = useRef<FocusableNode | null>(null);
+  const openKey = picking !== null && picking.decisions === decisions ? picking.key : null;
+
+  function clear(): void {
+    openedBy.current = null;
+    setPicking(null);
+    staged?.reset();
+  }
+
+  function choose(index: number): void {
+    clear();
+    onChoose(index);
+  }
+
+  function dismiss(): void {
+    const opener = openedBy.current;
+    clear();
+    // Before React re-renders, so the card is still connected to receive focus.
+    opener?.focus();
+  }
+
+  function open(key: string, via: OpenVia): void {
+    openedBy.current = focusedNode();
+    staged?.reset();
+    setPicking({ decisions, key, via });
+  }
+
+  function select(key: string): void {
+    const choices = byObject.get(key) ?? [];
+    const only = choices[0];
+    if (only === undefined) return;
+    if (openKey === key) {
+      if (choices.length === 1 && coarse) {
+        choose(only.index);
+        return;
+      }
+      dismiss();
+      return;
+    }
+    if (staged?.has(key) === true) {
+      open(key, 'click');
+      return;
+    }
+    if (choices.length === 1 && !coarse) {
+      choose(only.index);
+      return;
+    }
+    open(key, 'click');
+  }
+
+  function activate(key: string): void {
+    if (staged?.has(key) === true) {
+      open(key, 'click');
+      return;
+    }
+    const choices = byObject.get(key) ?? [];
+    const only = choices[0];
+    if (choices.length === 1 && only !== undefined) {
+      if (coarse) choose(only.index);
+      return;
+    }
+    if (choices.length < 2) return;
+    const move = defaultChoice(choices, key);
+    if (move === null) return;
+    choose(move.index);
+  }
+
+  function openMenu(key: string): void {
+    if (openKey === key) return;
+    const choices = byObject.get(key) ?? [];
+    if (choices.length === 0) return;
+    open(key, 'menu');
+  }
+
+  function pickerFor(key: string, cardName: string): ReactNode {
+    if (picking === null || picking.key !== key || openKey !== key) return null;
+    if (staged?.has(key) === true) return staged.render(key, dismiss);
+    const choices = byObject.get(key) ?? [];
+    if (choices.length < (picking.via === 'menu' ? 1 : 2)) return null;
+    return pickerPanel(cardName, choices, (index) => {
+      dismiss();
+      onChoose(index);
+    });
+  }
+
+  return { openKey, choose, select, activate, openMenu, dismiss, pickerFor };
+}
+
 export interface SelectionInput {
   /** `session.decisions`, which is what an open picker is scoped to. */
   readonly decisions: number;
@@ -151,6 +278,7 @@ export interface SelectionInput {
   readonly state: GameState;
   readonly names: SeatNames;
   readonly onChoose: (index: number) => void;
+  readonly coarse: boolean;
 }
 
 /**
@@ -249,7 +377,7 @@ interface OpenDeclaration {
   readonly from: PressOrigin;
 }
 
-const NOTHING_ASSIGNED: Assignment = new Map<ObjectId, string>();
+const NOTHING_ASSIGNED: Assignment = new Map();
 
 /**
  * A damage assignment order being built, and the two ways to change it.
@@ -295,6 +423,13 @@ export interface TargetControl {
   readonly stage: CastTargetStage;
   /** Aims the open slot at a permanent. A no-op for an id the slot does not name. */
   readonly aim: (oid: ObjectId) => void;
+  /** Aims the open slot at a seat. A no-op for a seat the slot does not name. */
+  readonly aimPlayer: (player: PlayerId) => void;
+  /**
+   * Aims the open slot at an object on the stack, by the key the strip draws it
+   * under. A no-op for a key the slot does not name (`mtg-bz2.16`).
+   */
+  readonly aimSpell: (key: string) => void;
 }
 
 /** What is placed, scoped to the decision it was placed against (`OpenDeclaration`). */
@@ -306,6 +441,8 @@ interface OpenOrder {
 export interface TableSelection {
   /** The object whose picker is open, or null. */
   readonly openKey: string | null;
+  /** Submits one already-enumerated choice. */
+  readonly choose?: ((index: number) => void) | undefined;
   /** A click on a card face: play its one move, or open its menu. */
   readonly select: (key: string) => void;
   /** A double click: play the card's default move, when it has one. */
@@ -328,17 +465,45 @@ export interface TableSelection {
 }
 
 export function useTableSelection(input: SelectionInput): TableSelection {
-  const { decisions, byObject, castPlans, decision, state, names, onChoose } = input;
-  const [picking, setPicking] = useState<OpenPicker | null>(null);
+  const { decisions, byObject, castPlans, decision, state, names, onChoose, coarse } = input;
   const [declaring, setDeclaring] = useState<OpenDeclaration | null>(null);
   const [ordering, setOrdering] = useState<OpenOrder | null>(null);
   // What a staged cast has been aimed at so far, oldest answer first. Empty
   // whenever the panel opens, so a cast never inherits the last one's answers.
   const [picks, setPicks] = useState<readonly CastPick[]>([]);
-  // The card that opened the picker, caught while it still holds the ring. A ref
-  // rather than state because nothing on screen is drawn from it.
-  const openedBy = useRef<FocusableNode | null>(null);
-  const openKey = picking !== null && picking.decisions === decisions ? picking.key : null;
+  const enumerated = useEnumeratedSelection({
+    decisions,
+    byObject,
+    onChoose,
+    coarse,
+    staged: {
+      has: (key): boolean => castPlans.has(key),
+      reset: (): void => setPicks([]),
+      render: (key, dismiss): ReactNode => {
+        const plan = castPlans.get(key);
+        if (plan === undefined) return null;
+        const stage = castStage(state, names, plan, picks);
+        if (stage === null) return null;
+        return castPanel({
+          plan,
+          stage,
+          onPick: (pick: CastPick): void => setPicks([...picks, pick]),
+          onBack:
+            picks.length === 0
+              ? null
+              : (): void => {
+                  setPicks(picks.slice(0, -1));
+                },
+          onCancel: dismiss,
+          onChoose: (index: number): void => {
+            dismiss();
+            onChoose(index);
+          },
+        });
+      },
+    },
+  });
+  const openKey = enumerated.openKey;
   // The staged cast and the question it is on, derived once and read by both
   // surfaces that draw it: the panel below and, through `targeting`, the board.
   // One `castStage` call rather than one per surface, because two calls are two
@@ -347,50 +512,6 @@ export function useTableSelection(input: SelectionInput): TableSelection {
   // avoid.
   const openPlan = openKey === null ? undefined : castPlans.get(openKey);
   const openStage = openPlan === undefined ? null : castStage(state, names, openPlan, picks);
-
-  function dismiss(): void {
-    const opener = openedBy.current;
-    openedBy.current = null;
-    setPicking(null);
-    setPicks([]);
-    // Before React re-renders, so the card is still in the document to take it.
-    // A card the choice removed from the table cannot, and the ring falls to the
-    // body there, which is what a card leaving the screen costs either way.
-    opener?.focus();
-  }
-
-  function open(key: string, via: OpenVia): void {
-    openedBy.current = focusedNode();
-    setPicks([]);
-    setPicking({ decisions, key, via });
-  }
-
-  function select(key: string): void {
-    const choices = byObject.get(key) ?? [];
-    const only = choices[0];
-    if (only === undefined) return;
-    if (openKey === key) {
-      // Clicking the card whose panel is already open closes it. For a picker
-      // that is a menu being dismissed; for a staged cast it is the cancel, and
-      // both are local — nothing was ever submitted.
-      dismiss();
-      return;
-    }
-    // A castable card goes to the staged flow even when it has one aiming,
-    // because the stage that always has something to say is the payment.
-    if (castPlans.has(key)) {
-      open(key, 'click');
-      return;
-    }
-    if (choices.length === 1) {
-      openedBy.current = null;
-      setPicking(null);
-      setPicks([]);
-      onChoose(only.index);
-      return;
-    }
-    open(key, 'click');
-  }
 
   /**
    * A double click: the card's default move, submitted without the menu.
@@ -410,25 +531,6 @@ export function useTableSelection(input: SelectionInput): TableSelection {
    * the menu here would be a third meaning for a gesture the player used to say
    * "skip the menu".
    */
-  function activate(key: string): void {
-    // A castable card has no default worth submitting, whatever its move count.
-    // The staged cast exists because the payment is the stage that always has
-    // something to say, and a double click that submitted an aiming outright
-    // would be the one gesture that skips it. This is the same refusal the rule
-    // below makes for a card with two aims, arrived at one step earlier.
-    if (castPlans.has(key)) {
-      open(key, 'click');
-      return;
-    }
-    const choices = byObject.get(key) ?? [];
-    if (choices.length < 2) return;
-    const move = defaultChoice(choices);
-    if (move === null) return;
-    openedBy.current = null;
-    setPicking(null);
-    onChoose(move.index);
-  }
-
   /**
    * A right click or the context key: this card's menu, whatever it holds.
    *
@@ -443,13 +545,6 @@ export function useTableSelection(input: SelectionInput): TableSelection {
    * would make the gesture mean two things depending on state, which is the
    * inference this lane is avoiding.
    */
-  function openMenu(key: string): void {
-    if (openKey === key) return;
-    const choices = byObject.get(key) ?? [];
-    if (choices.length === 0) return;
-    open(key, 'menu');
-  }
-
   /**
    * The guard below is not dead and the branch is not empty. `select` never
    * names a card it found fewer than two choices on, so no click of the
@@ -476,49 +571,6 @@ export function useTableSelection(input: SelectionInput): TableSelection {
    * way and the list is read fresh from `byObject` on every render rather than
    * carried in the open picker.
    */
-  function pickerFor(key: string, cardName: string): ReactNode {
-    if (picking === null || picking.key !== key || openKey !== key) return null;
-    if (openPlan !== undefined) return openStage === null ? null : castFor(openPlan, openStage);
-    const choices = byObject.get(key) ?? [];
-    if (choices.length < (picking.via === 'menu' ? 1 : 2)) return null;
-    return pickerPanel(cardName, choices, (index) => {
-      dismiss();
-      onChoose(index);
-    });
-  }
-
-  /**
-   * The staged cast, or nothing when the answers no longer name a cast the
-   * kernel is offering.
-   *
-   * `castStage` returning null is the same staleness the guard above answers, in
-   * the same way and for the same reason: a panel is scoped to a decision
-   * *count*, and two positions can share one. Drawing a stage over an empty
-   * option list would be a panel asking about a spell that is no longer castable.
-   * The null is caught at the call above; the stage is handed in rather than
-   * derived here so that the panel and the board draw one question (`openStage`).
-   */
-  function castFor(plan: CastPlan, stage: CastStage): ReactNode {
-    return castPanel({
-      plan,
-      stage,
-      onPick: (pick: CastPick): void => {
-        setPicks([...picks, pick]);
-      },
-      onBack:
-        picks.length === 0
-          ? null
-          : (): void => {
-              setPicks(picks.slice(0, -1));
-            },
-      onCancel: dismiss,
-      onChoose: (index: number): void => {
-        dismiss();
-        onChoose(index);
-      },
-    });
-  }
-
   /**
    * The declaration being assembled, or null when the kernel is asking anything
    * else.
@@ -571,12 +623,13 @@ export function useTableSelection(input: SelectionInput): TableSelection {
         // A toggle keeps the ring where it is: the row is the same button before
         // and after, so nothing is unmounted and nothing has to be handed back.
         if (press.kind === 'ask') write(assignment, press.oid, null, from);
-        else write(withAssignment(assignment, press.oid, press.to), null, null, from);
+        else write(withAssignment(assignment, press.oid, press.to, subject.multiple), null, null, from);
       },
       // Answering closes the question, which is what makes the roster the place
       // a player always ends up: every answer is one press and one step back.
       assign: (oid: ObjectId, key: string | null, from: PressOrigin = 'panel'): void => {
-        write(withAssignment(assignment, oid, key), null, oid, from);
+        const subject = plan.subjects.find((candidate) => candidate.oid === oid);
+        write(withAssignment(assignment, oid, key, subject?.multiple ?? false), null, oid, from);
       },
       back: (from: PressOrigin = 'panel'): void => {
         write(assignment, null, live?.asking ?? null, from);
@@ -645,27 +698,40 @@ export function useTableSelection(input: SelectionInput): TableSelection {
   function targetControl(): TargetControl | null {
     if (openPlan === undefined || openStage === null || openStage.kind !== 'targets') return null;
     const stage = openStage;
+    // One attach for all three doors, because the pick a target becomes does not
+    // depend on which surface was pressed: the slot and the `Target` are the
+    // whole of the answer, and three copies of this line would be three chances
+    // for one of them to stage a pick the panel spells differently.
+    const attach = (target: Target | undefined): void => {
+      // An aim the slot never named. Every board surface draws such a thing
+      // inert, so this is unreachable by pointer; it is the guard that keeps
+      // that true rather than assumed, in the way `pressOrderBlocker` guards its
+      // own lookup.
+      if (target === undefined) return;
+      setPicks([...picks, { kind: 'target', slot: stage.slot, target }]);
+    };
     return {
       oid: openPlan.oid,
       stage,
       aim: (oid: ObjectId): void => {
-        const target = aimableTargets(stage).get(oid);
-        // A permanent the slot never named. The board draws it inert, so this is
-        // unreachable by pointer; it is the guard that keeps that true rather
-        // than assumed, in the way `pressOrderBlocker` guards its own lookup.
-        if (target === undefined) return;
-        setPicks([...picks, { kind: 'target', slot: stage.slot, target }]);
+        attach(aimableTargets(stage).get(oid));
+      },
+      aimPlayer: (player: PlayerId): void => {
+        attach(aimablePlayers(stage).get(player));
+      },
+      aimSpell: (key: string): void => {
+        attach(aimableSpells(stage).get(key));
       },
     };
   }
 
   return {
     openKey,
-    select,
-    activate,
-    openMenu,
-    dismiss,
-    pickerFor,
+    select: enumerated.select,
+    activate: enumerated.activate,
+    openMenu: enumerated.openMenu,
+    dismiss: enumerated.dismiss,
+    pickerFor: enumerated.pickerFor,
     declaration: declarationControl(),
     ordering: orderingControl(),
     targeting: targetControl(),

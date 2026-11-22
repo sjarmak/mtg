@@ -131,10 +131,37 @@ describe('summaries', () => {
     expect(summary.onPlayWins).toBe(LOG.games.filter(onPlayWon).length);
   });
 
-  it('groups games by matchup', () => {
+  /**
+   * Derived from the fixture rather than named, because the fixture is a run.
+   * `packages/slice/test/ui-replay-fixture.test.ts` re-cuts it every unit run
+   * and a kernel change moves which matchups the round robin reaches first: the
+   * literal `['WU/WB', 'WU/WR', 'WU/UB']` this used to carry went stale on the
+   * third one and stayed that way until something else re-cut the file. What is
+   * under test is the grouping, so read the pairs off the games and assert the
+   * grouping against them.
+   */
+  it('groups games by matchup, in the order the run played them', () => {
+    const played = LOG.games.map((game) => `${game.extras.sim_user_deck}/${game.extras.sim_oppo_deck}`);
     const rows = matchupRows(LOG.games);
-    expect(rows.map((row) => row.key)).toEqual(['WU/WB', 'WU/WR', 'WU/UB']);
-    expect(rows.reduce((sum, row) => sum + row.games, 0)).toBe(3);
+    expect(rows.map((row) => row.key)).toEqual([...new Set(played)]);
+    expect(rows.reduce((sum, row) => sum + row.games, 0)).toBe(LOG.games.length);
+  });
+
+  /**
+   * The fixture carries one game per matchup, so it exercises the map's insert
+   * arm and never its hit arm. Playing it twice is the cheapest subject that
+   * does: same keys, same order, every count doubled.
+   */
+  it('counts a repeated matchup into the one row', () => {
+    const once = matchupRows(LOG.games);
+    const twice = matchupRows([...LOG.games, ...LOG.games]);
+    expect(twice.map((row) => row.key)).toEqual(once.map((row) => row.key));
+    for (const [index, row] of twice.entries()) {
+      const single = once[index];
+      if (single === undefined) throw new Error(`no one-run row beside ${row.key}`);
+      expect(row.games, row.key).toBe(single.games * 2);
+      expect(row.userWins, row.key).toBe(single.userWins * 2);
+    }
   });
 
   it('says n/a rather than dividing by zero', () => {

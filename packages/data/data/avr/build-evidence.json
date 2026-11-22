@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "avr",
+  "formatSha256": "07a0c2a598d84e6ab910f55e4bed8e555cae40343513e5030976e5006c045829",
+  "sourceSha256": "8d640f3d5a7443227a0673f20c1cb9caa0f639b8022b96a055ada43a15858389",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "8d640f3d5a7443227a0673f20c1cb9caa0f639b8022b96a055ada43a15858389",
+    "recipe.json": "6f816b5522ce5e519ecd833911ae1c34130277b4db6f84658d866e57dce81bdb",
+    "avr-printed-catalog-v1.json": "d77575a127e4516281b07255294d0f815bed0c9df26054425446c2798d7cc45f",
+    "avr-limited-format-v1.json": "82826212de2dc713d498cccb6580de687dc3fc16c00b64811ed295d8bf5bc676"
+  },
+  "catalogs": [
+    {
+      "code": "AVR",
+      "cards": 244,
+      "contentSha256": "5949fea49a6113030b16a6c1e8cd055bfe79a044f58fa8bb3ea2d383d72d6525"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 2423.703598,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 234,
+    "printings": 244
+  }
+}

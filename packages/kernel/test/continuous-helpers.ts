@@ -10,7 +10,7 @@
  * one. When the DSL grows replacement abilities its compiler produces exactly
  * these shapes.
  */
-import type { CardKind, Color, Condition, Keyword, KeywordAbility } from '@mtg/dsl';
+import type { Ability, CardKind, Color, Condition, Keyword, KeywordAbility } from '@mtg/dsl';
 import type {
   AbilityChangeEffect,
   ColorChangeEffect,
@@ -131,8 +131,12 @@ export function recolor(
 export interface AbilityChange {
   readonly add?: readonly Keyword[] | undefined;
   /** The keyword-ability half of layer 6 — landwalk, indestructible and the rest. */
-  readonly addAbilities?: readonly KeywordAbility[] | undefined;
+  readonly addKeywordAbilities?: readonly KeywordAbility[] | undefined;
+  /** Ordinary printed-shaped abilities granted in layer 6. */
+  readonly addAbilities?: readonly Ability[] | undefined;
   readonly remove?: readonly Keyword[] | undefined;
+  readonly removeAbilities?: readonly KeywordAbility[] | undefined;
+  readonly prohibitActivation?: boolean | undefined;
   readonly removeAll?: boolean | undefined;
 }
 
@@ -147,8 +151,11 @@ export function abilities(
     kind: 'abilityChange',
     layer: '6',
     addKeywords: change.add ?? [],
-    addKeywordAbilities: change.addAbilities ?? [],
+    addKeywordAbilities: change.addKeywordAbilities ?? [],
     removeKeywords: change.remove ?? [],
+    removeKeywordAbilities: change.removeAbilities ?? [],
+    addAbilities: change.addAbilities ?? [],
+    prohibitActivation: change.prohibitActivation ?? false,
     removeAll: change.removeAll ?? false,
   };
 }
@@ -230,12 +237,30 @@ export function replacement(
 
 /** "Damage dealt to this player" trigger. */
 export function damageToPlayer(player: PlayerId): ReplacementTrigger {
-  return { kind: 'damage', toPlayer: player, toPermanent: null, fromSource: null, combatOnly: false };
+  return {
+    kind: 'damage',
+    toPlayer: player,
+    toPermanent: null,
+    toController: null,
+    toPermanentCardType: null,
+    fromSource: null,
+    fromSpellSource: null,
+    combatOnly: false,
+  };
 }
 
 /** "Damage dealt to this permanent" trigger. */
 export function damageToPermanent(oid: ObjectId): ReplacementTrigger {
-  return { kind: 'damage', toPlayer: null, toPermanent: oid, fromSource: null, combatOnly: false };
+  return {
+    kind: 'damage',
+    toPlayer: null,
+    toPermanent: oid,
+    toController: null,
+    toPermanentCardType: null,
+    fromSource: null,
+    fromSpellSource: null,
+    combatOnly: false,
+  };
 }
 
 export function withContinuous(state: GameState, effects: readonly ContinuousEffect[]): GameState {

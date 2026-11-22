@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-19T15:22:46.471Z",
+  "sources": [
+    {
+      "code": "M12",
+      "mtgjson": {
+        "file": "M12-2121b3903df81cf257c42e6ba7983b891b36c8f6d6f7df083acc68a6ca855929.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/M12.json",
+        "sha256": "2121b3903df81cf257c42e6ba7983b891b36c8f6d6f7df083acc68a6ca855929",
+        "meta": {
+          "date": "2026-09-19",
+          "version": "5.3.0+20260919"
+        }
+      },
+      "scryfall": {
+        "file": "M12-6c5db8df8eb2a29d2407b30b21ee288330f710f5cc32c3a273d632b35eaaeb36.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Am12+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "6c5db8df8eb2a29d2407b30b21ee288330f710f5cc32c3a273d632b35eaaeb36",
+        "cards": 249
+      }
+    }
+  ]
+}

@@ -23,6 +23,7 @@ import {
   targetChoicesFor,
   targetChoicesForEffects,
 } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { creature, FOREST, lands, sorcery } from './cards';
 
 let fixtureCounter = 0;
@@ -94,7 +95,11 @@ describe('the kernel agent scores a modal cast by the mode it is casting', () =>
       { kind: 'permanent', oid: theirs },
     ]);
 
-    const chosen = simpleAgent('bot').decide({ state: start.state, player: 0, decision });
+    const chosen = simpleAgent('bot').decide({
+      state: observeState(start.state, 0, 'test/modal-targets.test.ts:97'),
+      player: 0,
+      decision,
+    });
     expect(chosen).toEqual({
       type: 'castSpell',
       player: 0,
@@ -123,12 +128,12 @@ describe('the kernel agent scores a modal cast by the mode it is casting', () =>
     // `card.effects` scores both at zero and takes the first, so this pins the
     // ordering rather than the arithmetic.
     const first = agent.decide({
-      state: start.state,
+      state: observeState(start.state, 0, 'test/modal-targets.test.ts:126'),
       player: 0,
       decision: { ...decision, options: [selfBolt, draw] },
     });
     const second = agent.decide({
-      state: start.state,
+      state: observeState(start.state, 0, 'test/modal-targets.test.ts:131'),
       player: 0,
       decision: { ...decision, options: [draw, selfBolt] },
     });
@@ -167,7 +172,11 @@ describe('the kernel agent scores a modal cast by the mode it is casting', () =>
       [1, { kind: 'permanent', oid: theirs }],
     ]);
 
-    const chosen = simpleAgent('bot').decide({ state: start.state, player: 0, decision });
+    const chosen = simpleAgent('bot').decide({
+      state: observeState(start.state, 0, 'test/modal-targets.test.ts:170'),
+      player: 0,
+      decision,
+    });
     expect(chosen).toEqual({
       type: 'castSpell',
       player: 0,

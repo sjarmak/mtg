@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "avr",
+  "archetypes": [
+    {
+      "id": "white-blue-blink",
+      "name": "White-Blue Blink",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Mist Raven",
+        "physicalId": "avr-printed-v1:0067:0d98f0c4-021a-407a-8b0c-5500d804f959"
+      },
+      "plan": "Build around Mist Raven: Reuse enter-the-battlefield abilities with blink and bounce while flyers create a tempo-driven clock."
+    },
+    {
+      "id": "blue-black-loners",
+      "name": "Blue-Black Loners",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Homicidal Seclusion",
+        "physicalId": "avr-printed-v1:0108:022960a1-8223-4b83-aea2-85359c39f3b8"
+      },
+      "plan": "Build around Homicidal Seclusion: Trade away lesser creatures, protect one premium threat, and exploit bonuses that require fighting alone."
+    },
+    {
+      "id": "black-red-sacrifice",
+      "name": "Black-Red Sacrifice",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Blood Artist",
+        "physicalId": "avr-printed-v1:0086:2e1fb442-68ff-4249-8e44-87edf6fae211"
+      },
+      "plan": "Build around Blood Artist: Feed expendable creatures to sacrifice outlets so death triggers and drain effects turn every trade into reach."
+    },
+    {
+      "id": "red-green-soulbond",
+      "name": "Red-Green Soulbond",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Trusted Forcemage",
+        "physicalId": "avr-printed-v1:0199:3ee66ef9-10a7-4aab-88f7-84956811cc6c"
+      },
+      "plan": "Build around Trusted Forcemage: Pair creatures with complementary soulbond abilities and protect both partners so their shared bonuses keep applying."
+    },
+    {
+      "id": "green-white-humans",
+      "name": "Green-White Humans",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Goldnight Commander",
+        "physicalId": "avr-printed-v1:0022:c6ebec82-9d4a-4e78-b923-37c3a52133e7"
+      },
+      "plan": "Build around Goldnight Commander: Curve Humans into tribal or enter-the-battlefield bonuses, go wide, and attack with a strengthened team."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-29T23:55:11.122Z",
+  "sources": [
+    {
+      "code": "LRW",
+      "mtgjson": {
+        "file": "LRW-120d0a7378be15b3e5e9a08d7eaf3d37fce32f326d7392bf1f67db8d8c061036.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/LRW.json",
+        "sha256": "120d0a7378be15b3e5e9a08d7eaf3d37fce32f326d7392bf1f67db8d8c061036",
+        "meta": {
+          "date": "2026-09-29",
+          "version": "5.3.0+20260929"
+        }
+      },
+      "scryfall": {
+        "file": "LRW-1cf3bdc7bd3528d5e34349e45a8c46100f7c046aa265ee9e8563e833e1826036.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Alrw+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "1cf3bdc7bd3528d5e34349e45a8c46100f7c046aa265ee9e8563e833e1826036",
+        "cards": 301
+      }
+    }
+  ]
+}

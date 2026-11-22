@@ -32,6 +32,7 @@ export {
   absolutePath,
   defaultBriefPath,
   defaultFixtureDir,
+  defaultFixtureManifestPath,
   defaultOutDir,
   defaultSliceOptions,
   isMetricsGate,

@@ -8,7 +8,7 @@
  * independent walls rather than one. `EFFECT_RULES.putCounters` named
  * `targetCreature` and `targetCreatureYouControl` and no kind that reaches the
  * source at all; and `selfCreature`, the kind that does reach the source, is
- * refused on a card that is not a creature (`checkSelfCreatureTarget`) because
+ * refused on a card that is not a creature (`checkSourceReferentTarget`) because
  * it prints the word "creature".
  *
  * So this is the same retained referent `selfCreature` already is — CR 115.6a,
@@ -21,11 +21,12 @@
  * spell one — an instant's own `effects` list, where `checkEffectTarget`
  * refuses `selfCreature` for the identical reason.
  *
- * It is legal on `putCounters` and on nothing else, which is `LEGAL_TARGETS`'
- * decision and follows the rule the rest of the vocabulary follows: a widening
- * arrives with the card that needs it. The two effects that admit
- * `selfCreature` keep it alone, so no effect kind admits both and there is no
- * second spelling of one card.
+ * It is legal on the three source-body effects whose cards need it, which is
+ * `LEGAL_TARGETS`' decision and follows the rule the rest of the vocabulary
+ * follows: a widening arrives with the card that needs it. Counter placement
+ * now admits both because current Oracle text uses both nouns: Quirion Dryad
+ * says "this creature", while a noncreature source must say "this permanent".
+ * The narrower kind is still refused on a noncreature source.
  */
 import { describe, expect, it } from 'vitest';
 import type { AbilityInput, CardInput, TargetKind } from '../src/index';
@@ -93,20 +94,32 @@ describe("the targeting mode that names the ability's own source as a permanent"
     expect(ModelTargetSpecSchema.safeParse({ kind: SELF_PERMANENT_KIND }).success).toBe(false);
   });
 
-  it('is hand-authored on putCounters, the only row it answers', () => {
+  it('is hand-authored on the four effects that can name a noncreature source', () => {
+    expect(HAND_AUTHORED_TARGETS['destroyPermanent']).toContain(SELF_PERMANENT_KIND);
     expect(HAND_AUTHORED_TARGETS['putCounters']).toContain(SELF_PERMANENT_KIND);
+    expect(HAND_AUTHORED_TARGETS['sacrificeSelf']).toContain(SELF_PERMANENT_KIND);
+    expect(HAND_AUTHORED_TARGETS['animateSourceUntilEndOfTurn']).toContain(SELF_PERMANENT_KIND);
     expect(legalTargetsFor('putCounters')).toContain(SELF_PERMANENT_KIND);
+    expect(legalTargetsFor('sacrificeSelf')).toContain(SELF_PERMANENT_KIND);
     // The generatable half is untouched, so the fill prompt's printed list and
     // every fixture keyed to those bytes stay exactly where they were.
     expect(LEGAL_TARGETS.putCounters).toEqual(['targetCreature', 'targetCreatureYouControl']);
   });
 
-  it('reaches no other effect kind, so no card can spell one sentence two ways', () => {
+  it('reaches only source damage, destruction, counter placement, sacrifice, return, and animation', () => {
     const rows = Object.keys(LEGAL_TARGETS) as (keyof typeof LEGAL_TARGETS)[];
     const reached = rows.filter((kind) => legalTargetsFor(kind).includes(SELF_PERMANENT_KIND));
-    expect(reached).toEqual(['putCounters']);
+    expect(reached).toEqual([
+      'dealDamage',
+      'destroyPermanent',
+      'returnToHand',
+      'putCounters',
+      'sacrificeSelf',
+      'animateSourceUntilEndOfTurn',
+    ]);
     expect(legalTargetsFor('pumpUntilEndOfTurn')).not.toContain(SELF_PERMANENT_KIND);
-    expect(legalTargetsFor('putCounters')).not.toContain('selfCreature');
+    expect(legalTargetsFor('putCounters')).toContain('selfCreature');
+    expect(legalTargetsFor('sacrificeSelf')).not.toContain('selfCreatureOrPlaneswalker');
   });
 
   it('prints the Trisigil cycle, counter and all', () => {

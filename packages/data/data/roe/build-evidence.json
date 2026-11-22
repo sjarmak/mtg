@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "roe",
+  "formatSha256": "ada5581e31a3f227ac237343b7d0ab7db6aed423814644f6567a548a57e14bdc",
+  "sourceSha256": "d07665b4e6f69984d60a6b0ee656eb04fea7e01261c230bf1316ff44f0877dad",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "d07665b4e6f69984d60a6b0ee656eb04fea7e01261c230bf1316ff44f0877dad",
+    "recipe.json": "636003b7bb6fd2c4b3fbbdc1bb8d74043cdb3b4a5aaddc0e8f462afc46592af6",
+    "roe-printed-catalog-v1.json": "ddd39fcd41ce6f2b40a67454aa6d8cc88f2e338346bb0df38993912e5ed2b02d",
+    "roe-limited-format-v1.json": "2c472e40858d46a392aa8b877f5edcb1185616a803ce06b26772292ee141f494"
+  },
+  "catalogs": [
+    {
+      "code": "ROE",
+      "cards": 248,
+      "contentSha256": "b20fb6532481136a90d16538e7259d23bae07a3bc2787b8851a4aa45465a7140"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1056.756495,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 233,
+    "printings": 248
+  }
+}

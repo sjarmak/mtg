@@ -151,10 +151,9 @@ describe('the sentence the clause modifies', () => {
 });
 
 describe('reading the payer off the target', () => {
-  it('refuses "its controller" on an effect that targets nothing', () => {
+  it('accepts "its controller" on a counter, whose target is a spell rather than a permanent', () => {
     const input = sorceryInput({ effects: [COUNTER], unless: TWO });
-    expect(codesOf(input)).toContain('UNLESS_PAYER_HAS_NO_TARGET');
-    expect(violationAt(input, 'UNLESS_PAYER_HAS_NO_TARGET')).toBe('unless.payer');
+    expect(codesOf(input)).toEqual([]);
   });
 
   it('refuses "that player" on an effect aimed at a permanent', () => {

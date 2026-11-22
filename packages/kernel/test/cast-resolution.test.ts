@@ -213,7 +213,7 @@ describe('the exchange the report was actually about', () => {
         session = next;
         continue;
       }
-      let pick = decision.options.length - 1;
+      let pick = decision.options.findLastIndex((option) => option.type !== 'concede');
       for (const [index, option] of decision.options.entries()) {
         if (option.type === 'castSpell' || option.type === 'playLand') {
           pick = index;

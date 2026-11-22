@@ -18,7 +18,7 @@
  * under a key, and every caller decides on its own what a failure means.
  *
  * Both guards are load-bearing rather than defensive. The workspace tsconfig has
- * no `lib: dom` (`../../app/mount.ts` records why), so the store is reached
+ * no `lib: dom` (`../../mount.ts` records why), so the store is reached
  * through a structural interface and runtime-checked rather than asserted; and a
  * page in a private window *throws* from `setItem` rather than declining, so
  * every call is wrapped.

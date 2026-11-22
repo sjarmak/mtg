@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-scenario-probe-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "266c365eebfa3023207d91f00e942926483cfe74f4c7f6382527816bef0855fb",
+    "adapterSha256": "c35761829bb2a2273aeebc963d5bc3a54ebca474c3dd2dec0902d3436d483083",
+    "protocolVersion": 2
+  },
+  "result": {
+    "id": "ancient-crab-engine-controller-profile-v1",
+    "scope": "scenario",
+    "controller": "engine",
+    "sourceName": "Ancient Crab",
+    "sourceSeat": 1,
+    "decisionFamilies": [
+      "priority",
+      "combat"
+    ],
+    "assertions": [
+      "Ancient Crab engine controller profile"
+    ],
+    "status": "passed"
+  },
+  "sourceScript": {
+    "path": "a/ancient_crab.txt",
+    "sha256": "38c40c667d5ed06ce58b9d9314f0ab697b120317e57d80f21954d0046e9799e2"
+  },
+  "sources": [
+    {
+      "path": "packages/forge-export/test/bridge-exert-bot-scenario.integration.test.ts",
+      "sha256": "4823015d9265af7f2d91b581dff28631f4f71d6256e72af155d77a4e90f1f56a"
+    },
+    {
+      "path": "packages/forge-export/test/bridge-exert-contract.integration.test.ts",
+      "sha256": "26329c204bc2fd8362eabb0f1986d56f6716801c6bc4e68f0e25a364e214cc9e"
+    },
+    {
+      "path": "packages/forge-export/test/bridge-priority-controller-profile.integration.test.ts",
+      "sha256": "01a65805d905b484b304944df11c467c99f6f81dfa2b6b9b6c650698178716e5"
+    },
+    {
+      "path": "packages/forge-export/test/bridge-textless-controller-profile.integration.test.ts",
+      "sha256": "12448519c9ee45c2f645cb72aa4a1a4cedc7a8afefcbfe5a09c0e156e40753cf"
+    },
+    {
+      "path": "packages/forge-export/test/support/exert-scenarios.ts",
+      "sha256": "91502d7d0dd90d99bcbd67535d561d153cd71558aac8657c0f659629b749935b"
+    },
+    {
+      "path": "packages/forge-export/test/support/isd-match-fixture.ts",
+      "sha256": "e5c0767437e824d6f40669c75a2e9ac0438b2173d4676f4902923b669ac8e66e"
+    },
+    {
+      "path": "packages/forge-export/test/support/printed-match-probes.ts",
+      "sha256": "246653ef7d2bb516e89b58429f2bbdc2cf490242d7aa452ed504894bb6b8d5e0"
+    },
+    {
+      "path": "packages/forge-export/test/support/scd-match-fixture.ts",
+      "sha256": "954cbe53d0f5cdffb47f46cf9be64507d3559b8387490d1e61576b14d88136af"
+    },
+    {
+      "path": "packages/forge-export/test/support/snapshot-backend.ts",
+      "sha256": "56c29208bc9980e74efec42b19447162f49b2568041e07184fe311607d8aa353"
+    },
+    {
+      "path": "packages/forge-export/test/support/textless-blocking.ts",
+      "sha256": "1ea2cba3671c2304881f1c36fb02df22a5f388747a20806fc4323fc7f5cb3a93"
+    }
+  ],
+  "cases": [
+    {
+      "testFile": "packages/forge-export/test/bridge-textless-controller-profile.integration.test.ts",
+      "testIdentity": {
+        "id": "656515260_1",
+        "ancestorTitles": [],
+        "title": "Ancient Crab engine controller profile"
+      },
+      "formatId": "akh-hou",
+      "stateSha256": "22c3a689f5c9546f45e4df33692b7ef346efb4231c233e04203c852bb8df6b3a",
+      "seed": "ancient-crab-engine-controller-profile-v1",
+      "maximumTurns": 4
+    }
+  ],
+  "evidence": {
+    "report": {
+      "path": "vitest.json",
+      "sha256": "2cb0b961b683a975699dd4dc6de4700618102ee874872328c7cda270fd05432d"
+    },
+    "usage": {
+      "path": "snapshot-usage.jsonl",
+      "sha256": "e1178d2667b773e59200daaff4f43fc47346a2c4f13e404850e86e7755135911"
+    }
+  }
+}

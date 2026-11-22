@@ -39,7 +39,12 @@ describe('reduced reference set document', () => {
     expect(ReducedReferenceSetDocumentSchema.parse(document)).toEqual(document);
     expect(document.formatVersion).toBe(REDUCED_REFERENCE_SET_DOCUMENT_VERSION);
     expect(document.kind).toBe('position-reduced-reference-set-document');
-    expect(document.set).toEqual({ code: 'RDC', name: 'Reduced Test Set (reduced)', reduced: true });
+    expect(document.set).toEqual({
+      code: 'RDC',
+      name: 'Reduced Test Set (reduced)',
+      reduced: true,
+      origin: 'official',
+    });
     // The source keeps its own name, so a reader can tell what this was cut from.
     expect(document.reduction.source.name).toBe('Reduced Test Set');
     expect(document.reduction.source.mainSetPositions).toBe(SPECS.length);
@@ -82,12 +87,15 @@ describe('reduced reference set document', () => {
     expect(reduction.collation).toEqual({
       fillsAPack: true,
       // Keyed by the card id this document prints, never by the printing uuid
-      // it left behind, which is what lets a play surface deal from these.
+      // it left behind, which is what lets a play surface deal from these. The
+      // printing's own `foil` boolean rides along, which is what lets a pool
+      // dealt off these sheets say which copy was the foil one (`mtg-11yd`);
+      // this fixture prints no foil sheet, so every one of them says so.
       sheets: [
-        { name: 'basic', sourceCards: 1, cards: 1, weights: { 'rdc-1': 1 } },
-        { name: 'common', sourceCards: 2, cards: 1, weights: { 'rdc-2': 1 } },
-        { name: 'rare', sourceCards: 1, cards: 1, weights: { 'rdc-5': 1 } },
-        { name: 'uncommon', sourceCards: 1, cards: 1, weights: { 'rdc-4': 1 } },
+        { name: 'basic', foil: false, sourceCards: 1, cards: 1, weights: { 'rdc-1': 1 } },
+        { name: 'common', foil: false, sourceCards: 2, cards: 1, weights: { 'rdc-2': 1 } },
+        { name: 'rare', foil: false, sourceCards: 1, cards: 1, weights: { 'rdc-5': 1 } },
+        { name: 'uncommon', foil: false, sourceCards: 1, cards: 1, weights: { 'rdc-4': 1 } },
       ],
       emptiedSheets: [],
       // The five-card booster no longer fits; the four-card one does, and the
@@ -151,15 +159,32 @@ describe('reduced reference set document', () => {
     expect(() => reducedReferenceSetDocument(nothing, [])).toThrowError(/kept no collector position/);
   });
 
-  it('is still a reduced document when nothing was dropped at all', () => {
+  it('does not call a build that dropped nothing reduced, and keeps the record', () => {
     const whole = buildPartialExecutableReferenceSet(corpus(), evidence());
     const document = reducedReferenceSetDocument(whole, []);
 
     expect(document.reduction.dropped).toBe(0);
+    expect(document.reduction.kept).toBe(SPECS.length);
     expect(document.reduction.drops).toEqual([]);
-    // Nothing was lost and it still does not claim to be the printing: the
-    // discriminant is about which builder made it, not about what it lost.
+    // The kind still says which builder made it; the label says what it lost.
     expect(document.kind).toBe('position-reduced-reference-set-document');
-    expect(document.set.reduced).toBe(true);
+    expect(ReducedReferenceSetDocumentSchema.parse(document)).toEqual(document);
+    expect(document.set).toEqual({
+      code: 'RDC',
+      name: 'Reduced Test Set',
+      reduced: false,
+      origin: 'official',
+    });
+  });
+
+  // `removal-census` parses `out/reference/*/set.json` off disk, and a checkout
+  // that has not relaunched still holds documents from before `origin` existed.
+  it('still reads a document written before it declared its origin', () => {
+    const document = reducedReferenceSetDocument(reducedSet(), [RED_REFUSAL]);
+    const { origin: _origin, ...older } = document.set;
+
+    const read = ReducedReferenceSetDocumentSchema.parse({ ...document, set: older });
+
+    expect(read.set).toEqual(document.set);
   });
 });

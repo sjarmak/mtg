@@ -123,9 +123,13 @@ describe('a replay log carrying a modal spell on the stack', () => {
     const entry = frame.stack.entries.find((candidate) => candidate.card.id === FORK.id);
     if (entry === undefined) throw new Error('the frame drew no modal spell on the stack');
     // The chosen mode is index 1 (gain life), rendered through the same
-    // `renderEffectList` a spell's own oracle paragraph is built from.
-    expect(entry.targetLabel).toBe('You gain 5 life.');
-    expect(entry.targetLabel).not.toMatch(/^mode \d+$/);
+    // `renderEffectList` a spell's own oracle paragraph is built from. It is
+    // `modeLabel` and not `targetLabel` since `mtg-sujc`: the mode says which
+    // spell this is and the target says where it points, and a modal spell with
+    // a target was printing both as one string.
+    expect(entry.modeLabel).toBe('You gain 5 life.');
+    expect(entry.modeLabel).not.toMatch(/^mode \d+$/);
+    expect(entry.targetLabel).toBeUndefined();
   });
 
   it('is reproducible from the seed alone', () => {

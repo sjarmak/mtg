@@ -56,7 +56,7 @@ const SYMBOL_PATTERN = /\{([^}]+)\}/g;
  * them are charged as generic for demand purposes, because a deck of basics
  * cannot aim a source at them.
  */
-const COLOURLESS_SYMBOLS: ReadonlySet<string> = new Set(['S', 'C', 'L', 'D']);
+const COLORLESS_SYMBOLS: ReadonlySet<string> = new Set(['S', 'C', 'L', 'D']);
 
 /** Variable symbols, zero on the stack. */
 const VARIABLE_SYMBOLS: ReadonlySet<string> = new Set(['X', 'Y', 'Z']);
@@ -93,7 +93,7 @@ export function parseManaCost(cost: string | null): ParsedManaCost {
 
     if (VARIABLE_SYMBOLS.has(symbol)) continue;
 
-    if (COLOURLESS_SYMBOLS.has(symbol)) {
+    if (COLORLESS_SYMBOLS.has(symbol)) {
       fixed.generic += 1;
       continue;
     }
@@ -133,7 +133,7 @@ export function parseManaCost(cost: string | null): ParsedManaCost {
 
       hybrid.push({
         options: colors,
-        hasColorlessOption: parts.some((part) => /^\d+$/.test(part) || COLOURLESS_SYMBOLS.has(part)),
+        hasColorlessOption: parts.some((part) => /^\d+$/.test(part) || COLORLESS_SYMBOLS.has(part)),
       });
       continue;
     }

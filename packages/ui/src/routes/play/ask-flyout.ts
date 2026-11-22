@@ -170,7 +170,7 @@
  *
  * # Why the announcement is a fifth `role="status"` and not a fold
  *
- * `../PhaseBar.ts`'s `PHASE_BAR_STATUS_LABEL` records the rule: two lanes once
+ * `./PhaseBar.ts`'s `PHASE_BAR_STATUS_LABEL` records the rule: two lanes once
  * collided by each adding an unnamed region, and three unnamed channels are one
  * channel. There are four named ones on this table — `Stop changes`, `Newest log
  * entry`, `Priority changes` and `Pass shortcut` — and this is a fifth.
@@ -187,7 +187,7 @@
  *
  * # No `lib: dom`
  *
- * The workspace tsconfig has none (`../../app/mount.ts` writes out why), so
+ * The workspace tsconfig has none (`../../mount.ts` writes out why), so
  * nothing here touches a DOM type. The one host fact this needs is inside
  * `./dismiss.ts`, declared structurally and runtime-checked there.
  */
@@ -199,7 +199,7 @@ import { useDismissable } from './dismiss';
 export const ASK_FLYOUT_LABEL = 'Current ask';
 
 /**
- * The announcement region's own name. See `../PhaseBar.ts`'s
+ * The announcement region's own name. See `./PhaseBar.ts`'s
  * `PHASE_BAR_STATUS_LABEL` for why every one of these is named, and the docblock
  * above for why this is a fifth channel rather than a fold into the fourth.
  */

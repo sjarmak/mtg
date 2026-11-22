@@ -90,6 +90,7 @@ describe('exalted', () => {
           triggerContext: {
             kind: 'controlledCreatureAttacksAlone',
             triggeringCreature: attackerOid,
+            triggeringCreatureIncarnation: 0,
           },
         }),
       ]),
@@ -226,6 +227,7 @@ describe('exalted', () => {
         triggerContext: {
           kind: 'controlledCreatureAttacksAlone',
           triggeringCreature: attackerOid,
+          triggeringCreatureIncarnation: 0,
         },
       }),
     );

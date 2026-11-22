@@ -114,13 +114,17 @@ const SWEEP: CardInput = {
   id: 'cen-every-kill',
   name: 'Every Kill',
   set: { code: 'CEN', collectorNumber: 6 },
+  // "Destroy all creatures target player controls", written the one way the DSL
+  // accepts it: `creaturesThatPlayerControls` reads its group off a targeted
+  // player, so the effect needs a player slot, and the scope already names
+  // creatures on the battlefield, so a `scopeFilter` beside it would be a second
+  // competing answer. This probe had `noTarget` and a redundant filter, so it was
+  // two `ILLEGAL_EFFECT_SCOPE` violations that nothing caught while `parseSetFile`
+  // was a shape check (`mtg-6lny`) and `poolCards` reads its pool through it. The
+  // census reads `scope` and never the target or the filter, so the row this probe
+  // produces is the row it always produced.
   effects: [
-    {
-      kind: 'destroyPermanent',
-      target: { kind: 'noTarget' },
-      scope: 'creaturesThatPlayerControls',
-      scopeFilter: { cardTypes: ['creature'] },
-    },
+    { kind: 'destroyPermanent', target: { kind: 'targetPlayer' }, scope: 'creaturesThatPlayerControls' },
   ],
 };
 

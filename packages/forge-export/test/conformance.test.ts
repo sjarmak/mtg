@@ -20,6 +20,7 @@ import {
   COUNTER_DECLARATIONS,
   COUNTER_KINDS,
   ALL_EFFECT_KINDS,
+  DECLARED_PARTIAL_EFFECT_KINDS,
   EFFECT_KINDS,
   EXAMPLE_SET,
   KEYWORDS,
@@ -40,13 +41,46 @@ import {
   FORGE_RARITY_CODES,
   FORGE_STATIC_AFFECTED,
   FORGE_VALID_TARGETS,
+  isForgeEffectRefusal,
   transpileAbility,
   transpileCard,
   transpileSet,
 } from '@mtg/forge-export';
 
+/**
+ * The Forge line each CR 508/509 combat restriction opens with, for a static
+ * scoped to the card printing it.
+ *
+ * A prefix rather than a whole line: the description Forge shows is the DSL's
+ * printed sentence, which `renderStaticAbility`'s own suites pin, and what is
+ * under test here is that every combat modification reaches its grammar and
+ * names its creature under the key that grammar reads. Forge uses three
+ * different keys across four modes, so a mode emitted with the wrong one parses
+ * and enforces nothing -- `ValidCard$` on a `CantBlockBy` line restricts no
+ * attacker.
+ *
+ * Every prefix is read off a shipped script: `juggernaut.txt` for both
+ * `MustAttack` and the two-key `CantBlockBy`, the 55 `ValidAttacker$
+ * Creature.withoutFlying` lines for "can block only creatures with flying", and
+ * `stone_tongue_basilisk.txt` for the one requirement Forge does not write as a
+ * mode at all. `ability-script.ts`'s `combatRestriction` carries the counts and
+ * says why `Mode$ MustBlock` is the wrong side of that last one.
+ */
+const COMBAT_RESTRICTION_PREFIXES: Readonly<Record<string, string | undefined>> = {
+  cantAttack: 'S:Mode$ CantAttack | ValidCard$ Card.Self |',
+  cantBlock: 'S:Mode$ CantBlock | ValidCard$ Card.Self |',
+  cantAttackOrBlock: 'S:Mode$ CantAttack,CantBlock | ValidCard$ Card.Self |',
+  cantBeBlocked: 'S:Mode$ CantBlockBy | ValidAttacker$ Card.Self |',
+  attacksEachCombatIfAble: 'S:Mode$ MustAttack | ValidCreature$ Card.Self |',
+  mustBeBlockedIfAble:
+    'S:Mode$ Continuous | Affected$ Card.Self | AddHiddenKeyword$ All creatures able to block CARDNAME do so. |',
+  blockOnlyCreaturesWithKeyword:
+    'S:Mode$ CantBlockBy | ValidAttacker$ Creature.withoutFlying | ValidBlocker$ Card.Self |',
+  cantBeBlockedBySubtype: 'S:Mode$ CantBlockBy | ValidAttacker$ Card.Self | ValidBlocker$ Creature.Wall |',
+};
+
 describe('vocabulary coverage', () => {
-  it('rejects a targeted imitation of exalted at the public ability seam', () => {
+  it('exports a non-exalted attacks-alone ability as an ordinary trigger', () => {
     const result = transpileAbility(
       {
         kind: 'triggered',
@@ -65,16 +99,19 @@ describe('vocabulary coverage', () => {
       'abilities[0]',
     );
 
-    expect(result).toEqual({
-      ok: false,
-      rejections: [
-        expect.objectContaining({
-          cardId: 'tst-hostile-exalted',
-          path: 'abilities[0]',
-          message: expect.stringMatching(/reserved.*canonical.*exalted/iu),
+    expect(result).toEqual(
+      expect.objectContaining({
+        ok: true,
+        value: expect.objectContaining({
+          lines: expect.arrayContaining([
+            expect.stringMatching(
+              /^T:Mode\$ Attacks \| ValidCard\$ Creature\.YouCtrl \| Alone\$ True \| TriggerZones\$ Battlefield \| Execute\$ Trig1Effect1/u,
+            ),
+          ]),
         }),
-      ],
-    });
+      }),
+    );
+    if (result.ok) expect(result.value.lines).not.toContain('K:Exalted');
   });
 
   it('maps every evergreen keyword to a Forge K: name', () => {
@@ -84,11 +121,22 @@ describe('vocabulary coverage', () => {
     }
   });
 
-  it('maps every effect primitive to a Forge effect API', () => {
+  it('maps or explicitly refuses every effect primitive', () => {
     expect(Object.keys(FORGE_EFFECTS).sort()).toEqual([...ALL_EFFECT_KINDS].sort());
     for (const kind of ALL_EFFECT_KINDS) {
-      expect(FORGE_EFFECTS[kind].api.length, kind).toBeGreaterThan(0);
+      const row = FORGE_EFFECTS[kind];
+      if (isForgeEffectRefusal(row)) {
+        expect(row.refusal.code, kind).toBe('UNMAPPED_EFFECT_KIND');
+        expect(row.refusal.reason.length, kind).toBeGreaterThan(0);
+        continue;
+      }
+      expect(row.api.length, kind).toBeGreaterThan(0);
     }
+  });
+
+  it('gives exactly the declared-partial effects named Forge refusals', () => {
+    const refused = ALL_EFFECT_KINDS.filter((kind) => isForgeEffectRefusal(FORGE_EFFECTS[kind]));
+    expect(refused).toEqual([...DECLARED_PARTIAL_EFFECT_KINDS]);
   });
 
   it('maps every targeting mode', () => {
@@ -144,7 +192,19 @@ describe('vocabulary coverage', () => {
 
     for (const kind of COUNTER_KINDS) {
       const mapped = FORGE_COUNTER_TYPES[kind];
-      expect(mapped === null ? null : [...mapped], `Forge counters for "${kind}"`).toEqual(decompose(kind));
+      const expected =
+        kind === 'phylactery'
+          ? ['PHYLACTERY']
+          : kind === 'pressure'
+            ? ['PRESSURE']
+            : kind === 'petrification'
+              ? ['PETRIFICATION']
+              : kind === 'charge'
+                ? ['CHARGE']
+                : kind === 'filibuster'
+                  ? ['FILIBUSTER']
+                  : decompose(kind);
+      expect(mapped === null ? null : [...mapped], `Forge counters for "${kind}"`).toEqual(expected);
     }
     // The part counter is the case the two-counter form exists for.
     expect(FORGE_COUNTER_TYPES.horn).toEqual(['P1P1', 'First Strike']);
@@ -172,6 +232,18 @@ describe('vocabulary coverage', () => {
       },
       {
         kind: 'static',
+        scope: 'creaturesYouControl',
+        subtype: null,
+        modification: {
+          kind: 'grantKeywordAbilities',
+          grants: [
+            { kind: 'keyword', keyword: 'flying' },
+            { kind: 'protection', quality: { kind: 'color', color: 'B' } },
+          ],
+        },
+      },
+      {
+        kind: 'static',
         scope: 'self',
         subtype: null,
         modification: {
@@ -196,6 +268,12 @@ describe('vocabulary coverage', () => {
         kind: 'static',
         scope: 'self',
         subtype: null,
+        modification: { kind: 'statBonusPerColor', power: 1, toughness: 0 },
+      },
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
         modification: { kind: 'doubleDamage' },
       },
       {
@@ -203,6 +281,18 @@ describe('vocabulary coverage', () => {
         scope: 'self',
         subtype: null,
         modification: { kind: 'doubleLifeGain' },
+      },
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'doublePlusOnePlusOneCountersOnCreaturesYouControl' },
+      },
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'discardedByOpponentEntersBattlefield' },
       },
       {
         kind: 'static',
@@ -221,6 +311,18 @@ describe('vocabulary coverage', () => {
         scope: 'self',
         subtype: null,
         modification: { kind: 'cantBeBlocked' },
+      },
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'cantAttackOrBlock' },
+      },
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'cantAttackOrBlockAlone' },
       },
       {
         kind: 'static',
@@ -246,12 +348,92 @@ describe('vocabulary coverage', () => {
         subtype: null,
         modification: { kind: 'cantBeBlockedBySubtype', subtype: 'Wall' },
       },
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'canBlockAnyNumber' },
+      },
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'canAttackAsThoughNoDefender' },
+        enabledWhile: { kind: 'controlsSubtype', subtype: 'Gate', atLeast: 1 },
+        printedSubjectReference: 'thisCreature',
+      },
+      {
+        kind: 'static',
+        scope: 'allLands',
+        subtype: null,
+        modification: { kind: 'addSubtype', subtype: 'Island' },
+      },
+      {
+        kind: 'static',
+        scope: 'landsYouControl',
+        subtype: null,
+        modification: { kind: 'grantAnyColorManaAbility' },
+      },
+      {
+        kind: 'static',
+        scope: 'otherCreaturesYouControl',
+        subtype: null,
+        modification: {
+          kind: 'grantTriggeredAbility',
+          ability: {
+            kind: 'triggered',
+            condition: 'controlledCreatureAttacksAlone',
+            effects: [
+              {
+                kind: 'pumpUntilEndOfTurn',
+                power: 1,
+                toughness: 1,
+                target: { kind: 'triggeringCreature' },
+              },
+            ],
+          },
+        },
+      },
+      {
+        kind: 'static',
+        scope: 'allCreatures',
+        subtype: null,
+        modification: {
+          kind: 'cantAttackWithoutAnyOf',
+          anyOf: [{ kind: 'keyword', keyword: 'flying' }],
+        },
+      },
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'preventCombatDamage' },
+      },
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'preventDamageToSelfAndRemoveCounters', counter: 'plusOnePlusOne' },
+      },
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'damageCannotReduceControllerLifeBelow', minimum: 7 },
+      },
     ];
     const triggers: readonly Ability[] = MODEL_TRIGGER_CONDITIONS.map((condition) => ({
       kind: 'triggered',
       condition,
       effects: [{ kind: 'gainLife', amount: 2, target: { kind: 'noTarget' } }],
     }));
+    const stateTriggers: readonly Ability[] = [
+      {
+        kind: 'stateTriggered',
+        condition: { kind: 'controllerControlsNoPermanentWithCounter', counter: 'phylactery' },
+        effects: [{ kind: 'sacrificeSelf', target: { kind: 'selfCreature' } }],
+      },
+    ];
     const activations: readonly Ability[] = [
       {
         kind: 'activated',
@@ -259,11 +441,63 @@ describe('vocabulary coverage', () => {
         effects: [{ kind: 'dealDamage', amount: 1, target: { kind: 'anyTarget' } }],
       },
     ];
-    const samples: readonly Ability[] = [...statics, ...triggers, ...activations];
+    const playerRules: readonly Ability[] = [
+      {
+        kind: 'staticPlayerRule',
+        players: 'eachOpponent',
+        rule: 'cantAttackWithCreaturesIfCastSpellThisTurn',
+      },
+    ];
+    const gameRules: readonly Ability[] = [
+      {
+        kind: 'staticGameRule',
+        rule: 'controllerCantLoseAndOpponentsCantWin',
+      },
+    ];
+    const activationRules: readonly Ability[] = [
+      {
+        kind: 'staticActivationRule',
+        rule: 'chosenNameNonManaAbilitiesCantActivate',
+      },
+    ];
+    const bundles: readonly Ability[] = [
+      {
+        kind: 'staticBundle',
+        scope: 'otherCreaturesYouControl',
+        subtype: 'Vampire',
+        includeSelf: true,
+        enabledWhile: { kind: 'controllerTopLibraryHasColor', color: 'B' },
+        modifications: [
+          { kind: 'statBonus', power: 2, toughness: 1 },
+          { kind: 'grantKeyword', keyword: 'flying' },
+        ],
+      },
+    ];
+    const samples: readonly Ability[] = [
+      ...statics,
+      ...triggers,
+      ...stateTriggers,
+      ...activations,
+      ...playerRules,
+      ...gameRules,
+      ...activationRules,
+      ...bundles,
+    ];
     expect([...new Set(samples.map((ability) => ability.kind))].sort()).toEqual([...ABILITY_KINDS].sort());
     expect(statics.map((ability) => ability.modification.kind).sort()).toEqual(
       [...STATIC_MODIFICATION_KINDS].sort(),
     );
+    const bundle = transpileAbility(bundles[0]!, 0, 'tst-conformance', 'abilities[0]');
+    expect(bundle.ok).toBe(true);
+    if (bundle.ok) {
+      expect(bundle.value.lines[0]).toContain('Affected$ Creature.Vampire+Other+YouCtrl,Card.Self');
+      expect(bundle.value.lines[0]).toContain('TopCardOfLibraryIs$ Card.Black');
+    }
+    const activationRule = transpileAbility(activationRules[0]!, 0, 'tst-conformance', 'abilities[0]');
+    expect(activationRule.ok).toBe(true);
+    if (activationRule.ok) {
+      expect(activationRule.value.lines[0]).toContain('ValidSA$ Activated.!ManaAbility');
+    }
     for (const ability of statics) {
       const result = transpileAbility(ability, 0, 'tst-conformance', 'abilities[0]');
       if (ability.modification.kind === 'definePt') {
@@ -279,14 +513,14 @@ describe('vocabulary coverage', () => {
         continue;
       }
       if (ability.modification.kind === 'statBonusPer') {
-        // A rate times a live board count. Forge writes that as a counting
-        // SVar plus `AddPower$ X`, which is two lines this transpiler has no
-        // shape for, so it rejects by name rather than emitting the printed
-        // rate as a flat bonus — which would export a creature that is +0/+1
-        // whatever the board holds.
-        expect(result.ok, JSON.stringify(ability)).toBe(false);
-        if (!result.ok) {
-          expect(result.rejections.map((r) => r.code)).toContain('UNMAPPED_EFFECT_KIND');
+        expect(result.ok, JSON.stringify(ability)).toBe(true);
+        if (result.ok) {
+          expect(result.value.lines).toEqual(
+            expect.arrayContaining([
+              expect.stringContaining('AddToughness$ Static1Count'),
+              'SVar:Static1Count:Count$Valid Mountain.YouCtrl',
+            ]),
+          );
         }
         continue;
       }
@@ -302,40 +536,86 @@ describe('vocabulary coverage', () => {
         }
         continue;
       }
+      if (ability.modification.kind === 'discardedByOpponentEntersBattlefield') {
+        expect(result.ok, JSON.stringify(ability)).toBe(true);
+        if (result.ok) expect(result.value.lines[0]).toMatch(/^R:Event\$ Moved /);
+        continue;
+      }
+      if (ability.modification.kind === 'damageCannotReduceControllerLifeBelow') {
+        expect(result.ok, JSON.stringify(ability)).toBe(true);
+        if (result.ok) expect(result.value.lines[0]).toMatch(/^R:Event\$ LifeReduced /);
+        continue;
+      }
+      if (ability.modification.kind === 'doublePlusOnePlusOneCountersOnCreaturesYouControl') {
+        expect(result.ok, JSON.stringify(ability)).toBe(true);
+        if (result.ok) expect(result.value.lines[0]).toMatch(/^R:Event\$ AddCounter /);
+        continue;
+      }
+      const combatPrefix = COMBAT_RESTRICTION_PREFIXES[ability.modification.kind];
+      if (combatPrefix !== undefined) {
+        expect(result.ok, JSON.stringify(ability)).toBe(true);
+        if (!result.ok) continue;
+        const line = result.value.lines[0] ?? '';
+        expect(line.startsWith(combatPrefix), line).toBe(true);
+        expect(line).toContain('Description$');
+        continue;
+      }
+      if (ability.modification.kind === 'cantAttackOrBlockAlone') {
+        expect(result.ok, JSON.stringify(ability)).toBe(true);
+        if (!result.ok) continue;
+        expect(result.value.lines).toEqual(["K:CARDNAME can't attack or block alone."]);
+        continue;
+      }
+      if (ability.modification.kind === 'canAttackAsThoughNoDefender') {
+        expect(result.ok, JSON.stringify(ability)).toBe(true);
+        if (!result.ok) continue;
+        expect(result.value.lines).toEqual([
+          "S:Mode$ CanAttackDefender | ValidCard$ Card.Self | IsPresent$ Gate.YouCtrl | Description$ CARDNAME can attack as though it didn't have defender as long as you control a Gate.",
+          'SVar:BuffedBy:Gate',
+          'DeckNeeds:Type$Gate',
+        ]);
+        continue;
+      }
       if (
-        ability.modification.kind === 'cantAttack' ||
-        ability.modification.kind === 'cantBlock' ||
-        ability.modification.kind === 'cantBeBlocked' ||
-        ability.modification.kind === 'attacksEachCombatIfAble' ||
-        ability.modification.kind === 'mustBeBlockedIfAble' ||
-        ability.modification.kind === 'blockOnlyCreaturesWithKeyword' ||
-        ability.modification.kind === 'cantBeBlockedBySubtype'
+        ability.modification.kind === 'attacksEachCombatIfAble' &&
+        ability.scope === 'self' &&
+        ability.subtype === null &&
+        ability.filter === undefined
       ) {
-        // CR 508/509 combat restrictions and requirements, printed on a plain
-        // static rather than an Aura. `mtg-t3ik` generalized the kernel's
-        // legality checks (`combat.ts`'s `hasCombatModification`) to read any
-        // battlefield source's printed statics, not only an Aura's, but this
-        // transpiler's `S:Mode$ Continuous | Affected$ …` shape has no slot for
-        // a combat restriction: `aura-script.ts` already writes
-        // `cantAttack`/`cantBlock`/`cantBeBlocked` for an *Aura* onto Forge's
-        // separate `Mode$ CantAttack`/`CantBlock`/`CantBlockBy` grammar, and a
-        // second transpiler that reaches the same grammar from a plain static
-        // — plus a Forge grammar for the three requirements/restrictions that
-        // have no worked Aura example at all — is scope this bead did not take
-        // on (`ability-script.ts`'s `modificationParams` docblock says the
-        // same). Read the same way as the two refusals above: prove the
-        // rejection fires by name rather than assert a Forge line nobody has
-        // written.
-        expect(result.ok, JSON.stringify(ability)).toBe(false);
-        if (!result.ok) {
-          expect(result.rejections.map((r) => r.code)).toContain('UNMAPPED_EFFECT_KIND');
-        }
+        expect(result.ok, JSON.stringify(ability)).toBe(true);
+        if (!result.ok) continue;
+        expect(result.value.lines[0]).toMatch(
+          /^S:Mode\$ MustAttack \| ValidCreature\$ Card\.Self \| Description\$/u,
+        );
+        continue;
+      }
+      if (ability.modification.kind === 'preventCombatDamage') {
+        expect(result.ok, JSON.stringify(ability)).toBe(true);
+        if (!result.ok) continue;
+        expect(result.value.lines).toEqual([
+          'K:Prevent all combat damage that would be dealt to and dealt by CARDNAME.',
+        ]);
+        continue;
+      }
+      if (ability.modification.kind === 'cantAttackWithoutAnyOf') {
+        expect(result.ok, JSON.stringify(ability)).toBe(true);
+        if (!result.ok) continue;
+        const line = result.value.lines[0] ?? '';
+        expect(line.startsWith('S:Mode$ CantAttack')).toBe(true);
+        expect(line).toContain('ValidCard$ Creature.withoutFlying');
+        expect(line).toContain('Description$');
         continue;
       }
       expect(result.ok, JSON.stringify(ability)).toBe(true);
       if (!result.ok) continue;
       const line = result.value.lines[0] ?? '';
-      expect(line.startsWith('S:Mode$ Continuous')).toBe(true);
+      if (ability.modification.kind === 'preventDamageToSelfAndRemoveCounters') {
+        expect(line).toContain('R:Event$ DamageDone');
+        expect(line).toContain('ValidTarget$ Card.Self');
+        expect(line).toContain('PreventionEffect$ True');
+        continue;
+      }
+      expect(line.startsWith('S:Mode$ Continuous'), JSON.stringify(ability)).toBe(true);
       expect(line).toContain('Affected$');
       expect(line).toContain('Description$');
     }
@@ -350,6 +630,15 @@ describe('vocabulary coverage', () => {
       expect(trigger).toContain('TriggerDescription$ ');
       expect(sub).toBe(`SVar:Trig${index + 1}Effect1:DB$ GainLife | Defined$ You | LifeAmount$ 2`);
     }
+    for (const ability of stateTriggers) {
+      const result = transpileAbility(ability, 0, 'tst-conformance', 'abilities[0]');
+      expect(result.ok, JSON.stringify(ability)).toBe(true);
+      if (!result.ok) continue;
+      expect(result.value.lines[0]).toMatch(
+        /^T:Mode\$ Always .* IsPresent\$ Permanent\.counters_GE1_PHYLACTERY\+YouCtrl .* Execute\$ Trig1Effect1/,
+      );
+      expect(result.value.lines[1]).toBe('SVar:Trig1Effect1:DB$ Sacrifice | SacValid$ Self');
+    }
     for (const ability of activations) {
       const result = transpileAbility(ability, 0, 'tst-conformance', 'abilities[0]');
       expect(result.ok, JSON.stringify(ability)).toBe(true);
@@ -358,6 +647,19 @@ describe('vocabulary coverage', () => {
       expect(line.startsWith('A:AB$ ')).toBe(true);
       expect(line).toContain('Cost$ ');
       expect(line).toContain('SpellDescription$ ');
+    }
+    for (const ability of playerRules) {
+      const result = transpileAbility(ability, 0, 'tst-conformance', 'abilities[0]');
+      expect(result.ok, JSON.stringify(ability)).toBe(true);
+      if (result.ok) expect(result.value.lines[0]).toMatch(/^S:Mode\$ CantAttack /);
+    }
+    for (const ability of gameRules) {
+      const result = transpileAbility(ability, 0, 'tst-conformance', 'abilities[0]');
+      expect(result.ok, JSON.stringify(ability)).toBe(true);
+      if (!result.ok) continue;
+      expect(result.value.lines).toHaveLength(2);
+      expect(result.value.lines[0]).toMatch(/^R:Event\$ GameLoss /);
+      expect(result.value.lines[1]).toMatch(/^R:Event\$ GameWin /);
     }
   });
 
@@ -386,6 +688,10 @@ describe('vocabulary coverage', () => {
       [{ mana: mana({ generic: 1 }), tapSelf: false, sacrificeSelf: true }, '1 Sac<1/CARDNAME>'],
       [{ mana: mana({ generic: 1, R: 1 }), tapSelf: true, sacrificeSelf: true }, '1 R T Sac<1/CARDNAME>'],
       [{ mana: mana(), tapSelf: false, sacrificeSelf: true }, 'Sac<1/CARDNAME>'],
+      [
+        { mana: mana({ generic: 4 }), tapSelf: true, sacrificeSelf: false, exileSelf: true },
+        '4 T Exile<1/CARDNAME>',
+      ],
     ];
     for (const [cost, expected] of cases) {
       const result = transpileAbility(
@@ -567,7 +873,9 @@ describe('vocabulary coverage', () => {
    */
   it('agrees with the DSL about which targets each effect may take', () => {
     for (const kind of ALL_EFFECT_KINDS) {
-      expect([...FORGE_EFFECTS[kind].targets].sort()).toEqual([...legalTargetsFor(kind)].sort());
+      const row = FORGE_EFFECTS[kind];
+      if (isForgeEffectRefusal(row)) continue;
+      expect([...row.targets].sort(), kind).toEqual([...legalTargetsFor(kind)].sort());
     }
   });
 
@@ -669,15 +977,15 @@ describe('vocabulary coverage', () => {
   });
 
   /**
-   * A quantity counted at resolution is refused rather than approximated.
-   *
-   * Forge can say it — `RememberChanged$ True` on the ability that exiles, an
-   * `SVar:` the next ability reads — but that is one ability referring to
-   * another, and this transpiler writes each effect on its own. A script that
-   * dropped the clause would transpile clean and deal zero damage, which is the
-   * silent disagreement the rejection vocabulary exists to prevent.
+   * A quantity counted at resolution is a protocol across the chain: the exile
+   * carries `RememberChanged$ True`, the clause that counts reads `NumDmg$ X`,
+   * and `SVar:X:Remembered$Amount` joins them (`remember.ts` argues the whole
+   * of it). What still refuses is a count with nothing behind it, which is this
+   * card: it exiles nothing, so the number it asks for was never counted. A
+   * script that dropped the clause would transpile clean and deal zero, which
+   * is the silent disagreement the rejection vocabulary exists to prevent.
    */
-  it('refuses a quantity it would have to invent a number for', () => {
+  it('refuses a quantity nothing on the card ever counted', () => {
     const card = parseCard({
       kind: 'sorcery',
       id: 'tst-counted-strike',
@@ -698,6 +1006,43 @@ describe('vocabulary coverage', () => {
     expect(result.ok).toBe(false);
     const codes = result.ok ? [] : result.rejections.map((entry) => entry.code);
     expect(codes).toContain('UNMAPPED_COMPUTED_AMOUNT');
+  });
+
+  /**
+   * The same quantity with an exile in front of it, which is the shape the
+   * refusal above is the absence of. `cinder_seer.txt` is the shipped card
+   * carrying it end to end.
+   */
+  it('reads a resolution count the card actually exiled', () => {
+    const card = parseCard({
+      kind: 'sorcery',
+      id: 'tst-counted-sweep',
+      name: 'Counted Sweep',
+      rarity: 'rare',
+      set: { code: 'TST', collectorNumber: 4 },
+      manaCost: mana({ generic: 3, R: 1 }),
+      colors: ['R'],
+      effects: [
+        {
+          kind: 'exileTarget',
+          scope: 'creaturesThatPlayerControls',
+          target: { kind: 'targetOpponent' },
+        },
+        {
+          kind: 'dealDamage',
+          amount: { kind: 'exiledThisResolution' },
+          target: { kind: 'targetOpponent' },
+        },
+      ],
+    });
+    const result = transpileCard(card);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const script = result.script.text;
+    expect(script).toContain('RememberChanged$ True');
+    expect(script).toContain('NumDmg$ X');
+    expect(script).toContain('SVar:X:Remembered$Amount');
+    expect(script).toContain('DB$ Cleanup | ClearRemembered$ True');
   });
 
   /**

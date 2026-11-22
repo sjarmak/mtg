@@ -252,9 +252,10 @@ Optional:
                            the colors the cube's archetypes span — a fifth when
                            it states none — as a fraction (default 0.05)
   --allow-multiples        drop the singleton rule, up to the game's four copies.
-                           Such a cube is measured but not drafted: the draft
-                           runtime deals a list of distinct cards, so a list
-                           holding one twice reports why instead of a share
+                           Such a cube is measured but not drafted: a copy is
+                           indistinguishable to the draft runtime from a distinct
+                           card with the same stats, so a list holding one twice
+                           reports why instead of a share
   --rounds <n>             model repair rounds (default ${String(DEFAULT_CUBE_ROUNDS)})
   --max-spend-usd <n>      dollars of model spend the construction may reach
                            before it stops asking. The default is what this

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "formatId": "xln",
+  "archetypes": [
+    {
+      "id": "merfolk",
+      "name": "Merfolk",
+      "colors": ["U", "G"],
+      "signpost": {
+        "name": "Shapers of Nature",
+        "physicalId": "xln-printed-v1:0228:7aa682fb-f5b6-41c1-9428-6043b0b76744"
+      },
+      "plan": "Build around Shapers of Nature: Build a critical mass of Merfolk, place counters where they enable attacks, and use evasion to break board stalls."
+    },
+    {
+      "id": "pirates",
+      "name": "Pirates",
+      "colors": ["U", "B", "R"],
+      "signpost": {
+        "name": "Dire Fleet Captain",
+        "physicalId": "xln-printed-v1:0221:8200f8a3-d60b-470a-a558-0c3555d1f10b"
+      },
+      "plan": "Build around Dire Fleet Captain: Attack with evasive Pirates, use raid and Treasure to maintain tempo, and remove blockers before they stabilize."
+    },
+    {
+      "id": "vampires",
+      "name": "Vampires",
+      "colors": ["W", "B"],
+      "signpost": {
+        "name": "Call to the Feast",
+        "physicalId": "xln-printed-v1:0219:f7226de1-0e05-4baf-8c2f-54297fee43c1"
+      },
+      "plan": "Build around Call to the Feast: Gain life and create Vampire tokens, then use tribal payoffs to turn the growing board into an evasive attack."
+    },
+    {
+      "id": "dinosaurs",
+      "name": "Dinosaurs",
+      "colors": ["W", "R", "G"],
+      "signpost": {
+        "name": "Raging Swordtooth",
+        "physicalId": "xln-printed-v1:0226:15a79137-9589-4c24-9bea-31041fd3c9ae"
+      },
+      "plan": "Build around Raging Swordtooth: Ramp into oversized Dinosaurs, exploit enrage when profitable, and use trample to convert size into damage."
+    }
+  ]
+}

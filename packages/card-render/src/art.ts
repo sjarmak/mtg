@@ -10,14 +10,22 @@
  * changes a JSON file rather than any TypeScript.
  *
  * A card with no entry is not an error and is not blank. It renders the
- * pending frame with `@mtg/ui`'s exact `ART_PENDING_LABEL` and the card's own
- * id, which is the governance rule ported from the prior project: an unfinished
+ * pending frame with `@mtg/render-spec`'s exact `ART_PENDING_LABEL` — the one
+ * the played face reads too — and the card's own id, which is the governance
+ * rule ported from the prior project: an unfinished
  * surface announces itself, so a contact sheet of a set in progress is
  * self-describing and a missing render can never pass for a design choice.
  */
-import { z } from 'zod';
 import type { Card } from '@mtg/dsl';
-import { ART_PENDING_LABEL } from '@mtg/ui';
+import {
+  ART_MANIFEST_VERSION,
+  ART_PENDING_LABEL,
+  ArtManifestEntrySchema,
+  ArtManifestSchema,
+  parseArtManifest,
+  type ArtManifest,
+  type ArtManifestEntry,
+} from '@mtg/render-spec';
 import type { Box, CardGeometry } from './geometry';
 import { el } from './svg';
 import { fitLine } from './text/layout';
@@ -25,37 +33,28 @@ import { BOLD_WIDTH_FACTOR } from './text/metrics';
 import { textRun } from './text/emit';
 import type { FrameIds } from './frame';
 
-export { ART_PENDING_LABEL };
+export { ART_MANIFEST_VERSION, ART_PENDING_LABEL, ArtManifestSchema, parseArtManifest };
+export type { ArtManifest };
 
-export const ART_MANIFEST_VERSION = 2;
+/**
+ * One illustration, under the name a *drawing* uses for it.
+ *
+ * The same shape the manifest stores, aliased rather than restated: this file
+ * reads it as the picture a resolver hands the renderer, and a resolver need
+ * not have read a manifest at all — `render.test.ts` passes literals. The
+ * document's own names live in `@mtg/render-spec/src/art-manifest.ts`.
+ */
+export const CardArtSchema = ArtManifestEntrySchema;
+export type CardArtImage = ArtManifestEntry;
 
-export const CardArtSchema = z.object({
-  /** A URL or a `data:` URI. Data URIs keep a rendered file self-contained. */
-  href: z.string().min(1),
-  /** Describes the illustration, not the card; the card name is already text. */
-  alt: z.string().min(1),
-});
-
-export type CardArtImage = z.infer<typeof CardArtSchema>;
-
-export const ArtManifestSchema = z.object({
-  formatVersion: z.literal(ART_MANIFEST_VERSION),
-  /**
-   * Card id to its illustrations, best-known first. Ids are DSL card ids, so the
-   * join is exact; the list is non-empty because a card with no art has no entry.
-   */
-  art: z.record(z.string(), z.array(CardArtSchema).min(1)),
-});
-
-export type ArtManifest = z.infer<typeof ArtManifestSchema>;
-
-/** Resolves art for a card, or `null` when none exists yet. */
+/**
+ * Resolves art for a card, or `null` when none exists yet.
+ *
+ * Deliberately not `@mtg/ui`'s resolver, which takes a copy number as well:
+ * that face draws a table where five Swamps are five objects, and this one
+ * draws a card once. One document, two readings of it.
+ */
 export type ArtResolver = (card: Card) => CardArtImage | null;
-
-/** Parses a manifest from disk or an API; throws with schema issues on bad input. */
-export function parseArtManifest(input: unknown): ArtManifest {
-  return ArtManifestSchema.parse(input);
-}
 
 /**
  * A resolver over a validated manifest. The data-driven registry.
@@ -130,8 +129,11 @@ const PENDING_TRACKING = 1.5;
  * `.art[data-art-state='pending'] .well` back to `--mtg-surface-sunken`, because
  * what is printed here is a production notice in `--mtg-pending` amber rather
  * than the card's picture, and amber over a tinted well drops under 2.2:1. The
- * subject line beneath it is `ink-muted`, the same ink `@mtg/ui`'s
- * `.mtg-art__pending-note` uses, rather than the `ink-faint` it used to be.
+ * subject line beneath it is `ink-muted` rather than the `ink-faint` it used to
+ * be. It is printed here and drawn on no played face: `@mtg/ui` hides
+ * `.mtg-art__pending-note` at every size, because a card id under a card's own
+ * name is production metadata on a surface a set is played on. This sheet is
+ * the surface that metadata is for.
  */
 function pendingFrame(area: Box, options: ArtSlotOptions): string {
   const inner = area.width - options.geometry.textPadding * 2;

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "m12",
+  "archetypes": [
+    {
+      "id": "white-blue-flyers",
+      "name": "White-Blue Flyers",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Griffin Rider",
+        "physicalId": "m12-printed-v1:0020:3f1a5517-e442-4fbc-b8c3-fea28e5e44d2"
+      },
+      "plan": "Build around Griffin Rider: Hold the ground with defensive creatures and interaction while a concentrated suite of flyers wins overhead."
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Azure Mage",
+        "physicalId": "m12-printed-v1:0045:a473897f-49eb-4e0f-a5b6-ea75e10be91a"
+      },
+      "plan": "Build around Azure Mage: Trade one-for-one early, defend with high-toughness creatures, and win after card advantage exhausts the opponent."
+    },
+    {
+      "id": "black-red-bloodthirst",
+      "name": "Black-Red Bloodthirst",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Bloodrage Vampire",
+        "physicalId": "m12-printed-v1:0083:a078e438-fcf9-4648-95dc-3d4037f9b561"
+      },
+      "plan": "Build around Bloodrage Vampire: Deal early damage reliably so bloodthirst creatures enter larger and keep the opponent on the defensive."
+    },
+    {
+      "id": "red-green-bloodthirst",
+      "name": "Red-Green Bloodthirst",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Gorehorn Minotaurs",
+        "physicalId": "m12-printed-v1:0144:1087e015-a3c4-4207-8285-5bda6bb50e52"
+      },
+      "plan": "Build around Gorehorn Minotaurs: Guarantee early damage with cheap attackers or burn, then deploy oversized bloodthirst creatures on curve."
+    },
+    {
+      "id": "green-white-creatures",
+      "name": "Green-White Creatures",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Arachnus Spinner",
+        "physicalId": "m12-printed-v1:0162:23321b80-d7e7-48fd-985d-1e9dc3adcd35"
+      },
+      "plan": "Build around Arachnus Spinner: Curve efficient creatures into larger bodies and use combat tricks to keep superior board presence."
+    }
+  ]
+}

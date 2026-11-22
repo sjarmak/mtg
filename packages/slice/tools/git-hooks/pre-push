@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# pre-push: refuse any push to the public mtg repository from ordinary work.
+#
+# Stephanie, 2026-09-17: worker branches were aimed at the public repository
+# rather than the private one. The slot upstreams are correct again (every
+# mtg-worker-N branch tracks origin/main, remote.pushDefault=origin), but
+# nothing stopped a regression from publishing private work. This hook is that
+# stop. It is shared by the rig root and every worker worktree, which all use
+# /home/ds/projects/mtg/.git.
+#
+# origin  = sjarmak/mtg-lab (private working remote, correct for all work)
+# public  = sjarmak/mtg     (stripped export, written only by the export flow)
+#
+# The export flow sets GC_MTG_PUBLIC_EXPORT=1 to pass. Nothing else may.
+#
+# Reference: mtg-yved2.
+
+set -euo pipefail
+
+remote_name="${1:-}"
+remote_url="${2:-}"
+
+is_public=0
+case "$remote_name" in
+	public) is_public=1 ;;
+esac
+case "$remote_url" in
+	*sjarmak/mtg.git | *sjarmak/mtg | *:sjarmak/mtg.git | *:sjarmak/mtg) is_public=1 ;;
+esac
+
+if [ "$is_public" -eq 0 ]; then
+	exit 0
+fi
+
+if [ "${GC_MTG_PUBLIC_EXPORT:-}" = "1" ]; then
+	exit 0
+fi
+
+cat >&2 <<EOF
+pre-push REFUSED: this push targets the PUBLIC mtg repository.
+
+  remote name: ${remote_name:-<none>}
+  remote url:  ${remote_url:-<none>}
+
+All ordinary work, including every worker branch, pushes to 'origin'
+(sjarmak/mtg-lab, private). The public repository holds a stripped export and
+is written only by the export flow, which sets GC_MTG_PUBLIC_EXPORT=1.
+
+If you are the export flow, re-run with GC_MTG_PUBLIC_EXPORT=1 set.
+If you are not, push to origin instead:
+
+  git push origin HEAD
+
+Reference: mtg-yved2.
+EOF
+exit 1

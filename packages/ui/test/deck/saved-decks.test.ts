@@ -27,8 +27,11 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import type { Card } from '@mtg/dsl';
 import { parseCard } from '@mtg/dsl';
 import { BUILD_LABEL, DeckRoute } from '../../src/routes/DeckRoute';
-import { SEARCH_LABEL } from '../../src/routes/deck/ConstructedBuilder';
-import { addCopy, emptyBuild, selectable, spellCount } from '../../src/routes/deck/build';
+import { SEARCH_LABEL, addCopyLabel } from '../../src/routes/deck/ConstructedBuilder';
+import { addCopy, deckFor, emptyBuild, selectable, spellCount } from '../../src/routes/deck/build';
+import type { ConstructedBuild } from '../../src/routes/deck/build';
+import { constructedPool, withMintedBasics } from '../../src/routes/deck/constructed-pool';
+import type { PoolSet } from '../../src/routes/deck/constructed-pool';
 import {
   DECK_NAME_LABEL,
   EMPTY_LIST_NOTE,
@@ -45,12 +48,15 @@ import {
   newSavedDeckId,
   readSavedDecks,
   restoreBuild,
+  savedBasics,
   savedCardCount,
+  savedDeckDocument,
   toSavedDeck,
   withSaved,
   withoutSaved,
   writeSavedDecks,
 } from '../../src/routes/deck/saved-decks';
+import type { SavedDeck, SavedDeckBasic } from '../../src/routes/deck/saved-decks';
 
 afterEach(cleanup);
 
@@ -86,11 +92,15 @@ function subject(at = 0): Card {
 }
 
 const FIRST_NAME = 'the list I keep coming back to';
+
+/** A fixed timestamp: a saved deck records when it was written and nothing here reads it. */
+const NOW = '2026-01-01T00:00:00.000Z';
 const SECOND_NAME = 'the same list, renamed';
 
 interface ElementLike {
   readonly nextElementSibling: { readonly textContent: string | null } | null;
   readonly hasAttribute: (name: string) => boolean;
+  readonly closest: (selector: string) => unknown;
 }
 
 function asElement(value: unknown): ElementLike {
@@ -101,11 +111,27 @@ function asElement(value: unknown): ElementLike {
   return candidate as ElementLike;
 }
 
-/** The value beside a toolbar label: how the builder states a count on screen. */
-function factValue(label: string): string {
-  const value = asElement(screen.getByText(label)).nextElementSibling;
-  if (value === null) throw new Error(`toolbar fact ${label} has no value`);
-  return value.textContent ?? '';
+/**
+ * How many cards have been picked, read off the toolbar's own sentence.
+ *
+ * It used to read a `spells 4/36` fact pair, which `mtg-dcxg.7` took off the
+ * screen: the strip counted the assembled deck and the deck pane counted the
+ * picks, and the two disagreed in front of the reader. The toolbar now prints
+ * one prose line and the deck pane prints the same one, so this parses the two
+ * numbers that are the picks.
+ */
+function pickedCards(): number {
+  // The toolbar and the deck pane print the identical sentence, which is the
+  // point of it; either copy answers this.
+  const [first] = screen.getAllByText(/ of \d+ cards ·/);
+  const line = (first as unknown as { textContent: string | null } | undefined)?.textContent ?? null;
+  if (line === null) throw new Error('the builder states no counts');
+  const creatures = /(\d+) creatures?(?: |$)/.exec(line);
+  const spells = /(\d+) noncreature spells?(?: |$)/.exec(line);
+  if (creatures?.[1] === undefined || spells?.[1] === undefined) {
+    throw new Error(`the builder's count line is not two piles: ${line}`);
+  }
+  return Number(creatures[1]) + Number(spells[1]);
 }
 
 /** What the saved-decks panel says about the deck on screen. */
@@ -125,9 +151,11 @@ function openBuilder(): void {
 function playCopies(card: Card, copies: number): void {
   fireEvent.change(screen.getByLabelText(SEARCH_LABEL), { target: { value: card.name } });
   const pool = screen.getByRole('group', { name: 'Playable cards' });
-  const face = within(pool).getAllByRole('button', { name: new RegExp(card.name, 'u') })[0];
-  if (face === undefined) throw new Error('the narrowed pool drew no face');
-  for (let copy = 0; copy < copies; copy += 1) fireEvent.click(face);
+  // The `+` under the face, not the face: a click in the collection reads a
+  // card and a double click plays one (`mtg-d0y1`).
+  const step = within(pool).getAllByRole('button', { name: addCopyLabel(card.name) })[0];
+  if (step === undefined) throw new Error('the narrowed pool drew no face');
+  for (let copy = 0; copy < copies; copy += 1) fireEvent.click(step);
 }
 
 function typeName(name: string): void {
@@ -227,9 +255,9 @@ describe('saving a deck from the builder', () => {
     expect(readSavedDecks().map((deck) => deck.name)).toEqual([FIRST_NAME]);
 
     openBuilder();
-    expect(factValue('spells').startsWith('0/')).toBe(true);
+    expect(pickedCards()).toBe(0);
     fireEvent.click(screen.getByRole('button', { name: `Open ${FIRST_NAME}` }));
-    expect(factValue('spells').startsWith('2/')).toBe(true);
+    expect(pickedCards()).toBe(2);
     expect(savedNote()).toContain(SAVED_NOTE);
 
     typeName(SECOND_NAME);
@@ -249,7 +277,7 @@ describe('saving a deck from the builder', () => {
     expect(screen.getByText(EMPTY_LIST_NOTE)).toBeTruthy();
     expect(savedNote()).toBe(NO_OPEN_DECK_NOTE);
     // Deleting the deck did not empty the pane it came from.
-    expect(factValue('spells').startsWith('2/')).toBe(true);
+    expect(pickedCards()).toBe(2);
   });
 
   it('refuses a name another saved deck already uses', () => {
@@ -260,5 +288,170 @@ describe('saving a deck from the builder', () => {
     fireEvent.click(screen.getByRole('button', { name: SAVE_NEW_LABEL }));
     expect(readSavedDecks().length).toBe(1);
     expect(screen.getByText(new RegExp(`already called`, 'u'))).toBeTruthy();
+  });
+});
+
+/**
+ * The panel is a disclosure and the summary is what a shut one costs.
+ *
+ * Two things are asserted rather than one: that it opens shut on an arrival with
+ * nothing to keep and nothing kept, and that the message line is *outside* it.
+ * The second is the load-bearing half — a private window refuses to store the
+ * deck, and a warning a shut panel can swallow is a warning nobody reads.
+ */
+describe('the save controls as a disclosure', () => {
+  const disclosure = (): ElementLike =>
+    asElement(asElement(screen.getByText(SAVED_DECKS_TITLE)).closest('details'));
+
+  it('opens shut on a browser with nothing saved and a deck with no cards', () => {
+    openBuilder();
+    expect(disclosure().hasAttribute('open')).toBe(false);
+    // The state note is in the summary, so the shut panel still says it.
+    expect(savedNote()).toBe(NO_OPEN_DECK_NOTE);
+  });
+
+  it('opens on a browser that already holds a deck', () => {
+    writeSavedDecks([toSavedDeck('kept', FIRST_NAME, addCopy(emptyBuild(SET), subject().id), NOW)]);
+    openBuilder();
+    expect(disclosure().hasAttribute('open')).toBe(true);
+  });
+
+  it('keeps a refusal outside the disclosure, where a shut panel cannot hide it', () => {
+    writeSavedDecks([toSavedDeck('gone', FIRST_NAME, addCopy(emptyBuild(SET), subject().id), NOW)]);
+    openBuilder();
+    // Deleting the only saved deck leaves the list empty and the panel open;
+    // what matters is where the note that a press produces is drawn.
+    fireEvent.click(screen.getByRole('button', { name: `Delete ${FIRST_NAME}` }));
+    typeName(FIRST_NAME);
+    playCopies(subject(), 1);
+    fireEvent.click(screen.getByRole('button', { name: SAVE_NEW_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: SAVE_NEW_LABEL }));
+    const message = asElement(screen.getByText(/already called/u));
+    expect(message.closest('details')).toBeNull();
+  });
+});
+
+/**
+ * Which Plains a reopened deck is dealt (`mtg-t7ez`).
+ *
+ * The pool a saved deck is reopened against is the union of every staged set,
+ * and a color plus a count cannot say which set's Plains it meant, so the union's
+ * order answered it: the first staged set's, whatever set the deck was cut from.
+ * The lands on the board then drew the labeled pending frame, because the deck's
+ * own art manifest has no key for the other set's basic.
+ *
+ * Two staged sets are the whole apparatus, and the first one is deliberately the
+ * one the deck is *not* cut from: an assertion against a one-set pool passes
+ * without the resolver, because there is only one Plains to find.
+ */
+const UNION_SETS: readonly PoolSet[] = withMintedBasics([
+  { name: 'First Set', origin: 'custom', cards: [unionCard('AAA', 'aaa-1', 'First Bear')] },
+  { name: 'Second Set', origin: 'custom', cards: [unionCard('BBB', 'bbb-1', 'Second Bear')] },
+]);
+
+const UNION = constructedPool(UNION_SETS);
+
+/** The set the deck below was cut from, as the document records it. */
+const SECOND_SET_REF = { name: 'Second Set', origin: 'custom' } as const;
+
+/** A mono-white creature, so the mana base the deck gets is Plains. */
+function unionCard(setCode: string, id: string, name: string): Card {
+  return parseCard({
+    id,
+    name,
+    rarity: 'common',
+    set: { code: setCode, collectorNumber: 1 },
+    colors: ['W'],
+    supertypes: [],
+    subtypes: ['Bear'],
+    keywords: [],
+    effects: [],
+    abilities: [],
+    power: 2,
+    toughness: 2,
+    kind: 'creature',
+    manaCost: { generic: 1, W: 1, U: 0, B: 0, R: 0, G: 0 },
+    artifact: false,
+    oracleText: '',
+  });
+}
+
+/** The ids of the basics the reopened deck actually plays. */
+function landIds(build: ConstructedBuild): readonly string[] {
+  return deckFor(build).lands.map((land) => land.id);
+}
+
+/** A deck of Second Set cards, saved with `set` recorded and `basics` as given. */
+function savedFromSecondSet(basics: readonly SavedDeckBasic[] | null, withSet = true): SavedDeck {
+  return savedDeckDocument({
+    id: 'deck-1',
+    name: FIRST_NAME,
+    savedAt: NOW,
+    entries: [{ id: 'bbb-1', name: 'Second Bear', count: 4 }],
+    basics,
+    ...(withSet ? { set: SECOND_SET_REF } : {}),
+  });
+}
+
+describe('which printing a reopened deck plays its basics from', () => {
+  it('records the printing beside the count when the build knows one', () => {
+    const second = UNION.cards.find((card) => card.id === 'bbb-plains');
+    if (second === undefined) throw new Error('the union minted no Second Set Plains');
+    const build: ConstructedBuild = {
+      ...addCopy(emptyBuild(UNION.cards), 'bbb-1'),
+      basics: { W: 9 },
+      set: [second],
+    };
+    expect(savedBasics(build)).toEqual([{ color: 'W', count: 9, id: 'bbb-plains' }]);
+  });
+
+  it('writes no printing for a build assembled by clicking, rather than the union’s guess', () => {
+    const build: ConstructedBuild = { ...addCopy(emptyBuild(UNION.cards), 'bbb-1'), basics: { W: 9 } };
+    expect(savedBasics(build)).toEqual([{ color: 'W', count: 9 }]);
+  });
+
+  it('reopens on the printing the deck recorded', () => {
+    const saved = savedFromSecondSet([{ color: 'W', count: 9, id: 'bbb-plains' }]);
+    const restored = restoreBuild(UNION.cards, saved);
+    if (!restored.ok) throw new Error(restored.message);
+    expect(landIds(restored.build)).toContain('bbb-plains');
+    expect(landIds(restored.build)).not.toContain('aaa-plains');
+  });
+
+  it('resolves a deck saved before the printing was recorded through the set it names', () => {
+    // Exactly the document shape every browser already holds: a color, a count
+    // and no id, beside the set the library shelves the deck under.
+    const saved = savedFromSecondSet([{ color: 'W', count: 9 }]);
+    const restored = restoreBuild(UNION.cards, saved, { setOf: UNION.setOf });
+    if (!restored.ok) throw new Error(restored.message);
+    expect(landIds(restored.build)).toContain('bbb-plains');
+    expect(landIds(restored.build)).not.toContain('aaa-plains');
+  });
+
+  it('deals the recorded set’s basics to a deck that never overrode the computed base', () => {
+    const saved = savedFromSecondSet(null);
+    const restored = restoreBuild(UNION.cards, saved, { setOf: UNION.setOf });
+    if (!restored.ok) throw new Error(restored.message);
+    expect(restored.build.basics).toBeNull();
+    expect(landIds(restored.build)).toContain('bbb-plains');
+    expect(landIds(restored.build)).not.toContain('aaa-plains');
+  });
+
+  it('leaves a deck that records neither to the union’s order rather than guessing', () => {
+    const saved = savedFromSecondSet([{ color: 'W', count: 9 }], false);
+    const restored = restoreBuild(UNION.cards, saved, { setOf: UNION.setOf });
+    if (!restored.ok) throw new Error(restored.message);
+    expect(restored.build.set).toBeNull();
+    expect(landIds(restored.build)).toContain('aaa-plains');
+  });
+
+  it('still opens a deck whose caller cannot say which set a pool card came from', () => {
+    // `DeckFilePanel` restores a deck parsed out of a text list and has no such
+    // map; the deck opens, and its printing is simply not known.
+    const saved = savedFromSecondSet([{ color: 'W', count: 9 }]);
+    const restored = restoreBuild(UNION.cards, saved);
+    if (!restored.ok) throw new Error(restored.message);
+    expect(restored.build.set).toBeNull();
+    expect(spellCount(restored.build)).toBe(4);
   });
 });

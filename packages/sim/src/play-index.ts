@@ -34,9 +34,10 @@ export function playIndex(
     seed,
     decks: spec.decks,
     agents: [
-      factory(spec.bots[0], agentSeed(spec.runSeed, index, 0), 0),
-      factory(spec.bots[1], agentSeed(spec.runSeed, index, 1), 1),
+      factory(spec.bots[0], agentSeed(spec.runSeed, index, 0), 0, seed),
+      factory(spec.bots[1], agentSeed(spec.runSeed, index, 1), 1, seed),
     ],
+    ...(spec.rolloutPool === undefined ? {} : { rolloutPool: spec.rolloutPool }),
     startingPlayer: startingPlayerFor(index, spec.alternatePlayFirst),
     maximumTurns: spec.maximumTurns,
     ...(spec.budget === undefined ? {} : { budget: spec.budget }),

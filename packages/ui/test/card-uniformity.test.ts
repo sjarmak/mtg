@@ -140,7 +140,7 @@ describe('a title shrinks to fit before it is ever cut', () => {
    */
   it('takes the scale on all three faces that draw a name', () => {
     expect(declarations('.mtg-card__name'), 'the full face').toContain(
-      'font-size: calc(var(--mtg-text-sm) * var(--name-scale, 1))',
+      'font-size: calc(var(--rules-type) * var(--name-scale, 1))',
     );
     expect(SHEET, 'the compact face in a container query').toContain(
       '.mtg-card__name { font-size: calc(var(--mtg-text-xs) * var(--name-scale, 1)); }',
@@ -216,7 +216,8 @@ describe('a title shrinks to fit before it is ever cut', () => {
 });
 
 /**
- * The zoom, which overrules both ladders because it exists to be read.
+ * The zoom, which overrules both generated-card ladders because it exists to
+ * be read. Immutable official text keeps its printed fit rung.
  *
  * It is a `full` face at 20rem instead of 15.25rem, and the extra width lands
  * entirely on the name — the cost run and the paddings beside it are fixed — so
@@ -225,7 +226,45 @@ describe('a title shrinks to fit before it is ever cut', () => {
  */
 describe('the hover zoom sets both ladders back', () => {
   it('reads the whole card at full size', () => {
-    expect(declarations('.mtg-zoom > .mtg-card .mtg-card__text')).toContain('font-size: var(--mtg-text-sm)');
+    expect(
+      declarations(".mtg-zoom > .mtg-card:not([data-presentation='printed-card']) .mtg-card__text"),
+    ).toContain('font-size: var(--rules-type)');
     expect(declarations('.mtg-zoom > .mtg-card .mtg-card__name')).toContain('--name-scale: 1');
+  });
+
+  it('sizes a printed pack to be looked through and hides the idle commit on a wide screen', () => {
+    // Both rules sit inside media blocks, which `declarations` does not enter.
+    expect(SHEET).toMatch(
+      /\.mtg-draft \.mtg-work__scroll > \.mtg-thumbs:has\(> \[data-presentation='printed-card'\]\) \{\s*--thumb-w: 17.5rem;\s*--thumb-max: 17.5rem;/u,
+    );
+    expect(SHEET).toMatch(
+      /@media \(min-width: 40\.001rem\) and \(min-height: 40\.001rem\) \{\s*\.mtg-draft \.mtg-rail > \.mtg-rail__foot:has\(> button:disabled\) \{\s*display: none;/u,
+    );
+  });
+
+  it('sizes a printed card in the rail by the width the rail is drawn at', () => {
+    // The rail is one width by default and twice that behind the play board's
+    // split handle, so its face's width is a container length rather than a
+    // percentage, and the printed rules type is a share of it stepped down the
+    // pack's ladder, under print leading.
+    expect(declarations('.mtg-rail__body')).toContain('container-type: inline-size');
+    expect(declarations('.mtg-rail__body > .mtg-card')).toContain('--card-w: 100cqw');
+    expect(declarations('.mtg-rail__body > .mtg-card')).not.toContain('--frame-band');
+    expect(
+      declarations(".mtg-rail__body > .mtg-card[data-presentation='printed-card'] .mtg-card__text"),
+    ).toContain('line-height: 1.1');
+    expect(
+      declarations(
+        ".mtg-rail__body > .mtg-card[data-presentation='printed-card'] .mtg-card__text[data-fit='0']",
+      ),
+    ).toContain('font-size: calc(5.5cqi * 1)');
+    expect(
+      declarations(
+        ".mtg-rail__body > .mtg-card[data-presentation='printed-card'] .mtg-card__text[data-fit='9']",
+      ),
+    ).toContain('font-size: calc(5.5cqi * 0.66)');
+    expect(SHEET).toContain(
+      ".mtg-rail__body > .mtg-card[data-presentation='printed-card']:has(.mtg-card__shield) .mtg-card__text",
+    );
   });
 });

@@ -7,10 +7,10 @@
  *  - **It holds a snapshot, not a session.** There is no `choose` in this file
  *    that reduces anything. A press posts an index and waits to be told what the
  *    game did, because the game is somewhere else.
- *  - **The viewer never moves.** Hot-seat draws the board from the seat being
- *    asked, because the question crosses the table; here the seat is fixed at
- *    the one this browser holds the link for, and the board follows the game
- *    rather than the question.
+ *  - **The viewer never moves.** A local session draws the board from the seat
+ *    being asked, which on a two-human table means the question crosses the
+ *    table; here the seat is fixed at the one this browser holds the link for,
+ *    and the board follows the game rather than the question.
  *  - **It is never sure it is up to date.** A held request is open for as long
  *    as the table is quiet, and anything can drop it: a laptop lid, a router, a
  *    server restart. So the loop reconnects rather than failing, and `connected`
@@ -191,14 +191,16 @@ export function useRemoteTable(base: string, token: string): RemoteTableHandle {
         send({ kind: 'choose', index: choice, at });
         return;
       }
-      // Two requests because they are two things the table does: an index
-      // addresses the enumeration it just sent, and a declaration is a move the
-      // enumeration never listed (`@mtg/kernel`'s `session.ts`). The table takes
-      // the seat from the connection whatever the body says.
+      if (choice.type === 'chooseCardName') {
+        send({ kind: 'nameCard', name: choice.name, at });
+        return;
+      }
+      // A declaration is the remaining constructed shape after free text above;
+      // the table takes the seat from the connection whatever the body says.
       const declaration = asDeclaration(choice);
       if (declaration === null) {
-        // Nothing on this surface builds a constructed move that is not a
-        // combat declaration, so this is a bug rather than a player's mistake —
+        // Nothing else on this surface builds a constructed move, so this is a
+        // bug rather than a player's mistake —
         // and it is said out loud instead of dropping the press on the floor.
         setError(`this table cannot carry a constructed ${choice.type}`);
         return;

@@ -441,6 +441,42 @@
       "kind": "land",
       "basicLandType": "Mountain",
       "producesMana": ["R"]
+    },
+    {
+      "id": "lnf-lantern-siege",
+      "name": "Invasion of Lantern Fen",
+      "rarity": "rare",
+      "set": {
+        "code": "LNF",
+        "collectorNumber": 14
+      },
+      "colors": ["R"],
+      "supertypes": [],
+      "subtypes": ["Siege"],
+      "keywords": [],
+      "effects": [],
+      "abilities": [],
+      "costReduction": null,
+      "kind": "battle",
+      "manaCost": {
+        "generic": 2,
+        "W": 0,
+        "U": 0,
+        "B": 0,
+        "R": 1,
+        "G": 0,
+        "hasX": false
+      },
+      "defense": 3,
+      "backFace": {
+        "kind": "creature",
+        "name": "Lantern-Fen Victor",
+        "colors": ["R"],
+        "subtypes": ["Warrior"],
+        "keywords": ["haste"],
+        "power": 4,
+        "toughness": 3
+      }
     }
   ]
 }

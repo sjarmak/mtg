@@ -1,0 +1,17 @@
+Simulation mode
+Ai(1)-Draconic Domination [C17] [2017] vs Ai(2)-Heavenly Inferno [CMA] [2017] - three games of Commander seed 20261011
+Game Outcome: Turn 11
+Game Outcome: Ai(1)-Draconic Domination [C17] [2017] has won because all opponents have lost
+Game Outcome: Ai(2)-Heavenly Inferno [CMA] [2017] has lost because life total reached 0
+Match Result: Ai(1)-Draconic Domination [C17] [2017]: 1 Ai(2)-Heavenly Inferno [CMA] [2017]: 0 
+Game Result: Game 1 ended in 24337 ms. Ai(1)-Draconic Domination [C17] [2017] has won!
+Game Outcome: Turn 11
+Game Outcome: Ai(1)-Draconic Domination [C17] [2017] has won because all opponents have lost
+Game Outcome: Ai(2)-Heavenly Inferno [CMA] [2017] has lost because life total reached 0
+Match Result: Ai(1)-Draconic Domination [C17] [2017]: 2 Ai(2)-Heavenly Inferno [CMA] [2017]: 0 
+Game Result: Game 2 ended in 1995 ms. Ai(1)-Draconic Domination [C17] [2017] has won!
+Game Outcome: Turn 8
+Game Outcome: Ai(1)-Draconic Domination [C17] [2017] has won because all opponents have lost
+Game Outcome: Ai(2)-Heavenly Inferno [CMA] [2017] has lost because life total reached 0
+Match Result: Ai(1)-Draconic Domination [C17] [2017]: 3 Ai(2)-Heavenly Inferno [CMA] [2017]: 0 
+Game Result: Game 3 ended in 1623 ms. Ai(1)-Draconic Domination [C17] [2017] has won!

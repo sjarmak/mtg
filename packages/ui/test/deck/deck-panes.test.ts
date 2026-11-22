@@ -28,7 +28,18 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { readDeckArtifact } from '../../src/lab/deck-artifact';
 import type { DeckArtifact, DeckArtifactEntry } from '../../src/lab/deck-artifact';
 import { DeckRoute, MAIN_DECK_LABEL, SIDEBOARD_LABEL } from '../../src/routes/DeckRoute';
+import { deckOpenParam } from '../../src/routes/deck/open';
 import { deckTypeCounts, typeCountsLine } from '../../src/routes/deck/type-counts';
+
+/**
+ * The link that opens the staged artifact deck.
+ *
+ * Since `mtg-nuk3` the Decks tab lands on the library and an open deck takes the
+ * whole route, so a render that means to describe a deck has to say which one.
+ * A link rather than a click because these read the markup of one render: the
+ * param is exactly what a person following a link to this deck arrives with.
+ */
+const OPEN_ARTIFACT = deckOpenParam({ kind: 'artifact' });
 
 afterEach(cleanup);
 
@@ -118,7 +129,9 @@ describe('counting a pane by type line', () => {
 });
 
 describe('the main deck as one pane', () => {
-  const html = renderToStaticMarkup(h(DeckRoute, { state: { status: 'ready', deck: DECK } }));
+  const html = renderToStaticMarkup(
+    h(DeckRoute, { state: { status: 'ready', deck: DECK }, open: OPEN_ARTIFACT }),
+  );
 
   it('names itself with what it holds, the way the capture writes a pane title', () => {
     expect(html).toContain(`>${MAIN_DECK_LABEL}: ${String(DECK.totalCards)}<`);
@@ -154,17 +167,21 @@ describe('a deck that carries a sideboard', () => {
   };
 
   it('counts it in its own title and splits it in its own line', () => {
-    const html = renderToStaticMarkup(h(DeckRoute, { state: { status: 'ready', deck } }));
+    const html = renderToStaticMarkup(
+      h(DeckRoute, { state: { status: 'ready', deck }, open: OPEN_ARTIFACT }),
+    );
     expect(html).toContain(`>${SIDEBOARD_LABEL}: 7<`);
     expect(html).toContain('Creatures: 4 · Other: 3');
   });
 
   it('gives each pane its own density, which is what the per-pane control is for', () => {
-    render(h(DeckRoute, { state: { status: 'ready', deck } }));
+    render(h(DeckRoute, { state: { status: 'ready', deck }, open: OPEN_ARTIFACT }));
     const side = screen.getByRole('group', { name: `${SIDEBOARD_LABEL}, View` });
     fireEvent.click(within(side).getByRole('button', { name: 'Compact list' }));
     expect(within(side).getByRole('button', { name: 'Compact list', pressed: true })).toBeTruthy();
     const main = screen.getByRole('group', { name: `${MAIN_DECK_LABEL}, View` });
+    // Untouched, so it is still in the mode a pane opens in, which is whole
+    // cards since 2026-09-17 (`../../src/routes/deck/DeckPane.ts`).
     expect(within(main).getByRole('button', { name: 'Full cards', pressed: true })).toBeTruthy();
   });
 });

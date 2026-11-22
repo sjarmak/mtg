@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "m14",
+  "archetypes": [
+    {
+      "id": "white-blue-flyers",
+      "name": "White-Blue Flyers",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Air Servant",
+        "physicalId": "m14-printed-v1:0042:0cbc279d-952a-4b8d-b6ff-37166daa2dd5"
+      },
+      "plan": "Build around Air Servant: Hold the ground with defensive creatures and interaction while a concentrated suite of flyers wins overhead."
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Opportunity",
+        "physicalId": "m14-printed-v1:0066:e1b242f3-9398-4d65-a2c7-4de56ee58933"
+      },
+      "plan": "Build around Opportunity: Trade one-for-one early, defend with high-toughness creatures, and win after card advantage exhausts the opponent."
+    },
+    {
+      "id": "black-red-sacrifice",
+      "name": "Black-Red Sacrifice",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Act of Treason",
+        "physicalId": "m14-printed-v1:0125:babcfccf-83db-40e7-8a2c-f77358ba3cc0"
+      },
+      "plan": "Build around Act of Treason: Feed expendable creatures to sacrifice outlets so death triggers and drain effects turn every trade into reach."
+    },
+    {
+      "id": "red-green-creatures",
+      "name": "Red-Green Creatures",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Advocate of the Beast",
+        "physicalId": "m14-printed-v1:0164:b1320400-5aa8-48d6-be84-197b4559456f"
+      },
+      "plan": "Build around Advocate of the Beast: Play the largest efficient creature each turn and use removal or tricks to keep those threats attacking."
+    },
+    {
+      "id": "green-white-slivers",
+      "name": "Green-White Slivers",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Sentinel Sliver",
+        "physicalId": "m14-printed-v1:0030:74c28560-e6ac-4be9-a253-22c4613b0d90"
+      },
+      "plan": "Build around Sentinel Sliver: Draft a critical mass of Slivers whose abilities stack, then attack once the whole team shares enough bonuses."
+    }
+  ]
+}

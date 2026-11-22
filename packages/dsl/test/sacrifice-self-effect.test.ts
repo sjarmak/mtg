@@ -26,9 +26,9 @@
  * refusal for free too: `checkEffectTarget` refuses a source-body kind on an
  * instant, because a spell on the stack has no body to sacrifice.
  *
- * `selfPermanent` is the kind it does *not* admit, and the last test here is
- * why: one behavior with two spellings is the ambiguity
- * `self-permanent-target.test.ts` exists to keep out of the vocabulary.
+ * `selfPermanent` is admitted only for noncreature sources. A creature still
+ * has one canonical spelling (`selfCreature`), while an artifact such as
+ * Sorcerer's Strongbox needs the wider noun to name its own source.
  *
  * The kernel half — CR 701.17, and that a sacrifice is not a destruction — is
  * `packages/kernel/test/sacrifice-self.test.ts`.
@@ -131,10 +131,10 @@ describe('the sacrificeSelf effect', () => {
     expect(ModelEffectSchema.safeParse(effect).success).toBe(false);
   });
 
-  it('names the source and nothing else, so no card can aim it at a neighbor', () => {
+  it('names a creature or noncreature source and nothing else', () => {
     expect(LEGAL_TARGETS.sacrificeSelf).toEqual([]);
-    expect(HAND_AUTHORED_TARGETS['sacrificeSelf']).toEqual(['selfCreature']);
-    expect(legalTargetsFor('sacrificeSelf')).toEqual(['selfCreature']);
+    expect(HAND_AUTHORED_TARGETS['sacrificeSelf']).toEqual(['selfCreature', 'selfPermanent']);
+    expect(legalTargetsFor('sacrificeSelf')).toEqual(['selfCreature', 'selfPermanent']);
   });
 
   it('prints Arc Runner, whole', () => {
@@ -143,7 +143,7 @@ describe('the sacrificeSelf effect', () => {
     expect(renderOracleText(card)).toBe('Haste\nAt the beginning of the end step, sacrifice this creature.');
   });
 
-  it('refuses the permanent-shaped referent, so one behavior has one spelling', () => {
+  it('admits the permanent-shaped referent on a noncreature source', () => {
     const result = safeParseCard({
       kind: 'artifact',
       id: 'ref-fading-reliquary',
@@ -159,14 +159,30 @@ describe('the sacrificeSelf effect', () => {
         },
       ],
     });
+    expect(result.ok).toBe(true);
+  });
+
+  it('keeps selfCreature as the one canonical spelling on a creature source', () => {
+    const input = arcRunnerInput();
+    const ability = input.abilities?.[0];
+    if (ability?.kind !== 'triggered') throw new Error('Arc Runner trigger fixture is missing');
+    const result = safeParseCard({
+      ...input,
+      abilities: [
+        {
+          ...ability,
+          effects: [{ kind: 'sacrificeSelf', target: { kind: 'selfPermanent' } }],
+        },
+      ],
+    });
+
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    // `ILLEGAL_TARGET_IN_ABILITY` rather than `ILLEGAL_TARGET_FOR_EFFECT`: the
-    // ability path reads `legalTargetsFor` itself and reports under its own
-    // code, and this effect only ever appears inside an ability.
-    expect(result.violations.map((found) => found.code)).toContain('ILLEGAL_TARGET_IN_ABILITY');
-    expect(result.violations.map((found) => found.message).join(' ')).toContain(
-      'sacrificeSelf cannot use "selfPermanent"',
+    expect(result.violations).toContainEqual(
+      expect.objectContaining({
+        code: 'ABILITY_ILLEGAL_ON_CARD_TYPE',
+        path: 'abilities[0].effects[0]',
+      }),
     );
   });
 

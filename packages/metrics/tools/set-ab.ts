@@ -119,7 +119,18 @@ async function main(): Promise<void> {
   if (a === undefined || b === undefined) throw new Error('set-ab: give it two paths to DSL set files');
   const seeds = seedsFor(seedCount(process.env));
   const games = gamesPerMatchup();
-  const floor = scaledSeedDeviation('balance.pair.WU', games * 45) ?? 0.02;
+  // Not `?? 0.02`: a second copy of the constant, sitting behind a branch
+  // nothing reaches, is a copy that goes stale unwatched. Every pair id is in
+  // the table, so a `null` here means the table lost one and the tool should
+  // say so rather than quietly measure against a number of its own.
+  //
+  // A planned volume, not a measured one: the arms have not been simulated
+  // yet, so this is the floor the sweep will have if no two of its games come
+  // out the same. Every caller that reads a finished run passes the distinct
+  // count instead (`mtg-pixl`), and the gap between the two numbers is the
+  // duplicate share the report prints.
+  const floor = scaledSeedDeviation('balance.pair.WU', games * 45);
+  if (floor === null) throw new Error('set-ab: seed-noise names no deviation for a color pair');
   const arms = [await measure(a, seeds, games), await measure(b, seeds, games)];
   for (const [index, arm] of arms.entries()) {
     console.log(`\nARM ${'AB'[index] ?? '?'}: ${arm.label}\n  ${arm.path}`);

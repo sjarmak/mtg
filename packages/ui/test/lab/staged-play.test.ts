@@ -51,6 +51,8 @@ import type { ArtManifest, ArtManifestEntry, ArtResolver } from '../../src/lab/a
 import { seatPossessive } from '../../src/seat';
 import { LOADING_TITLE, PlayRoute, UNREADABLE_TITLE } from '../../src/routes/PlayRoute';
 import { SEALED_POOL_LABEL } from '../../src/routes/play/SealedBuilder';
+import { clearSealedSession } from '../../src/routes/play/sealed-session';
+import { generateSealed } from '../support/play-chooser';
 import { dealMirrorGame } from '../../src/routes/play/deal';
 import { boardPosition } from '../../src/routes/play/position';
 import type { SeatNames } from '../../src/routes/play/position';
@@ -61,6 +63,9 @@ import { stageSetArt } from '../../tools/stage-set-art';
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  // A pool dealt in one test is written to the store, and the next test's
+  // chooser would read it and offer to resume it. Every test here deals its own.
+  clearSealedSession();
 });
 
 /**
@@ -203,7 +208,7 @@ describe('the staged set reaches the sealed pool', () => {
    */
   it('paints no pool at all until the staged set has arrived', async () => {
     stubFetch({ 'set.json': SET_DOCUMENT });
-    setHash('#/play');
+    setHash('#/play/sealed');
     render(h(LabApp, { replayUrl: 'missing.jsonl', setUrl: 'set.json', cards: EXAMPLE_CARDS }));
 
     // The first render, synchronously: the fetch has not resolved, so there is
@@ -213,9 +218,13 @@ describe('the staged set reaches the sealed pool', () => {
     expect(onScreen(ONLY_FALLBACK)).toEqual([]);
     expect(screen.getByText(LOADING_TITLE)).toBeTruthy();
 
+    // `mtg-tewc.5`: the arrival of the set draws the chooser, not a pool. The
+    // press is what deals, and it can only deal what the route is holding.
     await waitFor(() => {
-      expect(onScreen(ONLY_STAGED).length).toBeGreaterThan(POOL_EVIDENCE);
+      expect(screen.queryByText(LOADING_TITLE)).toBeNull();
     });
+    generateSealed();
+    expect(onScreen(ONLY_STAGED).length).toBeGreaterThan(POOL_EVIDENCE);
     // The hash never moves in this test, which is the whole point: a round-trip
     // to another tab and back was the only thing that used to get the set in.
     expect(onScreen(ONLY_FALLBACK)).toEqual([]);
@@ -231,17 +240,19 @@ describe('the staged set reaches the sealed pool', () => {
    */
   it('deals the stand-in pool when nothing is staged, and says that is what it did', async () => {
     stubFetch({});
-    setHash('#/play');
+    setHash('#/play/sealed');
     render(h(LabApp, { replayUrl: 'missing.jsonl', setUrl: 'set.json', cards: EXAMPLE_CARDS }));
 
     await waitFor(() => {
-      expect(onScreen(ONLY_FALLBACK).length).toBeGreaterThan(0);
+      expect(screen.queryByText(LOADING_TITLE)).toBeNull();
     });
+    generateSealed();
+    expect(onScreen(ONLY_FALLBACK).length).toBeGreaterThan(0);
     expect(onScreen(ONLY_STAGED)).toEqual([]);
     // Named, not silent. A pool that cannot be told from the staged one is the
-    // half of `mtg-c4h` that a remount would have left in place.
+    // half of `mtg-c4h` that a remount would have left in place, and the note
+    // stands over the builder as well as over the chooser.
     expect(screen.getByText(/no set is staged/i)).toBeTruthy();
-    expect(screen.queryByText(LOADING_TITLE)).toBeNull();
   });
 
   /**
@@ -256,14 +267,38 @@ describe('the staged set reaches the sealed pool', () => {
    */
   it('reads the dev server fallback page as no set staged, not as a broken one', async () => {
     stubSpaFallback();
-    setHash('#/play');
+    setHash('#/play/sealed');
     render(h(LabApp, { replayUrl: 'missing.jsonl', setUrl: 'set.json', cards: EXAMPLE_CARDS }));
 
     await waitFor(() => {
-      expect(onScreen(ONLY_FALLBACK).length).toBeGreaterThan(0);
+      expect(screen.queryByText(LOADING_TITLE)).toBeNull();
     });
+    generateSealed();
+    expect(onScreen(ONLY_FALLBACK).length).toBeGreaterThan(0);
     expect(screen.getByText(/no set is staged/i)).toBeTruthy();
     expect(screen.queryByText(UNREADABLE_TITLE)).toBeNull();
+  });
+
+  /**
+   * The same fallback, one tab over, where it had never been read.
+   *
+   * `loadDeck` was the reader without the content-type check, and the Decks tab
+   * is where that showed: a checkout that has never built a deck asks for
+   * `deck.json`, gets the page at 200, and the tab answered "That deck could not
+   * be read: deck.json is not valid JSON (Unexpected token '<')" to somebody
+   * whose only mistake was not having staged one. Nothing staged is an ordinary
+   * state and it has its own words.
+   */
+  it('reads the dev server fallback page as no deck staged, not as a broken one', async () => {
+    stubSpaFallback();
+    setHash('#/decks');
+    render(h(LabApp, { replayUrl: 'missing.jsonl', deckUrl: 'deck.json', cards: [] }));
+
+    await waitFor(() => {
+      expect(screen.getByText('No deck staged')).toBeTruthy();
+    });
+    expect(screen.queryByText('That deck could not be read')).toBeNull();
+    expect(screen.queryByText(/is not valid JSON/i)).toBeNull();
   });
 
   /**
@@ -295,7 +330,8 @@ describe('the staged set reaches the sealed pool', () => {
    * such a parent hands down.
    */
   it('keeps a build in progress when the same set arrives as a new array', () => {
-    const view = render(h(PlayRoute, { set: { status: 'ready', cards: STAGED } }));
+    const view = render(h(PlayRoute, { sub: 'sealed', set: { status: 'ready', cards: STAGED } }));
+    generateSealed();
     const suggested = deckSize();
     expect(suggested).toBeGreaterThan(CUTS);
     for (let cut = 0; cut < CUTS; cut += 1) cutFirstCard();
@@ -303,6 +339,7 @@ describe('the staged set reaches the sealed pool', () => {
 
     view.rerender(
       h(PlayRoute, {
+        sub: 'sealed',
         set: { status: 'ready', cards: [...STAGED] },
         sourceHint: 'a hint the builder never reads',
       }),
@@ -320,18 +357,33 @@ describe('the staged set reaches the sealed pool', () => {
 /** Enough cuts that no off-by-one could land on the same count by accident. */
 const CUTS = 3;
 
-/** The deck panel's gallery, which draws one button per card in the deck. */
+/** The deck pane's cards region, which draws one strip per copy. */
 const DECK_LABEL = 'Cards in your deck';
 
+/**
+ * Copies, counted as strips. Since `mtg-pmpu.1` the deck pane draws one strip
+ * per copy rather than one face per distinct card, so a playset is four objects
+ * and the count is the deck's size without any arithmetic over a badge.
+ */
 function deckSize(): number {
-  return within(screen.getByRole('group', { name: DECK_LABEL })).getAllByRole('button').length;
+  const pane = screen.getByRole('group', { name: DECK_LABEL }) as unknown as {
+    readonly querySelectorAll: (selector: string) => { readonly length: number };
+  };
+  return pane.querySelectorAll('.mtg-strips__card').length;
 }
 
+/**
+ * Cuts a copy the way the screen offers it: select the strip, then press the
+ * button that names the move. Not the double-click accelerator, because this is
+ * the path a keyboard and a touch screen also have.
+ */
 function cutFirstCard(): void {
-  const cards = within(screen.getByRole('group', { name: DECK_LABEL })).getAllByRole('button');
-  const first = cards[0];
+  const strips = within(screen.getByRole('group', { name: DECK_LABEL })).getAllByRole('button');
+  const first = strips[0];
   if (first === undefined) throw new Error('the suggested deck is empty, so there is nothing to cut');
   fireEvent.click(first);
+  const bar = screen.getByRole('group', { name: /^Selected: /u });
+  fireEvent.click(within(bar).getByRole('button', { name: /^Return /u }));
 }
 
 /** A 1x1 PNG, so the staged rasters are real files rather than empty names. */
@@ -454,7 +506,7 @@ describe('the staged art manifest reaches the played table', () => {
 
     // Served paths rather than the manifest's own relative hrefs, and each one
     // names a file the dev server would find under `public/`.
-    expect(onBoard.src).toBe(`art/${creature.card.id}.png`);
+    expect(onBoard.src).toBe(`art/${creature.card.id}.webp`);
     expect(existsSync(join(ART.publicDir, onBoard.src))).toBe(true);
     expect(existsSync(join(ART.publicDir, inHand.src))).toBe(true);
 
@@ -506,7 +558,7 @@ describe('the staged art manifest reaches the played table', () => {
     // of the middle two and every face on the table hatches, with nothing else
     // in the suite noticing.
     stubFetch({ 'set.json': SET_DOCUMENT, 'art.json': ART.document });
-    setHash('#/play');
+    setHash('#/play/sealed');
     render(
       h(LabApp, {
         replayUrl: 'missing.jsonl',
@@ -516,8 +568,10 @@ describe('the staged art manifest reaches the played table', () => {
       }),
     );
     await waitFor(() => {
-      expect(onScreen(ONLY_STAGED).length).toBeGreaterThan(POOL_EVIDENCE);
+      expect(screen.queryByText(LOADING_TITLE)).toBeNull();
     });
+    generateSealed();
+    expect(onScreen(ONLY_STAGED).length).toBeGreaterThan(POOL_EVIDENCE);
 
     // The builder's own start button: the only route from a staged set to a
     // table that does not go through a terminal.

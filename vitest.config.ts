@@ -1,6 +1,8 @@
 import { availableParallelism } from 'node:os';
 import { defineConfig } from 'vitest/config';
-import { testWorkerCount } from './packages/slice/tools/test-load/workers';
+import { runsDirPath } from './packages/slice/tools/test-load/host-lock';
+import { liveRunCount } from './packages/slice/tools/test-load/run-claims';
+import { runSharers, testWorkerCount, testWorkerOverride } from './packages/slice/tools/test-load/workers';
 
 /**
  * Single root config so packages need no vitest config of their own.
@@ -42,7 +44,7 @@ import { testWorkerCount } from './packages/slice/tools/test-load/workers';
  * once in five runs at load 25 to 54, which is the load these agents put on the
  * box rather than anything CI will see.
  *
- * The projects deliberately still run concurrently under a bare
+ * The unit, browser, and balance projects deliberately still run concurrently under a bare
  * `vitest run`. Vitest can serialize them (`sequence.groupOrder`), and
  * that was weighed and rejected under mtg-bc2.55 — it would add the unit
  * project's ~15s to every full run and to CI while leaving the real fragility
@@ -116,6 +118,10 @@ import { testWorkerCount } from './packages/slice/tools/test-load/workers';
 const resolveLocalPackages = {
   alias: [
     {
+      find: /^@mtg\/printed-card\/node$/,
+      replacement: new URL('./packages/printed-card/src/node/index.ts', import.meta.url).pathname,
+    },
+    {
       find: /^@mtg\/sim\/bot$/,
       replacement: new URL('./packages/sim/src/greedy-bot.ts', import.meta.url).pathname,
     },
@@ -151,6 +157,51 @@ export const TEST_LOAD_REPORTER = './packages/slice/tools/test-load/reporter.ts'
 export const RPC_TIMEOUT_REPORTER = './packages/slice/tools/test-load/rpc-timeout.ts';
 
 /**
+ * Where the accounting check lives, named here for the same reason.
+ *
+ * It is a third reporter because it answers a third question. `reporter.ts`
+ * explains a timeout, `rpc-timeout.ts` decides whether a lost channel may be an
+ * exit code, and this one asks whether every file the run collected actually
+ * came back. A run can mark three files failed while nothing in them failed and
+ * nothing was thrown, and vitest prints no block for those files at all
+ * (mtg-jc05); `unaccounted.ts` is the sentence that run is missing. It hardens
+ * only, and defers to `rpc-timeout.ts` when a transport timeout is present.
+ */
+export const UNACCOUNTED_REPORTER = './packages/slice/tools/test-load/unaccounted.ts';
+
+/**
+ * Where the gate's outcome writer lives, named here for the same reason.
+ *
+ * It is a fourth reporter because it answers a question that is not asked from
+ * inside the run at all. `tools/gate/` memoizes the base verdict per sha, and
+ * it may only write a red one down when something asserted rather than timed
+ * out — on this box a wave of lanes turns a budget into a queueing measurement,
+ * and a memoized red would abort every later lane on that sha. That call needs
+ * the run's modules, which exist only here. It is inert unless
+ * `MTG_GATE_OUTCOME` names a path, so an ordinary run is untouched.
+ */
+export const GATE_OUTCOME_REPORTER = './packages/slice/tools/gate/outcome-reporter.ts';
+
+/**
+ * Where the Forge-run lock's global setup lives, named here for the same
+ * reason. It is the second clause of the playtester's lane ruling (2026-09-18
+ * 15:44Z): at most one `MTG_REQUIRE_FORGE_BRIDGE=1` run at a time on the host.
+ * `MAX_WORKERS` below forces the run's own pool to one worker under that same
+ * env var; this file forces every *other* Forge-required run on the host to
+ * wait behind it, the way `with-lock.ts` does for `npm test`'s full-suite
+ * lock. Inert without the env var: it takes no lock and returns no teardown.
+ */
+export const FORGE_LOCK_SETUP = './packages/slice/tools/test-load/forge-lock-setup.ts';
+
+/**
+ * Where the run claim's global setup lives, named here for the same reason. It
+ * is what `MAX_WORKERS` below counts: a run that starts while this one is live
+ * finds a claim under this run's pid and divides the worker budget by it.
+ * `run-claims.ts` has the rule and what it cannot see.
+ */
+export const RUN_CLAIM_SETUP = './packages/slice/tools/test-load/run-claim-setup.ts';
+
+/**
  * Which files are the browser project, as one string for the same reason the
  * reporter path is one: it is named twice, once to include and once to exclude,
  * and two globs that must agree are two globs that will not.
@@ -161,9 +212,27 @@ export const RPC_TIMEOUT_REPORTER = './packages/slice/tools/test-load/rpc-timeou
 export const BROWSER_TESTS = 'packages/*/test/**/*.browser.test.ts';
 
 /**
- * Capped at half the machine, which the loaded measurements in `workers.ts`
- * found faster than twelve or fifteen workers. `maxWorkers` rather than
- * `poolOptions`, so `--maxWorkers` on the command line still wins.
+ * This complete two-seed, twenty-policy integration passes alone but exceeds
+ * its unchanged budget while competing with the balance simulations. Keep it
+ * in the default run, in an earlier scheduling group, without serializing any
+ * other tests or weakening its canonical validation.
+ */
+export const CALIBRATION_PIPELINE_TEST = 'packages/metrics/test/legacy-cube-quality-pipeline.test.ts';
+
+/**
+ * Capped at half the machine, divided among the runs sharing it. Half is the
+ * share the loaded measurements in `workers.ts` found faster than twelve or
+ * fifteen workers; dividing it is `mtg-a3ix4`, and `workers.ts` says what those
+ * measurements do and do not cover. `maxWorkers` rather than `poolOptions`, so
+ * `--maxWorkers` on the command line still wins.
+ *
+ * **Who else is on the box** is `runSharers`' answer, from two sources. The
+ * worker pool can say how many runs it starts, `MTG_TEST_SLOTS`, which is exact
+ * and the one to set. Without it the runs that have already claimed a place
+ * (`run-claims.ts`, written by `RUN_CLAIM_SETUP` below) are counted, which sees
+ * only the siblings that started first. This is read at config evaluation and
+ * never written here, because this file is imported by test workers and by the
+ * gate, and none of them is a run.
  *
  * This does not replace the worker-heartbeat fix `mtg-bj9c` required. That test
  * blocked its worker's event loop for 40-odd seconds and now yields a macrotask
@@ -173,12 +242,14 @@ export const BROWSER_TESTS = 'packages/*/test/**/*.browser.test.ts';
  * **A fixed cap was tried once before and reverted**, and the reason it was
  * reverted was that it shortened every run on every machine, the blocking
  * balance gate included, to work around one test. That objection is answered
- * rather than forgotten: the arm this cap picks was the *fastest* arm measured,
- * not merely the calmest one, so on this box the cap does not buy safety with
- * wall clock. It is answered only where it was measured. On a genuinely quiet
- * sixteen-core box, or on a machine with a different core count, half the cores
- * could still be the slower arm, and nothing here re-measures that; a run that
- * wants the old behavior sets `MTG_TEST_WORKERS`.
+ * rather than forgotten, but only where it was measured: the arm this cap picks
+ * was the *fastest* arm measured against neighbors that predate any cap, not
+ * merely the calmest one, so on this box a lone run does not buy safety with wall clock. On
+ * a genuinely quiet sixteen-core box, or on a machine with a different core
+ * count, half the cores could still be the slower arm, and nothing here
+ * re-measures that. Beside two capped runs the per-run number is below the
+ * smallest arm that table tried, and it is a budget rather than a measurement; a
+ * run that wants the old behavior sets `MTG_TEST_WORKERS`.
  *
  * The comparison's own limit, stated because a table reads more certain than it
  * is: all six arms ran on a box carrying other lanes, and the external load was
@@ -192,27 +263,44 @@ export const BROWSER_TESTS = 'packages/*/test/**/*.browser.test.ts';
  * that sizes itself from the machine's instantaneous state makes the run's
  * shape, and eventually some test's verdict, a fact about the hard drive rather
  * than about the tree. This repo has that rule written down elsewhere for
- * `verify:art`; the same rule applies here, and a fixed share obeys it.
+ * `verify:art`; the same rule applies here, and a fixed share obeys it. The
+ * count of live runs is the one concession to it, and it can only lower the cap
+ * below that fixed share, never raise it.
  */
 const MAX_WORKERS = testWorkerCount({
   cores: availableParallelism(),
-  override: process.env.MTG_TEST_WORKERS,
+  override: testWorkerOverride(process.env),
+  sharers: runSharers({ slots: process.env.MTG_TEST_SLOTS, liveOthers: liveRunCount(runsDirPath()) }),
 });
 
 export default defineConfig({
   test: {
     maxWorkers: MAX_WORKERS,
+    globalSetup: [FORGE_LOCK_SETUP, RUN_CLAIM_SETUP],
     // Last, so the attribution block lands under vitest's own summary, where
     // the reader is already looking when something is red, and the verdict on
     // the exit code lands under that, because it is the last question a reader
     // of a red run has.
-    reporters: ['default', TEST_LOAD_REPORTER, RPC_TIMEOUT_REPORTER],
+    // The accounting check is last of all: it speaks only when a file went
+    // missing, and when it does it is the first thing worth acting on.
+    reporters: [
+      'default',
+      TEST_LOAD_REPORTER,
+      RPC_TIMEOUT_REPORTER,
+      UNACCOUNTED_REPORTER,
+      GATE_OUTCOME_REPORTER,
+      // Stays last: it restores an exit code that an earlier reporter may have
+      // cleared, so anything appended after it can silently green a red run.
+      // `packages/slice/test/scheduled-files.test.ts` fails when it is not last,
+      // which is how appending `GATE_OUTCOME_REPORTER` here was caught.
+      './packages/slice/tools/test-load/scheduled-files.ts',
+    ],
     projects: [
       {
         test: {
           name: 'unit',
           include: ['packages/*/test/**/*.test.ts'],
-          exclude: ['packages/metrics/test/balance/**', BROWSER_TESTS],
+          exclude: ['packages/metrics/test/balance/**', BROWSER_TESTS, CALIBRATION_PIPELINE_TEST],
         },
         resolve: resolveLocalPackages,
       },
@@ -229,6 +317,14 @@ export default defineConfig({
           include: ['packages/metrics/test/balance/**/*.test.ts'],
           testTimeout: 600_000,
           hookTimeout: 600_000,
+        },
+        resolve: resolveLocalPackages,
+      },
+      {
+        test: {
+          name: 'calibration',
+          include: [CALIBRATION_PIPELINE_TEST],
+          sequence: { groupOrder: -1 },
         },
         resolve: resolveLocalPackages,
       },

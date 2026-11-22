@@ -26,12 +26,11 @@
  *
  * ## The bound
  *
- * A mode's effect list is typed with `CardEffectSchema`, which has no
- * `modal` member — modes cannot nest, by construction, the same way
- * `TokenEffectSchema` (`effects.ts:151`) omits `createToken` so a token
- * cannot carry a token. Recursion depth is exactly one, and there is no
- * runtime check for it because there is no code path that could produce a
- * second level: `Mode`'s `effects` field has no `modes` field of its own.
+ * A mode's effect list is typed with `CardEffectSchema`, while `modes` is a
+ * sibling field on `Card` rather than an effect member. Modes therefore cannot
+ * nest by construction. There is no runtime recursion check because there is
+ * no code path that could produce a second level: `Mode` has only `effects`,
+ * and an `Effect` has no `modes` field.
  *
  * `MIN_MODES`/`MAX_MODES` are a width bound, not a depth one, and are
  * measured rather than guessed: of 38,623 oracle cards, 782 print a "Choose
@@ -41,9 +40,9 @@
  * own-adventure joke card, not a real modal spell, and is excluded. Six is
  * therefore the ceiling every genuine printed mode count has ever needed, and
  * it is enforced in the schema itself (`.max(MAX_MODES)`) rather than left to
- * a coded violation — the same device `card.ts`'s
- * `abilities: z.array(AbilitySchema).max(2)` uses for its own hand-picked
- * cap. CR 700.2 requires at least two modes, so `MIN_MODES` is 2.
+ * a coded violation — the same device `card.ts` uses for its independently
+ * named hand-authored ability cap. CR 700.2 requires at least two modes, so
+ * `MIN_MODES` is 2.
  */
 import { z } from 'zod';
 import { CardEffectSchema } from './effects';

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "ktk",
+  "name": "Khans of Tarkir",
+  "sourceCodes": ["KTK"],
+  "products": [{ "id": "ktk-draft", "setCode": "KTK", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["ktk-draft", "ktk-draft", "ktk-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["ktk-draft", "ktk-draft", "ktk-draft", "ktk-draft", "ktk-draft", "ktk-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

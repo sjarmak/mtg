@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "akh-hou",
+  "name": "Amonkhet / Hour of Devastation",
+  "sourceCodes": ["AKH", "HOU", "MP2"],
+  "products": [
+    { "id": "akh-draft", "setCode": "AKH", "boosterKey": "draft" },
+    { "id": "hou-draft", "setCode": "HOU", "boosterKey": "draft" }
+  ],
+  "draft": {
+    "seats": 8,
+    "rounds": ["hou-draft", "hou-draft", "akh-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["hou-draft", "hou-draft", "hou-draft", "hou-draft", "akh-draft", "akh-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

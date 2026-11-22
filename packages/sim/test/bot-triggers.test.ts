@@ -22,6 +22,7 @@ import type { AbilityInput, Card, CardInput, TriggerCondition } from '@mtg/dsl';
 import { KEYWORDS, parseCard } from '@mtg/dsl';
 import type { Action, GameState } from '@mtg/kernel';
 import { pendingDecision, scenario, validateAction } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { DEFAULT_GREEDY_CONFIG, decideGreedy, printedCardValue } from '@mtg/sim';
 import { creature, PLAINS } from './cards';
 
@@ -68,19 +69,38 @@ const BLIND = {
     selfEnters: 0,
     selfAttacks: 0,
     selfDies: 0,
+    selfLeavesBattlefield: 0,
+    selfPutIntoGraveyardFromBattlefield: 0,
+    selfPutIntoGraveyardFromAnywhere: 0,
+    enchantedCreatureDies: 0,
+    enchantedLandBecomesTapped: 0,
+    controlledCreatureDealsCombatDamageToPlayer: 0,
+    selfBecomesTarget: 0,
+    enchantedCreatureBecomesTarget: 0,
+    selfBecomesTargetByOpponent: 0,
     selfDiesNotSacrificed: 0,
     controlledCreatureAttacksAlone: 0,
+    selfAttacksAlone: 0,
+    selfAndThreeOthersAttack: 0,
     selfDealsCombatDamageToCreature: 0,
     beginningOfYourUpkeep: 0,
+    beginningOfEachPlayersUpkeep: 0,
     beginningOfYourEndStep: 0,
     anotherControlledPermanentEnters: 0,
+    controlledLandSubtypeEnters: 0,
+    controlledCreatureEnters: 0,
     anotherControlledCreatureEnters: 0,
+    anotherCreatureEnters: 0,
+    controlledCreatureDies: 0,
     youCastSpell: 0,
     youCastInstantOrSorcery: 0,
     selfDealsCombatDamageToPlayer: 0,
     selfBlocks: 0,
+    enchantedCreatureAttacksOrBlocks: 0,
+    selfBlocksCreature: 0,
     selfBlocksOrIsBlockedByGreaterPower: 0,
     youGainLife: 0,
+    youDrawCard: 0,
     selfEntersOrAttacks: 0,
     aPlayerCastsWhiteSpell: 0,
     aPlayerCastsBlueSpell: 0,
@@ -88,6 +108,10 @@ const BLIND = {
     aPlayerCastsRedSpell: 0,
     aPlayerCastsGreenSpell: 0,
     opponentDealtNoncombatDamage: 0,
+    opponentDiscardsCard: 0,
+    selfPlusOnePlusOneCounterRemoved: 0,
+    creatureAttacksYouOrPlaneswalkerYouControl: 0,
+    selfIsDealtDamage: 0,
     anotherControlledCreatureWithPowerThreeOrGreaterEnters: 0,
     beginningOfEndStep: 0,
   },
@@ -96,7 +120,10 @@ const BLIND = {
 function decide(state: GameState, player: 0 | 1 = 0): Action {
   const decision = pendingDecision(state, 512);
   if (decision === null) throw new Error('no decision pending');
-  const action = decideGreedy({ state, player, decision }, config);
+  const action = decideGreedy(
+    { state: observeState(state, player, 'test/bot-triggers.test.ts:122'), player, decision },
+    config,
+  );
   expect(validateAction(state, action)).toBeNull();
   return action;
 }

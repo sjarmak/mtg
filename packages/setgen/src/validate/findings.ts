@@ -31,11 +31,14 @@ export const FINDING_CODES = [
   'SLOT_UNFILLABLE',
   'SLOT_ROLE_UNFILLABLE',
   'OFF_PIE',
+  // Generated text beyond the fixed UI zoom's measured reading capacity.
+  'ZOOM_TEXT_OVERFLOW',
   // Set-level composition.
   'TERTIARY_OVER_BUDGET',
   'NWO_MULTI_RED_FLAG',
   'NWO_BUDGET_EXCEEDED',
   'CURVE_MISMATCH',
+  'CURVE_UNPLACEABLE',
   'CREATURE_SHARE_BAND',
   'RARITY_DISTRIBUTION',
   'DUPLICATE_NAME',

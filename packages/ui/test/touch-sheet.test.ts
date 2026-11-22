@@ -18,6 +18,7 @@
 import { describe, expect, it } from 'vitest';
 import { BASE_CSS } from '../src/styles/base';
 import { BOARD_CSS } from '../src/styles/board';
+import { DECK_CARD_CSS } from '../src/styles/deck-card';
 import { TOUCH_CSS, TOUCH_TARGET_PX, TOUCH_TARGET_SELECTORS } from '../src/styles/touch';
 import { VIEWS_CSS } from '../src/styles/views';
 import { uiStyleSheet } from '../src/styles/index';
@@ -52,12 +53,26 @@ describe('the touch target floor', () => {
     // life total under the fold. The control is a `<button>`
     // (`../src/routes/play/TurnStops.ts`), and every label is a `<span>`, so the
     // element is the distinction rather than a second class to remember to add.
+    //
+    // `.mtg-shell__mark` joined the list in `mtg-aqxi.17`, when it stopped being
+    // the caption naming the staged set and became the link to the landing page.
+    // A control the shell draws on every route, at the text height its own font
+    // gives it, which on a phone is 20px.
+    //
+    // `.mtg-linkrow` left it with the More menu. That menu held Analysis and
+    // Replay behind a row of links; both are route tabs again, so the rows are
+    // gone and the floor that sized them has nothing left to size. The next
+    // test is why an entry cannot outlive its class: a floor on a selector no
+    // sheet draws reports nothing and fails nothing.
     expect(TOUCH_TARGET_SELECTORS).toEqual([
       '.mtg-choice',
       '.mtg-btn',
+      '.mtg-input',
+      '.mtg-chip',
       'button.mtg-badge',
       '.mtg-browser__head',
       '.mtg-browser__row',
+      '.mtg-shell__mark',
       '.mtg-modes__item',
       '.mtg-phasebar__node',
     ]);
@@ -77,7 +92,7 @@ describe('the touch target floor', () => {
     // sheet narrowing its own reach, and no other sheet has to repeat it. So the
     // qualifier comes off before the lookup, and what is checked is the part
     // that could hold the typo.
-    const drawn = [BASE_CSS, BOARD_CSS, VIEWS_CSS].join('\n');
+    const drawn = [BASE_CSS, BOARD_CSS, DECK_CARD_CSS, VIEWS_CSS].join('\n');
     for (const selector of TOUCH_TARGET_SELECTORS) {
       expect(drawn).toContain(selector.slice(selector.indexOf('.')));
     }
@@ -136,5 +151,14 @@ describe('the move list track floor', () => {
     // true — a label in that column wraps rather than being cut.
     expect(VIEWS_CSS).toContain('grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr))');
     expect(VIEWS_CSS).not.toContain('minmax(11rem, 1fr)');
+    // The Constructed collection's wrapping grid, floored the same way for the
+    // same reason (`mtg-xiso`): its pane is a column of a workbench and can be
+    // dragged narrower than one card face. The two other `minmax(_, 1fr)` tracks
+    // in this sheet are not here -- `.mtg-grid` and the analysis pair are page
+    // width, which nobody can drag.
+    expect(VIEWS_CSS).toContain(
+      ".mtg-builder-curve[data-flow='rows'] .mtg-deck__column {\n  display: grid; " +
+        'grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr));',
+    );
   });
 });

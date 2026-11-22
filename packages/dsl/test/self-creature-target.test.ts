@@ -12,7 +12,7 @@
  * from the ability's own `sourceOid` instead, a fact every ability on the
  * stack carries whether a trigger put it there or a player activated it, so
  * it needs one permission rather than one per condition: the printed card is
- * a creature (`checkSelfCreatureTarget`, `validate/abilities.ts`).
+ * a creature (`checkSourceReferentTarget`, `validate/abilities.ts`).
  */
 import { describe, expect, it } from 'vitest';
 import type { AbilityInput, CardInput, TargetKind } from '../src/index';
@@ -102,7 +102,9 @@ describe("the targeting mode that names the ability's own source", () => {
 
   it('is hand-authored on pumpUntilEndOfTurn, the only row it answers', () => {
     expect(HAND_AUTHORED_TARGETS['pumpUntilEndOfTurn']).toContain(SELF_CREATURE);
+    expect(HAND_AUTHORED_TARGETS['untapPermanent']).toContain(SELF_CREATURE);
     expect(legalTargetsFor('pumpUntilEndOfTurn')).toContain(SELF_CREATURE);
+    expect(legalTargetsFor('untapPermanent')).toContain(SELF_CREATURE);
   });
 
   it('is legal on both an activated and a triggered ability of a creature card', () => {

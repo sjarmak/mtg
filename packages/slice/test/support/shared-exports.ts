@@ -33,11 +33,14 @@ export interface SharedExport {
   readonly why: string;
 }
 
-const ART_MANIFEST = `The art manifest schema is declared twice on purpose (AGENTS.md).
-\`@mtg/card-render\` pulls React in through \`@mtg/ui\`, and \`@mtg/ui\` cannot import
-\`@mtg/card-render\` back because that arrow closes a cycle. So each states the shape it
-reads, and \`packages/card-render/test/parity.test.ts\` holds the two renderers to one
-specification.`;
+const ART_RESOLVER = `A homonym, and the one name the art manifest merge could not take with
+it. \`mtg-sn68\` moved the document itself into \`@mtg/render-spec\`, so the schema, its version
+literals and its parser are declared once rather than restated by each reader. A *resolver* is not
+the document: it is a reading of it, and the two faces read it differently on purpose.
+\`@mtg/card-render\` draws a card once — a contact sheet, a printed proof — so its resolver is
+\`(card) => image | null\` and always takes the first illustration. \`@mtg/ui\` draws a table
+where five Swamps are five objects, so its resolver takes a copy number as well and rotates the
+list. Merging them would mean giving the printed face a parameter it has nothing to pass.`;
 
 const DECK_ARTIFACT = `The deck artifact's producer and its consumer describe it separately
 because \`@mtg/ui\` must not depend on \`@mtg/decklab\`: that would put \`better-sqlite3\`
@@ -63,9 +66,7 @@ to \`@mtg/sim\` by \`packages/ui/test/replay-contract.test.ts\`.`;
  * failure diff lines up with this file.
  */
 export const SHARED_EXPORTS: readonly SharedExport[] = [
-  { name: 'ART_MANIFEST_VERSION', packages: ['card-render', 'ui'], why: ART_MANIFEST },
-  { name: 'ArtManifest', packages: ['card-render', 'ui'], why: ART_MANIFEST },
-  { name: 'ArtResolver', packages: ['card-render', 'ui'], why: ART_MANIFEST },
+  { name: 'ArtResolver', packages: ['card-render', 'ui'], why: ART_RESOLVER },
 
   { name: 'DECK_ARTIFACT_VERSION', packages: ['decklab', 'ui'], why: DECK_ARTIFACT },
   { name: 'DeckArt', packages: ['decklab', 'ui'], why: DECK_ARTIFACT },
@@ -148,12 +149,14 @@ about real cards the kernel never runs.`,
   },
   {
     name: 'cardColors',
-    packages: ['deckbuild', 'ui'],
-    why: `Two right answers to "what colors is this card". \`@mtg/deckbuild\`'s unions the
-declared colors with the cost's, because an unvalidated card must not slip an off-color
-spell into a deck; \`@mtg/ui\`'s additionally reads \`producesMana\` and a basic land's type,
-because a face has to show a land's color. A builder that used the face's rule would let
-a land's produced color count as a spell color.`,
+    packages: ['deckbuild', 'render-spec', 'ui'],
+    why: `Two right answers to "what colors is this card", handed on by three barrels.
+\`@mtg/deckbuild\`'s unions the declared colors with the cost's, because an unvalidated card
+must not slip an off-color spell into a deck; the face's additionally reads \`producesMana\`
+and a basic land's type, because a face has to show a land's color. A builder that used the
+face's rule would let a land's produced color count as a spell color. The face's rule is
+declared in \`@mtg/render-spec\` since \`mtg-ey09\` and \`@mtg/ui\` re-exports it, so the third
+package on this line is one name reaching a second barrel, not a third answer.`,
   },
   {
     name: 'createRng',

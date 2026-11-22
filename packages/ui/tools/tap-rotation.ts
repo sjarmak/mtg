@@ -48,6 +48,28 @@
  * The before-and-after pair for the same change is in
  * `test/play/table-allocation.browser.test.ts`, on a twelve-a-side table.
  *
+ * ## `mtg-6hhr`, chrome-headless-shell 151, 2026-08-24
+ *
+ * The height guard was `min(71.59cqw, 100cqh)`, and the second term was the
+ * slot's *whole* height where the first is 63/88 of its width. That is the wrong
+ * number for the same reason the first term is the right one: an upright face in
+ * a squashed slot is 63/88 of the slot's height, so the two states parted by
+ * 88/63 exactly where the cap bound. Both pages, both terms now carrying the
+ * share:
+ *
+ *   viewport   upright face   tapped face before   tapped face after
+ *   1440x900   124 x 173.2    173.2 x 124          173.2 x 124
+ *   1280x800   100 x 139.7    139.7 x 100          139.7 x 100
+ *   1024x768   100 x 139.7    139.7 x 100          139.7 x 100
+ *   1440x560   87.9 x 122.8   132.4 x 94.8         122.8 x 87.9
+ *   1440x480   69.6 x 97.2    106.8 x 76.5          97.2 x 69.6
+ *
+ * The tapped face's *base* width is its painted height, so read the second
+ * number: 94.8 against an upright 87.9 before, 87.9 against 87.9 after. The
+ * three unsquashed viewports are identical across the change, which is the claim
+ * that this costs a tall table nothing. Overhang, block overhang, row clip and
+ * overlapping pairs are 0 in every cell of both runs.
+ *
  * Run it:
  *
  *     npx tsx packages/ui/tools/tap-rotation.ts out/verify
@@ -186,7 +208,9 @@ window.mtgTapRotation = function () {
     if (card === null) continue;
     var faceBox = card.getBoundingClientRect();
     var slotBox = slot.getBoundingClientRect();
-    var rowBox = slot.parentElement.getBoundingClientRect();
+    var place = slot.parentElement;
+    var row = place.getAttribute('data-holds') === 'false' ? place.parentElement : place;
+    var rowBox = row.getBoundingClientRect();
     if (faceBox.height === 0) continue;
     var style = getComputedStyle(card);
     rows.push({
@@ -251,7 +275,7 @@ window.mtgTapRotation = function () {
     board: { upright: group('board', false), tapped: group('board', true) },
     land: { upright: group('art', false), tapped: group('art', true) },
     overlappingPairs: pairs(".mtg-slot[data-slot='play'] .mtg-card"),
-    boardPairs: pairs(".mtg-board__spells > .mtg-slot[data-slot='play'] .mtg-card"),
+    boardPairs: pairs(".mtg-board__spells > .mtg-attach > .mtg-slot[data-slot='play'] .mtg-card"),
     landPairs: pairs(".mtg-lands > .mtg-slot[data-slot='play'] .mtg-card"),
     all: rows
   };

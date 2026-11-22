@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "coveragePlan": "out/validation-pilot/akh-hou-complete-coverage-plan-v6/coverage-plan.json",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "ancient-crab-local-controller-profile-v1",
+      "scope": "scenario",
+      "controller": "local",
+      "sourceName": "Ancient Crab",
+      "sourceSeat": 0,
+      "decisionFamilies": ["priority", "combat"],
+      "assertions": ["Ancient Crab local controller profile"],
+      "testFile": "packages/forge-export/test/bridge-textless-controller-profile.integration.test.ts"
+    },
+    {
+      "id": "ancient-crab-engine-controller-profile-v1",
+      "scope": "scenario",
+      "controller": "engine",
+      "sourceName": "Ancient Crab",
+      "sourceSeat": 1,
+      "decisionFamilies": ["priority", "combat"],
+      "assertions": ["Ancient Crab engine controller profile"],
+      "testFile": "packages/forge-export/test/bridge-textless-controller-profile.integration.test.ts"
+    }
+  ]
+}

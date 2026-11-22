@@ -203,7 +203,7 @@ describe('the scope rules a CR 614 replacement needs', () => {
 });
 
 describe('the target rules', () => {
-  it('gives a drain three player-shaped slots, a back-reference, and the other two none', () => {
+  it('gives a drain three player-shaped slots, three retained referents, and the other two none', () => {
     // `thatPlayer` is the fourth because Sign in Blood (M11 #117, M13 #110)
     // drains the player it just made draw, and reading the slot the draw chose
     // is the only way to say "that player" — a second `targetPlayer` would let
@@ -213,6 +213,8 @@ describe('the target rules', () => {
       'targetPlayer',
       'targetOpponent',
       'thatPlayer',
+      'thatCreaturesController',
+      'triggeringPlayer',
     ]);
     expect([...legalTargetsFor('setLife')]).toEqual([]);
     expect([...legalTargetsFor('preventCombatDamage')]).toEqual([]);

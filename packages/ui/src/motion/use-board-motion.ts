@@ -31,10 +31,21 @@ import { motionPlan } from './plan';
 import { asMotionRoot, createMotionRunner } from './runner';
 import type { MotionRoot, MotionRunner } from './runner';
 import { prefersReducedMotion, watchReducedMotion } from './reduced-motion';
+import { DEFAULT_PACE, PACE_ATTRIBUTE } from './pace';
+import type { Pace } from './pace';
 
 export interface BoardMotionInput {
   readonly events: readonly GameEvent[];
   readonly viewer: PlayerId;
+  /**
+   * How fast this viewer asked the table to move. Absent is `DEFAULT_PACE`.
+   *
+   * It reaches two places from here, and it has to reach both: `./plan.ts`,
+   * which scales the cue timeline the runner plays, and `PACE_ATTRIBUTE` on the
+   * board, which scales the animations the sheets declare. A pace that moved
+   * only the plan would leave a 240ms arrival landing under a 400ms travel.
+   */
+  readonly pace?: Pace;
 }
 
 export interface BoardMotion {
@@ -87,7 +98,13 @@ export function useBoardMotion(input: BoardMotionInput): BoardMotion {
     seen.current = events.length;
     const live = runner.current ?? createMotionRunner();
     runner.current = live;
-    live.sync(node, motionPlan(fresh, { viewer: input.viewer, reduced }));
+    const pace = input.pace ?? DEFAULT_PACE;
+    // Written on every commit rather than in an effect of its own: this is the
+    // one place that holds the board node, the write is idempotent, and setting
+    // it here means the plan below and the sheet above it can never disagree
+    // about which pace this frame is being drawn at.
+    node.setAttribute(PACE_ATTRIBUTE, pace);
+    live.sync(node, motionPlan(fresh, { viewer: input.viewer, reduced, pace }));
   });
 
   useEffect(

@@ -284,7 +284,7 @@ describe('the band sheet', () => {
   /**
    * The declarations the sheet finally applies for a selector, which is the
    * *last* rule written for it and not the first. `.mtg-board__divider` is
-   * declared in `./mat.ts` as well, and reading the first match would have
+   * declared in `../../src/styles/board/mat.ts` as well, and reading the first match would have
    * measured the rule this file exists to override.
    */
   function declaration(selector: string): string {

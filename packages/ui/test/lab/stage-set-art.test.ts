@@ -67,7 +67,11 @@ describe('staging a set’s generated art', () => {
     const copied: string[] = [];
     stageSetArt(
       manifestOf({ 'tgr-one': { href: './tgr-one.png', alt: 'a pier' } }),
-      harness({ copy: (from, to) => copied.push(`${from} -> ${to}`) }),
+      harness({
+        copy: (from, to) => {
+          copied.push(`${from} -> ${to}`);
+        },
+      }),
     );
     expect(copied).toEqual(['/repo/out/art/tgr-one.png -> /repo/packages/ui/public/art/tgr-one.png']);
   });
@@ -76,7 +80,12 @@ describe('staging a set’s generated art', () => {
     const copied: string[] = [];
     stageSetArt(
       manifestOf({ 'tgr-one': { href: './tgr-one.png', alt: 'a pier' } }),
-      harness({ exists: () => true, copy: (from) => copied.push(from) }),
+      harness({
+        exists: () => true,
+        copy: (from) => {
+          copied.push(from);
+        },
+      }),
     );
     expect(copied).toHaveLength(1);
   });
@@ -543,10 +552,37 @@ describe('an explicitly named manifest', () => {
       'xmp-two': { href: './second/shared.png', alt: 'two' },
     });
 
-    expect(() => stageSetArt(colliding, harness({ copy: (from) => copied.push(from) }))).toThrow(
-      'both stage as art/shared.png',
-    );
+    expect(() =>
+      stageSetArt(
+        colliding,
+        harness({
+          copy: (from) => {
+            copied.push(from);
+          },
+        }),
+      ),
+    ).toThrow('both stage as art/shared.png');
     expect(copied).toEqual([]);
+  });
+
+  it('rejects a PNG whose WebP output would overwrite another staged raster', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'mtg-webp-collision-'));
+    writeFileSync(
+      join(directory, 'shared.png'),
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    );
+    writeFileSync(join(directory, 'shared.webp'), 'not a PNG');
+    const colliding = manifestOf({
+      'xmp-one': { href: './shared.png', alt: 'one' },
+      'xmp-two': { href: './shared.webp', alt: 'two' },
+    });
+
+    expect(() =>
+      stageSetArt(colliding, {
+        manifestDir: directory,
+        publicDir: join(directory, 'public'),
+      }),
+    ).toThrow('both stage as art/shared.webp');
   });
 
   it.each(['direct', 'symbolic', 'hard'] as const)('refuses a %s alias of the staged manifest', (kind) => {

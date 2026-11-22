@@ -53,16 +53,17 @@
  *
  * A win rate measured over one seed is a draw from a distribution, and the
  * balance suite measured that distribution rather than guessing at it (see
- * `test/balance/round-robin.ts`): across eight seeds at the pinned volume, the
- * win-rate spread moved with a standard deviation of 0.008 to 0.017 depending
- * on the subject, and a single color pair's win rate with a standard deviation
- * of about 0.01. So a spread that missed its band by 0.01 missed it by less
- * than the dice move it, and reporting that as a finding about the *set* is
- * reporting the seed.
+ * `test/balance/round-robin.ts`): across 24 seeds at the pinned volume, the
+ * win-rate spread moved with a standard deviation of 0.012 to 0.014 depending
+ * on the subject, and the worst single color pair with one of 0.014. So a
+ * spread that missed its band by 0.01 missed it by less than the dice move it,
+ * and reporting that as a finding about the *set* is reporting the seed.
  *
- * `./seed-noise` names that number for the two statistics it has been measured
- * for, and `null` for every other gate — measured, never guessed, the same
- * rule `@mtg/cube` applies to a criterion nobody stated. Those deviations were
+ * `./seed-noise` names that number for every gate the balance config emits and
+ * `null` for the rest — measured, never guessed, the same rule `@mtg/cube`
+ * applies to a criterion nobody stated. What it names is not the standard
+ * deviation but a 95% upper bound on it, because a deviation read off 24 seeds
+ * is itself an estimate; the argument is in that module. Those deviations were
  * measured at one volume and are reported at another: the study ran the pinned
  * 10,035-game sweep, `npm run analyze` defaults to 2,700, and a rate over a
  * quarter of the games moves twice as far on the same dice. So a finding's
@@ -75,10 +76,10 @@
  * moves 0.055 on the dice at this volume, and still call the first sentence a
  * fact about the set (`mtg-qt1f`). `./gates`' `abstainWithinNoise` now
  * re-reads the list against the run volume before anything here sees it, and a
- * miss smaller than the dice comes through as the `withinNoise` status. This
- * module's part is the consequence: that status is unjudged, so it is never a
- * `FairnessFinding` — a finding is a fail — and a reading holding one cannot
- * come back `fair`.
+ * gate that landed within one deviation of its band, on either side, comes
+ * through as the `withinNoise` status. This module's part is the consequence:
+ * that status is unjudged, so it is never a `FairnessFinding` — a finding is a
+ * fail — and a reading holding one cannot come back `fair`.
  */
 import type { GateResult, GateStatus } from './gates';
 import { gateMargin, seedNoiseAbstention } from './gates';
@@ -201,10 +202,14 @@ export interface Fairness {
   readonly unattributed: readonly string[];
 }
 
-function findingFor(gate: GateResult, question: FairnessQuestion, games: number): FairnessFinding | null {
+function findingFor(
+  gate: GateResult,
+  question: FairnessQuestion,
+  distinctGames: number,
+): FairnessFinding | null {
   const margin = gateMargin(gate);
   if (margin === null) return null;
-  const noise = scaledSeedDeviation(gate.id, games);
+  const noise = scaledSeedDeviation(gate.id, distinctGames);
   return {
     gate: gate.id,
     question,
@@ -215,7 +220,7 @@ function findingFor(gate: GateResult, question: FairnessQuestion, games: number)
     noise,
     // The same comparison the re-classifier makes, made in one place rather
     // than subtracted a second time here.
-    withinNoise: seedNoiseAbstention(gate, games) !== null,
+    withinNoise: seedNoiseAbstention(gate, distinctGames) !== null,
     detail: gate.detail,
   };
 }
@@ -225,9 +230,10 @@ function findingFor(gate: GateResult, question: FairnessQuestion, games: number)
  *
  * They are kept apart because they are three different instructions to the
  * reader: buy more games, accept that this subject has nothing to measure, or
- * accept that at this volume the miss and the dice are the same size. The
- * third is the one that has a lever attached — a bigger sweep narrows the
- * deviation and the band comes back — so its sentence names the volume.
+ * accept that at this volume the distance to the band and the dice are the
+ * same size. The third is the one that has a lever attached — a bigger sweep
+ * narrows the deviation and the band comes back — so its sentence names the
+ * volume.
  */
 function unjudgedFor(gate: GateResult): UnjudgedGate | null {
   if (gate.status === 'withinNoise') {
@@ -235,7 +241,7 @@ function unjudgedFor(gate: GateResult): UnjudgedGate | null {
       gate: gate.id,
       label: gate.label,
       status: 'withinNoise',
-      reason: `the miss is inside the dice at this volume, so this run cannot judge it: ${gate.detail}`,
+      reason: `the band is inside the dice at this volume, so this run cannot judge it: ${gate.detail}`,
     };
   }
   if (gate.status === 'underSampled') {
@@ -280,13 +286,13 @@ export const NOT_ASKED = 'this run measured no gate for it';
 function readingFor(
   question: FairnessQuestion,
   gates: readonly GateResult[],
-  games: number,
+  distinctGames: number,
 ): FairnessReading {
   const mine = gates.filter((gate) => questionOf(gate.id) === question);
   const findings = mine
     .filter((gate) => gate.status === 'fail')
     .flatMap((gate) => {
-      const finding = findingFor(gate, question, games);
+      const finding = findingFor(gate, question, distinctGames);
       return finding === null ? [] : [finding];
     });
   const unjudged = mine.flatMap((gate) => {
@@ -316,7 +322,13 @@ function readingFor(
  * gates were held to which numbers, and by how much each one missed.
  */
 export function fairness(health: FormatHealth): Fairness {
-  const readings = FAIRNESS_QUESTIONS.map((question) => readingFor(question, health.gates, health.games));
+  // `distinctGames` rather than `games`, for the reason `./gates`
+  // `seedNoiseAbstention` states: a finding's noise floor is the same number
+  // the abstention rule uses, so reading a different volume here would put two
+  // answers about one gate in one report (`mtg-pixl`).
+  const readings = FAIRNESS_QUESTIONS.map((question) =>
+    readingFor(question, health.gates, health.distinctGames),
+  );
   const unattributed = health.gates.filter((gate) => questionOf(gate.id) === null).map((gate) => gate.id);
   const findings = readings
     .flatMap((reading) => reading.findings)

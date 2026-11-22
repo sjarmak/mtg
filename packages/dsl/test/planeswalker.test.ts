@@ -52,7 +52,7 @@ describe('planeswalker cards', () => {
     expect(card.kind).toBe('planeswalker');
     if (card.kind !== 'planeswalker') throw new Error('expected planeswalker');
     expect(card.startingLoyalty).toBe(4);
-    expect(CARD_KINDS.at(-1)).toBe('planeswalker');
+    expect(CARD_KINDS).toContain('planeswalker');
     expect(renderOracleText(card)).toBe(
       '[+1]: You gain 2 life.\n[0]: Draw a card.\n[−4]: Create a 2/2 colorless creature token.',
     );
@@ -153,5 +153,115 @@ describe('planeswalker cards', () => {
     expect(parsed.error?.issues.map((issue) => issue.message)).toContainEqual(
       expect.stringContaining('"loyaltyCost"'),
     );
+  });
+
+  it('parses and renders a modal loyalty ability without widening the model schema', () => {
+    const card = parseCard(
+      walker({
+        abilities: [
+          {
+            kind: 'activated',
+            loyaltyCost: -3,
+            cost: { mana: {} },
+            effects: [],
+            modes: [
+              {
+                effects: [
+                  {
+                    kind: 'pumpUntilEndOfTurn',
+                    power: 2,
+                    toughness: 2,
+                    target: { kind: 'targetCreature' },
+                  },
+                ],
+              },
+              {
+                effects: [
+                  {
+                    kind: 'pumpUntilEndOfTurn',
+                    power: -2,
+                    toughness: -2,
+                    target: { kind: 'targetCreature' },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    );
+
+    expect(renderOracleText(card)).toBe(
+      '[−3]: Choose one —\n• Target creature gets +2/+2 until end of turn.\n• Target creature gets -2/-2 until end of turn.',
+    );
+    const model = ModelAbilitySchema.safeParse({
+      kind: 'activated',
+      cost: { mana: {} },
+      effects: [],
+      modes: [
+        { effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }] },
+        { effects: [{ kind: 'gainLife', amount: 1, target: { kind: 'noTarget' } }] },
+      ],
+    });
+    expect(model.success).toBe(false);
+  });
+
+  it('rejects modes on special activated variants whose executors do not run them', () => {
+    const modalRegeneration = safeParseCard({
+      kind: 'creature',
+      id: 'tst-modal-regenerator',
+      name: 'Modal Regenerator',
+      rarity: 'rare',
+      set: { code: 'TST', collectorNumber: 12 },
+      manaCost: { B: 1 },
+      colors: ['B'],
+      subtypes: [],
+      power: 1,
+      toughness: 1,
+      abilities: [
+        {
+          kind: 'activated',
+          cost: { mana: { B: 1 } },
+          regenerateSelf: true,
+          effects: [],
+          modes: [
+            { effects: [{ kind: 'gainLife', amount: 1, target: { kind: 'noTarget' } }] },
+            { effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }] },
+          ],
+        },
+      ],
+    });
+    expect(modalRegeneration.ok).toBe(false);
+    if (!modalRegeneration.ok) {
+      expect(modalRegeneration.violations.map((violation) => violation.code)).toContain(
+        'REGENERATION_ABILITY_INVALID',
+      );
+    }
+
+    const modalAttach = safeParseCard({
+      kind: 'artifact',
+      id: 'tst-modal-equipment',
+      name: 'Modal Equipment',
+      rarity: 'rare',
+      set: { code: 'TST', collectorNumber: 13 },
+      manaCost: { generic: 1 },
+      subtypes: ['Equipment'],
+      abilities: [
+        {
+          kind: 'activated',
+          cost: { mana: { generic: 1 } },
+          attach: { modifications: [{ kind: 'statBonus', power: 1, toughness: 1 }] },
+          effects: [],
+          modes: [
+            { effects: [{ kind: 'gainLife', amount: 1, target: { kind: 'noTarget' } }] },
+            { effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }] },
+          ],
+        },
+      ],
+    });
+    expect(modalAttach.ok).toBe(false);
+    if (!modalAttach.ok) {
+      expect(modalAttach.violations.map((violation) => violation.code)).toContain('EQUIP_ABILITY_INVALID');
+    }
   });
 });

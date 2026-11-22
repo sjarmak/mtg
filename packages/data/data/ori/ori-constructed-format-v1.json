@@ -1,0 +1,703 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "ori",
+  "name": "Magic Origins",
+  "sources": [
+    {
+      "code": "ORI",
+      "catalogFormat": "ori-printed-v1",
+      "catalogSha256": "3bdeb0af2b8d62beb626bbe266e24bf7e474d3bce3627bf896914cb9c34355c2",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/ORI.json",
+        "sha256": "bf9bf6550c72e5788315f1bf3c52181b07de6b00b86d9375dce4325d33a390da",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "blue-black-graveyard",
+      "name": "Blue-Black Graveyard",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ori-printed-v1:0215:6ebc94e5-a595-43ab-929b-426009190669",
+          "name": "Possessed Skaab",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0070:a8f65037-d382-4a95-8cde-15f5d9f41297",
+          "name": "Screeching Skaab",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0060:02d6d693-f1f3-4317-bcc0-c21fa8490d38",
+          "name": "Jace, Vryn's Prodigy",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0073:d5849fa3-6296-4ca9-b2ac-519cf90f6b62",
+          "name": "Sigiled Starfish",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0116:103b369c-da58-40e7-98aa-5a5471434bca",
+          "name": "Returned Centaur",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0101:85880be1-65b2-432f-8788-79716e4c8066",
+          "name": "Graveblade Marauder",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0117:c7c6dbe5-3375-42c2-88f5-8ead0dc2b094",
+          "name": "Revenant",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0098:9eb8ea7b-dfac-47bf-b608-efd54e4fe0f1",
+          "name": "Fleshbag Marauder",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0109:3915c0be-7e9c-45bc-9c83-80beba469a81",
+          "name": "Nantuko Husk",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0074:3682b3d3-cb3d-4c2c-a419-f08e3a370cd1",
+          "name": "Skaab Goliath",
+          "count": 1
+        },
+        {
+          "physicalId": "ori-printed-v1:0107:b958e5da-ca77-4f22-972f-5d6e2777509a",
+          "name": "Macabre Waltz",
+          "count": 1
+        },
+        {
+          "physicalId": "ori-printed-v1:0110:3afe7891-09d5-470e-aa41-71d89249875b",
+          "name": "Necromantic Summons",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0115:db3d5e9d-07e8-43e1-aaf0-1f9e4ed2834a",
+          "name": "Reave Soul",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0246:b14a3dd4-27bd-4825-a525-2d6cc2201046",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0257:d3a9df3b-b542-4915-96ac-0c9027f6870a",
+          "name": "Island",
+          "count": 12
+        },
+        {
+          "physicalId": "ori-printed-v1:0261:e1ae0b13-c9f6-4659-ba85-a87a81f6e730",
+          "name": "Swamp",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "black-red-sacrifice",
+      "name": "Black-Red Sacrifice",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ori-printed-v1:0210:332769b1-1eb5-4c77-8317-27addc28650b",
+          "name": "Blazing Hellhound",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0109:3915c0be-7e9c-45bc-9c83-80beba469a81",
+          "name": "Nantuko Husk",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0098:9eb8ea7b-dfac-47bf-b608-efd54e4fe0f1",
+          "name": "Fleshbag Marauder",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0140:b19fc806-f1b7-4f82-be0e-b960699f9a36",
+          "name": "Dragon Fodder",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0091:2b62a4c2-e66d-4fc3-8703-a90b84f567bf",
+          "name": "Deadbridge Shaman",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0149:f05cafb6-8812-42bb-ad14-3dde4bcb7034",
+          "name": "Ghirapur Gearcrafter",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0157:0dcafa9e-3637-42ca-bdb2-45a2b5da7294",
+          "name": "Pia and Kiran Nalaar",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0106:9f25e1cf-eeb4-458d-8fb2-b3a2f86bdd54",
+          "name": "Liliana, Heretical Healer",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0145:5b81a589-44bf-4441-9079-1ae66d067519",
+          "name": "Fiery Impulse",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0129:57a71ba3-e5f0-4f36-bafa-db96611681dd",
+          "name": "Act of Treason",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0115:db3d5e9d-07e8-43e1-aaf0-1f9e4ed2834a",
+          "name": "Reave Soul",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0246:b14a3dd4-27bd-4825-a525-2d6cc2201046",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0247:73f29e03-0a71-46cd-992e-7baa61f16ac5",
+          "name": "Foundry of the Consuls",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0261:e1ae0b13-c9f6-4659-ba85-a87a81f6e730",
+          "name": "Swamp",
+          "count": 11
+        },
+        {
+          "physicalId": "ori-printed-v1:0265:e7b95522-a9de-4ec1-8158-c66813919e62",
+          "name": "Mountain",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "red-green-creature-ramp",
+      "name": "Red-Green Creature Ramp",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ori-printed-v1:0219:eb12b1d8-c53e-4d48-89e5-2168ff34a853",
+          "name": "Zendikar Incarnate",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0184:99f0c9b4-9b79-4e61-8386-a36b26d9963c",
+          "name": "Leaf Gilder",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0190:800cef89-e90c-4f84-a7a0-3cd203532169",
+          "name": "Nissa's Pilgrimage",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0189:ff0063da-ab6b-499d-8e87-8b34d46f0372",
+          "name": "Nissa, Vastwood Seer",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0186:1a08e5ab-1ff9-4470-ab28-fea19bb79845",
+          "name": "Managorger Hydra",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0196:64c3c972-82f6-46ea-8f9f-090c65c22e44",
+          "name": "Rhox Maulers",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0141:664f60a8-e80a-4fe0-b76c-2d76c728329e",
+          "name": "Embermaw Hellion",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0193:1caad298-52cb-46f1-8212-fe657ab80159",
+          "name": "Outland Colossus",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0161:a60d957b-f71a-403e-82fe-30ea87d1e142",
+          "name": "Seismic Elemental",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0183:65c89431-0881-4aa6-ac15-d4c13b075273",
+          "name": "Joraga Invocation",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0246:b14a3dd4-27bd-4825-a525-2d6cc2201046",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0265:e7b95522-a9de-4ec1-8158-c66813919e62",
+          "name": "Mountain",
+          "count": 12
+        },
+        {
+          "physicalId": "ori-printed-v1:0269:b4ee8330-f1bf-460b-9345-00d08665e9cf",
+          "name": "Forest",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "id": "green-white-renown",
+      "name": "Green-White Renown",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ori-printed-v1:0213:9aa11f30-f2b7-4279-9176-c336c74538bf",
+          "name": "Citadel Castellan",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0036:b9ef727b-3e67-46d2-80f9-b1d483977b05",
+          "name": "Topan Freeblade",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0011:301a1b68-2890-4702-a90e-bad8d309c40d",
+          "name": "Consul's Lieutenant",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0196:64c3c972-82f6-46ea-8f9f-090c65c22e44",
+          "name": "Rhox Maulers",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0203:e693a7e7-d95e-4cd8-9524-ca5fc517189a",
+          "name": "Valeron Wardens",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0184:99f0c9b4-9b79-4e61-8386-a36b26d9963c",
+          "name": "Leaf Gilder",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0035:904cb2f5-eb62-4416-8236-d2fbeadf1dc4",
+          "name": "Swift Reckoning",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0034:d34c717b-224b-4289-826d-f5b1f7c3dbfb",
+          "name": "Suppression Bonds",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0201:24f80ad0-2420-4de4-886c-1168166c7dae",
+          "name": "Titanic Growth",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0013:b059bd3e-451c-445a-b299-544c82fc0eb9",
+          "name": "Enshrouding Mist",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0246:b14a3dd4-27bd-4825-a525-2d6cc2201046",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0253:88f96591-4f22-451e-bfb5-32561cc4640d",
+          "name": "Plains",
+          "count": 17
+        },
+        {
+          "physicalId": "ori-printed-v1:0269:b4ee8330-f1bf-460b-9345-00d08665e9cf",
+          "name": "Forest",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "id": "white-black-auras",
+      "name": "White-Black Auras",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ori-printed-v1:0005:598ebb91-57d6-4800-8931-4d0016e9fec1",
+          "name": "Auramancer",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0007:150dd602-5f61-4f1e-a422-e64c079de141",
+          "name": "Blessed Spirits",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0033:861dc1a5-4e84-47bc-83a2-f289804086d8",
+          "name": "Starfield of Nyx",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0015:6a8740d2-7fcf-4bdf-afea-0c28c025370c",
+          "name": "Grasp of the Hieromancer",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0102:d1ead8cc-5b7d-4a6d-a56f-95da91a958d2",
+          "name": "Infernal Scarring",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0022:20930fab-eb4f-4179-94a7-84dc7055710a",
+          "name": "Knightly Valor",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0126:e2f31943-e26c-4bd2-bdbd-d980836f99b9",
+          "name": "Weight of the Underworld",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0125:5994b7b0-3bca-480b-b265-ed269f15c17e",
+          "name": "Unholy Hunger",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0041:3d8827bf-11c3-4f78-b7aa-ae953442c709",
+          "name": "War Oracle",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0011:301a1b68-2890-4702-a90e-bad8d309c40d",
+          "name": "Consul's Lieutenant",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0245:ca145c1c-537a-459e-9241-0b95368aaf3a",
+          "name": "Caves of Koilos",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0253:88f96591-4f22-451e-bfb5-32561cc4640d",
+          "name": "Plains",
+          "count": 17
+        },
+        {
+          "physicalId": "ori-printed-v1:0261:e1ae0b13-c9f6-4659-ba85-a87a81f6e730",
+          "name": "Swamp",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "id": "blue-red-artifacts",
+      "name": "Blue-Red Artifacts",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ori-printed-v1:0216:5299a549-06cf-47e8-b6cd-7e44d9f1efb8",
+          "name": "Reclusive Artificer",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0229:791c21fb-fc78-4106-9a42-abc73f41ab8b",
+          "name": "Hangarback Walker",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0149:f05cafb6-8812-42bb-ad14-3dde4bcb7034",
+          "name": "Ghirapur Gearcrafter",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0165:a5e6c48a-29d0-40ae-aac6-df7319873f50",
+          "name": "Thopter Engineer",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0225:f2c65947-bc1d-4f47-b60b-2f76ab5ebde9",
+          "name": "Chief of the Foundry",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0083:0feb66d2-c50f-4296-af2f-b374c57443b0",
+          "name": "Whirler Rogue",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0157:0dcafa9e-3637-42ca-bdb2-45a2b5da7294",
+          "name": "Pia and Kiran Nalaar",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0148:2e4a0c29-a759-465f-9136-9d709b6f30fc",
+          "name": "Ghirapur Aether Grid",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0145:5b81a589-44bf-4441-9079-1ae66d067519",
+          "name": "Fiery Impulse",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0251:f1d33afd-6f2a-43c8-ae5d-17a0674fcdd3",
+          "name": "Shivan Reef",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0247:73f29e03-0a71-46cd-992e-7baa61f16ac5",
+          "name": "Foundry of the Consuls",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0257:d3a9df3b-b542-4915-96ac-0c9027f6870a",
+          "name": "Island",
+          "count": 12
+        },
+        {
+          "physicalId": "ori-printed-v1:0265:e7b95522-a9de-4ec1-8158-c66813919e62",
+          "name": "Mountain",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "black-green-elves",
+      "name": "Black-Green Elves",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ori-printed-v1:0217:304687b1-2294-4144-b2bd-7e36f9aaac34",
+          "name": "Shaman of the Pack",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0121:3290c60a-f9a0-464d-a15e-8473a6d50d96",
+          "name": "Thornbow Archer",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0175:367ef35a-528b-407c-8b8d-679109662bae",
+          "name": "Elvish Visionary",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0173:c203722b-3f16-4b6c-9b2e-18169d3f80c9",
+          "name": "Dwynen's Elite",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0184:99f0c9b4-9b79-4e61-8386-a36b26d9963c",
+          "name": "Leaf Gilder",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0199:95e0550c-d3ad-4bd4-a259-d597991079b1",
+          "name": "Sylvan Messenger",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0172:91c143a9-c642-425a-a469-a9d158e43c21",
+          "name": "Dwynen, Gilt-Leaf Daen",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0100:e05572ba-3a26-41f5-96c1-960ec9367178",
+          "name": "Gnarlroot Trapper",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0115:db3d5e9d-07e8-43e1-aaf0-1f9e4ed2834a",
+          "name": "Reave Soul",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0248:924d4025-a6f7-4ab0-8f0d-f4ba9ed0a232",
+          "name": "Llanowar Wastes",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0246:b14a3dd4-27bd-4825-a525-2d6cc2201046",
+          "name": "Evolving Wilds",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0261:e1ae0b13-c9f6-4659-ba85-a87a81f6e730",
+          "name": "Swamp",
+          "count": 11
+        },
+        {
+          "physicalId": "ori-printed-v1:0269:b4ee8330-f1bf-460b-9345-00d08665e9cf",
+          "name": "Forest",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "red-white-aggro",
+      "name": "Red-White Aggro",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ori-printed-v1:0214:c0441583-c9d5-47a1-8754-c9162cec64bc",
+          "name": "Iroas's Champion",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0023:58c39df6-b237-40d1-bdcb-2fe5d05392a9",
+          "name": "Kytheon, Hero of Akros",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0150:e2779415-9e0e-4c61-b590-e15ac089cf30",
+          "name": "Goblin Glory Chaser",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0036:b9ef727b-3e67-46d2-80f9-b1d483977b05",
+          "name": "Topan Freeblade",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0011:301a1b68-2890-4702-a90e-bad8d309c40d",
+          "name": "Consul's Lieutenant",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0127:cb7a2770-9a20-4f52-aac4-24502f50e374",
+          "name": "Abbot of Keral Keep",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0145:5b81a589-44bf-4441-9079-1ae66d067519",
+          "name": "Fiery Impulse",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0143:42eca98e-a164-4f70-a0b0-7a604863f30b",
+          "name": "Exquisite Firecraft",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0166:0e48f309-8e56-4741-a9ff-e899dafb333a",
+          "name": "Titan's Strength",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0244:034c5944-aad3-4bf2-b79d-8da61ab1bd52",
+          "name": "Battlefield Forge",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0246:b14a3dd4-27bd-4825-a525-2d6cc2201046",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0253:88f96591-4f22-451e-bfb5-32561cc4640d",
+          "name": "Plains",
+          "count": 13
+        },
+        {
+          "physicalId": "ori-printed-v1:0265:e7b95522-a9de-4ec1-8158-c66813919e62",
+          "name": "Mountain",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "id": "green-blue-tempo",
+      "name": "Green-Blue Tempo",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ori-printed-v1:0212:660befe5-9c98-4aa3-9ca7-e643eaf91490",
+          "name": "Bounding Krasis",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0058:94ca53de-cffb-4740-b318-a4ebfb3a31af",
+          "name": "Harbinger of the Tides",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0184:99f0c9b4-9b79-4e61-8386-a36b26d9963c",
+          "name": "Leaf Gilder",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0175:367ef35a-528b-407c-8b8d-679109662bae",
+          "name": "Elvish Visionary",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0186:1a08e5ab-1ff9-4470-ab28-fea19bb79845",
+          "name": "Managorger Hydra",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0083:0feb66d2-c50f-4296-af2f-b374c57443b0",
+          "name": "Whirler Rogue",
+          "count": 3
+        },
+        {
+          "physicalId": "ori-printed-v1:0189:ff0063da-ab6b-499d-8e87-8b34d46f0372",
+          "name": "Nissa, Vastwood Seer",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0054:f790b0b5-ed67-40f8-b23b-10cf0a71f285",
+          "name": "Disperse",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0049:665ee42f-8d76-4f8b-9dd3-7455a90f0da7",
+          "name": "Clash of Wills",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0044:15058f91-d266-4804-96af-fc050b6c8436",
+          "name": "Anchor to the Aether",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0252:7ae3d45b-a40c-4003-960a-2d1d0847e750",
+          "name": "Yavimaya Coast",
+          "count": 4
+        },
+        {
+          "physicalId": "ori-printed-v1:0246:b14a3dd4-27bd-4825-a525-2d6cc2201046",
+          "name": "Evolving Wilds",
+          "count": 2
+        },
+        {
+          "physicalId": "ori-printed-v1:0257:d3a9df3b-b542-4915-96ac-0c9027f6870a",
+          "name": "Island",
+          "count": 15
+        },
+        {
+          "physicalId": "ori-printed-v1:0269:b4ee8330-f1bf-460b-9345-00d08665e9cf",
+          "name": "Forest",
+          "count": 9
+        }
+      ]
+    }
+  ],
+  "contentSha256": "e0453fbb0eb9f6189e8a34985ef1fbac578e164de3cbfc709bfea1034af888c2"
+}

@@ -14,7 +14,8 @@
  *    `textLength`. A fixed font size that suits a two-line common is the bug
  *    this package exists to prevent.
  *  * **Art is a registry, never an import.** See `art.ts`.
- *  * **No color is chosen here.** `@mtg/ui`'s token layer is the only palette;
+ *  * **No color is chosen here.** `@mtg/render-spec`'s token layer is the only
+ *    palette;
  *    see `palette.ts`.
  */
 
@@ -26,6 +27,7 @@ export {
   CARD_WIDTH,
   CARD_WIDTH_MM,
   DEFAULT_BLEED_MM,
+  LAND_GEOMETRY,
   PLANESWALKER_GEOMETRY,
   TITLE_MAX_SIZE,
   UNITS_PER_MM,
@@ -82,7 +84,7 @@ export {
   symbolAdvance,
 } from './text/symbols';
 
-// The treatment these paint from is `@mtg/ui`'s `frameTreatment`, and it is not
+// The treatment these paint from is `@mtg/render-spec`'s `frameTreatment`, and it is not
 // re-exported here: one fact, one export path (ADR-0002 §6.1).
 export { frameDefs, frameIds, frameLayers, raritySeal } from './frame';
 export type { FrameIds } from './frame';

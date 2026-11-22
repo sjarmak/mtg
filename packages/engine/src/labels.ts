@@ -173,7 +173,7 @@ interface Aspect {
 }
 
 const ASPECTS: readonly Aspect[] = [
-  { say: (object, view): string => view.seats[object.controller].name },
+  { say: (object, view): string => view.seats[object.controller]?.name ?? '' },
   {
     say: (object): string =>
       object.power === null || object.toughness === null
@@ -181,6 +181,7 @@ const ASPECTS: readonly Aspect[] = [
         : `${String(object.power)}/${String(object.toughness)}`,
   },
   { say: (object): string => (object.tapped ? 'tapped' : 'untapped') },
+  { say: (object): string => (object.attacking ? 'attacking' : '') },
   { say: (object): string => (object.damage === 0 ? '' : `${String(object.damage)} damage marked`) },
   { say: (object): string => countersOf(object) },
 ];
@@ -295,10 +296,10 @@ function qualifyGroup(
  * does not carry it.
  *
  * Null is a normal answer and not a backend fault: the projection carries the
- * stack, both battlefields, both graveyards and whichever hands the viewer may
- * see, and nothing else. A move that points into exile or into a library points
- * at something this layer cannot describe, and an option that cannot be
- * described is left to `sharedWith`.
+ * stack, both battlefields, both graveyards, both exile zones and whichever
+ * hands the viewer may see. A move that points into a library points at
+ * something this layer cannot describe, and an option that cannot be described
+ * is left to `sharedWith`.
  */
 function objectAt(option: MoveOption, at: number, index: ReadonlyMap<string, ObjectView>): ObjectView | null {
   const target = option.targets[at];
@@ -317,7 +318,7 @@ function objectIndex(view: TableView): ReadonlyMap<string, ObjectView> {
 function zonesOf(view: TableView): readonly (readonly ObjectView[])[] {
   const zones: (readonly ObjectView[])[] = [view.stack];
   for (const seat of view.seats) {
-    zones.push(seat.battlefield, seat.graveyard);
+    zones.push(seat.battlefield, seat.graveyard, seat.exile);
     if (seat.hand !== null) zones.push(seat.hand);
   }
   return zones;

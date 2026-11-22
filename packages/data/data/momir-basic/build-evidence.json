@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "momir-basic",
+  "formatSha256": "4b444700c5239901d101982996e7570f7fa3f52670514cb83a21340702b13c08",
+  "sourceSha256": "82f33d7f74d089824069ff23cb10165347dc0297f6a093b1dd9e80841fbb134a",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "82f33d7f74d089824069ff23cb10165347dc0297f6a093b1dd9e80841fbb134a",
+    "recipe.json": "463bb3b90e24331528f323c8403a36401805304d0f24000e92aa3df4f43f84a7",
+    "m11-printed-catalog-v1.json": "a053bd25e9b8a5ba6f222779997f02011367a6a6a10ba70fe950f2c2b15a05fc",
+    "momir-basic-constructed-format-v1.json": "623484a34732bf0c3ccf55b2a53f727839b7949e2a53daf3b93b0724833430ec"
+  },
+  "catalogs": [
+    {
+      "code": "M11",
+      "cards": 249,
+      "contentSha256": "ea0c6153e664b1c21aed2054a7bd0af617700997d3836f7977be809d5eec5dfe"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1591.563646,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 234,
+    "printings": 249
+  }
+}

@@ -9,16 +9,6 @@
  * the eye, nothing saying which object was new, no beat in which to read it.
  * The game log already *reports* it; this is what makes it *seen*.
  *
- * **It is a little bit, and the size is the design.** One motion, on one class
- * of object, for `ARRIVAL_MS`: the card fades up while dropping `ARRIVAL_RISE_REM`
- * into its slot. Nothing else on the table moves, nothing waits for it, and a
- * player who is not looking loses nothing, because the movement is the only thing
- * the animation carries and the log's sentence is still the record. Four things
- * were deliberately not built, and each is a bead rather than a guess at what
- * "a little bit" includes: your own plays and a card leaving the table
- * (`mtg-ncg`), a lasting mark on the newest object (`mtg-exe`), a timing a player
- * can turn (`mtg-kwu`), and the one false positive below (`mtg-wwy`).
- *
  * **The stack came off that list** (`mtg-atq`). the playtester asked that a spell she
  * has to let resolve "show it go onto the stack", and an object that is simply
  * present on the next frame is exactly what she is describing the absence of. It
@@ -48,13 +38,6 @@
  * marking pass unnecessary, and it is also what makes the effect immune to the
  * failure a marking pass has: an attribute set for one render and cleared by the
  * next unrelated re-render would cancel the animation halfway.
- *
- * The one place that gives a false positive is honest and asserted in
- * `test/play/arrival.test.ts`: equipping a creature moves it inside the
- * `.mtg-attach` tray (`../../board/Battlefield.ts`, `attachedGroup`), which is a
- * new parent and therefore a new element, so the host arrives a second time. An
- * opponent equipping something is an opponent doing something, so the motion is
- * not lying about whether an event happened; it names the wrong one.
  *
  * **Two properties, both of them free.** `opacity` and `translate` are the whole
  * animation, and neither touches a layout box. That is not a preference —
@@ -120,14 +103,21 @@
  * depended on the motion — the log narrates the play, the card is on the board,
  * and every mark it wears is text.
  *
- * The timing is one named constant rather than a value in the sheet, which is
- * the configurability this lane took: `ARRIVAL_MS` is the number, it is
- * interpolated once, and `test/play/arrival.test.ts` reads it back out of the
- * shipped sheet. Handing it to a player as a setting means putting presentation
- * timing beside the stops in `SessionOptions`, which is a session-shaped change
- * and is filed rather than assumed.
+ * The timing is one named constant rather than a value in the sheet:
+ * `ARRIVAL_MS` is the number, every rule below interpolates that one binding,
+ * and `test/play/arrival.test.ts` reads it back out of the shipped sheet.
+ *
+ * `mtg-kwu` handed it to the player, and the shape it did *not* take is worth
+ * recording, because this comment guessed wrong: it assumed a setting meant
+ * putting presentation timing beside the stops in `SessionOptions`. It does not.
+ * A duration is not a decision the game waits on, so nothing here belongs in a
+ * session — `../../motion/pace.ts` holds a multiplier, the sheets ask for it
+ * through the `--mtg-pace` custom property, and the constant below keeps
+ * carrying the whole argument for what a comfortable arrival is. The setting
+ * scales the number; it does not replace it, and it cannot reach `GameState`.
  */
 import { cssNumber } from '../number';
+import { paceCss } from '../../motion/pace';
 import { ART_ANCHOR } from './slot';
 
 /**
@@ -230,14 +220,14 @@ export const ARRIVAL_CSS = `
   to { opacity: 1; }
 }
 ${traveling('')} {
-  animation: mtg-arrive ${cssNumber(ARRIVAL_MS)}ms ${ARRIVAL_EASING};
+  animation: mtg-arrive ${paceCss(ARRIVAL_MS)} ${ARRIVAL_EASING};
 }
 ${marksRow('')} {
-  animation: mtg-arrive-in-place ${cssNumber(ARRIVAL_MS)}ms ${ARRIVAL_EASING};
+  animation: mtg-arrive-in-place ${paceCss(ARRIVAL_MS)} ${ARRIVAL_EASING};
 }
 @supports not (anchor-scope: ${ART_ANCHOR}) {
 ${marksRow('  ')} {
-    animation: mtg-arrive ${cssNumber(ARRIVAL_MS)}ms ${ARRIVAL_EASING};
+    animation: mtg-arrive ${paceCss(ARRIVAL_MS)} ${ARRIVAL_EASING};
   }
 }
 /* No fill mode, so the moment the animation ends the element is back on its own

@@ -69,6 +69,42 @@
  * a sticky offset stated in the sheet is only as good as the number it was
  * measured against, and this is where that number comes from.
  *
+ * ## The page names no host, so any driver can drive it
+ *
+ * The deck is a deck of real printings and its entries carry absolute Scryfall
+ * URLs. A page built straight out of them cannot be measured by
+ * `../test/support/chrome-driver.ts`'s `measurePage`, which settles on
+ * `document.readyState === 'complete'`: on a machine with no route to that host
+ * the requests are not refused, they are dropped, so `readyState` stays
+ * `interactive` for the life of a page that is fully laid out and sitting there.
+ * Nothing is animating and every pane is drawn; the wait is on images. Every
+ * driver written for this file therefore hand-rolled its own settle, and the
+ * tool's acceptance-criteria role (`mtg-ybrn` named it) depended on a network
+ * the measurement does not need.
+ *
+ * `mtg-hznd` is that fixed, and at this end rather than at `measurePage`'s:
+ * `complete` is what stops the other rigs measuring an unsized image mid-load,
+ * and a settle relaxed for one page is relaxed for all of them. So the art is
+ * staged beside the pages the way `npm run lab` stages it beside the dev server
+ * -- through the shared cache at `data/images/`, copied into `<out>/art/`, with
+ * every `src` rewritten to a relative path.
+ *
+ * **What could not be staged is dropped rather than kept.** That is the one way
+ * this differs from `./stage-art.ts`'s own decision, and the difference is what
+ * the two pages are for: a served deck keeps a failed illustration's absolute
+ * URL because a viewer who *can* reach Scryfall should still see it, while a
+ * measured page that keeps one is a page that cannot be measured on the machine
+ * that could not fetch it. Dropping it draws the labeled pending frame, which
+ * reserves its box from `@mtg/card-geometry` rather than from the raster, so no
+ * number below moves. The run says how many it dropped and why.
+ *
+ * `../test/deck/deck-density-offline.browser.test.ts` holds that: it runs this
+ * program, reads the emitted files for anything pointing off the machine, and
+ * drives them through `measurePage` unchanged in a browser whose every host name
+ * resolves into a blackhole -- because the machine writing this fix can reach
+ * Scryfall and the machine that found the bead could not, and a rig that merely
+ * ran here would go green on a page still full of remote URLs.
+ *
  * ## Reaching a pane's own controls, having scrolled into it
  *
  * `window.mtgDeckHeadReach()` is the `mtg-n4d3` measurement and it is separate
@@ -86,11 +122,14 @@ import { fileURLToPath } from 'node:url';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Shell } from '../src/app/Shell';
+import type { DeckArtifact, DeckArtifactEntry } from '../src/lab/deck-artifact';
 import { readDeckArtifact } from '../src/lab/deck-artifact';
 import { DeckRoute } from '../src/routes/DeckRoute';
+import { deckOpenParam } from '../src/routes/deck/open';
 import { DECK_VIEW_MODES, DEFAULT_DECK_VIEW_MODE, deckViewStoreKey } from '../src/routes/deck/view-mode';
 import type { DeckViewMode } from '../src/routes/deck/view-mode';
 import { uiStyleSheet } from '../src/styles/index';
+import { ART_DIR, stageDeckArt } from './stage-art';
 
 const UI_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REPO_ROOT = resolve(UI_ROOT, '..', '..');
@@ -113,11 +152,16 @@ window.mtgDeckBarHeight = function () {
 window.mtgDeckDensity = function () {
   window.scrollTo(0, 0);
   var panes = [];
-  var sections = document.querySelectorAll('.mtg-deck__section');
+  var sections = document.querySelectorAll('.mtg-deck__pane');
   for (var s = 0; s < sections.length; s += 1) {
-    var grid = sections[s].querySelector('.mtg-deck__grid');
+    // The pane's body, whichever of the two a density draws: 'mtg-rgc.21'
+    // retired the flat '.mtg-deck__grid' this used to name, so a full pane is
+    // now the curve's columns and a compact one is the strips region. The
+    // tile counts below are a full pane's reading -- a compact pane holds
+    // strips rather than tiles and reports zero of them, which is right.
+    var grid = sections[s].querySelector('.mtg-builder-curve, .mtg-strips');
     if (grid === null) continue;
-    var title = sections[s].querySelector('.mtg-deck__section-title');
+    var title = sections[s].querySelector('.mtg-deck__pane-title');
     var tiles = grid.querySelectorAll('.mtg-deck-card');
     var gridTop = grid.getBoundingClientRect().top;
     var onArrival = 0;
@@ -168,12 +212,12 @@ window.mtgDeckDensity = function () {
 window.mtgDeckHeadReach = function () {
   var barBottom = window.mtgDeckBarHeight();
   var out = [];
-  var sections = document.querySelectorAll('.mtg-deck__section');
+  var sections = document.querySelectorAll('.mtg-deck__pane');
   for (var s = 0; s < sections.length; s += 1) {
-    var grid = sections[s].querySelector('.mtg-deck__grid');
-    var head = sections[s].querySelector('.mtg-deck__section-head');
+    var grid = sections[s].querySelector('.mtg-builder-curve, .mtg-strips');
+    var head = sections[s].querySelector('.mtg-deck__pane-head');
     if (grid === null || head === null) continue;
-    var title = sections[s].querySelector('.mtg-deck__section-title');
+    var title = sections[s].querySelector('.mtg-deck__pane-title');
     window.scrollTo(0, 0);
     var gridBox = grid.getBoundingClientRect();
     var middle = window.scrollY + gridBox.top + gridBox.height / 2;
@@ -199,6 +243,44 @@ window.mtgDeckHeadReach = function () {
 };
 `;
 
+/** The shared image cache every other launcher in this tree reads. */
+const IMAGE_CACHE = join(REPO_ROOT, 'data', 'images');
+
+/**
+ * An illustration the browser would have to leave this machine to get.
+ *
+ * Asked of the `src` rather than of the staging result, because the result says
+ * what this run did and the page is what the next reader loads: an entry
+ * `./stage-art.ts` could not fetch keeps its absolute URL, and so would one that
+ * arrived in the artifact already pointing somewhere odd.
+ */
+function isRemote(src: string): boolean {
+  return /^[a-z]+:\/\//i.test(src) || src.startsWith('//');
+}
+
+function dropRemote(entries: readonly DeckArtifactEntry[]): DeckArtifactEntry[] {
+  return entries.map((entry) =>
+    entry.art !== null && isRemote(entry.art.src) ? { ...entry, art: null } : entry,
+  );
+}
+
+/** How many illustrations the page would still have gone off-machine for. */
+function remoteCount(deck: DeckArtifact): number {
+  return [...deck.spells, ...deck.lands, ...deck.basics, ...(deck.sideboard ?? [])].filter(
+    (entry) => entry.art !== null && isRemote(entry.art.src),
+  ).length;
+}
+
+function onlyLocalArt(deck: DeckArtifact): DeckArtifact {
+  return {
+    ...deck,
+    spells: dropRemote(deck.spells),
+    lands: dropRemote(deck.lands),
+    basics: dropRemote(deck.basics),
+    ...(deck.sideboard === undefined ? {} : { sideboard: dropRemote(deck.sideboard) }),
+  };
+}
+
 function page(markup: string, css: string, mode: DeckViewMode, subject: string): string {
   return [
     '<!doctype html>',
@@ -213,7 +295,7 @@ function page(markup: string, css: string, mode: DeckViewMode, subject: string):
   ].join('\n');
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const out = process.argv[2] ?? join(REPO_ROOT, 'out', 'deck-density');
   const deckPath = resolve(process.argv[3] ?? DEFAULT_DECK);
   const parsed = readDeckArtifact(JSON.parse(readFileSync(deckPath, 'utf8')), deckPath);
@@ -222,10 +304,13 @@ function main(): void {
     process.exitCode = 1;
     return;
   }
-  const deck = parsed.deck;
-  const subject = `${deckPath} — “${deck.prompt}” (${deck.format}, ${String(deck.totalCards)} cards)`;
+  const subject = `${deckPath} — “${parsed.deck.prompt}” (${parsed.deck.format}, ${String(parsed.deck.totalCards)} cards)`;
   const css = uiStyleSheet();
   mkdirSync(out, { recursive: true });
+
+  const staged = await stageDeckArt(parsed.deck, { cacheDir: IMAGE_CACHE, publicDir: join(out, ART_DIR) });
+  const dropped = remoteCount(staged.deck);
+  const deck = onlyLocalArt(staged.deck);
 
   // The route reads its density out of the preference store on mount, so this
   // hands Node a store rather than threading a prop in. The markup measured is
@@ -255,9 +340,16 @@ function main(): void {
     mode = each;
     const markup = renderToStaticMarkup(
       h(Shell, {
-        mode: 'deck',
+        mode: 'customize',
+        sub: 'decks',
         onSelectMode: (): void => undefined,
-        children: h(DeckRoute, { state: { status: 'ready', deck } }),
+        // The link that opens the staged deck rather than the bare tab: since
+        // `mtg-nuk3` Customize's Decks section lands on the library, so a rig that renders
+        // the route with no request measures shelves instead of a deck.
+        children: h(DeckRoute, {
+          state: { status: 'ready', deck },
+          open: deckOpenParam({ kind: 'artifact' }),
+        }),
       }),
     );
     const file = join(out, `density-${mode}.html`);
@@ -265,6 +357,11 @@ function main(): void {
     process.stdout.write(`${file}\n`);
   }
   process.stdout.write(`deck: ${subject}\n`);
+  process.stdout.write(
+    `art: ${String(staged.fetched)} fetched, ${String(staged.reused)} already cached, ` +
+      `${String(dropped)} dropped so the page asks no host\n`,
+  );
+  for (const failure of staged.failures) process.stdout.write(`  could not stage ${failure}\n`);
 }
 
-main();
+await main();

@@ -43,6 +43,25 @@ function lineFor(name: string, effect: EffectInput): string {
 const SWEEP = 'creaturesThatPlayerControls' as const;
 
 describe('a scoped effect on the four priced primitives', () => {
+  it('keeps linked target-and-controller damage mapped outside loyalty abilities', () => {
+    const script = mustTranspile(
+      spell('Linked Inferno', [
+        {
+          kind: 'dealDamage',
+          amount: 10,
+          target: { kind: 'targetPlayerOrPlaneswalker' },
+          scope: 'targetAndPermanentsItsPlayerControls',
+          scopeFilter: { cardTypes: ['creature'] },
+        },
+      ]),
+    );
+    expect(script).toContain('SubAbility$ DmgAll | DamageMap$ True');
+    expect(script).toContain(
+      'SVar:DmgAll:DB$ DamageAll | NumDmg$ 10 | ValidCards$ Creature.ControlledBy TargetedOrController | SubAbility$ DBDamageResolve',
+    );
+    expect(script).toContain('SVar:DBDamageResolve:DB$ DamageResolve');
+  });
+
   it('destroys a group with DestroyAll and one creature with Destroy', () => {
     const sweep = lineFor('Calamity Below', {
       kind: 'destroyPermanent',

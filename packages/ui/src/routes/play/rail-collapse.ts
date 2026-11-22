@@ -22,7 +22,7 @@
  * panel they shut to stay shut.
  *
  * The storage is reached through a structural interface and runtime-checked,
- * because the workspace tsconfig has no `lib: dom` (`../../app/mount.ts` records
+ * because the workspace tsconfig has no `lib: dom` (`../../mount.ts` records
  * why) — and because a page in a private window can *throw* from
  * `localStorage.setItem` rather than merely returning nothing. A store that
  * cannot be read or written is not an error worth surfacing: the panel simply
@@ -128,7 +128,7 @@ export type RailCollapse = CollapsePreference;
  * again: it stays where they put it.
  */
 export function useRailCollapse(): RailCollapse {
-  const { collapsed, toggle } = useCollapsePreference(STORE_KEY, CRAMPED_TABLE_QUERY);
+  const { collapsed, toggle, expand } = useCollapsePreference(STORE_KEY, CRAMPED_TABLE_QUERY);
   useEffect((): (() => void) | undefined => {
     const host = keyHost();
     if (host === null) return undefined;
@@ -149,7 +149,7 @@ export function useRailCollapse(): RailCollapse {
       host.removeEventListener('keydown', onKeyDown);
     };
   }, [toggle]);
-  return { collapsed, toggle };
+  return { collapsed, toggle, expand };
 }
 
 /**
@@ -166,7 +166,7 @@ export function useRailCollapse(): RailCollapse {
  * "Side panel" and a name that disappeared with the text would leave a screen
  * reader on an unlabeled button exactly when it is the only control in the column.
  */
-export function railToggle(state: RailCollapse): ReactElement {
+export function railToggle(state: Pick<RailCollapse, 'collapsed' | 'toggle'>): ReactElement {
   return createElement(
     'div',
     { className: 'mtg-rail__head' },

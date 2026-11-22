@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "m10",
+  "name": "Magic 2010",
+  "sourceCodes": ["M10"],
+  "products": [{ "id": "m10-draft", "setCode": "M10", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["m10-draft", "m10-draft", "m10-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["m10-draft", "m10-draft", "m10-draft", "m10-draft", "m10-draft", "m10-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

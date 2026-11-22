@@ -151,7 +151,7 @@ afterEach(cleanup);
 
 describe('a replay log carrying an equip', () => {
   it('states the schema version the snapshot shape belongs to', () => {
-    expect(EVENT_LOG_SCHEMA_VERSION).toBe('mtg-ui/event-log/8');
+    expect(EVENT_LOG_SCHEMA_VERSION).toBe('mtg-ui/event-log/10');
     expect(recordedLog().startsWith(`{"record":"header","schema":"${EVENT_LOG_SCHEMA_VERSION}"`)).toBe(true);
   });
 

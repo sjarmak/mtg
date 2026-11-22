@@ -1,0 +1,323 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "wwk",
+  "name": "Worldwake / Zendikar",
+  "sources": [
+    {
+      "code": "WWK",
+      "catalogFormat": "wwk-printed-v1",
+      "catalogSha256": "2e12f15c19c867e5508b276f5565eaa734cd2ed93be9c2fd42542d8a44691eab",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/WWK.json",
+        "sha256": "e4dbd3a615bc15560b405eb4c8b7cea5692bdb69e559960d00bde94504c4cf1c",
+        "version": "5.3.0+20260930"
+      }
+    },
+    {
+      "code": "ZEN",
+      "catalogFormat": "zen-printed-v1",
+      "catalogSha256": "a83df5125b9e8f026ed19876cfae14ac7089451fa07237b27d9c1f549942f37d",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/ZEN.json",
+        "sha256": "4ecb5fd0296227d1708ece540e53e27428baedb22628edc60c2d4d337f960090",
+        "version": "5.3.0+20260930"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-fliers",
+      "name": "White-Blue Fliers",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "zen-printed-v1:0023:bb2e9465-f5ba-4c7b-9f03-d40dc8394acd",
+          "name": "Kor Skyfisher",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0076:357931d0-8ba6-4857-9db9-7f42d81514a5",
+          "name": "Welkin Tern",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0075:6049cc80-1faa-48bf-897e-fefe5a8e7ab2",
+          "name": "Umara Raptor",
+          "count": 3
+        },
+        {
+          "physicalId": "zen-printed-v1:0078:c18b11f0-19cc-4169-84e0-fbb038a5c848",
+          "name": "Windrider Eel",
+          "count": 3
+        },
+        {
+          "physicalId": "zen-printed-v1:0011:8b386d39-ba41-42f8-ba05-f9ed602ee23f",
+          "name": "Emeria Angel",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0014:09cfe585-8a55-4b27-89e0-dfb6946fe1f3",
+          "name": "Journey to Nowhere",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0067:cb3d3901-e4a6-45ab-a7b5-c65d91e1875e",
+          "name": "Spell Pierce",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0048:5dba9972-dd8b-407b-9374-a8f0ed1a96db",
+          "name": "Into the Roil",
+          "count": 2
+        },
+        {
+          "physicalId": "wwk-printed-v1:0133:f6929259-2903-4f6f-9b06-42048fd55c6a",
+          "name": "Celestial Colonnade",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0224:1fd8cb0d-d651-44e7-ae14-4035b0f1aa77",
+          "name": "Sejiri Refuge",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0225:6bf0de91-765a-49e3-bd8a-94f266b3bdd8",
+          "name": "Soaring Seacliff",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0230:bc4f4b6d-ff35-4b1f-974b-f39569e6b3c7",
+          "name": "Plains",
+          "count": 13
+        },
+        {
+          "physicalId": "zen-printed-v1:0238:efd86f2a-bd28-4731-838d-78e67be8b49e",
+          "name": "Island",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "blue-black-allies",
+      "name": "Blue-Black Allies",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "wwk-printed-v1:0029:d147dce7-b2dd-426a-9ff7-843d50bb8b01",
+          "name": "Halimar Excavator",
+          "count": 4
+        },
+        {
+          "physicalId": "wwk-printed-v1:0032:587f91f6-b46e-4dd5-a86d-1048054dd3c0",
+          "name": "Jwari Shapeshifter",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0075:6049cc80-1faa-48bf-897e-fefe5a8e7ab2",
+          "name": "Umara Raptor",
+          "count": 4
+        },
+        {
+          "physicalId": "wwk-printed-v1:0051:33e0aa67-0ea9-4c50-8297-369ab486fd0f",
+          "name": "Bojuka Brigand",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0106:8c504d12-a3ef-4588-a52d-734c20f6ac58",
+          "name": "Nimana Sell-Sword",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0095:c303e7e2-cb22-4dea-889f-d03e2494ed0f",
+          "name": "Hagra Diabolist",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0087:b3842ad2-a449-4963-8c96-276554125757",
+          "name": "Disfigure",
+          "count": 3
+        },
+        {
+          "physicalId": "wwk-printed-v1:0068:09b4deea-c077-46ab-898f-41b3907ecf33",
+          "name": "Smother",
+          "count": 3
+        },
+        {
+          "physicalId": "wwk-printed-v1:0134:0f427f0b-034c-4821-8758-e395c0042d8a",
+          "name": "Creeping Tar Pit",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0215:ddd9463f-d029-459d-a933-432b7bbd7a41",
+          "name": "Jwar Isle Refuge",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0238:efd86f2a-bd28-4731-838d-78e67be8b49e",
+          "name": "Island",
+          "count": 11
+        },
+        {
+          "physicalId": "zen-printed-v1:0246:7cd6becc-f06a-4fd3-8305-70604b92a187",
+          "name": "Swamp",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "black-red-aggro",
+      "name": "Black-Red Aggro",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "zen-printed-v1:0115:114eca6c-76de-4b87-8174-78e2d17ad0e3",
+          "name": "Vampire Lacerator",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0093:f3c92575-1c97-48bf-801b-22f34040cf9a",
+          "name": "Guul Draz Vampire",
+          "count": 4
+        },
+        {
+          "physicalId": "wwk-printed-v1:0065:1da2dc92-0352-4757-8249-67f08a2464d1",
+          "name": "Ruthless Cullblade",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0089:71db3698-a45c-4eaf-87e6-30502c0c10f4",
+          "name": "Gatekeeper of Malakir",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0119:2dc16614-5cf8-444d-a5ae-cac25018af68",
+          "name": "Burst Lightning",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0098:30a09ee1-99d9-432f-a4e2-a1377edef9d2",
+          "name": "Hideous End",
+          "count": 4
+        },
+        {
+          "physicalId": "wwk-printed-v1:0139:c7066095-f05a-4f2e-ab9c-47c498608ccb",
+          "name": "Lavaclaw Reaches",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0210:2ed95b4a-1452-4337-a4b2-e67e624d33df",
+          "name": "Akoum Refuge",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0246:7cd6becc-f06a-4fd3-8305-70604b92a187",
+          "name": "Swamp",
+          "count": 19
+        },
+        {
+          "physicalId": "zen-printed-v1:0254:232ee129-0db1-4a03-9eda-4692a8495b53",
+          "name": "Mountain",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "id": "red-green-landfall",
+      "name": "Red-Green Landfall",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "wwk-printed-v1:0116:d5cc40e7-fb31-4540-81a1-d0c0f514c8a8",
+          "name": "Vastwood Animist",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0174:0d598220-bddd-48a4-8c80-eb149c6292a3",
+          "name": "Oran-Rief Survivalist",
+          "count": 4
+        },
+        {
+          "physicalId": "wwk-printed-v1:0071:031950b6-110f-4e20-b31b-afe5ffdd6086",
+          "name": "Akoum Battlesinger",
+          "count": 4
+        },
+        {
+          "physicalId": "wwk-printed-v1:0105:78a538cf-2291-49aa-8429-17d97d454479",
+          "name": "Harabaz Druid",
+          "count": 3
+        },
+        {
+          "physicalId": "zen-printed-v1:0141:fd8b5c0c-acda-411e-9f17-6d9292628a56",
+          "name": "Plated Geopede",
+          "count": 4
+        },
+        {
+          "physicalId": "wwk-printed-v1:0090:301f13dd-39b8-4a93-9c05-3dc4fa1f1c75",
+          "name": "Searing Blaze",
+          "count": 4
+        },
+        {
+          "physicalId": "wwk-printed-v1:0099:d8f81e8a-e309-4bac-81de-326756cd8901",
+          "name": "Explore",
+          "count": 3
+        },
+        {
+          "physicalId": "zen-printed-v1:0191:a24bba56-3256-489b-82a2-22748388e110",
+          "name": "Turntimber Ranger",
+          "count": 2
+        },
+        {
+          "physicalId": "wwk-printed-v1:0141:cb7b6fb5-4d38-4734-b46f-923322cff24e",
+          "name": "Raging Ravine",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0217:8af66f9c-c90b-45e0-a54c-a76e7e1b9dff",
+          "name": "Kazandu Refuge",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0226:e56aca36-bb51-45e3-9ef9-9f9f2aa1e088",
+          "name": "Teetering Peaks",
+          "count": 3
+        },
+        {
+          "physicalId": "zen-printed-v1:0220:24a5cc2c-0fbf-4a5f-b175-6e0ffd0d0787",
+          "name": "Misty Rainforest",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0229:7abd2723-2851-4f1a-b2d0-dfcb526472c3",
+          "name": "Verdant Catacombs",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0223:327cf118-cc92-4073-85d0-94d2a0a6989a",
+          "name": "Scalding Tarn",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0211:16c8d2fa-54a7-46e8-980c-905258497c90",
+          "name": "Arid Mesa",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0254:232ee129-0db1-4a03-9eda-4692a8495b53",
+          "name": "Mountain",
+          "count": 7
+        },
+        {
+          "physicalId": "zen-printed-v1:0262:f0ca4b9f-4ee6-4ad8-a95f-326ada9de3cd",
+          "name": "Forest",
+          "count": 6
+        }
+      ]
+    }
+  ],
+  "contentSha256": "04076f06511752ce74c47020ef3e8e015a67b29aa4d9eb83812b0d724f5029d6"
+}

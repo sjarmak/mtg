@@ -32,6 +32,7 @@ function permanent(
     power: 2,
     toughness: 2,
     tapped: false,
+    attacking: false,
     damage: 0,
     controller,
     counters: {},
@@ -48,6 +49,7 @@ function seat(id: SeatId, name: string, battlefield: readonly ObjectView[]): Sea
     handSize: 0,
     librarySize: 40,
     graveyard: [],
+    exile: [],
     battlefield,
   };
 }

@@ -37,128 +37,31 @@
  * capture's leftmost column in the place the capture puts it. Nothing here
  * changed to allow that, which is the point: the rule was never about lands.
  *
- * # What is deliberately not adopted
+ * # The overlapping stack, which this file refused and no longer decides
  *
- * The capture's columns overlap: every card in a column shows only its
- * name-and-cost strip, and the last card in the column is drawn full, which is
- * how six cards fit in the height of two. `mtg-9ubz` asked for that to be
- * measured before adopting, and it is not adopted, for three reasons that are
- * about our page rather than about taste.
+ * Three paragraphs here used to argue against the capture's other half — the
+ * columns of overlapping name-and-cost strips with the last card drawn full.
+ * The playtester overruled that on 2026-08-29 against three fresh captures, and the
+ * argument is answered rather than deleted, in `./strips.ts`: two of the three
+ * reasons were about a pane drawn as tiles rather than as strips, and the third
+ * (negative margins and a stacking order, which `../../styles/board/zone.ts` has
+ * paid for twice) was right and is why the pitch is arithmetic handed to an
+ * absolutely-positioned stack instead of a margin.
  *
- * The stack solves a problem the strip count already solved for us. MTGO stacks
- * because a 60-card deck is 60 strips there; the same deck is 13 tiles here, and
- * the committed fixture's largest pane is 10. Overlapping ten strips saves a few
- * hundred pixels on a pane that already fits.
- *
- * Overlapping means negative margins and a stacking order, and a tile that draws
- * outside its border box then loses whatever the box above it covers. This
- * codebase has paid for that clip twice (`../../styles/board/zone.ts`), and the
- * remedy costs more than the pixels the stack would save.
- *
- * And drawing the last card of each column full is a second density inside a pane
- * whose density control says one thing. `./view-mode.ts` states that a third mode
- * is a bead rather than a quiet addition; a mode that is compact except for six
- * cards is exactly that, arrived at sideways.
+ * What survives here is one sentence and nothing else. The grouping moved on
+ * one axis further to `./grouping.ts`, which every pane reads, and the artifact
+ * pane's mana-value special case went with it: `manaValueColumns` lost its last
+ * caller in `mtg-pmpu`, when the full grid started reading the pane's grouping
+ * the way the columns already did, and a function two tests call is not a
+ * second implementation worth keeping.
  */
-import type { DeckArtifactEntry } from '../../lab/deck-artifact';
-
-/**
- * A column of anything, keyed by mana value and counted in cards.
- *
- * Three panes on two routes group by mana value and put a count above the
- * column, and until `mtg-xzxs` each of them wrote the loop out: this file for a
- * built artifact's entries, `./ConstructedBuilder.ts` for the DSL cards of a
- * build, and `../DeckRoute.ts` for a precon's spells paired with their counts.
- * Three implementations of one rule is three places for the count above a column
- * to stop summing to the count in the pane's own header, which is the invariant
- * the docblock above spends its length establishing.
- *
- * Generic over the member rather than over a card, because the three panes hold
- * three different things and none of them is willing to become one of the
- * others: an artifact entry has its mana value already written down by the
- * producer, a DSL card has it derived by `./build.ts`'s `cardManaValue`, and the
- * precon pane holds a `{ card, count }` pair because the count is not on the
- * card. What they share is the grouping and the arithmetic, so that is what is
- * shared.
- */
-export interface ManaValueGroup<T> {
-  /** The mana value every member of this group shares. */
-  readonly manaValue: number;
-  /** Cards, not members: the sum of what `weigh` said each member is worth. */
-  readonly cards: number;
-  /** In the order they arrived, which is the order the pane draws them. */
-  readonly members: readonly T[];
-}
-
-/**
- * Groups by mana value, ascending, counting cards.
- *
- * `valueOf` is what a member sorts under and `weigh` is what it contributes to
- * the number above the column. Both are the caller's, and they are two functions
- * rather than one because the two questions genuinely differ per pane: the pool
- * pane weighs every card as one, since it lists each playable card once and its
- * header counts those; the deck pane weighs a card as the copies played, since
- * its header counts cards.
- *
- * Present values only, never contiguous. An empty column claims a card belongs
- * there; `./build.ts`'s `manaCurve` is the one drawing that wants the gaps and
- * says why.
- */
-export function manaValueGroups<T>(
-  members: readonly T[],
-  valueOf: (member: T) => number,
-  weigh: (member: T) => number,
-): readonly ManaValueGroup<T>[] {
-  const grouped = new Map<number, T[]>();
-  for (const member of members) {
-    const value = valueOf(member);
-    const held = grouped.get(value);
-    if (held === undefined) grouped.set(value, [member]);
-    else held.push(member);
-  }
-  return [...grouped.entries()]
-    .sort(([left], [right]) => left - right)
-    .map(([manaValue, members_]) => ({
-      manaValue,
-      cards: members_.reduce((sum, member) => sum + weigh(member), 0),
-      members: members_,
-    }));
-}
-
-export interface DeckColumn {
-  /** The mana value every entry in this column shares. */
-  readonly manaValue: number;
-  /** Cards, not entries: the sum of the entries' counts. See the docblock. */
-  readonly cards: number;
-  /** In the order the artifact listed them, which is the order the pane drew them. */
-  readonly entries: readonly DeckArtifactEntry[];
-}
-
-/**
- * One column per distinct mana value present, ascending.
- *
- * The artifact's own name for a group, kept because `entries` is what the pane
- * that draws these reads and `members` would say less about them. The producer
- * has already written each entry's mana value down, so nothing here derives one.
- *
- * A pure function over entries the page already holds — no schema change, no
- * `DECK_ARTIFACT_VERSION` bump, nothing crosses a package boundary.
- */
-export function manaValueColumns(entries: readonly DeckArtifactEntry[]): readonly DeckColumn[] {
-  return manaValueGroups(
-    entries,
-    (entry) => entry.manaValue,
-    (entry) => entry.count,
-  ).map((group) => ({ manaValue: group.manaValue, cards: group.cards, entries: group.members }));
-}
-
 /**
  * How a column's mana value is written when it is spoken rather than drawn.
  *
  * `curveLabel` is the sentence and takes the two numbers, so the Constructed
  * builder — which counts DSL cards out of a build rather than entries out of an
  * artifact (`./build.ts`'s `manaCurve`) — says the same one instead of a second
- * that could drift from it. `columnLabel` is the same sentence about a column.
+ * that could drift from it.
  *
  * The visible head draws the value as a mana symbol through the same registry the
  * card face and the tile's own cost use (`../../card/symbols.ts`), because a bare
@@ -172,8 +75,4 @@ export function manaValueColumns(entries: readonly DeckArtifactEntry[]): readonl
  */
 export function curveLabel(manaValue: number, cards: number): string {
   return `Mana value ${String(manaValue)}, ${String(cards)} ${cards === 1 ? 'card' : 'cards'}`;
-}
-
-export function columnLabel(column: DeckColumn): string {
-  return curveLabel(column.manaValue, column.cards);
 }

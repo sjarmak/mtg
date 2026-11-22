@@ -36,6 +36,9 @@ import type {
   RarityTarget,
   RunFairness,
   RunFairnessReading,
+  RunClaim,
+  RunClaimFinding,
+  RunClaims,
   RunFinding,
   RunGate,
   RunHealth,
@@ -45,7 +48,7 @@ import type {
   SkeletonTargets,
   WinRateInterval,
 } from './model';
-import { FAIRNESS_QUESTIONS, FAIRNESS_VERDICTS, GATE_STATUSES } from './model';
+import { CLAIM_STATUSES, CLAIM_UNITS, FAIRNESS_QUESTIONS, FAIRNESS_VERDICTS, GATE_STATUSES } from './model';
 
 export class AnalysisDataError extends Error {
   readonly path: string;
@@ -565,6 +568,117 @@ function readPrecons(raw: Raw, path: string): PreconMatchupBlock | null {
   };
 }
 
+function readClaimFinding(value: unknown, path: string): RunClaimFinding {
+  const raw = record(value, path);
+  return {
+    code: str(raw, 'code', path),
+    subject: str(raw, 'subject', path),
+    measured: num(raw, 'measured', path),
+    required: num(raw, 'required', path),
+    detail: str(raw, 'detail', path),
+  };
+}
+
+/**
+ * One stated capability.
+ *
+ * `measured` and `distance` are `null` exactly when the capability was not
+ * measured, and that pairing is enforced here rather than trusted: a document
+ * carrying `status: 'unmeasured'` beside a number would render as a measurement
+ * nobody made, which is the one thing this block exists to prevent.
+ */
+function readClaim(value: unknown, path: string): RunClaim {
+  const raw = record(value, path);
+  const status = str(raw, 'status', path);
+  const knownStatus = CLAIM_STATUSES.find((entry) => entry === status);
+  if (knownStatus === undefined) {
+    throw new AnalysisDataError(`${path}.status`, `unknown claim status ${JSON.stringify(status)}`);
+  }
+  const unit = str(raw, 'unit', path);
+  const knownUnit = CLAIM_UNITS.find((entry) => entry === unit);
+  if (knownUnit === undefined) {
+    throw new AnalysisDataError(`${path}.unit`, `unknown claim unit ${JSON.stringify(unit)}`);
+  }
+  const measured = maybeNum(raw, 'measured', path);
+  const distance = maybeNum(raw, 'distance', path);
+  if ((measured === null) !== (knownStatus === 'unmeasured')) {
+    throw new AnalysisDataError(
+      `${path}.measured`,
+      knownStatus === 'unmeasured'
+        ? 'an unmeasured claim carries no measurement'
+        : `a ${knownStatus} claim must carry its measurement`,
+    );
+  }
+  if ((distance === null) !== (measured === null)) {
+    throw new AnalysisDataError(`${path}.distance`, 'a distance exists exactly when a measurement does');
+  }
+  return {
+    capability: str(raw, 'capability', path),
+    subject: str(raw, 'subject', path),
+    statement: str(raw, 'statement', path),
+    status: knownStatus,
+    measured,
+    required: num(raw, 'required', path),
+    distance,
+    unit: knownUnit,
+    detail: str(raw, 'detail', path),
+  };
+}
+
+/**
+ * The claims block, or `null`.
+ *
+ * Absent and `null` read the same, because every document produced before this
+ * block existed simply has no key here and those fixtures still have to load.
+ */
+function readClaims(raw: Raw, path: string): RunClaims | null {
+  if (!('claims' in raw) || raw['claims'] === null) return null;
+  return readRunClaims(raw['claims'], `${path}.claims`);
+}
+
+/**
+ * The claims block on its own, for the producer that writes one to a file.
+ *
+ * `@mtg/cube` measures a format and writes this block; `npm run analyze` reads
+ * the file and passes it through. Both ends validate with this function, so a
+ * shape the dashboard would reject is rejected where it was written rather than
+ * a run later.
+ */
+export function readRunClaims(value: unknown, at = 'claims'): RunClaims {
+  const claims = record(value, at);
+  const provenance = field(claims, 'draftProvenance', at);
+  return {
+    claims: list(claims, 'claims', at).map((entry, index) =>
+      readClaim(entry, `${at}.claims[${String(index)}]`),
+    ),
+    unclaimed: list(claims, 'unclaimed', at).map((entry, index) =>
+      readClaimFinding(entry, `${at}.unclaimed[${String(index)}]`),
+    ),
+    reported: list(claims, 'reported', at).map((entry, index) =>
+      readClaimFinding(entry, `${at}.reported[${String(index)}]`),
+    ),
+    limitsKind: str(claims, 'limitsKind', at),
+    limits: list(claims, 'limits', at).map((entry, index) => {
+      const limitPath = `${at}.limits[${String(index)}]`;
+      const limit = record(entry, limitPath);
+      return { id: str(limit, 'id', limitPath), what: str(limit, 'what', limitPath) };
+    }),
+    draftProvenance:
+      provenance === null
+        ? null
+        : {
+            seed: str(record(provenance, `${at}.draftProvenance`), 'seed', `${at}.draftProvenance`),
+            drafts: num(record(provenance, `${at}.draftProvenance`), 'drafts', `${at}.draftProvenance`),
+            seatDrafts: num(
+              record(provenance, `${at}.draftProvenance`),
+              'seatDrafts',
+              `${at}.draftProvenance`,
+            ),
+          },
+    ok: bool(claims, 'ok', at),
+  };
+}
+
 /** Parses one analysis document. Throws `AnalysisDataError` naming the field. */
 export function readAnalysisRun(value: unknown, path = 'run'): AnalysisRun {
   const raw = record(value, path);
@@ -580,6 +694,7 @@ export function readAnalysisRun(value: unknown, path = 'run'): AnalysisRun {
     targets: readTargets(raw, path),
     cards: readCards(raw, path),
     precons: readPrecons(raw, path),
+    claims: readClaims(raw, path),
   };
 }
 

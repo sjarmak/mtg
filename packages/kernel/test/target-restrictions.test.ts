@@ -58,6 +58,24 @@ describe('choosing a target the restriction admits (CR 601.2c)', () => {
     expect(offered).toEqual(expect.arrayContaining([small, big, mine]));
   });
 
+  it('reads a toughness ceiling from the current layered characteristics', () => {
+    const { state, small, big, mine } = board();
+    const offered = oids(
+      targetChoicesForEffects(
+        state,
+        [
+          {
+            kind: 'destroyPermanent',
+            target: { kind: 'targetCreature', restriction: { kind: 'maxToughness', toughness: 2 } },
+          },
+        ],
+        0,
+      ),
+    );
+    expect(offered).toEqual(expect.arrayContaining([small, mine]));
+    expect(offered).not.toContain(big);
+  });
+
   it('narrows on a state rather than a stat, and on a keyword', () => {
     const { state, small, mine } = board();
     const tappedOnly = oids(
@@ -135,6 +153,20 @@ describe('rechecking on resolution (CR 608.2b)', () => {
     expect(satisfiesTargetRestriction(state, small, { kind: 'maxPower', power: 3 })).toBe(true);
     expect(satisfiesTargetRestriction(grown, small, { kind: 'maxPower', power: 3 })).toBe(false);
     expect(isTargetStillLegal(grown, SMITE, targets, 0, 0)).toBe(false);
+  });
+
+  it('fails a toughness ceiling once the creature has grown past it', () => {
+    const { state, small } = board();
+    const effect: Effect = {
+      kind: 'destroyPermanent',
+      target: { kind: 'targetCreature', restriction: { kind: 'maxToughness', toughness: 2 } },
+    };
+    const targets: readonly Target[] = [{ kind: 'permanent', oid: small }];
+    const grown = withContinuous(state, [pump(onlyObject(small), 0, 1)]);
+
+    expect(satisfiesTargetRestriction(state, small, { kind: 'maxToughness', toughness: 2 })).toBe(true);
+    expect(satisfiesTargetRestriction(grown, small, { kind: 'maxToughness', toughness: 2 })).toBe(false);
+    expect(isTargetStillLegal(grown, effect, targets, 0, 0)).toBe(false);
   });
 
   it('fizzles once the counter it named has left', () => {

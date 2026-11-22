@@ -113,11 +113,13 @@ describe('the printed sentence', () => {
 });
 
 describe('the target rules', () => {
-  it('names the three kinds whose English a printed card actually uses', () => {
+  it('names the three choices, source creature, and retained creature referent', () => {
     expect([...legalTargetsFor('untapPermanent')]).toEqual([
       'targetPermanent',
       'targetCreature',
       'targetCreatureYouControl',
+      'selfCreature',
+      'thatCreature',
     ]);
   });
 

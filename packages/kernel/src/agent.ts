@@ -16,15 +16,35 @@ import type { PlayerId } from './ids';
 import type { Decision } from './legal';
 import type { GameState } from './state';
 
+declare const agentObservationBrand: unique symbol;
+
+/** A seat-projected state that is safe for player policy and feature code. */
+export type AgentObservation = GameState & {
+  readonly [agentObservationBrand]: true;
+};
+
 export interface AgentView {
-  readonly state: GameState;
+  /** Seat-projected observation. It must never be fed back to the reducer. */
+  readonly state: AgentObservation;
   readonly player: PlayerId;
   readonly decision: Decision;
+  /** Apply one candidate to privileged state and return only its projected settled result. */
+  readonly previewSettled?: (action: Action) => AgentObservation;
 }
 
 export interface PlayerAgent {
   readonly name: string;
   decide(view: AgentView): Action;
+}
+
+/** Deterministic non-enumerated answer for the one free-text decision. */
+function inputAction(view: AgentView): Action | null {
+  if (view.decision.kind !== 'cardName') return null;
+  const names = Object.values(view.state.objects)
+    .filter((object) => object.owner === view.player && !object.token)
+    .map((object) => object.card.name)
+    .sort((left, right) => left.localeCompare(right));
+  return { type: 'chooseCardName', player: view.player, name: names[0] ?? 'Black Lotus' };
 }
 
 /** Wraps a plain function as an agent. */
@@ -67,6 +87,8 @@ export function randomAgent(name: string, seed: string): PlayerAgent {
   return {
     name,
     decide(view: AgentView): Action {
+      const input = inputAction(view);
+      if (input !== null) return input;
       const options = view.decision.options;
       const first = options[0];
       if (first === undefined) throw new Error(`${name}: no legal options were offered`);
@@ -103,6 +125,8 @@ export function scoringAgent(name: string, score: (action: Action, view: AgentVi
   return {
     name,
     decide(view: AgentView): Action {
+      const input = inputAction(view);
+      if (input !== null) return input;
       let best: Action | undefined;
       let bestScore = Number.NEGATIVE_INFINITY;
       for (const option of view.decision.options) {

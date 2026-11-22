@@ -114,7 +114,7 @@ describe('the name a card face answers to', () => {
    * sentences a player would speak.
    */
   it('reads the card the way a player reads it aloud', () => {
-    expect(faceAccessibleName(named('Swamp'))).toBe('Swamp. Basic Land — Swamp.');
+    expect(faceAccessibleName(named('Swamp'))).toBe('Swamp. Basic Land — Swamp. Produces black mana.');
     expect(faceAccessibleName(named('Skywatch Sentinel'))).toBe(
       'Skywatch Sentinel. Mana cost {1}{W}. Creature — Bird Soldier. 2/1.',
     );

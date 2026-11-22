@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "wwk",
+  "archetypes": [
+    {
+      "id": "white-blue-fliers",
+      "name": "White-Blue Fliers",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Horizon Drake",
+        "physicalId": "wwk-printed-v1:0030:022f07c5-c644-41cd-9434-a57068f73ab2"
+      },
+      "plan": "Build an evasive force, protect it with efficient interaction, and keep land creatures from stopping attacks with Horizon Drake."
+    },
+    {
+      "id": "blue-black-allies",
+      "name": "Blue-Black Allies",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Halimar Excavator",
+        "physicalId": "wwk-printed-v1:0029:d147dce7-b2dd-426a-9ff7-843d50bb8b01"
+      },
+      "plan": "Chain Allies to multiply Halimar Excavator triggers while removal and defensive creatures buy time for the library attack."
+    },
+    {
+      "id": "black-red-aggro",
+      "name": "Black-Red Aggro",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Ruthless Cullblade",
+        "physicalId": "wwk-printed-v1:0065:1da2dc92-0352-4757-8249-67f08a2464d1"
+      },
+      "plan": "Attack early, use removal to force damage through, and let Ruthless Cullblade become a larger threat once the opponent is wounded."
+    },
+    {
+      "id": "red-green-landfall",
+      "name": "Red-Green Landfall",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Vastwood Animist",
+        "physicalId": "wwk-printed-v1:0116:d5cc40e7-fb31-4540-81a1-d0c0f514c8a8"
+      },
+      "plan": "Develop Allies and lands together, turn spare lands into attackers with Vastwood Animist, and convert landfall turns into large attacks."
+    },
+    {
+      "id": "green-white-allies",
+      "name": "Green-White Allies",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Graypelt Hunter",
+        "physicalId": "wwk-printed-v1:0103:ed04a5a7-f7d0-4dd8-9c23-6a767814316a"
+      },
+      "plan": "Curve Allies into Graypelt Hunter, stack permanent bonuses across the team, and overwhelm blockers with trample and a wide battlefield."
+    }
+  ]
+}

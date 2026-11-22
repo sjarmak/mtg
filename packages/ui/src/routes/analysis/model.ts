@@ -356,6 +356,72 @@ export interface RunSetRef {
   readonly name: string;
 }
 
+/**
+ * Does the format do what it claims.
+ *
+ * Structurally `@mtg/cube`'s `FormatClaims`, restated here for the reason
+ * `RunHealth` is a restatement of `FormatHealth`: `@mtg/cube` reaches
+ * `@mtg/decklab` and therefore `better-sqlite3`, and nothing under `src/` may
+ * pull that into a browser bundle. The block crosses the boundary as JSON in
+ * the document, never as an import, and `read.ts` validates it on the way in
+ * the same as everything else.
+ */
+export const CLAIM_STATUSES = ['met', 'missed', 'abstained', 'unmeasured'] as const;
+export type ClaimStatus = (typeof CLAIM_STATUSES)[number];
+
+export const CLAIM_UNITS = ['cards', 'copies', 'share'] as const;
+export type ClaimUnit = (typeof CLAIM_UNITS)[number];
+
+export interface RunClaim {
+  /** The producer's finding code, e.g. `archetype-availability`. */
+  readonly capability: string;
+  /** Color letter, band label, archetype name, or empty for the whole list. */
+  readonly subject: string;
+  /** The capability in the format's own numbers, before anything was measured. */
+  readonly statement: string;
+  readonly status: ClaimStatus;
+  /** `null` exactly when `status` is `unmeasured`; never a zero standing in. */
+  readonly measured: number | null;
+  readonly required: number;
+  readonly distance: number | null;
+  readonly unit: ClaimUnit;
+  /** The finding's own words, or the reason nothing was measured. */
+  readonly detail: string;
+}
+
+/** One thing the drafted half cannot say, carried beside the shares. */
+export interface RunClaimLimit {
+  readonly id: string;
+  readonly what: string;
+}
+
+export interface RunClaimFinding {
+  readonly code: string;
+  readonly subject: string;
+  readonly measured: number;
+  readonly required: number;
+  readonly detail: string;
+}
+
+export interface RunClaimProvenance {
+  readonly seed: string;
+  readonly drafts: number;
+  readonly seatDrafts: number;
+}
+
+export interface RunClaims {
+  readonly claims: readonly RunClaim[];
+  /** Construction faults no stated capability accounts for. Blocking. */
+  readonly unclaimed: readonly RunClaimFinding[];
+  /** Differences against numbers the schema supplied. Shown, never failed on. */
+  readonly reported: readonly RunClaimFinding[];
+  readonly limitsKind: string;
+  readonly limits: readonly RunClaimLimit[];
+  /** Where every share came from, or `null` when nothing was drafted. */
+  readonly draftProvenance: RunClaimProvenance | null;
+  readonly ok: boolean;
+}
+
 export interface AnalysisRun {
   /** Stable across revisions of the same run; the diff view keys on it. */
   readonly id: string;
@@ -371,6 +437,11 @@ export interface AnalysisRun {
   readonly cards: CardPerformanceBlock;
   /** `null` when no written decks matched the measured set. */
   readonly precons: PreconMatchupBlock | null;
+  /**
+   * `null` when the format stated no capabilities, which is every document
+   * produced before this block existed. Absent and `null` read the same.
+   */
+  readonly claims: RunClaims | null;
 }
 
 /** A generated set file, parsed into DSL cards. */

@@ -12,7 +12,13 @@ import {
   estimateCostUsd,
   priceFor,
 } from '../src/providers/pricing';
-import { asObjectSchema, fixtureKey, formatIssues, toJsonSchema } from '../src/schema';
+import {
+  asObjectSchema,
+  fixtureKey,
+  formatIssues,
+  isStrictlyAdditiveSchemaWidening,
+  toJsonSchema,
+} from '../src/schema';
 import { addUsage, totalTokens, worstCostSource, ZERO_USAGE } from '../src/types';
 
 const CardSchema = z.object({
@@ -71,6 +77,20 @@ describe('fixtureKey', () => {
     expect(fixtureKey({ ...base, prompt: 'p2' })).not.toBe(fixtureKey(base));
     expect(fixtureKey({ ...base, system: 's2' })).not.toBe(fixtureKey(base));
     expect(fixtureKey({ ...base, jsonSchema: { type: 'string' } })).not.toBe(fixtureKey(base));
+  });
+});
+
+describe('strictly additive schema widening', () => {
+  it('admits added enum members and union arms through an otherwise identical schema', () => {
+    const before = { oneOf: [{ type: 'string', enum: ['a'] }] };
+    const after = { oneOf: [{ type: 'string', enum: ['a', 'b'] }, { type: 'number' }] };
+    expect(isStrictlyAdditiveSchemaWidening(before, after)).toBe(true);
+  });
+
+  it('rejects removals and changed constraints', () => {
+    expect(isStrictlyAdditiveSchemaWidening({ enum: ['a'] }, { enum: ['a'] })).toBe(false);
+    expect(isStrictlyAdditiveSchemaWidening({ enum: ['a', 'b'] }, { enum: ['a'] })).toBe(false);
+    expect(isStrictlyAdditiveSchemaWidening({ maxItems: 2 }, { maxItems: 3 })).toBe(false);
   });
 });
 

@@ -6,9 +6,14 @@
  * the question "what changed between these two frames" is the one an engine bug
  * is found with. Playback is the secondary control, and it is a convenience for
  * watching a game's shape, not the main event.
+ *
+ * The band carries `TRANSPORT_CLASS` because a landscape phone takes every other
+ * toolbar off this route and must not take this one; `../../styles/replay.ts`
+ * owns the class and makes that argument where the rule is.
  */
 import { createElement } from 'react';
 import type { ReactElement } from 'react';
+import { TRANSPORT_CLASS } from '../../styles/replay';
 import { PLAYBACK_SPEEDS } from './steps';
 import type { ReplayTurn } from './steps';
 
@@ -73,7 +78,7 @@ export function Transport(props: TransportProps): ReactElement {
   const atEnd = props.seq >= last;
   return createElement(
     'div',
-    { className: 'mtg-toolbar' },
+    { className: `mtg-toolbar ${TRANSPORT_CLASS}` },
     button('First', atStart, () => {
       props.onSeq(0);
     }),

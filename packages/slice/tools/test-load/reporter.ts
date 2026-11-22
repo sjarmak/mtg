@@ -19,6 +19,12 @@
  *
  * `attribution.ts` holds the thresholds and the wording and is where the
  * reasoning is written down. This file is the clock, the counter and the wiring.
+ *
+ * It answers one more question at the end of a run, and it is a question about
+ * the summary line rather than about any one test: how many of the failed files
+ * failed only because a clock ran out. `timeout-only.ts` is that arithmetic and
+ * says why the run cannot be read without it. Same contract as everything else
+ * here — it reports, and the exit code is exactly what it was.
  */
 import { availableParallelism, loadavg } from 'node:os';
 import { relative } from 'node:path';
@@ -34,6 +40,9 @@ import {
   loadOver,
   timedOutAtMs,
 } from './attribution';
+import { offerLoadSource } from './load-source';
+import type { FailedTestShape, MachineSummary, RedModuleShape, ScopeErrorShape } from './timeout-only';
+import { classifyTimeoutOnly, describeTimeoutOnly } from './timeout-only';
 
 /**
  * How often the machine is read.
@@ -88,6 +97,49 @@ function errorsOf(testCase: TestCase): readonly WritableError[] {
   return result.errors ?? [];
 }
 
+/**
+ * A module's failures, as `timeout-only.ts` reads them.
+ *
+ * The path is relativized here rather than there so the block's file names are
+ * the same strings as the per-timeout blocks above it; a reader comparing the
+ * two should not have to notice that one is absolute.
+ *
+ * The budget is read back off the error message rather than remembered from
+ * `onTestCaseResult`, because that is where `attribution.ts` reads it too and a
+ * second source for one number is a second answer waiting to happen. The
+ * annotation this reporter already appended does not interfere: the regex finds
+ * the runner's phrase wherever it sits in the message.
+ */
+export function redShapeOf(module: TestModule): RedModuleShape {
+  // A `beforeAll` or `afterAll` that ran out of time is an error on the suite or
+  // the file, never on a test, so each error keeps its own budget: the same
+  // phrase the tests are read for says which of these were only a clock.
+  const scopeErrors: ScopeErrorShape[] = module
+    .errors()
+    .map((error) => ({ scope: null, budgetMs: timedOutAtMs(error.message) }));
+  for (const suite of module.children.allSuites()) {
+    for (const error of suite.errors()) {
+      scopeErrors.push({ scope: suite.fullName, budgetMs: timedOutAtMs(error.message) });
+    }
+  }
+  const failedTests: FailedTestShape[] = [];
+  for (const test of module.children.allTests()) {
+    const result = test.result();
+    if (result.state !== 'failed') continue;
+    const budgets = (result.errors ?? []).map((error) => timedOutAtMs(error.message));
+    // A failure with several errors is a timeout only if a timeout is the whole
+    // of it; one ordinary error beside one timeout is an ordinary failure.
+    const budgetMs = budgets.length > 0 && budgets.every((ms) => ms !== null) ? (budgets[0] ?? null) : null;
+    failedTests.push({ name: test.fullName, budgetMs });
+  }
+  return {
+    moduleId: relative(process.cwd(), module.moduleId),
+    state: module.state(),
+    scopeErrors,
+    failedTests,
+  };
+}
+
 export default class TestLoadReporter implements Reporter {
   private readonly cores = availableParallelism();
   private readonly samples: LoadSample[] = [];
@@ -108,6 +160,10 @@ export default class TestLoadReporter implements Reporter {
   onInit(vitest: Vitest): void {
     const configured: unknown = (vitest.config as { readonly maxWorkers?: unknown }).maxWorkers;
     this.workers = typeof configured === 'number' ? configured : null;
+    // Closures, so the caller reads this run's findings at the end of it rather
+    // than the empty list that exists now. `onTestRunStart` replaces `timeouts`,
+    // which is why the field is read at call time and not captured.
+    offerLoadSource({ timeouts: () => this.timeouts, machine: () => this.machine() });
   }
 
   /**
@@ -170,9 +226,13 @@ export default class TestLoadReporter implements Reporter {
     this.nearLimit.push({ file, name: testCase.fullName, budgetMs, durationMs: diagnostic.duration });
   }
 
-  onTestRunEnd(): void {
+  onTestRunEnd(modules: readonly TestModule[]): void {
     this.stop();
     this.report();
+    // After the per-timeout blocks, because it is the subtraction over them and
+    // a subtraction printed before its terms reads as an assertion.
+    const text = describeTimeoutOnly(classifyTimeoutOnly(modules.map(redShapeOf)), this.machine());
+    if (text !== '') console.log(text);
   }
 
   /** Reads the machine once. Cheap enough to run beside a saturated box. */
@@ -203,10 +263,25 @@ export default class TestLoadReporter implements Reporter {
     this.timer = null;
   }
 
-  private report(): void {
-    const peak = this.samples
+  /** The peak 1-minute load over this run, or 0 when nothing was sampled. */
+  private peakLoad(): number {
+    return this.samples
       .filter((sample) => sample.at >= this.startedAt)
       .reduce((worst, sample) => Math.max(worst, sample.load1), 0);
+  }
+
+  /**
+   * The box, for the block that restates it, or `null` when no sample fell
+   * inside the run. A zero peak and an unsampled run are different claims and a
+   * reader acts differently on each, so they get different sentences.
+   */
+  private machine(): MachineSummary | null {
+    if (!this.samples.some((sample) => sample.at >= this.startedAt)) return null;
+    return { cores: this.cores, peakLoad1: this.peakLoad(), peakRunningFiles: this.peakRunning };
+  }
+
+  private report(): void {
+    const peak = this.peakLoad();
     const perCore = (peak / this.cores).toFixed(1);
     const pool = this.workers === null ? '' : `, ${this.workers} test workers`;
     // The peak is a reading of the whole box and this run is on it, so the line

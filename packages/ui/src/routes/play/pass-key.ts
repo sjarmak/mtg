@@ -20,16 +20,6 @@
  * makes the hook a no-op wherever there is no document, which is what a
  * server-rendered table wants.
  *
- * It refuses to fire from inside a control, and that is not politeness. The
- * browser already activates a focused `<button>` on both keys, so firing as well
- * would submit two choices for one press — the pass, and whatever move the ring
- * happened to be sitting on. That refusal is right and `mtg-s9p` did not change
- * it: a player who tabs to a control and presses Space means the control, and a
- * shortcut that overrode them would pass priority for a keystroke aimed at a
- * setting. What `mtg-s9p` changed is upstream of here — `PlayView` hands the
- * ring back to the table after a *pointer* press on a panel header, so the ring
- * stops being parked on a control nobody is using.
- *
  * **A combat pause takes the same key, and the caller decides that** (`mtg-rgc.2`).
  * While the game is halted on a beat the kernel has asked nothing, so there is
  * no pass to take and this hook would otherwise refuse every press and print the
@@ -79,10 +69,35 @@ function keyHost(): KeyHost | null {
   return document as KeyHost;
 }
 
+/**
+ * Whether the press already belongs to something.
+ *
+ * The tag list is the first half and a declared `role` is the second
+ * (`mtg-bz2.16`). A stack entry that a spell may be aimed at is a `role='button'`
+ * on the row rather than a nested `button` element, because the strip spends
+ * width and a second box on every legal row is what stops a deep stack fitting;
+ * it answers Enter and Space itself, exactly as the tags above do. Without this
+ * clause the same Enter aimed the spell *and* passed priority — one keystroke,
+ * two moves, and the second one was the whole rest of the turn.
+ *
+ * Read off the attribute rather than off any list of roles, because the promise
+ * being made is the element's own: anything that says it is a button has taken
+ * responsibility for these two keys.
+ */
 function insideControl(target: unknown): boolean {
   if (typeof target !== 'object' || target === null) return false;
   const tag = (target as { readonly tagName?: unknown }).tagName;
-  return typeof tag === 'string' && CONTROLS.includes(tag.toUpperCase());
+  if (typeof tag === 'string' && CONTROLS.includes(tag.toUpperCase())) return true;
+  const read = (target as { readonly getAttribute?: unknown }).getAttribute;
+  if (typeof read !== 'function') return false;
+  return (read as (name: string) => unknown).call(target, 'role') === 'button';
+}
+
+function isInteractiveCard(target: unknown): boolean {
+  if (typeof target !== 'object' || target === null) return false;
+  const read = (target as { readonly getAttribute?: unknown }).getAttribute;
+  if (typeof read !== 'function') return false;
+  return (read as (name: string) => unknown).call(target, 'data-interactive') === 'true';
 }
 
 /**
@@ -130,7 +145,7 @@ export function usePassKey(input: PassKeyInput): string | null {
       if (event.key !== ' ' && event.key !== 'Enter') return;
       if (event.repeat === true || event.altKey === true) return;
       if (event.ctrlKey === true || event.metaKey === true) return;
-      if (insideControl(event.target)) return;
+      if (insideControl(event.target) && (event.key === 'Enter' || !isInteractiveCard(event.target))) return;
       // Space scrolls the page otherwise, which on a table bounded by the
       // viewport moves the board out from under the person who just passed —
       // and moves it out from under one who has just been told why their key

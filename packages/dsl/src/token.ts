@@ -54,11 +54,13 @@ export function tokenSlug(name: string): string {
  * `common` and `TKN 0` are bookkeeping the `Card` shape requires rather than
  * claims about the token. Supertypes are empty and `TokenSpec` has no field to
  * fill them from, which `packages/kernel/src/sba.ts` relies on when it explains
- * why the legend rule passes a token over.
+ * why the legend rule passes a token over. The card id normally comes from the
+ * printed name; hand-authored `identity` separates same-named token definitions
+ * without changing that name.
  */
 export function tokenCard(spec: TokenSpec): Card {
   const shared = {
-    id: `token-${tokenSlug(spec.name)}`,
+    id: `token-${spec.identity ?? tokenSlug(spec.name)}`,
     rarity: 'common' as const,
     name: spec.name,
     set: { code: TOKEN_SET_CODE, collectorNumber: 0 },
@@ -72,7 +74,16 @@ export function tokenCard(spec: TokenSpec): Card {
     costReduction: null,
   };
   if (isCreatureTokenSpec(spec)) {
-    return { ...shared, kind: 'creature', artifact: false, power: spec.power, toughness: spec.toughness };
+    return {
+      ...shared,
+      kind: 'creature',
+      artifact: false,
+      power: spec.power,
+      toughness: spec.toughness,
+      ...(spec.characteristicPowerToughness === undefined
+        ? {}
+        : { characteristicPowerToughness: spec.characteristicPowerToughness }),
+    };
   }
   return { ...shared, kind: 'artifact' };
 }

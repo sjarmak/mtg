@@ -5,23 +5,24 @@
  * randomness and no locale dependence.
  */
 
-const NUMBER_WORDS = [
-  'zero',
-  'one',
-  'two',
-  'three',
-  'four',
-  'five',
-  'six',
-  'seven',
-  'eight',
-  'nine',
-  'ten',
-] as const;
+const NUMBER_WORDS: Readonly<Record<number, string>> = {
+  0: 'zero',
+  1: 'one',
+  2: 'two',
+  3: 'three',
+  4: 'four',
+  5: 'five',
+  6: 'six',
+  7: 'seven',
+  8: 'eight',
+  9: 'nine',
+  10: 'ten',
+  20: 'twenty',
+};
 
-/** Card/token counts print as words up to ten, as digits beyond (Magic style). */
+/** Card/token counts with source-attested word forms; other numbers remain digits. */
 export function numberWord(n: number): string {
-  const word = Number.isInteger(n) && n >= 0 && n < NUMBER_WORDS.length ? NUMBER_WORDS[n] : undefined;
+  const word = Number.isInteger(n) && n >= 0 ? NUMBER_WORDS[n] : undefined;
   return word ?? String(n);
 }
 
@@ -193,29 +194,38 @@ export function asClause(sentence: string, cardName: string): string {
  * Magic writes the permission in front of the effect — "you may put a +1/+1
  * counter on target creature" — and switches construction when the sentence's
  * subject is the source rather than the player: "you may *have* Ember Drake
- * *deal* 2 damage", because "you may Ember Drake deals 2 damage" is not English
- * and "you may deal 2 damage" would say the player deals it.
+ * *deal* 2 damage", or "you may *have it deal*" for a hand-authored sweep that
+ * uses the source pronoun. The ordinary construction would either be
+ * ungrammatical or say the player deals the damage.
  *
  * Written as a rewrite of the printed sentence rather than as a second
  * `renderEffect`, so a card's optional line and its mandatory line can never
  * come out of two different printers. Two primitives in the vocabulary make the
- * source the subject: `dealDamage` names it outright, and `fight` names it as
- * the pronoun the trigger's own clause has just supplied an antecedent for. Both
- * take the "have … " construction and both need their own arm, because the
- * rewrite has to reach inside the sentence to find the bare verb.
+ * source the subject: `dealDamage` names it outright or through the pronoun the
+ * trigger supplies, and `fight` always names that pronoun.
+ * `millCards` supplies the third-person subject "target player". All three take
+ * the "have … " construction and need an explicit arm, because the rewrite has
+ * to reach inside the sentence to put the verb in its bare form.
  *
  * `oracle.test.ts` walks every effect kind through this function to make sure a
  * new primitive that names the source as its subject fails there rather than
  * shipping a card that reads "you may CARDNAME does something". That guard
- * looks for the card's *name*, so it cannot see the pronoun form: "you may it
- * fights target creature you don't control" contains no card name and would
- * pass. `fight.test.ts` asserts the optional line directly for that reason.
+ * looks for the card's *name*, so the pronoun rewrites remain pinned directly
+ * by `oracle.test.ts` and `fight.test.ts`.
  */
 export function mayClause(sentence: string, cardName: string): string {
   const deals = `${cardName} deals `;
   if (sentence.startsWith(deals)) return `you may have ${cardName} deal ${sentence.slice(deals.length)}`;
+  const itDeals = 'It deals ';
+  if (sentence.startsWith(itDeals)) return `you may have it deal ${sentence.slice(itDeals.length)}`;
   const fights = 'It fights ';
   if (sentence.startsWith(fights)) return `you may have it fight ${sentence.slice(fights.length)}`;
+  const targetPlayerMills = 'Target player mills ';
+  if (sentence.startsWith(targetPlayerMills)) {
+    return `you may have target player mill ${sentence.slice(targetPlayerMills.length)}`;
+  }
+  const you = 'You ';
+  if (sentence.startsWith(you)) return `you may ${sentence.slice(you.length)}`;
   return `you may ${asClause(sentence, cardName)}`;
 }
 

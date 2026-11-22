@@ -15,7 +15,7 @@
  * `cli.ts`.
  *
  * This tool never reads an adjudication file, and cannot: it has no code path
- * that imports `./records.ts`'s adjudication reader. See `../src/critic/records.ts`.
+ * that imports `../src/critic/records.ts`'s adjudication reader. See `../src/critic/records.ts`.
  *
  *   tsx packages/setgen/tools/run-critic.ts --size 60 --record --max-usd 5
  *   tsx packages/setgen/tools/run-critic.ts --size 60

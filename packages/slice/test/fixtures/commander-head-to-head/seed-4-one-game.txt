@@ -1,0 +1,37 @@
+Simulation mode
+Ai(1)-Draconic Domination [C17] [2017] vs Ai(2)-Heavenly Inferno [CMA] [2017] - one game of Commander seed 4
+Mulligan: Ai(2)-Heavenly Inferno [CMA] [2017] has kept a hand of 7 cards
+Mulligan: Ai(1)-Draconic Domination [C17] [2017] has kept a hand of 7 cards
+Turn: Turn 1 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 2 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 3 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 4 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 5 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 6 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 7 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 8 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 9 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 10 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 11 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 12 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 13 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 14 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 15 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 16 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 17 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 18 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 19 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 20 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 21 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 22 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 23 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 24 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 25 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 26 (Ai(1)-Draconic Domination [C17] [2017])
+Turn: Turn 27 (Ai(2)-Heavenly Inferno [CMA] [2017])
+Turn: Turn 28 (Ai(1)-Draconic Domination [C17] [2017])
+Game Outcome: Turn 14
+Game Outcome: Ai(1)-Draconic Domination [C17] [2017] has won because all opponents have lost
+Game Outcome: Ai(2)-Heavenly Inferno [CMA] [2017] has lost because life total reached 0
+Match Result: Ai(1)-Draconic Domination [C17] [2017]: 1 Ai(2)-Heavenly Inferno [CMA] [2017]: 0 
+Game Result: Game 1 ended in 7833 ms. Ai(1)-Draconic Domination [C17] [2017] has won!

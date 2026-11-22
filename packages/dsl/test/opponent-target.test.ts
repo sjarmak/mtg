@@ -124,6 +124,7 @@ describe('the targeting mode that names an opponent', () => {
       'putCounters',
       'exileTarget',
       'returnFromGraveyard',
+      'revealHand',
       'discardCards',
       // `loseLife` reads as an opponent slot here and always did; what put it
       // in this list is that it now hand-authors something (`thatPlayer`, for
@@ -131,6 +132,9 @@ describe('the targeting mode that names an opponent', () => {
       // enumeration walks.
       'loseLife',
       'sacrificePermanent',
+      'nameNonlandCardAndExileMatchingOpponentZones',
+      'targetPlayerGainsControlOfSelfPermanent',
+      'chooseFromRevealedHand',
     ]);
   });
 

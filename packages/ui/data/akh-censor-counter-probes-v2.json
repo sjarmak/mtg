@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "censor-counter-local-v2",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0046:4cb4e315-1a77-479a-9f15-fb23575de805"],
+      "decisionFamilies": [
+        "censor-unpaid-tax-counters-exact-spell",
+        "counter-unless-one-local-payment-and-decline"
+      ],
+      "assertions": [
+        "Censor resolves its exact counter-unless-one route: pay, local counter pilot",
+        "Censor resolves its exact counter-unless-one route: decline, local counter pilot"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-counter.integration.test.ts"
+    },
+    {
+      "id": "censor-counter-engine-v2",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0046:4cb4e315-1a77-479a-9f15-fb23575de805"],
+      "decisionFamilies": [
+        "censor-unpaid-tax-counters-exact-spell",
+        "native-counter-against-tapped-out-local-caster"
+      ],
+      "assertions": ["Censor resolves its exact counter-unless-one route: decline, engine counter pilot"],
+      "testFile": "packages/forge-export/test/observed-akh-counter.integration.test.ts"
+    }
+  ]
+}

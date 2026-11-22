@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "rav",
+  "formatSha256": "0ccf6684dd2efca7bcbfaa03a4a686b51e79ba56df82cc676f7972e0a2e79fe0",
+  "sourceSha256": "48f53d121d4bab70c40990dcc167699299001b36b4ade12e88df461ccfc4c304",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "48f53d121d4bab70c40990dcc167699299001b36b4ade12e88df461ccfc4c304",
+    "recipe.json": "f20ab76d88edc5859b350c686e0f8b8bf0c14e02684da1b80d0b59c3fc57c5ff",
+    "rav-printed-catalog-v1.json": "1705c31e3f22c03acd6cabeeeae3e87bcbb6cf9f82abf59e254bab0b38dd66cb",
+    "rav-limited-format-v1.json": "c2c468ce35d468a26a8ea9e66ecfda5adc534ab7338c7ac172f6973b574e84a9"
+  },
+  "catalogs": [
+    {
+      "code": "RAV",
+      "cards": 306,
+      "contentSha256": "2f32c49619ad7fab74e161ceb856dfe150e322b2339e47f0ba2f8fc5e3be3aed"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 2410.870571,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 291,
+    "printings": 306
+  }
+}

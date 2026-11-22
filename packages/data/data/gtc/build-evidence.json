@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "gtc",
+  "formatSha256": "2eb1e51b5ac35ca09c73c7391bdc978c02340e91bc2a9ab391287c8be7d85c6f",
+  "sourceSha256": "aa0a36bde9d5a434819d80f6d9859458f2b85e7a22dc274ca407de088141526f",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "aa0a36bde9d5a434819d80f6d9859458f2b85e7a22dc274ca407de088141526f",
+    "recipe.json": "bcac5f098e2448afeacddf97c2ccb9b38824eebb1f4ecd206b31461852fc9670",
+    "gtc-printed-catalog-v1.json": "dabcfe9e6ae832441b3260b180e020bc403ea22eb332e22f9e24a1828904c2b4",
+    "rtr-printed-catalog-v1.json": "233b0906a6ae8496c1245625ed680ba9fa1c73e575dbff53440a0bdd44f5f322",
+    "gtc-limited-format-v1.json": "c38f48449e54e9b6b57415cfd7c9f635dff751689629d4c16a00c8b7f003da0a"
+  },
+  "catalogs": [
+    {
+      "code": "GTC",
+      "cards": 249,
+      "contentSha256": "bf7b418c9e0de05b4b7c21b53ef8631d1f02f8b9b61905a077850bc02a2204d3"
+    },
+    {
+      "code": "RTR",
+      "cards": 274,
+      "contentSha256": "b0c21d818619151dbaf1ca6493f91216ea8aa9efb270640c3607c12dece6392c"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 2398.200653,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 503,
+    "printings": 523
+  }
+}

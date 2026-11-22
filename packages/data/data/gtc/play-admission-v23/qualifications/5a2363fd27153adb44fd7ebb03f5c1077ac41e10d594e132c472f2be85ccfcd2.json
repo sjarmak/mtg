@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-script-qualification-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "552129e5a061b1d5e39d20b071313ed8516e59d003ecc13f733bdc8efa498de8",
+    "adapterSha256": "f8cdee5bbe0f10787f68b94ef2b797cb12dbb98065af82b2d853e5f965966534",
+    "protocolVersion": 2
+  },
+  "sourceScript": {
+    "path": "a/aerial_predation.txt",
+    "sha256": "5a2363fd27153adb44fd7ebb03f5c1077ac41e10d594e132c472f2be85ccfcd2"
+  },
+  "decisionFamilies": [
+    "priority",
+    "targets"
+  ],
+  "obligations": [
+    "controller-contract-priority",
+    "controller-contract-targets",
+    "exact-source-declarations"
+  ],
+  "residualObligations": [],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "decisionFamilies": [
+        "priority",
+        "targets"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "priority-v1",
+        "targets-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "decisionFamilies": [
+        "priority",
+        "targets"
+      ],
+      "scenarioReceiptIds": [],
+      "capabilityProfiles": [],
+      "controllerContractIds": [
+        "priority-v1",
+        "targets-v1"
+      ]
+    }
+  ],
+  "dependencies": [],
+  "evidence": {
+    "coveragePlan": {
+      "path": "coverage-plan.json",
+      "sha256": "490510dba03498ec03aaf1d207c57eaaf2b4d27b6fece49f730faee1ace0c7c2"
+    },
+    "coverageReport": {
+      "path": "script-coverage.json",
+      "sha256": "2cc86977c8c5f3c4aec815faa8c2d9b98342ce002d3370fb0202b8eb7966d6cc"
+    },
+    "scenarioReceipts": [],
+    "controllerContracts": [
+      {
+        "contractId": "priority-v1",
+        "file": {
+          "path": "contracts/priority-v1.json",
+          "sha256": "9ac7643d6c7251aca5a930ab85abb686fbfae6bbfdfdc35b61b9ed9aaf858977"
+        }
+      },
+      {
+        "contractId": "targets-v1",
+        "file": {
+          "path": "contracts/targets-v1.json",
+          "sha256": "aa8e3dce357394bf679da30e84e2b37012e32149898b61a2a4a63d4346cbee41"
+        }
+      }
+    ]
+  }
+}

@@ -53,17 +53,37 @@ function creatureQuotaByBucket(config: DeckBuildConfig): ReadonlyMap<CurveBucket
   return new Map(CURVE_BUCKETS.map((bucket, index) => [bucket, quotas[index] ?? 0]));
 }
 
+/**
+ * The bucket a zero-cost card competes in when the curve asks for no zero-drops.
+ *
+ * `mtg-odaj`. Every stated curve in this package has `targetCurve[0] === 0`,
+ * which was written when a zero-cost card could not exist, and `fillCurve`
+ * skips a bucket it is asked for nothing from. So a free spell was structurally
+ * excluded from curve fill whatever `evaluateCard` scored it, and reached a
+ * deck only if the pool left slots for `fillOverflow`. A card that costs
+ * nothing satisfies any slot a card costing one would, so it competes for the
+ * cheapest slot the curve does ask for, on score, against the cards already
+ * there. A curve that does state a zero-drop target fills bucket 0 normally and
+ * this returns null.
+ */
+function zeroCostHost(config: DeckBuildConfig): CurveBucket | null {
+  if (config.targetCurve[0] > 0) return null;
+  return CURVE_BUCKETS.find((bucket) => config.targetCurve[bucket] > 0) ?? null;
+}
+
 function fillCurve(
   groups: ReadonlyMap<CurveBucket, PoolCard[]>,
   config: DeckBuildConfig,
   taken: Set<number>,
 ): PoolCard[] {
   const quotas = creatureQuotaByBucket(config);
+  const host = zeroCostHost(config);
   const selected: PoolCard[] = [];
   for (const bucket of config.curvePriority) {
     const target = config.targetCurve[bucket];
     if (target <= 0) continue;
-    const candidates = groups.get(bucket) ?? [];
+    const own = groups.get(bucket) ?? [];
+    const candidates = bucket === host ? [...own, ...(groups.get(0) ?? [])].sort(comparePoolCards) : own;
     const creatureQuota = Math.min(quotas.get(bucket) ?? 0, target);
 
     let picked = 0;

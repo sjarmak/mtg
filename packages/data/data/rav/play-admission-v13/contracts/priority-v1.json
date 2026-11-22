@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-controller-contract-receipt",
+  "id": "priority-v1",
+  "engineRuntime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "protocolVersion": 2
+  },
+  "decisionFamilies": [
+    "priority"
+  ],
+  "sourceRegions": [
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        List<SpellAbility> choose(Player player) {",
+      "endMarker": "        void recordPriorityMana(SpellAbility ability, boolean played) {",
+      "sha256": "436b17c1c261cccd04da9281b8de825f61c735ba60f953d2fadabf32e3816ada"
+    }
+  ],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "scenarioReceiptIds": [
+        "abandoned-sarcophagus-local-controller-profile-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "scenarioReceiptIds": [
+        "abandoned-sarcophagus-engine-controller-profile-v1"
+      ]
+    }
+  ],
+  "evidence": {
+    "scenarioReceipts": [
+      {
+        "receiptId": "abandoned-sarcophagus-engine-controller-profile-v1",
+        "file": {
+          "path": "scenarios/abandoned-sarcophagus-engine-controller-profile-v1.json",
+          "sha256": "e82e793512847056809b5fa528166b25266cb9e1211797eb67869c12770b7783"
+        }
+      },
+      {
+        "receiptId": "abandoned-sarcophagus-local-controller-profile-v1",
+        "file": {
+          "path": "scenarios/abandoned-sarcophagus-local-controller-profile-v1.json",
+          "sha256": "21013110b394a98d26ecbd9131ee616f9f1f4430fa81a439ce8977825c877fd7"
+        }
+      }
+    ]
+  }
+}

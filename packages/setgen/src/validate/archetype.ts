@@ -26,6 +26,7 @@ import {
 
 export { pairCapacity };
 import type { Entry } from './composition';
+import type { GenerationSemanticsVersion } from '../generation-semantics';
 import type { FindingCode, SetFinding } from './findings';
 import { finding } from './findings';
 
@@ -106,6 +107,7 @@ export interface ArchetypeCheckInput {
   readonly plans: readonly ArchetypePlan[];
   readonly profile: SkeletonLiteProfile;
   readonly floors?: ArchetypeFloors;
+  readonly semanticsVersion?: GenerationSemanticsVersion;
 }
 
 export function checkArchetypeViability(input: ArchetypeCheckInput): SetFinding[] {
@@ -123,7 +125,7 @@ export function checkArchetypeViability(input: ArchetypeCheckInput): SetFinding[
       ),
     ];
   }
-  const reports = archetypeReports(entries, plans, floors);
+  const reports = archetypeReports(entries, plans, floors, input.semanticsVersion);
   return reports.flatMap((report) => {
     const plan = plans.find((item) => item.pair === report.pair);
     if (plan === undefined) return [];
@@ -143,7 +145,8 @@ export function archetypeReports(
   entries: readonly Entry[],
   plans: readonly ArchetypePlan[],
   floors: ArchetypeFloors = DEFAULT_ARCHETYPE_FLOORS,
+  semanticsVersion?: GenerationSemanticsVersion,
 ): readonly PairViability[] {
   const contributions = entries.map((entry) => cardContribution(entry.slot, entry.card));
-  return assessArchetypes(contributions, plans, floors);
+  return assessArchetypes(contributions, plans, floors, semanticsVersion);
 }

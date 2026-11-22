@@ -83,14 +83,15 @@
  * battlefield" lands; the art-less compact face stayed behind in the sealed
  * builder, where a hundred cards down a page is the point.
  */
-import { createElement } from 'react';
-import type { ReactElement, ReactNode } from 'react';
+import { createElement, useEffect, useRef, useState } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import type { Card as DslCard } from '@mtg/dsl';
 import { isAuraCard, isCreature, isLand } from '@mtg/dsl';
 import type { CardArt } from '../card/ArtSlot';
 import type { FaceStats } from '../card/Card';
 import { CardSlot } from './CardSlot';
 import type { SlotFace } from './CardSlot';
+import { counterKind } from './counter-kind';
 import { markNode } from './Mark';
 import type { BoardMark } from './Mark';
 import { Zone } from './Zone';
@@ -139,18 +140,53 @@ export interface TargetedBy {
   readonly source: string;
 }
 
+/**
+ * One soulbond pair as a member of it reads it (CR 702.95).
+ *
+ * `number` is what ties the two ends together on a table that holds more than
+ * one pair: both members carry the same digit and no two pairs carry the same.
+ * `partner` is the other creature by name, which is the sentence a screen reader
+ * gets and the tooltip a pointer gets, since a digit says *which* pair and only
+ * a name says *whom*.
+ */
+export interface BoardPair {
+  readonly number: number;
+  readonly partner: string;
+}
+
 export interface BoardPermanent {
   readonly key: string;
   readonly card: DslCard;
+  /**
+   * What this permanent is a copy of, for piling. Absent means the card id
+   * says it, which is true of every kernel card. An observed backend's cards
+   * carry one display id per object, so it names the printing instead
+   * (`../routes/play/backend-position.ts`), and forty tokens of one kind pile.
+   */
+  readonly pileId?: string;
   readonly tapped?: boolean;
   readonly summoningSick?: boolean;
   /** Damage marked this turn; rendered as a negative mark when above zero. */
   readonly damage?: number;
   readonly counters?: number;
+  /** Named counter totals supplied by a backend-neutral observed projection. */
+  readonly namedCounters?: Readonly<Record<string, number>>;
   /** Current planeswalker loyalty; absent for every other permanent. */
   readonly loyalty?: number;
+  /** Current Battle defense; absent for every other permanent. */
+  readonly defense?: number;
+  /** Seat designated to protect a Battle; absent for every other permanent. */
+  readonly protector?: 0 | 1;
+  /**
+   * The soulbond pair this permanent is one half of; absent while it is unpaired.
+   * Both members carry the same `number`, so each draws the matching badge
+   * (`mtg-in4k9`) and the pair reads without a hover or a line between them.
+   */
+  readonly pair?: BoardPair;
   readonly attacking?: boolean;
   readonly blocking?: boolean;
+  /** Active CR 701.29 restriction, projected by live play or a replay snapshot. */
+  readonly detained?: boolean;
   /**
    * Whom this permanent is attacking, as that seat is said (CR 508.1a: an
    * attacker is declared against a defending player). The sentence a screen
@@ -170,7 +206,13 @@ export interface BoardPermanent {
    */
   readonly blockedBy?: readonly string[];
   /** And the mirror: what this blocker was assigned to, by name. */
-  readonly blockingAttacker?: string;
+  readonly blockingAttackers?: readonly string[];
+  /**
+   * The same attackers by key, which is what `./CombatZone.ts` lays a declared
+   * block out on: the blocker leaves its row and sits in the seam against the
+   * attacker it answers, the way `stagedBlockKeys` below moves a proposed one.
+   */
+  readonly blockingKeys?: readonly string[];
   /**
    * Chosen to attack but not declared yet — the player's proposal, drawn as one.
    *
@@ -192,16 +234,16 @@ export interface BoardPermanent {
    * tell a player who assigned three blockers and took one back from one who
    * assigned two.
    *
-   * The name is what the sentence is built from; `./CombatZone.ts` pairs the two
-   * cards on the table off `stagedBlockKey` below.
+   * The name is what the sentence is built from; `./CombatZone.ts` pairs the
+   * cards on the table off `stagedBlockKeys` below.
    */
   readonly stagedBlock?: string;
   /**
-   * The same attacker by key, which is what the seam lays the pair out on — the
-   * `attachedTo` / `attachedToKey` split one relation over, and for the same
-   * reason: a name identifies a card to a reader and cannot find one in a row.
+   * The same attackers by key, which is what the seam lays the relationship out
+   * on — the `attachedTo` / `attachedToKey` split one relation over, and for the
+   * same reason: names identify cards to a reader and cannot find them in a row.
    */
-  readonly stagedBlockKey?: string;
+  readonly stagedBlockKeys?: readonly string[];
   /**
    * Where this blocker sits in the damage assignment order the attacking player
    * is building, 1 first (CR 509.2).
@@ -305,6 +347,28 @@ export interface BattlefieldProps {
   /** The move picker belonging to a permanent; see `Hand`'s prop of this name. */
   readonly pickerFor?: (key: string, name: string) => ReactNode;
   readonly emptyText?: string;
+  /**
+   * The kernel objects the reader is pointing at from the game log (`mtg-47o`).
+   *
+   * A set rather than one key, because one sentence names two objects as often
+   * as it names one -- "Gloom Hand deals 2 damage to Marsh Rider" is a source
+   * and a target, and lighting only one of them answers half the question.
+   */
+  readonly pointed?: ReadonlySet<string>;
+  /**
+   * The row is a compressed opponent tile (`mtg-bc2.154.6.5.4`), not a lane.
+   *
+   * A row that holds eight places is *crowded* in a lane, and everything that
+   * word buys there (a 72px identity floor per place, a fan of overlapped lines,
+   * a lowered hand cap on the whole board, a phone layout that reserves rows) is
+   * the answer to one lane sharing a table with a hand. A tile is the opposite
+   * trade: it draws every permanent at a size it states itself
+   * (`../styles/board/pod.ts`), so it must not opt into rules that would
+   * out-vote that size, and one crowded opponent must not lower the viewer's
+   * hand for the other three. It says so with `data-tile-crowded`, which only the
+   * tile sheet reads.
+   */
+  readonly tile?: boolean;
 }
 
 function sizeText(stats: FaceStats): string {
@@ -387,9 +451,10 @@ function derivedMark(permanent: BoardPermanent): BoardMark | null {
  *
  * It names what is blocking the attacker when the projection knows, which is
  * strictly more than the badge ever said. That answers the question a player
- * asks during combat — whether this creature's damage is getting through — and
- * it is the one thing the drawing genuinely cannot show yet, since blockers stay
- * in their own row until `mtg-bz2.5` pairs them.
+ * asks during combat — whether this creature's damage is getting through — in
+ * words, beside the drawing: a declared blocker sits in the seam against this
+ * attacker (`./CombatZone.ts`, off `blockingKeys`), and a position reaches no
+ * screen reader.
  */
 function attackingMark(permanent: BoardPermanent): BoardMark | null {
   if (permanent.attacking !== true) return null;
@@ -434,8 +499,10 @@ function stagedAttackMark(permanent: BoardPermanent): BoardMark | null {
 }
 
 /**
- * And the mirror, which stays visible: a blocker has not moved anywhere, so
- * nothing about the table says it is in combat except this badge.
+ * And the mirror, which stays visible. A declared blocker moves into the seam
+ * too now (`./CombatZone.ts`, off `blockingKeys`), but the seam holds attackers
+ * and blockers from both seats in one row, and the badge is what says which of
+ * the two cards in a tray is the one that answered.
  *
  * What it gains is the sentence. `BLK` alone said a creature was blocking and
  * left the only question worth asking — blocking *what* — to be worked out by
@@ -444,12 +511,12 @@ function stagedAttackMark(permanent: BoardPermanent): BoardMark | null {
  */
 function blockingMark(permanent: BoardPermanent): BoardMark | null {
   if (permanent.blocking !== true) return null;
-  const attacker = permanent.blockingAttacker;
+  const attackers = permanent.blockingAttackers ?? [];
   return {
     key: 'blocking',
     label: 'BLK',
     tone: 'neutral',
-    title: attacker === undefined ? 'Blocking.' : `Blocking ${attacker}.`,
+    title: attackers.length === 0 ? 'Blocking.' : `Blocking ${attackers.join(', ')}.`,
   };
 }
 
@@ -597,6 +664,44 @@ function targetedMarks(permanent: BoardPermanent): readonly BoardMark[] {
 }
 
 /**
+ * That this permanent is bonded to another (soulbond, CR 702.95): the same badge
+ * on both creatures, numbered per pair.
+ *
+ * The playtester ruled the shape on dec-6044 (2026-09-19): a badge on each card, not a
+ * line between the two. A line has to survive cards moving, tapping and stacking,
+ * which is exactly the crowded board where a pair most needs reading, and a badge
+ * moves with the card because it is on the card. The number is what tells two
+ * pairs apart; the partner's name is the sentence, in the same mark, because the
+ * digit alone answers "which pair" and never "whom".
+ */
+function pairedMark(permanent: BoardPermanent): BoardMark | null {
+  const pair = permanent.pair;
+  if (pair === undefined) return null;
+  return {
+    key: 'paired',
+    label: `Paired with ${pair.partner}`,
+    tone: 'neutral',
+    glyph: 'link',
+    badge: String(pair.number),
+    title: `Soulbond pair ${String(pair.number)}: paired with ${pair.partner}.`,
+  };
+}
+
+/** The temporary attack, block, and activation restriction imposed by detain. */
+function detainedMark(permanent: BoardPermanent): BoardMark | null {
+  if (permanent.detained !== true) return null;
+  return {
+    key: 'detained',
+    label: 'Detained',
+    badge: 'DET',
+    glyph: 'lock',
+    tone: 'negative',
+    title:
+      "Detained: this permanent can't attack, block, or activate abilities until the detaining player's next turn.",
+  };
+}
+
+/**
  * The marks a permanent's flags earn, in a fixed order.
  *
  * Two of them say a value on the face is not the card's: `derived` for a size
@@ -622,6 +727,8 @@ export function permanentMarks(permanent: BoardPermanent): readonly BoardMark[] 
   // answer *now*: everything under it is a standing fact about the permanent,
   // and this is an object waiting to resolve onto it.
   const marks: BoardMark[] = [...targetedMarks(permanent)];
+  const detained = detainedMark(permanent);
+  if (detained !== null) marks.push(detained);
   const stagedAttack = stagedAttackMark(permanent);
   if (stagedAttack !== null) marks.push(stagedAttack);
   const attacking = attackingMark(permanent);
@@ -641,6 +748,8 @@ export function permanentMarks(permanent: BoardPermanent): readonly BoardMark[] 
   if (derived !== null) marks.push(derived);
   const granted = grantedMark(permanent);
   if (granted !== null) marks.push(granted);
+  const paired = pairedMark(permanent);
+  if (paired !== null) marks.push(paired);
   // Net, and either sign. `counters > 0` was the old test, so a creature under
   // two -1/-1 counters wore nothing at all while its size fell by two.
   const counters = permanent.counters ?? 0;
@@ -651,11 +760,31 @@ export function permanentMarks(permanent: BoardPermanent): readonly BoardMark[] 
       tone: counters > 0 ? 'positive' : 'negative',
     });
   }
+  for (const [kind, count] of Object.entries(permanent.namedCounters ?? {}).sort(([left], [right]) =>
+    left.localeCompare(right),
+  )) {
+    if (count === 0) continue;
+    const { name, stat } = counterKind(kind);
+    marks.push({
+      key: `counter-${kind}`,
+      label: stat === null ? `${String(count)} ${name}` : `${name} ×${String(count)}`,
+      title: `${String(count)} ${name} counter${count === 1 ? '' : 's'}.`,
+      tone: count < 0 || stat === 'lowers' ? 'negative' : stat === 'raises' ? 'positive' : 'neutral',
+    });
+  }
   if (permanent.loyalty !== undefined) {
     marks.push({
       key: 'loyalty',
       label: `L${String(permanent.loyalty)}`,
       title: `${String(permanent.loyalty)} loyalty counter${permanent.loyalty === 1 ? '' : 's'}.`,
+      tone: 'neutral',
+    });
+  }
+  if (permanent.defense !== undefined) {
+    marks.push({
+      key: 'defense',
+      label: `D${String(permanent.defense)}`,
+      title: `${String(permanent.defense)} defense counter${permanent.defense === 1 ? '' : 's'}.`,
       tone: 'neutral',
     });
   }
@@ -689,6 +818,7 @@ export function permanentNode(
   props: BattlefieldProps,
   permanent: BoardPermanent,
   face: SlotFace = 'board',
+  cover?: ReactNode,
 ): ReactElement {
   const marks = permanentMarks(permanent);
   const inert = permanent.playable === false;
@@ -706,12 +836,14 @@ export function permanentNode(
     selected: props.selectedKey === permanent.key,
     tapped: permanent.tapped === true,
     permanentKey: permanent.key,
+    ...(props.pointed?.has(permanent.key) === true ? { pointed: true } : {}),
     ...(permanent.stats === undefined ? {} : { stats: permanent.stats }),
     ...(footnote === undefined ? {} : { footnote }),
     ...(marks.length === 0
       ? {}
       : { marks: createElement('span', { className: 'mtg-slot__marks' }, ...marks.map(markNode)) }),
     ...(picker === null ? {} : { picker }),
+    ...(cover === undefined ? {} : { cover }),
     ...(onSelect === undefined
       ? {}
       : {
@@ -740,6 +872,146 @@ export function permanentNode(
 export interface PermanentGroup {
   readonly host: BoardPermanent;
   readonly held: readonly BoardPermanent[];
+}
+
+/** Groups whose visible and actionable permanent state is exactly alike. */
+export interface PermanentPile {
+  readonly groups: readonly PermanentGroup[];
+}
+
+/** Keep duplicate permanents direct until their visible nonland row is genuinely crowded. */
+const PERMANENT_PILE_MIN_PLACES = 10;
+
+function sorted(values: readonly string[] | undefined): readonly string[] {
+  return values === undefined ? [] : [...values].sort();
+}
+
+/**
+ * The counters a face names, in one order. A zero draws no mark, so it is the
+ * same state as no entry; and a backend is free to list kinds in any order, so
+ * two permanents holding the same counters must not split a pile over it.
+ */
+function namedCounterState(permanent: BoardPermanent): readonly (readonly [string, number])[] {
+  return Object.entries(permanent.namedCounters ?? {})
+    .filter(([, count]) => count !== 0)
+    .sort(([left], [right]) => left.localeCompare(right));
+}
+
+/**
+ * The state whose differences must remain visible before a player chooses an
+ * exact object from a pile.
+ *
+ * Object keys and art are deliberately absent: keys are the identities a pile
+ * preserves for the second interaction, while art is a presentation of the
+ * same card. Attachment host keys are likewise local object identities. Every
+ * rules or interaction field is present, including the full attachment tray.
+ */
+function permanentPileState(permanent: BoardPermanent): readonly unknown[] {
+  return [
+    permanent.pileId ?? permanent.card.id,
+    permanent.tapped === true,
+    permanent.summoningSick === true,
+    permanent.damage ?? 0,
+    permanent.counters ?? 0,
+    namedCounterState(permanent),
+    permanent.loyalty ?? null,
+    permanent.defense ?? null,
+    permanent.protector ?? null,
+    // The digit and the partner both: two identical creatures paired to
+    // different partners are different objects to a player choosing one.
+    permanent.pair ?? null,
+    permanent.attacking === true,
+    permanent.blocking === true,
+    permanent.detained === true,
+    permanent.attackingDefender ?? null,
+    permanent.blockedBy ?? [],
+    permanent.blockingAttackers ?? [],
+    permanent.blockingKeys ?? [],
+    permanent.staged === true,
+    permanent.stagedBlock ?? null,
+    permanent.stagedBlockKeys ?? [],
+    permanent.damageOrder ?? null,
+    permanent.stats ?? null,
+    permanent.attachedTo ?? null,
+    permanent.controlledBy ?? null,
+    sorted(permanent.attachments),
+    sorted(permanent.gainedKeywords),
+    permanent.targetedBy ?? [],
+    permanent.playable ?? null,
+  ];
+}
+
+function permanentGroupPileKey(group: PermanentGroup): string {
+  return JSON.stringify([
+    permanentPileState(group.host),
+    group.held
+      .map(permanentPileState)
+      .sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right))),
+  ]);
+}
+
+/**
+ * Coalesces exact-state copies only once this visible nonland row contains ten
+ * or more places. Smaller boards remain direct and individually actionable,
+ * even when two permanents are copies. Piles retain the first battlefield
+ * position and the kernel order of the exact objects inside each pile.
+ */
+export function groupPermanentPiles(
+  groups: readonly PermanentGroup[],
+  presentation: Pick<BattlefieldProps, 'selectedKey' | 'pointed'> = {},
+): readonly PermanentPile[] {
+  if (groups.length < PERMANENT_PILE_MIN_PLACES) {
+    return groups.map((group) => ({ groups: [group] }));
+  }
+  const positions = new Map<string, number>();
+  const piles: PermanentGroup[][] = [];
+  for (const group of groups) {
+    const members = [group.host, ...group.held];
+    const key = JSON.stringify([
+      permanentGroupPileKey(group),
+      members.map((member) => presentation.selectedKey === member.key),
+      members.map((member) => presentation.pointed?.has(member.key) === true),
+    ]);
+    const position = positions.get(key);
+    if (position === undefined) {
+      positions.set(key, piles.length);
+      piles.push([group]);
+      continue;
+    }
+    piles[position]?.push(group);
+  }
+  return piles.map((pile) => ({ groups: pile }));
+}
+
+/** The row-axis share a card occupies after a quarter turn. */
+const TAPPED_PLACE_WIDTH = 88 / 63;
+
+/** Attached cards are drawn at 70% of their host in `styles/board/attach.ts`. */
+const HELD_PLACE_WIDTH = 0.7;
+
+function permanentWidth(permanent: BoardPermanent): number {
+  return permanent.tapped === true ? TAPPED_PLACE_WIDTH : 1;
+}
+
+/**
+ * Publishes the real width pressure of the representatives left after piling.
+ *
+ * A tapped place reserves the printed card's long side and an attachment tray
+ * contains its host plus each tucked card. Counting DOM children alone makes a
+ * half-tapped row about a fifth wider than its fit claims. The small extra tray
+ * share covers its connector and keyline without making ordinary rows smaller.
+ */
+function permanentRowStyle(piles: readonly PermanentPile[]): CSSProperties {
+  const width = piles.reduce((total, pile) => {
+    const group = pile.groups[0];
+    if (group === undefined) return total;
+    const held = group.held.reduce((sum, permanent) => sum + HELD_PLACE_WIDTH * permanentWidth(permanent), 0);
+    return total + permanentWidth(group.host) + held + (group.held.length === 0 ? 0 : 0.2);
+  }, 0);
+  return {
+    '--board-place-count': String(piles.length),
+    '--board-width-units': width.toFixed(6),
+  } as CSSProperties;
 }
 
 /**
@@ -796,7 +1068,7 @@ export function groupAttachments(permanents: readonly BoardPermanent[]): readonl
  * the weapons after, which is the order a player says it in and the order the
  * two cards are read in.
  */
-function attachedGroup(props: BattlefieldProps, group: PermanentGroup): ReactElement {
+function attachedGroup(props: BattlefieldProps, group: PermanentGroup, cover?: ReactNode): ReactElement {
   const relationName = (permanent: BoardPermanent): string =>
     permanent.controlledBy === undefined
       ? permanent.card.name
@@ -807,40 +1079,180 @@ function attachedGroup(props: BattlefieldProps, group: PermanentGroup): ReactEle
     ...(equipment.length === 0 ? [] : [`equipped with ${equipment.join(', ')}`]),
     ...(auras.length === 0 ? [] : [`enchanted by ${auras.join(', ')}`]),
   ];
+  const holds = group.held.length > 0;
   return createElement(
     'div',
     {
       key: group.host.key,
       className: 'mtg-attach',
-      role: 'group',
-      'aria-label': `${group.host.card.name}, ${relations.join(', ')}`,
+      'data-holds': holds,
+      ...(holds ? { role: 'group', 'aria-label': `${group.host.card.name}, ${relations.join(', ')}` } : {}),
     },
-    permanentNode(props, group.host),
-    createElement('span', { key: 'link', className: 'mtg-attach__link', 'aria-hidden': true }),
-    createElement(
-      'div',
-      { key: 'held', className: 'mtg-attach__held' },
-      ...group.held.map((permanent) => permanentNode(props, permanent)),
-    ),
+    permanentNode(props, group.host, 'board', holds ? undefined : cover),
+    ...(holds
+      ? [
+          createElement('span', { key: 'link', className: 'mtg-attach__link', 'aria-hidden': true }),
+          createElement(
+            'div',
+            { key: 'held', className: 'mtg-attach__held' },
+            ...group.held.map((permanent) => permanentNode(props, permanent)),
+          ),
+        ]
+      : []),
+    holds ? (cover ?? null) : null,
   );
 }
 
-/**
- * One group, drawn: a permanent on its own, or a tray holding its attachments.
- *
- * Exported because the combat band draws the same thing. An attacker that is
- * holding a weapon takes the weapon with it — CR 301.5c keeps the Equipment
- * attached through the whole of combat, and a tray split across the seam would
- * be the tray saying the two are one object while the table says they are two.
- */
-export function groupNode(props: BattlefieldProps, group: PermanentGroup): ReactElement {
-  return group.held.length === 0 ? permanentNode(props, group.host) : attachedGroup(props, group);
+export function groupNode(props: BattlefieldProps, group: PermanentGroup, cover?: ReactNode): ReactElement {
+  return attachedGroup(props, group, cover);
+}
+
+interface PileRoot {
+  contains(value: unknown): boolean;
+}
+
+interface PileOpener {
+  focus(): void;
+}
+
+interface PileDocumentEvent {
+  readonly key?: string;
+  readonly target?: unknown;
+}
+
+interface PileDocument {
+  addEventListener(type: string, listener: (event: PileDocumentEvent) => void): void;
+  removeEventListener(type: string, listener: (event: PileDocumentEvent) => void): void;
+}
+
+function pileDocument(): PileDocument | null {
+  const candidate = (globalThis as { document?: unknown }).document;
+  if (candidate === undefined || candidate === null || typeof candidate !== 'object') return null;
+  return candidate as PileDocument;
+}
+
+interface PermanentPileViewProps {
+  readonly battlefield: BattlefieldProps;
+  readonly pile: PermanentPile;
+  readonly renderGroup: PermanentPileGroupRenderer;
+}
+
+export type PermanentPileGroupRenderer = (
+  battlefield: BattlefieldProps,
+  group: PermanentGroup,
+  cover?: ReactNode,
+) => ReactElement;
+
+/** One counted face at rest; every exact kernel object after one interaction. */
+function PermanentPileView({ battlefield, pile, renderGroup }: PermanentPileViewProps): ReactElement {
+  const [expanded, setExpanded] = useState(false);
+  const root = useRef<PileRoot | null>(null);
+  const opener = useRef<PileOpener | null>(null);
+  const restoreFocus = useRef(false);
+  const count = pile.groups.length;
+  const first = pile.groups[0];
+  if (first === undefined) throw new Error('A permanent pile must contain at least one group.');
+  const name = first.host.card.name;
+  const collapsedLabel = `${String(count)} ${name} permanents, collapsed; expand to choose one`;
+  const expandedLabel = `${String(count)} ${name} permanents, expanded`;
+
+  useEffect(() => {
+    if (!expanded) return undefined;
+    const document = pileDocument();
+    if (document === null) return undefined;
+    const onKeyDown = (event: PileDocumentEvent): void => {
+      if (event.key !== 'Escape') return;
+      restoreFocus.current = true;
+      setExpanded(false);
+    };
+    const onPointerDown = (event: PileDocumentEvent): void => {
+      if (root.current?.contains(event.target) === true) return;
+      setExpanded(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('pointerdown', onPointerDown);
+    return (): void => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('pointerdown', onPointerDown);
+    };
+  }, [expanded]);
+
+  useEffect(() => {
+    if (expanded || !restoreFocus.current) return;
+    restoreFocus.current = false;
+    opener.current?.focus();
+  }, [expanded]);
+
+  const toggle = createElement(
+    'button',
+    {
+      key: 'toggle',
+      type: 'button',
+      className: 'mtg-permanent-pile__toggle',
+      'data-pile-count': count,
+      'aria-label': expanded ? 'Collapse permanent pile' : collapsedLabel,
+      'aria-expanded': expanded,
+      ref: (node: PileOpener | null): void => {
+        opener.current = node;
+      },
+      onClick: (): void => {
+        setExpanded((open) => !open);
+      },
+    },
+    createElement('span', { className: 'mtg-permanent-pile__count', 'aria-hidden': true }, count),
+  );
+
+  if (!expanded) {
+    const {
+      onSelect: _onSelect,
+      onActivate: _onActivate,
+      onMenu: _onMenu,
+      pickerFor: _pickerFor,
+      ...inertBattlefield
+    } = battlefield;
+    return renderGroup(inertBattlefield, first, toggle);
+  }
+
+  return createElement(
+    'div',
+    {
+      className: 'mtg-permanent-pile',
+      'data-expanded': true,
+      'data-pile-count': count,
+      role: 'group',
+      'aria-label': expandedLabel,
+      ref: (node: PileRoot | null): void => {
+        root.current = node;
+      },
+    },
+    toggle,
+    ...pile.groups.map((group) => renderGroup(battlefield, group)),
+  );
+}
+
+/** Draw a pile through the battlefield or another exact-object board seam. */
+export function permanentPileNode(
+  props: BattlefieldProps,
+  pile: PermanentPile,
+  renderGroup: PermanentPileGroupRenderer = groupNode,
+): ReactElement {
+  const first = pile.groups[0];
+  if (first === undefined) throw new Error('A permanent pile must contain at least one group.');
+  return pile.groups.length === 1
+    ? renderGroup(props, first)
+    : createElement(PermanentPileView, {
+        key: first.host.key,
+        battlefield: props,
+        pile,
+        renderGroup,
+      });
 }
 
 export function Battlefield(props: BattlefieldProps): ReactElement {
   const lands = props.permanents.filter((permanent) => isLand(permanent.card));
   const others = props.permanents.filter((permanent) => !isLand(permanent.card));
   const groups = groupAttachments(others);
+  const piles = groupPermanentPiles(groups, props);
   // Groups rather than permanents, because the row draws one item per group: a
   // creature holding a weapon takes one place on the table, not two.
   //
@@ -857,7 +1269,7 @@ export function Battlefield(props: BattlefieldProps): ReactElement {
   // What replaces them is the honest sentence the zone already had: a row with
   // nothing in it renders `emptyText` rather than a wall of holes, so a blank
   // half of the mat still reads as a board rather than as a surface that failed.
-  const played: ReactNode[] = groups.map((group) => groupNode(props, group));
+  const played: ReactNode[] = piles.map((pile) => permanentPileNode(props, pile));
   // The same node every other permanent gets, drawn as a tile instead of a
   // face. A land's picker rides inside its slot exactly as a spell's does, which
   // is what retired the Fragment this map used to wrap each chip in: the chip
@@ -886,7 +1298,17 @@ export function Battlefield(props: BattlefieldProps): ReactElement {
     played.length === 0 && band === null
       ? []
       : [
-          createElement('div', { key: 'spells', className: 'mtg-board__spells' }, ...played),
+          createElement(
+            'div',
+            {
+              key: 'spells',
+              className: 'mtg-board__spells',
+              style: permanentRowStyle(piles),
+              [props.tile === true ? 'data-tile-crowded' : 'data-crowded']:
+                groups.length >= 8 ? 'true' : undefined,
+            },
+            ...played,
+          ),
           ...(band === null ? [] : [band]),
         ];
   return createElement(Zone, {

@@ -28,10 +28,9 @@
  *
  * The bar and the disclosure both need `autoPass` and `onAutoPass` before they
  * can be drawn at all, because a set of controls nobody is listening to would be
- * a screen that lies about what it controls. The disclosure needs `onYield` as
- * well, since half of what is left in its panel is the two yields — a caller
- * with settings but no yield gets the turn text on the bar as a plain badge,
- * rather than a disclosure with one dead half. The beat toggle answers to the
+ * a screen that lies about what it controls. Yield controls are an independent
+ * capability: a caller without `onYield` still owns stops and full control, and
+ * the disclosure simply omits the actions it cannot honor. The beat toggle answers to the
  * same rule one level down: it is drawn only for a caller that passes `onBeats`,
  * which `@mtg/netplay` deliberately does not.
  */
@@ -40,6 +39,8 @@ import type { ReactElement, ReactNode } from 'react';
 import type { AutoPassSettings, BeatSet, Step, YieldBoundary } from '@mtg/kernel';
 import { PhaseBar } from './PhaseBar';
 import { TurnStops } from './TurnStops';
+import type { TriggerYield } from './trigger-yields';
+import type { Pace } from '../../motion/pace';
 
 /**
  * What the step bar needs: where the game is, whose turn it is, and what it may
@@ -51,8 +52,8 @@ import { TurnStops } from './TurnStops';
  * is a control neither file describes.
  */
 export interface StepBarInput {
-  /** Where the game is, so the bar can mark the node it is in. */
-  readonly step: Step;
+  /** Where the game is; null means the standard turn has not begun yet. */
+  readonly step: Step | null;
   /** The turn and whose it is; `prompt.ts`'s `describeTurn` writes it. */
   readonly turnText: string;
   /** The whole sentence including the step, which stays in the badge's name. */
@@ -62,9 +63,30 @@ export interface StepBarInput {
   /** A yield is a run of passes, so it needs a pass to start from. */
   readonly canYield: boolean;
   readonly onYield?: ((boundary: YieldBoundary) => void) | undefined;
+  /**
+   * The settled optional-trigger answers, and the way out of one.
+   *
+   * Passed through rather than read here, like every other setting on this bar:
+   * `TurnStops` draws them and `use-session.ts` owns them. A caller with no
+   * `onClearTriggerYield` draws no list, which is the same rule that gives a
+   * caller with no `onYield` no settled-yield list.
+   */
+  readonly triggerYields?: readonly TriggerYield[] | undefined;
+  readonly onClearTriggerYield?: ((key: string) => void) | undefined;
   /** Which combat moments the game pauses at, and how to change them. */
   readonly beats?: BeatSet | undefined;
   readonly onBeats?: ((next: BeatSet) => void) | undefined;
+  /**
+   * How fast the table moves for this viewer, and how to change it.
+   *
+   * Passed through under the same rule as everything else on this bar, and it is
+   * the one setting here that the game cannot see at all: it scales durations in
+   * `../../motion/pace.ts` and reaches no session, so a caller that owns no stop
+   * set and draws no bar loses a control over presentation rather than over
+   * play.
+   */
+  readonly pace?: Pace | undefined;
+  readonly onPace?: ((next: Pace) => void) | undefined;
 }
 
 /** What game details draw beside the ask, once the turn text has left them. */
@@ -97,17 +119,15 @@ export function stepBar(input: StepBarInput): ReactElement | null {
   const settings = input.autoPass ?? null;
   const { onAutoPass, onYield } = input;
   if (settings === null || onAutoPass === undefined) return null;
-  const head =
-    onYield === undefined
-      ? createElement('span', { className: 'mtg-badge' }, input.turnText)
-      : createElement(TurnStops, {
-          label: input.turnText,
-          detail: input.stepText,
-          settings,
-          onChange: onAutoPass,
-          canYield: input.canYield,
-          onYield,
-        });
+  const head = createElement(TurnStops, {
+    label: input.turnText,
+    detail: input.stepText,
+    settings,
+    onChange: onAutoPass,
+    ...(onYield === undefined ? {} : { canYield: input.canYield, onYield }),
+    ...(input.triggerYields === undefined ? {} : { triggerYields: input.triggerYields }),
+    ...(input.onClearTriggerYield === undefined ? {} : { onClearTriggerYield: input.onClearTriggerYield }),
+  });
   return createElement(PhaseBar, {
     settings,
     onChange: onAutoPass,
@@ -115,6 +135,8 @@ export function stepBar(input: StepBarInput): ReactElement | null {
     head,
     ...(input.beats === undefined ? {} : { beats: input.beats }),
     ...(input.onBeats === undefined ? {} : { onBeats: input.onBeats }),
+    ...(input.pace === undefined ? {} : { pace: input.pace }),
+    ...(input.onPace === undefined ? {} : { onPace: input.onPace }),
   });
 }
 

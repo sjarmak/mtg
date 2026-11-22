@@ -1,0 +1,36 @@
+/** Each row adds a subject to the same executable interaction contract. */
+export const exertScenarios = [
+  {
+    name: 'Ahn-Crop Crasher',
+    format: 'akh-hou',
+    power: 3,
+    toughness: 2,
+    exertPower: 3,
+    exertToughness: 2,
+    target: true,
+    preventsBlock: true,
+    killsTarget: false,
+  },
+  {
+    name: 'Glorybringer',
+    format: 'legacy-cube-2021-08',
+    power: 4,
+    toughness: 4,
+    exertPower: 4,
+    exertToughness: 4,
+    target: true,
+    preventsBlock: false,
+    killsTarget: true,
+  },
+  {
+    name: 'Gust Walker',
+    format: 'akh-hou',
+    power: 2,
+    toughness: 2,
+    exertPower: 3,
+    exertToughness: 3,
+    target: false,
+    preventsBlock: false,
+    killsTarget: false,
+  },
+] as const;

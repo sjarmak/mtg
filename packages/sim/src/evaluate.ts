@@ -11,7 +11,14 @@
  * `boardCreatureValue` reads through the kernel's layer system (used for
  * permanents, so pump effects and damage are reflected).
  */
-import type { Ability, Card, GrantableKeyword, Keyword, StaticModification, StaticScope } from '@mtg/dsl';
+import type {
+  Ability,
+  Card,
+  EngineStaticScope,
+  GrantableKeyword,
+  Keyword,
+  StaticModification,
+} from '@mtg/dsl';
 import { assertNever, cardManaValue, isGrantableKeywordAbilityKind, KEYWORDS, manaValue } from '@mtg/dsl';
 import type { GameObject, GameState, ObjectId, PlayerId } from '@mtg/kernel';
 import {
@@ -34,17 +41,6 @@ export function keywordValue(config: CastPolicyConfig, keywords: readonly Keywor
 }
 
 /**
- * What one static modification is worth on one permanent, in the units a body
- * is valued in.
- *
- * One owner, because two things ask it: a lord's printed static, valued for a
- * card still in hand, and an equip clause, valued for the creature the
- * activation policy is choosing to attach to (`policies/activate.ts`). CR 613
- * gives them the same two layers and the kernel registers the same record for
- * both, so a second scale here would price a +2/+0 on a weapon differently from
- * a +2/+0 on an anthem.
- */
-/**
  * What granting one name is worth, from whichever of the two tables holds it.
  *
  * The modification names one thing and the config prices two lists, for the
@@ -59,12 +55,34 @@ function grantValue(config: CastPolicyConfig, keyword: GrantableKeyword): number
     : config.keywordValue[keyword];
 }
 
+/**
+ * What one static modification is worth on one permanent, in the units a body
+ * is valued in.
+ *
+ * One owner, because two things ask it: a lord's printed static, valued for a
+ * card still in hand, and an equip clause, valued for the creature the
+ * activation policy is choosing to attach to (`policies/activate.ts`). CR 613
+ * gives them the same two layers and the kernel registers the same record for
+ * both, so a second scale here would price a +2/+0 on a weapon differently from
+ * a +2/+0 on an anthem.
+ */
 export function modificationValue(config: CastPolicyConfig, modification: StaticModification): number {
   switch (modification.kind) {
     case 'statBonus':
       return modification.power * config.powerWeight + modification.toughness * config.toughnessWeight;
     case 'grantKeyword':
       return grantValue(config, modification.keyword);
+    case 'grantKeywordAbilities':
+      return modification.grants.reduce(
+        (total, grant) =>
+          total +
+          (grant.kind === 'keyword'
+            ? grantValue(config, grant.keyword)
+            : grant.kind === 'landwalk'
+              ? config.grantedLandwalkValue
+              : 0),
+        0,
+      );
     case 'definePt': {
       const count = config.definePtAssumedCount;
       return (
@@ -85,25 +103,33 @@ export function modificationValue(config: CastPolicyConfig, modification: Static
         modification.toughness * count * config.toughnessWeight
       );
     }
+    case 'statBonusPerColor':
+      return modification.power * config.definePtAssumedCount * config.powerWeight;
     // Zero, and the scale is why. Every term above is power and toughness: this
     // function prices a modification as the body it changes, and a CR 614
     // replacement changes no body at all. There is no number here to multiply —
-    // a doubler's value is a future damage or life-gain event, which is not a
+    // its value is a future damage, life-gain, or discard event, which is not a
     // characteristic and not on this scale. `@mtg/deckbuild`'s
     // `staticModificationValue` reaches the same zero from the deck-shaped
     // argument.
     case 'doubleDamage':
     case 'doubleLifeGain':
+    case 'doublePlusOnePlusOneCountersOnCreaturesYouControl':
+    case 'damageCannotReduceControllerLifeBelow':
+    case 'discardedByOpponentEntersBattlefield':
+    case 'preventDamageToSelfAndRemoveCounters':
       return 0;
     // The combat class (`static-modification-class.ts`) is zero for the same
-    // scale reason as the two replacements above: this function prices a
-    // modification as the power/toughness it changes, and none of the seven
+    // scale reason as the replacement effects above: this function prices a
+    // modification as the power/toughness it changes, and none of the nine
     // change power or toughness. `cantAttack`, `cantBlock`, `cantBeBlocked`,
     // `attacksEachCombatIfAble`, `mustBeBlockedIfAble`,
-    // `blockOnlyCreaturesWithKeyword` and `cantBeBlockedBySubtype` are
+    // `canBlockAnyNumber`, `blockOnlyCreaturesWithKeyword`,
+    // `cantBeBlockedBySubtype` and `cantAttackWithoutAnyOf` are
     // combat-legality facts (CR 508/509), not characteristics, and this
-    // evaluator has a body-shaped scale to spend them on and none to spend. A bot policy that needs to weigh a combat
-    // restriction reads it where it decides whether to attack or block
+    // evaluator has a body-shaped scale to spend them on and none to spend. A
+    // bot policy that needs to weigh a combat restriction reads it where it
+    // decides whether to attack or block
     // (`legal.ts` already refuses an illegal choice before the policy sees
     // it), not here where a card in hand is scored as a body.
     case 'cantAttack':
@@ -111,8 +137,17 @@ export function modificationValue(config: CastPolicyConfig, modification: Static
     case 'cantBeBlocked':
     case 'attacksEachCombatIfAble':
     case 'mustBeBlockedIfAble':
+    case 'canBlockAnyNumber':
+    case 'canAttackAsThoughNoDefender':
     case 'blockOnlyCreaturesWithKeyword':
     case 'cantBeBlockedBySubtype':
+    case 'addSubtype':
+    case 'cantAttackWithoutAnyOf':
+    case 'cantAttackOrBlock':
+    case 'cantAttackOrBlockAlone':
+    case 'preventCombatDamage':
+    case 'grantTriggeredAbility':
+    case 'grantAnyColorManaAbility':
       return 0;
     default:
       return assertNever(modification, 'modificationValue');
@@ -166,6 +201,23 @@ export function printedAbilityValue(config: CastPolicyConfig, ability: Ability):
       // *this* one, at *that* target, is the activation policy's question and
       // it reads the payload there (`policies/activate.ts`).
       return Math.max(0, config.activationValue - config.activationCostWeight * manaValue(ability.cost.mana));
+    case 'staticPlayerRule':
+      // This body-shaped evaluator has no opponent-action forecast to price a
+      // conditional rule against. Legality still reads and enforces it live.
+      return 0;
+    case 'staticGameRule':
+      // The kernel enforces this live board rule; this printed-card heuristic
+      // has no result context in which to price it.
+      return 0;
+    case 'stateTriggered':
+      // The live kernel executes it; this hand-value heuristic has no board.
+      return 0;
+    case 'staticBundle':
+      // The live board and library decide both reach and uptime.
+      return 0;
+    case 'staticActivationRule':
+      // The named opposing source is unavailable while this card is in hand.
+      return 0;
     default:
       return assertNever(ability, 'printedAbilityValue');
   }
@@ -197,7 +249,7 @@ export function printedCreatureValue(config: CastPolicyConfig, card: Card): numb
  * a creature, and `otherCreaturesYouControl` excludes it. So the board-side term
  * is the printed reach less the one permanent the layers already spoke for.
  */
-function boardStaticReach(config: CastPolicyConfig, scope: StaticScope): number {
+function boardStaticReach(config: CastPolicyConfig, scope: EngineStaticScope): number {
   switch (scope) {
     case 'self':
       return 0;
@@ -205,6 +257,10 @@ function boardStaticReach(config: CastPolicyConfig, scope: StaticScope): number 
       return Math.max(0, config.staticAbilityReach - 1);
     case 'otherCreaturesYouControl':
       return config.staticAbilityReach;
+    case 'landsYouControl':
+    case 'allLands':
+    case 'allCreatures':
+      return 0;
     default:
       return assertNever(scope, 'boardStaticReach');
   }

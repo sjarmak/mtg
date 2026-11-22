@@ -22,8 +22,10 @@ import {
   currentVocabulary,
   diffVocabulary,
   parseVocabularySnapshotArgs,
+  readVocabularySnapshot,
   refreshVocabularySnapshot,
   serializeVocabularySnapshot,
+  vocabularyContentSha256,
   vocabularyReport,
   vocabularyVerdict,
   VOCABULARY_SNAPSHOT_PATH,
@@ -76,7 +78,7 @@ describe('an addition', () => {
     const { verdict, text } = reportFor({ RARITIES: ['common'] }, { RARITIES: ['common', 'mythic'] });
     expect(verdict).toBe('stale');
     expect(text).toBe(
-      'RARITIES gained mythic\nthe committed vocabulary snapshot is stale; run npm run vocabulary:refresh\n',
+      'RARITIES gained mythic\nthe committed @mtg/dsl vocabulary snapshot is stale; run npm run vocabulary:refresh\n',
     );
   });
 
@@ -94,8 +96,8 @@ describe('a removal', () => {
     expect(text).toBe(
       [
         'COUNTER_KINDS no longer declares wing',
-        'narrowing a DSL enum invalidates every generated artifact already on disk that names the dropped member, and nothing in CI regenerates those artifacts',
-        'record COUNTER_KINDS.wing in packages/dsl/src/retired-vocabulary.ts, mapping each retired name to the member that carries its meaning now, then run npm run vocabulary:refresh',
+        'narrowing a @mtg/dsl enum invalidates every generated artifact already on disk that names the dropped member, and nothing in CI regenerates those artifacts',
+        'record COUNTER_KINDS.wing in packages/dsl/src/retired-vocabulary.ts, mapping each retired name to its replacement or to null when it was removed, then run npm run vocabulary:refresh',
         'the snapshot was not rewritten: a refresh that accepted an unrecorded removal would be the silent narrowing it exists to catch',
         '',
       ].join('\n'),
@@ -122,6 +124,16 @@ describe('a removal', () => {
     expect(text).toContain('run npm run vocabulary:refresh');
   });
 
+  it('records a removal without pretending another member replaced it', () => {
+    const { verdict, text } = reportFor(
+      { VIOLATION_CODES: ['MANA_COST_ZERO', 'MANA_COST_OUT_OF_RANGE'] },
+      { VIOLATION_CODES: ['MANA_COST_OUT_OF_RANGE'] },
+      () => ({ MANA_COST_ZERO: null }),
+    );
+    expect(verdict).toBe('stale');
+    expect(text).toContain('VIOLATION_CODES dropped MANA_COST_ZERO, recorded as removed');
+  });
+
   it('reads the recorded name from the enum it belongs to, not from any enum', () => {
     const { verdict } = reportFor({ RARITIES: ['saberHorn'] }, { RARITIES: [] }, retiredNames);
     expect(verdict).toBe('narrowed');
@@ -129,8 +141,12 @@ describe('a removal', () => {
 });
 
 describe('the retired table', () => {
-  it('records the one narrowing that has happened, and counters.ts still parses it', () => {
+  it('distinguishes the recorded rename from the recorded removal', () => {
     expect(retiredNames('COUNTER_KINDS')).toStrictEqual({ saberHorn: 'horn' });
+    expect(retiredNames('VIOLATION_CODES')).toStrictEqual({
+      MANA_COST_ZERO: null,
+      TOKEN_COLOR_OFF_IDENTITY: null,
+    });
     expect(retiredNames('RARITIES')).toStrictEqual({});
     expect(CounterKindSchema.parse('saberHorn')).toBe('horn');
     expect(CounterKindSchema.parse('horn')).toBe('horn');
@@ -142,7 +158,7 @@ describe('the retired table', () => {
       const members = derived[enumName];
       expect(members, enumName).toBeDefined();
       for (const [retiredName, currentName] of Object.entries(retired)) {
-        expect(members, `${enumName}.${currentName}`).toContain(currentName);
+        if (currentName !== null) expect(members, `${enumName}.${currentName}`).toContain(currentName);
         expect(members, `${enumName}.${retiredName}`).not.toContain(retiredName);
       }
     }
@@ -157,6 +173,31 @@ describe('the retired table', () => {
 });
 
 describe('the refresh', () => {
+  it('content-addresses resolved members independently of source evidence', async () => {
+    const first = { EFFECT_KINDS: ['drawCards'] };
+    const widened = { EFFECT_KINDS: ['drawCards', 'gainLife'] };
+    const parsed = JSON.parse(await serializeVocabularySnapshot(first)) as {
+      readonly contentSha256: string;
+    };
+    expect(parsed.contentSha256).toBe(vocabularyContentSha256(first));
+    expect(vocabularyContentSha256(widened)).not.toBe(vocabularyContentSha256(first));
+  });
+
+  it('rejects a snapshot whose independent content address is false', async () => {
+    const scratch = mkdtempSync(join(tmpdir(), 'vocabulary-snapshot-'));
+    const path = join(scratch, 'vocabulary-snapshot.json');
+    try {
+      const serialized = await serializeVocabularySnapshot({ EFFECT_KINDS: ['drawCards'] });
+      writeFileSync(
+        path,
+        serialized.replace(/"contentSha256": "[0-9a-f]+"/, '"contentSha256": "' + '0'.repeat(64) + '"'),
+      );
+      expect(() => readVocabularySnapshot(path)).toThrow(/contentSha256 does not match enums/);
+    } finally {
+      rmSync(scratch, { recursive: true, force: true });
+    }
+  });
+
   it('refuses to rewrite a snapshot the live vocabulary has narrowed', async () => {
     const scratch = mkdtempSync(join(tmpdir(), 'vocabulary-snapshot-'));
     const path = join(scratch, 'vocabulary-snapshot.json');
@@ -191,7 +232,7 @@ describe('the refresh', () => {
    */
   it('finds the committed snapshot already fresh', async () => {
     const { verdict, drift, wrote, text } = await refreshVocabularySnapshot(true);
-    expect(text).toMatch(/^the vocabulary snapshot is fresh: \d+ enums, \d+ members\n$/);
+    expect(text).toMatch(/^the @mtg\/dsl vocabulary snapshot is fresh: \d+ enums, \d+ members\n$/);
     expect(drift).toStrictEqual({ added: [], dropped: [] });
     expect(wrote).toBe(false);
     expect(verdict).toBe('fresh');

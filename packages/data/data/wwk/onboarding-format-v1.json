@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "wwk",
+  "name": "Worldwake / Zendikar",
+  "sourceCodes": ["WWK", "ZEN"],
+  "products": [
+    { "id": "wwk-draft", "setCode": "WWK", "boosterKey": "draft" },
+    { "id": "zen-draft", "setCode": "ZEN", "boosterKey": "draft" }
+  ],
+  "draft": {
+    "seats": 8,
+    "rounds": ["wwk-draft", "zen-draft", "zen-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["wwk-draft", "wwk-draft", "zen-draft", "zen-draft", "zen-draft", "zen-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

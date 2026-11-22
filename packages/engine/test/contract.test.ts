@@ -17,6 +17,7 @@ import type {
   MoveId,
   ObservedBackend,
   ObservedSession,
+  ObjectView,
   OpenResult,
   PendingDecision,
   ProjectingSession,
@@ -28,14 +29,22 @@ import type {
   TableView,
 } from '@mtg/engine';
 import {
+  COMMANDER_RULES,
+  MOMIR_RULES,
   PROJECTION_VERSION,
-  SEAT_IDS,
   checkBackend,
   isRecorded,
   isRecordedSession,
+  matchRulesRefusals,
+  perSeat,
   projectsPerSeat,
+  rulesOf,
   scriptBackend,
+  seatViewOf,
 } from '@mtg/engine';
+
+/** `SEAT_IDS` was two seats spelled once; this file only ever builds two-seat tables. */
+const TWO_SEATS: readonly SeatId[] = [0, 1];
 
 const PRINTED: SessionSpec = {
   content: { kind: 'printed', format: 'legacy' },
@@ -55,9 +64,78 @@ const SEATED: SessionSpec = {
 
 const GENERATED: SessionSpec = { ...PRINTED, content: { kind: 'dsl-set', setCode: 'TDG' } };
 
+/** The same two seats on a 1v1 Commander board, each deck naming its general. */
+const COMMANDER: SessionSpec = {
+  ...PRINTED,
+  rules: COMMANDER_RULES,
+  seats: [
+    {
+      ...PRINTED.seats[0],
+      deck: { ...PRINTED.seats[0].deck, commanders: [{ name: 'general-north', count: 1 }] },
+    },
+    {
+      ...PRINTED.seats[1],
+      deck: { ...PRINTED.seats[1].deck, commanders: [{ name: 'general-south', count: 1 }] },
+    },
+  ],
+};
+
+/** The toy with seat 0's opening seat view rewritten. */
+function rewrittenSeat(rewrite: (seat: SeatView) => SeatView): ObservedBackend {
+  return rewrittenOpening((session) => ({
+    ...session,
+    view: { ...session.view, seats: [rewrite(session.view.seats[0]), session.view.seats[1]] },
+  }));
+}
+
+/** The observed toy with only its opening snapshot rewritten. */
+function rewrittenOpening(rewrite: (session: ObservedSession) => ObservedSession): ObservedBackend {
+  const inner = scriptBackend();
+  return {
+    ...inner,
+    open: async (table): Promise<OpenResult<ObservedSession>> => {
+      const opened = await inner.open(table);
+      return opened.ok ? { ok: true, session: rewrite(opened.session) } : opened;
+    },
+  };
+}
+
+/** A Commander pod: the same four decks, each naming its own general. */
+const FOUR_SEATED: SessionSpec = {
+  ...PRINTED,
+  rules: COMMANDER_RULES,
+  seats: perSeat(
+    ['North', 'East', 'South', 'West'].map((name) => ({
+      name,
+      controller: 'engine',
+      deck: {
+        name: name.toLowerCase(),
+        cards: [],
+        commanders: [{ name: `general-${name.toLowerCase()}`, count: 1 }],
+      },
+    })),
+  ),
+};
+
 describe('a backend that is not the kernel', () => {
   it('satisfies the conformance suite', async () => {
     expect(await checkBackend(scriptBackend(), PRINTED)).toEqual([]);
+  });
+
+  it('seats a four-player pod, which the two-seat kernel cannot', async () => {
+    expect(await scriptBackend().supports(FOUR_SEATED)).toEqual([]);
+    expect(await checkBackend(scriptBackend(), FOUR_SEATED)).toEqual([]);
+    const opened = await scriptBackend().open(FOUR_SEATED);
+    expect(opened.ok).toBe(true);
+    if (!opened.ok) return;
+    expect(opened.session.view.seats).toHaveLength(4);
+    expect(opened.session.view.seats.map((seat) => seat.life)).toEqual([40, 40, 40, 40]);
+    for (const [index, name] of ['north', 'east', 'south', 'west'].entries()) {
+      expect(seatViewOf(opened.session.view, index).commandZone?.map((object) => object.name)).toEqual([
+        `general-${name}`,
+      ]);
+    }
+    await opened.session.close();
   });
 
   it('refuses content it does not play, by name', async () => {
@@ -88,6 +166,134 @@ describe('a backend that is not the kernel', () => {
     session = next.session;
     expect(session.transcript).toHaveLength(2);
     expect(session.transcript[1]?.move).toBe(first.id);
+  });
+});
+
+describe('session identity and decision coherence', () => {
+  const checks = (findings: readonly Finding[]): readonly string[] => findings.map((one) => one.check);
+
+  it('reports a session whose backend identity differs from the backend that opened it', async () => {
+    const findings = await checkBackend(
+      rewrittenOpening((session) => ({ ...session, backend: 'some-other-backend' })),
+      PRINTED,
+    );
+    expect(checks(findings)).toContain('session-identity');
+  });
+
+  it('reports a session on a different determinism arm from its backend', async () => {
+    const findings = await checkBackend(
+      rewrittenOpening(
+        (session) =>
+          ({
+            ...session,
+            determinism: 'recorded',
+            record: { backend: session.backend, table: session.table, seed: 'hostile', moves: [] },
+            fingerprint: 'hostile',
+          }) as unknown as ObservedSession,
+      ),
+      PRINTED,
+    );
+    expect(checks(findings)).toContain('determinism');
+  });
+
+  it('reports a session that substitutes another table or another local-seat list', async () => {
+    const changedTable = await checkBackend(
+      rewrittenOpening((session) => ({ ...session, table: { ...session.table, maximumTurns: 17 } })),
+      PRINTED,
+    );
+    const changedSeats = await checkBackend(
+      rewrittenOpening((session) => ({ ...session, localSeats: [1, 0] })),
+      SEATED,
+    );
+    expect(checks(changedTable)).toContain('session-table');
+    expect(checks(changedSeats)).toContain('local-seats');
+  });
+
+  it('treats a card origin as part of the table identity', async () => {
+    const table = {
+      ...PRINTED,
+      seats: [
+        {
+          ...PRINTED.seats[0],
+          deck: {
+            name: 'north',
+            cards: [{ name: 'Shared Spark', count: 1, origin: { kind: 'printed' } }],
+          },
+        },
+        PRINTED.seats[1],
+      ],
+    } as unknown as SessionSpec;
+    const findings = await checkBackend(
+      rewrittenOpening((session) => ({
+        ...session,
+        table: {
+          ...session.table,
+          seats: [
+            {
+              ...session.table.seats[0],
+              deck: {
+                ...session.table.seats[0].deck,
+                cards: [
+                  {
+                    name: 'Shared Spark',
+                    count: 1,
+                    origin: { kind: 'custom', setCode: 'CSTM', cardId: 'cstm-shared-spark' },
+                  },
+                ],
+              },
+            },
+            session.table.seats[1],
+          ],
+        } as SessionSpec,
+      })),
+      table,
+    );
+    expect(checks(findings)).toContain('session-table');
+  });
+
+  it('treats the sideboard as part of the table identity', async () => {
+    const table: SessionSpec = {
+      ...PRINTED,
+      seats: [
+        {
+          ...PRINTED.seats[0],
+          deck: { ...PRINTED.seats[0].deck, sideboard: [{ name: 'Yorion, Sky Nomad', count: 1 }] },
+        },
+        PRINTED.seats[1],
+      ],
+    };
+    const findings = await checkBackend(
+      rewrittenOpening((session) => ({
+        ...session,
+        table: {
+          ...session.table,
+          seats: [
+            {
+              ...session.table.seats[0],
+              deck: { ...session.table.seats[0].deck, sideboard: [] },
+            },
+            session.table.seats[1],
+          ],
+        },
+      })),
+      table,
+    );
+    expect(checks(findings)).toContain('session-table');
+  });
+
+  it('reports duplicate opaque move ids because submit cannot distinguish them', async () => {
+    const findings = await checkBackend(
+      rewrittenOpening((session) => {
+        const decision = session.decision;
+        if (decision === null) throw new Error('the toy opened without a decision');
+        const first = decision.options[0];
+        if (first === undefined) throw new Error('the toy opened without an option');
+        return { ...session, decision: { ...decision, options: [first, { ...first, text: 'Same id' }] } };
+      }),
+      PRINTED,
+    );
+    expect(checks(findings)).toContain('decision-options');
+    expect(findings.map((one) => one.detail).join('\n')).toContain('advance');
   });
 });
 
@@ -142,6 +348,7 @@ describe('a decision a backend could not finish listing', () => {
       handSize: 0,
       librarySize: 0,
       graveyard: [],
+      exile: [],
       battlefield: [],
     };
   }
@@ -233,7 +440,7 @@ describe('a decision a backend could not finish listing', () => {
         result: done ? { winner: null, reason: 'blocks declared', endedOnTurn: 1 } : null,
         seats: null,
         submitted: taken.length,
-        localSeats: [1],
+        localSeats: [0],
         // One frame per position, which is one more than the moves that reached
         // it. Flat mode's whole declaration is one move and one frame however
         // many blockers it assigned, which is the difference between the two
@@ -450,7 +657,7 @@ describe('a backend cannot declare per-seat projection without passing it', () =
     after: number,
     type: string,
     oids: readonly string[],
-    seats: readonly SeatId[] = SEAT_IDS,
+    seats: readonly SeatId[] = TWO_SEATS,
   ): readonly EngineEvent[] {
     if (log.length < after) return log;
     return [
@@ -498,7 +705,7 @@ describe('a backend cannot declare per-seat projection without passing it', () =
     }
     const logs: readonly (readonly EngineEvent[])[] = [
       played.events,
-      ...SEAT_IDS.map((seat) => played.seats?.events(seat) ?? []),
+      ...TWO_SEATS.map((seat) => played.seats?.events(seat) ?? []),
     ];
     // A positive control: a suite that read no events would satisfy every
     // assertion below on an empty log.
@@ -687,6 +894,7 @@ describe('a backend cannot declare per-seat projection without passing it', () =
                           power: null,
                           toughness: null,
                           tapped: false,
+                          attacking: false,
                           damage: 0,
                           controller: one.id,
                           counters: {},
@@ -708,6 +916,110 @@ describe('a backend cannot declare per-seat projection without passing it', () =
     // The library finding is the one this test is for, and the assertion above
     // is the one that fails if arrivals go back to being union-scoped.
     expect(checks(findings)).toContain('hidden-information');
+  });
+
+  it('checks a library card that moves directly into public exile', async () => {
+    const projectedObject = (seat: SeatId, at: number): ObjectView => ({
+      oid: `hand-${String(seat)}-${String(at)}`,
+      name: `held-${String(seat)}-${String(at)}`,
+      typeLine: 'Token',
+      power: null,
+      toughness: null,
+      tapped: false,
+      attacking: false,
+      damage: 0,
+      controller: seat,
+      counters: {},
+    });
+    const exileNewest = (view: TableView): TableView => {
+      const exileSeat = (one: SeatView): SeatView => {
+        const at = one.handSize - 1;
+        const newest = projectedObject(one.id, at);
+        return {
+          ...one,
+          hand: one.hand?.filter((card) => card.oid !== newest.oid) ?? null,
+          handSize: at,
+          exile: [newest],
+        };
+      };
+      return { ...view, seats: [exileSeat(view.seats[0]), exileSeat(view.seats[1])] };
+    };
+    const findings = await checkBackend(
+      broken(true, (session) => {
+        const seats = session.seats;
+        if (seats === null) return session;
+        return {
+          ...session,
+          view: exileNewest(session.view),
+          seats: {
+            ...seats,
+            view: (seat) => exileNewest(seats.view(seat)),
+            events: (seat) => {
+              const log = seats.events(seat);
+              const view = seats.view(seat);
+              const next = view.seats.map((one) => `hand-${String(one.id)}-${String(one.handSize)}`);
+              return [
+                ...log,
+                {
+                  seq: log.length,
+                  type: 'libraries',
+                  text: 'the libraries',
+                  detail: { next },
+                  reveals: [],
+                },
+              ];
+            },
+          },
+        };
+      }),
+      SEATED,
+    );
+
+    const detail = findings.map((one) => one.detail).join('\n');
+    expect(detail).toContain("came out of seat 0's library");
+    expect(detail).toContain('one move earlier');
+  });
+
+  it('accepts a public top card of the library, named to both seats and then drawn', async () => {
+    // Oracle of Mul Daya: the backend says the top card is public by naming it
+    // in `libraryTop` on every view, so the other seat's payload carries the
+    // id of a card still in the library, and one move later that card is in
+    // the owner's hand. That is the exact shape the library check refuses when
+    // the id arrives through the log; through the projection's own field it is
+    // a reveal the contract states, and the check reads it as one.
+    const revealTop = (view: TableView): TableView => {
+      const revealSeat = (one: SeatView): SeatView => ({
+        ...one,
+        libraryTop: [
+          {
+            oid: `hand-${String(one.id)}-${String(one.handSize)}`,
+            name: `held-${String(one.id)}-${String(one.handSize)}`,
+            typeLine: 'Token',
+            power: null,
+            toughness: null,
+            tapped: false,
+            attacking: false,
+            damage: 0,
+            controller: one.id,
+            counters: {},
+          },
+        ],
+      });
+      return { ...view, seats: [revealSeat(view.seats[0]), revealSeat(view.seats[1])] };
+    };
+    const findings = await checkBackend(
+      broken(true, (session) => {
+        const seats = session.seats;
+        if (seats === null) return session;
+        return {
+          ...session,
+          view: revealTop(session.view),
+          seats: { ...seats, view: (seat) => revealTop(seats.view(seat)) },
+        };
+      }),
+      SEATED,
+    );
+    expect(checks(findings)).not.toContain('hidden-information');
   });
 
   it('does not accuse a backend whose payloads simply never name an undrawn card', async () => {
@@ -949,5 +1261,181 @@ describe('the determinism split', () => {
     // @ts-expect-error an observed backend cannot reproduce a game and cannot be
     // a simulation substrate, so it is not assignable here.
     expect(() => massSimulation(observed)).toBeTypeOf('function');
+  });
+});
+
+describe('the rules a table plays under', () => {
+  const checks = (findings: readonly Finding[]): readonly string[] => findings.map((one) => one.check);
+
+  it('reads the standard game off a table that states no rules', () => {
+    expect(rulesOf(PRINTED)).toEqual({ variant: 'standard', startingLife: 20 });
+    expect(matchRulesRefusals(PRINTED)).toEqual([]);
+  });
+
+  it('accepts only the fixed sixty-basic deck on a Momir table', () => {
+    const cards = ['Plains', 'Island', 'Swamp', 'Mountain', 'Forest'].map((name) => ({ name, count: 12 }));
+    const table: SessionSpec = {
+      ...PRINTED,
+      rules: MOMIR_RULES,
+      seats: [
+        { ...PRINTED.seats[0], deck: { ...PRINTED.seats[0].deck, cards } },
+        { ...PRINTED.seats[1], deck: { ...PRINTED.seats[1].deck, cards } },
+      ],
+    };
+    expect(matchRulesRefusals(table)).toEqual([]);
+    expect(
+      matchRulesRefusals({
+        ...table,
+        seats: [
+          { ...table.seats[0], deck: { ...table.seats[0].deck, cards: [{ name: 'Mountain', count: 60 }] } },
+          table.seats[1],
+        ],
+      }),
+    ).toEqual([
+      'seat 0 (North) has a Momir deck other than 12 each of Plains, Island, Swamp, Mountain, and Forest',
+    ]);
+  });
+
+  it('seats a commander table on a backend that is not the kernel', async () => {
+    expect(await scriptBackend().supports(COMMANDER)).toEqual([]);
+    expect(await checkBackend(scriptBackend(), COMMANDER)).toEqual([]);
+    const opened = await scriptBackend().open(COMMANDER);
+    expect(opened.ok).toBe(true);
+    if (!opened.ok) return;
+    expect(opened.session.view.seats.map((seat) => seat.life)).toEqual([40, 40]);
+    expect(opened.session.view.seats[1].commandZone?.map((object) => object.name)).toEqual(['general-south']);
+    expect(opened.session.view.seats[1].commanderDamage).toEqual({});
+    expect(opened.session.view.seats[1].commanderCasts).toEqual({ 'command-1-0': 0 });
+    await opened.session.close();
+  });
+
+  it('refuses, by name, a commander table with no commander and a standard table with one', async () => {
+    const headless: SessionSpec = {
+      ...COMMANDER,
+      seats: [COMMANDER.seats[0], { ...COMMANDER.seats[1], deck: { name: 'south', cards: [] } }],
+    };
+    expect(matchRulesRefusals(headless)).toEqual([
+      'seat 1 (South) names no commander, and a commander table seats no deck without one',
+    ]);
+    const refusals = await scriptBackend().supports(headless);
+    expect(refusals).toHaveLength(1);
+    expect(refusals[0]).toContain('names no commander');
+    const opened = await scriptBackend().open(headless);
+    expect(opened.ok).toBe(false);
+
+    const general: SessionSpec = { ...PRINTED, seats: COMMANDER.seats };
+    expect(matchRulesRefusals(general)).toEqual([
+      'seat 0 (North) names a commander, and the standard game has no command zone to put it in',
+      'seat 1 (South) names a commander, and the standard game has no command zone to put it in',
+    ]);
+  });
+
+  it('refuses a commander at a count other than one, and a life total nobody can start on', () => {
+    const twice: SessionSpec = {
+      ...COMMANDER,
+      seats: [
+        {
+          ...COMMANDER.seats[0],
+          deck: { ...COMMANDER.seats[0].deck, commanders: [{ name: 'general-north', count: 2 }] },
+        },
+        COMMANDER.seats[1],
+      ],
+    };
+    expect(matchRulesRefusals(twice)).toEqual([
+      'seat 0 (North) names 2 copies of commander "general-north"; a commander is one card',
+    ]);
+    expect(matchRulesRefusals({ ...COMMANDER, rules: { variant: 'commander', startingLife: 0 } })).toEqual([
+      'starting life 0: a seat starts on a positive whole number of life',
+    ]);
+  });
+
+  it('reports a backend that seats a commander table and deals the standard game', async () => {
+    // The silent failure the check exists for: `supports` said yes, and the
+    // opening board has no command zone, so a different game was dealt.
+    const noZone = await checkBackend(
+      rewrittenSeat(({ commandZone: _dropped, ...seat }) => seat),
+      COMMANDER,
+    );
+    expect(checks(noZone)).toContain('command-zone');
+    expect(noZone.find((one) => one.check === 'command-zone')?.detail).toContain('projects no command zone');
+
+    const wrongLife = await checkBackend(
+      rewrittenSeat((seat) => ({ ...seat, life: 20 })),
+      COMMANDER,
+    );
+    expect(checks(wrongLife)).toContain('rules');
+    expect(wrongLife.find((one) => one.check === 'rules')?.detail).toContain('opened on 20 life');
+  });
+
+  it('reports a command zone that does not hold the commanders the deck named', async () => {
+    const findings = await checkBackend(
+      rewrittenSeat((seat) => ({ ...seat, commandZone: [] })),
+      COMMANDER,
+    );
+    expect(checks(findings)).toContain('command-zone');
+    expect(findings.find((one) => one.check === 'command-zone')?.detail).toContain(
+      'command zone holds [], and its deck named [general-north]',
+    );
+  });
+
+  it('holds a standard table to its opening life as well', async () => {
+    const findings = await checkBackend(
+      rewrittenSeat((seat) => ({ ...seat, life: 40 })),
+      PRINTED,
+    );
+    expect(checks(findings)).toContain('rules');
+  });
+
+  it('treats the rules and the commanders as part of the table identity', async () => {
+    const forgotRules = await checkBackend(
+      rewrittenOpening(({ table: { rules: _dropped, ...table }, ...session }) => ({ ...session, table })),
+      COMMANDER,
+    );
+    expect(checks(forgotRules)).toContain('session-table');
+
+    const forgotGeneral = await checkBackend(
+      rewrittenOpening((session) => ({
+        ...session,
+        table: {
+          ...session.table,
+          seats: [
+            session.table.seats[0],
+            { ...session.table.seats[1], deck: { ...session.table.seats[1].deck, commanders: [] } },
+          ],
+        },
+      })),
+      COMMANDER,
+    );
+    expect(checks(forgotGeneral)).toContain('session-table');
+  });
+
+  it('keeps the command zone public and identifiable', async () => {
+    // The payload search treats the command zone as a zone: a commander a
+    // seat's view names is one it may identify, and the table and both seat
+    // views must agree about what the zone holds.
+    const disagreeing = await checkBackend(
+      rewrittenOpening((session) => {
+        const seats = session.seats;
+        if (seats === null) return session;
+        return {
+          ...session,
+          seats: {
+            ...seats,
+            view: (seat: SeatId): TableView => {
+              const view = seats.view(seat);
+              return {
+                ...view,
+                seats: [{ ...view.seats[0], commandZone: [] }, view.seats[1]],
+              };
+            },
+          },
+        };
+      }),
+      COMMANDER,
+    );
+    expect(checks(disagreeing)).toContain('hidden-information');
+    expect(disagreeing.find((one) => one.check === 'hidden-information')?.detail).toContain(
+      'disagrees about the public position',
+    );
   });
 });

@@ -39,6 +39,7 @@ import {
   simpleAgent,
   stateFingerprint,
 } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { creature, instant, lands, MOUNTAIN } from './cards';
 import { apply, handOidOf, oidsOf } from './helpers';
 import { copies, controlledBy as controlChange, onlyObject, withContinuous } from './continuous-helpers';
@@ -708,7 +709,11 @@ describe('a recorded game replays the legend choice', () => {
       if (decision === null) return { session, asked };
       if (decision.kind === 'legendRule') asked += 1;
       const wanted = JSON.stringify(
-        agent.decide({ state: session.state, player: decision.player, decision }),
+        agent.decide({
+          state: observeState(session.state, decision.player, 'test/legend-rule.test.ts:711'),
+          player: decision.player,
+          decision,
+        }),
       );
       const index = decision.options.findIndex((option) => JSON.stringify(option) === wanted);
       if (index < 0) throw new Error(`the agent chose an action outside the ${decision.kind} options`);

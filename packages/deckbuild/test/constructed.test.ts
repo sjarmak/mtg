@@ -57,6 +57,19 @@ describe('the copy limit', () => {
     ]);
   });
 
+  it('honors a card-level any-number rule without disabling the format limit for its neighbors', () => {
+    const rats = {
+      ...first(),
+      id: 'm11-relentless-rats',
+      name: 'Relentless Rats',
+      deckConstruction: { kind: 'anyNumberOfThisCard' },
+    } as unknown as Card;
+
+    expect(copyExcesses([...copies(rats, 20), ...copies(first(), 5)], CONSTRUCTED_COPY_LIMIT)).toEqual([
+      { name: first().name, limit: 4, played: 5 },
+    ]);
+  });
+
   it('says so in one line', () => {
     expect(formatCopyExcess({ name: 'Saltbank Lookout', limit: 4, played: 5 })).toBe(
       'Saltbank Lookout: 5 copies, 4 allowed',

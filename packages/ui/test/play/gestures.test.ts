@@ -218,14 +218,32 @@ describe('the default action a double click plays', () => {
       kind: 'declareAttackers',
       oids: ['o0', 'o1'],
     };
-    expect(defaultChoice([alone, together])).toBe(alone);
+    expect(defaultChoice([alone, together], 'o0')).toBe(alone);
     // Two moves about the card alone are two different moves, and neither is
     // more default than the other. This is the refusal, not a gap.
-    expect(defaultChoice([alone, { ...together, oids: ['o0'] }])).toBeNull();
+    expect(defaultChoice([alone, { ...together, oids: ['o0'] }], 'o0')).toBeNull();
     // Nothing about the card alone is the same refusal from the other side.
-    expect(defaultChoice([together, { ...together, index: 8, oids: ['o0', 'o2'] }])).toBeNull();
+    expect(defaultChoice([together, { ...together, index: 8, oids: ['o0', 'o2'] }], 'o0')).toBeNull();
     // A card repeatedly named by one move is still named by one object.
-    expect(defaultChoice([{ ...alone, oids: ['o0', 'o0'] }])).toEqual({ ...alone, oids: ['o0', 'o0'] });
+    expect(defaultChoice([{ ...alone, oids: ['o0', 'o0'] }], 'o0')).toEqual({ ...alone, oids: ['o0', 'o0'] });
+  });
+
+  it('is never a move this card only received because it was aimed at', () => {
+    // choicesByObject buckets a choice under its aimedAt objects too, so a
+    // spell's own bucket is not the only one this choice can reach: the
+    // creature it targets shares the bucket. oids names only the caster, so
+    // without the key filter this would look "alone" from the target's side
+    // as much as from the caster's.
+    const cast: PlayChoice = {
+      index: 2,
+      label: 'Cast Cinder Glide targeting Thornhide Guardian',
+      detail: null,
+      kind: 'other',
+      oids: ['spell'],
+      aimedAt: ['target'],
+    };
+    expect(defaultChoice([cast], 'spell')).toBe(cast);
+    expect(defaultChoice([cast], 'target')).toBeNull();
   });
 });
 
@@ -489,7 +507,7 @@ describe('a right click on a card', () => {
     expect(host.document?.activeElement).toBe(face);
   });
 
-  it('reaches nothing on a card the position offers no move on', () => {
+  it('opens the reader on a card the position offers no move on', () => {
     const session = seated(skirmish());
     const prompt = promptOf(session);
     const green = handOid(session.state, 'Thornhide Guardian');
@@ -499,11 +517,14 @@ describe('a right click on a card', () => {
     const face = anyFaceOf(rendered.container, green);
     expect(face.matches('button')).toBe(false);
 
-    // The default survives, so the browser's own menu is what a right click on
-    // an inert card gets. A page that swallowed it would have taken something
-    // away and offered nothing back.
-    expect(fireEvent.contextMenu(face)).toBe(true);
+    // An inert card has no action menu to offer, so the shared delegated
+    // inspection gesture opens its full face in the Info rail. The browser menu
+    // is suppressed only because the application has supplied that reader.
+    expect(fireEvent.contextMenu(face)).toBe(false);
     expect(menu('Thornhide Guardian')).toBeNull();
+    expect(
+      within(screen.getByRole('group', { name: 'Info' })).getAllByText('Thornhide Guardian').length,
+    ).toBeGreaterThan(0);
   });
 });
 

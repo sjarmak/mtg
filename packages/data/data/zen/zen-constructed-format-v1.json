@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "zen",
+  "name": "Zendikar",
+  "sources": [
+    {
+      "code": "ZEN",
+      "catalogFormat": "zen-printed-v1",
+      "catalogSha256": "caacc45fc6280ca35ff61e5c8caed0fff6ab438969fd3999ee4bc4bf431da02f",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/ZEN.json",
+        "sha256": "324985398b7946dc2dde3d2fa799e0aa605b0664b0c6eb6d608e9074ed61f322",
+        "version": "5.3.0+20260929"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "kor-armory",
+      "name": "Kor Armory",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "zen-printed-v1:0001:975f7752-e981-4046-ae9b-90b20db6b23a",
+          "name": "Armament Master",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0019:4fd1af74-ba3b-4528-9490-99edd54e9fe1",
+          "name": "Kor Duelist",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0023:bb2e9465-f5ba-4c7b-9f03-d40dc8394acd",
+          "name": "Kor Skyfisher",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0017:87ae3eb8-b570-4129-9d4e-b7afa8fc4840",
+          "name": "Kor Aeronaut",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0209:86c9838e-aa72-49fc-bae2-f880bcbc9313",
+          "name": "Trusty Machete",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0195:3aa395f2-656e-4bf3-bd9b-6240bd3e2774",
+          "name": "Adventuring Gear",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0014:09cfe585-8a55-4b27-89e0-dfb6946fe1f3",
+          "name": "Journey to Nowhere",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0020:68ad3199-c202-4b71-8a36-53547e70c39b",
+          "name": "Kor Hookmaster",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0038:9a8b0fd3-ae3e-41eb-b31b-d941b84b6c64",
+          "name": "Windborne Charge",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0216:a776decb-cdb5-4f41-8a3a-c0cece18eb35",
+          "name": "Kabira Crossroads",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0230:bc4f4b6d-ff35-4b1f-974b-f39569e6b3c7",
+          "name": "Plains",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "id": "pumped-up",
+      "name": "Pumped Up",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "zen-printed-v1:0076:357931d0-8ba6-4857-9db9-7f42d81514a5",
+          "name": "Welkin Tern",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0075:6049cc80-1faa-48bf-897e-fefe5a8e7ab2",
+          "name": "Umara Raptor",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0078:c18b11f0-19cc-4169-84e0-fbb038a5c848",
+          "name": "Windrider Eel",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0119:2dc16614-5cf8-444d-a5ae-cac25018af68",
+          "name": "Burst Lightning",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0048:5dba9972-dd8b-407b-9374-a8f0ed1a96db",
+          "name": "Into the Roil",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0067:cb3d3901-e4a6-45ab-a7b5-c65d91e1875e",
+          "name": "Spell Pierce",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0069:d97b61b6-bf80-4326-a646-a1985e0b50d7",
+          "name": "Sphinx of Lost Truths",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0226:e56aca36-bb51-45e3-9ef9-9f9f2aa1e088",
+          "name": "Teetering Peaks",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0225:6bf0de91-765a-49e3-bd8a-94f266b3bdd8",
+          "name": "Soaring Seacliff",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0238:efd86f2a-bd28-4731-838d-78e67be8b49e",
+          "name": "Island",
+          "count": 15
+        },
+        {
+          "physicalId": "zen-printed-v1:0254:232ee129-0db1-4a03-9eda-4692a8495b53",
+          "name": "Mountain",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "rise-of-the-vampires",
+      "name": "Rise of the Vampires",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "zen-printed-v1:0115:114eca6c-76de-4b87-8174-78e2d17ad0e3",
+          "name": "Vampire Lacerator",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0083:63870c81-63bf-4a9a-aeb5-74c6eaded9f1",
+          "name": "Bloodghast",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0114:93d2c4d1-6205-404a-b03d-995b90a3a33a",
+          "name": "Vampire Hexmage",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0089:71db3698-a45c-4eaf-87e6-30502c0c10f4",
+          "name": "Gatekeeper of Malakir",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0116:44f19fe3-7a17-4c45-adfa-590f73dfebfa",
+          "name": "Vampire Nighthawk",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0100:865ac36f-4c61-468b-a2ed-ed2d1bbbf4e3",
+          "name": "Malakir Bloodwitch",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0087:b3842ad2-a449-4963-8c96-276554125757",
+          "name": "Disfigure",
+          "count": 3
+        },
+        {
+          "physicalId": "zen-printed-v1:0088:1a7dd5e2-b2a5-46ab-a67c-499451706505",
+          "name": "Feast of Blood",
+          "count": 3
+        },
+        {
+          "physicalId": "zen-printed-v1:0229:7abd2723-2851-4f1a-b2d0-dfcb526472c3",
+          "name": "Verdant Catacombs",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0219:45026d57-0324-4312-8b86-2e7d4f581ee9",
+          "name": "Marsh Flats",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0246:7cd6becc-f06a-4fd3-8305-70604b92a187",
+          "name": "Swamp",
+          "count": 24
+        }
+      ]
+    },
+    {
+      "id": "the-adventurers",
+      "name": "The Adventurers",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "zen-printed-v1:0174:0d598220-bddd-48a4-8c80-eb149c6292a3",
+          "name": "Oran-Rief Survivalist",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0132:e3c22bf3-2ba6-4d8f-a2b8-a5d5e26f1316",
+          "name": "Highland Berserker",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0152:e6f37982-d2ae-4ff1-b5da-3936733f8108",
+          "name": "Tuktuk Grunts",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0185:ec46dbeb-f9b3-4e0f-a61f-52a91da6f087",
+          "name": "Tajuru Archer",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0191:a24bba56-3256-489b-82a2-22748388e110",
+          "name": "Turntimber Ranger",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0119:2dc16614-5cf8-444d-a5ae-cac25018af68",
+          "name": "Burst Lightning",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0217:8af66f9c-c90b-45e0-a54c-a76e7e1b9dff",
+          "name": "Kazandu Refuge",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0221:9bcc3bab-46f8-4ed2-abdb-7a117ad07d03",
+          "name": "Oran-Rief, the Vastwood",
+          "count": 3
+        },
+        {
+          "physicalId": "zen-printed-v1:0254:232ee129-0db1-4a03-9eda-4692a8495b53",
+          "name": "Mountain",
+          "count": 16
+        },
+        {
+          "physicalId": "zen-printed-v1:0262:f0ca4b9f-4ee6-4ad8-a95f-326ada9de3cd",
+          "name": "Forest",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "unstable-terrain",
+      "name": "Unstable Terrain",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "zen-printed-v1:0168:19adde22-e5eb-4815-beb6-c520b3274cc9",
+          "name": "Lotus Cobra",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0165:e309c1fc-3a7c-4624-8b48-9b152c2590ae",
+          "name": "Harrow",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0167:797d8cd6-fc6b-4560-9c6f-1a867dfce85a",
+          "name": "Khalni Heart Expedition",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0172:7f89a173-0b2f-4a6a-b706-9aed8dbcabec",
+          "name": "Oracle of Mul Daya",
+          "count": 3
+        },
+        {
+          "physicalId": "zen-printed-v1:0178:66ae703d-b133-4749-9d38-216abe6c6647",
+          "name": "Rampaging Baloths",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0062:66139c73-8e14-433d-bcb6-ae3e518bcdfb",
+          "name": "Roil Elemental",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0048:5dba9972-dd8b-407b-9374-a8f0ed1a96db",
+          "name": "Into the Roil",
+          "count": 3
+        },
+        {
+          "physicalId": "zen-printed-v1:0220:24a5cc2c-0fbf-4a5f-b175-6e0ffd0d0787",
+          "name": "Misty Rainforest",
+          "count": 4
+        },
+        {
+          "physicalId": "zen-printed-v1:0221:9bcc3bab-46f8-4ed2-abdb-7a117ad07d03",
+          "name": "Oran-Rief, the Vastwood",
+          "count": 2
+        },
+        {
+          "physicalId": "zen-printed-v1:0238:efd86f2a-bd28-4731-838d-78e67be8b49e",
+          "name": "Island",
+          "count": 17
+        },
+        {
+          "physicalId": "zen-printed-v1:0262:f0ca4b9f-4ee6-4ad8-a95f-326ada9de3cd",
+          "name": "Forest",
+          "count": 13
+        }
+      ]
+    }
+  ],
+  "contentSha256": "8d722f283683c9735558daf257a72ab56e16be695a65d4449a2eb3be7203c077"
+}

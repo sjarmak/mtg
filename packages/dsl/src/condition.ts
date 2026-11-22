@@ -80,59 +80,20 @@
  * opponent" and the printed card would stop distinguishing them, so the
  * question is the table's rather than the vocabulary's.
  *
- * ## Why `lifeAtLeast` is the fourth (`mtg-nhyv.76`)
+ * ## Why `opponentUndamagedThisTurn` is the fourth (`mtg-nhyv.60`)
  *
- * The life total the paragraph above called an obvious next member, and M11's
- * Serra Ascendant is the card that asks: "as long as you have 30 or more life,
- * this creature gets +5/+5 and has flying". It is `controlsSubtype`'s threshold
- * read off a seat's life rather than off a board or a zone, and it keeps
- * `atLeast` for that family's reason — every printed life check of this shape is
- * a floor.
+ * Bloodcrazed Goblin asks whether a per-turn event has happened, rather than
+ * whether the current board or a zone has a shape. The condition is negative
+ * because `enabledWhile` names when its `cantAttack` restriction applies: no
+ * opponent has yet been dealt damage. The positive event remains the kernel's
+ * stored fact, so other cards can read the history without inheriting this
+ * card's restriction grammar.
  *
- * Its floor is `LIMITS.lifeThreshold` rather than `LIMITS.conditionThreshold`,
- * and the split is a card rather than a taste: the shared threshold limit caps
- * at 20, which is a statement about how many permanents of one subtype a deck
- * can put on a board, and 30 is a life total a game reaches routinely. Reusing
- * the permanent-count ceiling would have refused the one card the member is for.
- *
- * ## Why `noOpponentDealtDamageThisTurn` is the fifth (`mtg-nhyv.76`)
- *
- * M11's Bloodcrazed Goblin: "this creature can't attack unless an opponent has
- * been dealt damage this turn". The `cantAttack` restriction is CR 508.1a and
- * has worked unconditionally since it landed; the whole card refused on this
- * clause.
- *
- * It is the first member of a different family. The four above are censuses —
- * each counts or looks for something the state holds right now, so each is
- * answerable from a board and a zone with no history. This one reads what
- * *happened*, and the state has to have been kept for it. The kernel keeps it
- * the way it already keeps a land drop: `TurnState.damagedPlayers`, written at
- * `applyDamage`'s one player-recipient branch and reset by `beginTurn`, which
- * rebuilds the whole turn record. A second per-turn accumulator with a reset of
- * its own is how two turn boundaries end up disagreeing.
- *
- * It is also the first member written in the negative, and the polarity is the
- * printed sentence rather than a preference. `enabledWhile` turns a
- * modification *on*; the printed clause is a restriction with an "unless" in
- * it, so the thing that has to be on is the prohibition, and the prohibition is
- * on exactly while no opponent has been dealt damage. Spelling the member
- * positively and negating it at the reader would have put the polarity in six
- * `switch` arms instead of in the name, and `conditionPhrase` would have had to
- * invent an "unless" the schema does not carry. A `not` wrapper over the union
- * is the general answer and it is not this card's: one card asks, and a
- * combinator that reaches every member is a vocabulary decision with no
- * evidence behind it yet.
- *
- * Presence rather than a floor, unlike the other member that names the opponent:
- * the printed clause asks whether damage happened, not how much, and an amount
- * would print a condition no card in this corpus says. It names the opponent for
- * `opponentGraveyardAtLeast`'s stated reason and reads the seat live for the
- * same one.
- *
- * A card-in-hand count and CR 603.4's trigger clause are still the obvious next
- * members. Each is a vocabulary decision that belongs to the card that needs it,
- * so inventing them now would ship members no card exercises — the restraint
- * `ComputedAmountSchema` states for the same reason.
+ * A card-in-hand count and CR 603.4's trigger clause remain obvious future
+ * members. Each is a vocabulary decision that
+ * belongs to the card that needs it, so inventing them now would ship members
+ * no card exercises — the restraint `ComputedAmountSchema` states for the same
+ * reason.
  *
  * ## Who "you" is
  *
@@ -146,7 +107,9 @@
  * repeat that limitation).
  */
 import { z } from 'zod';
+import { CountFilterSchema } from './amount';
 import { CounterKindSchema } from './counters';
+import { ColorSchema } from './vocabulary';
 
 /**
  * "You control [atLeast] or more permanents with the subtype [subtype]."
@@ -209,61 +172,146 @@ export const OpponentGraveyardAtLeastConditionSchema = z.strictObject({
 export type OpponentGraveyardAtLeastCondition = z.infer<typeof OpponentGraveyardAtLeastConditionSchema>;
 
 /**
+ * "No opponent has been dealt damage this turn."
+ *
+ * The negative predicate is deliberate: `enabledWhile` names when a static
+ * modification applies, and Bloodcrazed Goblin's `cantAttack` restriction is
+ * active before opposing damage, not after it. Naming the positive event here
+ * would require a second inversion flag on every condition reader merely to
+ * recover the predicate the printed restriction actually asks.
+ */
+export const OpponentUndamagedThisTurnConditionSchema = z.strictObject({
+  kind: z.literal('opponentUndamagedThisTurn'),
+});
+
+export type OpponentUndamagedThisTurnCondition = z.infer<typeof OpponentUndamagedThisTurnConditionSchema>;
+
+/**
  * "You have [atLeast] or more life."
  *
- * `controlsSubtype`'s threshold read off a life total. "You" is the ability
- * source's controller, read live, which is the module docblock's rule for every
- * member that does not name a seat.
- *
- * `atLeast` and not an exact total, for the threshold family's stated reason,
- * and no upper bound of its own: "as long as you have exactly 30 life" is a
- * sentence Magic does not print on this shape, and a window would stop holding
- * above the number the card names.
+ * The source's current controller supplies "you", just as it does for
+ * `controlsSubtype`; life is read live because CR 611.2c turns a conditional
+ * continuous effect on and off without waiting for another event. There is no
+ * arbitrary maximum: Magic life totals are unbounded, while the positive
+ * integer schema refuses zero, fractions, and negative thresholds.
  */
-export const LifeAtLeastConditionSchema = z.strictObject({
-  kind: z.literal('lifeAtLeast'),
+export const ControllerLifeAtLeastConditionSchema = z.strictObject({
+  kind: z.literal('controllerLifeAtLeast'),
   atLeast: z.int().min(1),
 });
 
-export type LifeAtLeastCondition = z.infer<typeof LifeAtLeastConditionSchema>;
+export type ControllerLifeAtLeastCondition = z.infer<typeof ControllerLifeAtLeastConditionSchema>;
 
-/**
- * "No opponent has been dealt damage this turn."
- *
- * The first member that reads accumulated turn state rather than a census of
- * the board, a zone or a seat, and the first written in the negative; the
- * module docblock argues both, including why the negation is in the name and
- * not in a wrapper.
- *
- * No field. Presence, like `anyCreatureHasCounter` and for its reason — the
- * printed clause asks whether damage happened, not how much and not from what.
- * Damage specifically, not life loss: `applyDamage` is the one write site, so a
- * card that made an opponent pay life does not turn this on, which is the
- * distinction CR 119.3 draws and the distinction the printed word makes.
- */
-export const NoOpponentDealtDamageThisTurnConditionSchema = z.strictObject({
-  kind: z.literal('noOpponentDealtDamageThisTurn'),
+/** "Your life total is less than [fewerThan]." */
+export const ControllerLifeBelowConditionSchema = z.strictObject({
+  kind: z.literal('controllerLifeBelow'),
+  fewerThan: z.int().min(1),
 });
 
-export type NoOpponentDealtDamageThisTurnCondition = z.infer<
-  typeof NoOpponentDealtDamageThisTurnConditionSchema
+export type ControllerLifeBelowCondition = z.infer<typeof ControllerLifeBelowConditionSchema>;
+
+/** "You have [atLeast] or more cards in your library." */
+export const ControllerLibraryAtLeastConditionSchema = z.strictObject({
+  kind: z.literal('controllerLibraryAtLeast'),
+  atLeast: z.int().min(1),
+});
+
+export type ControllerLibraryAtLeastCondition = z.infer<typeof ControllerLibraryAtLeastConditionSchema>;
+
+/** "The top card of your library is [color]." */
+export const ControllerTopLibraryHasColorConditionSchema = z.strictObject({
+  kind: z.literal('controllerTopLibraryHasColor'),
+  color: ColorSchema,
+});
+
+export type ControllerTopLibraryHasColorCondition = z.infer<
+  typeof ControllerTopLibraryHasColorConditionSchema
 >;
 
 /**
+ * "Fewer than [fewerThan] permanents matching [filter] are on the battlefield."
+ *
+ * This is the wide static-condition answer to Harbor Serpent rather than a
+ * `cantAttackUnless` modification built for one sentence. The narrow arm would
+ * add a second combat-modification grammar and a second attack-legality path;
+ * this member pays the six existing exhaustive readers once and can gate any
+ * static modification through the `enabledWhile` seam they already share.
+ *
+ * The selected M11/M13 corpus has three collector positions blocked only by a
+ * board-conditional attack restriction. Harbor Serpent's M11#56 and M13#53
+ * share this whole-battlefield threshold. War Falcon's M13#38 instead needs a
+ * disjunction over two controlled subtypes, so this member deliberately does
+ * not claim it. `CountFilterSchema` is reused because it already defines the
+ * characteristic predicate for whole-battlefield counts; the condition owns
+ * the domain and the strict less-than comparison.
+ *
+ * Negative for the same reason `opponentUndamagedThisTurn` is: `enabledWhile`
+ * names when Harbor Serpent's `cantAttack` restriction applies. The stored
+ * predicate is therefore count < 5, while the Oracle renderer can state the
+ * equivalent permission as "unless there are five or more".
+ */
+export const BattlefieldCountBelowConditionSchema = z.strictObject({
+  kind: z.literal('battlefieldCountBelow'),
+  filter: CountFilterSchema,
+  fewerThan: z.int().min(1),
+});
+
+export type BattlefieldCountBelowCondition = z.infer<typeof BattlefieldCountBelowConditionSchema>;
+
+/**
+ * "You control none of the listed subtypes."
+ *
+ * The list is an OR over current permanents, not a sum: one permanent that is
+ * both a Knight and a Soldier still makes the predicate false exactly once.
+ * This negative spelling is the state in which an `enabledWhile` restriction
+ * applies; Oracle may render the equivalent positive permission as "unless".
+ */
+export const ControlsNoneOfSubtypesConditionSchema = z.strictObject({
+  kind: z.literal('controlsNoneOfSubtypes'),
+  subtypes: z.array(z.string()).min(1),
+});
+
+export type ControlsNoneOfSubtypesCondition = z.infer<typeof ControlsNoneOfSubtypesConditionSchema>;
+
+/** The source has fewer than the named number of one counter kind. */
+export const SelfCounterCountBelowConditionSchema = z.strictObject({
+  kind: z.literal('selfCounterCountBelow'),
+  counter: CounterKindSchema,
+  fewerThan: z.int().min(1),
+});
+
+export type SelfCounterCountBelowCondition = z.infer<typeof SelfCounterCountBelowConditionSchema>;
+
+/** The source has at least the named number of one counter kind. */
+export const SelfCounterCountAtLeastConditionSchema = z.strictObject({
+  kind: z.literal('selfCounterCountAtLeast'),
+  counter: CounterKindSchema,
+  atLeast: z.int().min(1),
+});
+
+export type SelfCounterCountAtLeastCondition = z.infer<typeof SelfCounterCountAtLeastConditionSchema>;
+
+/**
  * The predicate union, so readers can switch on `kind` and stay exhaustive as
- * it grows. Five members as of `mtg-nhyv.76`; see the module docblock for why
- * the obvious next ones are not here yet.
+ * it grows.
  */
 export const ConditionSchema = z.discriminatedUnion('kind', [
   ControlsSubtypeConditionSchema,
   AnyCreatureHasCounterConditionSchema,
   OpponentGraveyardAtLeastConditionSchema,
-  LifeAtLeastConditionSchema,
-  NoOpponentDealtDamageThisTurnConditionSchema,
+  OpponentUndamagedThisTurnConditionSchema,
+  ControllerLifeAtLeastConditionSchema,
+  ControllerLifeBelowConditionSchema,
+  ControllerLibraryAtLeastConditionSchema,
+  ControllerTopLibraryHasColorConditionSchema,
+  BattlefieldCountBelowConditionSchema,
+  ControlsNoneOfSubtypesConditionSchema,
+  SelfCounterCountBelowConditionSchema,
+  SelfCounterCountAtLeastConditionSchema,
 ]);
 
 /**
- * What now keeps a third member from silently skipping a reader (retired the
+ * What keeps a new member from silently skipping a reader (retired the
  * `ConditionStillHasOneMember` type-level tripwire, `mtg-5adk`/`mtg-jp23`).
  *
  * That tripwire existed because `z.discriminatedUnion` with exactly one
@@ -291,8 +339,9 @@ export const ConditionSchema = z.discriminatedUnion('kind', [
  * the tripwire was betting on, and named all six again at `mtg-nhyv.76`'s
  * fourth and fifth members without the list above being consulted.
  *
- * With a real multi-member union, `Condition['kind']` is now a literal type
- * naming every member rather than a plain `string`, so the standard idiom works
+ * With a real multi-member union, `Condition['kind']` is now a literal union
+ * of every discriminator above rather than plain `string`,
+ * so the standard idiom works
  * on its own terms: a `switch` over `condition.kind` that omits a case leaves
  * `condition` un-narrowed in the `default` arm, `assertNever` demands a
  * `never`, and `tsc` refuses to compile. A separate tripwire type is

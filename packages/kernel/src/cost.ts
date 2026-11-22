@@ -50,11 +50,14 @@
  * or a future log line can read.
  */
 import type { Card, CastableCard, ManaCost } from '@mtg/dsl';
-import { printedCardTypes, resolveX } from '@mtg/dsl';
+import { printedCardTypes, resolveX, ZERO_MANA_COST } from '@mtg/dsl';
+import type { CastingCostChoice } from './actions';
 import { costModifierId } from './ids';
 import type { ObjectId, PlayerId } from './ids';
 import { controllerOf } from './layers';
 import { availableMana, canPay } from './mana';
+import { lifeLostByOpponentsThisTurn } from './life-history';
+import { copiableCardOf } from './state';
 import type { GameState, RegisteredCostModifier } from './state';
 
 export interface CostModifierRegistration {
@@ -75,13 +78,22 @@ function costModifiersFor(
   controller: PlayerId,
   nextId: number,
 ): CostModifierRegistration {
-  if (card.costReduction === null) return { modifiers: [], nextId };
+  const turnLifeLossBundle = card.kind === 'creature' && card.opponentsLifeLostThisTurnCasting === true;
+  const reduction = turnLifeLossBundle
+    ? ({ amount: { kind: 'opponentsLifeLostThisTurn' }, cardTypes: ['creature'] } as const)
+    : card.costReduction;
+  if (reduction === null) return { modifiers: [], nextId };
   const modifier: RegisteredCostModifier = {
     id: costModifierId(nextId),
     sourceOid: source,
     controller,
-    amount: card.costReduction.amount,
-    cardType: card.costReduction.cardType,
+    amount: reduction.amount,
+    cardTypes:
+      'cardTypes' in reduction
+        ? reduction.cardTypes
+        : reduction.cardType === null
+          ? null
+          : [reduction.cardType],
   };
   return { modifiers: [modifier], nextId: nextId + 1 };
 }
@@ -98,7 +110,7 @@ function costModifiersFor(
 export function registerCostModifiers(state: GameState, oid: ObjectId): GameState {
   const object = state.objects[oid];
   if (object === undefined) return state;
-  const registration = costModifiersFor(object.card, oid, controllerOf(state, oid), state.nextId);
+  const registration = costModifiersFor(copiableCardOf(object), oid, controllerOf(state, oid), state.nextId);
   if (registration.modifiers.length === 0) return state;
   return {
     ...state,
@@ -132,8 +144,26 @@ export function effectiveManaCost(
   player: PlayerId,
   card: CastableCard,
   x?: number,
+  targetCount = 0,
 ): ManaCost {
-  const withX = resolveX(card.manaCost, x ?? 0);
+  return effectiveSelectedManaCost(state, player, card, card.manaCost, x, 1, targetCount);
+}
+
+function effectiveSelectedManaCost(
+  state: GameState,
+  player: PlayerId,
+  card: CastableCard,
+  base: ManaCost,
+  x: number | undefined,
+  xSymbols: number,
+  targetCount: number,
+): ManaCost {
+  const withX = resolveX(base, x ?? 0, xSymbols);
+  const targetIncrease =
+    (card.kind === 'instant' || card.kind === 'sorcery') && card.targetCostIncrease !== undefined
+      ? Math.max(0, targetCount - 1) * card.targetCostIncrease.genericPerTargetBeyondFirst
+      : 0;
+  const increased = targetIncrease === 0 ? withX : { ...withX, generic: withX.generic + targetIncrease };
   let reduction = 0;
   for (const modifier of state.costModifiers) {
     if (modifier.controller !== player) continue;
@@ -142,11 +172,54 @@ export function effectiveManaCost(
     // less". Its discriminant is `creature` and its type line reads both, and
     // the comparison against the discriminant skipped half the artifacts a
     // generated set prints (`mtg-0zhm`, the CR 205.1a class of `mtg-6y4g`).
-    if (modifier.cardType !== null && !printedCardTypes(card).includes(modifier.cardType)) continue;
-    reduction += modifier.amount;
+    if (
+      modifier.cardTypes !== null &&
+      !modifier.cardTypes.some((cardType) => printedCardTypes(card).includes(cardType))
+    ) {
+      continue;
+    }
+    reduction +=
+      typeof modifier.amount === 'number'
+        ? modifier.amount
+        : lifeLostByOpponentsThisTurn(state, modifier.controller);
   }
-  if (reduction === 0) return withX;
-  return { ...withX, generic: Math.max(0, withX.generic - reduction) };
+  if (reduction === 0) return increased;
+  return { ...increased, generic: Math.max(0, increased.generic - reduction) };
+}
+
+/**
+ * The mana component of the casting price the action selected.
+ *
+ * CR 118.9 replaces the printed mana cost rather than reducing it, so an
+ * alternative selected here bypasses X and every cost modifier together. Its
+ * life and permanent payments stay outside `ManaCost` and are charged by the
+ * same cast transaction after legality has checked all of them.
+ */
+export function selectedCastingManaCost(
+  state: GameState,
+  player: PlayerId,
+  card: CastableCard,
+  x: number | undefined,
+  choice: CastingCostChoice,
+  targetCount = 0,
+): ManaCost {
+  if (choice === 'mana') return effectiveManaCost(state, player, card, x, targetCount);
+  if (
+    choice === 'overload' &&
+    (card.kind === 'instant' || card.kind === 'sorcery') &&
+    card.overload !== undefined
+  ) {
+    return effectiveSelectedManaCost(
+      state,
+      player,
+      card,
+      card.overload.cost,
+      x,
+      card.overload.xSymbols ?? 1,
+      targetCount,
+    );
+  }
+  return ZERO_MANA_COST;
 }
 
 /**

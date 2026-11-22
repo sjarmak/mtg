@@ -25,14 +25,42 @@
 import { z } from 'zod';
 import type { ZodType } from 'zod';
 import { PermanentTallySchema } from './amount';
-import { ManaCostSchema, ModelManaCostSchema } from './mana';
+import { CardFilterSchema } from './card-filter';
+import { CounterKindSchema } from './counters';
+import { HybridManaPairSchema, ManaCostSchema, ModelManaCostSchema } from './mana';
+import { TargetFilterSchema } from './targets';
+import { GrantedKeywordAbilitySchema } from './keyword-ability';
 import {
+  BasicLandTypeSchema,
+  CardKindSchema,
+  ColorSchema,
   GrantableKeywordSchema,
   KeywordSchema,
   PtCountSourceSchema,
   StaticScopeSchema,
   TriggerConditionSchema,
 } from './vocabulary';
+
+/**
+ * Current-characteristic narrowing for a printed static creature scope.
+ *
+ * The scope already fixes both the card type (creature) and controller, while
+ * `subtype` is the older, model-visible creature-type narrowing. Color and
+ * token status are the engine-only dimensions admitted here: they compile to
+ * the same CR 613 filter used by targeted and swept effects, but stay outside
+ * every model-facing `abilitiesOver` application.
+ */
+export const StaticScopeFilterSchema = TargetFilterSchema.pick({
+  colors: true,
+  excludeColors: true,
+}).extend({
+  /** Engine-only CR 111.1 narrowing for creature tokens. */
+  token: z.literal(true).optional(),
+  /** Live orientation narrowing for tapped creatures. */
+  tapped: z.literal(true).optional(),
+});
+
+export type StaticScopeFilter = z.infer<typeof StaticScopeFilterSchema>;
 
 /**
  * What a permanent other than the source is sacrificed as a cost: how many, and
@@ -61,15 +89,60 @@ export const SacrificeOtherSchema = z.strictObject({
 
 export type SacrificeOther = z.infer<typeof SacrificeOtherSchema>;
 
+/** Controlled permanents matching current battlefield characteristics paid as a cost. */
+export const SacrificeMatchingSchema = z.strictObject({
+  count: z.int(),
+  filter: TargetFilterSchema,
+  /** CR 111.1 exclusion for costs that specifically require a nontoken permanent. */
+  nontoken: z.literal(true).optional(),
+});
+
+export type SacrificeMatching = z.infer<typeof SacrificeMatchingSchema>;
+
+/** Activation-only source exclusion for “Sacrifice another …” payments. */
+export const ActivationSacrificeMatchingSchema = SacrificeMatchingSchema.extend({
+  excludeSource: z.literal(true).optional(),
+});
+
+export type ActivationSacrificeMatching = z.infer<typeof ActivationSacrificeMatchingSchema>;
+
+/** Untapped controlled permanents matching current battlefield characteristics paid as a cost. */
+export const TapMatchingSchema = z.strictObject({
+  count: z.int(),
+  filter: TargetFilterSchema,
+});
+
+export type TapMatching = z.infer<typeof TapMatchingSchema>;
+
+/** A fixed number of one named counter removed from the source as a cost. */
+export const RemoveCounterCostSchema = z.strictObject({
+  counter: CounterKindSchema,
+  count: z.int(),
+});
+
+export type RemoveCounterCost = z.infer<typeof RemoveCounterCostSchema>;
+
+/**
+ * One source-attested relational hand payment: two nonland cards whose printed
+ * names match. The relation, filter, and count stay in one closed bundle so
+ * adding Sphinx of the Chimes cannot independently widen every discard cost.
+ */
+export const DiscardMatchingCostSchema = z.strictObject({
+  count: z.literal(2),
+  filter: z.literal('nonland'),
+  relation: z.literal('sameName'),
+});
+
+export type DiscardMatchingCost = z.infer<typeof DiscardMatchingCostSchema>;
+
 /**
  * CR 602.1: what an activated ability costs to play. Mana, plus optionally the
- * source's own tap symbol, plus optionally sacrificing the source, plus
- * optionally sacrificing permanents the cost names, plus optionally discarding
- * cards.
+ * source's own tap symbol, plus optionally sacrificing or exiling the source,
+ * plus optionally sacrificing permanents the cost names, plus optionally
+ * discarding cards, plus optionally removing counters from the source.
  *
- * The remaining costs Magic prints — exile, pay life, remove a counter — are
- * each a new payment path in the reducer and a new
- * legality check beside it, so each stays its own bead rather than a field here
+ * Pay life remains a separate payment path in the reducer and a new legality
+ * check beside it, so it stays its own bead rather than a field here
  * (`docs/design/dsl-v1-ability-model.md` section 6.2). Sacrifice came first
  * because the flagship set's first two mechanics both spend it: Fuse is
  * "Sacrifice this. Put a <part> counter on target creature", and a
@@ -112,12 +185,34 @@ export const ActivationCostSchema = z.strictObject({
    */
   mana: ManaCostSchema,
   /**
+   * Source-faithful order for the fixed colored and hybrid pips of this
+   * activation. Payment still reads `mana`; this is only the order a face and
+   * an export print when the source differs from the canonical WUBRG order.
+   * `checkActivationCost` requires an exact noncanonical permutation, so the
+   * field cannot change a payment or create a second spelling of the default.
+   *
+   * Hand-authored only. Both model-facing cost schemas omit it below because
+   * source transcription is not a design lever for the generator.
+   */
+  printedManaPips: z.array(z.union([ColorSchema, HybridManaPairSchema])).optional(),
+  /**
    * CR 302.6: a creature that has not been controlled since its controller's
    * turn began cannot pay this. The kernel checks it through
    * `isCreatureObject`, which is layer-aware, so an animated artifact is
    * summoning-sick and a creature that lost its type is not.
    */
   tapSelf: z.boolean().default(false),
+  /**
+   * CR 119.4 as an activation payment: the activating player must have at
+   * least this much life and loses it before the ability reaches the stack.
+   * Paying the last life is legal; state-based actions decide the result only
+   * after the completed activation.
+   *
+   * Optional rather than defaulted so every older cost keeps its canonical
+   * spelling. Both model-facing schemas omit it below: this is exact reference
+   * machinery, not a new design lever offered to the generator.
+   */
+  payLife: z.int().min(1).optional(),
   /**
    * CR 701.17a: the source goes to its owner's graveyard as the cost is paid,
    * which is *before* the ability is put on the stack (CR 602.2b routes an
@@ -135,6 +230,22 @@ export const ActivationCostSchema = z.strictObject({
    */
   sacrificeSelf: z.boolean().default(false),
   /**
+   * CR 701.11a as a cost: move the source from the battlefield to exile while
+   * the ability is activated, before that ability reaches the stack. Brittle
+   * Effigy is the measured case. This is not sacrifice under another name:
+   * dies and sacrifice triggers do not fire, the destination is exile, and a
+   * replacement effect can care about the zone move independently.
+   *
+   * No extra action choice is required and summoning sickness does not restrict
+   * the payment. An optional true literal makes absence the only spelling of
+   * "do not exile it", so this narrow hand-authored field adds no default key
+   * to every existing activation. Validation refuses carrying both
+   * source-leaving fields because one permanent cannot pay both costs.
+   */
+  exileSelf: z.literal(true).optional(),
+  /** Nivmagus Elemental's closed, hand-authored stack-object payment. */
+  exileControlledInstantOrSorcerySpell: z.literal(true).optional(),
+  /**
    * CR 701.17a again, for permanents the source does not own the right to by
    * being itself. Paid at the same moment `sacrificeSelf` is — on activation,
    * before the ability is put on the stack (CR 601.2h) — so a Chest that opens
@@ -145,6 +256,39 @@ export const ActivationCostSchema = z.strictObject({
    * and `{Q}`, so a Key that arrived this turn may be spent.
    */
   sacrificeOther: SacrificeOtherSchema.optional(),
+  /**
+   * CR 701.17a over a current-characteristic battlefield filter. Unlike
+   * `sacrificeOther`, this payment includes the source when the source matches:
+   * “Sacrifice a creature” permits Bloodthrone Vampire to sacrifice itself.
+   *
+   * It is a separate field rather than a widening of `sacrificeOther` because
+   * the latter's exclusion is load-bearing for Chests. Validation refuses a
+   * cost carrying this field beside either older sacrifice spelling, leaving
+   * the action's one chosen-permanent list with one unambiguous predicate.
+   */
+  sacrificeMatching: ActivationSacrificeMatchingSchema.optional(),
+  /**
+   * Two independently named land-subtype payments, kept as one atomic cost.
+   * Jarad is the source-attested shape: one Swamp and one Forest, with a
+   * dual-typed land permitted to satisfy either slot but never both. This is
+   * hand-authored only; the model schemas below omit the whole bundle.
+   */
+  sacrificeLandSubtypePair: z
+    .tuple([BasicLandTypeSchema, BasicLandTypeSchema])
+    .refine(([left, right]) => left !== right, 'the two sacrificed land subtypes must differ')
+    .optional(),
+  /**
+   * CR 701.21a as a chosen activation payment: tap this many untapped
+   * permanents the activator controls whose current characteristics match the
+   * filter. Unlike `tapSelf`, this is not a tap-symbol cost, so CR 302.6 does
+   * not restrict a creature that entered this turn. The source is eligible
+   * when it matches unless it is already paying `tapSelf`.
+   *
+   * Hand-authored only. Both model cost schemas omit it below, preserving the
+   * generator's strict containment while the engine can run cards whose costs
+   * select a board-sized cohort.
+   */
+  tapMatching: TapMatchingSchema.optional(),
   /**
    * CR 701.8 as a cost rather than an effect: this many cards out of the
    * activating player's own hand, chosen by them, put into their graveyard as
@@ -176,16 +320,51 @@ export const ActivationCostSchema = z.strictObject({
    * summoning sickness restricts `{T}` and `{Q}` and nothing else.
    */
   discard: z.int().optional(),
+  /**
+   * Printed characteristics a discarded card must have. Absence keeps the
+   * existing "Discard a card" payment; presence narrows the candidates before
+   * options are enumerated and is legal only beside `discard`.
+   *
+   * This remains outside both model-facing cost schemas below. It exists for
+   * exact hand-authored reference cards and does not widen generated designs.
+   */
+  discardFilter: CardFilterSchema.optional(),
+  /**
+   * A relational discard payment whose candidates cannot be described one at
+   * a time. Kept separate from `discard` plus `discardFilter`: those fields
+   * constrain individual cards, while this bundle also constrains the chosen
+   * cohort, and its three literals are the complete installed-Forge contract.
+   * Hand-authored only; both model schemas omit it below.
+   */
+  discardMatching: DiscardMatchingCostSchema.optional(),
+  /** Counters removed from the source before the ability reaches the stack. */
+  removeCounter: RemoveCounterCostSchema.optional(),
 });
 
 /**
- * CR 606.4: a loyalty symbol is a signed cost paid by adding or removing that
- * many loyalty counters. Zero is a real cost; variable X is deliberately not
- * represented by this integer shape. Card validation bounds fixed costs to the
- * supported loyalty envelope.
+ * CR 606.4: a loyalty symbol is a cost paid by adding or removing loyalty
+ * counters. Generated cards retain the fixed signed-integer envelope; the
+ * authored union adds Chandra Nalaar's one current variable spelling without
+ * widening the model contract.
  */
-export const LoyaltyCostSchema = z.int();
+export const FixedLoyaltyCostSchema = z.int();
+export const LoyaltyCostSchema = z.union([
+  FixedLoyaltyCostSchema,
+  z.strictObject({ kind: z.literal('removeChosenX') }),
+]);
 export type LoyaltyCost = z.infer<typeof LoyaltyCostSchema>;
+
+/** True for the authored loyalty symbol whose removed amount is announced as X. */
+export function isVariableLoyaltyCost(cost: LoyaltyCost): cost is Exclude<LoyaltyCost, number> {
+  return typeof cost !== 'number';
+}
+
+/** The signed counter change paid for a fixed or announced-X loyalty symbol. */
+export function loyaltyCostChange(cost: LoyaltyCost, chosenX: number | null): number {
+  if (!isVariableLoyaltyCost(cost)) return cost;
+  if (chosenX === null) throw new Error('a variable loyalty cost has no announced X');
+  return -chosenX;
+}
 
 export type ActivationCost = z.infer<typeof ActivationCostSchema>;
 export type ActivationCostInput = z.input<typeof ActivationCostSchema>;
@@ -221,7 +400,7 @@ export const EQUIPMENT_SUBTYPE = 'Equipment';
  * model that saw it would be guessing, and every fixture that shows an
  * ability-bearing batch would key differently for a field never offered.
  *
- * `mana` is left in the `.omit` call (only `sacrificeOther` and `discard` are
+ * `mana` is left in the `.omit` call (only non-model payment fields are
  * dropped) and then overridden through `.extend`, rather than omitted alongside
  * them and re-added: Zod builds a shape by object spread, and JS
  * preserves a key's original position when an existing key is reassigned but
@@ -241,8 +420,17 @@ export const EQUIPMENT_SUBTYPE = 'Equipment';
  * ability in X — and not a side effect of teaching the engine the cost.
  */
 export const ModelActivationCostSchema = ActivationCostSchema.omit({
+  printedManaPips: true,
+  payLife: true,
+  exileSelf: true,
   sacrificeOther: true,
+  sacrificeMatching: true,
+  sacrificeLandSubtypePair: true,
+  tapMatching: true,
   discard: true,
+  discardFilter: true,
+  discardMatching: true,
+  removeCounter: true,
 }).extend({
   mana: ModelManaCostSchema,
 });
@@ -264,7 +452,16 @@ export const ModelActivationCostSchema = ActivationCostSchema.omit({
  * field. One definition, referenced from both.
  */
 export const MechanicModelActivationCostSchema = ActivationCostSchema.omit({
+  printedManaPips: true,
+  payLife: true,
+  exileSelf: true,
+  sacrificeMatching: true,
+  sacrificeLandSubtypePair: true,
+  tapMatching: true,
   discard: true,
+  discardFilter: true,
+  discardMatching: true,
+  removeCounter: true,
 }).extend({
   mana: ModelManaCostSchema,
 });
@@ -279,7 +476,7 @@ const StatBonusModificationSchema = z.strictObject({
  * Layer 6, narrow: the nine evergreen `KEYWORDS` and nothing else.
  *
  * This is the member every *model-facing* tier carries — `ModelStaticModification`,
- * `AttachModification` (which `ModelAttachSchema` points at) and
+ * `ModelAttachModification` (which `ModelAttachSchema` points at) and
  * `AuraStaticModification` (which `ModelAuraModificationSchema` is built from).
  * A fixture key is `sha256(system, prompt, schema)` (`packages/llm/src/schema.ts`),
  * and 143 of the 151 recorded calls carry these nine names inside their answer
@@ -305,11 +502,9 @@ const GrantKeywordModificationSchema = z.strictObject({
  * point here — a printed static ability and an equip clause are hand-authored,
  * and `effectForModification` (`@mtg/kernel`'s `abilities.ts`) takes a
  * `LayeredStaticModification`, so the wide name has to reach that union to
- * reach the layer walk at all. `AttachModificationSchema` stays narrow anyway,
- * and that is not an oversight: it is a subtype of the layered union either
- * way, so an equip clause still compiles through the same function, and
- * narrowing it costs a hand-authored Equipment nothing anyone has asked for
- * while keeping `ModelAttachSchema`'s bytes exactly what they were.
+ * reach the layer walk at all. The engine's `AttachModificationSchema` uses
+ * this wide grant in its layered arm, while `ModelAttachSchema` keeps the
+ * narrow schema above so its recorded bytes do not move.
  */
 export type GrantKeywordModification = z.infer<typeof GrantKeywordModificationSchema>;
 
@@ -317,6 +512,33 @@ const GrantAnyKeywordModificationSchema = z.strictObject({
   kind: z.literal('grantKeyword'),
   keyword: GrantableKeywordSchema,
 });
+
+/**
+ * One or more CR 613.1f grants over one scope, in printed order.
+ *
+ * A singleton is reserved for a payload-bearing ability such as Islandwalk or
+ * Protection; validation keeps the existing singular `grantKeyword` as the
+ * one spelling for one parameterless grant. Seven is the rules-box ceiling
+ * proven by Akroma's Memorial; it is local to the bundle and does not widen
+ * the card-level three-ability limit or any model-facing schema.
+ */
+const STATIC_KEYWORD_ABILITY_GRANT_LIMITS = { min: 1, max: 7 } as const;
+const GrantKeywordAbilitiesModificationSchema = z.strictObject({
+  kind: z.literal('grantKeywordAbilities'),
+  grants: z
+    .array(GrantedKeywordAbilitySchema)
+    .min(STATIC_KEYWORD_ABILITY_GRANT_LIMITS.min)
+    .max(STATIC_KEYWORD_ABILITY_GRANT_LIMITS.max),
+});
+
+/** Fixed layer 6/7c modifications that one conditional static clause may share. */
+export const StaticBundleModificationSchema = z.discriminatedUnion('kind', [
+  StatBonusModificationSchema,
+  GrantAnyKeywordModificationSchema,
+  GrantKeywordAbilitiesModificationSchema,
+]);
+
+export type StaticBundleModification = z.infer<typeof StaticBundleModificationSchema>;
 
 /**
  * CR 613.4a, layer 7a. The characteristic-defining ability: `countOf` names
@@ -363,7 +585,65 @@ export const StatBonusPerModificationSchema = z.strictObject({
   kind: z.literal('statBonusPer'),
   power: z.int(),
   toughness: z.int(),
-  each: PermanentTallySchema,
+  each: z.union([
+    PermanentTallySchema,
+    PermanentTallySchema.options[0]
+      .extend({ zone: z.literal('controllerGraveyard') })
+      .superRefine((tally, context) => {
+        const exactFilter =
+          tally.whose === 'you' &&
+          tally.filter.cardTypes?.length === 1 &&
+          tally.filter.cardTypes[0] === 'creature' &&
+          Object.keys(tally.filter).length === 1;
+        if (!exactFilter) {
+          context.addIssue({
+            code: 'custom',
+            message: 'the controller-graveyard tally counts exactly creature cards in your graveyard',
+          });
+        }
+      }),
+  ]),
+});
+
+/**
+ * CR 613.4c, layer 7c: +1/+0 for each of the affected permanent's live colors.
+ *
+ * This is not a `PermanentTally`: it reads the object being modified after
+ * layer 5, not a collection of battlefield objects from the source's point of
+ * view. The fixed rate is the complete source-attested capability Forge names
+ * `Count$CardNumColors`; widening it would require a different, attested Forge
+ * arithmetic spelling rather than an exporter guess.
+ */
+export const StatBonusPerColorModificationSchema = z.strictObject({
+  kind: z.literal('statBonusPerColor'),
+  power: z.literal(1),
+  toughness: z.literal(0),
+});
+
+/** Jarad's closed layer-7c +1/+1 per creature card in its controller's graveyard. */
+/**
+ * CR 613.1d, layer 4: add one subtype without replacing existing subtypes.
+ *
+ * The global scope is carried by the containing static ability, so this record
+ * states only what the layer does. It is hand-authored-only and absent from
+ * `ModelStaticModificationSchema`; generated sets therefore keep their frozen
+ * answer schema while reference cards can use the native layer machinery.
+ */
+export const AddSubtypeModificationSchema = z.strictObject({
+  kind: z.literal('addSubtype'),
+  subtype: BasicLandTypeSchema,
+});
+
+/**
+ * CR 613.1f: grant the canonical five-color tap mana ability.
+ *
+ * The payload is intentionally closed rather than a second activated-ability
+ * grammar. Chromatic Lantern is the source-attested capability: one tap, one
+ * mana, and the WUBRG choice. The containing static scope supplies which lands
+ * receive it, while model-facing static schemas remain unchanged.
+ */
+export const GrantAnyColorManaAbilityModificationSchema = z.strictObject({
+  kind: z.literal('grantAnyColorManaAbility'),
 });
 
 /**
@@ -372,34 +652,60 @@ export const StatBonusPerModificationSchema = z.strictObject({
  * `grantKeyword` is layer 6, `definePt` is layer 7a, so each compiles to
  * exactly one `ContinuousEffect` the kernel's existing walk resolves.
  *
- * A schema of its own rather than the whole union, because two things in the
- * vocabulary genuinely mean *these three and not the others*: an equip clause,
- * whose modifications are applied to the equipped creature by that same walk
- * (`packages/kernel/src/attach.ts`), and `effectForModification`, which returns
- * a `ContinuousEffect` and has nothing to return for a modification that is not
- * one. The alternative was the pattern `AuraStaticModificationSchema`'s docblock
- * argues against directly below — admit the wide union and refuse the member in
- * a validator afterwards, leaving every downstream reader an arm no valid card
- * can reach.
+ * A schema of its own rather than the whole union because
+ * `effectForModification` returns a `ContinuousEffect` and has nothing to
+ * return for a combat restriction or replacement. Equipment and Auras narrow
+ * their mixed attachment vocabularies to this union before calling it.
  *
  * Its `grantKeyword` is the wide one, and this is the union that decides that:
  * `effectForModification` takes a `LayeredStaticModification`, so a keyword the
  * layer walk is meant to grant has to be sayable here or it cannot reach layer 6
  * at all. Nothing model-facing reads this schema — `ModelAttachSchema` points at
- * the narrow `AttachModificationSchema` below — so widening it addresses no
- * fixture.
+ * its frozen schema below — so widening it addresses no fixture.
  */
 export const LayeredStaticModificationSchema = z.discriminatedUnion('kind', [
   StatBonusModificationSchema,
   GrantAnyKeywordModificationSchema,
+  GrantKeywordAbilitiesModificationSchema,
   DefinePtModificationSchema,
   StatBonusPerModificationSchema,
+  StatBonusPerColorModificationSchema,
+  AddSubtypeModificationSchema,
+  GrantAnyColorManaAbilityModificationSchema,
 ]);
 
 export type LayeredStaticModification = z.infer<typeof LayeredStaticModificationSchema>;
 
 /**
- * The three members an *attachment* clause may carry, frozen at three.
+ * The three combat-restriction leaves shared by statics and Auras. They are
+ * declared before the attachment schema because Whispersilk Cloak's
+ * source-proven Equip clause also reuses `cantBeBlocked` directly.
+ */
+export const CantAttackModificationSchema = z.strictObject({
+  kind: z.literal('cantAttack'),
+});
+
+export const CantBlockModificationSchema = z.strictObject({
+  kind: z.literal('cantBlock'),
+});
+
+export const CantBeBlockedModificationSchema = z.strictObject({
+  kind: z.literal('cantBeBlocked'),
+});
+
+/** One printed restriction that prohibits both combat roles. */
+const CantAttackOrBlockModificationSchema = z.strictObject({
+  kind: z.literal('cantAttackOrBlock'),
+});
+
+/** A declaration-level restriction that requires another participating creature. */
+const CantAttackOrBlockAloneModificationSchema = z.strictObject({
+  kind: z.literal('cantAttackOrBlockAlone'),
+});
+
+/**
+ * The three members the model-facing attachment clause may carry, frozen at
+ * the exact schema bytes recorded before the engine grew source-proven grants.
  *
  * This is the union the paragraph above used to be, under the name above, and
  * the split is a fixture-hash fact rather than a taste: `ModelAttachSchema`
@@ -412,36 +718,58 @@ export type LayeredStaticModification = z.infer<typeof LayeredStaticModification
  * rate read off the board, riding on a permanent that moves between creatures,
  * is an Equipment whose value depends on which lands its wielder's controller
  * happens to have out, and `checkEquipAbility` already refuses the CDA for the
- * neighboring reason. `AttachModification` is a subtype of
- * `LayeredStaticModification`, so `effectForModification` takes an attachment's
- * modifications unchanged.
+ * neighboring reason. Every member of this frozen model schema is layered; the
+ * engine's wider attachment schema below narrows before calling
+ * `effectForModification`.
  */
-export const AttachModificationSchema = z.discriminatedUnion('kind', [
+const ModelAttachModificationSchema = z.discriminatedUnion('kind', [
   StatBonusModificationSchema,
   GrantKeywordModificationSchema,
   DefinePtModificationSchema,
 ]);
 
+/**
+ * Every hand-authored attachment modification the native engine can enforce.
+ * Layered grants use the full engine keyword vocabulary; `cantBeBlocked` stays
+ * live on the attachment relation because it is a combat-legality rule rather
+ * than a characteristic change. The model schema above remains unchanged.
+ */
+export const AttachModificationSchema = z.discriminatedUnion('kind', [
+  StatBonusModificationSchema,
+  GrantAnyKeywordModificationSchema,
+  StatBonusPerColorModificationSchema,
+  DefinePtModificationSchema,
+  CantBeBlockedModificationSchema,
+]);
+
 export type AttachModification = z.infer<typeof AttachModificationSchema>;
 
 /**
- * CR 614: a damage event, doubled before it happens. Furnace of Rath's text,
- * and symmetric exactly as that card is — the trigger it registers names no
- * source, no recipient and no controller, so it doubles both seats' damage.
+ * CR 614: a damage event, doubled before it happens. With no filter this is
+ * Furnace of Rath and is symmetric exactly as that card is. `sourceFilter` is
+ * Fire Servant's narrower spell-source shape: a live controller-relative
+ * filter over the spell's printed card types and colors.
  *
- * Filtering it would be the interesting card (M13's Fire Servant doubles a red
- * instant or sorcery *you control*), and it is deliberately not expressible:
- * `ReplacementTrigger.fromSource` (`packages/kernel/src/replacement-effects.ts`)
- * is one object id or nothing, so "a red instant or sorcery spell you control"
- * has nowhere to go. A field here that the kernel could not honor would be the
- * divergence this vocabulary exists to prevent.
+ * The source filter is deliberately a spell filter rather than a general
+ * object filter. Its presence proves the source is a spell, which matters for
+ * a red creature's activated ability, and its two lists use any-of semantics:
+ * `['instant', 'sorcery']` means either type, just as `TargetFilter.cardTypes`
+ * does. The controller is the source permanent's current controller in the
+ * kernel, not the player who controlled it when it entered.
  *
  * No factor, and the fixed 2 is the containment: the kernel's
  * `multiplyDamage.factor` is a number, and every printed card that reaches it
  * from the DSL says the word in this member's name.
  */
+const DamageSpellSourceFilterSchema = z.strictObject({
+  controller: z.literal('you'),
+  cardTypes: z.array(CardKindSchema).min(1),
+  colors: z.array(ColorSchema).min(1),
+});
+
 const DoubleDamageModificationSchema = z.strictObject({
   kind: z.literal('doubleDamage'),
+  sourceFilter: DamageSpellSourceFilterSchema.optional(),
 });
 
 /**
@@ -452,12 +780,52 @@ const DoubleDamageModificationSchema = z.strictObject({
  * damage member that makes the registered record one-sided. The kernel bakes
  * the controller at registration, which is what `RegisteredCostModifier`
  * already does with the same field and for the same reason
- * (`packages/kernel/src/cost.ts`), and the consequence is stated where the
- * record is built rather than hidden: `triggerMatches` is a pure function of a
- * trigger and an event and holds no state to re-read a controller from.
+ * (`packages/kernel/src/cost.ts`). Unlike Fire Servant, the record has no
+ * source-relative player filter to re-evaluate after a control change.
  */
 const DoubleLifeGainModificationSchema = z.strictObject({
   kind: z.literal('doubleLifeGain'),
+});
+
+/**
+ * Corpsejack Menace's CR 614 counter-placement replacement. The recipient,
+ * counter kind, and factor are all fixed by the member rather than exposed as
+ * model-shaped parameters: this is the reusable exact envelope printed by
+ * cards with that rule, not a general counter-replacement generator.
+ */
+const DoublePlusOnePlusOneCountersOnCreaturesYouControlModificationSchema = z.strictObject({
+  kind: z.literal('doublePlusOnePlusOneCountersOnCreaturesYouControl'),
+});
+
+/**
+ * A live CR 614 replacement that limits damage to the amount between the
+ * source's controller's current life total and a floor. It is not prevention:
+ * damage that cannot be prevented is still rewritten, while life loss never
+ * enters the damage pipeline at all.
+ */
+const DamageCannotReduceControllerLifeBelowModificationSchema = z.strictObject({
+  kind: z.literal('damageCannotReduceControllerLifeBelow'),
+  minimum: z.int().min(1),
+});
+
+/**
+ * Obstinate Baloth's hand-active CR 614 replacement. The containing static is
+ * self-scoped, so the record needs no object filter: its own printed card is
+ * the discard event's subject, and the kernel additionally requires the cause
+ * to be a spell or ability controlled by the owner's opponent.
+ *
+ * This is hand-authored only. It is absent from
+ * `ModelStaticModificationSchema` because generated sets have no reason to
+ * synthesize zone-specific replacement text, while exact reference cards do.
+ */
+const DiscardedByOpponentEntersBattlefieldModificationSchema = z.strictObject({
+  kind: z.literal('discardedByOpponentEntersBattlefield'),
+});
+
+/** Prevent all damage to the source, then remove up to that many named counters. */
+const PreventDamageToSelfAndRemoveCountersModificationSchema = z.strictObject({
+  kind: z.literal('preventDamageToSelfAndRemoveCounters'),
+  counter: CounterKindSchema,
 });
 
 /**
@@ -520,24 +888,35 @@ const DoubleLifeGainModificationSchema = z.strictObject({
 // `packages/kernel/src/combat.ts`'s `hasCombatModification`), and
 // `AuraStaticModificationSchema` already sets the precedent of pointing at the
 // shared object rather than a second literal that could drift from it.
-export const CantAttackModificationSchema = z.strictObject({
-  kind: z.literal('cantAttack'),
-});
-
-export const CantBlockModificationSchema = z.strictObject({
-  kind: z.literal('cantBlock'),
-});
-
-export const CantBeBlockedModificationSchema = z.strictObject({
-  kind: z.literal('cantBeBlocked'),
-});
-
 const AttacksEachCombatIfAbleModificationSchema = z.strictObject({
   kind: z.literal('attacksEachCombatIfAble'),
 });
 
 const MustBeBlockedIfAbleModificationSchema = z.strictObject({
   kind: z.literal('mustBeBlockedIfAble'),
+});
+
+/**
+ * CR 509.1a's exception to one block per creature.
+ *
+ * This is hand-authored-only card data. It stays outside
+ * `ModelStaticModificationSchema`: generated sets have no demonstrated need
+ * for an unbounded combat-capacity rule, while exact reference cards do.
+ */
+const CanBlockAnyNumberModificationSchema = z.strictObject({
+  kind: z.literal('canBlockAnyNumber'),
+});
+
+/**
+ * CR 702.3b's card-authored exception to defender's attack prohibition.
+ *
+ * This is a permission, not a keyword removal: the permanent still has
+ * defender for every other rule that asks. It remains hand-authored-only and
+ * is currently validated only on the source creature, matching the exact
+ * reference capability without giving the generator a team-wide escape hatch.
+ */
+const CanAttackAsThoughNoDefenderModificationSchema = z.strictObject({
+  kind: z.literal('canAttackAsThoughNoDefender'),
 });
 
 const BlockOnlyCreaturesWithKeywordModificationSchema = z.strictObject({
@@ -560,15 +939,36 @@ const CantBeBlockedBySubtypeModificationSchema = z.strictObject({
   subtype: z.string(),
 });
 
+/** One current ability that admits a creature through a global attack restriction. */
+export const AttackAdmissionSchema = z.discriminatedUnion('kind', [
+  z.strictObject({ kind: z.literal('keyword'), keyword: KeywordSchema }),
+  z.strictObject({ kind: z.literal('landwalk'), landType: BasicLandTypeSchema }),
+]);
+
+export type AttackAdmission = z.infer<typeof AttackAdmissionSchema>;
+
 /**
- * The seven combat members of `StaticModification`, as their own union.
+ * CR 508.1c: creatures in the containing global scope may attack only when at
+ * least one listed current ability admits them.
+ *
+ * The list is an OR because Stormtide Leviathan admits flying or Islandwalk.
+ * Multiple simultaneous restrictions still combine as rules normally do: the
+ * kernel requires a creature to satisfy each live restriction independently.
+ */
+const CantAttackWithoutAnyOfModificationSchema = z.strictObject({
+  kind: z.literal('cantAttackWithoutAnyOf'),
+  anyOf: z.array(AttackAdmissionSchema).min(1),
+});
+
+/**
+ * The combat members of `StaticModification`, as their own union.
  *
  * A schema of its own for the reason `LayeredStaticModificationSchema` has
  * one: `classifyStaticModification`'s `'combat'` arm and its predicate
  * (`isCombatStaticModification`, `static-modification-class.ts`) need a type
  * to narrow to, and `renderStaticAbility`'s three-way dispatch
  * (`oracle.ts`) reads this name to pick its combat-sentence branch rather
- * than re-deriving the six-member list at each call site.
+ * than re-deriving the list at each call site.
  */
 export const CombatModificationSchema = z.discriminatedUnion('kind', [
   CantAttackModificationSchema,
@@ -576,46 +976,75 @@ export const CombatModificationSchema = z.discriminatedUnion('kind', [
   CantBeBlockedModificationSchema,
   AttacksEachCombatIfAbleModificationSchema,
   MustBeBlockedIfAbleModificationSchema,
+  CanBlockAnyNumberModificationSchema,
+  CanAttackAsThoughNoDefenderModificationSchema,
   BlockOnlyCreaturesWithKeywordModificationSchema,
   CantBeBlockedBySubtypeModificationSchema,
+  CantAttackWithoutAnyOfModificationSchema,
+  CantAttackOrBlockModificationSchema,
+  CantAttackOrBlockAloneModificationSchema,
 ]);
 
 export type CombatModification = z.infer<typeof CombatModificationSchema>;
+
+/**
+ * CR 615: a live scoped permanent prevents combat damage dealt to or by each
+ * permanent in that scope. Unlike a turn-long Fog effect, this rule is read
+ * from current battlefield abilities for every proposed damage event.
+ */
+export const DamagePreventionModificationSchema = z.strictObject({
+  kind: z.literal('preventCombatDamage'),
+});
+
+export type DamagePreventionModification = z.infer<typeof DamagePreventionModificationSchema>;
 
 /**
  * What a static ability does, in full: the engine's own union and every
  * hand-authored ability's (`abilities.ts`'s `AbilitySchema`, `effects.ts`'s
  * `TokenAbilitySchema`, neither shown to a model).
  *
- * The three layer members above plus the two CR 614 replacements plus the six
- * CR 508/509 combat members `mtg-t3ik` appended. The split between the three
- * classes is not cosmetic and `LayeredStaticModificationSchema`'s docblock
- * says where the first bites; `STATIC_MODIFICATION_KINDS` (`vocabulary.ts`)
- * argues why a replacement, and now a combat restriction, is printed as a
- * static ability at all.
+ * Layered modifications, CR 614 replacements, and CR 508/509 combat
+ * modifications remain separate structural classes. The split is not cosmetic
+ * and `LayeredStaticModificationSchema`'s docblock says where the first bites;
+ * `STATIC_MODIFICATION_KINDS` (`vocabulary.ts`) argues why a replacement, and
+ * now a combat restriction, is printed as a static ability at all.
  *
- * Neither doubler, nor any of the six combat members, is on any model-facing
- * tier, and that is the one place in this file where the containment rule is
- * a design decision rather than a fixture-hash one: a set whose generator can
+ * These hand-authored members are on no model-facing tier, and that is the one
+ * place in this file where the containment rule is a design decision rather
+ * than a fixture-hash one: a set whose generator can
  * print "this creature must be blocked if able" on every rare prints a format
  * where combat math stops being the player's decision, and no per-card check
- * can catch it, because the mistake is a property of the set. So all eight are
+ * can catch it, because the mistake is a property of the set. They remain
  * hand-authored, exactly where `addMana` sits and for the same stated reason.
  */
 export const StaticModificationSchema = z.discriminatedUnion('kind', [
   StatBonusModificationSchema,
   GrantAnyKeywordModificationSchema,
+  GrantKeywordAbilitiesModificationSchema,
   DefinePtModificationSchema,
   StatBonusPerModificationSchema,
+  StatBonusPerColorModificationSchema,
+  AddSubtypeModificationSchema,
+  GrantAnyColorManaAbilityModificationSchema,
   DoubleDamageModificationSchema,
   DoubleLifeGainModificationSchema,
+  DoublePlusOnePlusOneCountersOnCreaturesYouControlModificationSchema,
+  DamageCannotReduceControllerLifeBelowModificationSchema,
+  DiscardedByOpponentEntersBattlefieldModificationSchema,
+  PreventDamageToSelfAndRemoveCountersModificationSchema,
   CantAttackModificationSchema,
   CantBlockModificationSchema,
   CantBeBlockedModificationSchema,
   AttacksEachCombatIfAbleModificationSchema,
   MustBeBlockedIfAbleModificationSchema,
+  CanBlockAnyNumberModificationSchema,
+  CanAttackAsThoughNoDefenderModificationSchema,
   BlockOnlyCreaturesWithKeywordModificationSchema,
   CantBeBlockedBySubtypeModificationSchema,
+  CantAttackWithoutAnyOfModificationSchema,
+  CantAttackOrBlockModificationSchema,
+  CantAttackOrBlockAloneModificationSchema,
+  DamagePreventionModificationSchema,
 ]);
 
 export type StaticModification = z.infer<typeof StaticModificationSchema>;
@@ -623,6 +1052,39 @@ export type StaticModificationOf<K extends StaticModification['kind']> = Extract
   StaticModification,
   { kind: K }
 >;
+
+/**
+ * Adds the one recursive layer-6 payload that cannot be declared in this file.
+ *
+ * `ability-shape.ts` deliberately does not import `effects.ts`: tokens contain
+ * abilities and abilities contain effects, so that import would close the
+ * module cycle this file exists to prevent. The concrete ability unions already
+ * have their own exact triggered member, however. Supplying that member here
+ * lets cards and both finite token tiers build the same static modification
+ * without weakening its `ability` payload to `unknown` or duplicating an effect
+ * union.
+ */
+function triggeredAbilityGrantSchema<T extends ZodType>(triggeredAbility: T) {
+  return z.strictObject({
+    kind: z.literal('grantTriggeredAbility'),
+    ability: triggeredAbility,
+  });
+}
+
+export function staticModificationsWithTriggeredAbility<T extends ZodType>(triggeredAbility: T) {
+  return z.discriminatedUnion('kind', [
+    ...StaticModificationSchema.options,
+    triggeredAbilityGrantSchema(triggeredAbility),
+  ]);
+}
+
+/** The CR 613-only view of the same recursively supplied modification. */
+export function layeredStaticModificationsWithTriggeredAbility<T extends ZodType>(triggeredAbility: T) {
+  return z.discriminatedUnion('kind', [
+    ...LayeredStaticModificationSchema.options,
+    triggeredAbilityGrantSchema(triggeredAbility),
+  ]);
+}
 
 /**
  * `StaticModificationSchema` narrowed to the two kinds the set generator may
@@ -695,13 +1157,14 @@ export const AuraStaticModificationSchema = z.discriminatedUnion('kind', [
  *
  * ## Why the modifications ride here rather than in a static ability
  *
- * A real Equipment prints two lines, "Equipped creature gets +2/+0" and "Equip
- * {2}", and Magic models the first as a static ability whose scope is the
- * equipped creature. `STATIC_SCOPES` has no such scope, and adding one is a
- * change to two tables outside `@mtg/dsl` that are keyed by it. It is also a
- * scope no card can use without an equip ability, so the two halves are one
- * clause here: the ability that attaches states what being attached does, and
- * the renderer prints Magic's two lines from it.
+ * Equipment that modifies its host prints a static line such as "Equipped
+ * creature gets +2/+0" beside "Equip {2}", and Magic models the first as a
+ * static ability whose scope is the equipped creature. `STATIC_SCOPES` has no
+ * such scope, and adding one is a change to two tables outside `@mtg/dsl` that
+ * are keyed by it. It is also a scope no card can use without an equip ability,
+ * so the two halves are one clause here: the ability that attaches states what
+ * being attached does. A bare Equip ability leaves the list empty and prints
+ * only its Equip line.
  *
  * ## Why a list, and what its bounds mean
  *
@@ -715,19 +1178,16 @@ export const AuraStaticModificationSchema = z.discriminatedUnion('kind', [
  * for it is `+99/-3` *and* deathtouch, which is one clause about one weapon and
  * is unspellable as one modification.
  *
- * The list is bounded at both ends, and the bounds are the encoding rule:
+ * The list is bounded, and its spelling is the encoding rule:
  *
- *  - **At least one, and the field is required.** There is no empty list and no
- *    absent field, so an equip clause has exactly one spelling and
- *    `canonicalJson` — which the fingerprints and the duplicate check read —
- *    cannot see two shapes where the card has one. This is the same rule
- *    `OptionalTriggerSchema` and `TargetSpec.distinct` state with
- *    `literal(true).optional()`, reached from the other side: those fields have
- *    one absent spelling because absence means something, and this one has no
- *    absent spelling because it would not.
- *  - **At most two**, which is `Card.abilities`' cap and a triggered ability's
- *    effect cap, taken for the reason they were taken: a third clause is a
- *    rules box, not a schema (`packages/card-render`).
+ *  - **The field is required and may be empty.** M13's Rings carry Equip while
+ *    granting no continuous modification in the same clause. An empty list is
+ *    their one spelling; an absent field is still invalid, so `canonicalJson`
+ *    cannot see two shapes where the card has one.
+ *  - **At most five**, the smallest source-attested ceiling that holds Sword
+ *    of Vengeance's one bonus plus four keyword grants. This is an engine-only
+ *    list: `ModelAttachSchema` remains one modification, so the wider bound
+ *    does not enlarge or re-key the generator's answer space.
  *
  * Order is printed order and nothing else, exactly as an effect list's order
  * is: the renderer says the modifications in the order the card lists them, so
@@ -741,7 +1201,7 @@ export const AuraStaticModificationSchema = z.discriminatedUnion('kind', [
  * (`validate/abilities.ts`), the way `DUPLICATE_EFFECT` refuses a repeated
  * effect.
  */
-export const ATTACH_MODIFICATION_LIMITS = { min: 1, max: 2 } as const;
+export const ATTACH_MODIFICATION_LIMITS = { min: 0, max: 5 } as const;
 
 export const AttachSchema = z.strictObject({
   modifications: z
@@ -774,7 +1234,7 @@ export type Attach = z.infer<typeof AttachSchema>;
  * the compile-time proof that the crossing lands inside `Ability`.
  */
 export const ModelAttachSchema = z.strictObject({
-  modification: AttachModificationSchema,
+  modification: ModelAttachModificationSchema,
 });
 
 export type ModelAttach = z.infer<typeof ModelAttachSchema>;
@@ -843,11 +1303,13 @@ const NO_EXTRA_FIELDS = {};
  * unfillable. `abilities.ts` fills it; the generator's union and a token's
  * leave it empty.
  *
- * The fourth parameter is the triggered member's, and it carries `optional`.
- * That field is filled by the engine's union and by a token's — a part in The
- * flagship set is a token and Fuse is its printed trigger — and left empty by
- * the two the generator answers with, because a field added to the schema the
- * model is shown renames every recorded fixture keyed to it
+ * The fourth parameter is the triggered member's. It carries `optional`, and
+ * may replace the ordinary one-effect floor when a hand-authored trigger has a
+ * different validated payload, such as a retained stack-object counter clause.
+ * Those fields are filled by the engine's union and, where applicable, by a
+ * token's — a part in the flagship set is a token and Fuse is its printed
+ * trigger — and left empty by the two the generator answers with, because a
+ * field added to the schema the model is shown renames every recorded fixture keyed to it
  * (`packages/llm/src/schema.ts` hashes the answer schema). So an optional
  * trigger is expressible by hand and unreachable from the generator until a
  * setgen slice re-records, which is exactly where `putCounters` and a token's
@@ -886,6 +1348,7 @@ export function abilitiesOver<
   S extends Record<string, ZodType> = typeof NO_EXTRA_FIELDS,
   M extends ZodType = typeof ModelStaticModificationSchema,
   TCondition extends ZodType = typeof TriggerConditionSchema,
+  TScope extends ZodType = typeof StaticScopeSchema,
 >(
   effect: T,
   cost: C = ActivationCostSchema as unknown as C,
@@ -894,11 +1357,12 @@ export function abilitiesOver<
   staticExtra: S = NO_EXTRA_FIELDS as S,
   staticModification: M = ModelStaticModificationSchema as unknown as M,
   triggerCondition: TCondition = TriggerConditionSchema as unknown as TCondition,
+  staticScope: TScope = StaticScopeSchema as unknown as TScope,
 ) {
   return z.discriminatedUnion('kind', [
     z.strictObject({
       kind: z.literal('static'),
-      scope: StaticScopeSchema,
+      scope: staticScope,
       /**
        * Narrows the scope to one creature type, or `null` for all of it. A plain
        * string at the schema level for the reason `Card.subtypes` is one: a
@@ -922,8 +1386,10 @@ export function abilitiesOver<
       /**
        * What the ability does when it resolves, in the same primitives a spell
        * uses, so `applyEffect` and `renderEffect` each stay one switch instead of
-       * two. Two is the cap for the reason `Card.abilities` caps at two: a third
-       * clause is a rules box, not a schema (`packages/card-render`).
+       * two. This is a per-ability resolution bound, independent of the three
+       * abilities a hand-authored Card may carry. The caller may replace the
+       * floor of one only when it also supplies a separately validated
+       * resolution payload; the model-facing callers never do.
        *
        * These may target. CR 603.3d chooses a trigger's targets when the
        * ability is put on the stack, which is inside `settle`, so the kernel

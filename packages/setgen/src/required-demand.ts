@@ -55,7 +55,7 @@ import type {
 import { SLICE_RARITIES } from '@mtg/design-data';
 import type { RequiredCard, SetBrief } from './brief';
 import { slotPoolFor } from './brief';
-import { spellCurve } from './curve';
+import { colorlessPermanentWindow, spellCurve } from './curve';
 import { rarityPolicy } from './rarity';
 import { addToCurve, dropFromCurve, rescaleKeywords } from './plan';
 import { colorlessEffectKinds, roleProfile } from './roles';
@@ -312,11 +312,24 @@ interface RoleSeat {
  * The mana value a spell slot would have cost, which a body converted from it
  * inherits.
  *
- * `bomb` is the tier's, not the slot's: `spellCurve` costs a bomb-tier group's
- * spells from the expensive end of the curve, so a body bought out of one at the
- * curve's mode would carry a window the allocator would never have printed the
- * spell at. That is why `rules` is threaded down here from the profile rather
- * than the curve being read tier-blind.
+ * Three sources, and which one applies is exactly `colorlessPermanentSlots`'s
+ * rule in `allocate.ts`, read the same way rather than restated: a role that
+ * prints its own effects costs what the table says; a colorless slot whose role
+ * prints none is an artifact and rotates over the window list; anything else
+ * reads the weighted spell curve. `curve.ts`'s header is the argument for the
+ * split — a colored spell slot reads a curve and a colorless permanent reads a
+ * rotation, because a rotation has no ends for the bomb tier to walk.
+ *
+ * `mtg-na5y`: the artifact arm used to fall through to `spellCurve`, so the
+ * demand pass and the allocator disagreed about what a colorless artifact costs,
+ * and the disagreement rode into the creature curve every time one of those
+ * slots was sold for a body.
+ *
+ * `bomb` is the tier's, not the slot's, and both branches need it: `spellCurve`
+ * costs a bomb-tier group's spells from the expensive end, and
+ * `colorlessPermanentWindow` swaps the whole list at that tier. That is why
+ * `rules` is threaded down here from the profile rather than either being read
+ * tier-blind.
  */
 function roleManaValue(
   plan: SliceGroupPlan,
@@ -325,8 +338,8 @@ function roleManaValue(
   ordinal: number,
   bomb: boolean,
 ): number {
-  const stated = kindOfRole(role, pool) === 'artifact' ? undefined : roleProfile(role).manaValue;
-  return (stated ?? spellCurve(plan.spells, bomb)[ordinal] ?? { min: 2, max: 3 }).min;
+  if (kindOfRole(role, pool) === 'artifact') return colorlessPermanentWindow(ordinal, bomb).min;
+  return (roleProfile(role).manaValue ?? spellCurve(plan.spells, bomb)[ordinal] ?? { min: 2, max: 3 }).min;
 }
 
 /** The last slot of a kind in the scope's rarity that holds the most of them. */

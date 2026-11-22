@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-10-01T01:26:40.670Z",
+  "sources": [
+    {
+      "code": "WWK",
+      "mtgjson": {
+        "file": "WWK-e4dbd3a615bc15560b405eb4c8b7cea5692bdb69e559960d00bde94504c4cf1c.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/WWK.json",
+        "sha256": "e4dbd3a615bc15560b405eb4c8b7cea5692bdb69e559960d00bde94504c4cf1c",
+        "meta": {
+          "date": "2026-09-30",
+          "version": "5.3.0+20260930"
+        }
+      },
+      "scryfall": {
+        "file": "WWK-fdf453852768c433bbf4a45378048971de96ee917e3218e8de2e2cad8cb3de74.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Awwk+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "fdf453852768c433bbf4a45378048971de96ee917e3218e8de2e2cad8cb3de74",
+        "cards": 145
+      }
+    },
+    {
+      "code": "ZEN",
+      "mtgjson": {
+        "file": "ZEN-4ecb5fd0296227d1708ece540e53e27428baedb22628edc60c2d4d337f960090.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/ZEN.json",
+        "sha256": "4ecb5fd0296227d1708ece540e53e27428baedb22628edc60c2d4d337f960090",
+        "meta": {
+          "date": "2026-09-30",
+          "version": "5.3.0+20260930"
+        }
+      },
+      "scryfall": {
+        "file": "ZEN-84cb08044ff4a9e1b92ffa0d912d4f6748722583918917d7eb46bea8bfda04f3.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Azen+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "84cb08044ff4a9e1b92ffa0d912d4f6748722583918917d7eb46bea8bfda04f3",
+        "cards": 269
+      }
+    }
+  ]
+}

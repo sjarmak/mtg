@@ -12,6 +12,11 @@
 import type { SideTotals, SideTurnStats, SimGameLog, Side, TurnRecord } from '@mtg/sim';
 import { emptySideTotals, emptySideTurnStats, SIM_LOG_SCHEMA_VERSION, SimGameLogSchema } from '@mtg/sim';
 
+/** Zeroed `CardGameStats`, with any of the four counters overridden. */
+export function cardStats(overrides: Partial<SimGameLog['cards'][string]> = {}): SimGameLog['cards'][string] {
+  return { deck: 0, sideboard: 0, opening_hand: 0, drawn: 0, ...overrides };
+}
+
 export interface FakeGameSpec {
   readonly index?: number;
   readonly userColors?: string;
@@ -42,8 +47,14 @@ export interface FakeGameSpec {
    * the state the trigger floor exists to catch.
    */
   readonly triggersPerTurn?: number;
-  /** Perturbs the trajectory so otherwise-identical games fingerprint apart. */
+  /**
+   * Perturbs the trajectory so otherwise-identical games fingerprint apart. It
+   * moves the life lines and nothing else, so no metric reads it; see
+   * `lifeLine` for why that is the field it moves.
+   */
   readonly variant?: number;
+  /** The GAME-dataset `cards` map, keyed by card name. Default `{}`, matching a fixture with no card identity. */
+  readonly cards?: SimGameLog['cards'];
 }
 
 function sideOf(seat: 0 | 1): Side {
@@ -59,9 +70,50 @@ function landsAt(schedule: readonly number[] | undefined, ordinal: number): numb
   return schedule[schedule.length - 1] ?? 0;
 }
 
-/** Keeps a perturbed life total inside a plausible range without colliding often. */
-function lifeFor(variant: number, offset: number): number {
-  return Math.max(1, 20 - ((variant + offset) % 17));
+/**
+ * The life total at the end of each of a game's turns: twenty at the start,
+ * declining at a rate this game does not share with its neighbors.
+ *
+ * This was one modular shift of a total that then stayed flat for the whole
+ * game, and it cycled on 17, so a thousand games were seventeen trajectories
+ * wearing a large number and every rule that scales with volume read a sample
+ * the fixture had not bought (`mtg-pixl`). Perturbing the whole line rather
+ * than its intercept is both far more distinct and closer to a game: life goes
+ * down, at a pace the two decks decide.
+ *
+ * Free to move because nothing under `../../src` reads `eot_life` — its one
+ * reader is `sample.ts`'s fingerprint, which is the reader this exists for.
+ */
+function lifeLine(variant: number, offset: number, turns: number): readonly number[] {
+  const line: number[] = [];
+  let life = 20;
+  for (let turn = 1; turn <= turns; turn += 1) {
+    // One point or none per turn. Never two, so a long game does not bottom out
+    // at 1 and give back the distinctness the tail of the line is carrying.
+    line.push((life = Math.max(1, life - (scramble(variant, offset, turn) % 2))));
+  }
+  return line;
+}
+
+/**
+ * An avalanche mix of the three numbers that name a turn of a game.
+ *
+ * A mix and not a modular shift, which is the whole of why this reads the way
+ * it does: taking a bit out of a linear function of the variant is a structured
+ * sequence, and the first thing tried here repeated its sixteen-turn pattern
+ * every ten games. Two hundred games have to be two hundred lines, or the
+ * fixture is back to promising a sample it did not buy.
+ */
+function scramble(variant: number, offset: number, turn: number): number {
+  let mixed = (Math.imul(variant, 1000003) + offset * 97 + turn) >>> 0;
+  mixed = Math.imul(mixed ^ (mixed >>> 16), 2246822507);
+  mixed = Math.imul(mixed ^ (mixed >>> 13), 3266489909);
+  return (mixed ^ (mixed >>> 16)) >>> 0;
+}
+
+/** A life line's reading at `turn`, 1-based; a turn past its end holds. */
+function lifeAt(line: readonly number[], turn: number): number {
+  return line[turn - 1] ?? line[line.length - 1] ?? 20;
 }
 
 function stats(lands: number, life: number, creatures: number, activations = 0, triggers = 0): SideTurnStats {
@@ -87,6 +139,11 @@ export function fakeLog(spec: FakeGameSpec): SimGameLog {
   const schedules: Record<Side, readonly number[] | undefined> = {
     user: spec.userLands,
     oppo: spec.oppoLands,
+  };
+
+  const lives: Record<Side, readonly number[]> = {
+    user: lifeLine(variant, 0, spec.playerTurns),
+    oppo: lifeLine(variant, 3, spec.playerTurns),
   };
 
   const ordinals: Record<Side, number> = { user: 0, oppo: 0 };
@@ -125,14 +182,14 @@ export function fakeLog(spec: FakeGameSpec): SimGameLog {
       creatures_blocking: 0,
       user: stats(
         landsAt(schedules.user, ordinals.user),
-        lifeFor(variant, 0),
+        lifeAt(lives.user, turn),
         ordinals.user,
         owner === 'user' ? activations : 0,
         owner === 'user' ? triggers : 0,
       ),
       oppo: stats(
         landsAt(schedules.oppo, ordinals.oppo),
-        lifeFor(variant, 3),
+        lifeAt(lives.oppo, turn),
         ordinals.oppo,
         owner === 'oppo' ? activations : 0,
         owner === 'oppo' ? triggers : 0,
@@ -177,6 +234,10 @@ export function fakeLog(spec: FakeGameSpec): SimGameLog {
     },
     totals,
     turns,
+    // This fixture synthesizes turns from schedules, not from a real deck or
+    // event stream, so there is no card identity to seed per-card counts from
+    // unless the spec states one.
+    cards: spec.cards ?? {},
   };
   return SimGameLogSchema.parse(log);
 }
@@ -185,6 +246,12 @@ export function fakeLog(spec: FakeGameSpec): SimGameLog {
  * `count` games from one spec, each perturbed so they fingerprint apart. Use
  * this whenever a test needs to clear a sample floor without pretending that
  * one repeated trajectory is evidence.
+ *
+ * `count` distinct trajectories, and not approximately: `countGames` reports
+ * `count` distinct for every size this suite asks for. That was not true until
+ * `mtg-pixl` — it saturated at 17 — and the sentence above was a promise the
+ * helper was not keeping, silently, at exactly the sizes a gate needs to be
+ * decidable.
  */
 export function distinctGames(count: number, spec: FakeGameSpec): readonly SimGameLog[] {
   return Array.from({ length: count }, (_unused, index) => fakeLog({ ...spec, index, variant: index }));
@@ -195,6 +262,28 @@ export function repeatedGame(count: number, spec: FakeGameSpec): readonly SimGam
   const log = fakeLog(spec);
   return Array.from({ length: count }, () => log);
 }
+
+/**
+ * What a matchup varies from one game to the next, on top of its own spec.
+ *
+ * A matchup deals one trajectory `count` times and moves only the life lines,
+ * which `lifeLine` now makes distinct per game; a matchup of a thousand is a
+ * thousand trajectories. What it does not move is the *shape* of the play — the
+ * turn count, the inert turns, the land schedules are one spec for the whole
+ * matchup, so every game reaches the same board on the same turn. This is the
+ * dial for that: anything the fingerprint reads, moved per game rather than per
+ * matchup, when a fixture wants games that differ in more than how much life
+ * was left.
+ *
+ * It exists because the life perturbation used to cycle on 17, which capped a
+ * matchup at about 68 trajectories however large `count` got and made a run of
+ * thousands a few dozen trajectories wearing a large number (`mtg-ijl6`). That
+ * ceiling is gone (`mtg-pixl`); the hook is still the honest way to vary a game
+ * in a way that a life total cannot express.
+ */
+export type PerGameSpec = (
+  index: number,
+) => Omit<Partial<FakeGameSpec>, 'userColors' | 'oppoColors' | 'winner' | 'onPlay' | 'index' | 'variant'>;
 
 /**
  * A matchup: `count` games between two color pairs, with `winsForUser` of them
@@ -208,10 +297,12 @@ export function matchup(
   spec: Omit<FakeGameSpec, 'userColors' | 'oppoColors' | 'winner' | 'onPlay' | 'index'> = {
     playerTurns: 16,
   },
+  perGame?: PerGameSpec,
 ): readonly SimGameLog[] {
   return Array.from({ length: count }, (_unused, index) =>
     fakeLog({
       ...spec,
+      ...(perGame === undefined ? {} : perGame(index)),
       index,
       userColors,
       oppoColors,

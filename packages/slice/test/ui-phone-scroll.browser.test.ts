@@ -21,10 +21,10 @@
  * navigates to a live server twice — once at `127.0.0.1` and once at a hostname
  * mapped to it, because the claim is about a plain-HTTP origin not being a
  * secure context — and reaches the played table only by playing: pick a precon,
- * pick an opponent, start the hotseat, keep two hands, and pass through however
- * many privacy handoffs the shuffle produced. None of that is expressible as a
- * settle selector, and inventing a second `measurePage` shape for one caller
- * would put the drift back where it was taken out of.
+ * pick an opponent, start the game against the bot, and keep the opening hand.
+ * None of that is expressible as a settle selector, and inventing a second
+ * `measurePage` shape for one caller would put the drift back where it was
+ * taken out of.
  *
  * The CDP call bounds below are explicit for the same reason. The harness
  * defaults to four seconds, which is right for a synchronous read and wrong for
@@ -32,12 +32,13 @@
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
+import { createServer as createHttpServer, get as httpGet, type Server as HttpServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { AddressInfo } from 'node:net';
-import { createServer, type Plugin } from 'vite';
-import { describe, expect } from 'vitest';
+import { createServer, type Plugin, type ViteDevServer } from 'vite';
+import { describe, expect, it } from 'vitest';
 import { SHORT_TABLE_ASK_SHUT_REM, SHORT_TABLE_RAIL_SHUT_PX } from '../../ui/src/styles/board/rail';
 import {
   browserIt,
@@ -63,11 +64,20 @@ const JOURNEY_CALL_TIMEOUT_MS = 20_000;
 const PREVIEW_CALL_TIMEOUT_MS = 12_000;
 
 /**
- * The final read scrolls and waits two animation frames. That is fast on an
- * idle machine and not instant on a loaded one: `requestAnimationFrame` in a
- * headless browser competing for CPU with the rest of the suite has been seen
- * to stall for whole seconds, and the harness default would call that a dead
- * socket.
+ * The final read scrolls, then polls frame over frame until the snapshot it
+ * takes stops changing.
+ *
+ * A fixed two-frame wait was seen to read `div.mtg-zone__body` (the command
+ * zone; `../../ui/src/styles/board/command.ts` gives it `overflow: auto` by
+ * design) as an extra vertical scroller once in five, under host load, with
+ * the assertion otherwise unchanged: a zone whose content is still reflowing
+ * when the clock fires can transiently report `scrollHeight > clientHeight`
+ * before the layout it will actually render settles. Polling for two
+ * consecutive identical snapshots proves the layout has settled instead of
+ * guessing at a duration; on an idle machine that is still one or two frames.
+ * `requestAnimationFrame` in a headless browser competing for CPU with the
+ * rest of the suite has been seen to stall for whole seconds, which is what
+ * the outer bound below is for rather than the settle loop itself.
  */
 const MEASURE_CALL_TIMEOUT_MS = 10_000;
 
@@ -137,6 +147,17 @@ function stagedFixtures(): Plugin {
     configureServer(server): void {
       server.middlewares.use((request, response, next) => {
         const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
+        // This journey exercises the flat XMP set and precon fixtures below.
+        // A developer may legitimately have `npm run play`'s ignored set index
+        // staged in `public/`; if it leaks into this server, LabApp follows that
+        // selected bundle and stops reading the flat precon URL. Keep the clean
+        // checkout's absent-index state explicit so launcher state cannot
+        // silently change which set this test plays.
+        if (pathname === '/sets/index.json') {
+          response.statusCode = 404;
+          response.end();
+          return;
+        }
         const body = pathname === '/set.json' ? setBody : pathname === '/precons.json' ? preconBody : null;
         if (body === null) {
           next();
@@ -284,11 +305,12 @@ async function measure(
           .find((button) => button.textContent.trim() === name);
         const buttonWithLabel = (name) => [...document.querySelectorAll('button')]
           .find((button) => button.getAttribute('aria-label') === name);
-        const handoff = () => [...document.querySelectorAll('button')]
-          .find((button) => /^I am /.test(button.textContent.trim()));
         await click('Wield the Obliterator', () => buttonWithLabel('Play Wield the Obliterator'));
         await click('The Sky Islands opponent', () => buttonWithLabel('Opponent plays The Sky Islands'));
-        await click('hotseat start', () => buttonNamed('Two players, one screen'));
+        await click('bot game start', () => buttonNamed('Play against bot'));
+        await click('the opening roll', () => buttonNamed('Roll for first'));
+        document.querySelector('.mtg-opening-roll').click();
+        await click('the rolled table', () => buttonNamed('Begin'));
         // A short table shuts the ask column and puts the panel behind the
         // strip's own alert (../../ui/src/routes/play/ask-collapse.ts, and
         // ask-flyout.ts for the box it opens). So every press on a panel control
@@ -302,27 +324,14 @@ async function measure(
             await new Promise((resolve) => setTimeout(resolve, 50));
           }
         };
-        await waitFor('player one board', () => document.querySelector('.mtg-board'));
+        await waitFor('opening board', () => document.querySelector('.mtg-board'));
         await openAsk();
-        await click('player one Keep', () => buttonNamed('Keep this hand'));
-        await click('player two privacy handoff', handoff);
-        await openAsk();
-        const playerTwoKeep = await click('player two Keep', () => buttonNamed('Keep this hand'));
-        await waitFor('player two Keep to settle', () => !playerTwoKeep.isConnected);
-        // A shuffled game may start with either player. P1 starting adds one
-        // more handoff; P2 starting correctly returns straight to the board.
-        const turnOne = await waitFor(
-          'turn one board or privacy handoff',
-          () => handoff() ?? document.querySelector('.mtg-board'),
-        );
-        let handoffs = 1;
-        if (turnOne.tagName === 'BUTTON') {
-          turnOne.click();
-          handoffs += 1;
-          await waitFor('turn one privacy handoff to settle', () => !turnOne.isConnected);
-        }
+        const keep = await click('Keep', () => buttonNamed('Keep this hand'));
+        await waitFor('Keep to settle', () => !keep.isConnected);
+        // The bot keeps its own hand without a press, so once the Keep control
+        // is gone the next board drawn is turn one.
         await waitFor('turn one board', () => document.querySelector('.mtg-board'));
-        return { handoffs };
+        return { kept: true };
       })()`,
         awaitPromise: true,
         returnByValue: true,
@@ -334,10 +343,7 @@ async function measure(
       throw new Error(`phone scroll browser journey failed: ${JSON.stringify(journey['exceptionDetails'])}`);
     }
     const journeyResult = journey['result'] as { readonly value?: unknown } | undefined;
-    if (
-      !record(journeyResult?.value) ||
-      (journeyResult.value['handoffs'] !== 1 && journeyResult.value['handoffs'] !== 2)
-    ) {
+    if (!record(journeyResult?.value) || journeyResult.value['kept'] !== true) {
       throw new Error('phone scroll browser journey did not complete');
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -350,14 +356,13 @@ async function measure(
         const board = document.querySelector('.mtg-board');
         const beforeY = window.scrollY;
         window.scrollTo(0, 500);
-        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        return {
+        const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+        const snapshot = () => ({
           viewport: [window.innerWidth, window.innerHeight],
           documentClientHeight: scrolling.clientHeight,
           documentScrollHeight: scrolling.scrollHeight,
           documentClientWidth: scrolling.clientWidth,
           documentScrollWidth: scrolling.scrollWidth,
-          beforeY,
           afterY: window.scrollY,
           mainClientHeight: main.clientHeight,
           mainScrollHeight: main.scrollHeight,
@@ -392,7 +397,24 @@ async function measure(
                 && element.scrollHeight > element.clientHeight;
             })
             .map((element) => [element.tagName.toLowerCase(), [...element.classList].sort()]),
-        };
+        });
+        // Two consecutive frames reading the same snapshot is the proof that
+        // layout has settled; a zone still reflowing under host load changes
+        // shape frame over frame and never reads the same twice by accident.
+        // Bounded at eighty frames for the same reason every other in-page
+        // loop in this file is: a run that never settles fails as a named
+        // error here rather than as the outer socket timeout.
+        await nextFrame();
+        let previous = JSON.stringify(snapshot());
+        for (let attempt = 0; attempt < 80; attempt += 1) {
+          await nextFrame();
+          const current = JSON.stringify(snapshot());
+          if (current === previous) {
+            return { beforeY, ...JSON.parse(current) };
+          }
+          previous = current;
+        }
+        throw new Error('phone scroll measurement did not settle after eighty frames');
       })()`,
         awaitPromise: true,
         returnByValue: true,
@@ -431,24 +453,212 @@ async function measure(
  */
 const PHONE_SCROLL_BUDGET_MS = 90_000;
 
+/**
+ * Bind the parent HTTP server to a genuinely ephemeral loopback port.
+ *
+ * Vite 7 treats `server.port: 0` as falsy and substitutes its default 5173, so
+ * putting zero in Vite's own options makes this test depend on an unrelated
+ * process not owning that port. Middleware mode leaves the bind to Node, whose
+ * port-zero contract asks the OS for a free listener without a probe-and-release
+ * race.
+ */
+function listenEphemeral(server: HttpServer): Promise<AddressInfo> {
+  return new Promise((resolve, reject) => {
+    const onError = (error: Error): void => {
+      reject(error);
+    };
+    server.once('error', onError);
+    server.listen(0, '127.0.0.1', () => {
+      server.off('error', onError);
+      const address = server.address();
+      if (address === null || typeof address === 'string') {
+        reject(new Error('the phone-scroll HTTP server published no TCP address'));
+        return;
+      }
+      resolve(address);
+    });
+  });
+}
+
+function closeHttpServer(server: HttpServer): Promise<void> {
+  return new Promise((resolve, reject) => {
+    server.close((error) => {
+      if (error === undefined) resolve();
+      else reject(error);
+    });
+  });
+}
+
+interface FixedPortBlocker {
+  readonly port: number;
+  readonly server: HttpServer;
+}
+
+function holdFixedPort(port: number): Promise<FixedPortBlocker | null> {
+  const server = createHttpServer();
+  return new Promise((resolve, reject) => {
+    const onError = (error: NodeJS.ErrnoException): void => {
+      if (error.code === 'EADDRINUSE') resolve(null);
+      else reject(error);
+    };
+    server.once('error', onError);
+    server.listen(port, '127.0.0.1', () => {
+      server.off('error', onError);
+      resolve({ port, server });
+    });
+  });
+}
+
+function readHttpText(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const request = httpGet(url, { agent: false }, (response) => {
+      response.setEncoding('utf8');
+      let chunks: readonly string[] = [];
+      response.on('data', (chunk: string) => {
+        chunks = [...chunks, chunk];
+      });
+      response.once('end', () => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`${url} answered HTTP ${String(response.statusCode)}`));
+          return;
+        }
+        resolve(chunks.join(''));
+      });
+      response.once('error', reject);
+    });
+    request.once('error', reject);
+  });
+}
+
+function hasHostPortToken(source: string, port: number): boolean {
+  return new RegExp(`:${String(port)}(?![0-9])`, 'u').test(source);
+}
+
+it('distinguishes a fixed port from a longer ephemeral port with the same prefix', () => {
+  expect(hasHostPortToken('const target = "127.0.0.1:5173/";', 5173)).toBe(true);
+  expect(hasHostPortToken('const target = "127.0.0.1:51730/";', 5173)).toBe(false);
+  expect(hasHostPortToken('const target = "127.0.0.1:52739/";', 5273)).toBe(false);
+});
+
+interface CleanupTask {
+  readonly name: string;
+  readonly run: () => Promise<void>;
+}
+
+async function runCleanupTasks(tasks: readonly CleanupTask[]): Promise<void> {
+  let failures: readonly { readonly name: string; readonly error: unknown }[] = [];
+  for (const task of tasks) {
+    try {
+      await task.run();
+    } catch (error) {
+      failures = [...failures, { name: task.name, error }];
+    }
+  }
+  const [failure] = failures;
+  if (failure !== undefined && failures.length === 1) throw failure.error;
+  if (failures.length > 1) {
+    throw new AggregateError(
+      failures.map((failure) => failure.error),
+      `phone-scroll cleanup failed for ${failures.map((failure) => failure.name).join(', ')}`,
+    );
+  }
+}
+
+it('attempts every phone-scroll cleanup when an earlier resource fails to close', async () => {
+  let attempted: readonly string[] = [];
+  const failure = new Error('Chrome did not stop');
+  const cleanup = runCleanupTasks([
+    {
+      name: 'browser process',
+      run: () => {
+        attempted = [...attempted, 'browser process'];
+        return Promise.reject(failure);
+      },
+    },
+    {
+      name: 'development server',
+      run: () => {
+        attempted = [...attempted, 'development server'];
+        return Promise.resolve();
+      },
+    },
+    {
+      name: 'HTTP',
+      run: () => {
+        attempted = [...attempted, 'HTTP'];
+        return Promise.resolve();
+      },
+    },
+    {
+      name: 'profile',
+      run: () => {
+        attempted = [...attempted, 'profile'];
+        return Promise.resolve();
+      },
+    },
+  ]);
+
+  await expect(cleanup).rejects.toThrow('Chrome did not stop');
+  expect(attempted).toEqual(['browser process', 'development server', 'HTTP', 'profile']);
+});
+
+it('aggregates multiple phone-scroll cleanup failures without masking either cause', async () => {
+  const chromeFailure = new Error('Chrome did not stop');
+  const listenerFailure = new Error('HTTP listener did not stop');
+  try {
+    await runCleanupTasks([
+      { name: 'browser process', run: () => Promise.reject(chromeFailure) },
+      { name: 'HTTP listener', run: () => Promise.reject(listenerFailure) },
+    ]);
+    expect.unreachable('cleanup with two failures must reject');
+  } catch (error) {
+    expect(error).toBeInstanceOf(AggregateError);
+    if (!(error instanceof AggregateError)) throw error;
+    expect(error.errors).toEqual([chromeFailure, listenerFailure]);
+    expect(error.message).toBe('phone-scroll cleanup failed for browser process, HTTP listener');
+  }
+});
+
 describe('the real played table owns phone scrolling', () => {
   browserIt(
     'keeps the document fixed while the main region remains the sole vertical scroller',
     async () => {
-      const server = await createServer({
-        configFile: fileURLToPath(new URL('../../ui/vite.config.ts', import.meta.url)),
-        root: packageDir,
-        logLevel: 'silent',
-        clearScreen: false,
-        plugins: [stagedFixtures()],
-        server: { host: '127.0.0.1', port: 0, strictPort: true },
-      });
-      const userDataDir = await mkdtemp(join(tmpdir(), 'mtg-phone-scroll-'));
+      const httpServer = createHttpServer();
+      let server: ViteDevServer | null = null;
+      let fixedPortBlockers: readonly FixedPortBlocker[] = [];
+      let userDataDir: string | null = null;
       let chrome: Awaited<ReturnType<typeof launchChrome>> | null = null;
       try {
-        await server.listen();
-        const address = server.httpServer?.address() as AddressInfo | null;
-        if (address === null) throw new Error('Vite did not publish a listening address');
+        for (const port of [5173, 24678]) {
+          const blocker = await holdFixedPort(port);
+          if (blocker !== null) fixedPortBlockers = [...fixedPortBlockers, blocker];
+        }
+        const address = await listenEphemeral(httpServer);
+        server = await createServer({
+          configFile: fileURLToPath(new URL('../../ui/vite.config.ts', import.meta.url)),
+          root: packageDir,
+          logLevel: 'silent',
+          clearScreen: false,
+          plugins: [stagedFixtures()],
+          server: {
+            host: '127.0.0.1',
+            port: address.port,
+            middlewareMode: { server: httpServer },
+            hmr: { server: httpServer, port: address.port, clientPort: address.port },
+          },
+        });
+        expect(server.config.server.hmr).toMatchObject({
+          server: httpServer,
+          port: address.port,
+          clientPort: address.port,
+        });
+        httpServer.on('request', server.middlewares);
+        const viteClient = await readHttpText(`http://127.0.0.1:${String(address.port)}/@vite/client`);
+        expect(hasHostPortToken(viteClient, address.port)).toBe(true);
+        expect(hasHostPortToken(viteClient, 5173)).toBe(false);
+        expect(hasHostPortToken(viteClient, 24678)).toBe(false);
+        expect(hasHostPortToken(viteClient, 5273)).toBe(false);
+        userDataDir = await mkdtemp(join(tmpdir(), 'mtg-phone-scroll-'));
         chrome = await launchChrome(userDataDir, [HOST_RESOLVER_SWITCH]);
         const plainHttp = await readPlainHttpPreview(
           chrome.client,
@@ -468,7 +678,11 @@ describe('the real played table owns phone scrolling', () => {
         for (const [width, height, expectedColumns] of [
           [390, 844, null],
           [430, 932, null],
-          [810, 1080, '99.8281px 608.172px 44px'],
+          // The ask column here is the percentage arm of `ASK_PERCENT`'s clamp
+          // rather than its 11rem cap, so this literal moves whenever that
+          // number does: it read 99.8281px at 13 and reads 122.875px at 16
+          // (`mtg-e0i`), and the 23px came out of the lanes beside it.
+          [810, 1080, '122.875px 585.125px 44px'],
           [844, 390, 'landscape'],
           [1440, 900, '176px 934px 272px'],
         ] as const) {
@@ -527,9 +741,29 @@ describe('the real played table owns phone scrolling', () => {
           }
         }
       } finally {
-        if (chrome !== null) await shutdownChrome(chrome);
-        await server.close();
-        await rm(userDataDir, { recursive: true, force: true });
+        await runCleanupTasks([
+          {
+            name: 'browser process',
+            run: () => (chrome === null ? Promise.resolve() : shutdownChrome(chrome)),
+          },
+          {
+            name: 'development server',
+            run: () => (server === null ? Promise.resolve() : server.close()),
+          },
+          {
+            name: 'HTTP listener',
+            run: () => (httpServer.listening ? closeHttpServer(httpServer) : Promise.resolve()),
+          },
+          {
+            name: 'Chrome profile',
+            run: () =>
+              userDataDir === null ? Promise.resolve() : rm(userDataDir, { recursive: true, force: true }),
+          },
+          ...fixedPortBlockers.map((blocker) => ({
+            name: `fixed-port blocker ${String(blocker.port)}`,
+            run: () => closeHttpServer(blocker.server),
+          })),
+        ]);
       }
     },
     PHONE_SCROLL_BUDGET_MS,

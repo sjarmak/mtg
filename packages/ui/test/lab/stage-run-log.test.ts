@@ -37,7 +37,7 @@ afterAll(() => {
   rmSync(DIR, { recursive: true, force: true });
 });
 
-/** The reader's own fixture: a real three-game slice of a TGR run, schema v2. */
+/** The reader's own fixture: a real three-game slice of a TGR run, schema v3. */
 const TIDEGLASS = readFileSync(join(HERE, '..', 'fixtures', RUN_LOG_FILENAME), 'utf8');
 /** The same bytes with the expansion column moved, which is the accept case. */
 const FLAGSHIP_SET = TIDEGLASS.replaceAll('"expansion":"TGR"', '"expansion":"XMP"');
@@ -69,10 +69,10 @@ describe('choosing a statistics log for the set being played', () => {
   });
 
   it('refuses a log the page’s own reader would refuse, carrying its message', () => {
-    const stale = TIDEGLASS.replaceAll('replay-superset/2', 'replay-superset/1');
+    const stale = TIDEGLASS.replaceAll('replay-superset/3', 'replay-superset/2');
     const search = chooseRunLog([candidate('v1.jsonl', stale)], 'XMP');
     expect(search.chosen).toBeNull();
-    expect(search.rejected[0]?.why).toContain('replay-superset/1');
+    expect(search.rejected[0]?.why).toContain('replay-superset/2');
   });
 
   it('refuses a log too large to serve, without reading it', () => {

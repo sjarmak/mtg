@@ -174,7 +174,7 @@ function attackWithEverything(session: GameSession): number {
   if (decision.kind !== 'declareAttackers') {
     throw new Error(`attackWithEverything: the game is asking for "${decision.kind}"`);
   }
-  return decision.options.length - 1;
+  return decision.options.findLastIndex((option) => option.type !== 'concede');
 }
 
 /** Settles to the human's attack declaration and takes it. */
@@ -245,7 +245,11 @@ function playOn(start: GameSession, options: SessionOptions): GameSession {
     }
     const decision = current.pending;
     if (decision === null) return current;
-    current = choose(current, decision.options.length - 1, options);
+    current = choose(
+      current,
+      decision.options.findLastIndex((option) => option.type !== 'concede'),
+      options,
+    );
   }
   throw new Error('playOn: the game never finished');
 }
@@ -355,7 +359,11 @@ describe('the same combat, beat by beat', () => {
       } else {
         const decision = current.pending;
         if (decision === null) break;
-        current = choose(current, decision.options.length - 1, WATCHING);
+        current = choose(
+          current,
+          decision.options.findLastIndex((option) => option.type !== 'concede'),
+          WATCHING,
+        );
       }
       const produced = current.events.slice(before);
       const held = COMBAT_BEATS.filter((beat) => beatIn(produced, new Set([beat])) !== null);

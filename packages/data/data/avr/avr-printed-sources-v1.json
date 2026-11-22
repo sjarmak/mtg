@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-19T18:42:11.614Z",
+  "sources": [
+    {
+      "code": "AVR",
+      "mtgjson": {
+        "file": "AVR-d24e3cb5095e8b828878b901f46026a8b5842ab1d98ad58b2a1e416d7e94e929.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/AVR.json",
+        "sha256": "d24e3cb5095e8b828878b901f46026a8b5842ab1d98ad58b2a1e416d7e94e929",
+        "meta": {
+          "date": "2026-09-19",
+          "version": "5.3.0+20260919"
+        }
+      },
+      "scryfall": {
+        "file": "AVR-1fda5dd1310aa141a176372f74ee2c5994754dbcfe917483fe76ada0839221b4.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Aavr+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "1fda5dd1310aa141a176372f74ee2c5994754dbcfe917483fe76ada0839221b4",
+        "cards": 244
+      }
+    }
+  ]
+}

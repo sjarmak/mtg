@@ -10,6 +10,8 @@
 import type { Card } from '@mtg/dsl';
 import { typeLineParts } from '@mtg/dsl';
 import type { ObjectId } from './ids';
+import { spellCardByOid } from './stack-spell';
+import { copiableCardOf } from './state';
 import type { GameState } from './state';
 
 /** `Legendary Artifact Creature — Golem`, joined the way a card prints it. */
@@ -22,10 +24,17 @@ export function typeLineOf(card: Card): string {
 /**
  * What an object is called, or what to say when there is no object.
  *
- * An ability on the stack has an `ab<n>` id and no `GameObject` behind it, which
- * is a documented shape rather than a fault, so the miss is answered rather than
- * thrown on.
+ * Abilities and copied spells on the stack have no `GameObject` behind them.
+ * A copied spell still has a card through its stack entry; an ability has only
+ * its id, which is a documented shape rather than a fault.
  */
 export function nameOf(state: GameState, oid: ObjectId): string {
-  return state.objects[oid]?.card.name ?? String(oid);
+  const pendingFace = state.pendingFreeCast?.oid === oid ? state.pendingFreeCast.card : undefined;
+  const object = state.objects[oid];
+  return (
+    pendingFace?.name ??
+    (object === undefined ? undefined : copiableCardOf(object).name) ??
+    spellCardByOid(state, oid)?.name ??
+    String(oid)
+  );
 }

@@ -130,7 +130,9 @@ describe('the server owns the bot', () => {
       if (owed === null) break;
       expect(owed).toBe(0);
       const owing = live.snapshotFor(0);
-      live.apply(0, { kind: 'choose', index: (owing.pending?.options.length ?? 1) - 1, at: owing.decisions });
+      const index = owing.pending?.options.findLastIndex((option) => option.type !== 'concede') ?? -1;
+      if (index < 0) throw new Error('the person was offered no move except concession');
+      live.apply(0, { kind: 'choose', index, at: owing.decisions });
     }
     expect(live.snapshotFor(0).decisions).toBeGreaterThan(20);
   });
@@ -169,5 +171,39 @@ describe('one preference per seat', () => {
     // The recording is a list of integers whatever the settings were, which is
     // what makes it replayable; `reconnection.test.ts` spends it.
     for (const index of settled.record().choices) expect(Number.isInteger(index)).toBe(true);
+  });
+});
+
+describe('the finished game, for a recorder', () => {
+  it('is null while the game is on and whole once it is over', () => {
+    const live = oneBot();
+    expect(live.capture()).toBeNull();
+    play(live, 4000);
+    const capture = live.capture();
+    expect(capture).not.toBeNull();
+    if (capture === null) return;
+    expect(capture.source).toBe('netplay-kernel');
+    expect(capture.setup).toBe(SETUP);
+    expect(capture.seats.map((seat) => seat.kind)).toEqual(['human', 'bot']);
+    expect(capture.choices).toEqual(live.record().choices);
+    expect(capture.result).toEqual(live.snapshotFor(0).result);
+  });
+
+  it('reports the format the table was dealt for, and constructed when none was stated', () => {
+    const finished = twoHumans();
+    play(finished, 4000);
+    expect(finished.capture()?.format).toBe('constructed');
+    const drafted = createTable({
+      id: 'drafted',
+      setup: SETUP,
+      format: 'draft',
+      seats: [humanSeat('One'), humanSeat('Two')],
+      seating: [
+        { name: 'One', token: 'token-one' },
+        { name: 'Two', token: 'token-two' },
+      ],
+    });
+    play(drafted, 4000);
+    expect(drafted.capture()?.format).toBe('draft');
   });
 });

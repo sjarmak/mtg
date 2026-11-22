@@ -104,6 +104,7 @@ import {
   seatState,
   yieldPriority,
 } from '@mtg/kernel';
+import type { GameplayFormat, KernelGameCapture } from './gameplay';
 import type { SeatRefusal, SeatRequest, SeatSnapshot } from './protocol';
 import { fromWireAutoPass, NETPLAY_PROTOCOL, toWireAutoPass } from './protocol';
 
@@ -130,6 +131,8 @@ export interface TableSpec {
   readonly seating: readonly [TableSeating, TableSeating];
   /** A recording to replay on creation; this is how a table comes back. */
   readonly choices?: readonly Choice[] | undefined;
+  /** What the table was dealt for, so a recorded game says which shelf it goes on. */
+  readonly format?: GameplayFormat | undefined;
 }
 
 /** Everything needed to build this table again somewhere else. */
@@ -146,6 +149,12 @@ export interface Table {
   /** Null when it was applied; a refusal, with the server's counter, when not. */
   apply(seat: PlayerId, request: SeatRequest): SeatRefusal | null;
   record(): TableRecord;
+  /**
+   * The finished game, whole, for a recorder; null while it is still being
+   * played. The seats are the real seats and not the seating, because a
+   * recorder wants to know which one was a bot and what the bot was called.
+   */
+  capture(): KernelGameCapture | null;
   /** Runs on every change. Returns the way to stop listening. */
   watch(listener: () => void): () => void;
   /**
@@ -287,6 +296,15 @@ export function createTable(spec: TableSpec): Table {
         // of the same move would have recorded it.
         return move((current) => chooseAction(current, { ...request.declaration, player: seat }, options()));
       }
+      if (request.kind === 'nameCard') {
+        // The name is free text rather than an enumeration of either hidden
+        // library. The authenticated connection supplies the player exactly as
+        // it does for a declaration; `chooseAction` rechecks the pending kind,
+        // seat, and length before recording it.
+        return move((current) =>
+          chooseAction(current, { type: 'chooseCardName', player: seat, name: request.name }, options()),
+        );
+      }
       const offered = session.pending?.options.length ?? 0;
       if (request.index >= offered) {
         return refuse(`choice ${String(request.index)} is outside the ${String(offered)} options offered`);
@@ -296,6 +314,18 @@ export function createTable(spec: TableSpec): Table {
 
     record(): TableRecord {
       return { id: spec.id, choices: session.choices };
+    },
+
+    capture(): KernelGameCapture | null {
+      if (session.result === null) return null;
+      return {
+        source: 'netplay-kernel',
+        format: spec.format ?? 'constructed',
+        setup: spec.setup,
+        seats: spec.seats,
+        choices: session.choices,
+        result: session.result,
+      };
     },
 
     watch(listener: () => void): () => void {

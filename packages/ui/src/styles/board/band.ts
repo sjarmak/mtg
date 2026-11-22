@@ -99,6 +99,8 @@
  */
 import { ARRIVAL_MS, ARRIVAL_RISE_REM } from './arrival';
 import { cssNumber } from '../number';
+import { paceCss } from '../../motion/pace';
+import { MIN_SLOT_REM } from './fit';
 import { PLAY } from './geometry';
 import { ART_ANCHOR, TAPPED_FACE_INSET } from './slot';
 
@@ -113,7 +115,7 @@ import { ART_ANCHOR, TAPPED_FACE_INSET } from './slot';
  * the confirm control: at the declare-attackers step, before a single creature
  * has been clicked, the band was a quarter of the column holding two buttons.
  *
- * What that cost was measured over `../../tools/board-budget.ts` against the
+ * What that cost was measured over `../../../tools/board-budget.ts` against the
  * flagship set at the median board the simulator reaches (four permanents and
  * five lands a side, 1,826 measured attacks). At 1280x800 the same position at
  * rest and at the declare-attackers step, side panel open:
@@ -164,7 +166,7 @@ const COMBAT_BAND_SHARE = 18;
  *
  * That is the right answer at rest and the wrong one in combat, because the free
  * space is what shrinks and the near lane's fixed rows do not. Measured at
- * 1280x800 over `../../tools/board-budget.ts` with one attacker declared and an
+ * 1280x800 over `../../../tools/board-budget.ts` with one attacker declared and an
  * even share: your row came out 93.5 against their 108.2, and your board face
  * 58.8 wide against their 68.8. **The seat you are attacking from had the
  * smaller cards**, which is the same inversion `./hand.ts`'s `mtg-d6s` spent a
@@ -173,7 +175,7 @@ const COMBAT_BAND_SHARE = 18;
  * Two rather than a weight fitted to a viewport. The free space over the two
  * lanes' content bases is split in proportion to these factors, so two gives the
  * near row two-thirds of it: enough at 1280x800 to keep the face over
- * `../card.ts`'s `BOARD_RULES_MIN_REM` with an attacker on the seam, which an
+ * `../card.ts`'s `BOARD_RULES_PANEL_MAX_REM` with an attacker on the seam, which an
  * even split does not, and the far row stays a row of readable cards rather than
  * a strip. `./fit.ts` already states the principle this spends — the seat you
  * act from and the seat you only read are worth different amounts of a screen —
@@ -196,6 +198,19 @@ const NEAR_GROW_IN_COMBAT = 2;
  * a difference in position and size rather than in tone, which leaves the tone
  * channel free for the amber ring the rest of this table already spends on "you
  * may act on this" (`./slot.ts`).
+ *
+ * A share of the pair rather than the operating point, and `MIN_SLOT_REM` is why
+ * the rule below takes the greater of the two. `./fit.ts`'s `${TABLE} .mtg-slot`
+ * already floors every slot on the played table at `MIN_SLOT_REM` before the row
+ * gives up and scrolls past it; a staged entry's own share of the pair has no
+ * such fallback; the tray is the box the card is measured against
+ * (`../../../test/play/combat-pair.browser.test.ts`), not a row it can hang off
+ * the edge of. At 1024x768, three staged blockers, 78% of the pair's content
+ * height came out to 74.56px against the slot's 80px floor — the floor won,
+ * and a slot the entry could not contain overflowed the tray it was measured
+ * against by 2.42px. `mtg-0jmxz`. The floor binds only where 78% would already
+ * put the entry under it, which the 1440x900 reading of the same board never
+ * does (104.8px against the 80px floor), so nothing at rest changes.
  */
 const STAGED_HEIGHT = 78;
 
@@ -242,7 +257,12 @@ const ENTER_EASING = 'cubic-bezier(0.2, 0.7, 0.3, 1)';
 const MIXED_STRIP = ".mtg-combat__strip[data-seats='both']";
 
 function hostSlot(seat: string, suffix: string): string {
-  const entry = `${MIXED_STRIP} > .mtg-combat__entry[data-seat='${seat}']`;
+  // A descendant reach rather than a child one, because `mtg-7all` put a tray
+  // between the strip and the pair it holds. Entries never nest, so the two
+  // spellings match the same set of entries either way; what the child
+  // combinator did was lose every paired entry, which is exactly the row the
+  // strip exists for.
+  const entry = `${MIXED_STRIP} .mtg-combat__entry[data-seat='${seat}']`;
   return [`${entry} > .mtg-slot${suffix}`, `${entry} > .mtg-attach > .mtg-slot${suffix}`].join(',\n');
 }
 
@@ -443,12 +463,32 @@ ${hostSlot('you', '::before')} {
    again (position, size, hue), because a proposal a player cannot tell from a
    declaration is worse than no staging at all. */
 .mtg-combat__entry[data-state='staged'] {
-  height: ${cssNumber(STAGED_HEIGHT)}%;
+  height: max(${cssNumber(STAGED_HEIGHT)}%, ${cssNumber(MIN_SLOT_REM)}rem);
   outline: 2px solid var(--mtg-ready); outline-offset: 1px;
   box-shadow: 0 0 12px 2px var(--mtg-ready-soft);
 }
 .mtg-combat__entry[data-seat='opponent'][data-state='staged'] { align-self: flex-start; }
 .mtg-combat__entry[data-seat='you'][data-state='staged'] { align-self: flex-end; }
+/* An attacker and the blockers staged against it, in one tray (mtg-7all).
+   The values are ./attach.ts's, to the pixel, because it is the same drawing:
+   a keyline round two cards, no gap between them where the row has one, and a
+   short connector saying the left one is what the right one is answering. The
+   band's own gap then separates one tray from the next, so the trays are told
+   apart by more space than the cards inside any of them.
+
+   flex: none for the reason the entry has it: a card in the band is sized off
+   the band's height and keeps the printed aspect, so a shrinking box takes
+   width the faces do not give back and they paint over each other. */
+.mtg-combat__pair {
+  display: flex; flex: none; align-items: stretch;
+  padding: 2px; border: 1px solid var(--mtg-line-strong);
+  border-radius: var(--mtg-radius-md); background: var(--mtg-surface-inset);
+}
+.mtg-combat__pair-link {
+  flex: none; align-self: center;
+  width: var(--mtg-space-2); height: 2px; border-radius: var(--mtg-radius-pill);
+  background: var(--mtg-ink-muted);
+}
 .mtg-combat__controls {
   display: flex; flex: none; align-self: center; align-items: center;
   gap: var(--mtg-space-1);
@@ -493,21 +533,21 @@ ${hostSlot('you', '::before')} {
   to { opacity: 1; }
 }
 ${entering('opponent', '')} {
-  animation: mtg-combat-enter-far ${cssNumber(ARRIVAL_MS)}ms ${ENTER_EASING};
+  animation: mtg-combat-enter-far ${paceCss(ARRIVAL_MS)} ${ENTER_EASING};
 }
 ${entering('you', '')} {
-  animation: mtg-combat-enter-near ${cssNumber(ARRIVAL_MS)}ms ${ENTER_EASING};
+  animation: mtg-combat-enter-near ${paceCss(ARRIVAL_MS)} ${ENTER_EASING};
 }
 ${enteringMarks('opponent', '')},
 ${enteringMarks('you', '')} {
-  animation: mtg-combat-enter-in-place ${cssNumber(ARRIVAL_MS)}ms ${ENTER_EASING};
+  animation: mtg-combat-enter-in-place ${paceCss(ARRIVAL_MS)} ${ENTER_EASING};
 }
 @supports not (anchor-scope: ${ART_ANCHOR}) {
 ${enteringMarks('opponent', '  ')} {
-    animation: mtg-combat-enter-far ${cssNumber(ARRIVAL_MS)}ms ${ENTER_EASING};
+    animation: mtg-combat-enter-far ${paceCss(ARRIVAL_MS)} ${ENTER_EASING};
   }
 ${enteringMarks('you', '  ')} {
-    animation: mtg-combat-enter-near ${cssNumber(ARRIVAL_MS)}ms ${ENTER_EASING};
+    animation: mtg-combat-enter-near ${paceCss(ARRIVAL_MS)} ${ENTER_EASING};
   }
 }
 /* The card and its badges rather than the entry, which is ./arrival.ts's own

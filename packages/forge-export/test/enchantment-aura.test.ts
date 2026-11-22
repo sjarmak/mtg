@@ -82,7 +82,7 @@ describe('blanket enchantments', () => {
     expect(lines.some((line) => line.startsWith('K:Enchant'))).toBe(false);
     expect(lines.some((line) => line.includes('AttachAILogic'))).toBe(false);
     expect(lines).toContain(
-      'S:Mode$ Continuous | Affected$ Creature.YouCtrl | AddPower$ +1 | AddToughness$ +1 | Description$ Creatures you control get +1/+1.',
+      'S:Mode$ Continuous | Affected$ Creature.YouCtrl | AddPower$ 1 | AddToughness$ 1 | Description$ Creatures you control get +1/+1.',
     );
   });
 });
@@ -119,9 +119,42 @@ describe('creature Auras', () => {
       'Types:Enchantment Aura',
       'K:Enchant:Creature',
       'SVar:AttachAILogic:Pump',
-      'S:Mode$ Continuous | Affected$ Creature.EnchantedBy | AddPower$ +1 | AddToughness$ +2 | Description$ Enchanted creature gets +1/+2.',
+      'S:Mode$ Continuous | Affected$ Creature.EnchantedBy | AddPower$ 1 | AddToughness$ 2 | Description$ Enchanted creature gets +1/+2.',
       'Oracle:Enchant creature\\nEnchanted creature gets +1/+2.',
     ]);
+  });
+
+  it("writes Shiv's Embrace's activated pump against Forge's retained Enchanted referent", () => {
+    const card = aura('m11-shivs-embrace', "Shiv's Embrace", {
+      set: { code: 'M11', collectorNumber: 156 },
+      rarity: 'uncommon',
+      manaCost: { generic: 2, R: 2 },
+      colors: ['R'],
+      aura: {
+        enchant: 'creature',
+        modifications: [
+          { kind: 'statBonus', power: 2, toughness: 2 },
+          { kind: 'grantKeyword', keyword: 'flying' },
+        ],
+      },
+      abilities: [
+        {
+          kind: 'activated',
+          cost: { mana: { R: 1 } },
+          effects: [
+            {
+              kind: 'pumpUntilEndOfTurn',
+              power: 1,
+              toughness: 0,
+              target: { kind: 'enchantedCreature' },
+            },
+          ],
+        },
+      ],
+    });
+    const pump = scriptOf(card).find((line) => line.startsWith('A:AB$ Pump'));
+    expect(pump).toContain('Defined$ Enchanted');
+    expect(pump).not.toContain('ValidTgts$');
   });
 
   it("grants landwalk as Forge's colon form rather than the one-word printed keyword", () => {
@@ -171,7 +204,7 @@ describe('creature Auras', () => {
     });
     const statics = scriptOf(card).filter((line) => line.startsWith('S:'));
     expect(statics).toEqual([
-      "S:Mode$ Continuous | Affected$ Creature.EnchantedBy | AddPower$ -2 | AddToughness$ +0 | Description$ Enchanted creature gets -2/-0 and can't block.",
+      "S:Mode$ Continuous | Affected$ Creature.EnchantedBy | AddPower$ -2 | AddToughness$ 0 | Description$ Enchanted creature gets -2/-0 and can't block.",
       "S:Mode$ CantBlock | ValidCard$ Creature.EnchantedBy | Secondary$ True | Description$ Enchanted creature gets -2/-0 and can't block.",
     ]);
   });
@@ -210,7 +243,7 @@ describe('creature Auras', () => {
     const statics = scriptOf(conscience).filter((line) => line.startsWith('S:'));
     expect(statics).toEqual([
       'S:Mode$ Continuous | Affected$ Creature.EnchantedBy | GainControl$ You | Description$ You control enchanted creature. Enchanted creature gets +1/+1.',
-      'S:Mode$ Continuous | Affected$ Creature.EnchantedBy | AddPower$ +1 | AddToughness$ +1 | Secondary$ True | Description$ You control enchanted creature. Enchanted creature gets +1/+1.',
+      'S:Mode$ Continuous | Affected$ Creature.EnchantedBy | AddPower$ 1 | AddToughness$ 1 | Secondary$ True | Description$ You control enchanted creature. Enchanted creature gets +1/+1.',
     ]);
     // The clause is a gift and the hint still has to say control: the AI needs
     // to know it is buying a creature, not pumping one it already has.
@@ -256,15 +289,16 @@ describe('creature Auras', () => {
     });
     const lines = scriptOf(feeling);
     expect(lines.filter((line) => line.startsWith('S:'))).toEqual([
-      'S:Mode$ Continuous | Affected$ Creature.EnchantedBy | AddPower$ -1 | AddToughness$ -1 | Description$ Enchanted creature gets -1/-1.',
+      'S:Mode$ Continuous | Affected$ Creature.EnchantedBy | AddPower$ -1 | AddToughness$ -1 | Secondary$ True | Description$ Enchanted creature gets -1/-1.',
     ]);
-    // The replacement carries its own sentence and no `Secondary$ True`: the
-    // convention that repeats the whole paragraph on every line is an `S:`
-    // convention and stops at the `R:` line.
-    expect(lines.at(-2)).toBe(
+    // The replacement carries its own sentence and no `Secondary$ True`; the
+    // following static line is marked secondary because it is the paragraph's
+    // second clause even though the first clause compiles as an `R:` line.
+    const replacement = lines.find((line) => line.startsWith('R:'));
+    expect(replacement).toBe(
       "R:Event$ Untap | ActiveZones$ Battlefield | ValidCard$ Creature.EnchantedBy | ValidStepTurnToController$ You | Layer$ CantHappen | Description$ Enchanted creature doesn't untap during its controller's untap step.",
     );
-    expect(lines.some((line) => line.includes('Secondary$ True'))).toBe(false);
+    expect(replacement).not.toContain('Secondary$ True');
   });
 
   it('hints Curse for a clause that stops the creature and Pump for one that helps it', () => {
@@ -286,15 +320,13 @@ describe('creature Auras', () => {
   });
 });
 
-describe('an Aura clause Forge cannot be handed', () => {
+describe('an Aura clause scaled by a live count', () => {
   /**
-   * Quag Sickness (M11 111) is the refusal, and its shape is why. Forge writes
-   * a scaled continuous bonus as a counting `SVar` plus `AddPower$ X` reading
-   * it, which is a second grammar `modificationLine` does not emit -- it writes
-   * fixed numbers. An exported script that dropped the clause would boot as an
-   * Aura that does nothing, which is the divergence a rejection exists to stop.
+   * Forge writes a scaled continuous bonus as a counting `SVar` plus
+   * `AddPower$ X` reading it. Quag Sickness is the hostile negative case: the
+   * reference and AI hint must both preserve the direction of the modifier.
    */
-  it('refuses a rate bonus by name rather than writing a fixed number', () => {
+  it('writes Quag Sickness with the counted SVar and negative references Forge ships', () => {
     const sickness = aura('m11-quag-sickness', 'Quag Sickness', {
       set: { code: 'M11', collectorNumber: 111 },
       manaCost: { generic: 2, B: 1 },
@@ -311,10 +343,15 @@ describe('an Aura clause Forge cannot be handed', () => {
         ],
       },
     });
-    const result = transpileCardScript(sickness);
-    expect(result.ok).toBe(false);
-    if (result.ok) throw new Error('Quag Sickness transpiled');
-    expect(result.rejections.map((entry) => entry.code)).toEqual(['UNMAPPED_EFFECT_KIND']);
-    expect(result.rejections[0]?.message).toContain('statBonusPer');
+    expect(scriptOf(sickness)).toEqual([
+      'Name:Quag Sickness',
+      'ManaCost:2 B',
+      'Types:Enchantment Aura',
+      'K:Enchant:Creature',
+      'SVar:AttachAILogic:Curse',
+      'S:Mode$ Continuous | Affected$ Creature.EnchantedBy | AddPower$ -AuraStat1Count | AddToughness$ -AuraStat1Count | Description$ Enchanted creature gets -1/-1 for each Swamp you control.',
+      'SVar:AuraStat1Count:Count$Valid Swamp.YouCtrl',
+      'Oracle:Enchant creature\\nEnchanted creature gets -1/-1 for each Swamp you control.',
+    ]);
   });
 });

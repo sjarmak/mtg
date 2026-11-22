@@ -88,7 +88,7 @@ describe('schema-shape violations', () => {
   });
 
   it('unknown card kind', () => {
-    expectViolation(legalInstant({ kind: 'battle' }), 'UNKNOWN_CARD_KIND');
+    expectViolation(legalInstant({ kind: 'contraption' }), 'UNKNOWN_CARD_KIND');
   });
 
   it('unknown rarity', () => {
@@ -144,19 +144,20 @@ describe('mana cost and color identity', () => {
     );
   });
 
-  it('token color outside the card color identity', () => {
-    expectViolation(
-      legalInstant({
-        effects: [
-          {
-            kind: 'createToken',
-            count: 1,
-            token: { name: 'Bear', power: 2, toughness: 2, colors: ['G'], subtypes: ['Bear'] },
-          },
-        ],
-      }),
-      'TOKEN_COLOR_OFF_IDENTITY',
-    );
+  it('lets a token state a color independently of its source card', () => {
+    expect(
+      validateCard(
+        legalInstant({
+          effects: [
+            {
+              kind: 'createToken',
+              count: 1,
+              token: { name: 'Bear', power: 2, toughness: 2, colors: ['G'], subtypes: ['Bear'] },
+            },
+          ],
+        }),
+      ),
+    ).toStrictEqual([]);
   });
 });
 
@@ -290,20 +291,12 @@ describe('effect legality', () => {
     expect(v.message).toContain('legal targets are targetCreature');
   });
 
-  /**
-   * Refused by the scope rule rather than by the target table, which is where
-   * this case moved when the board sweep landed: `noTarget` is on this row now,
-   * because Pyroclasm chooses nothing and reads a region of the board instead.
-   * What is still illegal is damage that chooses nothing *and* names no region,
-   * which resolves into no game action at all.
-   */
-  it('damage that chooses nothing with no region beside it', () => {
-    const v = expectViolation(
-      legalInstant({ effects: [{ kind: 'dealDamage', amount: 3, target: { kind: 'noTarget' } }] }),
-      'ILLEGAL_EFFECT_SCOPE',
-    );
-    expect(v.path).toBe('effects[0].target.kind');
-    expect(v.message).toContain('chooses nothing');
+  it('accepts untargeted damage to the resolving object controller', () => {
+    expect(
+      validateCard(
+        legalInstant({ effects: [{ kind: 'dealDamage', amount: 3, target: { kind: 'noTarget' } }] }),
+      ),
+    ).toEqual([]);
   });
 
   it('draw aimed at a creature', () => {
@@ -419,7 +412,7 @@ describe('TargetSpec.count (mtg-kg44)', () => {
 
   it('rejects count on a target kind other than targetCreature', () => {
     // `targetOpponent` is legal on `tapPermanent` (it is the scoped sweep's
-    // player handle), so this exercises `checkTargetCount`'s own kind check
+    // player handle), so this exercises `checkTargetCardinality`'s own kind check
     // rather than the earlier "is this kind legal on this effect at all" gate
     // a kind `tapPermanent` refuses outright, like `anyTarget`, never reaches.
     const v = expectViolation(
@@ -449,7 +442,7 @@ describe('TargetSpec.count (mtg-kg44)', () => {
 
   it('rejects count and distinct together on the same slot', () => {
     // The two fields both answer "how many objects does this slot pick", and a
-    // slot cannot answer that twice — `checkTargetCount`'s docblock in
+    // slot cannot answer that twice — `checkTargetCardinality`'s docblock in
     // `@mtg/dsl` argues the same point `targets.ts`'s own docblock does.
     const v = expectViolation(
       legalInstant({
@@ -473,18 +466,60 @@ describe('TargetSpec.count (mtg-kg44)', () => {
     ).toEqual([]);
   });
 
-  it('rejects a count below two: a counted slot is the plural template', () => {
-    expect(() =>
-      parseCard(
+  it('accepts one as the optional-target template and rejects a redundant mandatory minimum', () => {
+    expect(
+      validateCard(
         legalInstant({
           effects: [{ kind: 'tapPermanent', target: { kind: 'targetCreature', count: 1 } }],
         }),
       ),
-    ).toThrow(CardValidationError);
+    ).toEqual([]);
+    const v = expectViolation(
+      legalInstant({
+        effects: [
+          {
+            kind: 'tapPermanent',
+            target: { kind: 'targetCreature', count: 1, minimum: 1 },
+          },
+        ],
+      }),
+      'ILLEGAL_TARGET_COUNT',
+    );
+    expect(v.path).toBe('effects[0].target.minimum');
   });
 
-  it('rejects a count above the largest N printed Magic prints on this template', () => {
-    expect(MAX_TARGET_COUNT).toBe(5);
+  it('rejects optional-cardinality metadata on target spaces the chooser cannot enumerate', () => {
+    const controlled = expectViolation(
+      legalInstant({
+        effects: [
+          {
+            kind: 'grantKeywordUntilEndOfTurn',
+            keyword: 'flying',
+            target: { kind: 'targetCreatureYouControl', count: 1 },
+          },
+        ],
+      }),
+      'ILLEGAL_TARGET_COUNT',
+    );
+    expect(controlled.path).toBe('effects[0].target.count');
+
+    const untargeted = expectViolation(
+      legalInstant({
+        effects: [
+          {
+            kind: 'dealDamage',
+            amount: 1,
+            target: { kind: 'noTarget', count: 1 },
+          },
+        ],
+      }),
+      'ILLEGAL_TARGET_COUNT',
+    );
+    expect(untargeted.path).toBe('effects[0].target.count');
+  });
+
+  it('rejects a count above the largest supported literal N', () => {
+    expect(MAX_TARGET_COUNT).toBe(6);
     expect(() =>
       parseCard(
         legalInstant({
@@ -551,6 +586,28 @@ describe('duplicate effects', () => {
     const destroy = { kind: 'destroyPermanent', target: { kind: 'targetCreature' } };
     const another = { kind: 'destroyPermanent', target: { kind: 'targetCreature', distinct: true } };
     expect(validateCard(legalInstant({ effects: [destroy, another] }))).toEqual([]);
+  });
+
+  it('admits repeated independently targeted counter placements without requiring distinct targets', () => {
+    const counter = {
+      kind: 'putCounters',
+      counter: 'plusOnePlusOne',
+      count: 1,
+      target: { kind: 'targetCreature' },
+    };
+
+    expect(validateCard(legalInstant({ effects: [counter, counter] }))).toEqual([]);
+  });
+
+  it('keeps a third repeated targeted counter placement behind the duplicate guard', () => {
+    const counter = {
+      kind: 'putCounters',
+      counter: 'plusOnePlusOne',
+      count: 1,
+      target: { kind: 'targetCreature' },
+    };
+
+    expectViolation(legalInstant({ effects: [counter, counter, counter] }), 'DUPLICATE_EFFECT');
   });
 
   it('rejects distinct: false, the second spelling of an absent flag', () => {
@@ -838,11 +895,29 @@ describe('ability legality', () => {
     expect(v.message).toContain('abilities[0]');
   });
 
-  it('accepts two abilities that differ, up to the New World Order budget of two', () => {
-    expect(validateCard(legalCreature({ abilities: [lord, anthem] }))).toEqual([]);
-    expect(codes(validateCard(legalCreature({ abilities: [lord, anthem, anthem] }))).length).toBeGreaterThan(
-      0,
+  it('accepts four distinct hand-authored abilities and rejects a fifth', () => {
+    const entryTrigger = {
+      kind: 'triggered',
+      condition: 'selfEnters',
+      effects: [{ kind: 'gainLife', amount: 2, target: { kind: 'noTarget' } }],
+    };
+    const activation = {
+      kind: 'activated',
+      cost: { mana: { generic: 1 } },
+      effects: [{ kind: 'dealDamage', amount: 1, target: { kind: 'anyTarget' } }],
+    };
+    const deathTrigger = {
+      kind: 'triggered',
+      condition: 'selfDies',
+      effects: [{ kind: 'gainLife', amount: 1, target: { kind: 'noTarget' } }],
+    };
+
+    expect(validateCard(legalCreature({ abilities: [lord, anthem, entryTrigger, activation] }))).toEqual([]);
+    const violation = expectViolation(
+      legalCreature({ abilities: [lord, anthem, entryTrigger, activation, deathTrigger] }),
+      'SCHEMA_INVALID',
     );
+    expect(violation.path).toBe('abilities');
   });
 
   describe('triggered abilities', () => {

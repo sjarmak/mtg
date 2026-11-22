@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "catalogSha256": "65e32dd53edc2583c555ccf6922406229a2f6056ad21862370365b329bf5367c",
+  "cases": [
+    {
+      "id": "davis-2021-01-05-dimir-reanimator",
+      "split": "holdout",
+      "source": {
+        "author": "Jim Davis",
+        "url": "https://www.coolstuffinc.com/a/jimdavis-01052021-what-does-a-good-vintage-cube-draft-deck-look-like",
+        "published": "2021-01-05",
+        "session": "davis-cube4charity-2021-01",
+        "origin": "human",
+        "environment": "transfer",
+        "locator": "Draft Six - Dimir Reanimator. MTGO Vintage Cube, not Legacy Cube. Deck table totals 40 including 14 lands. Author criticizes filler, disconnected token subtheme, and mana despite strong reanimation and tutors. Original cards retained; 5.5/10 and 1-1 are source observations, not transferable Legacy quality labels. Reserve all decks from this article in this holdout source group."
+      },
+      "kind": "deck",
+      "cards": [
+        { "name": "Ashen Rider", "count": 1 },
+        { "name": "Baleful Strix", "count": 1 },
+        { "name": "Grave Titan", "count": 1 },
+        { "name": "Kitesail Freebooter", "count": 1 },
+        { "name": "Looter il-Kor", "count": 1 },
+        { "name": "Massacre Wurm", "count": 1 },
+        { "name": "Oona's Prowler", "count": 1 },
+        { "name": "Phyrexian Rager", "count": 1 },
+        { "name": "Sheoldred, Whispering One", "count": 1 },
+        { "name": "Spellseeker", "count": 1 },
+        { "name": "Liliana of the Veil", "count": 1 },
+        { "name": "Entomb", "count": 1 },
+        { "name": "Spell Pierce", "count": 1 },
+        { "name": "Vampiric Tutor", "count": 1 },
+        { "name": "Agadeem's Awakening", "count": 1 },
+        { "name": "Demonic Tutor", "count": 1 },
+        { "name": "Exhume", "count": 1 },
+        { "name": "Hymn to Tourach", "count": 1 },
+        { "name": "Inquisition of Kozilek", "count": 1 },
+        { "name": "Lingering Souls", "count": 1 },
+        { "name": "Reanimate", "count": 1 },
+        { "name": "Time Walk", "count": 1 },
+        { "name": "Animate Dead", "count": 1 },
+        { "name": "Chrome Mox", "count": 1 },
+        { "name": "Skullclamp", "count": 1 },
+        { "name": "Smuggler's Copter", "count": 1 },
+        { "name": "Island", "count": 5 },
+        { "name": "Swamp", "count": 8 },
+        { "name": "Scrubland", "count": 1 }
+      ]
+    }
+  ]
+}

@@ -15,9 +15,9 @@
  *    stream is a line or a heading, counted, and the count has to close. That is
  *    the whole of "authoritative": a log that quietly drops a class of event is a
  *    summary with a misleading name.
- *  - **Nothing leaks.** The play surface is a hotseat surface, so the log is read
- *    by both seats in turn, and a line naming a card the other player drew hands
- *    one player the other's hand. The rule is checked from both sides, and the
+ *  - **Nothing leaks.** The log is drawn for whichever seat is being asked, so
+ *    on a two-human table it is read by both seats in turn, and a line naming a
+ *    card the other player drew hands one player the other's hand. The rule is checked from both sides, and the
  *    negative is checked as well as the positive.
  *  - **It is history a person can read.** Grouped by the turn and step the kernel
  *    itself emitted, chronological, and anchored at its newest end.
@@ -34,6 +34,7 @@ import type { GameEvent, GameEventType, PlayerId } from '@mtg/kernel';
 import { botSeat, choose, createSession, FULL_CONTROL, humanSeat, simpleAgent } from '@mtg/kernel';
 import { PlayRoute } from '../../src/routes/PlayRoute';
 import { dealMirrorGame } from '../../src/routes/play/deal';
+import { TWO_HUMAN_NAMES, twoHumanMirror } from '../support/two-human';
 import { ownedName } from '../../src/routes/play/naming';
 import { nameOf } from '../../src/routes/play/position';
 import {
@@ -42,6 +43,7 @@ import {
   EVERY_EVENT_LABEL,
   GAME_LOG_LABEL,
   GAME_LOG_STATUS_LABEL,
+  OPEN_BY_DEFAULT,
 } from '../../src/log/GameLog';
 import { buildLog, countLines, eventRole, impliedEvents, logRoles, summarizeLog } from '../../src/log/group';
 import type { EventRole, LogTurn } from '../../src/log/group';
@@ -665,7 +667,14 @@ describe('grouped by the turn and step the kernel emitted', () => {
   it('puts the opening hands ahead of the first turn rather than inside it', () => {
     const opening = turns[0]?.steps[0];
     expect(opening?.title).toBe('opening hands');
-    expect(opening?.lines[0]?.text).toMatch(/plays? first \(seed /);
+    // The line names who goes first and stops there. It used to end with
+    // "(seed lab/v2/XMP/wield-the-obliterator-sky-islands/1)", which the
+    // 2026-08-23 sweep photographed as event 1 of a replay: the playtester's
+    // interface pass says technical information lives under *Game details*, and
+    // both surfaces that draw this log already carry the seed there
+    // (`../../src/routes/game-details.ts`). `mtg-dcxg.10`.
+    expect(opening?.lines[0]?.text).toMatch(/plays? first\.$/);
+    expect(opening?.lines[0]?.text).not.toContain('seed');
   });
 });
 
@@ -766,17 +775,24 @@ describe('a log the other seat may read', () => {
  * second place the same secret can escape, and it escapes as text rather than as
  * a card face, so it needs its own assertion against the panel's own words.
  */
-describe('the rendered log on a hotseat table', () => {
-  const HOTSEAT = ['Player one', 'Player two'] as const;
+describe('the rendered log on a two-human table', () => {
+  const TWO_HUMAN = TWO_HUMAN_NAMES;
 
+  /**
+   * The panel, which a played table now opens on rather than opens *to*.
+   *
+   * `GameLog`'s `OPEN_BY_DEFAULT` flipped in the 2026-08-22 interface pass, so
+   * the press this helper used to make is the press that would close it. The
+   * disclosure itself is still exercised, in the test immediately below, in both
+   * directions.
+   */
   function openLog(): ReturnType<typeof screen.getByRole> {
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${GAME_LOG_LABEL},`) }));
     return screen.getByRole('region', { name: GAME_LOG_LABEL });
   }
 
   function renderAt(seat: PlayerId): { readonly choices: readonly number[] } {
-    const game = dealMirrorGame(EXAMPLE_CARDS, { opponent: 'human' });
-    let session = createSession(game.config.setup, game.config.seats);
+    const game = twoHumanMirror(EXAMPLE_CARDS);
+    let session = createSession(game.setup, game.seats);
     const choices: number[] = [];
     // Far enough in that both seats have drawn, cast and taken damage.
     while (session.pending !== null && choices.length < 120) {
@@ -784,17 +800,23 @@ describe('the rendered log on a hotseat table', () => {
       choices.push(0);
       session = choose(session, 0);
     }
-    render(h(PlayRoute, { config: { ...game.config, choices, autoPass: FULL_CONTROL } }));
+    render(h(PlayRoute, { config: { ...game, choices, autoPass: FULL_CONTROL } }));
     return { choices };
   }
 
-  it('opens from a control that names itself and its size', () => {
+  it('opens on the history, from a control that names itself and its size', () => {
     renderAt(0);
     const head = screen.getByRole('button', { name: new RegExp(`^${GAME_LOG_LABEL}, \\d+ entr`) });
-    expect(attr(head, 'aria-expanded')).toBe('false');
-    fireEvent.click(head);
+    expect(OPEN_BY_DEFAULT).toBe(true);
     expect(attr(head, 'aria-expanded')).toBe('true');
     expect(screen.getByRole('region', { name: GAME_LOG_LABEL })).toBeTruthy();
+    // And it still shuts to the strip, which is the half that pays for the
+    // default: the rail is 272px and a player who wants it back says so once.
+    fireEvent.click(head);
+    expect(attr(head, 'aria-expanded')).toBe('false');
+    expect(screen.queryByRole('region', { name: GAME_LOG_LABEL })).toBeNull();
+    fireEvent.click(head);
+    expect(attr(head, 'aria-expanded')).toBe('true');
   });
 
   it('says the other seat drew a card, and never says which', () => {
@@ -803,11 +825,11 @@ describe('the rendered log on a hotseat table', () => {
       renderAt(seat);
       const other = seat === 0 ? 1 : 0;
       const shown = text(openLog());
-      expect(shown).toContain(`${HOTSEAT[other]} draws ${HIDDEN_CARD}.`);
-      expect(shown).toContain(`${HOTSEAT[seat]} draws `);
+      expect(shown).toContain(`${TWO_HUMAN[other]} draws ${HIDDEN_CARD}.`);
+      expect(shown).toContain(`${TWO_HUMAN[seat]} draws `);
       // The negative, in the words the leak would take: a draw line naming a
       // card is a draw line the viewer is not entitled to unless it is theirs.
-      const drawn = [...shown.matchAll(new RegExp(`${HOTSEAT[other]} draws ([^.]+)\\.`, 'g'))].map(
+      const drawn = [...shown.matchAll(new RegExp(`${TWO_HUMAN[other]} draws ([^.]+)\\.`, 'g'))].map(
         (found) => found[1] ?? '',
       );
       expect(new Set(drawn)).toEqual(new Set([HIDDEN_CARD]));
@@ -884,7 +906,6 @@ describe('the log is navigable rather than announced', () => {
         },
       }),
     );
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${GAME_LOG_LABEL},`) }));
     const panel = screen.getByRole('region', { name: GAME_LOG_LABEL });
     // Not a live region at all: the digest below is what announces.
     expect(attr(panel, 'aria-live')).toBeNull();

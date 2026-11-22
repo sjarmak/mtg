@@ -83,7 +83,7 @@ describe('the ink past the cut', () => {
     expect(svg).not.toContain('trim-mark');
   });
 
-  it('covers the whole document, corners included, in the card ground', () => {
+  it("covers the whole document, corners included, in the card's black edge", () => {
     const svg = renderCardSvg(SUBJECT, { bleedMm: DEFAULT_BLEED_MM }).svg;
     const found = /<rect class="frame-bleed"[^>]*>/.exec(svg);
     expect(found).not.toBeNull();
@@ -94,7 +94,10 @@ describe('the ink past the cut', () => {
     expect(rect).toContain('height="940"');
     // Square on purpose: the rounded corner is made by the knife, not drawn.
     expect(rect).not.toContain('rx=');
-    expect(rect).toContain('fill="var(--frame)"');
+    // The edge ink rather than the identity ground (`mtg-d4g`): the ink past
+    // the cut is the ink at the cut, so a blade that lands outside the trim
+    // widens the black edge instead of leaving a colored hairline.
+    expect(rect).toContain('fill="var(--mtg-card-edge)"');
   });
 
   it('is painted before the card, so the rounded ground still reads on screen', () => {

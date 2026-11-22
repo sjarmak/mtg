@@ -14,10 +14,14 @@
  *
  * # A reduced M11 that looks like an M11 is a trap
  *
- * Measured on the committed six-ledger union, M11's 249 main-set collector
- * positions reduce to 123 kept and 126 refused; M13's reduce to 121 and 128.
- * Those numbers move every time a capability lands, which is the point, and they
- * are not pinned anywhere — `reduction.dropped` is computed from the artifact.
+ * M11's 249 main-set collector positions once reduced to 123 kept and 126
+ * refused, and M13's to 121 and 128. Those numbers move every time a capability
+ * lands, which is the point, and they are not pinned anywhere —
+ * `reduction.dropped` is computed from the artifact. It has since reached zero
+ * for M11, M13 and RTR, and the document's `set.reduced` and name follow the
+ * measurement (`mtg-uzacz`): a build that dropped nothing says so and carries
+ * the printing's own name, with `origin: 'official'` declared outright because
+ * the origin reader used to infer it from `reduced: true`.
  * The half that is missing is not a random half: the rare-and-mythic sheet loses
  * most of its depth while the common sheet keeps most of its own, so a person
  * who opens this and finds no Llanowar Elves is looking at a set where that is
@@ -125,6 +129,17 @@ export type ReducedDropRecord = z.infer<typeof ReducedDropRecordSchema>;
 export const PlayableSheetSchema = z
   .object({
     name: NonemptyString,
+    /**
+     * Whether the printing calls this a foil sheet, straight off MTGJSON.
+     *
+     * The reduction has always carried it and this projection used to drop it,
+     * which is what left a pool dealt off these sheets unable to say which copy
+     * of a card was the foil one (`mtg-11yd`). It is the printing's own boolean
+     * rather than a reading of the sheet's name: `foil` is what both reference
+     * printings happen to call theirs, and a name match would be a guess about
+     * every printing that calls it something else.
+     */
+    foil: z.boolean(),
     sourceCards: z.number().int().nonnegative(),
     cards: z.number().int().positive(),
     /** Card id to sampler weight. Relative odds are the printing's, unchanged. */
@@ -169,9 +184,17 @@ export const ReducedReferenceSetDocumentSchema = z.object({
   kind: z.literal('position-reduced-reference-set-document'),
   set: z.object({
     code: NonemptyString,
-    /** Says "reduced" in the name, because the name is what a surface prints. */
+    /** Says "reduced" in the name when positions were dropped, and is the source's own name when none were. */
     name: NonemptyString,
-    reduced: z.literal(true),
+    /** Measured from `reduction.dropped`, never stamped: false for a build that kept every position. */
+    reduced: z.boolean(),
+    /**
+     * A real printing either way, so a complete build is still under the Magic
+     * heading. Defaulted rather than required: a document emitted before this
+     * field existed (`out/reference/*` on a checkout that has not relaunched)
+     * is still a real printing, and `removal-census` parses it off disk.
+     */
+    origin: z.literal('official').default('official'),
   }),
   reduction: z.object({
     source: z.object({
@@ -245,7 +268,13 @@ function playableCollation(reduced: PartialExecutableReferenceSet): PlayableColl
       }
       weights[id] = weight;
     }
-    return { name: sheet.name, sourceCards: sheet.sourceCards, cards: sheet.cards, weights };
+    return {
+      name: sheet.name,
+      foil: sheet.foil,
+      sourceCards: sheet.sourceCards,
+      cards: sheet.cards,
+      weights,
+    };
   });
   const named = new Set(sheets.map((sheet) => sheet.name));
   const boosters = reduced.collation.boosters.map((booster) => {
@@ -333,13 +362,16 @@ export function reducedReferenceSetDocument(
     );
   }
 
+  // The label is a measurement: a build that refused no position is the whole printing.
+  const isReduced = reduced.dropped.length > 0;
   const document = {
     formatVersion: REDUCED_REFERENCE_SET_DOCUMENT_VERSION,
     kind: 'position-reduced-reference-set-document',
     set: {
       code: reduced.sourceSet.code,
-      name: `${reduced.sourceSet.name} (reduced)`,
-      reduced: true,
+      name: isReduced ? `${reduced.sourceSet.name} (reduced)` : reduced.sourceSet.name,
+      reduced: isReduced,
+      origin: 'official',
     },
     reduction: {
       source: {

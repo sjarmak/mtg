@@ -21,17 +21,51 @@
  * Read off Forge 2.0.14's `res/cardsfolder`, not off a game it ran: the same
  * standing gap the `S:` and `T:` mappings already carry (`mtg-17a`).
  */
-import type { Aura, AuraModification, EnchantmentCard } from '@mtg/dsl';
-import { ENCHANTED_DOES_NOT_UNTAP, isStaticAuraModification, renderAuraModificationClause } from '@mtg/dsl';
+import type { Aura, AuraModification, EnchantmentCard, TokenSpec } from '@mtg/dsl';
+import {
+  isEnchantedLandBecomesTappedMillAbility,
+  isSacrificeEnchantedPermanentUnlessControllerPaysManaValueAbility,
+  isStaticAuraModification,
+  renderAbility,
+  renderAuraModificationClause,
+} from '@mtg/dsl';
 import type { AbilityScriptResult } from './ability-script';
+import { grantedActivatedAbilityScript, grantedTriggerScript } from './ability-script';
 import type { ForgeParam } from './script-text';
 import { isScriptSafe, params, renderModeAbility } from './script-text';
 import type { TranspileRejection } from './rejection';
 import { rejection } from './rejection';
 import { FORGE_KEYWORDS } from './vocabulary-map';
+import { statBonusPerValues } from './board-count';
 
-/** What every clause an Aura applies is scoped to. */
-const ENCHANTED = 'Creature.EnchantedBy';
+/** Forge's live attached-host selector for the Aura's printed restriction. */
+function enchantedSelector(aura: Aura): string {
+  return aura.enchant === 'creature' ? 'Creature.EnchantedBy' : 'Card.EnchantedBy';
+}
+
+/** Forge's checked-in `K:Enchant:` spelling for the Aura's printed restriction. */
+function enchantKeyword(aura: Aura): string {
+  switch (aura.enchant) {
+    case 'creature':
+      return 'K:Enchant:Creature';
+    case 'artifactOrCreature':
+      return 'K:Enchant:Creature,Artifact:artifact or creature';
+    case 'land':
+      return 'K:Enchant:Land';
+    case 'nonlandPermanent':
+      return 'K:Enchant:Permanent.nonLand:nonland permanent';
+  }
+}
+
+type AuraHostNoun = 'creature' | 'permanent' | 'land' | 'nonland permanent';
+
+function auraHostNoun(aura: Aura): AuraHostNoun {
+  return aura.enchant === 'artifactOrCreature'
+    ? 'permanent'
+    : aura.enchant === 'nonlandPermanent'
+      ? 'nonland permanent'
+      : aura.enchant;
+}
 
 /**
  * `doesNotUntap`, which is the one clause in this subset that is not an `S:`
@@ -56,17 +90,22 @@ const ENCHANTED = 'Creature.EnchantedBy';
  * printed card and this line cannot word it differently; it is a substring of
  * the paragraph `auraScript` already runs through `isScriptSafe`.
  */
-const UNTAP_REPLACEMENT_LINE = `R:${[
-  'Event$ Untap',
-  'ActiveZones$ Battlefield',
-  `ValidCard$ ${ENCHANTED}`,
-  'ValidStepTurnToController$ You',
-  'Layer$ CantHappen',
-  `Description$ ${ENCHANTED_DOES_NOT_UNTAP}`,
-].join(' | ')}`;
+function untapReplacementLine(aura: Aura, description: string): string {
+  return `R:${[
+    'Event$ Untap',
+    'ActiveZones$ Battlefield',
+    `ValidCard$ ${enchantedSelector(aura)}`,
+    'ValidStepTurnToController$ You',
+    'Layer$ CantHappen',
+    `Description$ ${description}`,
+  ].join(' | ')}`;
+}
 
 /** Every Aura clause that compiles to an `S:` line, which is all but the one above. */
-type StaticLineModification = Exclude<AuraModification, { kind: 'doesNotUntap' }>;
+type StaticLineModification = Exclude<
+  AuraModification,
+  { kind: 'doesNotUntap' | 'grantTriggeredAbility' | 'grantActivatedAbility' }
+>;
 
 /**
  * One `S:` line's mode and the parameter naming who it reaches.
@@ -81,6 +120,7 @@ interface ModeLine {
   readonly mode: string;
   readonly scopeParam: string;
   readonly body: readonly ForgeParam[];
+  readonly supportingLines?: readonly string[];
   /**
    * A line the corpus never writes beside another, so `mergeByMode` leaves it
    * alone.
@@ -97,24 +137,24 @@ interface ModeLine {
 }
 
 /**
- * `creature` -> `Creature`, so the `Enchant` keyword names what the DSL says it
- * enchants rather than a constant written twice. `AuraSchema.enchant` has one
- * member today and this is what makes a second one show up in the line.
+ * The bare delta, matching `ability-script.ts`'s `statDelta` for the same two
+ * fields. Holy Strength is the shipped Aura of exactly this shape and it writes
+ * `AddPower$ 1 | AddToughness$ 2`.
  */
-function capitalize(word: string): string {
-  return word.charAt(0).toUpperCase() + word.slice(1);
-}
-
-/** `+2` / `-1`, matching `ability-script.ts`'s form for the same fields. */
-function signed(delta: number): string {
-  return delta < 0 ? String(delta) : `+${delta}`;
+function statDelta(delta: number): string {
+  return String(delta);
 }
 
 type BodyResult =
   | { readonly ok: true; readonly value: ModeLine }
   | { readonly ok: false; readonly rejections: readonly TranspileRejection[] };
 
-function modificationLine(modification: StaticLineModification, cardId: string, path: string): BodyResult {
+function modificationLine(
+  modification: StaticLineModification,
+  cardId: string,
+  path: string,
+  svarPrefix: string,
+): BodyResult {
   if (isStaticAuraModification(modification)) {
     if (modification.kind === 'statBonus') {
       return {
@@ -123,30 +163,35 @@ function modificationLine(modification: StaticLineModification, cardId: string, 
           mode: 'Continuous',
           scopeParam: 'Affected',
           body: params(
-            ['AddPower', signed(modification.power)],
-            ['AddToughness', signed(modification.toughness)],
+            ['AddPower', statDelta(modification.power)],
+            ['AddToughness', statDelta(modification.toughness)],
           ),
         },
       };
     }
     if (modification.kind === 'statBonusPer') {
-      // The Aura arm of the refusal `ability-script.ts`'s `modificationParams`
-      // already takes for an equip clause, for the same reason and with the
-      // same wording: Forge writes a scaled continuous bonus as a counting
-      // `SVar` plus `AddPower$ X` reading it, and this function emits only
-      // fixed `AddPower$`/`AddToughness$` numbers. `mtg-nhyv.34` holds the
-      // transpiler change; guessing a line here would export an Aura that
-      // boots in Forge granting nothing.
+      const values = statBonusPerValues(modification, svarPrefix);
+      if (values === null) {
+        return {
+          ok: false,
+          rejections: [
+            rejection(
+              'UNMAPPED_EFFECT_KIND',
+              cardId,
+              `${path}.each`,
+              '"statBonusPer" names a live board tally with no exact Forge Count$Valid spelling',
+            ),
+          ],
+        };
+      }
       return {
-        ok: false,
-        rejections: [
-          rejection(
-            'UNMAPPED_EFFECT_KIND',
-            cardId,
-            `${path}.kind`,
-            '"statBonusPer" is a layer-7c bonus scaled by a live board count: Forge spells it with a counting SVar plus AddPower$/AddToughness$ referring to it, and this transpiler emits only fixed AddPower$/AddToughness$ values',
-          ),
-        ],
+        ok: true,
+        value: {
+          mode: 'Continuous',
+          scopeParam: 'Affected',
+          body: params(['AddPower', values.power], ['AddToughness', values.toughness]),
+          supportingLines: values.supportingLines,
+        },
       };
     }
     const forgeKeyword = FORGE_KEYWORDS[modification.keyword];
@@ -189,6 +234,8 @@ function modificationLine(modification: StaticLineModification, cardId: string, 
       return { ok: true, value: { mode: 'CantAttack', scopeParam: 'ValidCard', body: [] } };
     case 'cantBlock':
       return { ok: true, value: { mode: 'CantBlock', scopeParam: 'ValidCard', body: [] } };
+    case 'cantActivateAbilities':
+      return { ok: true, value: { mode: 'CantBeActivated', scopeParam: 'ValidCard', body: [] } };
     case 'cantBeBlocked':
       return { ok: true, value: { mode: 'CantBlockBy', scopeParam: 'ValidAttacker', body: [] } };
     case 'gainControl':
@@ -237,7 +284,11 @@ function mergeByMode(lines: readonly ModeLine[]): readonly ModeLine[] {
       continue;
     }
     if (open.mode === 'Continuous' && line.mode === 'Continuous') {
-      merged[merged.length - 1] = { ...open, body: [...open.body, ...line.body] };
+      merged[merged.length - 1] = {
+        ...open,
+        body: [...open.body, ...line.body],
+        supportingLines: [...(open.supportingLines ?? []), ...(line.supportingLines ?? [])],
+      };
       continue;
     }
     // Two combat restrictions reaching the same side of combat: Pacifism's
@@ -276,14 +327,19 @@ function attachAiLogic(aura: Aura): string {
     return 'GainControl';
   }
   const cursing = aura.modifications.some((modification) => {
-    if (modification.kind === 'statBonus') return modification.power + modification.toughness < 0;
+    if (modification.kind === 'statBonus' || modification.kind === 'statBonusPer') {
+      return modification.power + modification.toughness < 0;
+    }
     return (
       modification.kind === 'cantAttack' ||
       modification.kind === 'cantBlock' ||
+      modification.kind === 'cantActivateAbilities' ||
       // Holding a creature down is the strongest curse in the subset — it stops
       // the attack, the block and every tap cost at once — so an AI that read it
       // as a gift would enchant its own board with Claustrophobia.
-      modification.kind === 'doesNotUntap'
+      modification.kind === 'doesNotUntap' ||
+      (modification.kind === 'grantTriggeredAbility' &&
+        modification.ability.effects.some((effect) => effect.kind === 'sacrificeSelf'))
     );
   });
   return cursing ? 'Curse' : 'Pump';
@@ -309,11 +365,40 @@ export function auraScript(
   cardId: string,
   path: string,
 ): AbilityScriptResult {
-  const staticClause: readonly StaticLineModification[] = card.aura.modifications.flatMap((modification) =>
-    modification.kind === 'doesNotUntap' ? [] : [modification],
+  const continuousEntries = card.aura.modifications.flatMap((modification, index) =>
+    modification.kind === 'doesNotUntap' || modification.kind === 'grantTriggeredAbility'
+      ? []
+      : [{ modification, index }],
   );
-  const holdsUntapped = staticClause.length !== card.aura.modifications.length;
-  const description = renderAuraModificationClause(staticClause);
+  const continuousClause = continuousEntries.map((entry) => entry.modification);
+  const holdsUntapped = card.aura.modifications.some((modification) => modification.kind === 'doesNotUntap');
+  const untapsDuringOtherPlayersUntapSteps = card.aura.untapsDuringEachOtherPlayersUntapStep === true;
+  let grantNumber = 0;
+  const grantPrefixes = new Map<number, string>();
+  for (const [index, modification] of card.aura.modifications.entries()) {
+    if (modification.kind !== 'grantTriggeredAbility' && modification.kind !== 'grantActivatedAbility') {
+      continue;
+    }
+    grantNumber += 1;
+    grantPrefixes.set(index, `AuraGrant${String(grantNumber)}`);
+  }
+  // Forge's checked-in Ice Cage script predates the current Oracle comma. Keep
+  // its `S:` description byte-exact while the separate Oracle line stays current.
+  const host = auraHostNoun(card.aura);
+  const fullDescription = renderAuraModificationClause(card.aura.modifications, host);
+  const activationLocked = card.aura.modifications.some(
+    (modification) => modification.kind === 'cantActivateAbilities',
+  );
+  const description =
+    card.aura.enchantedControllerHandSizeBonus === true
+      ? "Enchanted creature gets +1/+1 for each card in its controller's hand."
+      : (holdsUntapped && activationLocked
+          ? fullDescription
+          : renderAuraModificationClause(continuousClause, host)
+        ).replace(
+          ", and its activated abilities can't be activated",
+          " and its activated abilities can't be activated",
+        );
   // Only the `S:` paragraph is checked: it is the only text here interpolated
   // from the card, and `UNTAP_REPLACEMENT_LINE` is a constant with no card data
   // in it.
@@ -333,26 +418,114 @@ export function auraScript(
 
   const built: ModeLine[] = [];
   const rejections: TranspileRejection[] = [];
-  for (const [index, modification] of staticClause.entries()) {
-    const result = modificationLine(modification, cardId, `${path}.modifications[${index}]`);
+  const tokens: TokenSpec[] = [];
+  if (card.aura.enchantedControllerHandSizeBonus === true) {
+    built.push({
+      mode: 'Continuous',
+      scopeParam: 'Affected',
+      body: params(['AddPower', 'X'], ['AddToughness', 'X']),
+      supportingLines: ['SVar:X:Count$ValidHand Card.OwnedBy EnchantedController'],
+    });
+  }
+  for (const { modification, index } of continuousEntries) {
+    if (modification.kind === 'grantActivatedAbility') {
+      const prefix = grantPrefixes.get(index);
+      if (prefix === undefined) throw new Error('activated Aura grant lost its generated Forge name');
+      const sourceKind = host === 'permanent' || host === 'nonland permanent' ? undefined : host;
+      const grantedDescription = renderAbility(modification.ability, `this ${host}`, sourceKind);
+      const compiled = grantedActivatedAbilityScript(
+        modification.ability,
+        prefix,
+        grantedDescription,
+        cardId,
+        `${path}.modifications[${String(index)}].ability`,
+      );
+      if (!compiled.ok) return compiled;
+      built.push({
+        mode: 'Continuous',
+        scopeParam: 'Affected',
+        body: params(['AddAbility', prefix]),
+        supportingLines: compiled.value.lines,
+      });
+      tokens.push(...compiled.value.tokens);
+      continue;
+    }
+    const result = modificationLine(
+      modification,
+      cardId,
+      `${path}.modifications[${String(index)}]`,
+      `AuraStat${String(index + 1)}`,
+    );
     if (result.ok) built.push(result.value);
     else rejections.push(...result.rejections);
   }
   if (rejections.length > 0) return { ok: false, rejections };
 
+  const enchanted = enchantedSelector(card.aura);
+  const soulTithe = card.abilities.some(isSacrificeEnchantedPermanentUnlessControllerPaysManaValueAbility);
+  const chronicFlooding = card.abilities.some(isEnchantedLandBecomesTappedMillAbility);
   const lines = [
-    `K:Enchant:${capitalize(card.aura.enchant)}`,
-    `SVar:AttachAILogic:${attachAiLogic(card.aura)}`,
+    enchantKeyword(card.aura),
+    ...(soulTithe ? ['SVar:AttachAITgts:Card.cmcGE2'] : []),
+    `SVar:AttachAILogic:${soulTithe || chronicFlooding ? 'Curse' : attachAiLogic(card.aura)}`,
   ];
+  if (holdsUntapped) {
+    const sentence = activationLocked
+      ? fullDescription
+      : `Enchanted ${host} doesn't untap during its controller's untap step.`;
+    lines.push(untapReplacementLine(card.aura, sentence));
+  }
+  if (untapsDuringOtherPlayersUntapSteps) {
+    const untapDescription = `Enchanted ${host} has "Untap this ${host} during each other player's untap step."`;
+    lines.push(
+      `S:${renderModeAbility('Continuous', [
+        ...params(['Affected', enchanted]),
+        ...params(['AddStaticAbility', 'BurgeoningUntap']),
+        ...params(['Description', untapDescription]),
+      ])}`,
+      "SVar:BurgeoningUntap:Mode$ UntapOtherPlayer | ValidCard$ Card.Self | Description$ Untap this land during each other player's untap step.",
+    );
+  }
   for (const [index, line] of mergeByMode(built).entries()) {
     const body: readonly ForgeParam[] = [
-      ...params([line.scopeParam, ENCHANTED]),
+      ...params([line.scopeParam, enchanted]),
       ...line.body,
-      ...(index === 0 ? [] : params(['Secondary', 'True'])),
+      ...(index === 0 && !holdsUntapped ? [] : params(['Secondary', 'True'])),
       ...params(['Description', description]),
     ];
     lines.push(`S:${renderModeAbility(line.mode, body)}`);
+    lines.push(...(line.supportingLines ?? []));
   }
-  if (holdsUntapped) lines.push(UNTAP_REPLACEMENT_LINE);
-  return { ok: true, value: { lines, tokens: [] } };
+  for (const [index, grant] of card.aura.modifications.entries()) {
+    if (grant.kind !== 'grantTriggeredAbility') continue;
+    const prefix = grantPrefixes.get(index);
+    if (prefix === undefined) throw new Error('triggered Aura grant lost its generated Forge name');
+    const grantedDescription = renderAbility(grant.ability, 'CARDNAME').replaceAll(
+      'this creature',
+      'CARDNAME',
+    );
+    const compiled = grantedTriggerScript(
+      grant.ability,
+      prefix,
+      grantedDescription,
+      cardId,
+      `${path}.modifications[${String(index)}].ability`,
+    );
+    if (!compiled.ok) return compiled;
+    const addedSvars = compiled.value.lines.flatMap((line) => {
+      const name = /^SVar:([^:]+):/.exec(line)?.[1];
+      return name === undefined || name === prefix ? [] : [name];
+    });
+    lines.push(
+      `S:${renderModeAbility('Continuous', [
+        ...params(['Affected', enchanted]),
+        ...params(['AddTrigger', prefix]),
+        ...params(['AddSVar', addedSvars.join(' & ')]),
+        ...params(['Description', renderAuraModificationClause([grant], host)]),
+      ])}`,
+      ...compiled.value.lines,
+    );
+    tokens.push(...compiled.value.tokens);
+  }
+  return { ok: true, value: { lines, tokens } };
 }

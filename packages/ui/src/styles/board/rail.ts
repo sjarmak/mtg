@@ -80,7 +80,7 @@
  * instead of the 52px a rail block is entitled to.
  *
  * Adding two blocks to a column measured for two is a claim about the narrow
- * viewport, so it was re-measured rather than assumed. `../../test/play/ask-column.browser.test.ts`
+ * viewport, so it was re-measured rather than assumed. `../../../test/play/ask-column.browser.test.ts`
  * holds the assertion and the numbers are in its docblock; the rule below is the
  * half that makes it hold — a shut strip cannot shrink and does not want to, and
  * an opened one is floored, capped at the same 30% a rail block was, and scrolls
@@ -120,7 +120,7 @@ export const PLAY_RAIL_REM = 17;
  *
  * No `--mtg-` prefix, for the reason `./hand.ts`'s `--hand-slot` carries none:
  * that prefix is the design vocabulary, declared once in `../tokens.ts` and
- * checked against every reference by `../../test/tokens.test.ts`, and this is the
+ * checked against every reference by `../../../test/tokens.test.ts`, and this is the
  * board sheet publishing a number to itself.
  */
 export const RAIL_WIDTH_VAR = '--rail-w';
@@ -159,7 +159,10 @@ const PLAY_RAIL_SHUT_PX = TOUCH_TARGET_PX;
  * poorest. `./fit.ts` writes it as `clamp(POD_WIDTH_REM, ASK_PERCENT%, this)`.
  *
  * Measured in chrome-headless-shell 151.0.7922.47: the column lands at 176px at
- * 1440x900, 160.9px at 1280x800 and 127.7px at 1024x768.
+ * 1440x900 and at 1280x800 — the 11rem cap binds at both — and 157.1px at
+ * 1024x768. Every reading below this line was taken while `ASK_PERCENT` was 13,
+ * where the three came out 176 / 160.9 / 127.7px; the argument they make is
+ * about a column narrower than its cap, and 1024x768 is still that column.
  *
  * **The claim that used to follow that sentence was false, and it was false
  * because the check could not fail** (`mtg-6i4`). It read: no move label, group
@@ -168,7 +171,7 @@ const PLAY_RAIL_SHUT_PX = TOUCH_TARGET_PX;
  * is that `../views.ts`'s move grid stated a track minimum of 11rem, a grid item
  * never shrinks below its track minimum, and every group laid out at 176px in a
  * column that was 127.7px — so the labels did not wrap, they hung out over the
- * board and were sliced by the panel's own edge. `../../tools/rail-split.ts`
+ * board and were sliced by the panel's own edge. `../../../tools/rail-split.ts`
  * asked each label whether it had clipped *itself* and got 0, because the thing
  * doing the cutting was one box up. Re-measured with that check fixed and the
  * track minimum bounded: 16 of 16 and 28 of 28 labels outside their box before,
@@ -199,7 +202,7 @@ export const PLAY_ASK_REM = 11;
  * it with `--mtg-space-1` either side; at the strip's 44px it would ellipsize.
  *
  * Stated here rather than inline in the block below because two rigs read it:
- * `../../../slice/test/ui-phone-scroll.browser.test.ts` plays a landscape phone
+ * `@mtg/slice`’s `test/ui-phone-scroll.browser.test.ts` plays a landscape phone
  * through Vite and asserts the first grid track, and a number a test restates by
  * hand is a number that drifts.
  */
@@ -234,36 +237,41 @@ export const SHORT_TABLE_ASK_SHUT_REM = 3;
 /**
  * What share of the mat the ask column asks for between its floor and its cap.
  *
- * 13 rather than the 19 that would hold the full 176px at every viewport, and the
- * difference is one board. The lanes pay for this column, and at 1024x768 with
- * twelve permanents a side the row is already fitted to `./fit.ts`'s 3rem slot
- * floor and scrolling sideways, so every pixel taken off it is a card that stops
- * being painted. Measured there: 19% costs one of the opponent's twelve and two
- * of yours, 16% costs one each, and 13% costs one of yours and nothing of theirs.
+ * 16 rather than the 19 that would hold the full 176px at every viewport, and
+ * the difference is one board. The lanes pay for this column, and at 1024x768
+ * with twelve permanents a side the row is already fitted to `./fit.ts`'s 3rem
+ * slot floor and scrolling sideways, so every pixel taken off it is a card that
+ * stops being painted. Measured there: 19% costs one of the opponent's twelve
+ * and two of yours, 16% costs one each, and 13% costs one of yours and nothing
+ * of theirs.
  *
- * What 13% costs in total, over the six measurements: one of the opponent's
- * twelve at 1280x800, one of yours at 1024x768, and nothing at all at 1440x900 or
- * at four permanents a side anywhere. **No card changed height at any of them** —
- * 182.4px, 149.1px and 138.4px before and after — because `./fit.ts` fits a slot
- * to its row's height and only its width follows the room. So the whole bill is a
- * narrower card in a row that already scrolls.
+ * **It was 13 until `mtg-e0i`, and the change is a decision rather than a
+ * measurement.** 13 was argued on two halves and only one of them survived
+ * being checked. The half that stands is the board's bill: against 13, 16%
+ * leaves one more of the opponent's twelve unpainted at 1280x800 and at
+ * 1024x768, and every card is 4px shorter at the smaller one. The half that
+ * does not is "no label overflows at any of the three" — see `PLAY_ASK_REM`
+ * above — which came from a cut check that could not have failed at any width,
+ * because a grid track minimum held every label at a flat 150px and the column
+ * was doing the cutting. So the comfort side of the trade had never been read.
+ * Read properly, 13% draws an 81.7px label at 1024x768 and breaks a card name
+ * mid-word ("Broodmothe / r of the Chasm"); 16% draws about 111px, shows one
+ * more move in full, and takes 18% off the list's scroll height (2,246 ->
+ * 1,835px at twelve permanents a side).
  *
- * The ask column takes Magic Online's own width wherever the board can afford it
- * and gives some back where it cannot. The narrow end is 127.7px, which is still
- * 45% wider than the pod it replaced.
+ * One board card in a row that already scrolls sideways, against a card name
+ * that does not break in the primary action list. the playtester made that trade on
+ * 2026-08-23 and took the list: the row the card leaves is reachable by
+ * scrolling, and a name broken mid-word in the thing you press is not
+ * recoverable by anything the player can do.
  *
- * **The number is kept and it is not settled**, because half of what argued it
- * is gone. The half that stands is the board's bill, re-measured at 16%: one
- * more of the opponent's twelve unpainted at 1280x800 and at 1024x768, and every
- * card 4px shorter at the smaller one. The half that does not is "no label
- * overflows at any of the three" — see `PLAY_ASK_REM` above — so 13% was chosen
- * against a reading of this column's own comfort that no width could have
- * failed. What 16% buys, now that the labels are inside the column: one more
- * move fully shown at 1024x768 and 18% off the list's scroll height. One board
- * card against one move is a trade somebody has to make on purpose, and this
- * lane's beads are the fold and the slicing rather than the width.
+ * **No card changes height at 1440x900 or at four permanents a side** — 182.4px,
+ * 149.1px and 138.4px, before and after — because `./fit.ts` fits a slot to its
+ * row's height and only its width follows the room. The 4px is 1024x768 alone.
+ * The narrow end of the column is now 157.1px, against Magic Online's own 168px
+ * at 1280x720 and the 127.7px this was.
  */
-export const ASK_PERCENT = 13;
+export const ASK_PERCENT = 16;
 
 /**
  * The shortest a rail block may be squeezed to: its head and one row under it.
@@ -292,7 +300,14 @@ const RAIL_BLOCK_MIN_REM = 3.25;
 export const RAIL_CSS = `
 ${TABLE} .mtg-board__rail { min-height: 0; overflow-y: auto; gap: var(--mtg-space-1); }
 ${TABLE} .mtg-ask__head { flex: none; }
+/* Flex, which is what the two declarations under it were already written for.
+   A \`<button>\` is inline-block until something says otherwise, so \`gap\` and
+   \`justify-content\` did nothing and the chevron sat against the first letter of
+   the word: every board shot in the 2026-08-23 sweep reads \`\u2039Game details\`
+   and \`\u203aSide panel\` (\`mtg-dcxg.10\`). The gap was stated when this control
+   was written; it just had no box model to apply to. */
 ${TABLE} .mtg-ask__toggle {
+  display: flex; align-items: center;
   width: 100%; min-width: 0; justify-content: center;
   gap: var(--mtg-space-1); padding-inline: var(--mtg-space-1);
 }
@@ -303,9 +318,33 @@ ${TABLE} .mtg-play-meta {
   padding: var(--mtg-space-1); border-bottom: 1px solid var(--mtg-line);
 }
 ${TABLE} .mtg-board[data-ask='shut'] { --ask-w: ${cssNumber(PLAY_ASK_SHUT_REM)}rem; }
+/*
+ * Shut: the column is a strip, and a block that cannot be read in a strip is
+ * not drawn in one.
+ *
+ * \`.mtg-board__pods > .mtg-zone\` is the graveyard browser, and it is on this
+ * list for the same reason the panel above it is and was missed because it is a
+ * zone rather than a panel. Measured at 844x390 with the ask shut: the strip is
+ * 48px, each browser holds 93px and 100px of content behind \`overflow: hidden\`,
+ * so both seats' graveyards were drawn as "Opponent's graveyar" and "your
+ * graveya" cut through the middle of a letter, one under each pod, for the whole
+ * game. What replaces them differs by block, and the difference is worth
+ * writing down (mtg-aqxi.10, re-measured 2026-08-23): the panel on this list is
+ * redrawn by the flyout (../../routes/play/ask-flyout.ts) on a press of the
+ * strip, and a graveyard is not — the flyout carries the ask panel and nothing
+ * else. A pile is reached by re-opening the column, which is one press of a
+ * disclosure that is drawn in both states and is flex: none so it can never
+ * scroll off the top. Two presses to a pile, against a title cut through the
+ * middle of a letter for the whole game.
+ *
+ * display: none rather than a narrower box, so the browsers leave the accessible
+ * tree and the tab order with the rest of the column instead of staying reachable
+ * as an unreadable one.
+ */
 ${TABLE} .mtg-board[data-ask='shut'] .mtg-ask__toggle-label,
 ${TABLE} .mtg-board[data-ask='shut'] .mtg-play-meta,
 ${TABLE} .mtg-board[data-ask='shut'] .mtg-board__pods > .mtg-panel,
+${TABLE} .mtg-board[data-ask='shut'] .mtg-board__pods > .mtg-zone,
 ${TABLE} .mtg-board[data-ask='shut'] .mtg-pod__chips,
 ${TABLE} .mtg-board[data-ask='shut'] .mtg-pod__name { display: none; }
 ${TABLE} .mtg-board[data-ask='shut'] .mtg-pod { padding-inline: var(--mtg-space-1); }
@@ -323,7 +362,9 @@ ${TABLE} .mtg-board[data-ask='shut'] .mtg-priority .mtg-btn {
  * reads in either state.
  */
 ${TABLE} .mtg-rail__head { flex: none; display: flex; flex-direction: column; gap: var(--mtg-space-1); }
+/* Flex, for the reason the ask column's own toggle above carries. */
 ${TABLE} .mtg-rail__toggle {
+  display: flex; align-items: center;
   width: 100%; min-width: 0; justify-content: center;
   gap: var(--mtg-space-1); padding-inline: var(--mtg-space-1);
 }
@@ -346,6 +387,17 @@ ${TABLE} .mtg-rail__toggle-label { overflow: hidden; text-overflow: ellipsis; wh
 ${TABLE} .mtg-board[data-rail='shut'] { ${RAIL_WIDTH_VAR}: ${cssNumber(PLAY_RAIL_SHUT_PX)}px; }
 ${TABLE} .mtg-board[data-rail='shut'] .mtg-board__rail > *:not(.mtg-rail__head) { display: none; }
 ${TABLE} .mtg-board[data-rail='shut'] .mtg-rail__toggle-label { display: none; }
+/*
+ * A block placed directly in the rail, which since mtg-aqxi.2 is none of them.
+ *
+ * The rule stays because the shape it enforces is what makes a rail block a
+ * place rather than a sliver: a floor so a squeezed one still reads, a cap so
+ * one cannot push the others out, and a clip so none paints over its neighbor.
+ * Anything dropped into this column outside the tabbed rail gets it, and
+ * ../../test/play/fit.test.ts asserts what is actually in the column so that a
+ * block arriving here is a decision somebody made rather than a diff nobody
+ * read.
+ */
 ${TABLE} .mtg-board__rail > .mtg-zone {
   flex: 0 1 auto;
   max-height: 30%;
@@ -407,5 +459,56 @@ ${TABLE} .mtg-board__pods > .mtg-browser:has(.mtg-browser__list) {
   flex: 0 1 auto;
   min-height: 4.5rem;
   max-height: 30%;
+}
+
+/* ── the rail's three sections (mtg-aqxi.2) ────────────────────────────────
+   The furniture is ../panel.ts's and is not re-answered here; what this block
+   owns is the play surface's two facts about it. First, the rail is the whole
+   of the column and must give its height to the section showing rather than to
+   itself, which is what a flex child with no a zero min-block-size refuses to do.
+   Second, the log brings its own head and its own frame, so the body's padding
+   under it is a second border a hand's width from the first. The stack block
+   pays that padding itself instead. */
+${TABLE} .mtg-board__rail > .mtg-rail--play { flex: 1 1 auto; min-block-size: 0; }
+${TABLE} .mtg-rail--play > .mtg-rail__body { padding: 0; gap: 0; }
+${TABLE} .mtg-rail--play > .mtg-rail__body > .mtg-rail__empty { padding: var(--mtg-space-2); }
+.mtg-rail-stack-block { display: flex; flex-direction: column; gap: var(--mtg-space-2); padding: var(--mtg-space-2); }
+/* The sentence that says where the spoken copy of this list is. It is drawn
+   quiet because it is a note about the arrangement rather than about the game;
+   ../../routes/play/PlayRail.ts carries why it is said at all. */
+.mtg-rail-stack__note { margin: 0; font-size: var(--mtg-text-xs); color: var(--mtg-ink-muted); }
+.mtg-rail-stack { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--mtg-space-1); }
+/* Top-first down the column, which is resolution order: the entry that resolves
+   next is the one at the top of the box, matching the strip on the seam and the
+   order ../../board/StackZone.ts argues for in prose. */
+.mtg-rail-stack__entry {
+  display: flex; gap: var(--mtg-space-2); align-items: baseline;
+  padding: var(--mtg-space-1) var(--mtg-space-2);
+  border: 1px solid var(--mtg-line);
+  border-radius: var(--mtg-radius-sm);
+  background: var(--mtg-surface-raised);
+}
+/* The same number the reticle on the permanent wears, so the two ends of one
+   mark are drawn the same size and the same shape wherever they are met. */
+.mtg-rail-stack__order {
+  flex: 0 0 auto;
+  font-family: var(--mtg-font-mono); font-variant-numeric: tabular-nums;
+  font-size: var(--mtg-text-xs); color: var(--mtg-ink-muted);
+}
+.mtg-rail-stack__body { display: flex; flex-direction: column; min-inline-size: 0; }
+/* No ellipsis anywhere in here, which is the point of the section: the strip on
+   the seam is one row and spends width, and this column spends height instead,
+   so a name that does not fit wraps rather than losing its end. */
+.mtg-rail-stack__name { font-weight: 600; overflow-wrap: anywhere; }
+.mtg-rail-stack__meta,
+.mtg-rail-stack__mode,
+.mtg-rail-stack__target { font-size: var(--mtg-text-xs); color: var(--mtg-ink-muted); overflow-wrap: anywhere; }
+/* The section showing takes the body, and nothing caps it. Sharing was the
+   whole of the old arrangement - four blocks in one column, each floored and
+   each capped at 30% so no one of them could push the others out - and the rail
+   shows one section at a time now, so a cap here would be a block refusing 70%
+   of a column it is alone in. */
+${TABLE} .mtg-rail--play .mtg-rail__body > .mtg-zone {
+  flex: 1 1 auto; min-block-size: 0; max-block-size: none; overflow: hidden;
 }
 `;

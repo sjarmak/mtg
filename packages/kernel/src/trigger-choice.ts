@@ -14,9 +14,12 @@
  * ability entry that still owes targets is one whose printed trigger chooses
  * some and whose `targets` list is empty, because a trigger is pushed with an
  * empty list (`triggers.ts`) and answering fills it to one slot per effect. An
- * ability that owes its "you may" is simply an optional trigger on top of the
- * stack, because the answer *is* the resolution — accepting resolves it and
- * declining removes it, so "answered" is never a state anything has to store.
+ * ability that owes a yes/no resolution choice is identified from the trigger
+ * on top of the stack. For an ordinary "you may", accepting resolves it and
+ * declining removes it. Faerie Impostor uses the same answer surface for its
+ * optional return cost: accepting continues to the creature choice, while
+ * declining resolves the printed sacrifice. In either case, "answered" is
+ * never a state anything has to store.
  *
  * That is worth the indirection. A field on `StackEntry` would land in
  * `stateFingerprint`, in every replay snapshot, and in `@mtg/ui`'s strict
@@ -32,13 +35,24 @@
  * it goes, so answering the bottom-most unanswered entry first is that sequence
  * read back off the stack.
  */
-import type { TriggeredAbility } from '@mtg/dsl';
-import { isOptionalTrigger, triggerChoosesTargets } from '@mtg/dsl';
-import { abilityAt } from './abilities';
+import type { StateTriggeredAbility, TriggeredAbility } from '@mtg/dsl';
+import {
+  hasTarget,
+  isLiteralAmount,
+  isGuildFeudAbility,
+  isMultipleTargetSpec,
+  isOptionalTrigger,
+  isReturnAnotherCreatureOrSacrificeSelfAbility,
+  targetMinimumOf,
+  triggerChoosesTargets,
+} from '@mtg/dsl';
+import { stackedAbilityAt, stackEntryTargetingController } from './abilities';
 import type { ObjectId } from './ids';
+import { pluralTargetMinimum } from './plural-targets';
 import type { GameState, StackEntry, Target } from './state';
-import { everySlotHasAChoice, targetChoicesForEffects } from './target-choices';
+import { everySlotHasAChoice, multipleTargetCandidates, targetChoicesForEffects } from './target-choices';
 import type { Trace } from './trace';
+import { multiTargetIncarnationsOf, targetIncarnationsOf } from './target-incarnations';
 import { emit, withState } from './trace';
 
 /**
@@ -51,9 +65,9 @@ import { emit, withState } from './trace';
  */
 export interface TriggerOnStack {
   readonly entry: StackEntry;
-  readonly ability: TriggeredAbility;
+  readonly ability: TriggeredAbility | StateTriggeredAbility;
   readonly source: ObjectId;
-  /** Index into the source's printed `card.abilities`. */
+  /** Index into the source card values retained by the stack entry. */
   readonly index: number;
 }
 
@@ -63,15 +77,16 @@ export interface TriggerOnStack {
  *
  * Total rather than a cast: the entry may be a spell, an activated ability, or
  * a trigger whose source has left the battlefield. CR 608.2 still resolves that
- * last one — the object record outlives the zone change, which is what
- * `abilityAt` reads — so the `null` here is "this is not a trigger", never "the
- * source is gone".
+ * last one — the stack entry retains the source card values from the firing
+ * incarnation — so the `null` here is "this is not a trigger", never "the source
+ * is gone".
  */
 export function triggerOf(state: GameState, entry: StackEntry): TriggerOnStack | null {
   const ability = entry.ability;
   if (ability === null) return null;
-  const printed = abilityAt(state, ability.sourceOid, ability.index);
-  if (printed === undefined || printed.kind !== 'triggered') return null;
+  const printed = stackedAbilityAt(state, entry);
+  if (printed === undefined || (printed.kind !== 'triggered' && printed.kind !== 'stateTriggered'))
+    return null;
   return { entry, ability: printed, source: ability.sourceOid, index: ability.index };
 }
 
@@ -105,7 +120,8 @@ function triggersAwaitingTargets(state: GameState): readonly TriggerOnStack[] {
     const pending = triggerOf(state, entry);
     if (pending === null) continue;
     if (!triggerChoosesTargets(pending.ability)) continue;
-    if (entry.targets.length >= pending.ability.effects.length) continue;
+    const targetSlots = isGuildFeudAbility(pending.ability) ? 1 : pending.ability.effects.length;
+    if (entry.targets.length >= targetSlots) continue;
     awaiting.push(pending);
   }
   return awaiting;
@@ -130,7 +146,10 @@ export function optionalTriggerOnTop(state: GameState): TriggerOnStack | null {
   const entry = state.stack[state.stack.length - 1];
   if (entry === undefined) return null;
   const pending = triggerOf(state, entry);
-  return pending !== null && isOptionalTrigger(pending.ability) ? pending : null;
+  return pending !== null &&
+    (isOptionalTrigger(pending.ability) || isReturnAnotherCreatureOrSacrificeSelfAbility(pending.ability))
+    ? pending
+    : null;
 }
 
 /**
@@ -145,10 +164,20 @@ export function triggerTargetChoices(
   state: GameState,
   pending: TriggerOnStack,
 ): readonly (readonly (Target | null)[])[] {
+  if (isGuildFeudAbility(pending.ability)) {
+    return targetChoicesForEffects(
+      state,
+      [{ kind: 'revealHand', target: { kind: 'targetOpponent' } }],
+      stackEntryTargetingController(state, pending.entry),
+      state.objects[pending.source]?.zone === 'battlefield'
+        ? pending.source
+        : (pending.entry.sourceCharacteristics ?? pending.source),
+    );
+  }
   return targetChoicesForEffects(
     state,
     pending.ability.effects,
-    pending.entry.controller,
+    stackEntryTargetingController(state, pending.entry),
     state.objects[pending.source]?.zone === 'battlefield'
       ? pending.source
       : (pending.entry.sourceCharacteristics ?? pending.source),
@@ -164,6 +193,26 @@ export function triggerTargetChoices(
  * reported by two different events for exactly that reason.
  */
 export function triggerHasLegalTargets(state: GameState, pending: TriggerOnStack): boolean {
+  const source =
+    state.objects[pending.source]?.zone === 'battlefield'
+      ? pending.source
+      : (pending.entry.sourceCharacteristics ?? pending.source);
+  for (const effect of pending.ability.effects) {
+    if (!hasTarget(effect) || !isMultipleTargetSpec(effect.target)) continue;
+    if (
+      effect.kind === 'dealDamage' &&
+      effect.division?.kind === 'asYouChoose' &&
+      (!isLiteralAmount(effect.amount) || targetMinimumOf(effect.target) > effect.amount)
+    ) {
+      return false;
+    }
+    if (
+      multipleTargetCandidates(state, effect, stackEntryTargetingController(state, pending.entry), source)
+        .length < pluralTargetMinimum(effect)
+    ) {
+      return false;
+    }
+  }
   return everySlotHasAChoice(triggerTargetChoices(state, pending));
 }
 
@@ -214,9 +263,24 @@ export function withChosenTargets(
   state: GameState,
   oid: ObjectId,
   targets: readonly (Target | null)[],
+  multiTargets?: Readonly<Record<number, readonly Target[]>>,
+  damageAllocations?: Readonly<Record<number, readonly number[]>>,
 ): GameState {
   return {
     ...state,
-    stack: state.stack.map((entry) => (entry.oid === oid ? { ...entry, targets } : entry)),
+    stack: state.stack.map((entry) =>
+      entry.oid === oid
+        ? {
+            ...entry,
+            targets,
+            targetIncarnations: targetIncarnationsOf(state, targets),
+            ...(multiTargets === undefined ? {} : { multiTargets }),
+            ...(multiTargets === undefined
+              ? {}
+              : { multiTargetIncarnations: multiTargetIncarnationsOf(state, multiTargets) }),
+            ...(damageAllocations === undefined ? {} : { damageAllocations }),
+          }
+        : entry,
+    ),
   };
 }

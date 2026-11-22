@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { COLORS, formatManaCost, mana } from '@mtg/dsl';
-import { PIP_GLYPHS, PIP_GLYPH_FOR_COLOR } from '@mtg/ui';
+import { PIP_GLYPHS, PIP_GLYPH_FOR_COLOR, pipToken } from '@mtg/ui';
 import type { PipGlyph } from '@mtg/ui';
 import { costPips, pipRunWidth, renderCost } from '@mtg/card-render';
 
@@ -26,11 +26,7 @@ describe('costPips', () => {
 
   it('prints the generic amount first, then WUBRG', () => {
     const pips = costPips(mana({ generic: 2, R: 1, W: 1 }));
-    expect(
-      pips.map((pip) =>
-        pip.kind === 'generic' ? 'generic' : pip.kind === 'variable' ? 'variable' : pip.color,
-      ),
-    ).toEqual(['generic', 'W', 'R']);
+    expect(pips.map(pipToken)).toEqual(['2', 'W', 'R']);
   });
 
   it('agrees with the DSL printed cost, symbol for symbol', () => {
@@ -53,6 +49,19 @@ describe('costPips', () => {
 
   it('omits the generic pip when the cost is entirely colored', () => {
     expect(costPips(mana({ B: 3 })).every((pip) => pip.kind === 'color')).toBe(true);
+  });
+
+  it('keeps a hybrid symbol as one pip and one registry token', () => {
+    const cost = mana({ generic: 1, hybrid: { 'W/U': 2 } });
+
+    expect(costPips(cost)).toEqual([
+      { kind: 'generic', amount: 1 },
+      { kind: 'hybrid', pair: 'W/U', identity: 'm' },
+      { kind: 'hybrid', pair: 'W/U', identity: 'm' },
+    ]);
+    expect(costPips(cost).map(pipToken)).toEqual(['1', 'W/U', 'W/U']);
+    expect(formatManaCost(cost)).toBe('{1}{W/U}{W/U}');
+    expect(renderCost(cost, DRAWN).match(/data-pip="m"/g)).toHaveLength(2);
   });
 });
 

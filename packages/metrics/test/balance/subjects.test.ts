@@ -16,7 +16,7 @@ import { isWaived, unwaivedAbstentions, unwaivedFailures } from './baseline';
 // Deliberately a second import from the same module rather than four more names
 // on the line above: that line is an exact-match anchor in `@mtg/slice`'s
 // public-export edits, and widening it breaks the export rather than this file.
-import { DRIFT_TOLERANCE, spreadDrift } from './baseline';
+import { DRIFT_TOLERANCE, spreadDrift, spreadDriftReading } from './baseline';
 import { loadSet } from './set';
 import type { BalanceSubject } from './subjects';
 import {
@@ -201,11 +201,19 @@ describe(`${SET_ENV_VAR}`, () => {
 });
 
 describe('loading a set', () => {
+  // The label is the rule under test and the size is a declared pin, so the two
+  // are separated rather than written as one literal string (`mtg-gvb7`). A
+  // label spelled out in full says nothing about how the label is built: it
+  // passes for a fixture of any size as long as somebody edits both numbers, and
+  // it fails for a fixture of the right shape and the wrong size in a sentence
+  // about labeling. Derived, it says what `loadSet` promises -- code, name, and
+  // the pool's own size -- and the size assertion beside it is left to be the
+  // one thing a fixture change moves.
   it('reads the committed fixture and labels it with its own code and size', () => {
     const set = loadSet(COMMITTED_SET_PATH);
     expect(set.code).toBe('TGR');
     expect(set.pool.length).toBe(90);
-    expect(set.label).toBe('TGR Tideglass Reach (90 cards)');
+    expect(set.label).toBe(`TGR Tideglass Reach (${String(set.pool.length)} cards)`);
   });
 
   it('names the path when the file is missing', () => {
@@ -266,6 +274,20 @@ describe('a recorded spread against the tree that is actually there', () => {
     // movement, at the width the waiver drift check already absorbs it.
     expect(spreadDrift(recorded, spread(0.16 + DRIFT_TOLERANCE))).toBeNull();
     expect(spreadDrift(recorded, spread(0.16 - DRIFT_TOLERANCE))).toBeNull();
+  });
+
+  it('reads out how much of the tolerance a passing pin has spent, which the verdict cannot', () => {
+    // The case this exists for: `spreadDrift` returns null at both of these and
+    // one of them is a re-measurement that should already have happened.
+    expect(spreadDriftReading(recorded, spread(0.16))).toContain('0% of the 0.02 tolerance spent');
+    expect(spreadDriftReading(recorded, spread(0.1798))).toContain('99% of the 0.02 tolerance spent');
+    expect(spreadDriftReading(recorded, spread(0.16))).toContain('the 0.1600 recorded 2026-08-16');
+  });
+
+  it('reads out a missing reading rather than dividing by the tolerance', () => {
+    const missing = spreadDriftReading(recorded, spread(null));
+    expect(missing).toContain('no reading now');
+    expect(missing).not.toContain('spent');
   });
 
   it('fires in both directions, because a format getting tighter is also a tree that moved', () => {

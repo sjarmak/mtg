@@ -1,0 +1,27 @@
+/** Token departure receipts claim only the two observed local destruction paths. */
+import { readFileSync } from 'node:fs';
+import { expect, it } from 'vitest';
+
+it('binds exact local token departure assertions without claiming hidden zones or bots', () => {
+  const config = JSON.parse(readFileSync('packages/ui/data/akh-token-departure-probes-v1.json', 'utf8'));
+  expect(config.probes).toEqual([
+    {
+      id: 'sacred-cat-token-departure-local-v1',
+      scope: 'card',
+      controller: 'local',
+      cardIds: ['akh-printed-v1:0027:08891c78-13c1-4d84-aa9c-78346b3b7d18'],
+      decisionFamilies: ['embalm-token-destroyed-public-departure'],
+      assertions: ["destroying the 'Sacred Cat' token removes it from public zones and choices"],
+      testFile: 'packages/forge-export/test/observed-akh-token-departure.integration.test.ts',
+    },
+    {
+      id: 'pouncer-token-departure-local-v1',
+      scope: 'card',
+      controller: 'local',
+      cardIds: ['hou-printed-v1:0002:865e267d-450c-4eeb-b61d-bd0ec5d8534a'],
+      decisionFamilies: ['eternalize-token-destroyed-public-departure'],
+      assertions: ["destroying the 'Adorned Pouncer' token removes it from public zones and choices"],
+      testFile: 'packages/forge-export/test/observed-akh-token-departure.integration.test.ts',
+    },
+  ]);
+});

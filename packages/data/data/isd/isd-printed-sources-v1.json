@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-14T20:55:25.843Z",
+  "sources": [
+    {
+      "code": "ISD",
+      "mtgjson": {
+        "file": "ISD-eb1f82901b98e81649d9fdf7533dd3a7bb6b4a523cc4ad601bdbea3985d00708.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/ISD.json",
+        "sha256": "eb1f82901b98e81649d9fdf7533dd3a7bb6b4a523cc4ad601bdbea3985d00708",
+        "meta": {
+          "date": "2026-09-14",
+          "version": "5.3.0+20260914"
+        }
+      },
+      "scryfall": {
+        "file": "ISD-46d9ccb242125c72e2a11782ffae8f97212b9d839c91d0e90b0bcdf565eb41be.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Aisd+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "46d9ccb242125c72e2a11782ffae8f97212b9d839c91d0e90b0bcdf565eb41be",
+        "cards": 264
+      }
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "mbs",
+  "archetypes": [
+    {
+      "id": "red-white-battle-cry",
+      "name": "Red-White Battle Cry",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Accorder Paladin",
+        "physicalId": "mbs-printed-v1:0001:df0a4370-729d-40e7-b68b-21902648492d"
+      },
+      "plan": "Build around Accorder Paladin: Build a wide attacking force, stack battle cry triggers, and preserve enough bodies for one overwhelming combat."
+    },
+    {
+      "id": "black-green-infect",
+      "name": "Black-Green Infect",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Viridian Corrupter",
+        "physicalId": "mbs-printed-v1:0094:0cc13aee-5a74-4dab-a6af-7dc31255981d"
+      },
+      "plan": "Build around Viridian Corrupter: Apply poison with efficient infect creatures and use removal or combat tricks to force the last counters through."
+    },
+    {
+      "id": "blue-black-proliferate",
+      "name": "Blue-Black Proliferate",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Core Prowler",
+        "physicalId": "mbs-printed-v1:0103:05414ba7-0f59-4c73-931c-e599d149d3ba"
+      },
+      "plan": "Build around Core Prowler: Seed poison or charge counters early, then proliferate repeatedly while removal slows opposing pressure."
+    },
+    {
+      "id": "white-blue-artifacts",
+      "name": "White-Blue Artifacts",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Vedalken Infuser",
+        "physicalId": "mbs-printed-v1:0037:1e4f4db7-913c-4dd2-931e-630d90eb98ab"
+      },
+      "plan": "Build around Vedalken Infuser: Build around cheap artifacts and evasive creatures, switching on artifact bonuses while interaction protects the clock."
+    },
+    {
+      "id": "red-green-dinosaurs",
+      "name": "Red-Green Dinosaurs",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Fangren Marauder",
+        "physicalId": "mbs-printed-v1:0079:f5cf62a2-d03a-495d-924a-bf79524175fa"
+      },
+      "plan": "Build around Fangren Marauder: Accelerate with mana Myr into large creatures, then turn sacrificed or destroyed artifacts into enough life to dominate combat."
+    }
+  ]
+}

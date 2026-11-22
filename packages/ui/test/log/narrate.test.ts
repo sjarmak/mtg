@@ -102,6 +102,15 @@ describe('a live kernel game narrates through the shared renderer', () => {
     expect(describeResult(result, NAMES)).toMatch(/(wins|Draw) on turn \d+:/);
   });
 
+  it('does not claim a card was chosen before an optional revealed-hand choice is answered', () => {
+    expect(describeDecision({ kind: 'revealedHandChoice', player: 0 }, NAMES)).toBe(
+      'You chooses from a revealed hand.',
+    );
+    expect(describeAction({ type: 'chooseFromRevealedHand', player: 0, chosen: null }, NAMES)).toBe(
+      'choose no card from the revealed hand',
+    );
+  });
+
   it('names every step the kernel can be in', () => {
     expect(stepWords('declareBlockers')).toBe('declare blockers');
     expect(stepWords('cleanup')).toBe('cleanup');
@@ -132,6 +141,107 @@ describe('a live kernel game narrates through the shared renderer', () => {
         NAMES,
       ),
     ).toBe('You copy card o1 for X=3 targeting Bot.');
+  });
+
+  it('distinguishes a free cast from an alternative cost while targets are staged', () => {
+    expect(
+      describeAction(
+        {
+          type: 'beginCastSpell',
+          player: 0,
+          oid: 'siege',
+          targets: [null],
+          castingCost: 'withoutMana',
+        },
+        NAMES,
+      ),
+    ).toBe('begin casting card siege using no mana payment');
+  });
+
+  it('names Overload rather than folding it into another casting price', () => {
+    expect(
+      describeAction(
+        {
+          type: 'castSpell',
+          player: 0,
+          oid: 'rift',
+          targets: [null],
+          castingCost: 'overload',
+        },
+        NAMES,
+      ),
+    ).toBe('cast card rift using its overload cost');
+    expect(
+      describeAction(
+        {
+          type: 'beginCastSpell',
+          player: 0,
+          oid: 'rift',
+          targets: [null],
+          castingCost: 'overload',
+        },
+        NAMES,
+      ),
+    ).toBe('begin casting card rift using its overload cost');
+  });
+
+  it('pairs divided-damage allocations with their plural targets', () => {
+    const action: Extract<Action, { type: 'chooseTriggerTargets' }> = {
+      type: 'chooseTriggerTargets',
+      player: 0,
+      oid: 'inferno-trigger',
+      targets: [null],
+      multiTargets: {
+        0: [
+          { kind: 'player', player: 1 },
+          { kind: 'permanent', oid: 'creature-1' },
+        ],
+      },
+      damageAllocations: { 0: [2, 1] },
+    };
+
+    expect(describeAction(action, NAMES)).toBe(
+      'aim card inferno-trigger targeting Bot for 2 and their card creature-1 for 1',
+    );
+    expect(
+      describeEvent(
+        {
+          type: 'triggerTargetsChosen',
+          oid: 'inferno-trigger',
+          source: 'inferno-titan',
+          targets: action.targets,
+          ...(action.multiTargets === undefined ? {} : { multiTargets: action.multiTargets }),
+          ...(action.damageAllocations === undefined ? {} : { damageAllocations: action.damageAllocations }),
+        },
+        NAMES,
+      ),
+    ).toBe(
+      "card inferno-titan's triggered ability goes on the stack targeting Bot for 2 and their card creature-1 for 1.",
+    );
+  });
+
+  it('narrates a public coin-flip result with its source', () => {
+    expect(
+      describeEvent({ type: 'coinFlipped', player: 0, sourceOid: 'strongbox', result: 'win' }, NAMES),
+    ).toBe('You win the coin flip for card strongbox.');
+  });
+
+  it('narrates the exact card and turn retained by a delayed zone change', () => {
+    expect(
+      describeEvent(
+        {
+          type: 'delayedZoneChangeScheduled',
+          id: 4,
+          source: 'maze',
+          target: 'attacker',
+          targetIncarnation: 2,
+          dueTurn: 7,
+        },
+        NAMES,
+      ),
+    ).toBe(
+      "card maze schedules card attacker to return tapped under its owner's control at the beginning of turn 7's end step.",
+    );
   });
 });
 

@@ -41,7 +41,7 @@ describe('an activation that sacrifices permanents the cost names', () => {
     const result = transpileCard(CHEST);
     if (!result.ok) throw new Error(JSON.stringify(result.rejections));
     expect(result.script.text).toContain(
-      'A:AB$ GainLife | Cost$ 1 Sac<2/Key> | Defined$ You | LifeAmount$ 2 | SpellDescription$ {1}, Sacrifice two Keys: You gain 2 life.',
+      'A:AB$ GainLife | Cost$ 1 Sac<2/Key> | Defined$ You | LifeAmount$ 2 | SpellDescription$ You gain 2 life.',
     );
     // The `SpellDescription$` is the DSL's own printed line, so the assertion
     // above is only worth something while the two are actually the same string.

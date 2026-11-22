@@ -15,8 +15,10 @@ This lab is unofficial Fan Content permitted under the Fan Content Policy.
 Not approved/endorsed by Wizards.
 
 Card data from Scryfall (https://scryfall.com), used under their API
-guidelines. Nothing is mirrored: `@mtg/image-cache` fetches an image once, on
-demand, keyed by URL, and keeps it in a gitignored local cache.
+guidelines. The printed-set catalogs under packages/data/data/ carry card
+names, types and rules text from Scryfall. Images are never mirrored:
+`@mtg/image-cache` fetches an image once, on demand, keyed by URL, and keeps it
+in a gitignored local cache.
 
 Vocabulary data from MTGJSON (https://mtgjson.com), MIT licensed.
 
@@ -35,11 +37,19 @@ its header names the upstream file and its license, and those headers are
 required by this project's engine-strategy decision record rather than
 optional courtesy.
 
-Forge (https://github.com/Card-Forge/forge) is GPL-3.0 and is never vendored,
-linked or copied. It is downloaded at run time into a gitignored directory and
-driven as a subprocess, as a conformance oracle only. A continuous-integration
-guard fails the build if any Forge source, jar, class file or upstream path
-fragment ever becomes tracked in this repository.
+Forge (https://github.com/Card-Forge/forge) is GPL-3.0. Forge itself is never
+vendored: it is downloaded into a gitignored directory and run as a separate
+process, as the rules engine behind the printed formats and as a conformance
+oracle. A continuous-integration guard fails the build if any Forge source,
+jar, class file or upstream path fragment becomes tracked in this repository.
+
+Two kinds of Forge-derived material are in this tree and remain GPL-3.0 (see
+LICENSE and LICENSE-GPL-3.0): the Java bridge under
+packages/forge-export/bridge/, compiled against an installed Forge and run in
+its own process, and lines of Forge card script quoted in the play-admission
+evidence and the Legacy Cube decision ledger as a record of what a Forge
+release does. The rest of the project is AGPL-3.0-or-later, which section 13
+of the GPL version 3 permits combining with GPL-3.0 work.
 
 Draftmancer (https://github.com/Draftmancer/Draftmancer, MIT) is the draft
 surface `@mtg/draft-export` writes a custom-set file for. Nothing of it is

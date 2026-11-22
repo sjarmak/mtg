@@ -13,6 +13,14 @@
  * output of a fix loop, so an existing file is usually the *stale* one and
  * skipping the copy would show yesterday's art after a regeneration.
  *
+ * The copy is also where a render is shrunk to the size the page draws it at
+ * (`./web-raster.ts`, `mtg-cax8`): a generative backend writes 2528px rasters
+ * and the flagship staged 3.9 GB of them into a directory the Cards tab fetches
+ * whole. That pass is the one exception to the paragraph above — it keeps a
+ * served copy that is newer than its source and already inside the budget,
+ * because re-encoding every raster on every launch is a minute of start-up for
+ * a run that changed nothing, and it says why at its own definition.
+ *
  * A manifest entry whose raster is not on disk is dropped rather than staged.
  * The card then renders the labeled pending frame, which is the true statement
  * about it, and the launcher names it. Entries that already point at a URL or a
@@ -41,6 +49,8 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'nod
 import { cacheImage } from '@mtg/image-cache';
 import type { CacheImageOptions } from '@mtg/image-cache';
 import { readMigratedArtManifest } from '../src/lab/art-manifest';
+import { publishWebRaster, webRasterOutputPath } from './web-raster';
+import type { PublishedRaster } from './web-raster';
 import type { ArtManifest, ArtManifestEntry, ArtManifestResult } from '../src/lab/art-manifest';
 import { ART_DIR } from './stage-art';
 
@@ -96,6 +106,22 @@ export interface StagedSetArt {
   readonly missing: readonly string[];
   /** Cards that lost every illustration and go back to the pending frame. */
   readonly pending: readonly string[];
+  /**
+   * What the served copies weigh, against what their sources weigh.
+   *
+   * Reported rather than merely applied, because the pass this pair measures
+   * (`./web-raster.ts`, `mtg-cax8`) is the difference between a Cards tab that
+   * transfers megabytes and one that transferred 3.9 GB, and a launcher that
+   * did not say so would leave the next person to re-measure it. Both are zero
+   * on a run whose `copy` hook reports nothing, which is every test that
+   * injects one.
+   */
+  readonly bytes: number;
+  readonly sourceBytes: number;
+  /** Rasters that were over the web budget and were shrunk to reach it. */
+  readonly resized: number;
+  readonly encoded: number;
+  readonly reused: number;
 }
 
 export interface StageSetArtOptions {
@@ -105,9 +131,10 @@ export interface StageSetArtOptions {
   readonly publicDir: string;
   /** The URL prefix `publicDir` is served under; defaults to the deck lab's flat `art/`. */
   readonly servedPrefix?: string;
+  readonly webRasterCacheDir?: string;
   /** Injectable for the tests, which must not touch the disk. */
   readonly exists?: (path: string) => boolean;
-  readonly copy?: (from: string, to: string) => void;
+  readonly copy?: (from: string, to: string) => PublishedRaster | void;
 }
 
 /** The first candidate that exists, or `null` — a set with no art is normal. */
@@ -157,31 +184,24 @@ function isRemote(href: string): boolean {
   return /^(?:https?:|data:)/i.test(href);
 }
 
-/**
- * The default copy, which also creates the served directory.
- *
- * Creating it here rather than once up front is what lets the tests inject a
- * copy and never touch the disk at all; it also means a manifest with nothing
- * local in it leaves no empty directory behind.
- */
-function copyInto(from: string, to: string): void {
-  mkdirSync(dirname(to), { recursive: true });
-  copyFileSync(from, to);
-}
-
 function localSource(href: string, manifestDir: string): string {
   return isAbsolute(href) ? resolve(href) : resolve(manifestDir, href);
 }
 
 /** Refuses two different inputs that the flat served directory cannot distinguish. */
-function requireUniqueDestinations(manifest: ArtManifest, options: StageSetArtOptions): void {
+function requireUniqueDestinations(
+  manifest: ArtManifest,
+  options: StageSetArtOptions,
+  outputPath: (from: string, to: string) => string,
+): void {
   const sources = new Map<string, string>();
   const prefix = options.servedPrefix ?? ART_DIR;
   for (const variants of Object.values(manifest.art)) {
     for (const entry of variants) {
       if (isRemote(entry.href)) continue;
       const source = localSource(entry.href, options.manifestDir);
-      const served = `${prefix}/${basename(source)}`;
+      const destination = outputPath(source, join(options.publicDir, basename(source)));
+      const served = `${prefix}/${basename(destination)}`;
       const previous = sources.get(served);
       if (previous !== undefined && previous !== source) {
         throw new Error(`${previous} and ${source} both stage as ${served}`);
@@ -219,15 +239,26 @@ function requireUniqueDestinations(manifest: ArtManifest, options: StageSetArtOp
  */
 export function stageSetArt(manifest: ArtManifest, options: StageSetArtOptions): StagedSetArt {
   const exists = options.exists ?? existsSync;
-  const copy = options.copy ?? copyInto;
+  const copy =
+    options.copy ??
+    ((from: string, to: string) =>
+      options.webRasterCacheDir === undefined
+        ? publishWebRaster(from, to)
+        : publishWebRaster(from, to, { cacheDir: options.webRasterCacheDir }));
   const prefix = options.servedPrefix ?? ART_DIR;
-  requireUniqueDestinations(manifest, options);
+  const outputPath = options.copy === undefined ? webRasterOutputPath : (_from: string, to: string) => to;
+  requireUniqueDestinations(manifest, options, outputPath);
 
   const art: Record<string, ArtManifestEntry[]> = {};
   const missing: string[] = [];
   const pending: string[] = [];
   let copied = 0;
   let remote = 0;
+  let bytes = 0;
+  let sourceBytes = 0;
+  let resized = 0;
+  let encoded = 0;
+  let reused = 0;
 
   for (const [cardId, variants] of Object.entries(manifest.art)) {
     const staged: ArtManifestEntry[] = [];
@@ -243,8 +274,15 @@ export function stageSetArt(manifest: ArtManifest, options: StageSetArtOptions):
         continue;
       }
       const name = basename(source);
-      copy(source, join(options.publicDir, name));
-      staged.push({ ...entry, href: `${prefix}/${name}` });
+      const published = copy(source, join(options.publicDir, name));
+      if (published !== undefined) {
+        bytes += published.bytes;
+        sourceBytes += published.sourceBytes;
+        if (published.resized) resized += 1;
+        if (published.encoded) encoded += 1;
+        if (published.reused) reused += 1;
+      }
+      staged.push({ ...entry, href: `${prefix}/${basename(published?.outputPath ?? name)}` });
       copied += 1;
     }
     // A card with nothing left is left out of the manifest entirely rather than
@@ -255,7 +293,18 @@ export function stageSetArt(manifest: ArtManifest, options: StageSetArtOptions):
     else art[cardId] = staged;
   }
 
-  return { manifest: { ...manifest, art }, copied, remote, missing, pending };
+  return {
+    manifest: { ...manifest, art },
+    copied,
+    remote,
+    missing,
+    pending,
+    bytes,
+    sourceBytes,
+    resized,
+    encoded,
+    reused,
+  };
 }
 
 /** `xmp-swamp (illustration 2 of 3, ./xmp-swamp-v2.png)`, for a launcher line. */

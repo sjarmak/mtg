@@ -49,7 +49,11 @@ import {
   RESET_TEXT_LABEL,
   SAVE_FILE_LABEL,
 } from '../../src/routes/deck/DeckFilePanel';
-import { DECK_NAME_LABEL, SAVED_DECKS_TITLE } from '../../src/routes/deck/SavedDecksPanel';
+import {
+  DECK_FILE_TOGGLE_LABEL,
+  DECK_NAME_LABEL,
+  SAVED_DECKS_TITLE,
+} from '../../src/routes/deck/SavedDecksPanel';
 import {
   deckFingerprint,
   partialLoadLabel,
@@ -251,9 +255,18 @@ describe('handing the file to the browser', () => {
 });
 
 /** Opens the Decks tab and presses Build, against whatever pool is passed. */
+/**
+ * The builder, with the decklist text on screen.
+ *
+ * The text box lives behind *Import / Export* now, which is the whole of what
+ * the UI pass changed about it: a sixty-line textarea is the tallest thing on a
+ * deckbuilding screen and is wanted on the day a deck moves between machines.
+ * Every test in this file is about that day, so they all open it.
+ */
 function openBuilder(pool: readonly Card[]): void {
   render(h(DeckRoute, { state: { status: 'absent' as const }, cards: pool }));
   fireEvent.click(screen.getByRole('button', { name: BUILD_LABEL }));
+  fireEvent.click(screen.getByRole('button', { name: DECK_FILE_TOGGLE_LABEL }));
 }
 
 interface ElementLike {
@@ -271,10 +284,27 @@ function asElement(value: unknown): ElementLike {
   return candidate as ElementLike;
 }
 
-function factValue(label: string): string {
-  const value = asElement(screen.getByText(label)).nextElementSibling;
-  if (value === null) throw new Error(`toolbar fact ${label} has no value`);
-  return value.textContent ?? '';
+/**
+ * How many cards have been picked, read off the toolbar's own sentence.
+ *
+ * It used to read a `spells 4/36` fact pair, which `mtg-dcxg.7` took off the
+ * screen: the strip counted the assembled deck and the deck pane counted the
+ * picks, and the two disagreed in front of the reader. The toolbar now prints
+ * one prose line and the deck pane prints the same one, so this parses the two
+ * numbers that are the picks.
+ */
+function pickedCards(): number {
+  // The toolbar and the deck pane print the identical sentence, which is the
+  // point of it; either copy answers this.
+  const [first] = screen.getAllByText(/ of \d+ cards ·/);
+  const line = (first as unknown as { textContent: string | null } | undefined)?.textContent ?? null;
+  if (line === null) throw new Error('the builder states no counts');
+  const creatures = /(\d+) creatures?(?: |$)/.exec(line);
+  const spells = /(\d+) noncreature spells?(?: |$)/.exec(line);
+  if (creatures?.[1] === undefined || spells?.[1] === undefined) {
+    throw new Error(`the builder's count line is not two piles: ${line}`);
+  }
+  return Number(creatures[1]) + Number(spells[1]);
 }
 
 function decklistBox(): ElementLike {
@@ -289,9 +319,11 @@ describe('the file panel on the screen', () => {
       target: { value: subject().name },
     });
     const pool = screen.getByRole('group', { name: 'Playable cards' });
-    const face = within(pool).getAllByRole('button')[0];
-    if (face === undefined) throw new Error('the narrowed pool drew no face');
-    fireEvent.click(face);
+    // The `+` under the face: a click in the collection reads a card and a
+    // double click plays one (`mtg-d0y1`).
+    const step = within(pool).getAllByRole('button', { name: `Play another ${subject().name}` })[0];
+    if (step === undefined) throw new Error('the narrowed pool drew no face');
+    fireEvent.click(step);
     const text = decklistBox().value ?? '';
     expect(text).toContain(`Name: ${DECK_NAME}`);
     expect(text).toContain(`1 ${subject().name} [${subject().id}]`);
@@ -299,14 +331,14 @@ describe('the file panel on the screen', () => {
 
   it('builds a pasted list here, and goes back to following the deck when told to', () => {
     openBuilder(SET);
-    expect(factValue('spells').startsWith('0/')).toBe(true);
+    expect(pickedCards()).toBe(0);
     fireEvent.change(decklistBox() as unknown as Element, {
       target: { value: `Name: ${DECK_NAME}\n2 ${subject().name}\n2 ${subject(1).name}\n` },
     });
     // Not a save: an imported list is on screen and is nobody's saved deck yet.
     expect(screen.getByRole('button', { name: RESET_TEXT_LABEL })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: LOAD_TEXT_LABEL }));
-    expect(factValue('spells').startsWith('4/')).toBe(true);
+    expect(pickedCards()).toBe(4);
     expect(readSavedDecks()).toEqual([]);
     expect(asElement(screen.getByLabelText(DECK_NAME_LABEL)).value).toBe(DECK_NAME);
     expect(screen.queryByRole('button', { name: RESET_TEXT_LABEL })).toBeNull();
@@ -329,13 +361,13 @@ describe('opening what is left of a deck the staged set outgrew', () => {
 
     fireEvent.click(screen.getByRole('button', { name: `Open ${DECK_NAME}` }));
     expect(screen.getByText(new RegExp('no longer holds', 'u'))).toBeTruthy();
-    expect(factValue('spells').startsWith('0/')).toBe(true);
+    expect(pickedCards()).toBe(0);
 
     const repair = screen.getByRole('button', { name: partialLoadLabel(deck, deck.entries.slice(0, 1)) });
     expect(repair).toBeTruthy();
     fireEvent.click(repair);
 
-    expect(factValue('spells').startsWith('3/')).toBe(true);
+    expect(pickedCards()).toBe(3);
     const note = asElement(screen.getByText(new RegExp('Opened 3 of the 5 cards', 'u')));
     expect(note.textContent).toContain(subject().name);
     expect(note.textContent).toContain('is untouched');
@@ -371,7 +403,7 @@ describe('opening what is left of a deck the staged set outgrew', () => {
     openBuilder(thinner);
     fireEvent.click(screen.getByRole('button', { name: `Open ${DECK_NAME}` }));
     // Refused: the staged set is missing a card this deck names.
-    expect(factValue('spells').startsWith('0/')).toBe(true);
+    expect(pickedCards()).toBe(0);
 
     // The download is an anchor carrying a data: URL, so the anchor is the
     // record of what left. Patched rather than mocked, and put back after.
@@ -412,9 +444,14 @@ describe('opening what is left of a deck the staged set outgrew', () => {
 });
 
 describe('the panel is reached from the builder rather than bolted beside it', () => {
-  it('draws the saved list and the file box on the same screen', () => {
-    openBuilder(SET);
+  it('keeps the file box a press away and the saved decks on screen', () => {
+    render(h(DeckRoute, { state: { status: 'absent' as const }, cards: SET }));
+    fireEvent.click(screen.getByRole('button', { name: BUILD_LABEL }));
+    // Saving is the everyday move and stays out; the decklist text is not.
     expect(screen.getByText(SAVED_DECKS_TITLE)).toBeTruthy();
+    expect(screen.queryByLabelText(DECK_TEXT_LABEL)).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: DECK_FILE_TOGGLE_LABEL }));
     expect(screen.getByLabelText(DECK_TEXT_LABEL)).toBeTruthy();
     expect(formatDeckFile('', [], null)).toContain('no mana base was counted out');
   });

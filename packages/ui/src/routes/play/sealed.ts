@@ -19,7 +19,7 @@
  * supports, and which colors it leaves short. That stays in `buildFromSpells`.
  */
 import type { Card, Color } from '@mtg/dsl';
-import { buildDeck, buildFromSpells, openCollatedPool, openSealedPool } from '@mtg/deckbuild';
+import { buildDeck, buildFromSpells, foilPositions, openCollatedPool, openSealedPool } from '@mtg/deckbuild';
 import type { BasicLandCounts, ManualDeck, PackCollation, SealedPool } from '@mtg/deckbuild';
 
 export interface SealedBuild {
@@ -28,6 +28,38 @@ export interface SealedBuild {
   readonly chosen: readonly number[];
   /** The basics the builder counted out, or null while the computed base stands. */
   readonly basics: BasicLandCounts | null;
+  /**
+   * The set the pool was opened from, which is what backs its mana base.
+   *
+   * A pool is six boosters and a set is the printing behind them, and the
+   * difference is `mtg-aqxi.9`: the mana base is built by looking for a printed
+   * Swamp, and looking in six boosters finds one or does not depending on the
+   * seed. When it does not, the builder mints `m11-swamp`, the art manifest is
+   * keyed by the set's `m11-238`, and the board draws a pending frame on every
+   * Swamp for the whole game. So the build carries the set and hands it to
+   * `@mtg/deckbuild` rather than letting the pool stand in for it.
+   *
+   * `null` for a build whose caller has no set to name, which falls back to the
+   * pool exactly as before.
+   */
+  readonly set: readonly Card[] | null;
+  /**
+   * Pool positions dealt off a foil sheet, or `null` where the pool cannot say.
+   *
+   * Positions rather than cards, for the reason the whole module indexes by
+   * position: a foil and an ordinary copy of one card are the same `Card`, and
+   * the difference between them is entirely which slot dealt them. That is what
+   * `mtg-11yd` settled and what a `foil` field on the card would have thrown
+   * away.
+   *
+   * `null` is not "no foils here". `@mtg/deckbuild`'s `foilPositions` declines
+   * for a rarity recipe, which has no foil slot to deal off, and for a collation
+   * that never stated the flag, and a surface has to tell those apart from an
+   * empty list: a pool that took no measurement is not a pool to draw a
+   * foil-versus-ordinary distinction on. A remote room's pool arrives as cards
+   * with no provenance behind them and is `null` for the first reason.
+   */
+  readonly foils: readonly number[] | null;
 }
 
 export interface OpenSealedOptions {
@@ -50,7 +82,13 @@ export function openSealed(set: readonly Card[], seed: string, options: OpenSeal
     options.collation === undefined
       ? openSealedPool(set, { seed })
       : openCollatedPool(set, options.collation, { seed });
-  return { pool: pool.cards, chosen: suggestSelection(pool.cards), basics: null };
+  return {
+    pool: pool.cards,
+    chosen: suggestSelection(pool.cards),
+    basics: null,
+    set,
+    foils: foilPositions(pool.provenance),
+  };
 }
 
 /**
@@ -118,7 +156,8 @@ export function chosenCards(build: SealedBuild): readonly Card[] {
 /** The deck the current selection makes, mana base included. */
 export function deckFor(build: SealedBuild): ManualDeck {
   const spells = chosenCards(build);
+  const config = { set: build.set };
   return build.basics === null
-    ? buildFromSpells(spells, build.pool)
-    : buildFromSpells(spells, build.pool, {}, build.basics);
+    ? buildFromSpells(spells, build.pool, config)
+    : buildFromSpells(spells, build.pool, config, build.basics);
 }

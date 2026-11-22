@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "manalith-mana-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0164:d4b420ed-75b8-4779-aaa2-e245e84202d1"],
+      "decisionFamilies": ["manalith-five-color-mana"],
+      "assertions": [
+        "Manalith produces exactly one W, cannot tap twice, and untaps next turn",
+        "Manalith produces exactly one U, cannot tap twice, and untaps next turn",
+        "Manalith produces exactly one B, cannot tap twice, and untaps next turn",
+        "Manalith produces exactly one R, cannot tap twice, and untaps next turn",
+        "Manalith produces exactly one G, cannot tap twice, and untaps next turn"
+      ],
+      "testFile": "packages/forge-export/test/observed-hou-manalith.integration.test.ts"
+    },
+    {
+      "id": "manalith-mana-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0164:d4b420ed-75b8-4779-aaa2-e245e84202d1"],
+      "decisionFamilies": ["manalith-five-color-mana"],
+      "assertions": [
+        "Forge uses Manalith as its only 'W' source to cast 'Those Who Serve'",
+        "Forge uses Manalith as its only 'U' source to cast 'Ancient Crab'",
+        "Forge uses Manalith as its only 'B' source to cast 'Dune Beetle'",
+        "Forge uses Manalith as its only 'R' source to cast 'Defiant Khenra'",
+        "Forge uses Manalith as its only 'G' source to cast 'Colossapede'"
+      ],
+      "testFile": "packages/forge-export/test/observed-hou-manalith-bot.integration.test.ts"
+    },
+    {
+      "id": "binding-mummy-artifact-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0006:fae54072-ae27-4aae-a2b7-71f4551934f6"],
+      "decisionFamilies": ["binding-mummy-noncreature-artifact-target"],
+      "assertions": [
+        "Binding Mummy taps a noncreature artifact (accept: true)",
+        "Binding Mummy taps a noncreature artifact (accept: false)"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-binding-artifact.integration.test.ts"
+    }
+  ]
+}

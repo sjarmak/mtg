@@ -17,7 +17,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { Card } from '@mtg/dsl';
-import { cartesian, legalActions, playerOf, scenario, validateAction } from '@mtg/kernel';
+import type { GameState } from '@mtg/kernel';
+import { cartesian, legalActions, pendingDecision, playerOf, scenario, validateAction } from '@mtg/kernel';
 import { creature, instant, ISLAND } from './cards';
 
 /** Two targeted effects, so a cast of it needs two filled target slots. */
@@ -118,5 +119,44 @@ describe('a capped legal-action list', () => {
     for (const action of options) {
       expect(validateAction(start.state, action)).toBeNull();
     }
+  });
+
+  it('remains complete when the cast space exactly fits the cap', () => {
+    const effect = { kind: 'gainLife', amount: 1, target: { kind: 'noTarget' } } as const;
+    const exact = instant('Test Exact Capped Cast', [effect], { generic: 0 });
+    const start = scenario({ hands: [[exact], []] });
+
+    const decision = pendingDecision(start.state, 1);
+    expect(decision).toEqual(expect.objectContaining({ kind: 'priority', complete: true }));
+    expect(decision?.options.filter((action) => action.type === 'castSpell')).toHaveLength(1);
+  });
+
+  it('stops the whole cast product once overflow proves the global result cap bit', () => {
+    const effect = { kind: 'gainLife', amount: 1, target: { kind: 'noTarget' } } as const;
+    const first = instant('Test First Capped Cast', [effect], { generic: 0 });
+    const overflow = instant('Test Overflow Capped Cast', [effect], { generic: 0 });
+    const unreachable = instant('Test Unreachable Capped Cast', [effect], { generic: 0 });
+    const start = scenario({ hands: [[first, overflow, unreachable], []] });
+    const overflowOid = playerOf(start.state, 0).hand[1] ?? '';
+    const unreachableOid = playerOf(start.state, 0).hand[2] ?? '';
+    let overflowReads = 0;
+    let unreachableReads = 0;
+    const state: GameState = {
+      ...start.state,
+      turn: { ...start.state.turn, active: 1, priority: 0 },
+      objects: new Proxy(start.state.objects, {
+        get(target, property, receiver): unknown {
+          if (property === overflowOid) overflowReads += 1;
+          if (property === unreachableOid) unreachableReads += 1;
+          return Reflect.get(target, property, receiver);
+        },
+      }),
+    };
+
+    const decision = pendingDecision(state, 1);
+    expect(decision).toEqual(expect.objectContaining({ kind: 'priority', complete: false }));
+    expect(decision?.options.filter((action) => action.type === 'castSpell')).toHaveLength(1);
+    expect(overflowReads).toBeGreaterThan(0);
+    expect(unreachableReads).toBe(0);
   });
 });

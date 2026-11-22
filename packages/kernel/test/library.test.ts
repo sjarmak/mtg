@@ -26,6 +26,7 @@ import {
   stateFingerprint,
   validateAction,
 } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { artifact, creature, FOREST, ISLAND, lands, sorcery } from './cards';
 import { apply, handOidOf, oidOf } from './helpers';
 
@@ -438,7 +439,11 @@ describe('search replay', () => {
     const asked = resolveSpell(searchScenario(), BORDERLAND.name);
     const decision = pendingDecision(asked.state);
     if (decision?.kind !== 'searchLibrary') throw new Error('a search was not pending');
-    const chosen = simpleAgent('finder').decide({ state: asked.state, player: 0, decision });
+    const chosen = simpleAgent('finder').decide({
+      state: observeState(asked.state, 0, 'test/library.test.ts:441'),
+      player: 0,
+      decision,
+    });
     expect(chosen).toEqual({ type: 'searchLibrary', player: 0, found: decision.cards[0] });
     expect(apply(asked, chosen).state.turn.awaiting).toBeNull();
   });

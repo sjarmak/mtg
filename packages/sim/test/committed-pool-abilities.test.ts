@@ -19,7 +19,7 @@
  * `tideglass-reach` are pinned to what it is: `sealed-calibration.test.ts` needs
  * six packs a side off a real rarity distribution, and `closing.test.ts` mirrors
  * the balance gate's own decks and seed so its closure bands mean what the gate
- * means by them. A twelve-card shape corpus is not a replacement for a
+ * means by them. A small shape corpus is not a replacement for a
  * ninety-card set and swapping one in would break the claim each of those files
  * makes. What was missing was a committed pool that prints the shapes at all, so
  * that is what `lantern-fen.set.json` is, and this is the gate that opens it.
@@ -41,6 +41,16 @@ import { describe, expect, it } from 'vitest';
 import type { Card, CardShape } from '@mtg/dsl';
 import { missingShapes, parseCards, validateCard } from '@mtg/dsl';
 import type { DeckList } from '@mtg/kernel';
+import {
+  applyDamage,
+  beginTrace,
+  eventsOfType,
+  pendingDecision,
+  reduce,
+  scenario,
+  settle,
+  spellCardByOid,
+} from '@mtg/kernel';
 import type { ActivationCensus, GameOutcome, TriggerCensus } from '@mtg/sim';
 import {
   agentSeed,
@@ -58,9 +68,9 @@ const RUN_SEED = 'lantern-fen/abilities';
 const GAMES = 12;
 
 /**
- * The shapes this pool exists to print. Seven of them were printed by no
- * committed set in the repository until it landed, and the three ability kinds
- * were printed by no *public* one.
+ * The shapes this pool exists to print. Several were printed by no committed
+ * set in the repository until this corpus landed, and the three model-facing
+ * ability kinds were printed by no *public* one.
  */
 const REQUIRED: readonly CardShape[] = [
   'land',
@@ -74,6 +84,8 @@ const REQUIRED: readonly CardShape[] = [
   'keywordAbility',
   'costReduction',
   'entersTapped',
+  'battle',
+  'doubleFaced',
 ];
 
 function pool(): readonly Card[] {
@@ -178,6 +190,53 @@ describe('the committed ability pool', () => {
     }
   });
 
+  it('plays the committed transforming Siege through defeat and its back face', () => {
+    const front = card('lnf-lantern-siege');
+    if (front.kind !== 'battle' || front.backFace === undefined) {
+      throw new Error('the committed Siege lost its transforming face');
+    }
+    const opened = scenario({ battlefield: [{ card: front, controller: 1 }] });
+    const oid = opened.state.battlefield.find((entry) => opened.state.objects[entry]?.card.id === front.id);
+    if (oid === undefined) throw new Error('the committed Siege did not enter the battlefield');
+
+    let current = settle(
+      applyDamage(beginTrace(opened.state), [
+        {
+          sourceOid: 'committed-pool-probe',
+          controller: 0,
+          recipient: { kind: 'permanent', oid },
+          amount: front.defense,
+          deathtouch: false,
+          lifelink: false,
+          combat: false,
+          preventable: true,
+        },
+      ]),
+    );
+    expect(eventsOfType(current.events, 'battleDefeated').map((event) => event.oid)).toStrictEqual([oid]);
+
+    for (let pass = 0; pass < 2; pass += 1) {
+      const priority = pendingDecision(current.state);
+      if (priority?.kind !== 'priority') throw new Error('Siege defeat opened no priority window');
+      current = reduce(current.state, { type: 'passPriority', player: priority.player });
+    }
+    const freeCast = pendingDecision(current.state);
+    if (freeCast?.kind !== 'freeCast') throw new Error('Siege defeat offered no transformed cast');
+    const cast = freeCast.options.find((action) => action.type === 'castSpell');
+    if (cast?.type !== 'castSpell') throw new Error('Siege defeat offered no cast action');
+    current = reduce(current.state, cast);
+    expect(spellCardByOid(current.state, oid)?.name).toBe(front.backFace.name);
+
+    for (let pass = 0; pass < 2; pass += 1) {
+      const priority = pendingDecision(current.state);
+      if (priority?.kind !== 'priority') throw new Error('transformed spell opened no priority window');
+      current = reduce(current.state, { type: 'passPriority', player: priority.player });
+    }
+    expect(current.state.objects[oid]?.zone).toBe('battlefield');
+    expect(current.state.objects[oid]?.faceCard?.name).toBe(front.backFace.name);
+    expect(eventsOfType(current.events, 'permanentEntered').map((event) => event.oid)).toContain(oid);
+  });
+
   it('deals decks that carry the abilities, so a game could reach them', () => {
     for (const deck of DECKS) {
       expect(deck.cards).toHaveLength(40);
@@ -188,7 +247,9 @@ describe('the committed ability pool', () => {
 
   it('plays every game to a real result', () => {
     for (const outcome of OUTCOMES) {
-      expect(['lifeZero', 'emptyLibrary', 'concede', 'turnLimit']).toContain(outcome.reason);
+      expect(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']).toContain(
+        outcome.reason,
+      );
       expect(outcome.turns).toBeGreaterThan(0);
     }
   });

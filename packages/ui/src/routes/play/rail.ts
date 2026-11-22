@@ -115,10 +115,11 @@
  * declaration space, is the property that mattered — **every enumerated
  * declaration is reachable, and each submits its own index.** The labeled group
  * stays, its name stays, and every entry is still a real focusable button.
- * Everything the kernel asks that is *not* one of those two decisions is
- * untouched and still lists one button per option.
+ * Everything the kernel asks that is *not* one of those two decisions still
+ * lists one button per option, except a bounded text decision: that has no
+ * honest option list and draws the descriptor's input plus one submit button.
  */
-import { createElement } from 'react';
+import { createElement, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { Beat, BeatKind, Choice, DepartureZone, GameState, PlayerId, SessionView } from '@mtg/kernel';
 import { describeResult, listPhrase } from '../../log/narrate';
@@ -130,6 +131,7 @@ import { orderPanel } from './order-panel';
 import type { SeatNames } from './position';
 import { TARGET_ARROW } from './prompt';
 import type { PlayChoice, PlayPrompt } from './prompt';
+import type { TriggerYieldControl } from './trigger-yields';
 import type { DeclarationControl, OrderControl } from './selection';
 
 /** The accessible name of the container holding every currently legal move. */
@@ -181,14 +183,6 @@ const GROUP_ORDER: readonly { readonly title: string; readonly kinds: readonly P
  * open or shut — so nothing became unreachable in either state, and `passIndex`,
  * the fixed button and the space key all still take the index the kernel handed
  * out.
- *
- * Filtered here rather than dropped from `GROUP_ORDER`, because a kind that is
- * in no group falls through to the `Other` bucket at the foot of `choiceGroups`
- * and would come straight back under a worse heading. `concede` keeps the `Turn`
- * group it always had: `@mtg/kernel`'s `legal.ts` deliberately never enumerates
- * it — it is always legal and validated rather than listed — so that group draws
- * in no position the kernel produces today, and it is the home the kind would
- * take if one ever did.
  */
 const UNLISTED: readonly PlayChoice['kind'][] = ['passPriority'];
 
@@ -366,13 +360,46 @@ function choiceGroup(
   );
 }
 
-function choiceGroups(prompt: PlayPrompt, onChoose: (index: number) => void): readonly ReactNode[] {
+/** A group of the enumeration, as the list draws it and as the head names it. */
+interface ChoiceGroup {
+  readonly title: string;
+  readonly members: readonly PlayChoice[];
+}
+
+/**
+ * How the enumeration divides, derived once for both the sections and the line
+ * above them.
+ *
+ * One derivation because the head's line is a promise about the body: a group
+ * named up there with no section under it is a scroll that ends in nothing, and
+ * a section down there the line never mentioned is the defect `mtg-euc`
+ * measured. Two copies of `GROUP_ORDER`'s filter would be two chances for those
+ * to disagree, and the disagreement is invisible until somebody scrolls.
+ */
+function choiceGroupsOf(prompt: PlayPrompt): readonly ChoiceGroup[] {
   // The enumeration less the kind that has a fixed home of its own; `UNLISTED`
   // carries the ruling and the reversal it is. Filtered once, here, so the
   // grouped pass below and the ungrouped fallback under it cannot disagree about
   // which choices the list is drawing.
   const listed = prompt.choices.filter((choice) => !UNLISTED.includes(choice.kind));
-  if (listed.length === 0)
+  const groups: ChoiceGroup[] = [];
+  const placed = new Set<number>();
+  for (const group of GROUP_ORDER) {
+    const members = listed.filter((choice) => group.kinds.includes(choice.kind));
+    if (members.length === 0) continue;
+    for (const member of members) placed.add(member.index);
+    groups.push({ title: group.title, members });
+  }
+  // Anything a future action type adds still reaches the screen rather than
+  // silently vanishing because nobody updated GROUP_ORDER.
+  const ungrouped = listed.filter((choice) => !placed.has(choice.index));
+  if (ungrouped.length > 0) groups.push({ title: 'Other', members: ungrouped });
+  return groups;
+}
+
+function choiceGroups(prompt: PlayPrompt, onChoose: (index: number) => void): readonly ReactNode[] {
+  const groups = choiceGroupsOf(prompt);
+  if (groups.length === 0)
     return prompt.choices.length === 0
       ? []
       : [
@@ -382,19 +409,69 @@ function choiceGroups(prompt: PlayPrompt, onChoose: (index: number) => void): re
             ONLY_PASS_NOTE,
           ),
         ];
-  const groups: ReactNode[] = [];
-  const placed = new Set<number>();
-  for (const group of GROUP_ORDER) {
-    const members = listed.filter((choice) => group.kinds.includes(choice.kind));
-    if (members.length === 0) continue;
-    for (const member of members) placed.add(member.index);
-    groups.push(choiceGroup(group.title, group.title, members, onChoose));
-  }
-  // Anything a future action type adds still reaches the screen rather than
-  // silently vanishing because nobody updated GROUP_ORDER.
-  const ungrouped = listed.filter((choice) => !placed.has(choice.index));
-  if (ungrouped.length > 0) groups.push(choiceGroup('other', 'Other', ungrouped, onChoose));
-  return groups;
+  return groups.map((group) => choiceGroup(group.title, group.title, group.members, onChoose));
+}
+
+/**
+ * The class the group index is found by, exported because it is how the tests
+ * reach it: the line is `aria-hidden`, so no role or name query finds it.
+ */
+export const ASK_INDEX_CLASS = 'mtg-prompt__index';
+
+/**
+ * What the panel head says about the list under it (`mtg-euc`).
+ *
+ * The measurement: sixteen legal moves at four viewports, 9 of them on screen at
+ * 1440x900, 7 at 1280x800, 5 at 1024x768 and 7 at 810x1080, and under
+ * `@media (pointer: coarse)` — where `styles/touch.ts` floors a move button at
+ * 44px — 2 of 17 at 1024x768. Nothing was clipped and the column scrolled; what
+ * a player could not see was that a `Mana` section existed, because the only
+ * group heading above the fold was the first one.
+ *
+ * A taller column is not on offer, since the height is the board's. So the shape
+ * of the list is printed where the fold cannot reach it: the head is outside the
+ * scroller (`styles/views.ts` gives `.mtg-prompt .mtg-panel__head` `flex: none`).
+ *
+ * **It takes the count's slot rather than a line of its own, and that is a
+ * measurement rather than a preference.** `../../../test/play/ask-fold.browser.test.ts`
+ * reads the body on a seventeen-move priority that divides `Play 13 · Mana 4`.
+ * On its own row it cost a move at the two narrow desktop widths; in the count's
+ * slot it fits beside the headline down to a 174px column and wraps below one,
+ * which is 3 moves visible against 4 at 1024x768 and no change at all at
+ * 1280x800, 1440x900 or 810x1080. One move, at one rig, for the difference
+ * between a player who knows there is mana below and one who does not.
+ *
+ * The count it displaces is still rendered and still spoken — `styles/views.ts`
+ * hides `.mtg-prompt__count` visually while an index is drawn — and it comes
+ * back on screen under `SHORT_VIEWPORT_QUERY`, because a phone held sideways has
+ * 38.78px of body under a 44px move floor and a two-line head there is the
+ * difference between one move and none. The number the index does not carry is
+ * the sum, which is one addition away and was already not the count of what the
+ * list draws: `UNLISTED` keeps the pass out of the sections and not out of the
+ * note.
+ *
+ * Drawn only when the list divides more than one way. `Play 7` over a body whose
+ * only section is `Play` repeats the heading below it, and there the count is
+ * the more useful of the two.
+ *
+ * `aria-hidden`, for the reason the play rail's second copy of the stack is:
+ * every word of it is already in the accessible tree as the group headings and
+ * the count, and announcing the shape of the list before the first move puts a
+ * summary between a screen-reader user and the thing they came for.
+ *
+ * What this does not fix, and it is half of `mtg-euc`: at 1024x768 under a
+ * coarse pointer the same board shows **one** whole move whatever the head says.
+ * A 44px floor in a 276px scroller is arithmetic, and the table in the browser
+ * test records it rather than leaving it to be rediscovered.
+ */
+function askIndex(prompt: PlayPrompt): ReactElement | null {
+  const groups = choiceGroupsOf(prompt);
+  if (groups.length < 2) return null;
+  return createElement(
+    'span',
+    { className: `mtg-panel__note ${ASK_INDEX_CLASS}`, 'aria-hidden': true },
+    groups.map((group) => `${group.title} ${String(group.members.length)}`).join(' · '),
+  );
 }
 
 /**
@@ -417,8 +494,12 @@ function railBody(
   declaration: DeclarationControl | null,
   ordering: OrderControl | null,
 ): readonly ReactNode[] {
+  const concede = prompt.choices.filter((choice) => choice.kind === 'concede');
+  const turn = concede.length === 0 ? [] : [choiceGroup('Turn', 'Turn', concede, onChoose)];
+  if (prompt.textInput !== null)
+    return [createElement(TextAnswer, { input: prompt.textInput, onChoose }), ...turn];
   if (declaration === null)
-    return ordering === null ? choiceGroups(prompt, onChoose) : orderBody(ordering, onChoose);
+    return ordering === null ? choiceGroups(prompt, onChoose) : [...orderBody(ordering, onChoose), ...turn];
   return [
     declarePanel({
       plan: declaration.plan,
@@ -433,7 +514,52 @@ function railBody(
       onClear: declaration.clear,
       onSubmit: onChoose,
     }),
+    ...turn,
   ];
+}
+
+/** A controlled input for the one legal-answer domain that cannot be listed. */
+function TextAnswer(props: {
+  readonly input: NonNullable<PlayPrompt['textInput']>;
+  readonly onChoose: (choice: Choice) => void;
+}): ReactElement {
+  const [value, setValue] = useState('');
+  const answer = value.trim();
+  const valid = answer.length >= props.input.minLength && answer.length <= props.input.maxLength;
+  return createElement(
+    'form',
+    {
+      className: 'mtg-choices__text',
+      onSubmit: (event: { preventDefault(): void }): void => {
+        event.preventDefault();
+        if (!valid) return;
+        props.onChoose({ type: 'chooseCardName', player: props.input.player, name: answer });
+      },
+    },
+    createElement(
+      'label',
+      { className: 'mtg-choices__group-title', htmlFor: 'mtg-card-name' },
+      props.input.label,
+    ),
+    createElement('input', {
+      // `mtg-input` is what draws a text field here and what
+      // `../../styles/touch.ts` floors at 44px under a coarse pointer. Without
+      // it this was a raw user-agent field on a phone, under a stated floor.
+      // `mtg-21s0`.
+      className: 'mtg-input',
+      id: 'mtg-card-name',
+      name: 'card-name',
+      type: 'text',
+      value,
+      minLength: props.input.minLength,
+      maxLength: props.input.maxLength,
+      autoComplete: 'off',
+      onChange: (event: { currentTarget: { value: string } }): void => {
+        setValue(event.currentTarget.value);
+      },
+    }),
+    createElement('button', { type: 'submit', className: 'mtg-btn', disabled: !valid }, 'Choose name'),
+  );
 }
 
 function orderBody(ordering: OrderControl, onChoose: (choice: Choice) => void): readonly ReactNode[] {
@@ -449,13 +575,135 @@ function orderBody(ordering: OrderControl, onChoose: (choice: Choice) => void): 
   ];
 }
 
+const ANCHORED_CHOICE_MAX = 3;
+
+/** Every kind `GROUP_ORDER` has a home for, flattened once for `anchoredChoices`. */
+const GROUPED_KINDS: readonly PlayChoice['kind'][] = GROUP_ORDER.flatMap((group) => group.kinds);
+
+/**
+ * The options of a prompt that is a decision rather than a list of moves, or
+ * null when it is a list of moves.
+ *
+ * It is also where the `OTHER` in her photograph goes: a two-way decision falls
+ * into `choiceGroups`'s ungrouped bucket, which draws a section heading, and a
+ * section heading over the entire prompt divides the list into one part. In the
+ * foot there is no group to name and none is drawn. The heading is left alone
+ * everywhere else on purpose — it was tried as a general rule, that the bucket
+ * is unlabeled whenever it is the only block, and
+ * `../../../test/play/stack-seam.browser.test.ts` caught what that costs: a
+ * priority window whose whole enumeration lands in that bucket changes height
+ * by one heading when a spell goes on the stack, which moves every card on the
+ * battlefield under it. The prompt whose actions are anchored is the one whose
+ * heading can go, because both changes are the same claim about the same
+ * prompt: it is a decision and not a menu.
+ *
+ * `mtg-aqxi.14`. the playtester played the opening hand on a phone held sideways and
+ * got a box she had to scroll inside to reach either answer: the panel is
+ * capped at 46% of the lanes (`../../styles/board/ask-flyout.ts`) and its head,
+ * its sentence and its two buttons wanted more than that, so the buttons were
+ * the part that fell below the fold. Measured at 844x390 in
+ * chrome-headless-shell before the fix: 184px of panel content in a 171.11px
+ * box, 15px of it scrolled, and `Mulligan` 9.52px under the bottom edge. After
+ * it the whole box is 121.69px and neither answer is under anything. Spec
+ * section 11 is the rule that settles it — a region may scroll, a primary
+ * control may not — so these two move out of the scroller and into a foot that
+ * is drawn whatever the sentence above them does.
+ */
+function anchoredChoices(prompt: PlayPrompt): readonly PlayChoice[] | null {
+  const listed = prompt.choices.filter((choice) => !UNLISTED.includes(choice.kind));
+  if (listed.length === 0 || listed.length > ANCHORED_CHOICE_MAX) return null;
+  const nonConcede = listed.filter((choice) => choice.kind !== 'concede');
+  if (nonConcede.length === 0 || nonConcede.some((choice) => GROUPED_KINDS.includes(choice.kind)))
+    return null;
+  return listed;
+}
+
+/**
+ * The name of the two controls that settle an optional trigger's answer.
+ *
+ * A group of its own rather than two more entries in the legal moves: these are
+ * not moves. `LEGAL_MOVES_LABEL` names the set the kernel enumerated, and a
+ * player choosing from it must be choosing among things the kernel offered — a
+ * setting that happens to also take one of them would be the third button in a
+ * two-button decision, and the count in the head would disagree with the list.
+ */
+export const TRIGGER_YIELD_LABEL = 'Always answer this ability';
+
+/**
+ * "Always take" and "Always decline", drawn only at an optional trigger.
+ *
+ * Both do two things at once and say so in one word: the ability is answered
+ * now and the answer is kept. There is no pressed state to draw, because a
+ * settled answer is why this prompt does not appear — reaching this panel is
+ * itself the proof that no yield covers this ability.
+ *
+ * The visible half is short and the spoken half is the sentence, which is
+ * `choice-button.ts`'s rule and WCAG 2.5.3's: the name leads with the words on
+ * the button, then adds the ability the eye reads off the headline above.
+ */
+function triggerYieldGroup(control: TriggerYieldControl): ReactElement {
+  return createElement(
+    'div',
+    { className: 'mtg-choices__yield', role: 'group', 'aria-label': TRIGGER_YIELD_LABEL },
+    ...[
+      { accept: true, text: 'Always take' },
+      { accept: false, text: 'Always decline' },
+    ].map((option) =>
+      createElement(
+        'button',
+        {
+          key: String(option.accept),
+          type: 'button',
+          className: 'mtg-btn',
+          'aria-label': `${option.text} ${control.label}`,
+          onClick: (): void => {
+            control.onYield(option.accept);
+          },
+        },
+        option.text,
+      ),
+    ),
+    // Where the other half of the control is. A setting that can only be turned
+    // on is a trap, and the place it is turned off is behind a disclosure two
+    // panels away, so this line is the only thing on screen that connects them.
+    createElement(
+      'p',
+      { className: 'mtg-choices__yield-note' },
+      'Kept until you clear it in the auto-pass settings.',
+    ),
+  );
+}
+
+/**
+ * The one labeled group around every move on offer, wherever it is drawn.
+ *
+ * A single function because there is exactly one of these on the panel and the
+ * contract at the top of this file is about its two attributes. It moves
+ * between the scrolling body and the anchored foot, and a second one written at
+ * the other site would be two groups with one name — which a screen reader
+ * announces as two sets to choose from at a decision that has one.
+ */
+function choicesGroup(children: readonly ReactNode[]): ReactElement {
+  return createElement(
+    'div',
+    { className: 'mtg-choices', role: 'group', 'aria-label': LEGAL_MOVES_LABEL },
+    ...children,
+  );
+}
+
 export function promptPanel(
   prompt: PlayPrompt,
   onChoose: (choice: Choice) => void,
   decisions: number,
   declaration: DeclarationControl | null = null,
   ordering: OrderControl | null = null,
+  triggerYield: TriggerYieldControl | null = null,
 ): ReactElement {
+  // A builder owns the whole panel when it is drawn — a declaration roster and a
+  // blocker ordering both carry their own confirm — so neither can also be a
+  // two-way decision, and asking is how this stays true if one ever offers two
+  // options.
+  const anchored = declaration === null && ordering === null ? anchoredChoices(prompt) : null;
   return createElement(
     'section',
     { className: 'mtg-panel mtg-prompt' },
@@ -463,7 +711,26 @@ export function promptPanel(
       'div',
       { className: 'mtg-panel__head' },
       createElement('span', { className: 'mtg-panel__title' }, prompt.headline),
-      createElement('span', { className: 'mtg-panel__note' }, `${String(prompt.choices.length)} legal`),
+      // The division of the list, in the slot the count had: the ask column is
+      // 155.1px at 1024x768 and its body shows four moves there, so a second
+      // line in the head is a quarter of the enumeration.
+      //
+      // A declaration, an ordering and a text answer are one move being
+      // assembled rather than an enumeration to find your way around, and none
+      // of them draws the sections the index names, so at those the slot holds
+      // the count alone.
+      prompt.textInput === null && declaration === null && ordering === null ? askIndex(prompt) : null,
+      // And the count itself, always rendered and drawn only where the index is
+      // not: `styles/views.ts` hides it beside a drawn index and draws it in the
+      // one place the index is not affordable, which is a phone held sideways —
+      // 38.78px of body under a 44px move floor, so a two-line head there is the
+      // difference between one move and none. It is the spoken one at every
+      // width, since the index is `aria-hidden`.
+      createElement(
+        'span',
+        { className: 'mtg-panel__note mtg-prompt__count' },
+        prompt.textInput === null ? `${String(prompt.choices.length)} legal` : 'Free text',
+      ),
     ),
     createElement(
       'div',
@@ -486,19 +753,39 @@ export function promptPanel(
         ? createElement(
             'p',
             { className: 'mtg-prompt__warning', role: 'note' },
-            'The kernel capped this enumeration, so some legal moves are not listed.',
+            prompt.truncationWarning ??
+              'The kernel capped this enumeration, so some legal moves are not listed.',
           )
         : null,
       // One labeled group around every move on offer. A screen reader announces
       // the set the player is choosing from, and it gives the surface a single
       // handle for "the legal moves right now" that is not a CSS class. The
       // contract at the top of this file is about exactly these two attributes.
-      createElement(
-        'div',
-        { className: 'mtg-choices', role: 'group', 'aria-label': LEGAL_MOVES_LABEL },
-        ...railBody(prompt, onChoose, declaration, ordering),
-      ),
+      // At a two-way decision it is in the foot below instead, which moves the
+      // group without splitting it.
+      anchored === null ? choicesGroup(railBody(prompt, onChoose, declaration, ordering)) : null,
+      // The yield, in the scrolling body and never in the anchored foot. It is
+      // the one control here that is not an answer to the question, so it is
+      // also the one that may fall below a fold: the rule `anchoredChoices`
+      // argues is that a *primary* control may not, and a player who cannot
+      // reach this one has lost a setting rather than a move.
+      triggerYield === null ? null : triggerYieldGroup(triggerYield),
     ),
+    // The foot, outside the scroller: `anchoredChoices` above argues which
+    // prompts get one and what a phone measured without it.
+    anchored === null
+      ? null
+      : createElement(
+          'div',
+          { className: 'mtg-prompt__foot' },
+          choicesGroup([
+            createElement(
+              'div',
+              { key: 'anchored', className: 'mtg-choices__list' },
+              ...anchored.map((choice) => choiceButton(choice, onChoose)),
+            ),
+          ]),
+        ),
   );
 }
 
@@ -568,11 +855,11 @@ const DEPARTURE_CLAUSES: Readonly<Record<DepartureZone, readonly [one: string, m
  * because that is who is reading it: "your attack" and "their attack" are the
  * same event and the wrong one is worse than none. `names` supplies the words,
  * for the reason every other string on this surface stopped saying "you" —
- * two people can share this screen and a pronoun resolves against whoever is
- * holding it.
+ * a two-human table names both seats and a pronoun would resolve against
+ * whichever of them is being asked.
  *
  * The verb then has to agree with the word `names` supplied, which is the half
- * this got wrong: the hot-seat launcher calls the near seat `You`, that seat
+ * this got wrong: the launcher calls the near seat `You`, that seat
  * attacks first in a sealed game, and the first sentence a player ever saw here
  * was `You is attacking with 4 creatures.` (`mtg-1ih`). `log/narrate.ts` had
  * already worked the rule out for the log — the label decides, so it stays
@@ -585,8 +872,8 @@ const DEPARTURE_CLAUSES: Readonly<Record<DepartureZone, readonly [one: string, m
  * own losses would leave the other half of a trade to be inferred from a board
  * that no longer has it on. So every death in the halt is named as its
  * controller's — `your Emberflow Raider`, `Bot's Emberflow Raider` — through the
- * same `ownedName` the log points with, and a hotseat table reads correctly for
- * whichever of the two people is holding the screen. `ownedName` rather than
+ * same `ownedName` the log points with, and a two-human table reads correctly
+ * from either seat. `ownedName` rather than
  * `targetName` because the twin qualifier is read off the board *now* and the
  * permanent this sentence is about has already left it.
  */
@@ -687,28 +974,19 @@ const BEAT_TITLES: Readonly<Record<BeatKind, string>> = {
  * nothing — so a control inside the group naming the legal moves would be
  * claiming a move that does not exist.
  */
-export function beatPanel(
-  beat: Beat,
-  state: GameState,
-  names: SeatNames,
-  onContinue: () => void,
-): ReactElement {
+export function presentedBeatPanel(kind: BeatKind, sentence: string, onContinue: () => void): ReactElement {
   return createElement(
     'section',
     { className: 'mtg-panel mtg-prompt' },
     createElement(
       'div',
       { className: 'mtg-panel__head' },
-      createElement('span', { className: 'mtg-panel__title' }, BEAT_TITLES[beat.kind]),
+      createElement('span', { className: 'mtg-panel__title' }, BEAT_TITLES[kind]),
     ),
     createElement(
       'div',
       { className: 'mtg-panel__body' },
-      createElement(
-        'p',
-        { className: 'mtg-prompt__explain', role: 'status' },
-        beatSentence(beat, state, names),
-      ),
+      createElement('p', { className: 'mtg-prompt__explain', role: 'status' }, sentence),
       createElement(
         'button',
         { type: 'button', className: 'mtg-btn', 'data-variant': 'primary', onClick: onContinue },
@@ -716,6 +994,16 @@ export function beatPanel(
       ),
     ),
   );
+}
+
+/** The kernel-backed beat translated through the shared beat presentation. */
+export function beatPanel(
+  beat: Beat,
+  state: GameState,
+  names: SeatNames,
+  onContinue: () => void,
+): ReactElement {
+  return presentedBeatPanel(beat.kind, beatSentence(beat, state, names), onContinue);
 }
 
 /**

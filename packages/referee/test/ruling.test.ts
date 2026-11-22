@@ -59,6 +59,7 @@ describe('selecting the ruled action', () => {
     // blockers are owed. Reaching validateAction rather than trusting the list
     // is what makes a stale or hand-built decision safe to rule on.
     const illegal: Action = { type: 'discard', player: view.player, oids: [] };
+    if (view.decision.kind !== 'declareBlockers') throw new Error('blocking view lost its decision kind');
     const decision: Decision = { ...view.decision, options: [illegal] };
     expect(validateAction(view.state, illegal)).not.toBeNull();
 
@@ -80,6 +81,7 @@ describe('selecting the ruled action', () => {
     const other = opponentOf(view.player);
     const wrongSeat: Action = { type: 'concede', player: other };
     expect(validateAction(view.state, wrongSeat)).toBeNull();
+    if (view.decision.kind !== 'declareBlockers') throw new Error('blocking view lost its decision kind');
     const decision: Decision = { ...view.decision, options: [wrongSeat] };
 
     const selection = selectRuledAction({ ...view, decision }, { optionIndex: 0, rationale: 'wrong seat' });

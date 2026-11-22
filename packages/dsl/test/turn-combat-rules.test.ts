@@ -68,10 +68,12 @@ describe('containment: hand-authored vocabulary the model cannot name', () => {
     }
   });
 
-  it('lands after the member that was last when the pair arrived', () => {
+  it('keeps the hand-authored turn-combat family contiguous', () => {
     const kinds: readonly string[] = UNPRICED_EFFECT_KINDS;
     expect(kinds.indexOf('cantBeBlockedThisTurn')).toBe(kinds.indexOf('grantKeywordUntilEndOfTurn') + 1);
-    expect(kinds.indexOf('attacksYouThisTurnIfAble')).toBe(kinds.indexOf('cantBeBlockedThisTurn') + 1);
+    expect(kinds.indexOf('cantBlockThisTurn')).toBe(kinds.indexOf('cantBeBlockedThisTurn') + 1);
+    expect(kinds.indexOf('blocksThisTurnIfAble')).toBe(kinds.indexOf('cantBlockThisTurn') + 1);
+    expect(kinds.indexOf('attacksYouThisTurnIfAble')).toBe(kinds.indexOf('blocksThisTurnIfAble') + 1);
   });
 });
 
@@ -116,8 +118,13 @@ describe('the printed sentence', () => {
 });
 
 describe('what a card may aim each at', () => {
-  it('states one slot each, and they are different slots', () => {
-    expect(legalTargetsFor('cantBeBlockedThisTurn')).toStrictEqual(['targetCreature']);
+  it('keeps self-evasion hand-authored while the lure uses its own target slot', () => {
+    expect(legalTargetsFor('cantBeBlockedThisTurn')).toStrictEqual([
+      'targetCreature',
+      'targetCreatureYouControl',
+      'selfCreature',
+      'thatCreature',
+    ]);
     expect(legalTargetsFor('attacksYouThisTurnIfAble')).toStrictEqual(['targetCreatureYouDontControl']);
   });
 

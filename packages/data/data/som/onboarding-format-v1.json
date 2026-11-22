@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "som",
+  "name": "Scars of Mirrodin",
+  "sourceCodes": ["SOM"],
+  "products": [{ "id": "som-draft", "setCode": "SOM", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["som-draft", "som-draft", "som-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["som-draft", "som-draft", "som-draft", "som-draft", "som-draft", "som-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

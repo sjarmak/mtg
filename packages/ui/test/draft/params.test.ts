@@ -7,19 +7,41 @@ import {
   encodePickLog,
   readDraftInputs,
 } from '../../src/routes/draft/params';
+import { DEFAULT_NATIVE_DRAFT_BOT_POLICY, DRAFTMANCER_SIMPLE_BOT_POLICY } from '@mtg/draft-export';
 
 describe('draft route input boundary', () => {
   it('round-trips a bounded seed and pick transcript', () => {
     const picks = ['set-one', 'set-two'];
-    expect(readDraftInputs({ seed: 'draft/one', picks: encodePickLog(picks) }, 'fallback')).toEqual({
+    expect(
+      readDraftInputs(
+        { seed: 'draft/one', picks: encodePickLog(picks), bot: DEFAULT_NATIVE_DRAFT_BOT_POLICY },
+        'fallback',
+      ),
+    ).toEqual({
       ok: true,
       seed: 'draft/one',
       picks,
+      botPolicy: DEFAULT_NATIVE_DRAFT_BOT_POLICY,
     });
   });
 
+  it('replays links without a policy under the legacy bot and rejects unknown policies', () => {
+    expect(readDraftInputs({ seed: 'old-link' }, 'fallback')).toEqual({
+      ok: true,
+      seed: 'old-link',
+      picks: [],
+      botPolicy: DRAFTMANCER_SIMPLE_BOT_POLICY,
+    });
+    expect(readDraftInputs({ seed: 'bad-link', bot: 'unknown-policy' }, 'fallback').ok).toBe(false);
+  });
+
   it('uses the caller seed only when the URL has none', () => {
-    expect(readDraftInputs({}, 'fallback/one')).toEqual({ ok: true, seed: 'fallback/one', picks: [] });
+    expect(readDraftInputs({}, 'fallback/one')).toEqual({
+      ok: true,
+      seed: 'fallback/one',
+      picks: [],
+      botPolicy: DRAFTMANCER_SIMPLE_BOT_POLICY,
+    });
   });
 
   it('bounds every attacker-controlled dimension before replay', () => {

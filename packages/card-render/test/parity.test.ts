@@ -48,6 +48,7 @@ import {
   FACE_REGIONS,
   LOYALTY_BADGE_POINTS,
   LOYALTY_FIT_STEPS,
+  LAND_ART_WINDOW,
   LOYALTY_SHIELD_POINTS,
   MAT_TOKEN_CSS,
   NAME_FIT_STEPS,
@@ -77,6 +78,7 @@ import type { FaceRegion, Outline } from '@mtg/ui';
 import {
   CARD_CSS,
   CARD_GEOMETRY,
+  LAND_GEOMETRY,
   TITLE_MAX_SIZE,
   cardGeometry,
   cardStyleSheet,
@@ -111,13 +113,12 @@ const ABILITY_CARDS = [
  * functions of a card, so sweeping all of it costs half a second. The examples
  * lead, which is where `everyColorCost` finds its castable base.
  *
- * The ability fixtures join it because nothing the repository commits carries
- * an ability yet, of any of the four kinds: both faces get their rules text from
- * `renderOracleText` (`@mtg/ui`'s `Card.ts` and this package's `regions.ts`),
- * so ability text reaches both with no renderer change — and a claim nothing
- * renders is a claim nothing checks. The fourth kind is the equip ability,
- * whose single record prints two lines, and it is the one shape neither face
- * had ever drawn.
+ * The ability fixtures join it because the generated corpus does not span
+ * every engine ability kind. Both faces get their rules text from
+ * `renderOracleText` (`@mtg/ui`'s `Card.ts` and this package's `regions.ts`), so
+ * a new kind reaches both with no renderer change — and a claim nothing renders
+ * is a claim nothing checks. Equip's activated specialization and the live
+ * player-rule kind are both present explicitly for that reason.
  *
  * The planeswalker fixture joins the same bucket for the same reason: the
  * flagship's `xmp-vessari-hero-of-hours` is the first card in the repository of
@@ -139,6 +140,40 @@ function glossedRules(): DslCard {
   return {
     ...base,
     effects: [{ kind: 'putCounters', counter: 'gloom', count: 1, target: { kind: 'targetCreature' } }],
+  };
+}
+
+/**
+ * A card whose *reminded* line is a whole rules row carrying mana symbols.
+ *
+ * `mtg-m7hq`. Every reminder in either corpus is a keyword, and a keyword has
+ * no braces in it, so the run this pair is about was checked over subjects that
+ * could not tell the two faces apart. `@mtg/dsl`'s reminder table also keys on
+ * whole rules rows -- populate, gloom, protection -- and there the roman run is
+ * the row, cost and all: Vitu-Ghazi Guildmage drew `{2}{G}{W}: Populate.` as
+ * eighteen characters on the DOM face beside a sibling ability of the same
+ * shape drawing pips, while the printed face painted both.
+ *
+ * Built here for the reason `glossedRules` is built here: a shape both faces
+ * can draw and neither corpus contains.
+ */
+function remindedCost(): DslCard {
+  const base = ALL_CARDS.find((card) => isCreature(card) && card.keywords.length === 0);
+  if (base === undefined) throw new Error('the parity corpus has no keywordless creature');
+  return {
+    ...base,
+    abilities: [
+      {
+        kind: 'activated',
+        cost: {
+          mana: mana({ generic: 2, W: 1, G: 1 }),
+          printedManaPips: ['G', 'W'],
+          tapSelf: false,
+          sacrificeSelf: false,
+        },
+        effects: [{ kind: 'populate' }],
+      },
+    ],
   };
 }
 
@@ -712,6 +747,42 @@ describe('the two renderers draw the same face', () => {
   });
 
   /**
+   * And paints the mana inside that roman run, on both faces.
+   *
+   * `mtg-m7hq`, and it is a case of its own rather than a line in the sweep
+   * above because no committed card is a subject for it: every reminded line in
+   * either corpus is a keyword, and a keyword has no braces, so the sweep was
+   * green over a run neither face could get wrong. `remindedCost` says what the
+   * shape is and where it came from.
+   *
+   * Counted rather than positioned. Where each pip lands is the medium's
+   * business -- one is an `<abbr>` in a span, the other a glyph at an x -- and
+   * what the two faces have to agree on is that the run is three symbols and
+   * not eighteen characters.
+   */
+  it('paints the mana inside a reminded rules row, in both faces', () => {
+    const card = remindedCost();
+    const [block] = textBoxBlocks(card);
+    if (block === undefined) throw new Error('parity: the reminded card prints no block');
+    expect(block.kind, 'the populate row earned its reminder').toBe('reminder');
+    expect(block.roman, 'the roman run is the whole rules row').toBe('{2}{G}{W}: Populate.');
+
+    const dom = domFace(card);
+    for (const token of ['{2}', '{G}', '{W}']) {
+      expect(dom, `DOM ${token} in the reminded run`).toContain(`data-symbol="${token}"`);
+    }
+    // Inside the roman span, not merely somewhere on the face: the title bar
+    // draws this card's own cost too, and a face that painted the pips there and
+    // printed the braces in the box would satisfy a search over the whole thing.
+    const roman = /<span class="mtg-card__reminder-keyword">([\s\S]*?)<\/span>/u.exec(dom)?.[1] ?? '';
+    expect([...roman.matchAll(/data-symbol="/gu)].length, 'DOM pips in the roman run').toBe(3);
+
+    const svg = svgFace(card);
+    const glyphs = [...svg.matchAll(/data-symbol="\{[^"]+\}"/gu)].length;
+    expect(glyphs, 'printed pips on the face').toBeGreaterThanOrEqual(3);
+  });
+
+  /**
    * The same boundary inside a line of rules text, which is where the flagship
    * meets it: a counter prints the gloss on what it does in the sentence that
    * puts one on, so the block is roman to the parenthesis and italic after it.
@@ -984,7 +1055,7 @@ describe('the two renderers draw the same face', () => {
     // not the other would leave a printed card and the same card on the table
     // wearing different rarities.
     const web = uiStyleSheet();
-    expect(Object.keys(RARITY_SEAL_INK)).toEqual(RARITIES);
+    expect(Object.keys(RARITY_SEAL_INK)).toEqual([...RARITIES, 'special', 'bonus']);
     for (const [rarity, token] of Object.entries(RARITY_SEAL_INK)) {
       expect(web, `the web sheet paints no ${rarity} seal`).toContain(
         `.mtg-card__seal[data-rarity='${rarity}'] path { fill: var(${token}); }`,
@@ -1018,7 +1089,7 @@ describe('the two renderers draw the same face', () => {
     expect(LOYALTY_FIT_STEPS.slice(0, RULES_FIT_STEPS.length)).toEqual([...RULES_FIT_STEPS]);
     LOYALTY_FIT_STEPS.forEach((scale, step) => {
       expect(web, `the web sheet has no rule for step ${String(step)}`).toContain(
-        `.mtg-card__text[data-fit='${String(step)}'] { font-size: calc(var(--mtg-text-sm) * ${String(scale)}); }`,
+        `.mtg-card__text[data-fit='${String(step)}'] { font-size: calc(var(--rules-type) * ${String(scale)}); }`,
       );
     });
     let capped = 0;
@@ -1078,10 +1149,12 @@ describe('the two renderers draw the same face', () => {
 
   it('sizes a title-row cost pip from the title text, in both faces', () => {
     // One rule — the pip's box is the title's own line box — applied by each
-    // medium with its own machinery: the web sheet multiplies two tokens, and
-    // the printed geometry multiplies the title band's ceiling. The shared
-    // number is the multiplier.
-    expect(uiStyleSheet()).toContain('--pip-box: calc(var(--mtg-text-sm) * var(--mtg-leading-tight));');
+    // medium with its own machinery: the web sheet multiplies the face's type
+    // channel by the leading, and the printed geometry multiplies the title
+    // band's ceiling. The shared number is the multiplier. `--rules-type` is
+    // that channel since `mtg-dcxg.13`, and it is `--mtg-text-sm` at the width
+    // the printed face is a drawing of.
+    expect(uiStyleSheet()).toContain('--pip-box: calc(var(--rules-type) * var(--mtg-leading-tight));');
     expect(uiStyleSheet()).toContain('width: var(--pip-box, 1.05rem)');
     expect(CARD_GEOMETRY.pipRadius * 2).toBeCloseTo(TITLE_MAX_SIZE * TITLE_PIP_TO_TEXT, 6);
   });
@@ -1172,12 +1245,7 @@ describe('the two renderers draw the same face', () => {
     );
   });
 
-  it('gives a planeswalker the shorter art window, on both faces and nowhere else', () => {
-    // The one card type whose window gives, and the reason it does is in
-    // `@mtg/card-geometry`'s `PLANESWALKER_ART_WINDOW` and in the sheet's
-    // `PLANESWALKER` block: three ruled ability rows ask for ten lines where
-    // the wordiest creature asks for six, and the alternative to taking the
-    // height from the picture is taking it from the words.
+  it('keeps nonland art uniform and gives only lands the taller window, on both faces', () => {
     const walker = onlyWalker('planeswalker-ultimate');
     const printed = cardGeometry(walker).art;
     expect(printed.width / printed.height).toBeCloseTo(
@@ -1187,11 +1255,16 @@ describe('the two renderers draw the same face', () => {
     expect(uiStyleSheet()).toContain(
       `aspect-ratio: ${String(PLANESWALKER_ART_WINDOW.width)} / ${String(PLANESWALKER_ART_WINDOW.height)}`,
     );
-    // And nowhere else: a creature keeps the window every other card has, so
-    // this is a planeswalker rule rather than a new default that happens to be
-    // asserted on a planeswalker.
+    expect(PLANESWALKER_ART_WINDOW).toEqual(ART_WINDOW);
     expect(cardGeometry(wordiest()).art).toEqual(CARD_GEOMETRY.art);
-    expect(PLANESWALKER_ART_WINDOW.height).toBeLessThan(ART_WINDOW.height);
+    const land = BASIC_LANDS[0];
+    if (land === undefined) throw new Error('the basic-land fixtures are empty');
+    expect(cardGeometry(land)).toBe(LAND_GEOMETRY);
+    expect(LAND_GEOMETRY.art.width / LAND_GEOMETRY.art.height).toBeCloseTo(
+      LAND_ART_WINDOW.width / LAND_ART_WINDOW.height,
+      6,
+    );
+    expect(LAND_ART_WINDOW.height).toBeGreaterThan(ART_WINDOW.height);
   });
 
   it('rules a planeswalker into ability rows, one cost badge per costed row, in both faces', () => {

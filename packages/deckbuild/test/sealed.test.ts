@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Card } from '@mtg/dsl';
-import { parseCard } from '@mtg/dsl';
+import { EXAMPLE_SET, isBasicLand, parseCard } from '@mtg/dsl';
 import type { BoosterRecipe } from '../src/index';
 import {
+  boosterPool,
   boosterRecipeFor,
   boosterSize,
   buildDeck,
@@ -228,5 +229,49 @@ describe('a sealed pool is playable', () => {
       const built = buildDeck(pool.cards);
       expect(built.deck.length).toBe(built.config.deckSize);
     }
+  });
+});
+
+/**
+ * `mtg-h77m`: a pack came out of an M11 draft with three basic lands in it.
+ *
+ * The generated fixture above could never show it, because a generated set
+ * prints no basics — the builder mints them. A set that prints its own basics
+ * gives them DSL rarity `common`, which used to put every one of them in the
+ * common slot's pool. The measurement is over the same shape the reduced M11
+ * has: a fifth of the commons are basic lands.
+ */
+describe('basic lands are not a slot', () => {
+  const BASICS = EXAMPLE_SET.filter((card) => isBasicLand(card));
+  const PRINTED = [...SET, ...BASICS];
+
+  it('the fixture that shows it prints basics at a real set share', () => {
+    expect(BASICS.length).toBe(5);
+    const commons = PRINTED.filter((card) => card.rarity === 'common');
+    expect(commons.filter((card) => isBasicLand(card)).length).toBe(5);
+    expect(commons.length).toBeGreaterThan(5);
+  });
+
+  it('deals no basic land in any pack of twenty pools', () => {
+    for (let index = 0; index < 20; index += 1) {
+      const pool = openSealedPool(PRINTED, { seed: `basics/${String(index)}` });
+      expect(pool.cards.filter((card) => isBasicLand(card))).toEqual([]);
+    }
+  });
+
+  it('still deals a full pack, because the pool it drops them from is the set', () => {
+    const pool = openSealedPool(PRINTED, { seed: 'basics/size', boosters: 1 });
+    expect(pool.cards.length).toBe(boosterSize(boosterRecipeFor(PRINTED)));
+  });
+
+  it('names the short rarity when dropping the basics is what made it short', () => {
+    const thin = [...BASICS, ...SET.filter((card) => card.rarity === 'common').slice(0, 5)];
+    expect(() => openSealedPool(thin, { seed: 'x' })).toThrow(/needs 9 common cards but the set has 5/);
+  });
+
+  it('boosterPool is the one derivation both surfaces read', () => {
+    expect(boosterPool(PRINTED).length).toBe(PRINTED.length - BASICS.length);
+    expect(boosterPool(PRINTED).some((card) => isBasicLand(card))).toBe(false);
+    expect(boosterPool(SET)).toEqual(SET);
   });
 });

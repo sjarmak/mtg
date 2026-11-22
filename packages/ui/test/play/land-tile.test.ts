@@ -143,7 +143,10 @@ describe('a land is an art tile', () => {
     expect(pill, 'the pill is left at a full face width and clamps to the window').toContain(
       'width: min-content',
     );
-    const note = rule(".mtg-card[data-size='art'] .mtg-art__pending-note");
+    // The id is hidden by one rule for every size rather than by this tile's
+    // own, so what is asserted is that the tile inherits it and not which
+    // selector carries it.
+    const note = rule('.mtg-art__pending-note');
     expect(note, 'the card id is still drawn under the pill').not.toBeNull();
     expect(note).toContain('display: none');
   });
@@ -159,7 +162,7 @@ describe('a land is an art tile', () => {
   it('draws one keyline instead of the printed border', () => {
     const tile = rule(".mtg-card[data-size='art']");
     expect(tile, 'the tile has no rule of its own').not.toBeNull();
-    expect(tile).toContain('border-width: 1px');
+    expect(tile).toContain('border: 1px solid var(--identity)');
     expect(tile).toContain('box-shadow: none');
     // The window's own keyline goes with it, or the tile wears two.
     const window = rule(".mtg-card[data-size='art'] > [data-region='art']");
@@ -208,7 +211,7 @@ describe('the band is one row under the cards in play', () => {
       { key: 'p1', card: creature() },
       { key: 'l1', card: land() },
     ]);
-    expect(markup).toContain('<div class="mtg-board__spells">');
+    expect(markup).toContain('<div class="mtg-board__spells"');
     expect(markup.indexOf('class="mtg-board__spells"')).toBeLessThan(markup.indexOf('class="mtg-lands"'));
     // The band is a sibling of the spell row rather than inside it, so no
     // horizontal scroll of the spells can take the mana base off the screen.

@@ -29,11 +29,11 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { Card } from '@mtg/dsl';
-import type { Action } from '@mtg/kernel';
+import type { GameState, Target } from '@mtg/kernel';
 import {
-  DEFAULT_ENUMERATION_CAP,
   eventsOfType,
   legalActions,
+  pendingDecision,
   playerOf,
   reduce,
   reduceAll,
@@ -68,23 +68,40 @@ function plains(count: number): { card: typeof PLAINS; controller: 0 }[] {
   return Array.from({ length: count }, () => ({ card: PLAINS, controller: 0 as const }));
 }
 
-/**
- * The casts of one card this board offers, asked for at a stated width.
- *
- * `multiTargetsOptionsFor` bounds a counted slot's member list with the cap it
- * is given, and `DEFAULT_ENUMERATION_CAP` is one global constant over every
- * enumeration in the kernel. A test whose claim is "every member count the slot
- * allows is offered" is a claim about the card and the board, so it says how
- * wide the space is rather than inheriting a number set for combat.
- */
-function castOptions(
-  state: ReturnType<typeof scenario>['state'],
-  oid: string,
-  cap = DEFAULT_ENUMERATION_CAP,
-): readonly Action[] {
-  return legalActions(state, cap)
-    .filter((action): action is Extract<Action, { type: 'castSpell' }> => action.type === 'castSpell')
-    .filter((action) => action.oid === oid);
+function permanent(oid: string): Target {
+  return { kind: 'permanent', oid };
+}
+
+function permanents(oids: readonly string[]): readonly Target[] {
+  return oids.map(permanent);
+}
+
+function targetKey(target: Target): string {
+  return target.kind === 'player' ? `player:${String(target.player)}` : `${target.kind}:${target.oid}`;
+}
+
+function beginPluralCast(state: GameState, oid: string) {
+  const action = legalActions(state).find(
+    (candidate) => candidate.type === 'beginCastSpell' && candidate.oid === oid,
+  );
+  if (action?.type !== 'beginCastSpell') throw new Error('plural cast was not offered');
+  return reduce(state, action);
+}
+
+function pluralTargetsOf(state: GameState) {
+  const decision = pendingDecision(state);
+  if (decision?.kind !== 'pluralTargets') throw new Error('plural targets were not staged');
+  return decision;
+}
+
+function choiceKeys(state: GameState): readonly string[] {
+  return pluralTargetsOf(state)
+    .options.flatMap((action) =>
+      action.type === 'choosePluralTarget'
+        ? [action.target === null ? 'finish' : targetKey(action.target)]
+        : [],
+    )
+    .sort();
 }
 
 describe('a counted target slot (mtg-kg44)', () => {
@@ -92,11 +109,8 @@ describe('a counted target slot (mtg-kg44)', () => {
     const start = scenario({ battlefield: islands(2), hands: [[STAKES], []] });
     const stakes = playerOf(start.state, 0).hand[0] ?? '';
 
-    const options = castOptions(start.state, stakes);
-    expect(options.length).toBeGreaterThan(0);
-    expect(
-      options.every((action) => action.type === 'castSpell' && (action.multiTargets?.[0]?.length ?? 0) === 0),
-    ).toBe(true);
+    const begun = beginPluralCast(start.state, stakes);
+    expect(choiceKeys(begun.state)).toEqual(['finish']);
 
     const cast = reduce(start.state, { type: 'castSpell', player: 0, oid: stakes, targets: [null] });
     expect(
@@ -118,19 +132,15 @@ describe('a counted target slot (mtg-kg44)', () => {
     const stakes = playerOf(start.state, 0).hand[0] ?? '';
     const victim = oidOf(start.state, 'Test Lone Bear');
 
-    const options = castOptions(start.state, stakes);
-    const counts = options
-      .filter((action): action is Extract<Action, { type: 'castSpell' }> => action.type === 'castSpell')
-      .map((action) => action.multiTargets?.[0]?.length ?? 0)
-      .sort();
-    expect(counts).toEqual([0, 1]);
+    const begun = beginPluralCast(start.state, stakes);
+    expect(choiceKeys(begun.state)).toEqual(['finish', `permanent:${victim}`]);
 
     const cast = reduce(start.state, {
       type: 'castSpell',
       player: 0,
       oid: stakes,
       targets: [null],
-      multiTargets: { 0: [victim] },
+      multiTargets: { 0: [permanent(victim)] },
     });
     const done = reduceAll(cast.state, [
       { type: 'passPriority', player: 0 },
@@ -151,19 +161,23 @@ describe('a counted target slot (mtg-kg44)', () => {
     const bearAOid = oidOf(start.state, 'Test Board Bear A');
     const bearBOid = oidOf(start.state, 'Test Board Bear B');
 
-    const options = castOptions(start.state, stakes);
-    const counts = options
-      .filter((action): action is Extract<Action, { type: 'castSpell' }> => action.type === 'castSpell')
-      .map((action) => action.multiTargets?.[0]?.length ?? 0)
-      .sort();
-    expect(counts).toEqual([0, 1, 1, 2]);
+    const begun = beginPluralCast(start.state, stakes);
+    expect(choiceKeys(begun.state)).toEqual(['finish', `permanent:${bearAOid}`, `permanent:${bearBOid}`]);
+    const first = pluralTargetsOf(begun.state).options.find(
+      (action) =>
+        action.type === 'choosePluralTarget' &&
+        action.target?.kind === 'permanent' &&
+        action.target.oid === bearAOid,
+    );
+    if (first === undefined) throw new Error('first creature target was not offered');
+    expect(choiceKeys(reduce(begun.state, first).state)).toEqual(['finish', `permanent:${bearBOid}`]);
 
     const cast = reduce(start.state, {
       type: 'castSpell',
       player: 0,
       oid: stakes,
       targets: [null],
-      multiTargets: { 0: [bearAOid, bearBOid] },
+      multiTargets: { 0: permanents([bearAOid, bearBOid]) },
     });
     const done = reduceAll(cast.state, [
       { type: 'passPriority', player: 0 },
@@ -195,7 +209,7 @@ describe('a counted target slot (mtg-kg44)', () => {
       player: 0,
       oid: stakes,
       targets: [null],
-      multiTargets: { 0: [survivor, doomed] },
+      multiTargets: { 0: permanents([survivor, doomed]) },
     });
     const answered = reduce(cast.state, {
       type: 'castSpell',
@@ -240,7 +254,7 @@ describe('a counted target slot (mtg-kg44)', () => {
       player: 0,
       oid: stakes,
       targets: [null],
-      multiTargets: { 0: oids },
+      multiTargets: { 0: permanents(oids) },
     });
     expect(error).not.toBeNull();
   });
@@ -259,7 +273,7 @@ describe('a counted target slot (mtg-kg44)', () => {
       player: 0,
       oid: stakes,
       targets: [null],
-      multiTargets: { 0: [victim, victim] },
+      multiTargets: { 0: [permanent(victim), permanent(victim)] },
     });
     expect(error).not.toBeNull();
   });
@@ -282,7 +296,7 @@ describe('a counted target slot (mtg-kg44)', () => {
       player: 0,
       oid: stakes,
       targets: [null],
-      multiTargets: { 0: [land] },
+      multiTargets: { 0: [permanent(land)] },
     });
     expect(error).not.toBeNull();
   });
@@ -320,21 +334,15 @@ describe('a counted slot at three (mtg-hgmz)', () => {
       oidOf(start.state, 'Test Rain Bear C'),
     ];
 
-    // Three creatures into a slot of up to three is every subset of them:
-    // 2^3 = 8 member lists, which is the width this claim needs listed.
-    const sizes = new Set(
-      castOptions(start.state, spell, 2 ** victims.length)
-        .filter((action): action is Extract<Action, { type: 'castSpell' }> => action.type === 'castSpell')
-        .map((action) => action.multiTargets?.[0]?.length ?? 0),
-    );
-    expect([...sizes].sort()).toEqual([0, 1, 2, 3]);
+    const begun = beginPluralCast(start.state, spell);
+    expect(choiceKeys(begun.state)).toEqual(['finish', ...victims.map((oid) => `permanent:${oid}`).sort()]);
 
     const cast = reduce(start.state, {
       type: 'castSpell',
       player: 0,
       oid: spell,
       targets: [null],
-      multiTargets: { 0: victims },
+      multiTargets: { 0: permanents(victims) },
     });
     const done = reduceAll(cast.state, [
       { type: 'passPriority', player: 0 },
@@ -362,7 +370,7 @@ describe('a counted slot at three (mtg-hgmz)', () => {
       oid: spell,
       targets: [null],
       multiTargets: {
-        0: ['A', 'B', 'C', 'D'].map((suffix) => oidOf(start.state, `Test Flood Bear ${suffix}`)),
+        0: permanents(['A', 'B', 'C', 'D'].map((suffix) => oidOf(start.state, `Test Flood Bear ${suffix}`))),
       },
     });
     expect(error).not.toBeNull();

@@ -15,11 +15,22 @@ import { CARD_CSS } from './card';
 import { SYMBOL_CSS } from './symbols';
 import { BOARD_CSS } from './board';
 import { VIEWS_CSS } from './views';
-import { PRECON_CSS } from './precon';
+import { PANEL_CSS } from './panel';
+import { DECK_CARD_CSS } from './deck-card';
 import { DECK_CSS } from './deck';
 import { REPLAY_CSS } from './replay';
+import { DESIGN_CSS } from './design';
+import { WORKBENCH_CSS } from './workbench';
 import { TOUCH_CSS } from './touch';
 import { MOBILE_CSS } from './mobile';
+import { REPLAY_MOBILE_CSS } from './replay-mobile';
+import { DECK_MOBILE_CSS } from './deck-mobile';
+import { DRAFT_MOBILE_CSS } from './draft-mobile';
+import { CARDS_MOBILE_CSS } from './cards-mobile';
+import { ADVISOR_CSS } from './advisor';
+import { PRINTED_READING_CSS } from './printed-reading';
+import { FEEDBACK_CSS } from './feedback';
+import { OPENING_ROLL_CSS } from './opening-roll';
 
 /**
  * The whole sheet: document tokens first, then any per-route re-valuation of
@@ -38,8 +49,11 @@ import { MOBILE_CSS } from './mobile';
  * The scoped blocks and the mat block sit outside `TOKEN_CSS` and immediately
  * after it. Outside, because `@mtg/card-render` embeds `TOKEN_CSS` verbatim in a
  * standalone SVG that has no shell to scope on and no table to lie on;
- * immediately after, because a scope's selector ties with `:root` on
- * specificity and only wins by coming later.
+ * immediately after, because the root rule that travels with each scope
+ * (`viewportScheme`) ties with `TOKEN_CSS`'s own root guards on specificity and
+ * only wins by coming later. Not the scope's palette itself: that lands on the
+ * shell div while `:root` lands on `html`, so the two never compete and the
+ * div's own value wins at any order (`mtg-bc2.108`).
  *
  * `REPLAY_CSS` comes after `BOARD_CSS` and after `VIEWS_CSS`, and both halves of
  * that matter. It is one route's layout, so it belongs with the route sheets;
@@ -64,13 +78,45 @@ export function uiStyleSheet(): string {
     SYMBOL_CSS,
     BOARD_CSS,
     VIEWS_CSS,
-    // After the route sheets, because the picker's tiles sit inside a
-    // `.mtg-panel__body` those sheets lay out and add nothing they answer.
-    PRECON_CSS,
+    // The shared contextual rail and the two-track screen it sits in, after the
+    // route sheets because it re-lays-out regions those sheets have styled.
+    PANEL_CSS,
+    ADVISOR_CSS,
+    // After the route sheets, because a deck card sits inside regions those
+    // sheets lay out and adds nothing they answer.
+    DECK_CARD_CSS,
     DECK_CSS,
     REPLAY_CSS,
+    // One route's layout, like the two above it, and after them for the same
+    // reason: it lays out regions the panel sheet has already styled.
+    DESIGN_CSS,
+    // And the deck workbench's, beside the designer's and for the same reason:
+    // it lays out regions the panel sheet has already styled, and it is read
+    // after `DECK_CSS` because it sits inside the Decks route's own frame.
+    WORKBENCH_CSS,
+    PRINTED_READING_CSS,
     TOUCH_CSS,
     MOBILE_CSS,
+    // Last, because it is the replay route's own answer to rules `MOBILE_CSS`
+    // now writes for every fitted board: same specificity either way, so it
+    // wins on order the way `REPLAY_CSS` wins over `BOARD_CSS` above.
+    REPLAY_MOBILE_CSS,
+    // And the Cards route's own answer, last for the same reason: its gallery
+    // and control-bar rules tie on specificity with `./views.ts`'s and win on
+    // order, and nothing in it is read above a phone.
+    CARDS_MOBILE_CSS,
+    // And the draft route's own, after those: it re-answers `PANEL_CSS`'s
+    // fitted screen on an upright phone, and ties with it on specificity in
+    // places, so it has to be read later.
+    DRAFT_MOBILE_CSS,
+    // And the deck route's own, beside the three above it: it re-answers the
+    // toolbar and mana-base rows `DECK_CSS` writes for a pane three times this
+    // wide, ties with them on specificity, and wins on order.
+    DECK_MOBILE_CSS,
+    OPENING_ROLL_CSS,
+    // The feedback helper floats over every route and every fitted layout, so
+    // it is read last: nothing under it may re-answer where it sits.
+    FEEDBACK_CSS,
   ].join('\n');
 }
 

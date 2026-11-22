@@ -46,6 +46,7 @@ import {
 } from '@mtg/kernel';
 import { PlayRoute } from '../../src/routes/PlayRoute';
 import { dealMirrorGame } from '../../src/routes/play/deal';
+import { twoHumanMirror } from '../support/two-human';
 import { declarationWords } from '../../src/routes/play/declare';
 import { NO_PASS_NOTE } from '../../src/routes/play/pass-key';
 import { CONTINUE_LABEL, LEGAL_MOVES_LABEL, PlayView } from '../../src/routes/play/PlayView';
@@ -100,7 +101,9 @@ function roster(): ReturnType<typeof screen.queryByRole> {
  */
 function pressBoldestMove(): boolean {
   if (roster() === null) {
-    const target = choiceButtons().at(-1);
+    const target = choiceButtons()
+      .filter((button) => attributeOf(button, 'data-kind') !== 'concede')
+      .at(-1);
     if (target === undefined) return false;
     fireEvent.click(target);
     return true;
@@ -171,7 +174,11 @@ function upToTheAttack(config: PlayConfig, attacker: PlayerId = 0): PlayConfig {
     if (decision.kind === 'declareAttackers' && decision.player === attacker && decision.options.length > 1) {
       return { ...config, choices: session.choices };
     }
-    session = choose(session, decision.options.length - 1, OPTIONS);
+    session = choose(
+      session,
+      decision.options.findLastIndex((option) => option.type !== 'concede'),
+      OPTIONS,
+    );
   }
   throw new Error(`upToTheAttack: the dealt game never offered player ${String(attacker)} an attack`);
 }
@@ -313,12 +320,12 @@ describe('the Continue button', () => {
 });
 
 /**
- * `mtg-1ih`. The hot-seat launcher names the near seat `You`, that seat attacks
+ * `mtg-1ih`. The launcher names the near seat `You`, that seat attacks
  * first in a sealed game, and so the first sentence a player ever read on this
  * panel was `You is attacking with 4 creatures.`
  *
  * The two cases are the whole rule, and the second is why a flag would not do:
- * on a hotseat table `deal.ts` names both seats outright, neither of them is
+ * on a two-human table both seats are named outright, neither of them is
  * second person, and every sentence takes the third-person verb. `log/narrate.ts`
  * reached the same answer for the log and `seatVerb` is that one rule.
  */
@@ -433,7 +440,7 @@ describe('the death sentence', () => {
     );
   });
 
-  it('says no second person at a hotseat table, where neither seat is the reader', () => {
+  it('says no second person at a two-human table, where neither seat is the reader', () => {
     cleanup();
     const { state, mine, theirs } = twoSides();
     expect(destroyed(state, [mine, theirs], ['the playtester', 'Wren'])).toBe(
@@ -533,7 +540,7 @@ describe('the departure sentence', () => {
     ).toBe("Your Emberflow Raider was exiled. Bot's Emberflow Raider was returned to its owner's hand.");
   });
 
-  it('says no second person at a hotseat table, where neither seat is the reader', () => {
+  it('says no second person at a two-human table, where neither seat is the reader', () => {
     cleanup();
     const { state, mine } = twoSides();
     expect(left(state, [{ oid: mine, to: 'exile' }], ['the playtester', 'Wren'])).toBe(
@@ -655,8 +662,8 @@ describe('two people at one screen', () => {
     // player two was in. `use-session.ts` holds the viewer across the pause
     // instead, and this is the position that tells the two apart: seat 1 is the
     // one attacking, and seat 0 is what a fallback would show.
-    const hotseat = dealMirrorGame(EXAMPLE_CARDS, { opponent: 'human' });
-    const view = render(h(PlayRoute, { config: upToTheAttack(hotseat.config, 1) }));
+    const twoHuman = twoHumanMirror(EXAMPLE_CARDS);
+    const view = render(h(PlayRoute, { config: upToTheAttack(twoHuman, 1) }));
 
     // Both hands are always drawn; which of them is the near one, face up, is
     // what the viewer decides, so that is what this reads.
@@ -686,7 +693,11 @@ function pausedSession(): GameSession {
   session = advance(session, OPTIONS);
   const decision = session.pending;
   if (decision === null) throw new Error('pausedSession: the attack was never offered');
-  const paused = choose(session, decision.options.length - 1, OPTIONS);
+  const paused = choose(
+    session,
+    decision.options.findLastIndex((option) => option.type !== 'concede'),
+    OPTIONS,
+  );
   if (paused.beat?.kind !== 'attackers') throw new Error('pausedSession: the attack did not pause');
   return paused;
 }

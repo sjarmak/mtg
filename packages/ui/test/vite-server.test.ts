@@ -80,6 +80,12 @@ describe("the dev server's reachability over a tunnel", () => {
     expect(block).toMatch(/http:\/\/127\.0\.0\.1:/);
   });
 
+  it('sends observed backend sessions through one explicit loopback prefix', () => {
+    const block = serverBlock();
+    expect(block).toMatch(/'\/engine-api'/);
+    expect(block).toMatch(/http:\/\/127\.0\.0\.1:\$\{[^}]*MTG_BACKEND_GATEWAY_PORT/);
+  });
+
   it('sends the curation writes to loopback too, and to their own port', () => {
     // The curation grid is driven from a tablet over the same tunnel, and its
     // server is a second loopback process, the one `npm run curate` starts.

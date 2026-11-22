@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  AbilitySchema,
   BASIC_LANDS,
+  ModelAbilitySchema,
   parseCard,
   renderOracleText,
   renderTypeLine,
@@ -65,6 +67,47 @@ describe('nonbasic land representation', () => {
     });
     expect(renderOracleText(tower)).toBe('{T}: Add {C}.');
     expect(tower.kind === 'land' ? tower.producesMana : []).toEqual(['C']);
+  });
+
+  it('authors Reliquary Tower as a controller-scoped live player rule', () => {
+    const rule = {
+      kind: 'staticPlayerRule' as const,
+      players: 'controller' as const,
+      rule: 'noMaximumHandSize' as const,
+    };
+    const tower = parseCard({
+      kind: 'land',
+      id: 'm13-reliquary-tower',
+      name: 'Reliquary Tower',
+      rarity: 'uncommon',
+      set: { code: 'M13', collectorNumber: 227 },
+      producesMana: ['C'],
+      abilities: [rule],
+    });
+
+    expect(AbilitySchema.safeParse(rule).success).toBe(true);
+    expect(ModelAbilitySchema.safeParse(rule).success).toBe(false);
+    expect(renderOracleText(tower)).toBe('You have no maximum hand size.\n{T}: Add {C}.');
+  });
+
+  it('rejects an opponent-scoped no-maximum-hand-size rule', () => {
+    expect(() =>
+      parseCard({
+        kind: 'land',
+        id: 'tst-opponent-tower',
+        name: 'Opponent Tower',
+        rarity: 'uncommon',
+        set: { code: 'TST', collectorNumber: 227 },
+        producesMana: ['C'],
+        abilities: [
+          {
+            kind: 'staticPlayerRule',
+            players: 'eachOpponent',
+            rule: 'noMaximumHandSize',
+          },
+        ],
+      }),
+    ).toThrow(/noMaximumHandSize.*controller|controller.*noMaximumHandSize/iu);
   });
 
   it('bounds and deduplicates printed mana choices and checkland conditions', () => {

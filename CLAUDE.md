@@ -31,10 +31,10 @@ would reject. Pass a path to play something else:
 
 Both launchers also stage the **rules-text symbols**, because a `{T}`
 referenced from another host is an empty box for a viewer who cannot reach it.
-`packages/ui/tools/stage-symbols.ts` pulls the 29 symbols through
+`packages/ui/tools/stage-symbols.ts` pulls the 46 symbols through
 `@mtg/image-cache` into `data/images/` and copies them into
 `packages/ui/public/symbols/` (gitignored, nothing vendored), and the page
-draws them from its own origin. **All 29 or none** — one short would draw one
+draws them from its own origin. **All 46 or none** — one short would draw one
 empty box, so a single failure hands the page the lab's own drawings instead
 and the launcher says which on stdout.
 
@@ -45,7 +45,7 @@ Deck tab. It also pulls each illustration into `packages/ui/public/art/`
 (gitignored) and points the staged deck at the local copies, so the page never
 reaches another host while you are looking at it.
 
-Twenty-one packages: `card-geometry`, `card-render`, `cube`, `data`, `deckbuild`, `decklab`, `design-data`, `draft-export`, `dsl`, `engine`, `forge-export`, `image-cache`, `kernel`, `llm`, `metrics`, `netplay`, `referee`, `setgen`, `sim`, `slice`, `ui`.
+Twenty-six packages: `bot-evidence`, `card-geometry`, `card-render`, `cube`, `data`, `deckbuild`, `decklab`, `design-data`, `draft-export`, `dsl`, `engine`, `forge-export`, `image-cache`, `kernel`, `limited`, `llm`, `metrics`, `netplay`, `printed-card`, `raster`, `referee`, `render-spec`, `setgen`, `sim`, `slice`, `ui`.
 
 That sentence is checked: `packages/slice/test/workspace-roster.test.ts` fails
 when the names or the count stop matching `packages/`. A roster loaded into
@@ -84,6 +84,7 @@ Prior-art evidence and the two argued architectures live in `docs/research/`.
   no-dominant-strategy guards as tests.
 - Sim logs emit a superset of the 17Lands replay schema under identical column
   names, so human-data calibration is a join.
-- License hygiene: GPL and AGPL engines behind process boundaries only; a CI
-  guard fails the build on a vendored engine path. Non-commercial, under the
-  WotC Fan Content Policy.
+- License: the project is AGPL-3.0-or-later. Forge runs as a separate process
+  and is never vendored; a CI guard fails the build on a vendored engine path.
+  The Forge bridge and quoted Forge script lines stay GPL-3.0 (see `LICENSE`).
+  Non-commercial, under the WotC Fan Content Policy.

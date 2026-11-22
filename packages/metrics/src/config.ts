@@ -46,6 +46,8 @@ export interface SampleFloors {
   readonly colorPair: number;
   readonly matchup: number;
   readonly abilityUsage: number;
+  /** Distinct games a card was seen in, before its win-rate-when-drawn is reported. */
+  readonly card: number;
 }
 
 export const DEFAULT_SAMPLE_FLOORS: SampleFloors = {
@@ -56,6 +58,9 @@ export const DEFAULT_SAMPLE_FLOORS: SampleFloors = {
   colorPair: 200,
   matchup: 50,
   abilityUsage: 100,
+  // Same reasoning as `colorPair`: a proportion near 0.5, so 200 distinct
+  // games is the floor below which the Wilson interval swallows the band.
+  card: 200,
 };
 
 /**

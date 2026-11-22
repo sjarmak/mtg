@@ -11,7 +11,8 @@
  * now by keyword ability rather than by card type, and the three questions it
  * asks are in `keywordAbilityPlacement` below.
  */
-import type { Card, KeywordAbility } from '../card';
+import type { Card } from '../card';
+import type { KeywordAbility } from '../keyword-ability';
 import { isPermanentCard } from '../card';
 import { canonicalJson } from '../canonical-json';
 import { withArticle } from '../text-util';
@@ -91,13 +92,14 @@ export function checkSubtypes(card: Card): Violation[] {
     card.kind !== 'artifact' &&
     card.kind !== 'land' &&
     card.kind !== 'enchantment' &&
-    card.kind !== 'planeswalker'
+    card.kind !== 'planeswalker' &&
+    card.kind !== 'battle'
   ) {
     found.push(
       violation(
         'SUBTYPE_ILLEGAL_ON_CARD_TYPE',
         'subtypes',
-        `DSL v0 allows subtypes only on creatures, artifacts, enchantments, lands, and planeswalkers, not on ${card.kind}s`,
+        `DSL v0 allows subtypes only on permanents, not on ${card.kind}s`,
       ),
     );
   }
@@ -148,6 +150,29 @@ export function checkCreatureStats(card: Card): Violation[] {
       }
       return found;
     }
+    // A creature whose entry replacement establishes complete copiable values
+    // may print 0/0 because the choice happens before state-based actions are
+    // checked. Both zeroes are required so this narrow replacement family
+    // cannot turn the general creature floor into a second range.
+    if (
+      (card.entryReplacement?.kind === 'entersAsCopyOfCreature' ||
+        card.entryReplacement?.kind === 'entersAsCharacteristicChoice') &&
+      card.power === 0 &&
+      card.toughness === 0
+    ) {
+      return found;
+    }
+    // A 0/0 creature whose own entry replacement supplies +1/+1 counters is a
+    // legal printed body. X may be zero; state-based actions, not authoring
+    // validation, decide whether that particular cast survives.
+    if (
+      card.entryReplacement?.kind === 'entersWithCounters' &&
+      card.entryReplacement.counter === 'plusOnePlusOne' &&
+      card.power === 0 &&
+      card.toughness === 0
+    ) {
+      return found;
+    }
     if (card.power < MIN_POWER || card.power > MAX_POWER) {
       found.push(
         violation(
@@ -195,6 +220,7 @@ export function checkCreatureStats(card: Card): Violation[] {
 export function checkKeywords(card: Card): Violation[] {
   const found: Violation[] = [];
   const keywordAbilities = card.keywordAbilities ?? [];
+  const targetingRestrictions = card.targetingRestrictions ?? [];
   if (card.kind !== 'creature' && card.keywords.length > 0) {
     found.push(
       violation(
@@ -237,6 +263,30 @@ export function checkKeywords(card: Card): Violation[] {
       }
     }
   }
+  const seenTargetingRestrictions = new Map<string, number>();
+  for (const [index, restriction] of targetingRestrictions.entries()) {
+    const identity = canonicalJson(restriction);
+    const earlier = seenTargetingRestrictions.get(identity);
+    if (earlier === undefined) seenTargetingRestrictions.set(identity, index);
+    else {
+      found.push(
+        violation(
+          'DUPLICATE_ABILITY',
+          `targetingRestrictions[${index}]`,
+          `this targeting restriction repeats targetingRestrictions[${earlier}]`,
+        ),
+      );
+    }
+    if (!isPermanentCard(card)) {
+      found.push(
+        violation(
+          'ABILITY_ILLEGAL_ON_CARD_TYPE',
+          `targetingRestrictions[${index}]`,
+          `a targeting restriction functions on a permanent on the battlefield, and ${withArticle(card.kind)} never reaches the battlefield`,
+        ),
+      );
+    }
+  }
   return found;
 }
 
@@ -268,6 +318,8 @@ const CREATURE_ONLY_KEYWORD_ABILITY_KINDS: readonly KeywordAbility['kind'][] = [
   'landwalk',
   'protection',
   'doubleStrike',
+  'intimidate',
+  'unleash',
 ];
 
 /**
@@ -280,7 +332,7 @@ const CREATURE_ONLY_KEYWORD_ABILITY_KINDS: readonly KeywordAbility['kind'][] = [
  * to be about. Then **the combat-shaped kinds stay on creatures**, for the
  * reasons `CREATURE_ONLY_KEYWORD_ABILITY_KINDS` gives.
  *
- * What is left is the pair this function exists to let through. Indestructible
+ * What is left is the three this function exists to let through. Indestructible
  * is a static ability of a permanent, not of a creature (CR 702.12a: "a
  * permanent with indestructible can't be destroyed"), and so is hexproof (CR
  * 702.11b: "a permanent with hexproof can't be the target of spells or
@@ -288,15 +340,22 @@ const CREATURE_ONLY_KEYWORD_ABILITY_KINDS: readonly KeywordAbility['kind'][] = [
  * — `destroyPermanent` short-circuits on `hasKeywordAbility(state, oid,
  * 'indestructible')` with no card-type check above it, the CR 704 sweep in
  * `sba.ts` asks the same question, and `canBeTargetedBy` asks its hexproof
- * question of whatever object is being aimed at — so the old blanket refusal
- * was the DSL declining to say a thing the engine already enforced, and The
- * Trisigil ({3}, Legendary Artifact, indestructible) could not be written down.
+ * question of whatever object is being aimed at. Shroud joins them as the same
+ * permanent-wide targeting rule without hexproof's controller exception, and
+ * `canBeTargetedBy` now enforces that wider denial. Before these placement
+ * exceptions, the DSL could not write The Trisigil ({3}, Legendary Artifact,
+ * indestructible) or Whispersilk Cloak's own permanent-wide Shroud grant.
  *
  * The message names the ability and the card type, because a validator that
  * says "a keyword ability is wrong here" on a card carrying three of them has
  * told the author to go looking.
  */
 function keywordAbilityPlacement(card: Card, ability: KeywordAbility): string | null {
+  if (ability.kind === 'flash') {
+    return card.kind === 'land'
+      ? '"flash" changes spell timing, and a land is played rather than cast'
+      : null;
+  }
   if (!isPermanentCard(card)) {
     return `"${ability.kind}" is a static ability of a permanent (CR 205.1a), and ${withArticle(card.kind)} never reaches the battlefield`;
   }

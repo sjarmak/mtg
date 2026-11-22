@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-controller-contract-receipt",
+  "id": "optional-costs-v1",
+  "engineRuntime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "protocolVersion": 2
+  },
+  "decisionFamilies": [
+    "optional-costs"
+  ],
+  "sourceRegions": [
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        public List<OptionalCostValue> chooseOptionalCosts(",
+      "endMarker": "         * Every number this session is asked for, over a range.",
+      "sha256": "d0e5909f284c797da9eadfe024dc2380ff7336b58603be514a210575b00f8670"
+    }
+  ],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "scenarioReceiptIds": [
+        "gust-walker-local-exert-scenario-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "scenarioReceiptIds": [
+        "gust-walker-engine-exert-scenario-v1"
+      ]
+    }
+  ],
+  "evidence": {
+    "scenarioReceipts": [
+      {
+        "receiptId": "gust-walker-engine-exert-scenario-v1",
+        "file": {
+          "path": "scenarios/gust-walker-engine-exert-scenario-v1.json",
+          "sha256": "8e823ffc2f7ce0cd2e27ac29d2496d3c1c614cbc3a70570484b2e49063be7c0d"
+        }
+      },
+      {
+        "receiptId": "gust-walker-local-exert-scenario-v1",
+        "file": {
+          "path": "scenarios/gust-walker-local-exert-scenario-v1.json",
+          "sha256": "e3f80e647a1a7ee17f4e7226918af20e2e03d33f35091ca1c98e9baac613d7d0"
+        }
+      }
+    ]
+  }
+}

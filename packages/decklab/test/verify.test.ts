@@ -71,9 +71,17 @@ describe('verifyProposals', () => {
     expect(result.rejections[0]?.code).toBe('no-criterion');
   });
 
-  it('enforces the four-copy rule', () => {
+  it('trims a card to the four-copy rule rather than losing it', () => {
+    // The count is the cheap half of a proposal and the card is the expensive
+    // one: the model already did the judging. Dropping the card spends a whole
+    // round to be told the same name again with a smaller number on it.
     const result = verify([bolt({ count: 5 })]);
-    expect(result.rejections[0]?.code).toBe('too-many-copies');
+
+    expect(result.rejections).toEqual([]);
+    expect(result.inclusions[0]?.count).toBe(4);
+    expect(result.adjustments[0]?.code).toBe('copies-trimmed');
+    expect(result.adjustments[0]?.detail).toContain('5');
+    expect(result.adjustments[0]?.detail).toContain('4');
   });
 
   it('lets a card that says so exceed four copies', () => {
@@ -84,8 +92,21 @@ describe('verifyProposals', () => {
 
   it('caps every card at one in a singleton format', () => {
     const result = verify([bolt({ count: 2 })], { format: 'commander', colors: [] });
-    expect(result.rejections[0]?.code).toBe('too-many-copies');
-    expect(result.rejections[0]?.detail).toContain('limit here is 1');
+
+    expect(result.inclusions[0]?.count).toBe(1);
+    expect(result.adjustments[0]?.detail).toContain('the limit here is 1');
+  });
+
+  it('caps every card at a stated maxCopies, which is how a singleton set deck says so', () => {
+    // `mtg-yp33.6`. Measured on the playtester's Vessari-v1: maxCopies 1 over a 391-card
+    // pool, and 57 of the 60 cards asked for came back as whole-proposal
+    // rejections because the model proposed the ordinary four-of spread. The
+    // three that survived were the three it happened to propose as one-ofs.
+    const result = verify([bolt({ count: 4 })], { maxCopies: 1 });
+
+    expect(result.inclusions).toHaveLength(1);
+    expect(result.inclusions[0]?.count).toBe(1);
+    expect(result.adjustments[0]?.code).toBe('copies-trimmed');
   });
 
   it('collapses a card listed twice into a rejection rather than a double entry', () => {

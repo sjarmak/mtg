@@ -7,10 +7,26 @@
  * or presence drift. Downstream packages (replay viewer, 17lands-superset log
  * exporter, metrics) consume this union and nothing else.
  */
-import type { GrantableKeyword, ManaCost, TriggerCondition } from '@mtg/dsl';
+import type {
+  Color,
+  CounterKind,
+  GrantableKeyword,
+  ManaCost,
+  StateTriggerCondition,
+  TriggerCondition,
+} from '@mtg/dsl';
 import type { ObjectId, PlayerId } from './ids';
 import type { ReplaceableEventKind } from './replacement-effects';
-import type { Attack, Block, GameEndReason, ManaColor, Step, Target, ZoneId } from './state';
+import type {
+  Attack,
+  Block,
+  GameEndReason,
+  IntrinsicTriggerCondition,
+  ManaColor,
+  Step,
+  Target,
+  ZoneId,
+} from './state';
 
 /**
  * `'lifeLoss'` is the fourth, appended for the reason the log's other reason
@@ -37,6 +53,38 @@ export type GameEvent =
   | { readonly type: 'turnBegan'; readonly turn: number; readonly active: PlayerId }
   | { readonly type: 'stepBegan'; readonly turn: number; readonly step: Step; readonly active: PlayerId }
   | { readonly type: 'stepEnded'; readonly turn: number; readonly step: Step }
+  | {
+      /** A resolving effect created a persistent command-zone emblem. */
+      readonly type: 'emblemCreated';
+      readonly id: string;
+      readonly player: PlayerId;
+      readonly name: string;
+    }
+  | {
+      /** A resolved effect fixed one exile incarnation for a future step. */
+      readonly type: 'delayedZoneChangeScheduled';
+      readonly id: number;
+      readonly source: ObjectId;
+      readonly target: ObjectId;
+      readonly targetIncarnation: number;
+      readonly dueTurn: number;
+    }
+  | {
+      readonly type: 'delayedCounterPlacementScheduled';
+      readonly id: number;
+      readonly source: ObjectId;
+      readonly target: ObjectId;
+      readonly targetIncarnation: number;
+      readonly dueTurn: number;
+      readonly counter: CounterKind;
+      readonly count: number;
+    }
+  | {
+      readonly type: 'delayedSpellCopyScheduled';
+      readonly id: number;
+      readonly source: ObjectId;
+      readonly player: PlayerId;
+    }
   | { readonly type: 'permanentUntapped'; readonly oid: ObjectId }
   | { readonly type: 'permanentTapped'; readonly oid: ObjectId }
   /**
@@ -68,6 +116,8 @@ export type GameEvent =
       readonly player: PlayerId;
       readonly oid: ObjectId;
       readonly targets: readonly (Target | null)[];
+      readonly multiTargets?: Readonly<Record<number, readonly Target[]>>;
+      readonly damageAllocations?: Readonly<Record<number, readonly number[]>>;
       readonly chosenX: number | null;
     }
   | {
@@ -76,7 +126,17 @@ export type GameEvent =
       readonly oid: ObjectId;
       readonly copiedFrom: ObjectId;
       readonly targets: readonly (Target | null)[];
+      readonly multiTargets?: Readonly<Record<number, readonly Target[]>>;
+      readonly damageAllocations?: Readonly<Record<number, readonly number[]>>;
       readonly chosenX: number | null;
+    }
+  | {
+      /** A resolving effect changed these targets on an existing spell. */
+      readonly type: 'spellTargetsChanged';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      /** Only newly acquired targets; retained targets do not trigger twice. */
+      readonly targets: readonly Target[];
     }
   | {
       /**
@@ -105,6 +165,8 @@ export type GameEvent =
       readonly source: ObjectId;
       readonly index: number;
       readonly targets: readonly (Target | null)[];
+      readonly multiTargets?: Readonly<Record<number, readonly Target[]>>;
+      readonly damageAllocations?: Readonly<Record<number, readonly number[]>>;
       readonly chosenX: number | null;
     }
   | {
@@ -137,7 +199,7 @@ export type GameEvent =
       readonly oid: ObjectId;
       readonly source: ObjectId;
       readonly index: number;
-      readonly condition: TriggerCondition;
+      readonly condition: TriggerCondition | StateTriggerCondition['kind'] | IntrinsicTriggerCondition;
     }
   | {
       /**
@@ -154,6 +216,8 @@ export type GameEvent =
       readonly oid: ObjectId;
       readonly source: ObjectId;
       readonly targets: readonly (Target | null)[];
+      readonly multiTargets?: Readonly<Record<number, readonly Target[]>>;
+      readonly damageAllocations?: Readonly<Record<number, readonly number[]>>;
     }
   | {
       /**
@@ -184,6 +248,8 @@ export type GameEvent =
       readonly why: string;
     }
   | { readonly type: 'spellCountered'; readonly oid: ObjectId; readonly by: ObjectId }
+  | { readonly type: 'abilityCountered'; readonly oid: ObjectId; readonly by: ObjectId }
+  | { readonly type: 'freeCastDeclined'; readonly oid: ObjectId; readonly player: PlayerId }
   | { readonly type: 'spellFizzled'; readonly oid: ObjectId }
   | {
       /**
@@ -221,6 +287,8 @@ export type GameEvent =
       readonly type: 'unlessPaid';
       readonly oid: ObjectId;
       readonly player: PlayerId;
+      /** Present when `oid` is a triggered ability rather than a spell card. */
+      readonly source?: ObjectId | undefined;
     }
   | { readonly type: 'resolutionBegan'; readonly oid: ObjectId }
   | { readonly type: 'effectSkipped'; readonly oid: ObjectId; readonly index: number; readonly why: string }
@@ -230,6 +298,16 @@ export type GameEvent =
       readonly from: ZoneId;
       readonly to: ZoneId;
       readonly owner: PlayerId;
+      /** Layer-derived controller immediately before a battlefield departure. */
+      readonly lastKnownController?: PlayerId | undefined;
+      /** Attachment sources pointing at this object immediately before departure. */
+      readonly attachedSources?: readonly ObjectId[] | undefined;
+      /** Layer-derived power immediately before a creature left the battlefield. */
+      readonly departingCreaturePower?: number | undefined;
+      /** Layer-derived toughness immediately before a creature left the battlefield. */
+      readonly departingCreatureToughness?: number | undefined;
+      /** CR 400.7 identity paired with the departing creature characteristics. */
+      readonly departingBattlefieldIncarnation?: number | undefined;
     }
   | { readonly type: 'permanentEntered'; readonly oid: ObjectId; readonly controller: PlayerId }
   | {
@@ -263,6 +341,14 @@ export type GameEvent =
       readonly plusOnePlusOne: number;
       readonly minusOneMinusOne: number;
       readonly loyalty?: number | undefined;
+      readonly defense?: number | undefined;
+    }
+  | { readonly type: 'battleDefeated'; readonly oid: ObjectId }
+  | {
+      readonly type: 'counterRemoved';
+      readonly oid: ObjectId;
+      readonly counter: CounterKind;
+      readonly count: number;
     }
   | {
       readonly type: 'lifeChanged';
@@ -278,6 +364,42 @@ export type GameEvent =
       readonly power: number;
       readonly toughness: number;
       readonly layer: string;
+    }
+  /**
+   * One source-bound animation began affecting a permanent across layers 4,
+   * 5, and 7b. Existing card types and subtypes are retained.
+   *
+   * This is deliberately not three `continuousEffectAdded` records. That
+   * event promises honest power and toughness fields; type and color changes
+   * have no such numbers, and reporting zeroes would describe effects that
+   * never happened. `effectIds` keeps this public sentence joinable to the
+   * individual records that later expire.
+   */
+  | {
+      readonly type: 'permanentAnimated';
+      readonly effectIds: readonly string[];
+      readonly sourceOid: ObjectId;
+      readonly targetOid: ObjectId;
+      readonly power: number;
+      readonly toughness: number;
+      readonly colors: readonly Color[];
+      readonly subtypes: readonly string[];
+    }
+  | {
+      /** A layer-2 control-changing continuous effect began affecting an object. */
+      readonly type: 'controlEffectAdded';
+      readonly id: string;
+      readonly targetOid: ObjectId;
+      readonly controller: PlayerId;
+      readonly layer: '2';
+    }
+  | {
+      /** A layer-4 additive subtype-changing effect began affecting an object. */
+      readonly type: 'subtypeAdded';
+      readonly id: string;
+      readonly targetOid: ObjectId;
+      readonly subtype: string;
+      readonly layer: '4';
     }
   /**
    * A layer-6 ability was added to one object for a duration.
@@ -305,6 +427,13 @@ export type GameEvent =
       readonly id: string;
       readonly targetOid: ObjectId;
       readonly keyword: GrantableKeyword;
+      readonly layer: string;
+    }
+  | {
+      readonly type: 'keywordAbilityRemoved';
+      readonly id: string;
+      readonly targetOid: ObjectId;
+      readonly keywordAbility: 'defender';
       readonly layer: string;
     }
   | { readonly type: 'continuousEffectsExpired'; readonly ids: readonly string[] }
@@ -337,6 +466,11 @@ export type GameEvent =
   | { readonly type: 'attackersDeclared'; readonly player: PlayerId; readonly attacks: readonly Attack[] }
   | { readonly type: 'blockersDeclared'; readonly player: PlayerId; readonly blocks: readonly Block[] }
   | {
+      readonly type: 'attackerOrderChosen';
+      readonly blocker: ObjectId;
+      readonly attackers: readonly ObjectId[];
+    }
+  | {
       readonly type: 'blockerOrderChosen';
       readonly attacker: ObjectId;
       readonly blockers: readonly ObjectId[];
@@ -349,6 +483,13 @@ export type GameEvent =
       readonly player: PlayerId;
       readonly count: number;
       readonly bottom: number;
+    }
+  | {
+      /** Public result of one deterministic RNG draw, attributed to its source. */
+      readonly type: 'coinFlipped';
+      readonly player: PlayerId;
+      readonly sourceOid: ObjectId;
+      readonly result: 'win' | 'loss';
     }
   | { readonly type: 'cardsDiscarded'; readonly player: PlayerId; readonly oids: readonly ObjectId[] }
   | {
@@ -381,6 +522,21 @@ export type GameEvent =
        * unlike a search, no shuffle follows to close the boundary for it.
        */
       readonly type: 'libraryTopRevealed';
+      readonly player: PlayerId;
+      readonly oids: readonly ObjectId[];
+    }
+  | {
+      /**
+       * Cards selected from a private, bounded library window and shown to all
+       * players without claiming they occupied a contiguous prefix.
+       *
+       * This is distinct from `libraryTopRevealed`: Augur of Bolas may reveal
+       * the third card it looked at, and recording that one card as the top of
+       * the library would make the replay log lie about the order. As with the
+       * other reveal events, this event is the whole public action rather than
+       * lasting state on the object.
+       */
+      readonly type: 'libraryCardsRevealed';
       readonly player: PlayerId;
       readonly oids: readonly ObjectId[];
     }

@@ -126,13 +126,21 @@ const LANDS = [
   exampleCard('slc-mountain'),
 ] as const;
 
+/** Preserve the rig's physical-card density now that equal identities form one pile. */
+function distinctCard(card: (typeof SPELLS)[number], position: string): (typeof SPELLS)[number] {
+  return { ...card, id: `${card.id}-${position}` };
+}
+
 /** WCAG 2.5.8, and the floor `styles/board/fit.ts` already states for a face. */
 const TARGET_MIN_PX = 24;
 
 function board(perSide: number): GameSession {
   const battlefield = ([0, 1] as const).flatMap((controller) => [
     ...Array.from({ length: perSide }, (_unused, index) => ({
-      card: SPELLS[index % SPELLS.length] ?? SPELLS[0],
+      card: distinctCard(
+        SPELLS[index % SPELLS.length] ?? SPELLS[0],
+        `${String(controller)}-${String(index)}`,
+      ),
       controller,
       tapped: index % 2 === 0,
       summoningSick: false,

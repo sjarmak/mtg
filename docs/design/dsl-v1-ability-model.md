@@ -69,12 +69,13 @@ const baseShape = {
    * on the battlefield; `checkAbilities` enforces that per card kind, the way
    * `checkEffects` enforces the spell-only rule for `effects`.
    */
-  abilities: z.array(AbilitySchema).max(2).default([]),
+  abilities: z.array(AbilitySchema).max(3).default([]),
   // …unchanged…
 };
 ```
 
-`max(2)` is a New-World-Order budget, not a technical limit; §6 argues it.
+`max(3)` is the hand-authored engine envelope, not a technical limit. The model-facing generator
+schema remains capped at two as a separate New-World-Order design budget; §6 argues that boundary.
 
 ### 1.2 `packages/dsl/src/abilities.ts` (new)
 

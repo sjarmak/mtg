@@ -25,6 +25,7 @@
  * `./arrival.ts` gives for the same reason.
  */
 import { cssNumber } from '../number';
+import { PACE_ATTRIBUTE, PACE_VAR, PACES, paceCss, paceScale } from '../../motion/pace';
 import { MARK_FAST_MS, MARK_MS } from '../../motion/timing';
 
 /**
@@ -91,7 +92,7 @@ const MARK = `
   to { box-shadow: 0 0 0 0 transparent; }
 }
 .mtg-slot[data-motion-mark] > .mtg-card {
-  animation: mtg-motion-mark ${cssNumber(MARK_MS)}ms var(--mtg-ease);
+  animation: mtg-motion-mark ${paceCss(MARK_MS)} var(--mtg-ease);
   border-radius: var(--mtg-radius-card);
 }
 .mtg-slot[data-motion-mark='damage'] > .mtg-card { --motion-mark: var(--mtg-negative); }
@@ -99,7 +100,7 @@ const MARK = `
 .mtg-slot[data-motion-mark='target'] > .mtg-card { --motion-mark: var(--mtg-accent); }
 .mtg-slot[data-motion-mark='tap'] > .mtg-card {
   --motion-mark: var(--mtg-ink-faint);
-  animation-duration: ${cssNumber(MARK_FAST_MS)}ms;
+  animation-duration: ${paceCss(MARK_FAST_MS)};
 }
 @media (prefers-reduced-motion: reduce) {
   .mtg-slot[data-motion-mark] > .mtg-card {
@@ -108,4 +109,21 @@ const MARK = `
 }
 `;
 
-export const MOTION_CSS = `${LAYER}${MARK}`;
+/**
+ * The pace, as four rules turning `PACE_ATTRIBUTE` into `PACE_VAR`.
+ *
+ * Generated from `PACES` rather than written out, so the sheet cannot be one
+ * setting behind the scale: a pace with no rule here would fall through to the
+ * `var(--mtg-pace, 1)` fallback and quietly play at `normal`, which is the most
+ * expensive kind of wrong — the control moves, the table does not.
+ *
+ * The selector is the attribute alone. Whatever element carries it, every
+ * duration below it inherits the multiplier, and that includes the rules in
+ * `./arrival.ts` and `./band.ts`, which is the point of using a property rather
+ * than four copies of each sheet.
+ */
+const PACE = `
+${PACES.map((pace) => `[${PACE_ATTRIBUTE}='${pace}'] { ${PACE_VAR}: ${cssNumber(paceScale(pace))}; }`).join('\n')}
+`;
+
+export const MOTION_CSS = `${LAYER}${MARK}${PACE}`;

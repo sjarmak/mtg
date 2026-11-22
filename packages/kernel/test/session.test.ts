@@ -14,6 +14,7 @@ import {
   simpleAgent,
   stateFingerprint,
 } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import type { Card } from '@mtg/dsl';
 import { exampleCard } from '@mtg/dsl';
 import { lands, MOUNTAIN } from './cards';
@@ -54,7 +55,11 @@ function asBotWould(agent: PlayerAgent): (session: GameSession) => number {
   return (session: GameSession): number => {
     const decision = session.pending;
     if (decision === null) throw new Error('asBotWould: nothing is pending');
-    const wanted = agent.decide({ state: session.state, player: decision.player, decision });
+    const wanted = agent.decide({
+      state: observeState(session.state, decision.player, 'test/session.test.ts:57'),
+      player: decision.player,
+      decision,
+    });
     const key = JSON.stringify(wanted);
     const index = decision.options.findIndex((option) => JSON.stringify(option) === key);
     if (index < 0) {

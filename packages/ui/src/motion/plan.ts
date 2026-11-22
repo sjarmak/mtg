@@ -48,6 +48,8 @@
  */
 import type { GameEvent, ObjectId, PlayerId, ZoneId } from '@mtg/kernel';
 import { BEAT_GAP_MS, ECHO_GAP_MS, MARK_FAST_MS, MARK_MS, MOTION_BUDGET_MS, MOVE_MS } from './timing';
+import { DEFAULT_PACE, paced, paceScale } from './pace';
+import type { Pace } from './pace';
 
 /** Which half of the table an object belongs to, from the viewer's chair. */
 export type MotionSeat = 'you' | 'opponent';
@@ -97,6 +99,16 @@ export interface MotionPlanInput {
   readonly viewer: PlayerId;
   /** `prefers-reduced-motion: reduce`. A true here is an empty plan. */
   readonly reduced?: boolean;
+  /**
+   * How fast the viewer asked the table to move. Absent is `DEFAULT_PACE`, so a
+   * caller that never heard of the setting plans the table `./timing.ts` argues.
+   *
+   * `still` arrives here as an empty plan rather than as instant cues, for the
+   * same reason reduced motion does: a cue of zero length is still a cue, and
+   * the runner would spend a frame writing and clearing attributes nobody asked
+   * to see move.
+   */
+  readonly pace?: Pace;
 }
 
 /** Nothing to do, said once so every early return is the same value. */
@@ -151,6 +163,9 @@ function cuesFor(event: GameEvent, viewer: PlayerId): readonly RawCue[] {
         : [];
     case 'countersChanged':
       return [{ kind: 'mark', oid: event.oid, mark: 'counter' }];
+    case 'counterRemoved':
+    case 'delayedCounterPlacementScheduled':
+      return [];
     case 'permanentTapped':
       return [{ kind: 'mark', oid: event.oid, mark: 'tap' }];
     case 'triggerTargetsChosen':
@@ -168,10 +183,14 @@ function cuesFor(event: GameEvent, viewer: PlayerId): readonly RawCue[] {
   }
 }
 
-/** How long a cue runs. A tap is the one that is shorter, and `./timing.ts` says why. */
-function durationOf(cue: RawCue): number {
-  if (cue.kind === 'move') return MOVE_MS;
-  return cue.mark === 'tap' ? MARK_FAST_MS : MARK_MS;
+/**
+ * How long a cue runs at `pace`. A tap is the one that is shorter, and
+ * `./timing.ts` says why; `./pace.ts` scales all three together, so the reason a
+ * tap is shorter than a mark survives every setting.
+ */
+function durationOf(cue: RawCue, pace: Pace): number {
+  if (cue.kind === 'move') return paced(MOVE_MS, pace);
+  return paced(cue.mark === 'tap' ? MARK_FAST_MS : MARK_MS, pace);
 }
 
 /**
@@ -203,9 +222,15 @@ export function motionPlan(events: readonly GameEvent[], input: MotionPlanInput)
   // the board is fully readable without it, which it is, because every cue here
   // is a second rendering of something the board already draws and the log
   // already narrates.
-  if (input.reduced === true) return { cues: [], totalMs: 0, reduced: true };
+  const pace = input.pace ?? DEFAULT_PACE;
+  if (input.reduced === true || paceScale(pace) === 0) {
+    return { cues: [], totalMs: 0, reduced: true };
+  }
   if (events.length === 0) return EMPTY;
 
+  const budgetMs = paced(MOTION_BUDGET_MS, pace);
+  const beatGapMs = paced(BEAT_GAP_MS, pace);
+  const echoGapMs = paced(ECHO_GAP_MS, pace);
   const cues: MotionCue[] = [];
   const seen = new Set<string>();
   let cursor = 0;
@@ -214,16 +239,16 @@ export function motionPlan(events: readonly GameEvent[], input: MotionPlanInput)
   for (const [index, event] of events.entries()) {
     for (const [offset, raw] of cuesFor(event, input.viewer).entries()) {
       const key = `${String(index)}-${String(offset)}-${raw.oid}`;
-      const durationMs = durationOf(raw);
+      const durationMs = durationOf(raw, pace);
       // Past the ceiling every remaining cue starts together rather than being
       // dropped: the board must not disagree with the log about what happened.
-      const atMs = Math.min(cursor, MOTION_BUDGET_MS);
+      const atMs = Math.min(cursor, budgetMs);
       const repeat = seen.has(echoKey(raw));
       seen.add(echoKey(raw));
       // A tap pays the short gap on its first appearance too. It is the most
       // frequent mark on the table and the one the board already states by
       // rotating the card, so it never sets the pace for what follows it.
-      const gap = repeat || raw.mark === 'tap' ? ECHO_GAP_MS : BEAT_GAP_MS;
+      const gap = repeat || raw.mark === 'tap' ? echoGapMs : beatGapMs;
       cursor = atMs + gap;
       totalMs = Math.max(totalMs, atMs + durationMs);
       if (raw.kind === 'move') {

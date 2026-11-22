@@ -229,12 +229,36 @@ export interface LlmTransport {
   send(request: RawRequest): Promise<RawResponse>;
 }
 
+/**
+ * How the JSON Schema is written down for the model.
+ *
+ * `inline` repeats a reused subschema at every place it occurs, which is what
+ * every recorded fixture in this tree was made under. `ref` states it once
+ * under `$defs` and points at it, which says the same contract in a fraction of
+ * the bytes.
+ *
+ * This is a per-request choice rather than a global one because the schema text
+ * is part of the prompt, and the prompt is part of the fixture key: flipping a
+ * caller that has recordings moves every one of its keys. See
+ * `SchemaEncoding`'s use in `@mtg/dsl-coverage`, the one caller that needs the
+ * compact form today and the one with no recordings to move.
+ */
+export const SCHEMA_ENCODINGS = ['inline', 'ref'] as const;
+export type SchemaEncoding = (typeof SCHEMA_ENCODINGS)[number];
+
+export const DEFAULT_SCHEMA_ENCODING: SchemaEncoding = 'inline';
+
 export interface CompletionRequest<T> {
   readonly system: string;
   readonly prompt: string;
   readonly schema: ZodType<T>;
   readonly maxTokens?: number;
   readonly temperature?: number;
+  /**
+   * Defaults to `inline`. Set `ref` only where no recorded fixture exists, or
+   * where its keys are being moved deliberately.
+   */
+  readonly schemaEncoding?: SchemaEncoding;
 }
 
 /** One failed attempt, kept so an exhausted retry loop is debuggable. */

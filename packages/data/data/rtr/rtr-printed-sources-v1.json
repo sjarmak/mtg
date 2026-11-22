@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-27T18:08:51.512Z",
+  "sources": [
+    {
+      "code": "RTR",
+      "mtgjson": {
+        "file": "RTR-d1205c694fbbf0297d228f06dd05f0a65b87ca4faadaefbe720f3a2f3058556d.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/RTR.json",
+        "sha256": "d1205c694fbbf0297d228f06dd05f0a65b87ca4faadaefbe720f3a2f3058556d",
+        "meta": {
+          "date": "2026-09-27",
+          "version": "5.3.0+20260927"
+        }
+      },
+      "scryfall": {
+        "file": "RTR-49aace46a1c75b0311d811c1f47bb09d8be56fee8f8fe9aa52a88c09129a48c1.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Artr+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "49aace46a1c75b0311d811c1f47bb09d8be56fee8f8fe9aa52a88c09129a48c1",
+        "cards": 274
+      }
+    }
+  ]
+}

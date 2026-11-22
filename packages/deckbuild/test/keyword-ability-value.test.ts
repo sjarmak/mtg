@@ -61,6 +61,25 @@ function delta(power: number, toughness: number, abilities: readonly KeywordAbil
   );
 }
 
+/** What it costs to kill a creature outright: the cap every denial price sits under. */
+const ANSWER = WEIGHTS.effectValue.destroyPermanent.base + WEIGHTS.effectValue.destroyPermanent.perUnit;
+
+/** The power the `defender` row is pinned through. */
+const REFERENCE_POWER = WEIGHTS.combatDenialReferencePower;
+
+/**
+ * The same rules text spelled as a static rather than as a keyword: a
+ * `cantAttack` modification scoped at the creature that carries it. `defender`
+ * is the printed word for exactly this, and `evaluate.ts` prices both through
+ * one function.
+ */
+function staticDelta(power: number, toughness: number): number {
+  const restricted = creature(power, toughness, {
+    abilities: [{ kind: 'static', scope: 'self', subtype: null, modification: { kind: 'cantAttack' } }],
+  });
+  return evaluateCard(restricted, WEIGHTS).score - evaluateCard(creature(power, toughness), WEIGHTS).score;
+}
+
 /**
  * A four-mana walker carrying no loyalty ability at all, because the quantity
  * under test is the loyalty itself: `evaluateCard` prices that at
@@ -85,8 +104,12 @@ function walker(startingLoyalty: number, keywordAbilities: readonly KeywordAbili
 
 describe('the defaults are the derivations they claim to be', () => {
   it('prices defender at what this file already pays to stop a creature attacking', () => {
-    const answer = WEIGHTS.effectValue.destroyPermanent.base + WEIGHTS.effectValue.destroyPermanent.perUnit;
-    expect(ABILITY.defender.flat).toBeCloseTo(-WEIGHTS.auraCombatDenialShare * answer, 10);
+    expect(ABILITY.defender.flat).toBeCloseTo(-WEIGHTS.auraCombatDenialShare * ANSWER, 10);
+    // The two zeroes are not "flat on every body": `evaluate.ts` reads this row
+    // as the price at `combatDenialReferencePower` and rotates a curve through
+    // it, because the same rules text arrives as a `cantAttack` static too and
+    // one table row cannot carry a slope both spellings agree on. What they
+    // mean is that this table contributes nothing else to the price.
     expect(ABILITY.defender.perPower).toBe(0);
     expect(ABILITY.defender.bodyShare).toBe(0);
   });
@@ -122,14 +145,40 @@ describe('the defaults are the derivations they claim to be', () => {
 describe('what each of the six does to a card score', () => {
   it('is the only negative one, and the bead sentence stops being true', () => {
     // "A 0/6 with defender and a 0/6 vanilla are the same card to buildDeck."
-    expect(delta(0, 6, [{ kind: 'defender' }])).toBeCloseTo(ABILITY.defender.flat, 10);
     expect(delta(0, 6, [{ kind: 'defender' }])).toBeLessThan(0);
+    // The table's row is the price at the reference power rather than the price
+    // at every power (`mtg-eetd`), so this is where the two meet.
+    expect(delta(REFERENCE_POWER, 6, [{ kind: 'defender' }])).toBeCloseTo(ABILITY.defender.flat, 10);
   });
 
-  it('charges defender the same on a zero-power body as on a big one', () => {
-    // The aura arm's `cantAttack` is flat, and this is that rules text printed
-    // on the card rather than enchanted onto it.
-    expect(delta(0, 6, [{ kind: 'defender' }])).toBeCloseTo(delta(6, 6, [{ kind: 'defender' }]), 10);
+  it('charges defender for the attack the body would actually have made', () => {
+    // The defect `mtg-eetd` names, stated as the assertion that used to hold:
+    // a 0/6 wall and a 6/6 that gains defender were charged the same 1.3, one
+    // for an attack it could never profitably make and one for the attack that
+    // was its whole point.
+    const wall = delta(0, 6, [{ kind: 'defender' }]);
+    const giant = delta(6, 6, [{ kind: 'defender' }]);
+    expect(giant).toBeLessThan(wall);
+    // Monotone across the whole range a printed creature occupies, and never
+    // dearer than simply killing the thing.
+    const prices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 12].map((power) => delta(power, 6, [{ kind: 'defender' }]));
+    for (const [index, price] of prices.entries()) {
+      if (index > 0) expect(price).toBeLessThan((prices[index - 1] ?? 0) + 1e-9);
+      expect(price).toBeGreaterThan(-ANSWER - 1e-9);
+    }
+    // The floor is a vigilance the card does not have: at zero power the only
+    // thing "cannot attack" takes away is the choice to leave the body back.
+    expect(prices[0]).toBeCloseTo(-WEIGHTS.keywordBase.vigilance, 10);
+  });
+
+  it('prices the printed word and the self-facing static as one rules text', () => {
+    // `mtg-eetd`'s acceptance criterion. `defender` and a `cantAttack` static
+    // scoped at the card that carries it are the same sentence in two
+    // spellings, and moving one price without the other fails here rather than
+    // pricing a Wall one thing printed and another thing granted.
+    for (const power of [0, 1, 3, 5, 8]) {
+      expect(staticDelta(power, 6)).toBeCloseTo(delta(power, 6, [{ kind: 'defender' }]), 10);
+    }
   });
 
   it('credits the other five on a body that can use them', () => {
@@ -191,6 +240,63 @@ describe('what each of the six does to a card score', () => {
   });
 });
 
+/**
+ * A cheap artifact whose whole value is one static, which is the point: an
+ * artifact has no stat line, so the body `indestructible` takes a share of can
+ * only be what the card's text is worth.
+ */
+function artifact(keywordAbilities: readonly KeywordAbility[], text = true): Card {
+  return parseCard({
+    kind: 'artifact',
+    id: 'tst-artifact',
+    name: 'Test Artifact',
+    rarity: 'rare',
+    set: { code: 'TST', collectorNumber: 3 },
+    manaCost: { generic: 2 },
+    abilities: text
+      ? [
+          {
+            kind: 'static',
+            scope: 'creaturesYouControl',
+            subtype: null,
+            modification: { kind: 'statBonus', power: 1, toughness: 1 },
+          },
+        ]
+      : [],
+    keywordAbilities: [...keywordAbilities],
+  });
+}
+
+/** The same arrangement one card kind over, because both hit the same arm. */
+function enchantment(keywordAbilities: readonly KeywordAbility[]): Card {
+  return parseCard({
+    kind: 'enchantment',
+    id: 'tst-enchantment',
+    name: 'Test Enchantment',
+    rarity: 'rare',
+    set: { code: 'TST', collectorNumber: 4 },
+    manaCost: { generic: 1, W: 1 },
+    colors: ['W'],
+    abilities: [
+      {
+        kind: 'static',
+        scope: 'creaturesYouControl',
+        subtype: null,
+        modification: { kind: 'statBonus', power: 1, toughness: 1 },
+      },
+    ],
+    keywordAbilities: [...keywordAbilities],
+  });
+}
+
+/** What `permanentTextBody` reads: every component but the mana penalty. */
+function textBody(card: Card): number {
+  return evaluateCard(card, WEIGHTS).components.reduce(
+    (sum, component) => (component.name === 'manaPenalty' ? sum : sum + component.value),
+    0,
+  );
+}
+
 describe('the permanents that are not creatures', () => {
   it('prices a walker`s hexproof off the loyalty it already prices as toughness', () => {
     const bare = evaluateCard(walker(4, []), WEIGHTS).score;
@@ -210,14 +316,44 @@ describe('the permanents that are not creatures', () => {
       evaluateCard(walker(6, []), WEIGHTS).score;
     expect(high).toBeCloseTo(low * 3, 10);
   });
+
+  it('ranks an indestructible artifact above the same artifact without the word', () => {
+    // `mtg-trp8`. Both were the same card to `buildDeck` for as long as the
+    // share was a share of a stat line an artifact does not have.
+    expect(evaluateCard(artifact([{ kind: 'indestructible' }]), WEIGHTS).score).toBeGreaterThan(
+      evaluateCard(artifact([]), WEIGHTS).score,
+    );
+  });
+
+  it('takes the share of the artifact`s own text value', () => {
+    const bare = evaluateCard(artifact([]), WEIGHTS).score;
+    const tough = evaluateCard(artifact([{ kind: 'indestructible' }]), WEIGHTS).score;
+    expect(tough - bare).toBeCloseTo(ABILITY.indestructible.bodyShare * textBody(artifact([])), 10);
+  });
+
+  it('prices an enchantment off the same body, because it has the same one', () => {
+    const bare = evaluateCard(enchantment([]), WEIGHTS).score;
+    const shrouded = evaluateCard(enchantment([{ kind: 'shroud' }]), WEIGHTS).score;
+    expect(shrouded - bare).toBeCloseTo(ABILITY.shroud.bodyShare * textBody(enchantment([])), 10);
+  });
+
+  it('pays nothing for indestructible on an artifact whose text is a liability', () => {
+    // The clamp. A vanilla artifact sits at `vanillaArtifactBaseline`, which is
+    // negative, and a negative share would pay its controller for printing a
+    // word that keeps a card doing nothing on the battlefield.
+    expect(textBody(artifact([], false))).toBeLessThan(0);
+    expect(evaluateCard(artifact([{ kind: 'indestructible' }], false), WEIGHTS).score).toBe(
+      evaluateCard(artifact([], false), WEIGHTS).score,
+    );
+  });
 });
 
 describe('the body every permanent price shares', () => {
   it('carries keyword abilities, so a sacrifice cost prices what it eats', () => {
     // `sacrificedValue`'s docblock claims "bodyValue carries every stat and
     // keyword it gives up"; before this it carried one of the two vocabularies.
-    const vanilla = bodyValue(2, 2, [], [], WEIGHTS);
-    const tough = bodyValue(2, 2, [], [{ kind: 'indestructible' }], WEIGHTS);
+    const vanilla = bodyValue(2, 2, [], [], [], WEIGHTS, undefined);
+    const tough = bodyValue(2, 2, [], [], [{ kind: 'indestructible' }], WEIGHTS, undefined);
     expect(tough).toBeGreaterThan(vanilla);
   });
 });

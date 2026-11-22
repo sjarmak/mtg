@@ -14,7 +14,7 @@
  * refereed games are excluded from balance CI (ADR-0001 §2.4).
  */
 import type { Action, AgentView, GameEvent, GameResult, GameState, PlayerAgent } from '@mtg/kernel';
-import { pendingDecision, reduce } from '@mtg/kernel';
+import { agentView, pendingDecision, reduce, settleAgentAction } from '@mtg/kernel';
 import type { Referee, RulingRecord } from './referee';
 
 export type RefereedSeat =
@@ -69,7 +69,13 @@ export async function playRefereed(
       throw new Error(`playRefereed: exceeded ${String(limit)} decisions without finishing the game`);
     }
     const seat = seats[decision.player];
-    const view: AgentView = { state: current, player: decision.player, decision };
+    const view: AgentView = agentView(
+      current,
+      decision.player,
+      decision,
+      `referee:${String(decisions)}`,
+      (candidate) => settleAgentAction(current, candidate),
+    );
     let action: Action;
     if (seat.kind === 'agent') {
       action = seat.agent.decide(view);

@@ -289,6 +289,13 @@ Full descriptions with acceptance criteria are in the structured output accompan
 2. **Forge seeded determinism.** Manabrew proves deterministically-driven Forge games are possible;
    whether the `sim` CLI (vs a purpose-built bridge) can be seeded reproducibly is unverified —
    spike A should probe it, and the parity harness depends on the answer.
+
+   > **Answered 2026-08-16 by spike C** (`spike-c-forge-parity-substrate.md` §2.2), recorded here
+   > 2026-08-28 (`mtg-egv9`) because ADR-0001 §8 item 2 carried the same stale sentence. `-s`
+   > reproduces: two fully logged runs at one seed differ only in a start-up banner carrying a wall
+   > clock, and two different seeds disagree on three of five winners. What it does not buy is a
+   > comparable trace — the log reports no characteristics at all — which is the finding that
+   > actually binds the parity harness, in ADR-0001 §11.7.
 3. **Throughput sufficiency thresholds.** What TS games/sec triggers the native-core escape hatch,
    and what Forge games/hour would have changed this decision — both get real numbers from the
    slice; the thresholds themselves (10⁴ games/revision assumed sufficient per the metrics

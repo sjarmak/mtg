@@ -14,8 +14,9 @@ import type {
   CountFilter,
   CounterKind,
   Effect,
+  EffectOf,
   EffectScope,
-  GrantableKeyword,
+  OverloadEffect,
   PlayerScope,
   PumpAmount,
   TargetFilter,
@@ -24,29 +25,40 @@ import type {
 import {
   assertNever,
   counterStatBonus,
-  effectsFor,
+  EFFECT_CAPABILITIES,
+  hasTarget,
   isAuraCard,
   isCreatureTokenSpec,
   isLiteralAmount,
+  isOverloadOnlyEffect,
+  isPermanentCard,
+  isSourceBodyOnlyTarget,
+  overloadEffectForMember,
+  spellEffectsFor,
 } from '@mtg/dsl';
-import type { GameState, ObjectId, PlayerId, Target } from '@mtg/kernel';
+import type { CastingCostChoice, GameState, ObjectId, PlayerId, Target } from '@mtg/kernel';
 import {
+  canCounterStackEntry,
   counterCount,
   derivedCharacteristics,
+  controllerOf,
   hasGrantableKeyword,
   hasKeyword,
+  hasKeywordAbility,
   objectFilter,
   objectsInEffectScope,
   opponentOf,
+  scopedDamageGroup,
   scopedGroup,
   PLAYER_IDS,
   powerOf,
   selectMatching,
+  satisfiesTargetFilter,
   toughnessOf,
   tryObject,
 } from '@mtg/kernel';
 import type { CastPolicyConfig, RacePolicyConfig, TargetPolicyConfig } from '../config';
-import { boardCreatureValue, isLethalDamage, modificationValueOn } from '../evaluate';
+import { boardCreatureValue, isLethalDamage, modificationValueOn, printedCardValue } from '../evaluate';
 import { isAttacking } from './combat';
 import type { RaceAssessment } from './race';
 import { assessRace } from './race';
@@ -63,18 +75,28 @@ interface TargetContext {
   /**
    * The body the effect is printed on, when there is one.
    *
-   * Only `fight` reads it, and it is the one primitive whose value depends on
-   * the source rather than on the target alone: what a fight is worth is the
-   * two power values against the two toughness values, and knowing only the
-   * target's half answers half the question. `undefined` for a spell, whose
-   * stack object is not a creature and has no power to fight with.
+   * `fight` reads its power and a retained self target reads its object. Both
+   * are values an activated or triggered ability already carries rather than
+   * CR 115 choices. `undefined` for a spell, whose stack object is not a
+   * battlefield permanent.
    */
   readonly sourceOid: ObjectId | undefined;
+  /**
+   * The permanents this cast option pays its additional sacrifice with, which
+   * `paidSacrificePower` is the total power of.
+   *
+   * Empty for every other decision. It is a property of the *option* rather
+   * than of the board — the kernel enumerates one cast option per legal
+   * sacrifice set (`legal.ts`), so two options for one Fling differ in nothing
+   * else — which is why it is carried here beside `chosenX` rather than derived
+   * from the state.
+   */
+  readonly sacrifices: readonly ObjectId[];
 }
 
 function isMine(state: GameState, oid: ObjectId, me: PlayerId): boolean {
   const object = tryObject(state, oid);
-  return object !== undefined && object.controller === me;
+  return object !== undefined && controllerOf(state, oid) === me;
 }
 
 /**
@@ -201,6 +223,7 @@ function preventDamageScore(context: TargetContext, target: Target | null): numb
 function fightScore(context: TargetContext, target: Target | null): number {
   const { state, me, sourceOid, target: weights } = context;
   if (target === null || target.kind !== 'permanent' || sourceOid === undefined) return 0;
+  if (tryObject(state, sourceOid)?.zone !== 'battlefield') return 0;
   if (isMine(state, target.oid, me)) return -weights.ownGoalPenalty;
   const dealt = damageScore(
     context,
@@ -251,25 +274,29 @@ function scopedBoardScore(
   filter: TargetFilter | undefined,
   target: Target | null,
   perMember: (context: TargetContext, member: Target) => number,
+  additionalFilter?: TargetFilter,
 ): number {
-  return scopedGroup(context.state, scope, filter, target, context.me).reduce(
+  return scopedDamageGroup(context.state, scope, filter, additionalFilter, target, context.me).reduce(
     (sum, oid) => sum + perMember(context, { kind: 'permanent', oid }),
     0,
   );
 }
 
-function scopedExileScore(context: TargetContext, scope: EffectScope, target: Target | null): number {
+function scopedExileScore(
+  context: TargetContext,
+  scope: EffectScope,
+  filter: TargetFilter | undefined,
+  target: Target | null,
+): number {
   switch (scope) {
-    // The space scopes share this arm rather than an unreachable stub: exile
-    // does not admit them (`SCOPES_LEGAL_ON`), and if it ever did, what it
-    // would be worth is what a one-sided wrath is worth. A `return 0` here
-    // would be a guess about a card that cannot exist; this is the same answer
-    // the arm above it gives, which is the honest one.
+    // A battlefield scope is worth what a one-sided wrath over its filtered
+    // group is worth. Mass Polymorph is the controller-relative, targetless
+    // member; the targeted-player scope shares the same arithmetic.
     case 'creaturesThatPlayerControls':
     case 'allPermanents':
     case 'permanentsYouControl':
     case 'permanentsOpponentsControl':
-      return scopedBoardScore(context, scope, undefined, target, destroyScore);
+      return scopedBoardScore(context, scope, filter, target, destroyScore);
     case 'creatureCardsInPlayerHand': {
       if (target === null || target.kind !== 'player') return 0;
       const group = objectsInEffectScope(context.state, scope, target.player);
@@ -281,6 +308,12 @@ function scopedExileScore(context: TargetContext, scope: EffectScope, target: Ta
     // flashback, delve), so a graveyard sweep scores as doing nothing rather
     // than as a guess this evaluator cannot check.
     case 'creatureCardsInPlayerGraveyard':
+    case 'creatureCardsInAllGraveyards':
+      return 0;
+    // Strict DSL validation reserves this linked target-and-group scope for
+    // damage. Keep the total switch honest without assigning an exile policy
+    // to an effect shape no card can parse.
+    case 'targetAndPermanentsItsPlayerControls':
       return 0;
     default:
       return assertNever(scope, 'scopedExileScore');
@@ -387,6 +420,29 @@ function sweepDirection(scope: PlayerScope): number {
   }
 }
 
+/** Number of cards a literal or whole-hand discard removes from one seat. */
+function discardCount(state: GameState, player: PlayerId, count: number | 'all'): number {
+  const handSize = state.players[player].hand.length;
+  return count === 'all' ? handSize : Math.min(count, handSize);
+}
+
+/** Differential value of an untargeted discard across its named seats. */
+function discardSweepScore(
+  context: TargetContext,
+  scope: PlayerScope,
+  count: number | 'all',
+  valuePerCard: number,
+): number {
+  const opponent = opponentOf(context.me);
+  if (scope === 'eachOpponent') {
+    return discardCount(context.state, opponent, count) * valuePerCard;
+  }
+  return (
+    (discardCount(context.state, opponent, count) - discardCount(context.state, context.me, count)) *
+    valuePerCard
+  );
+}
+
 function tapScore(context: TargetContext, target: Target | null): number {
   const { state, me, target: weights } = context;
   if (target === null || target.kind !== 'permanent') return 0;
@@ -439,13 +495,27 @@ function tapScore(context: TargetContext, target: Target | null): number {
  * (`UNPRICED_EFFECT_KINDS`); one honest unit keeps the grant preferred over
  * doing nothing and beaten by anything the policy can actually measure.
  */
-function grantKeywordScore(context: TargetContext, keyword: GrantableKeyword, target: Target | null): number {
+function grantKeywordScore(
+  context: TargetContext,
+  effect: Extract<Effect, { kind: 'grantKeywordUntilEndOfTurn' }>,
+  target: Target | null,
+): number {
   const { state, me, target: weights } = context;
-  if (target === null || target.kind !== 'permanent') return 0;
-  if (!isMine(state, target.oid, me)) return -weights.ownGoalPenalty;
-  if (tryObject(state, target.oid) === undefined) return 0;
-  if (hasGrantableKeyword(state, target.oid, keyword)) return 0;
-  return weights.pumpPowerWeight;
+  const oid =
+    target?.kind === 'permanent'
+      ? target.oid
+      : effect.target.kind === 'selfCreature'
+        ? context.sourceOid
+        : undefined;
+  if (oid === undefined) return 0;
+  if (!isMine(state, oid, me)) return -weights.ownGoalPenalty;
+  if (tryObject(state, oid) === undefined) return 0;
+  const grant = hasGrantableKeyword(state, oid, effect.keyword) ? 0 : weights.pumpPowerWeight;
+  const removal =
+    effect.removeKeywordAbility === 'defender' && hasKeywordAbility(state, oid, 'defender')
+      ? weights.pumpPowerWeight
+      : 0;
+  return grant + removal;
 }
 
 /**
@@ -499,6 +569,56 @@ function untapScore(context: TargetContext, target: Target | null): number {
   return weights.tapValue + boardCreatureValue(context.cast, state, target.oid);
 }
 
+/** Temporary theft gets the opponent's body for one turn without removing it. */
+function temporaryControlScore(context: TargetContext, target: Target | null): number {
+  const { state, me, target: weights } = context;
+  if (target === null || target.kind !== 'permanent') return 0;
+  if (isMine(state, target.oid, me)) return -weights.ownGoalPenalty;
+  if (tryObject(state, target.oid) === undefined) return 0;
+  return boardCreatureValue(context.cast, state, target.oid) + threatValue(context, target.oid);
+}
+
+/**
+ * Value of handing an opponent a source whose controller takes recurring upkeep damage.
+ *
+ * The swing is counted in both directions: this seat stops taking the damage
+ * and the opponent starts taking it. One firing is certain if the source
+ * remains there; `triggerValue` supplies the existing confidence in one more
+ * firing rather than introducing a Jinxed-Idol-only horizon constant.
+ */
+function sourceControlTransferScore(context: TargetContext, target: Target | null): number {
+  if (
+    target === null ||
+    target.kind !== 'player' ||
+    target.player === context.me ||
+    context.sourceOid === undefined
+  ) {
+    return 0;
+  }
+  const source = tryObject(context.state, context.sourceOid);
+  if (source?.zone !== 'battlefield') return 0;
+  const controllerDamage = source.card.abilities.reduce((sum, ability) => {
+    if (ability.kind !== 'triggered' || ability.condition !== 'beginningOfYourUpkeep') return sum;
+    return (
+      sum +
+      ability.effects.reduce((abilitySum, effect) => {
+        if (
+          effect.kind !== 'dealDamage' ||
+          !isLiteralAmount(effect.amount) ||
+          effect.target.kind !== 'noTarget' ||
+          effect.scope !== undefined ||
+          effect.players !== undefined
+        ) {
+          return abilitySum;
+        }
+        return abilitySum + effect.amount;
+      }, 0)
+    );
+  }, 0);
+  const expectedFirings = 1 + context.cast.triggerValue.beginningOfYourUpkeep;
+  return controllerDamage * context.target.faceDamageWeight * 2 * expectedFirings;
+}
+
 function bounceScore(context: TargetContext, target: Target | null): number {
   const { state, me, target: weights } = context;
   if (target === null || target.kind !== 'permanent') return 0;
@@ -508,6 +628,23 @@ function bounceScore(context: TargetContext, target: Target | null): number {
     weights.bounceValue +
     threatValue(context, target.oid)
   );
+}
+
+/** Value of moving a targeted object to its owner's hand from its current zone. */
+function returnToHandScore(context: TargetContext, target: Target | null): number {
+  if (target?.kind !== 'card') return bounceScore(context, target);
+  const object = tryObject(context.state, target.oid);
+  if (object === undefined) return 0;
+  return object.owner === context.me ? context.target.cardDrawValue : -context.target.cardDrawValue;
+}
+
+/** Value of one graveyard card becoming a permanent on the battlefield. */
+function graveyardPermanentValue(context: TargetContext, card: Card): number {
+  if (!isPermanentCard(card)) return 0;
+  if (card.kind === 'creature') {
+    return context.cast.creatureBaseValue + card.power * context.cast.powerWeight;
+  }
+  return Math.max(context.target.cardDrawValue, printedCardValue(context.cast, card));
 }
 
 function counterScore(context: TargetContext, target: Target | null): number {
@@ -534,26 +671,39 @@ function tokenScore(context: TargetContext, token: TokenSpec): number {
   return context.cast.creatureBaseValue + token.power * context.cast.powerWeight;
 }
 
+interface PredictedExileTally {
+  readonly cards: number;
+  readonly permanents: number;
+}
+
+const NOTHING_PREDICTED_EXILED: PredictedExileTally = { cards: 0, permanents: 0 };
+
 /**
- * How many *cards* this effect would put into exile, read off the board the
- * policy is looking at.
+ * What this effect would exile, split the same way as the kernel's two
+ * resolution tallies.
  *
- * The mirror of the kernel's `exiledSince`, and it has to be a prediction rather
- * than a reading because a policy runs before the spell resolves. The group
- * comes from the kernel's own `objectsInEffectScope`, so the two answers
- * agree by construction on everything except what changes between the choice and
- * the resolution — which is the honest residue, not a guess. Tokens are dropped
- * for the reason the kernel drops them: a token exiled is not a card exiled.
+ * The prediction is necessary because the policy runs before the spell
+ * resolves. `scopedGroup` is the kernel's own group derivation, including the
+ * controller-relative space scopes that choose no target. Cards exclude
+ * tokens; permanents include them but only while the predicted move starts on
+ * the battlefield. That distinction is Mass Polymorph's "that many."
  */
-function exiledCardsBy(context: TargetContext, effect: Effect, target: Target | null): number {
-  if (effect.kind !== 'exileTarget') return 0;
-  const isCard = (oid: ObjectId): boolean => tryObject(context.state, oid)?.token !== true;
-  if (effect.scope !== undefined) {
-    if (target === null || target.kind !== 'player') return 0;
-    return objectsInEffectScope(context.state, effect.scope, target.player).filter(isCard).length;
-  }
-  if (target === null || target.kind !== 'permanent') return 0;
-  return isCard(target.oid) ? 1 : 0;
+function exiledBy(context: TargetContext, effect: Effect, target: Target | null): PredictedExileTally {
+  if (effect.kind !== 'exileTarget') return NOTHING_PREDICTED_EXILED;
+  const oids =
+    effect.scope !== undefined
+      ? scopedGroup(context.state, effect.scope, effect.scopeFilter, target, context.me)
+      : target?.kind === 'permanent'
+        ? [target.oid]
+        : [];
+  return oids.reduce<PredictedExileTally>((tally, oid) => {
+    const object = tryObject(context.state, oid);
+    if (object === undefined) return tally;
+    return {
+      cards: tally.cards + (object.token ? 0 : 1),
+      permanents: tally.permanents + (object.zone === 'battlefield' ? 1 : 0),
+    };
+  }, NOTHING_PREDICTED_EXILED);
 }
 
 /**
@@ -574,8 +724,8 @@ function graveyardCount(context: TargetContext, whose: 'you' | 'each'): number {
 }
 
 /**
- * How many of `me`'s permanents on `state` match `filter`, read off the board
- * this policy is looking at right now.
+ * How many permanents in `controller`'s domain match `filter`, read off the
+ * board this policy is looking at right now. `null` means both sides.
  *
  * `countMatching` (CR 107.3h) is a snapshot of the board, not an event log,
  * so unlike `exiledCardsBy` there is nothing to predict across the rest of
@@ -587,11 +737,27 @@ function graveyardCount(context: TargetContext, whose: 'you' | 'each'): number {
  * on, so this reads the identical shape the resolution will, the same
  * reasoning `objectsInEffectScope` above was exported for.
  */
-function countMatching(state: GameState, me: PlayerId, filter: CountFilter): number {
+function countMatching(
+  state: GameState,
+  controller: PlayerId | null,
+  filter: CountFilter,
+  excludeSource = false,
+  sourceOid?: ObjectId,
+): number {
+  if (excludeSource && sourceOid === undefined) {
+    throw new Error('a predicted count excluding its source has no source object');
+  }
   return selectMatching(
+    state,
     state.battlefield,
     derivedCharacteristics(state),
-    objectFilter({ cardTypes: filter.cardTypes ?? null, subtypes: filter.subtypes ?? null, controller: me }),
+    objectFilter({
+      cardTypes: filter.cardTypes ?? null,
+      subtypes: filter.subtypes ?? null,
+      names: filter.names ?? null,
+      controller,
+      excludeOids: excludeSource && sourceOid !== undefined ? [sourceOid] : null,
+    }),
   ).length;
 }
 
@@ -615,9 +781,15 @@ function countWithCounter(
   counters: readonly CounterKind[],
 ): number {
   const matching = selectMatching(
+    state,
     state.battlefield,
     derivedCharacteristics(state),
-    objectFilter({ cardTypes: filter.cardTypes ?? null, subtypes: filter.subtypes ?? null, controller: me }),
+    objectFilter({
+      cardTypes: filter.cardTypes ?? null,
+      subtypes: filter.subtypes ?? null,
+      names: filter.names ?? null,
+      controller: me,
+    }),
   );
   return matching.filter((oid) => {
     const object = tryObject(state, oid);
@@ -640,9 +812,15 @@ function greatestPowerAmong(state: GameState, me: PlayerId, filter: CountFilter)
   const map = derivedCharacteristics(state);
   let greatest = 0;
   for (const oid of selectMatching(
+    state,
     state.battlefield,
     map,
-    objectFilter({ cardTypes: filter.cardTypes ?? null, subtypes: filter.subtypes ?? null, controller: me }),
+    objectFilter({
+      cardTypes: filter.cardTypes ?? null,
+      subtypes: filter.subtypes ?? null,
+      names: filter.names ?? null,
+      controller: me,
+    }),
   )) {
     const power = map.get(oid)?.power ?? 0;
     if (power > greatest) greatest = power;
@@ -662,6 +840,7 @@ function greatestPowerAmong(state: GameState, me: PlayerId, filter: CountFilter)
  */
 function countLandsWithSubtype(state: GameState, subtype: string, controller: PlayerId | null): number {
   return selectMatching(
+    state,
     state.battlefield,
     derivedCharacteristics(state),
     objectFilter({ cardTypes: ['land'], subtypes: [subtype], controller }),
@@ -671,11 +850,10 @@ function countLandsWithSubtype(state: GameState, subtype: string, controller: Pl
 /**
  * A printed quantity, as this policy expects it to come out.
  *
- * `exiled` is what the earlier effects of the same spell are predicted to have
- * exiled by the time this one applies — the policy's version of the kernel's
- * resolution mark. Without it a spell whose damage counts its own sweep scores
- * as zero damage, and a bot holding the set's best card would cast it as though
- * it were half a card.
+ * `exiled` is the pair of card and permanent counts earlier effects of the
+ * same spell are predicted to have produced by the time this one applies — the
+ * policy's version of the kernel's resolution tally. Without it a spell whose
+ * result counts its own sweep scores the linked result as zero.
  *
  * `cardsInGraveyard` reads the graveyard as the board stands before the spell
  * resolves, not as an earlier effect in the same list would leave it after
@@ -690,15 +868,30 @@ function countLandsWithSubtype(state: GameState, subtype: string, controller: Pl
  * as well as a count, and this policy has to price Mutilate before it decides
  * where to aim it.
  */
-function predictAmount(context: TargetContext, amount: PumpAmount, exiled: number): number {
+function predictAmount(
+  context: TargetContext,
+  amount: PumpAmount,
+  exiled: PredictedExileTally,
+  target: Target | null,
+): number {
   if (isLiteralAmount(amount)) return amount;
   switch (amount.kind) {
     case 'exiledThisResolution':
-      return exiled;
+      return exiled.cards;
+    case 'permanentsExiledThisResolution':
+      return exiled.permanents;
     case 'cardsInGraveyard':
       return graveyardCount(context, amount.whose);
+    case 'controllerLifeTotal':
+      return context.state.players[context.me].life;
     case 'countMatching':
-      return countMatching(context.state, context.me, amount.filter);
+      return countMatching(
+        context.state,
+        amount.whose === 'each' ? null : context.me,
+        amount.filter,
+        amount.excludeSource === true,
+        context.sourceOid,
+      );
     case 'countWithCounter':
       return countWithCounter(context.state, context.me, amount.filter, amount.counters);
     case 'countMatchingOpponent':
@@ -718,13 +911,65 @@ function predictAmount(context: TargetContext, amount: PumpAmount, exiled: numbe
       // than a shrug — the policy is choosing a target for the clause that will
       // deal the damage, and Corrupt's life-gain clause takes no target at all.
       return 0;
+    case 'cardsShuffledFromGraveyardThisResolution':
+      // The count is created by an earlier resolving instruction and cannot distinguish target tuples now.
+      return 0;
+    case 'lifeLostThisResolution':
+      // Like the damage-linked rider above, this amount is read after the
+      // targeting policy has finished. Blood Tithe's life-gain clause is
+      // untargeted, so zero is the honest pre-resolution prediction here.
+      return 0;
+    case 'thatCreatureToughness':
+      // The value belongs to an earlier target slot, while this scorer is
+      // called one tuple member at a time and the referent slot itself carries
+      // null. The linked life-gain clause cannot change which creature the
+      // spell may target, so zero is the honest neutral prediction here; the
+      // kernel retains and applies the exact layered value at resolution.
+      return 0;
+    case 'paidSacrificePower':
+      // The payment choice belongs to the complete cast action, and the option
+      // carries it: `context.sacrifices` is the set this option pays with, so
+      // the power is the layered power of those permanents right now. It read
+      // zero until `mtg-sejo`, which made Fling's whole payload score nothing
+      // and let the bot pick between its sacrifice options by enumeration
+      // order. A caller with no payment to name still gets zero.
+      return context.sacrifices.reduce((sum, oid) => sum + Math.max(0, powerOf(context.state, oid)), 0);
+    case 'sacrificedPermanentPowerThisResolution':
+      // The permanent is chosen during resolution, after this target scorer has
+      // finished. It therefore cannot distinguish target tuples here.
+      return 0;
+    case 'revealedCardManaValueThisResolution':
+      // This value is fixed only after the untargeted reveal-to-hand link has
+      // resolved, so it cannot distinguish target tuples at choice time.
+      return 0;
+    case 'triggeringCreaturePower':
+      // Fixed by the triggering event and unavailable to a cast-time scorer.
+      return 0;
+    case 'triggeringCreatureToughness':
+      // Fixed by the triggering event and unavailable to a cast-time scorer.
+      return 0;
+    case 'triggeringDamageAmount':
+      // Fixed by the triggering event and unavailable to a cast-time scorer.
+      return 0;
+    case 'halfTargetLibraryRoundedDown':
+      return target?.kind === 'player'
+        ? Math.floor(context.state.players[target.player].library.length / 2)
+        : 0;
+    case 'paidSacrificeToughness':
+      // Fixed by the activation payment and not represented in target-scoring context.
+      return 0;
+    case 'paidDiscardManaValue':
+      // The payment is fixed by the complete activation option, outside this target-only context.
+      return 0;
+    case 'triggeringSpellChosenColorCount':
+      return 0;
     case 'ratePer':
       // The rate the board is standing at right now, which is also the number
       // the kernel will fix at resolution unless something changes in between —
       // and nothing does, between choosing a target and putting the spell on
       // the stack. So this is a prediction only in the sense that every other
       // arm here is one.
-      return amount.rate * predictAmount(context, amount.each, exiled);
+      return amount.rate * predictAmount(context, amount.each, exiled, target);
     case 'chosenX':
       return context.chosenX;
     default:
@@ -732,122 +977,139 @@ function predictAmount(context: TargetContext, amount: PumpAmount, exiled: numbe
   }
 }
 
-function effectScore(context: TargetContext, effect: Effect, target: Target | null, exiled: number): number {
+function effectOf<K extends Effect['kind']>(effect: Effect, kind: K): EffectOf<K> {
+  if (effect.kind !== kind) {
+    throw new Error(
+      `${EFFECT_CAPABILITIES[effect.kind].targetScoring} scoring cannot read ${effect.kind} as ${kind}`,
+    );
+  }
+  return effect as EffectOf<K>;
+}
+
+function effectScore(
+  context: TargetContext,
+  effect: Effect,
+  target: Target | null,
+  exiled: PredictedExileTally,
+  dividedDamage?: number,
+): number {
   const weights = context.target;
-  const number = (amount: PumpAmount): number => predictAmount(context, amount, exiled);
-  switch (effect.kind) {
-    // Each of the four sweepers below is its own unscoped score, once per body.
-    // The scoped arm is asked first in each because a sweeper's target names a
-    // player and every single-target scorer here reads a permanent off it.
-    case 'dealDamage': {
-      const amount = number(effect.amount);
-      return effect.scope === undefined
-        ? damageScore(context, amount, target)
-        : scopedBoardScore(context, effect.scope, effect.scopeFilter, target, (inner, member) =>
-            damageScore(inner, amount, member),
-          );
+  const number = (amount: PumpAmount): number => predictAmount(context, amount, exiled, target);
+  const family = EFFECT_CAPABILITIES[effect.kind].targetScoring;
+  switch (family) {
+    case 'damage': {
+      if (effect.kind === 'preventNextDamageToYouAndRetaliate') {
+        return damageScore(context, number(effect.amount), target);
+      }
+      const scored = effectOf(effect, 'dealDamage');
+      const amount = dividedDamage ?? number(scored.amount);
+      if (scored.scope === undefined) return damageScore(context, amount, target);
+      const scopeAmount = scored.scopeAmount === undefined ? amount : number(scored.scopeAmount);
+      const group = scopedBoardScore(
+        context,
+        scored.scope,
+        scored.scopeFilter,
+        target,
+        (inner, member) => damageScore(inner, scopeAmount, member),
+        scored.additionalScopeFilter,
+      );
+      return scored.scope === 'targetAndPermanentsItsPlayerControls'
+        ? damageScore(context, amount, target) + group
+        : group;
     }
-    // The unscoped exile takes the same score a destroy does, because this
-    // policy prices the board and both take a creature off it. What separates
-    // them is the graveyard, and the graveyard is a zone nothing here reads —
-    // the same reason `putCounters` below scores as the pump it is and not as
-    // the keyword it also grants. The scoped one is a different question, and
-    // it is the only place in this switch where the target names a player and
-    // the score is about permanents.
-    case 'destroyPermanent':
-      return effect.scope === undefined
+    case 'destroy': {
+      if (effect.kind === 'destroyPermanent') {
+        return effect.scope === undefined
+          ? destroyScore(context, target)
+          : scopedBoardScore(context, effect.scope, effect.scopeFilter, target, destroyScore);
+      }
+      if (effect.kind !== 'petrifyCreature' && effect.kind !== 'returnSourceAuraAttached') {
+        throw new Error(`destroy scoring cannot read ${effect.kind}`);
+      }
+      return destroyScore(context, target);
+    }
+    case 'exile': {
+      const scored = effectOf(effect, 'exileTarget');
+      return scored.scope === undefined
         ? destroyScore(context, target)
-        : scopedBoardScore(context, effect.scope, effect.scopeFilter, target, destroyScore);
-    case 'exileTarget':
-      return effect.scope === undefined
-        ? destroyScore(context, target)
-        : scopedExileScore(context, effect.scope, target);
-    case 'pumpUntilEndOfTurn': {
-      const power = number(effect.power);
-      const toughness = number(effect.toughness);
-      return effect.scope === undefined
+        : scopedExileScore(context, scored.scope, scored.scopeFilter, target);
+    }
+    case 'pump': {
+      const scored = effectOf(effect, 'pumpUntilEndOfTurn');
+      const power = number(scored.power);
+      const toughness = number(scored.toughness);
+      return scored.scope === undefined
         ? pumpScore(context, power, toughness, target)
-        : scopedBoardScore(context, effect.scope, effect.scopeFilter, target, (inner, member) =>
+        : scopedBoardScore(context, scored.scope, scored.scopeFilter, target, (inner, member) =>
             pumpScore(inner, power, toughness, member),
           );
     }
-    // A player sweep is scored by which side of the table it lands on, and
-    // `sweepDirection` is the whole of that: everybody drawing cancels, the
-    // opponent drawing is worth the draw against this seat. It is not
-    // `playerScore` with a synthesized seat, because that helper charges
-    // `ownGoalPenalty` for aiming across the table and a sweep aims at nobody.
-    case 'drawCards':
-      return effect.players !== undefined
-        ? sweepDirection(effect.players) * number(effect.count) * weights.cardDrawValue
-        : playerScore(context, target, number(effect.count) * weights.cardDrawValue);
-    case 'gainLife':
-      return playerScore(context, target, number(effect.amount) * weights.lifeGainValue);
+    case 'draw': {
+      const scored = effectOf(effect, 'drawCards');
+      return scored.players !== undefined
+        ? sweepDirection(scored.players) * number(scored.count) * weights.cardDrawValue
+        : playerScore(context, target, number(scored.count) * weights.cardDrawValue);
+    }
+    case 'gainLife': {
+      const scored = effectOf(effect, 'gainLife');
+      return playerScore(context, target, number(scored.amount) * weights.lifeGainValue);
+    }
     case 'counterSpell':
       return counterScore(context, target);
-    case 'createToken':
-      return number(effect.count) * tokenScore(context, effect.token);
-    case 'tapPermanent':
-      return effect.scope === undefined
-        ? tapScore(context, target)
-        : scopedBoardScore(context, effect.scope, effect.scopeFilter, target, tapScore);
-    case 'returnToHand':
+    case 'token': {
+      const scored = effectOf(effect, 'createToken');
+      return number(scored.count) * tokenScore(context, scored.token);
+    }
+    case 'tap':
+      if (effect.kind === 'tapPermanent' && effect.scope !== undefined) {
+        return scopedBoardScore(context, effect.scope, effect.scopeFilter, target, tapScore);
+      }
+      if (
+        effect.kind !== 'tapPermanent' &&
+        effect.kind !== 'detainPermanent' &&
+        effect.kind !== 'skipNextUntap'
+      ) {
+        throw new Error(`tap scoring cannot read ${effect.kind}`);
+      }
+      return tapScore(context, target);
+    case 'bounce':
       return bounceScore(context, target);
+    case 'returnToHand':
+      return returnToHandScore(context, target);
     case 'fight':
       return fightScore(context, target);
-    case 'millCards':
-      return harmfulPlayerScore(context, target, number(effect.count) * weights.millValue);
-    // Mana, and this policy prices the board rather than the pool. A ritual's
-    // mana is spent by a later cast this function never sees, and a mana
-    // ability is never scored here at all because CR 605.3a keeps it off the
-    // stack and out of the cast options this policy ranks. Zero rather than a
-    // guess, and like the reveal below it never varies between the tuples of
-    // one effect list.
-    case 'addMana':
-      return 0;
-    // Information, and this policy has no term for information: nothing it
-    // reads is a decision the reveal would change. Scored at zero rather than
-    // guessed, and it costs the bot nothing — a reveal is never the reason a
-    // spell is cast and never varies between the tuples this function ranks.
-    case 'revealHand':
-    case 'scry':
-      return 0;
-    case 'putCounters': {
-      // Scored as the pump it is, times the number placed. The keyword half of
-      // a declaration has no term here for the reason `pumpScore` has none: the
-      // policy prices board swing, and this evaluator sees only P/T.
-      //
-      // Scoped, the same pump lands on every member of a group the kernel picks,
-      // so the group comes from `objectsInEffectScope` rather than from a second
-      // reading of the board — the same construction `scopedExileScore` uses and
-      // for the same reason: a policy that derived the group its own way could
-      // value a sweep the resolution does not perform.
-      const bonus = counterStatBonus(effect.counter);
+    case 'mill': {
+      const scored = effectOf(effect, 'millCards');
+      return harmfulPlayerScore(context, target, number(scored.count) * weights.millValue);
+    }
+    case 'graveyardPurge':
+      return harmfulPlayerScore(context, target, 0.2);
+    case 'counters': {
+      const scored = effectOf(effect, 'putCounters');
+      const bonus = counterStatBonus(scored.counter);
+      const placed = number(scored.count);
       const per = (at: Target | null): number =>
-        number(effect.count) * pumpScore(context, bonus.power, bonus.toughness, at);
-      if (effect.scope === undefined) return per(target);
+        pumpScore(context, placed * bonus.power, placed * bonus.toughness, at);
+      if (scored.scope === undefined) return per(target);
       if (target === null || target.kind !== 'player') return 0;
-      return objectsInEffectScope(context.state, effect.scope, target.player).reduce(
+      return objectsInEffectScope(context.state, scored.scope, target.player).reduce(
         (sum, oid) => sum + per({ kind: 'permanent', oid }),
         0,
       );
     }
-    // Reanimation, priced as the bodies it puts on the board — `tokenScore`'s
-    // arithmetic, since a creature arriving is a creature arriving however it
-    // got there, and this policy reads a printed power because a card in a
-    // graveyard has no derived one (CR 611.2c).
-    //
-    // Whose board it lands on is the sign: each card returns under its owner's
-    // control, so a Blood Moon aimed at an opponent's graveyard is a gift and
-    // this switch has to say so rather than counting bodies and stopping.
-    case 'returnFromGraveyard': {
+    case 'reanimate': {
+      const scored = effectOf(effect, 'returnFromGraveyard');
+      if (scored.scope === undefined) {
+        if (target === null || target.kind !== 'card') return 0;
+        if (scored.destination === 'hand') return returnToHandScore(context, target);
+        const object = tryObject(context.state, target.oid);
+        if (object === undefined) return 0;
+        const permanent = graveyardPermanentValue(context, object.card);
+        return scored.control === 'you' || object.owner === context.me ? permanent : -permanent;
+      }
       if (target === null || target.kind !== 'player') return 0;
-      const members = objectsInEffectScope(context.state, effect.scope, target.player);
-      // To hand it is a draw and not a board swing, so it is priced as the draw
-      // it is: `cardDrawValue` per card, the same term the `drawCards` arm
-      // above uses. Pricing it as bodies would let a policy value a card in a
-      // hand at what a creature on the battlefield is worth, which is the
-      // claim the destination exists to distinguish.
-      if (effect.destination === 'hand') {
+      const members = objectsInEffectScope(context.state, scored.scope, target.player);
+      if (scored.destination === 'hand') {
         const drawn = members.length * weights.cardDrawValue;
         return target.player === context.me ? drawn : -drawn;
       }
@@ -858,141 +1120,84 @@ function effectScore(context: TargetContext, effect: Effect, target: Target | nu
       }, 0);
       return target.player === context.me ? bodies : -bodies;
     }
-    // A tuck takes a permanent off the board, which is exactly what a bounce
-    // does to this policy's arithmetic — the difference between a hand and a
-    // library is a fact about the owner's next draws, and nothing this policy
-    // reads is a draw.
-    case 'putOnLibrary':
-      return bounceScore(context, target);
-    // The rest of the library and graveyard vocabulary is `revealHand`'s and
-    // `scry`'s case: nothing this policy reads is a hidden zone, so a shuffle,
-    // a reveal off the top and a graveyard exile all move numbers it does not
-    // hold. Scored at zero rather than guessed, and it costs the bot nothing,
-    // because none of the three varies between the target tuples this function
-    // ranks — `searchLibrary`, `exileGraveyard`, `chooseFromGraveyard` and
-    // `shuffleGraveyardIntoLibrary` name no target at all.
-    case 'shuffleLibrary':
-    case 'revealTopCards':
-    case 'exileGraveyard':
-    case 'shuffleGraveyardIntoLibrary':
-    case 'searchLibrary':
-    case 'chooseFromGraveyard':
-      return 0;
-    // A discard is a draw run backwards, so it is priced with the draw's own
-    // term rather than with `millValue`: a card out of a hand is a card, and a
-    // card off a library is a card the opponent had not drawn yet. That is the
-    // same argument `@mtg/deckbuild`'s `EFFECT_PRICING` makes, reached here
-    // independently and worth the duplication, because these two evaluators
-    // answer different questions — that one prices a card for a deck list, this
-    // one ranks target tuples for one cast.
-    //
-    // `harmfulPlayerScore` rather than `playerScore` is the whole of what this
-    // policy needs to know about the two of them: the sign follows whose hand
-    // it is, and a bot that aimed a discard at itself would be making the
-    // `pumpUntilEndOfTurn` mistake `calibration.ts` documents at the other end
-    // of the pipeline.
-    //
-    // `players` is Liliana's Specter, and it is `loseLife`'s sweep branch with
-    // the discard's own rate: a hand emptied on both sides cancels, and one
-    // emptied across the table is worth what taking the card is worth.
-    case 'discardCards':
-      return effect.players !== undefined
-        ? -sweepDirection(effect.players) * effect.count * weights.cardDrawValue
-        : harmfulPlayerScore(context, target, effect.count * weights.cardDrawValue);
-    // Priced identically to the discard above, and the tie is deliberate.
-    // Choosing beats not choosing, but how much depends on what is in the hand
-    // and this policy reads no hidden zone — the reveal that would tell it has
-    // not happened when a target tuple is being ranked. A number invented to
-    // separate them would be a claim about a zone nothing here holds.
-    case 'chooseDiscard':
-      return harmfulPlayerScore(context, target, effect.count * weights.cardDrawValue);
-    // A life total losing N is `damageScore`'s player branch exactly: the same
-    // `faceDamageWeight` per point and the same `lethalBonus` when it finishes
-    // the game. The two effects differ in everything that happens on the way to
-    // a life total — prevention, protection, marking a creature — and in
-    // nothing that happens once it gets there, so reusing the arithmetic is not
-    // a shortcut, it is the claim that a player at 3 does not care which one
-    // took the last three.
-    //
-    // Untargeted, `damageScore` returns zero, and that is the right answer here
-    // rather than an inherited one: an untargeted life loss is this seat's own,
-    // so it is the same number for every tuple this function ranks and moves
-    // none of them. `harmfulPlayerScore` already answers zero for exactly this
-    // shape, and `millCards` is the primitive that proves it is a decision and
-    // not an oversight — an untargeted mill is this seat's own library, and it
-    // is scored at zero and priced positively all the same. Both evaluators are
-    // blind to which seat a self-inflicted clause lands on, and a `loseLife`
-    // that broke the pattern would be the only primitive in the vocabulary that
-    // is not.
-    //
-    // A player sweep is `drawCards`' branch with the sign turned over, because
-    // life taken is worth what a card given is not: everybody losing the same
-    // life cancels under a differential policy, and the opponent losing it
-    // alone is worth the loss to this seat. `faceDamageWeight` rather than
-    // `damageScore` — the sweep names no target for that helper to read, and
-    // its `lethalBonus` is a claim about one seat's total that a scope does not
-    // make.
-    case 'loseLife':
-      return effect.players !== undefined
-        ? -sweepDirection(effect.players) * number(effect.amount) * weights.faceDamageWeight
-        : damageScore(context, number(effect.amount), target);
-    // The one arm in this switch whose whole value is a number the *board*
-    // holds, and this policy holds the board — so unlike `@mtg/deckbuild`,
-    // which prices this at zero because a single card cannot know which side of
-    // N the total is on, here it can just look. CR 118.5 makes the effect a
-    // gain or a loss of the difference, so the score is that difference at the
-    // rate a life gain is worth, signed. It names no target, so it is the same
-    // number for every tuple, which is what makes it safe to compute exactly
-    // rather than guess.
-    case 'setLife':
-      return (number(effect.amount) - lifeOf(context.state, context.me)) * weights.lifeGainValue;
-    // A Fog, and zero for `shuffleLibrary`'s reason one step removed: what it is
-    // worth is the combat step it stops, and this function scores an effect
-    // against a target tuple rather than against a combat. It names no target,
-    // so the zero costs the bot nothing here — whether the card is worth
-    // casting at all is `printedCardValue`'s question, and that one it answers.
-    case 'preventCombatDamage':
-      return 0;
-    // Dawn Charm's first mode, and it does name a target — the Fog above it in
-    // this switch names none, so this arm cannot share its zero. `preventDamageScore`
-    // is `destroyScore` with the sign flipped: point the shield at this seat's
-    // own board and it is worth what the creature is worth, point it at the
-    // opponent's and it costs the same `ownGoalPenalty` a self-destroy would.
-    case 'preventAllDamageToTarget':
+    case 'graveyardExile':
+      if (effect.kind !== 'exileGraveyard') throw new Error(`graveyard scoring cannot read ${effect.kind}`);
+      if (!('target' in effect) || target === null || target.kind !== 'player') return 0;
+      if (target.player === context.me) return -weights.ownGoalPenalty;
+      return context.state.players[target.player].graveyard.length * weights.cardDrawValue;
+    case 'discard': {
+      const scored = effectOf(effect, 'discardCards');
+      return scored.players !== undefined
+        ? discardSweepScore(context, scored.players, scored.count, weights.cardDrawValue)
+        : harmfulPlayerScore(
+            context,
+            target,
+            target?.kind === 'player'
+              ? discardCount(context.state, target.player, scored.count) * weights.cardDrawValue
+              : 0,
+          );
+    }
+    case 'chooseDiscard': {
+      const scored = effectOf(effect, 'chooseDiscard');
+      return harmfulPlayerScore(context, target, scored.count * weights.cardDrawValue);
+    }
+    case 'chooseFromRevealedHand':
+      return harmfulPlayerScore(context, target, weights.cardDrawValue);
+    case 'loseLife': {
+      const scored = effectOf(effect, 'loseLife');
+      return scored.players !== undefined
+        ? -sweepDirection(scored.players) * number(scored.amount) * weights.faceDamageWeight
+        : damageScore(context, number(scored.amount), target);
+    }
+    case 'loseGame':
+      return harmfulPlayerScore(context, target, weights.lethalBonus);
+    case 'setLife': {
+      const scored = effectOf(effect, 'setLife');
+      return (number(scored.amount) - lifeOf(context.state, context.me)) * weights.lifeGainValue;
+    }
+    case 'flipCoin': {
+      const scored = effectOf(effect, 'flipCoin');
+      const branchValue = (effects: readonly Effect[] | undefined): number => {
+        const branch = effects ?? [];
+        const branchTargets: readonly (Target | null)[] = branch.map((nested) =>
+          hasTarget(nested) && isSourceBodyOnlyTarget(nested.target.kind) && context.sourceOid !== undefined
+            ? { kind: 'permanent', oid: context.sourceOid }
+            : null,
+        );
+        return scoreEffectList(context, branch, branchTargets);
+      };
+      return (branchValue(scored.winEffects) + branchValue(scored.loseEffects)) / 2;
+    }
+    case 'preventDamage':
       return preventDamageScore(context, target);
-    case 'untapPermanent':
+    case 'untap':
       return untapScore(context, target);
-    case 'grantKeywordUntilEndOfTurn':
-      return grantKeywordScore(context, effect.keyword, target);
-    case 'cantBeBlockedThisTurn':
+    case 'grantKeyword':
+      return grantKeywordScore(context, effectOf(effect, 'grantKeywordUntilEndOfTurn'), target);
+    case 'control':
+      return temporaryControlScore(context, target);
+    case 'sourceControlTransfer':
+      return sourceControlTransferScore(context, target);
+    case 'unblockable':
       return unblockableScore(context, target);
-    case 'attacksYouThisTurnIfAble':
+    case 'lure':
       return lureScore(context, target);
-    case 'setBasePtUntilEndOfTurn':
-      return baseSetScore(context, effect.power, effect.toughness, target);
-    // Zero, `scry`'s and the Fog's zero rather than a price. This policy ranks
-    // the *tuples of targets* an effect list could be aimed at, and this effect
-    // offers none: the only kinds its row admits are `selfCreature` and
-    // `selfPermanent`, retained referents filled from the ability's own source
-    // (CR 115.6a). Every tuple scores the same, so a number here would tilt no
-    // decision and would only make the sacrifice look like a choice.
-    //
-    // What the drawback is worth is a question about whether to cast or
-    // activate the card at all, and that is `@mtg/deckbuild`'s `EFFECT_PRICING`,
-    // where it is priced negative.
-    case 'sacrificeSelf':
-      return 0;
-    // The edict (CR 701.17a): the target chooses what leaves their board, so
-    // this policy has no single object to price the way `destroyScore` prices
-    // a named permanent. `killBonus` alone is the floor value of removal
-    // landing at all, without a guess at which body pays it — the same
-    // shape `harmfulPlayerScore` already gives `discardCards`, priced by a
-    // count instead of a target-dependent card. Zero candidates on the board
-    // is not a case this function needs to special-case: it still favors
-    // aiming at the opponent, and CR 701.17a's own auto-resolve pays out
-    // nothing regardless of where the policy pointed.
-    case 'sacrificePermanent':
+    case 'basePt': {
+      const scored = effectOf(effect, 'setBasePtUntilEndOfTurn');
+      return baseSetScore(context, scored.power, scored.toughness, target);
+    }
+    case 'animateLand': {
+      const scored = effectOf(effect, 'animateLandWhileSourceOnBattlefield');
+      return target?.kind === 'permanent' && isMine(context.state, target.oid, context.me)
+        ? scored.power * weights.pumpPowerWeight + scored.toughness * weights.pumpToughnessWeight
+        : -weights.ownGoalPenalty;
+    }
+    case 'sacrifice':
       return harmfulPlayerScore(context, target, weights.killBonus);
+    case 'zero':
+      return 0;
+    default:
+      return assertNever(family, 'scoreEffectByCapability');
   }
 }
 
@@ -1013,10 +1218,49 @@ function auraToughnessDelta(context: TargetContext, modifications: readonly Aura
   for (const modification of modifications) {
     if (modification.kind === 'statBonus') total += modification.toughness;
     if (modification.kind === 'statBonusPer') {
-      total += modification.toughness * predictAmount(context, modification.each, 0);
+      total +=
+        modification.toughness * predictAmount(context, modification.each, NOTHING_PREDICTED_EXILED, null);
     }
   }
   return total;
+}
+
+function grantedEffectReferent(effect: Effect, host: ObjectId, controller: PlayerId): Target | null {
+  if (!hasTarget(effect)) return null;
+  if (isSourceBodyOnlyTarget(effect.target.kind)) return { kind: 'permanent', oid: host };
+  return effect.target.kind === 'noTarget' ? { kind: 'player', player: controller } : null;
+}
+
+function grantedAbilityHostValue(
+  context: TargetContext,
+  host: ObjectId,
+  ability:
+    | Extract<AuraModification, { kind: 'grantTriggeredAbility' }>['ability']
+    | Extract<AuraModification, { kind: 'grantActivatedAbility' }>['ability'],
+): number {
+  const controller = controllerOf(context.state, host);
+  const hostContext = targetContext(
+    context.state,
+    controller,
+    context.cast,
+    context.target,
+    context.race,
+    context.chosenX,
+    host,
+  );
+  let value = 0;
+  for (const effect of ability.effects) {
+    value +=
+      effect.kind === 'sacrificeSelf'
+        ? -bodyRemovalValue(hostContext, host)
+        : effectScore(
+            hostContext,
+            effect,
+            grantedEffectReferent(effect, host, controller),
+            NOTHING_PREDICTED_EXILED,
+          );
+  }
+  return ability.kind === 'triggered' && ability.optional === true ? Math.max(0, value) : value;
 }
 
 /**
@@ -1062,13 +1306,14 @@ function auraModificationHostValue(
     case 'grantKeyword':
       return modificationValueOn(cast, state, host, modification);
     case 'statBonusPer': {
-      const count = predictAmount(context, modification.each, 0);
+      const count = predictAmount(context, modification.each, NOTHING_PREDICTED_EXILED, null);
       return (
         modification.power * count * cast.powerWeight + modification.toughness * count * cast.toughnessWeight
       );
     }
     case 'cantAttack':
     case 'cantBlock':
+    case 'cantActivateAbilities':
       return -weights.auraCombatDenialShare * bodyRemovalValue(context, host);
     case 'doesNotUntap':
       // The whole anchor rather than a share of it, and `@mtg/deckbuild`'s
@@ -1080,6 +1325,9 @@ function auraModificationHostValue(
       return cast.keywordValue.flying;
     case 'grantLandwalk':
       return weights.auraLandwalkShare * cast.keywordValue.flying;
+    case 'grantTriggeredAbility':
+    case 'grantActivatedAbility':
+      return grantedAbilityHostValue(context, host, modification.ability);
     case 'gainControl':
       return 0;
     default:
@@ -1169,6 +1417,7 @@ function targetContext(
   race: RacePolicyConfig,
   chosenX: number,
   sourceOid: ObjectId | undefined,
+  sacrifices: readonly ObjectId[] = [],
 ): TargetContext {
   return {
     state,
@@ -1179,6 +1428,7 @@ function targetContext(
     assessment: assessRace(state, me, race),
     chosenX,
     sourceOid,
+    sacrifices,
   };
 }
 
@@ -1202,17 +1452,64 @@ export function scoreEffectTargets(
   race: RacePolicyConfig,
   chosenX = 0,
   sourceOid?: ObjectId,
+  multiTargets?: Readonly<Record<number, readonly Target[]>>,
+  damageAllocations?: Readonly<Record<number, readonly number[]>>,
+  sacrifices?: readonly ObjectId[],
 ): number {
-  const context = targetContext(state, me, castConfig, targetConfig, race, chosenX, sourceOid);
+  const context = targetContext(state, me, castConfig, targetConfig, race, chosenX, sourceOid, sacrifices);
+  return scoreEffectList(context, effects, targets, multiTargets, damageAllocations);
+}
+
+/** Scores one sequential effect list against an already-derived board context. */
+function scoreEffectList(
+  context: TargetContext,
+  effects: readonly Effect[],
+  targets: readonly (Target | null)[],
+  multiTargets?: Readonly<Record<number, readonly Target[]>>,
+  damageAllocations?: Readonly<Record<number, readonly number[]>>,
+): number {
   let total = 0;
   // The policy's resolution mark: effects are scored in printed order and each
   // one sees what the earlier ones are predicted to have exiled, exactly as the
   // kernel's resolution loop does.
-  let exiled = 0;
+  let exiled = NOTHING_PREDICTED_EXILED;
   for (const [index, effect] of effects.entries()) {
-    const target = targets[index] ?? null;
-    total += effectScore(context, effect, target, exiled);
-    exiled += exiledCardsBy(context, effect, target);
+    const selected = multiTargets?.[index] ?? [targets[index] ?? null];
+    if (effect.kind === 'exchangeControl') {
+      const creatures = selected.filter(
+        (target): target is Extract<Target, { readonly kind: 'permanent' }> =>
+          target?.kind === 'permanent' && tryObject(context.state, target.oid)?.zone === 'battlefield',
+      );
+      if (creatures.length === 2) {
+        const [first, second] = creatures;
+        if (first !== undefined && second !== undefined) {
+          const firstMine = isMine(context.state, first.oid, context.me);
+          const secondMine = isMine(context.state, second.oid, context.me);
+          if (firstMine !== secondMine) {
+            const gained = firstMine ? second.oid : first.oid;
+            const given = firstMine ? first.oid : second.oid;
+            total +=
+              boardCreatureValue(context.cast, context.state, gained) -
+              boardCreatureValue(context.cast, context.state, given);
+          }
+        }
+      }
+      continue;
+    }
+    for (const [targetIndex, target] of selected.entries()) {
+      const dividedDamage =
+        effect.kind !== 'dealDamage' || effect.division === undefined
+          ? undefined
+          : effect.division.kind === 'asYouChoose'
+            ? damageAllocations?.[index]?.[targetIndex]
+            : Math.floor(predictAmount(context, effect.amount, exiled, target) / selected.length);
+      total += effectScore(context, effect, target, exiled, dividedDamage);
+      const moved = exiledBy(context, effect, target);
+      exiled = {
+        cards: exiled.cards + moved.cards,
+        permanents: exiled.permanents + moved.permanents,
+      };
+    }
   }
   return total;
 }
@@ -1247,22 +1544,69 @@ export function scoreTargets(
   race: RacePolicyConfig,
   chosenX = 0,
   mode: number | null = null,
+  multiTargets?: Readonly<Record<number, readonly Target[]>>,
+  damageAllocations?: Readonly<Record<number, readonly number[]>>,
+  sacrifices?: readonly ObjectId[],
+  castingCost?: CastingCostChoice,
 ): number {
   if (isAuraCard(card)) {
     return auraScore(
-      targetContext(state, me, castConfig, targetConfig, race, chosenX, undefined),
+      targetContext(state, me, castConfig, targetConfig, race, chosenX, undefined, sacrifices),
       card.aura,
       targets[0] ?? null,
+    );
+  }
+  if (castingCost === 'overload') {
+    return scoreOverloadEffects(
+      targetContext(state, me, castConfig, targetConfig, race, chosenX, undefined, sacrifices),
+      card,
+      spellEffectsFor(card, null, 'overload'),
     );
   }
   return scoreEffectTargets(
     state,
     me,
-    effectsFor(card, mode),
+    spellEffectsFor(card, mode, 'ordinary'),
     targets,
     castConfig,
     targetConfig,
     race,
     chosenX,
+    undefined,
+    multiTargets,
+    damageAllocations,
+    sacrifices,
   );
+}
+
+/** Scores the same exact current-board cohort the Overload resolver will read. */
+function scoreOverloadEffects(
+  context: TargetContext,
+  sourceCard: Card,
+  effects: readonly OverloadEffect[],
+): number {
+  let total = 0;
+  for (const effect of effects) {
+    if (!isOverloadOnlyEffect(effect)) {
+      total += scoreEffectList(context, [effect], [null]);
+      continue;
+    }
+    if (effect.kind === 'counterSpell') {
+      const ordinary: Effect = { kind: 'counterSpell' };
+      for (const entry of context.state.stack) {
+        if (entry.ability !== null || entry.controller === context.me) continue;
+        if (!canCounterStackEntry(context.state, entry.oid, sourceCard)) continue;
+        total += scoreEffectList(context, [ordinary], [{ kind: 'spell', oid: entry.oid }]);
+      }
+      continue;
+    }
+    const ownSide = effect.kind === 'cantBeBlockedThisTurn';
+    const memberEffect = overloadEffectForMember(effect);
+    for (const oid of context.state.battlefield) {
+      if ((controllerOf(context.state, oid) === context.me) !== ownSide) continue;
+      if (!satisfiesTargetFilter(context.state, oid, effect.scopeFilter)) continue;
+      total += scoreEffectList(context, [memberEffect], [{ kind: 'permanent', oid }]);
+    }
+  }
+  return total;
 }

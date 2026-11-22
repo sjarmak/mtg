@@ -34,6 +34,7 @@ import {
   HAND_AUTHORED_TARGETS,
   isReferentTarget,
   legalTargetsFor,
+  ModelEffectSchema,
   MODEL_TARGET_KINDS,
   REFERENT_TARGETS,
   renderOracleText,
@@ -87,7 +88,7 @@ function codesOf(input: Record<string, unknown>): readonly string[] {
   return result.violations.map((found) => found.code);
 }
 
-describe('the three back-reference targeting modes', () => {
+describe('the back-reference targeting modes', () => {
   it('are kinds the engine knows and the generator may not choose', () => {
     for (const kind of REFERENT_TARGETS) {
       expect(TARGET_KINDS).toContain(kind);
@@ -96,22 +97,35 @@ describe('the three back-reference targeting modes', () => {
     }
   });
 
-  it('were appended rather than inserted, so every recorded fill fixture still hashes', () => {
+  it('leave the model-facing prefix frozen, so every recorded fill fixture still hashes', () => {
     // `@mtg/setgen` prints `LEGAL_TARGETS[kind]` verbatim into the fill prompt
     // and keys its recorded fixtures by that prompt's hash. Order is therefore
     // part of a checked-in artifact: a kind inserted mid-tuple would invalidate
-    // every fixture on the shelf, and a kind that reached
-    // `generatableTargets` would do it even at the end.
-    expect(TARGET_KINDS.slice(-3)).toEqual([THAT_CREATURE, THAT_PLAYER, THAT_CONTROLLER]);
-    expect([...MODEL_TARGET_KINDS]).toEqual(['anyTarget', 'targetCreature', 'targetPlayer', 'noTarget']);
+    // every fixture on the shelf. Hand-authored kinds may continue to append,
+    // so the stable property is the model prefix rather than which kind is
+    // currently last.
+    expect(TARGET_KINDS.slice(0, MODEL_TARGET_KINDS.length)).toEqual([...MODEL_TARGET_KINDS]);
+    expect(REFERENT_TARGETS).toEqual([
+      THAT_CREATURE,
+      THAT_PLAYER,
+      THAT_CONTROLLER,
+      'thatPlayerOrPlaneswalkerController',
+    ]);
+    for (const kind of REFERENT_TARGETS) {
+      expect(TARGET_KINDS.indexOf(kind)).toBeGreaterThanOrEqual(MODEL_TARGET_KINDS.length);
+    }
   });
 
-  it('are hand-authored onto the effect rows the three printed cards need', () => {
+  it('are hand-authored onto the effect rows the four printed cards need', () => {
     expect(HAND_AUTHORED_TARGETS['dealDamage']).toContain(THAT_CONTROLLER);
+    expect(HAND_AUTHORED_TARGETS['discardCards']).toContain(THAT_CONTROLLER);
     expect(HAND_AUTHORED_TARGETS['tapPermanent']).toContain(THAT_CREATURE);
+    expect(HAND_AUTHORED_TARGETS['putCounters']).toContain(THAT_CREATURE);
     expect(HAND_AUTHORED_TARGETS['loseLife']).toContain(THAT_PLAYER);
     expect(legalTargetsFor('dealDamage')).toContain(THAT_CONTROLLER);
+    expect(legalTargetsFor('discardCards')).toContain(THAT_CONTROLLER);
     expect(legalTargetsFor('tapPermanent')).toContain(THAT_CREATURE);
+    expect(legalTargetsFor('putCounters')).toContain(THAT_CREATURE);
     expect(legalTargetsFor('loseLife')).toContain(THAT_PLAYER);
   });
 
@@ -124,7 +138,7 @@ describe('the three back-reference targeting modes', () => {
   });
 });
 
-describe('the three printed shapes that wanted them', () => {
+describe('the four printed shapes that wanted them', () => {
   it('validates the burn-plus-drain template and prints its second half as a derived player', () => {
     const card = parseCard(instantInput({ effects: OUTRAGE_EFFECTS }) as CardInput);
     expect(validateCard(card)).toEqual([]);
@@ -145,6 +159,36 @@ describe('the three printed shapes that wanted them', () => {
     );
     expect(validateCard(card)).toEqual([]);
     expect(renderOracleText(card)).toBe('Target creature gets -1/-1 until end of turn. Tap that creature.');
+  });
+
+  it('validates a counter placed on an earlier creature target', () => {
+    const card = parseCard(
+      instantInput({
+        id: 'xmp-referent-counter',
+        name: 'Probe Mutiny',
+        effects: [
+          { kind: 'gainControlUntilEndOfTurn', target: { kind: 'targetCreature' } },
+          {
+            kind: 'putCounters',
+            counter: 'plusOnePlusOne',
+            count: 1,
+            target: { kind: THAT_CREATURE },
+          },
+        ],
+      }) as CardInput,
+    );
+    expect(validateCard(card)).toEqual([]);
+    expect(renderOracleText(card)).toBe(
+      'Gain control of target creature until end of turn. Put a +1/+1 counter on that creature.',
+    );
+    expect(
+      ModelEffectSchema.safeParse({
+        kind: 'putCounters',
+        counter: 'plusOnePlusOne',
+        count: 1,
+        target: { kind: THAT_CREATURE },
+      }).success,
+    ).toBe(false);
   });
 
   it('validates the draw-then-drain template, where the referent is a player rather than a creature', () => {

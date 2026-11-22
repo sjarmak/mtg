@@ -11,7 +11,14 @@
  * structured schema kills the first two by construction and these sections carry
  * the rest.
  */
-import type { AbilityKind, CardKind, Color, EffectKind, Keyword, ModelAuraModificationKind } from '@mtg/dsl';
+import type {
+  CardKind,
+  Color,
+  EffectKind,
+  Keyword,
+  ModelAbilityKind,
+  ModelAuraModificationKind,
+} from '@mtg/dsl';
 import type { Card } from '@mtg/dsl';
 import {
   AURA_MODIFICATION_KINDS,
@@ -34,9 +41,11 @@ import type { SetBrief } from './brief';
 import {
   batchWantsEquip,
   batchWantsMechanics,
+  fillCapabilitiesFor,
   LOYALTY_ABILITY_LIMITS,
   STARTING_LOYALTY_LIMITS,
 } from './filled';
+import type { FillCapability } from './capabilities';
 import type { RarityPolicy } from './rarity';
 import { hasRarityInstruction, rarityPolicy } from './rarity';
 import type { Slot } from './slot';
@@ -218,24 +227,28 @@ function briefSection(brief: SetBrief): string {
  * **That validator is gone.** `10c72ed` deleted the check and added
  * `triggerChoosesTargets`, and the kernel now stops for the decision, removes an
  * ability with no legal target, and tracks an entry on the stack that still owes
- * an answer. An artifact whose `selfEnters` trigger destroys target creature
- * validates clean today, which `test/substitution-notes.test.ts` prints and
- * checks. So this filter no longer stands on the engine; it stands on nothing
- * yet, and lifting it is a design change with a fixture cost, because it widens
- * `<effect_vocabulary>` for every batch whose slots carry a trigger and only a
- * trigger. `mtg-lr0z` corrected the sentence `roles.ts` was printing about the
- * same removed limit and deliberately left this one alone.
+ * an answer. Probed against this tree, all four kinds this narrowing withholds —
+ * `destroyPermanent`, `tapPermanent`, `returnToHand` and `counterSpell` — parse
+ * on a `selfEnters` trigger, return no violations from `validateCard`, and
+ * answer `triggerChoosesTargets` true. `test/abilities.test.ts` asserts that
+ * outright, so nobody has to take this paragraph's word for it.
  *
- * The rule is read off `LEGAL_TARGETS`, the same table the validator used to
- * read, so a primitive added there classifies itself. It was named instead — one
- * effect, `counterSpell` — and `destroyPermanent` has the identical property and
- * was missed, which left the colorless triggered menu holding exactly one effect
- * that could never be printed.
+ * **So what is left is a scope decision, and it is retained as one.** Not
+ * because the engine refuses these kinds, but because the corpus was recorded
+ * without them: `mtg-z9nq` counted the 152 recordings in `fixtures/llm` and
+ * exactly one was taken with this filter applied — the flagship's Silver Direhorn
+ * batch, a red trigger-only rare offered `createToken` and `drawCards` and
+ * nothing else. Lifting hands that slot `dealDamage` and `pumpUntilEndOfTurn`,
+ * which is a wider question than the recorded answer was asked, and
+ * `tools/rekey-fixtures.ts` substitutes a sentence rather than adding vocabulary
+ * lines. `mtg-ys1o` holds the lift and the three routes to it; the cheapest is
+ * re-recording that one batch, which is one call rather than a regeneration.
  *
- * `counterSpell` is still named, because the table is the wrong place to look
- * for it: it carries no `TargetSpec` at all, which reads here as choosing
- * nothing, while the validator refuses it by name for naming a spell on the
- * stack.
+ * The general rule is read off `LEGAL_TARGETS`, so a primitive added there
+ * classifies itself; `counterSpell` is named separately because it carries no
+ * `TargetSpec` at all and would otherwise read here as choosing nothing. Neither
+ * says anything about legality any more. They say which menu the recordings
+ * answer.
  */
 function choosesNothing(kind: EffectKind): boolean {
   if (kind === 'counterSpell') return false;
@@ -243,7 +256,10 @@ function choosesNothing(kind: EffectKind): boolean {
   return targets.length === 0 || targets.includes('noTarget');
 }
 
-function abilityEffectKinds(color: Color | null, offered: readonly AbilityKind[]): readonly EffectKind[] {
+function abilityEffectKinds(
+  color: Color | null,
+  offered: readonly ModelAbilityKind[],
+): readonly EffectKind[] {
   const usable = offered.includes('activated')
     ? MODEL_EFFECT_KINDS
     : MODEL_EFFECT_KINDS.filter((kind) => choosesNothing(kind));
@@ -280,7 +296,7 @@ export const STAT_BONUS_LIMIT = 8;
 export const BOMB_STAT_BONUS_LIMIT = 99;
 
 /** One `<ability_vocabulary>` line per kind this batch is actually offered. */
-function abilityKindLines(kind: AbilityKind, color: Color | null, statBonus: number): string[] {
+function abilityKindLines(kind: ModelAbilityKind, color: Color | null, statBonus: number): string[] {
   switch (kind) {
     case 'static': {
       const keywords = grantableKeywords(color);
@@ -333,8 +349,8 @@ function abilitySection(slots: readonly Slot[], statBonus: number): string {
   ].join('\n');
 }
 
-/** Printed order, matching `ABILITY_KINDS`; a set is stable, a filter is not. */
-const ABILITY_PRINT_ORDER: readonly AbilityKind[] = ['static', 'triggered', 'activated'];
+/** Printed order for the stable model-facing subset of engine ability kinds. */
+const ABILITY_PRINT_ORDER: readonly ModelAbilityKind[] = ['static', 'triggered', 'activated'];
 
 /**
  * CR 702.6b's equip clause, printed only for a batch holding a weapon.
@@ -535,7 +551,9 @@ function vocabularySection(slots: readonly Slot[]): string {
   const abilityEffects = offered.some((kind) => kind !== 'static')
     ? abilityEffectKinds(slots[0]?.color ?? null, offered)
     : [];
-  const kinds = [...new Set([...slots.flatMap((slot) => slot.effectKinds), ...abilityEffects])].sort();
+  const kinds = [...new Set([...slots.flatMap((slot) => slot.effectKinds), ...abilityEffects])]
+    .filter((kind): kind is EffectKind => Object.hasOwn(EFFECT_RANGES, kind))
+    .sort();
   if (kinds.length === 0) return '';
   const lines = kinds.map((kind) => {
     const targets = LEGAL_TARGETS[kind];
@@ -543,6 +561,36 @@ function vocabularySection(slots: readonly Slot[]): string {
     return `- ${kind}: ${EFFECT_RANGES[kind]}; ${targetText}`;
   });
   return ['<effect_vocabulary>', ...lines, '</effect_vocabulary>'].join('\n');
+}
+
+const CAPABILITY_PROMPT_LINES: Readonly<Partial<Record<FillCapability, string>>> = {
+  controlledCreatureKeywordGrant:
+    '- controlledCreatureKeywordGrant: {"kind":"grantKeywordUntilEndOfTurn","keyword":K,"target":{"kind":"targetCreatureYouControl"}}. No other target or rider is available.',
+  controlledCreatureCounterOnEntry:
+    '- controlledCreatureCounterOnEntry: exactly one triggered ability with condition anotherControlledCreatureEnters and one {"kind":"putCounters","counter":"plusOnePlusOne","count":N,"target":{"kind":"targetCreatureYouControl"}} effect.',
+  fightOpposingCreature:
+    '- fightOpposingCreature: {"kind":"fight","target":{"kind":"targetCreatureYouDontControl"}}; the source creature is the other fighter and no explicit fighter field is available.',
+  untapControlledCreature:
+    '- untapControlledCreature: {"kind":"untapPermanent","target":{"kind":"targetCreatureYouControl"}}; lands and arbitrary permanents are outside this capability.',
+  artifactOrEnchantmentBounce:
+    '- artifactOrEnchantmentBounce: {"kind":"returnToHand","target":{"kind":"targetArtifactOrEnchantment"}}; this selector is available only on returnToHand.',
+  ownGraveyardToHand:
+    '- ownGraveyardToHand: {"kind":"chooseFromGraveyard","whose":"you","filter":{"cardTypes":["creature"] OR ["instant","sorcery"], optional "maxManaValue":0-16},"destination":"hand"}; opponent graveyards, exile, and battlefield destinations are unavailable.',
+};
+
+function capabilitySection(slots: readonly Slot[]): string {
+  const lines = fillCapabilitiesFor(slots).flatMap((capability) => {
+    const line = CAPABILITY_PROMPT_LINES[capability];
+    if (line === undefined) return [];
+    if (capability !== 'controlledCreatureKeywordGrant') return [line];
+    const color = slots[0]?.color ?? null;
+    const keywords =
+      color === null ? [] : KEYWORDS.filter((keyword) => classify(keyword, color).verdict === 'pass');
+    return [`${line} K must be one of ${keywords.join(' | ')} in this ${color ?? 'colorless'} batch.`];
+  });
+  return lines.length === 0
+    ? ''
+    : ['<capability_vocabulary>', ...lines, '</capability_vocabulary>'].join('\n');
 }
 
 /**
@@ -629,9 +677,14 @@ function slotSection(slots: readonly Slot[]): string {
           : '  no aura: this enchantment is not attached to anything; print it as <enchantment> below says',
       );
       lines.push(...abilityLines(slot));
+    } else if ((slot.capabilities?.length ?? 0) > 0 && slot.effectKinds.length === 0) {
+      const profile = roleProfile(slot.role);
+      lines.push('  effects: exactly 1 entry, using the exact capability contract below');
+      if (profile.instruction !== undefined) lines.push(`  capability: ${profile.instruction}`);
     } else if (slot.effectKinds.length > 0) {
       const profile = roleProfile(slot.role);
       lines.push(effectBudgetLine(slot.effectKinds));
+      if (profile.instruction !== undefined) lines.push(`  capability: ${profile.instruction}`);
       if (profile.substitution !== undefined) lines.push(`  note: ${profile.substitution}`);
     } else if (slot.abilityKinds.length > 0) {
       lines.push(...abilityLines(slot));
@@ -877,6 +930,7 @@ export function buildFillPrompt(input: FillPromptInput): string {
     briefSection(input.brief),
     slotSection(input.slots),
     vocabularySection(input.slots),
+    capabilitySection(input.slots),
     abilitySection(input.slots, statBonus),
     equipSection(input.slots, statBonus, bomb),
     enchantmentSection(input.slots, statBonus),

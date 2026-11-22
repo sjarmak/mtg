@@ -15,14 +15,16 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { boosterRecipeFor, SLICE_BOOSTER } from '@mtg/deckbuild';
 import type { Card } from '@mtg/dsl';
-import { EXAMPLE_SET, isValidCard, parseCard } from '@mtg/dsl';
+import { EXAMPLE_SET, isBasicLand, isValidCard, parseCard } from '@mtg/dsl';
 import type { DraftPick, DraftResult } from '@mtg/draft-export';
 import {
   buildLayouts,
   buildSheets,
   DEFAULT_LAYOUT_NAME,
+  DEFAULT_NATIVE_DRAFT_BOT_POLICY,
   DEFAULT_PACKS_PER_SEAT,
   DEFAULT_SEATS,
+  DRAFTMANCER_SIMPLE_BOT_POLICY,
   DraftError,
   draftedPool,
   openPack,
@@ -158,7 +160,11 @@ describe('what it refuses', () => {
   });
 
   it('deals both halves of the default rare-mythic source sheet', () => {
-    const drafted = runDraft(RARE_MYTHIC_SET, { seed: 'rare-mythic/reachable', packs: 12 });
+    const drafted = runDraft(RARE_MYTHIC_SET, {
+      seed: 'rare-mythic/reachable',
+      packs: 12,
+      botPolicy: DRAFTMANCER_SIMPLE_BOT_POLICY,
+    });
     const highRarity = everyPick(drafted).filter(
       (pick) => pick.card.rarity === 'rare' || pick.card.rarity === 'mythic',
     );
@@ -362,10 +368,12 @@ describe('the seed', () => {
 });
 
 describe('the bot inside the loop', () => {
-  const result = runDraft(SET, { seed: 'bots/one' });
+  const result = runDraft(SET, { seed: 'bots/one', botPolicy: DRAFTMANCER_SIMPLE_BOT_POLICY });
   const ratingOf = new Map(result.ratings.map((rated) => [rated.card.id, rated.rating]));
 
   it('rates every card the packs are dealt from', () => {
+    expect(runDraft(SET, { seed: 'bots/default' }).botPolicy).toBe(DEFAULT_NATIVE_DRAFT_BOT_POLICY);
+    expect(result.botPolicy).toBe(DRAFTMANCER_SIMPLE_BOT_POLICY);
     expect(result.ratings).toHaveLength(SET.length);
     for (const pick of everyPick(result)) expect(ratingOf.get(pick.card.id)).toBeDefined();
   });
@@ -381,5 +389,45 @@ describe('the bot inside the loop', () => {
       expect(first).toBeDefined();
       expect(ratingOf.get(first?.card.id ?? '')).toBe(Math.max(...ratings));
     }
+  });
+});
+
+/**
+ * `mtg-h77m`, reported from an M11 draft: "in pick 2 I got a pack with 3 lands
+ * in it, that shouldn't be possible."
+ *
+ * The generated fixture above cannot show it — a generated set prints no basics.
+ * A printed set gives its basics DSL rarity `common`, and the reduced M11 has
+ * twenty of them among 121 commons, so the nine common slots dealt three or
+ * more in one pack in six. This drafts a set with that shape end to end and
+ * asks every pack every seat saw.
+ */
+describe('a drafted pack deals no basic land', () => {
+  const PRINTED = [...SET, ...EXAMPLE_SET.filter((card) => isBasicLand(card))];
+
+  it('prints basics at a real set share, so the draw would show them', () => {
+    const commons = PRINTED.filter((card) => card.rarity === 'common');
+    expect(commons.filter((card) => isBasicLand(card))).toHaveLength(5);
+  });
+
+  it('deals none in any of the 24 packs of five drafts', () => {
+    for (let index = 0; index < 5; index += 1) {
+      const picks = runDraft(PRINTED, { seed: `basics/${String(index)}` }).seats.flatMap(
+        (seat) => seat.picks,
+      );
+      expect(picks.filter((pick) => isBasicLand(pick.card))).toEqual([]);
+      expect(picks.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('still deals a full twelve-card pack of the recipe it was given', () => {
+    const sheets = buildSheets(PRINTED);
+    const [pack] = openPackFromLayouts(
+      sheets,
+      buildLayouts(boosterRecipeFor(PRINTED), sheets),
+      createRng('basics/pack'),
+    );
+    expect(pack).toHaveLength(12);
+    expect(pack.filter((card) => isBasicLand(card))).toEqual([]);
   });
 });

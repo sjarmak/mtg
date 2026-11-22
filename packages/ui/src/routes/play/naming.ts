@@ -45,21 +45,33 @@
  *
  * The word is `your` for the seat the reader is sitting in and `<label>'s` for
  * everyone else, and *which seat that is, is a fact about the label* — the
- * hot-seat launcher names both seats outright, so no flag can be trusted to say
+ * two-human table names both seats outright, so no flag can be trusted to say
  * it. `../../seat.ts` is the one copy of that rule and of the four other words
  * that follow from it. A second copy here is how `mtg-1ih` happened (`rail.ts`
  * printed `You is attacking with 4 creatures.` for a year), so there is one copy
  * and this file calls it.
  */
 import type { GameState, ObjectId, Target } from '@mtg/kernel';
-import { attachmentOf, powerOf, toughnessOf } from '@mtg/kernel';
+import {
+  attachmentOf,
+  copiableValuesOf,
+  isCreatureObject,
+  powerOf,
+  spellCardByOid,
+  toughnessOf,
+} from '@mtg/kernel';
 import { seatMention, seatPossessive, seatPossessiveLeading } from '../../seat';
 import { artCopies } from './art-copies';
 import type { SeatNames } from './position';
 
 /** A permanent's printed name, with nothing said about whose it is. */
 export function nameOf(state: GameState, oid: ObjectId): string {
-  return state.objects[oid]?.card.name ?? `object ${String(oid)}`;
+  if (state.pendingFreeCast?.oid === oid && state.pendingFreeCast.card !== undefined) {
+    return state.pendingFreeCast.card.name;
+  }
+  return state.objects[oid] === undefined
+    ? (spellCardByOid(state, oid)?.name ?? `object ${String(oid)}`)
+    : copiableValuesOf(state, oid).name;
 }
 
 /** The names of the permanents attached to this one (CR 701.3a), in board order. */
@@ -125,7 +137,7 @@ export function distinguishingLine(state: GameState, oid: ObjectId): string | nu
   const parts: string[] = [];
   const aimed = aimedAtOrders(state, oid);
   if (aimed.length > 0) parts.push(`targeted by ${aimed.map(String).join(', ')}`);
-  if (object.card.kind === 'creature') {
+  if (isCreatureObject(state, oid)) {
     parts.push(`${String(powerOf(state, oid))}/${String(toughnessOf(state, oid))}`);
   }
   if (object.tapped) parts.push('tapped');
@@ -155,7 +167,7 @@ function hasDifferingTwin(state: GameState, oid: ObjectId, line: string | null):
     if (other === oid) continue;
     const twin = state.objects[other];
     if (twin === undefined) continue;
-    if (twin.controller !== object.controller || twin.card.name !== object.card.name) continue;
+    if (twin.controller !== object.controller || nameOf(state, other) !== nameOf(state, oid)) continue;
     if (distinguishingLine(state, other) !== line) differs = true;
   }
   return differs;
@@ -210,10 +222,10 @@ export function rosterName(state: GameState, oid: ObjectId, siblings: readonly O
 }
 
 /**
- * A permanent named in a slot where whose it is decides the move.
+ * A targetable game object named in a slot where whose it is decides the move.
  *
  * The possessive is here and not on `permanentName` because a target's
- * controller is the choice — burn theirs or burn your own — while a source's
+ * controller is the choice — use theirs or use your own — while a source's
  * controller is never in question. A rail that said `your` on every activation
  * of every permanent would be spending a word per button on a fact no move on
  * the list disagrees about.
@@ -266,6 +278,7 @@ export function describeTarget(state: GameState, names: SeatNames, target: Targe
       // You (`mtg-crv` is the same word in a sentence).
       return seatMention(names[target.player]);
     case 'permanent':
+    case 'card':
     case 'spell':
       return targetName(state, names, target.oid);
   }

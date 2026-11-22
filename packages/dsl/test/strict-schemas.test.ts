@@ -6,13 +6,13 @@
  * rule was false where it mattered: Zod's object schemas strip by default, and
  * `validateCards` inherited the default, so five keys a plausible translation
  * would write were accepted and discarded. The caller got `[]` findings and a
- * card that quietly did something else — a discard cost that ate any card
- * rather than a creature, an exile that took the whole graveyard rather than
- * the nonland part of it, a shuffle that reached one player rather than each.
+ * card that quietly did something else — an exile that took the whole
+ * graveyard rather than the nonland part of it, or a shuffle that reached one
+ * player rather than each.
  *
- * The fix is one default rather than five patches, which is why the last test
- * here reads the source rather than a card: a sixth invented key has to be
- * refused without anybody writing a sixth test.
+ * The fix is one default rather than a list of patches, which is why the last
+ * test here reads the source rather than a card: the next invented key has to
+ * be refused without anybody writing a bespoke test.
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -57,15 +57,6 @@ const INVENTED_KEYS: readonly {
   readonly meaning: string;
   readonly card: unknown;
 }[] = [
-  {
-    key: 'discardFilter',
-    meaning: 'a discard cost that names which card, rather than any card',
-    card: creatureWith({
-      kind: 'activated',
-      cost: { mana: {}, tapSelf: true, discard: 1, discardFilter: { cardTypes: ['creature'] } },
-      effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }],
-    }),
-  },
   {
     key: 'filter',
     meaning: 'an exile that leaves part of the graveyard behind',

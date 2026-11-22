@@ -11,8 +11,16 @@
  * one that gives up the most) and free in layout terms, which makes it the only
  * detail channel compatible with fitting five zones on one screen. Daybreak say
  * it out loud for Magic Online: the small card is acceptable *because* zoom
- * exists. So the board face may drop the rules box, and this is where the rules
- * box went.
+ * exists.
+ *
+ * This docblock used to end that paragraph with "so the board face may drop the
+ * rules box, and this is where the rules box went". `mtg-u69` made it false:
+ * the board face prints as many lines of its own rules box as its height holds
+ * (`../card/anatomy.ts`, `BOARD_REGIONS`), with no pointer event involved. So
+ * the zoom is not the only copy of a permanent's rules text; it is the copy
+ * that is never clipped, never ellipsized and never cut by a line the box had
+ * no room for, which is a smaller claim and the true one. A docblock asserting
+ * the board face has no rules box is how the rules box gets dropped again.
  *
  * Four properties it has to hold, and how:
  *
@@ -36,12 +44,22 @@
  * abbreviates a card draws — the graveyard browser is the second — so those
  * four properties are stated and held in one place rather than per surface.
  *
- * What a touch user gets is nothing, and that is stated rather than glossed:
- * there is no hover on a touch screen and a tap on a board face plays the card.
- * The face's `title` (`../card/Card.ts`, `faceDetailText`) carries the same
- * words to a screen reader, but a phone shows no tooltip for it. Reaching a
- * permanent's rules text with a finger needs a gesture this surface does not
- * have yet.
+ * **A finger reaches the whole card too, and this file has no touch branch.**
+ * There is no hover on a touch screen, so for as long as `:hover` was the only
+ * trigger this paragraph said a touch user got nothing. Two changes since:
+ * `mtg-u69` put a rules box on the board face, so the abbreviation is smaller
+ * than it was, and `mtg-yg8` gave the face a long press (`../card/press.ts`)
+ * whose first act is to take the focus ring — which is the second trigger
+ * already in `../styles/card.ts`, `:focus-within` on the slot. So a gesture
+ * reaches the panel through the machinery the keyboard was using.
+ *
+ * On the played table it deliberately does not: `../styles/card.ts` stands the
+ * panel down under `.mtg-board` on a coarse pointer, because `mtg-aqxi.1` gives
+ * the tapped card to the rail instead and two answers to one tap is one too
+ * many on the screen with the least room. The Cards gallery and the deck tabs
+ * keep the panel, having no rail to hand the reading to. The face's `title`
+ * (`../card/Card.ts`, `faceDetailText`) is the copy a screen reader hears
+ * everywhere, whatever the pointer is.
  */
 import { createElement } from 'react';
 import type { ReactElement, ReactNode } from 'react';
@@ -99,8 +117,21 @@ export interface CardSlotProps {
   readonly stats?: FaceStats;
   /** The kernel object id, so a caller can match a rendered card back. */
   readonly permanentKey?: string;
+  /**
+   * Whether the reader is currently pointing at this card from somewhere else.
+   *
+   * `mtg-47o`. A game log line names an object; pressing or hovering that line
+   * lights the object here, which is how two of one seat's Gloom Hands are told
+   * apart without either of them printing a number. Written as an attribute only
+   * when it is true, unlike `data-tapped`: not-pointed-at is the resting state of
+   * every card on the table, and an attribute on all of them would be a fact
+   * about nothing.
+   */
+  readonly pointed?: boolean;
   /** Counters, damage and combat flags, drawn over the slot's own corner. */
   readonly marks?: ReactNode;
+  /** A control covering the resting face, used by a permanent pile opener. */
+  readonly cover?: ReactNode;
 }
 
 export function CardSlot(props: CardSlotProps): ReactElement {
@@ -145,8 +176,15 @@ export function CardSlot(props: CardSlotProps): ReactElement {
       ...(props.tapped === undefined ? {} : { 'data-tapped': props.tapped }),
       ...(props.permanentKey === undefined ? {} : { 'data-permanent-key': props.permanentKey }),
       ...(props.picker === undefined ? {} : { 'data-picking': true }),
+      ...(props.pointed === true ? { 'data-pointed': true } : {}),
     },
     createElement(Card, face),
+    /* A horizontal identity ribbon for a rotated card when narrow crowded rows
+       fan over their lower edges. Hidden in every ordinary layout and hidden
+       from assistive technology because Card already carries the full name. */
+    props.tapped === true
+      ? createElement('span', { className: 'mtg-slot__fan-name', 'aria-hidden': true }, props.card.name)
+      : null,
     // After the face rather than before it, and that is load-bearing rather
     // than tidy: `../styles/board/slot.ts` anchors the badges to the card's own
     // art window, and an anchor is only an acceptable one for a positioned
@@ -162,5 +200,6 @@ export function CardSlot(props: CardSlotProps): ReactElement {
       ...(props.stats === undefined ? {} : { stats: props.stats }),
     }),
     props.picker ?? null,
+    props.cover ?? null,
   );
 }

@@ -33,7 +33,7 @@
  *
  * # What it cost the column, measured
  *
- * `../../tools/block-ask.ts` parks a real blocker declaration and reports the
+ * `../../../tools/block-ask.ts` parks a real blocker declaration and reports the
  * ask panel's body. Read in chrome-headless-shell 151.0.7922.47 without
  * `--hide-scrollbars`, the same page before and after, one attacker throughout:
  *

@@ -37,11 +37,19 @@ export interface ZoneProps {
 export function Zone(props: ZoneProps): ReactElement {
   const count = props.count ?? props.items.length;
   const emptyText = props.emptyText ?? 'empty';
+  // The chip is dropped when it would say what the sentence beside it says.
+  // `mtg-dcxg.10`, from the 2026-08-23 sweep: an empty zone drew its name, then
+  // a `0`, then a sentence, three statements of one fact in a column 46px wide.
+  // Only when both are zero: a battlefield states its own `count`, and a seat
+  // that controls a permanent drawn on the other side of the mat has a count
+  // worth printing over a row holding nothing.
   const head = createElement(
     'div',
     { className: 'mtg-zone__head' },
     createElement('span', { className: 'mtg-zone__label' }, props.label),
-    createElement('span', { className: 'mtg-zone__count' }, String(count)),
+    count === 0 && props.items.length === 0
+      ? null
+      : createElement('span', { className: 'mtg-zone__count' }, String(count)),
     props.note === undefined ? null : createElement('span', { className: 'mtg-zone__note' }, props.note),
   );
   const body =
@@ -54,7 +62,15 @@ export function Zone(props: ZoneProps): ReactElement {
         );
   return createElement(
     'section',
-    { className: 'mtg-zone', 'data-tone': props.tone ?? 'sunken', 'aria-label': props.label },
+    {
+      className: 'mtg-zone',
+      'data-tone': props.tone ?? 'sunken',
+      // Stated on the box, so a sheet can lay out around a zone holding nothing
+      // rather than reserving the room its contents would have wanted. The
+      // battlefields are the case that needed it: `../styles/board/fit.ts`.
+      'data-empty': props.items.length === 0 ? 'true' : undefined,
+      'aria-label': props.label,
+    },
     head,
     body,
   );

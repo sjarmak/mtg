@@ -6,25 +6,48 @@
  * has priority. The replay viewer drives it from a reconstructed frame and the
  * playable board will drive it from live kernel state, and neither has to fight
  * this component for control.
+ *
+ * A table of more than two is the same board with `pod` set (`BoardPod`): the
+ * pod column holds a seat rail in place of the opponent's pod, and the opponent's
+ * lane is a row of tiles, one per opponent, so every other player's battlefield
+ * is on screen at once (`./PodRow.ts`). Without `pod` the markup is a duel's,
+ * byte for byte.
  */
 import { createElement } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { Battlefield } from './Battlefield';
 import type { BattlefieldProps } from './Battlefield';
+import { AvatarZone } from './AvatarZone';
+import type { AvatarZoneProps } from './AvatarZone';
 import { combatTable } from './CombatZone';
+import { CommandZone } from './CommandZone';
+import type { CommandZoneProps } from './CommandZone';
+import { LibraryTop } from './LibraryTop';
+import type { LibraryTopProps } from './LibraryTop';
 import { Exile } from './Exile';
 import type { ExileProps } from './Exile';
 import { Graveyard } from './Graveyard';
 import type { GraveyardProps } from './Graveyard';
 import { Hand } from './Hand';
 import type { HandProps } from './Hand';
-import type { PlayerStatusProps } from './PlayerStatus';
+import { podRow, podTile } from './PodRow';
 import { SeatPod } from './SeatPod';
+import type { SeatPodProps } from './SeatPod';
+import { SeatRail } from './SeatRail';
+import type { SeatRailProps } from './SeatRail';
 import { StackZone } from './StackZone';
 import type { StackZoneProps } from './StackZone';
 
 export interface BoardSide {
-  readonly status: PlayerStatusProps;
+  /**
+   * The seat's vitals, drawn as a pod in the column between the two boards.
+   *
+   * `SeatPodProps` rather than `PlayerStatusProps` since `mtg-bz2.16`: the pod
+   * is a control while a spell is being aimed at this seat, and the caller is
+   * the only one that knows whether it is. Every field the old type carried is
+   * still on this one, so nothing that fills a side had to change.
+   */
+  readonly status: SeatPodProps;
   readonly battlefield: BattlefieldProps;
   readonly hand?: HandProps;
   readonly graveyard?: GraveyardProps;
@@ -38,6 +61,54 @@ export interface BoardSide {
    * there is something in it to look at.
    */
   readonly exile?: ExileProps;
+  /**
+   * The seat's command zone, drawn on the right-hand side of its battlefield
+   * and supplied only at a Commander table (`./CommandZone.ts`). A standard
+   * game draws exactly the side it drew before.
+   */
+  readonly commandZone?: CommandZoneProps;
+  readonly avatars?: AvatarZoneProps;
+  /**
+   * The top of the seat's library while it is public, drawn in the same panel
+   * as the command zone and supplied only while the engine reveals it
+   * (`./LibraryTop.ts`). Absent on every ordinary position.
+   */
+  readonly libraryTop?: LibraryTopProps;
+}
+
+/** One opponent of a pod beyond the one `BoardProps.opponent` holds. */
+export interface BoardPodSeat {
+  /** Table position, the key the seat's row in the rail is filed under. */
+  readonly seat: number;
+  readonly side: BoardSide;
+}
+
+/**
+ * What a table of more than two players adds to the board (`mtg-bc2.154.6.5.4`).
+ *
+ * Optional whole rather than a field beside each of its parts, so the two halves
+ * of a pod cannot be handed over separately: a rail without the tiles it names,
+ * or tiles with no rail to say who is close to losing, are both a board that
+ * disagrees with itself. Absent draws exactly the duel this component always
+ * drew, byte for byte, which is what the replay frame and every two-seat played
+ * table rely on.
+ *
+ * `opponent` stays the seat the combat band lifts its creatures out of, and in a
+ * pod it is one of several: the caller says which, because the caller is the
+ * one that knows whose turn it is and which opponent is being fought
+ * (`../routes/play/backend-position.ts`). Everything else about that seat is as it
+ * was, so `opponent` still carries the aiming, the click gestures and the arrival
+ * marks and a tile built from it needs none of them re-wired.
+ */
+export interface BoardPod {
+  /** Every player, in table order, one row each (`./SeatRail.ts`). */
+  readonly rail: SeatRailProps;
+  /** Table position of the seat `BoardProps.opponent` is. */
+  readonly opponentSeat: number;
+  /** Every other opponent, in the order they are drawn once `opponent` is placed. */
+  readonly others: readonly BoardPodSeat[];
+  /** Where in the row of opponents `opponent` sits, so the row runs in table order. */
+  readonly opponentAt: number;
 }
 
 export interface BoardProps {
@@ -137,6 +208,25 @@ export interface BoardProps {
    */
   readonly steps?: ReactNode;
   /**
+   * The divider between the battlefield and the hand, and where it was dragged.
+   *
+   * `mtg-7rhk`. Two slots rather than one because they answer different
+   * questions and arrive at different times: the handle is drawn on every played
+   * table so the control can be found, and the style exists only once somebody
+   * has dragged it. `../styles/board/hand.ts` selects its whole seamed arm on
+   * the `data-seam` this component writes beside the style, so a caller that
+   * passes neither -- a replay frame, a read-only render -- gets markup
+   * identical to the one this component rendered before the seam existed, which
+   * is what `../../test/play/battlefield-geometry.browser.test.ts` measures.
+   *
+   * Slots for the reason `prompt` and `steps` are slots: the stored share and
+   * the pointer listener belong to whoever owns the view (`../routes/play/
+   * hand-seam.ts`), and this component draws the table and decides none of it.
+   */
+  readonly seam?: ReactNode;
+  /** The near lane's inline height for the hand; see `seam`. */
+  readonly seamStyle?: Readonly<Record<string, string>>;
+  /**
    * Drawn in the side rail, under the disclosure. One node or several.
    *
    * **It is the whole of the rail now** (`mtg-rgc.7`). Three other blocks have
@@ -219,6 +309,11 @@ export interface BoardProps {
    * `data-rail` and a lane's `data-active` already follow.
    */
   readonly aiming?: boolean;
+  /**
+   * The rest of the table when there are more than two players, and drawn in
+   * place of the opponent's pod and lane when present (`BoardPod`).
+   */
+  readonly pod?: BoardPod;
 }
 
 /** Which of the two seats a lane is, for a caller that treats them differently. */
@@ -244,7 +339,13 @@ export type BoardSeat = 'opponent' | 'you';
  * always written, false included, so a stylesheet can select either state and
  * a test can tell "not active" from "this component never said".
  */
-function side(props: BoardSide, seat: BoardSeat, steps: ReactNode = null): ReactElement {
+interface NearLane {
+  readonly steps: ReactNode;
+  readonly seam: ReactNode;
+  readonly seamStyle: Readonly<Record<string, string>> | undefined;
+}
+
+function side(props: BoardSide, seat: BoardSeat, near: NearLane | null = null): ReactElement {
   return createElement(
     'div',
     {
@@ -252,13 +353,48 @@ function side(props: BoardSide, seat: BoardSeat, steps: ReactNode = null): React
       className: 'mtg-board__side',
       'data-seat': seat,
       'data-active': props.status.active === true ? 'true' : 'false',
+      // The attribute the command sheet turns the column into a grid on; absent
+      // on a side with no zone so the standard table's cascade is untouched.
+      ...(props.commandZone === undefined ? {} : { 'data-command-zone': 'true' }),
+      // The panel column exists while either zone is drawn in it.
+      ...(props.commandZone === undefined && props.avatars === undefined && props.libraryTop === undefined
+        ? {}
+        : { 'data-side-panel': 'true' }),
+      // Written together or not at all: the attribute is what the stylesheet
+      // selects on and the style is the number it reads, and a lane carrying one
+      // without the other is a rule with no value or a value no rule reads.
+      ...(near === null || near.seamStyle === undefined
+        ? {}
+        : { 'data-seam': 'true', style: near.seamStyle }),
     },
     createElement(Battlefield, props.battlefield),
+    props.commandZone === undefined ? null : createElement(CommandZone, props.commandZone),
+    props.avatars === undefined ? null : createElement(AvatarZone, props.avatars),
+    props.libraryTop === undefined ? null : createElement(LibraryTop, props.libraryTop),
     // Between the two zones, which is the whole of `mtg-rgc.6`: the bar is the
     // seam between what is on the table and what you are holding.
-    steps,
+    near?.steps ?? null,
+    // And under the bar, on the hand's own edge, which is the edge it moves.
+    near?.seam ?? null,
     props.hand === undefined ? null : createElement(Hand, props.hand),
   );
+}
+
+/**
+ * A seat's graveyard and, when it owns an exiled card, its exile, each a strip
+ * that opens (`./Graveyard.ts`, `./Exile.ts`). Shared by the pod column and by a
+ * pod's opponent tiles, so a card sent to either place is reachable from the
+ * seat that owns it wherever that seat is drawn.
+ */
+function zoneStrips(props: BoardSide, seat: BoardSeat): readonly ReactElement[] {
+  const graveyard = props.graveyard;
+  const exile = props.exile;
+  return [
+    ...(graveyard === undefined
+      ? []
+      : [createElement(Graveyard, { key: `${seat}-graveyard`, seat, ...graveyard })]),
+    ...(exile === undefined ? [] : [createElement(Exile, { key: `${seat}-exile`, seat, ...exile })]),
+  ];
 }
 
 /**
@@ -290,15 +426,33 @@ function side(props: BoardSide, seat: BoardSeat, steps: ReactNode = null): React
  * pod it drew before.
  */
 function pod(props: BoardSide, seat: BoardSeat): readonly ReactElement[] {
-  const graveyard = props.graveyard;
-  const exile = props.exile;
-  return [
-    createElement(SeatPod, { key: seat, ...props.status, seat }),
-    ...(graveyard === undefined
-      ? []
-      : [createElement(Graveyard, { key: `${seat}-graveyard`, seat, ...graveyard })]),
-    ...(exile === undefined ? [] : [createElement(Exile, { key: `${seat}-exile`, seat, ...exile })]),
-  ];
+  return [createElement(SeatPod, { key: seat, ...props.status, seat }), ...zoneStrips(props, seat)];
+}
+
+/**
+ * The opponents of a pod, in table order, each a tile (`./PodRow.ts`).
+ *
+ * A tile is built from a side the way a duel's opponent lane is, so the lane's
+ * arrival marks, click gestures and zoom reach every opponent through the one
+ * function. `primary` is the seat the combat band was lifted out of, and it is
+ * drawn from the band's remainder rather than from the position it was given:
+ * the creatures the seam is holding are not also standing in the row.
+ */
+function opponents(table: BoardPod, primary: BoardSide): ReactElement {
+  const tile = (seat: number, from: BoardSide, isPrimary: boolean): ReactElement =>
+    podTile({
+      seat,
+      status: from.status,
+      primary: isPrimary,
+      body: side({ ...from, battlefield: { ...from.battlefield, tile: true } }, 'opponent'),
+      zones: zoneStrips(from, 'opponent'),
+    });
+  const others = table.others.map((other) => tile(other.seat, other.side, false));
+  return podRow([
+    ...others.slice(0, table.opponentAt),
+    tile(table.opponentSeat, primary, true),
+    ...others.slice(table.opponentAt),
+  ]);
 }
 
 export function Board(props: BoardProps): ReactElement {
@@ -308,6 +462,7 @@ export function Board(props: BoardProps): ReactElement {
   // that is one arrangement rather than two. `beat` rides the same spread for
   // the same reason and is already in `props`.
   const combat = combatTable({ ...props, stack: createElement(StackZone, props.stack) });
+  const table = props.pod;
   return createElement(
     'div',
     {
@@ -315,12 +470,20 @@ export function Board(props: BoardProps): ReactElement {
       'data-ask': props.askCollapsed === true ? 'shut' : 'open',
       'data-rail': props.railCollapsed === true ? 'shut' : 'open',
       'data-aiming': props.aiming === true ? 'true' : 'false',
+      // Written only at a pod, so a duel's markup is the one it always was and a
+      // sheet can select the arm that has a rail and a row without a class.
+      ...(table === undefined ? {} : { 'data-pod': String(table.rail.seats.length) }),
     },
     createElement(
       'div',
       { className: 'mtg-board__pods' },
       props.askHead ?? null,
-      ...pod(props.opponent, 'opponent'),
+      // A pod's vitals are the rail, one row per player; a duel's are the two
+      // pods at the ends of the column. Yours stays a pod either way, because
+      // the mana pool and the zone counts under it are yours to act on.
+      ...(table === undefined
+        ? pod(props.opponent, 'opponent')
+        : [createElement(SeatRail, { key: 'rail', ...table.rail })]),
       props.prompt ?? null,
       ...pod(props.you, 'you'),
     ),
@@ -332,9 +495,13 @@ export function Board(props: BoardProps): ReactElement {
       // Combat belongs to the table rather than to either row: CR 508 declares
       // an attacker against the *defending player*, which is a fact about both
       // halves and about neither.
-      side(combat.opponent, 'opponent'),
+      table === undefined ? side(combat.opponent, 'opponent') : opponents(table, combat.opponent),
       combat.band,
-      side(combat.you, 'you', props.steps ?? null),
+      side(combat.you, 'you', {
+        steps: props.steps ?? null,
+        seam: props.seam ?? null,
+        seamStyle: props.seamStyle,
+      }),
       props.askFlyout ?? null,
     ),
     createElement('div', { className: 'mtg-board__rail' }, props.railHead ?? null, props.rail ?? null),

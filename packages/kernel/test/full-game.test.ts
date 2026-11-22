@@ -44,18 +44,44 @@ function scriptedOrIdle(name: string, script: readonly Action[]): PlayerAgent {
       case 'declareBlockers':
         return { type: 'declareBlockers', player: view.player, blocks: [] };
       case 'orderBlockers':
+      case 'orderAttackers':
       case 'discard':
       case 'mulligan':
       case 'triggerTargets':
+      case 'pluralTargets':
+      case 'damageAllocation':
       case 'optionalTrigger':
       case 'may':
       case 'unless':
       case 'legendRule':
       case 'scry':
+      case 'topLibraryOrder':
+      case 'topLibrarySelect':
+      case 'topLibraryPartition':
+      case 'topLibraryPile':
       case 'searchLibrary':
+      case 'searchDestination':
       case 'graveyardChoice':
+      case 'battlefieldChoice':
+      case 'populate':
       case 'handDiscard':
-      case 'permanentSacrifice': {
+      case 'revealedHandChoice':
+      case 'permanentSacrifice':
+      case 'permanentUntap':
+      case 'entryCopy':
+      case 'entryCounter':
+      case 'entryAura':
+      case 'entryTimestampOrder':
+      case 'entryCharacteristics':
+      case 'entryOptionalCounter':
+      case 'entryPayLife':
+      case 'entryPlayer':
+      case 'entryColors':
+      case 'spellTargets':
+      case 'freeCast':
+      case 'damagePrevention':
+      case 'namedZoneExile':
+      case 'manaColor': {
         // A trigger's targets, a "you may" (from a trigger or a spell), a
         // printed toll, an opening hand, a scry, a library search, a card
         // taken out of a graveyard, the legend rule and CR 701.17a's edict are
@@ -73,6 +99,10 @@ function scriptedOrIdle(name: string, script: readonly Action[]): PlayerAgent {
         if (first === undefined) throw new Error(`${name}: no option offered`);
         return first;
       }
+      case 'openingHandAction':
+        return { type: 'chooseOpeningHandAction', player: view.player, oid: null };
+      case 'cardName':
+        return { type: 'chooseCardName', player: view.player, name: 'Black Lotus' };
     }
   });
 }

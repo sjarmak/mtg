@@ -62,6 +62,29 @@ describe('the discard rows', () => {
     );
   });
 
+  it("writes Wit's End with Forge's source-attested whole-hand mode", () => {
+    expect(
+      lineStartingWith(
+        spell("Wit's End", { kind: 'discardCards', count: 'all', target: { kind: 'targetPlayer' } }),
+        'A:',
+      ),
+    ).toBe(
+      'A:SP$ Discard | ValidTgts$ Player | Mode$ Hand | SpellDescription$ Target player discards their hand.',
+    );
+  });
+
+  it('writes an untargeted controller discard as Defined You', () => {
+    expect(
+      lineStartingWith(
+        spell('Looting', { kind: 'discardCards', count: 2, target: { kind: 'noTarget' } }),
+        'A:',
+      ),
+    ).toBe(
+      'A:SP$ Discard | Defined$ You | NumCards$ 2 | Mode$ TgtChoose |' +
+        ' SpellDescription$ You discard two cards.',
+    );
+  });
+
   it('writes Coercion as the same API with the reveal folded into the mode', () => {
     expect(
       lineStartingWith(

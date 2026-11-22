@@ -155,6 +155,17 @@ const TAPPED_SLOT_ASPECT = '1';
  * a quarter turn then lays it into the slot's width exactly, edge to edge, with
  * nothing left over to paint on a neighbor.
  *
+ * The guard beside it carries this same share and not the slot's whole height,
+ * which is `mtg-6hhr`. An upright face in a slot the block-axis cap squashed is
+ * drawn from that slot's height through the printed trim, so it is 63/88 of it;
+ * a rotated face guarded at `100cqh` was drawn the whole height and came out
+ * 88/63 wider than the card next to it. Measured over
+ * `../../../test/play/tapped-cap.browser.test.ts`, a battlefield row capped at
+ * 110px: the tapped base width was 110 against the upright's 78.8, and with the
+ * share on both terms both are 78.8. Wherever the slot really is square the two
+ * readings are the same number, so this changes nothing on a table that has its
+ * height - `min(0.7159S, S)` and `min(0.7159S, 0.7159S)` are both `0.7159S`.
+ *
  * A percentage of the slot rather than `height: 100%`, and that is the whole of
  * `mtg-bm1`: a percentage width resolves against the width the row settled on,
  * after `flex-shrink` has taken whatever it took, while `height: 100%` resolves
@@ -184,17 +195,20 @@ const TAPPED_FACE_WIDTH = (CARD_TRIM_MM.width / CARD_TRIM_MM.height) * 100;
  * Stated in the slot's own container units, and in the same shape as the width
  * above, because the two have to agree: where the second term binds - a slot
  * capped on the block axis, which `./hand.ts` does to a battlefield row - the
- * card is laid out from the slot's height, paints the slot's full height, and
- * the inset is exactly zero. A constant percentage would have been right only
+ * card is laid out from 63/88 of the slot's height, paints that, and the inset
+ * is the eighth of the slot's height left over at each end. It read zero while
+ * the second term was `100cqh`, and that was the same overdraw `mtg-6hhr`
+ * reported one line up: an inset of zero is a claim that the card fills the
+ * slot, which a card the width of its neighbor does not. A constant percentage would have been right only
  * while the square survived.
  */
-export const TAPPED_FACE_INSET = `calc((100cqh - min(${cssNumber(TAPPED_FACE_WIDTH)}cqw, 100cqh)) / 2)`;
+export const TAPPED_FACE_INSET = `calc((100cqh - min(${cssNumber(TAPPED_FACE_WIDTH)}cqw, ${cssNumber(TAPPED_FACE_WIDTH)}cqh)) / 2)`;
 
 /**
  * The name the marks row anchors to: the card's own art window.
  *
  * A dashed ident and not a design token — nothing ever reads it with `var()`,
- * and `../../test/tokens.test.ts` scans for exactly that — but it carries the
+ * and `../../../test/tokens.test.ts` scans for exactly that — but it carries the
  * project's prefix because it shares the custom-property namespace and a bare
  * `--art` would collide with the first sheet that wanted the word.
  *
@@ -329,10 +343,11 @@ export const SLOT_CSS = `
 }
 .mtg-slot[data-tapped='true'] > .mtg-card {
   rotate: 90deg;
-  width: min(${cssNumber(TAPPED_FACE_WIDTH)}%, 100cqh);
-  --card-w: min(${cssNumber(TAPPED_FACE_WIDTH)}cqw, 100cqh);
+  width: min(${cssNumber(TAPPED_FACE_WIDTH)}%, ${cssNumber(TAPPED_FACE_WIDTH)}cqh);
+  --card-w: min(${cssNumber(TAPPED_FACE_WIDTH)}cqw, ${cssNumber(TAPPED_FACE_WIDTH)}cqh);
   height: auto; min-width: 0; max-height: none;
 }
+.mtg-slot__fan-name { display: none; }
 /* A card with a move on it, drawn as lit. The renderer already knew which cards
    those were - data-interactive is on the face and clicking it already plays the
    card - and drew nothing, which is mtg-8ou: measured side by side in one hand,
@@ -418,8 +433,8 @@ export const SLOT_CSS = `
  *   constant would be a second derivation of the face's internals kept level by
  *   hand, which is the thing ADR-0002 §6.2 exists to stop.
  * - **The card's other bottom corner.** Universal and cheap, and it trades the
- *   name for the rules box's last line - or, under BOARD_RULES_MIN_REM where
- *   there is no rules box, for the type line. mtg-611 already has the corner P/T
+ *   name for the rules box's last line - or, under BOARD_RULES_PANEL_MAX_REM,
+ *   for the panel that box becomes over the picture's foot. mtg-611 already has the corner P/T
  *   badge overlapping that line; a second thing there is a worse bug, not a fix.
  * - **Indenting the name past the row.** The row's width is its badges' text, so
  *   the reserve would have to be a guess, and it is paid on every line of a
@@ -577,6 +592,40 @@ export const SLOT_CSS = `
   content: ''; position: absolute; inset: 2px; z-index: 1; pointer-events: none;
   border: 2px dashed var(--mtg-accent); border-radius: var(--mtg-radius-sm);
 }
+/* The card a log line is pointing at (mtg-47o, mtg-exe).
+
+   The question this answers is which of one seat's two Gloom Hands a sentence
+   is about, and the answer had to come from the board rather than from a mark
+   printed on each copy: a badge that means nothing except in the presence of a
+   twin, on a face that already carries counters, damage and combat flags. So
+   the log line points and the board lights up, and ../../routes/play/pointing.ts
+   argues that trade at length.
+
+   Which channel it may use was decided by what is already spent on this face.
+   box-shadow on .mtg-card is the lit-and-playable state, outline on .mtg-card is
+   the selected state, an outline on the slot is painted under the card (the rule
+   above records measuring exactly that), and ::after on the slot is the aim
+   reticle. ::before is what is left, and it is the right one anyway for the same
+   three reasons the reticle gives: inside the border box so ../zone.ts's
+   overflow: auto cannot clip it, over the face rather than under it, and
+   pointer-events: none so the card beneath is still the button it was.
+
+   It is solid where the reticle is dashed, and that is the whole of telling the
+   two apart when a spell is both aimed and pointed at. The reticle is a broken
+   line inset 2px; this is an unbroken one on the slot's own edge with a wash
+   behind it, so the difference survives a viewer who cannot separate the two
+   from color. The second channel is the face lifting by the hover step, which
+   is the one lift idiom on this route that is safe here: a scale on the *face*
+   is free because the hover zoom is its sibling rather than its descendant
+   (../board/lands.ts records the same finding), and the rule above already
+   spends it on hover, so a pointed card lifts exactly as far as a touched one
+   and no reader has to learn a second distance. */
+.mtg-slot[data-pointed='true']::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border: 2px solid var(--mtg-accent); border-radius: var(--mtg-radius-sm);
+  box-shadow: 0 0 12px 2px var(--mtg-accent-soft);
+}
+.mtg-slot[data-pointed='true'] > .mtg-card { scale: ${cssNumber(HOVER_SCALE)}; }
 /* Said, not shown. Two marks are drawn by the table itself now — an attacker is
    in the combat band and a derived size is underlined — and the badge would be
    the same sentence a second time on a face with no room for it. the playtester,

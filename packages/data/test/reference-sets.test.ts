@@ -335,4 +335,24 @@ describe('printing-level reference sets', () => {
       { code: 'MH2', main: 303, cards: 498, tokens: 21, draftCards: 441 },
     ]);
   });
+
+  it('keeps the documented 15-card draft-booster mix for M11, M13, and RTR', () => {
+    const corpus = loadReferenceCorpus();
+    const classicBoosters = [
+      { contents: { basic: 1, common: 10, rareMythic: 1, uncommon: 3 }, weight: 31 },
+      { contents: { basic: 1, common: 9, foil: 1, rareMythic: 1, uncommon: 3 }, weight: 9 },
+    ];
+
+    for (const code of ['M11', 'M13', 'RTR']) {
+      const set = corpus.sets.find((candidate) => candidate.code === code);
+      if (set === undefined) throw new Error(`the committed reference corpus has no ${code}`);
+      expect(set.draftBooster.boosters).toEqual(classicBoosters);
+      expect(set.draftBooster.boostersTotalWeight).toBe(40);
+      expect(
+        set.draftBooster.boosters.every(
+          (booster) => Object.values(booster.contents).reduce((sum, count) => sum + count, 0) === 15,
+        ),
+      ).toBe(true);
+    }
+  });
 });

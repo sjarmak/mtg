@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "m10",
+  "name": "Magic 2010",
+  "sources": [
+    {
+      "code": "M10",
+      "catalogFormat": "m10-printed-v1",
+      "catalogSha256": "2b44eeabb387d8671c5f9400ae677b7c2ac46414ad6329cdb840332dd704212f",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/M10.json",
+        "sha256": "4a725abadef0a55d888fd04a8a4d08b1146ed7ee42c8bee4569bae6a60fe6623",
+        "version": "5.3.0+20260929"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m10-printed-v1:0093:6e19acff-f3dd-417a-a9ab-ea3e36c1ba61",
+          "name": "Doom Blade",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0051:c231101e-6620-46fc-a0ad-a53291d12dc2",
+          "name": "Essence Scatter",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0044:2667f1d1-18d3-4bb4-a071-dd65b237d733",
+          "name": "Cancel",
+          "count": 3
+        },
+        {
+          "physicalId": "m10-printed-v1:0065:3877d196-332c-4266-aac8-a35754d74297",
+          "name": "Negate",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0114:e97cf3d1-4929-4161-bc5e-f7fa0fb9af68",
+          "name": "Tendrils of Corruption",
+          "count": 3
+        },
+        {
+          "physicalId": "m10-printed-v1:0049:3102cec9-1cdc-4946-a2dd-caf04eaa8b97",
+          "name": "Divination",
+          "count": 3
+        },
+        {
+          "physicalId": "m10-printed-v1:0064:72bea6b5-005c-48c8-9f2b-0dfb18039429",
+          "name": "Mind Spring",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0073:b0937274-d5cb-4790-8c10-804f537c5581",
+          "name": "Sphinx Ambassador",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0224:bdc6e950-38dd-46da-a1c3-58dc7495a9f9",
+          "name": "Drowned Catacomb",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0234:172bb1b6-08c3-4ffd-b26d-b1c77dba06c3",
+          "name": "Island",
+          "count": 21
+        },
+        {
+          "physicalId": "m10-printed-v1:0238:4dc185cc-5b8e-43ea-aa75-94ddffb74ad0",
+          "name": "Swamp",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "black-red-sacrifice",
+      "name": "Black-Red Sacrifice",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m10-printed-v1:0124:8b63bee5-d8e5-4c2f-8514-8c86d025f7c9",
+          "name": "Act of Treason",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0117:9bac0b9c-0077-44c8-8982-4e7b7e7ad398",
+          "name": "Vampire Aristocrat",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0146:435589bb-27c6-4a6d-9d63-394d5092b9d8",
+          "name": "Lightning Bolt",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0093:6e19acff-f3dd-417a-a9ab-ea3e36c1ba61",
+          "name": "Doom Blade",
+          "count": 3
+        },
+        {
+          "physicalId": "m10-printed-v1:0112:1975ed97-acb8-4bb6-804a-e5da725d876e",
+          "name": "Sign in Blood",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0097:595fff83-78d2-454f-8099-ee2da87c4826",
+          "name": "Gravedigger",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0223:2d4998db-13c0-412f-b02c-9f041cc45c7e",
+          "name": "Dragonskull Summit",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0238:4dc185cc-5b8e-43ea-aa75-94ddffb74ad0",
+          "name": "Swamp",
+          "count": 21
+        },
+        {
+          "physicalId": "m10-printed-v1:0242:ed783a0c-ba7c-48f4-aac6-ad93a02bce6b",
+          "name": "Mountain",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "red-green-ramp",
+      "name": "Red-Green Ramp",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m10-printed-v1:0189:199e047c-823b-4d18-a5e9-6de3e6989858",
+          "name": "Llanowar Elves",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0201:78472540-b085-4ee1-848c-de4631274919",
+          "name": "Rampant Growth",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0169:bdd0f8c8-1a1f-4d9b-a6e1-3654f3995012",
+          "name": "Borderland Ranger",
+          "count": 3
+        },
+        {
+          "physicalId": "m10-printed-v1:0146:435589bb-27c6-4a6d-9d63-394d5092b9d8",
+          "name": "Lightning Bolt",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0136:1dc84106-aec3-4e52-8dcb-1ed545bf3058",
+          "name": "Fireball",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0174:d779b14c-a100-4382-9e7c-0969efda73ec",
+          "name": "Cudgel Troll",
+          "count": 3
+        },
+        {
+          "physicalId": "m10-printed-v1:0191:2cf3169c-f01c-47f4-ba4b-e199b7ade5fc",
+          "name": "Master of the Wild Hunt",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0166:6ee46d8b-559e-4c33-99fb-b55f00aeee72",
+          "name": "Ant Queen",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0127:3226c1aa-37b8-4499-9579-60618261f3e8",
+          "name": "Bogardan Hellkite",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0198:d3e16262-a9c1-45e1-b88a-322c752256cf",
+          "name": "Overrun",
+          "count": 1
+        },
+        {
+          "physicalId": "m10-printed-v1:0227:5433b11b-efe9-4d94-8f71-6bf7c403494d",
+          "name": "Rootbound Crag",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0242:ed783a0c-ba7c-48f4-aac6-ad93a02bce6b",
+          "name": "Mountain",
+          "count": 12
+        },
+        {
+          "physicalId": "m10-printed-v1:0246:3394d804-c0e5-4901-a8ff-c1a765cc1e21",
+          "name": "Forest",
+          "count": 17
+        }
+      ]
+    },
+    {
+      "id": "green-white-creatures",
+      "name": "Green-White Creatures",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m10-printed-v1:0189:199e047c-823b-4d18-a5e9-6de3e6989858",
+          "name": "Llanowar Elves",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0178:53aa3ea3-fb3c-4758-8035-20ec0a94b730",
+          "name": "Elvish Visionary",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0176:544bc214-e32d-4370-a15f-62812a0420be",
+          "name": "Elvish Archdruid",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0186:451c8a79-1e8a-437d-836f-31155914c551",
+          "name": "Great Sable Stag",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0199:cde88869-5202-43e9-b0eb-4e40a50d311e",
+          "name": "Prized Unicorn",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0198:d3e16262-a9c1-45e1-b88a-322c752256cf",
+          "name": "Overrun",
+          "count": 3
+        },
+        {
+          "physicalId": "m10-printed-v1:0183:799315b8-19ab-474e-bbe2-f928d4969daf",
+          "name": "Garruk Wildspeaker",
+          "count": 2
+        },
+        {
+          "physicalId": "m10-printed-v1:0022:3d34551e-36a4-49ea-9d2a-4c72575fe06a",
+          "name": "Pacifism",
+          "count": 3
+        },
+        {
+          "physicalId": "m10-printed-v1:0191:2cf3169c-f01c-47f4-ba4b-e199b7ade5fc",
+          "name": "Master of the Wild Hunt",
+          "count": 1
+        },
+        {
+          "physicalId": "m10-printed-v1:0228:9f4e8ead-8c82-4258-bc59-551f7a74e042",
+          "name": "Sunpetal Grove",
+          "count": 4
+        },
+        {
+          "physicalId": "m10-printed-v1:0230:cc084e24-22fe-4326-b894-54d79fbeba2f",
+          "name": "Plains",
+          "count": 11
+        },
+        {
+          "physicalId": "m10-printed-v1:0246:3394d804-c0e5-4901-a8ff-c1a765cc1e21",
+          "name": "Forest",
+          "count": 18
+        }
+      ]
+    }
+  ],
+  "contentSha256": "3c4a0c046e723da3757bb4ac377f57cd1e8308f4876f3788a97775936f0027b5"
+}

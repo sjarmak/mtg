@@ -15,6 +15,7 @@ import type {
   CountFilter,
   Effect,
   EffectScope,
+  GraveyardArrivalGrant,
   PlayerScope,
   PumpAmount,
   TargetedEffect,
@@ -29,50 +30,87 @@ import {
   isGrantableKeywordAbilityKind,
   isLiteralAmount,
   isReferentTarget,
+  isSourceAttachmentTarget,
   isSourceBodyOnlyTarget,
+  isSpellTargetEffect,
+  isOverloadOnlyEffect,
+  overloadEffectForMember,
+  isTargetedFight,
+  isAuraCard,
+  isPermanentCard,
+  manaValue,
+  type OverloadEffect,
   requiresDistinctTarget,
   targetFilterOf,
   targetRestrictionOf,
 } from '@mtg/dsl';
-import type { ContinuousEffect } from './continuous';
-import { addCounters, ANY_PERMANENT, counterCount, objectFilter } from './continuous';
+import type { ContinuousEffect, ControlEffect, TypeChangeEffect } from './continuous';
+import { ANY_PERMANENT, counterCount, objectFilter, onlyObject } from './continuous';
+import { placeCounters } from './counters';
 import { selectMatching } from './characteristics';
 import type { ObjectId, PlayerId } from './ids';
+import { emblemId } from './ids';
 import { continuousEffectId, opponentOf, preventionEffectId } from './ids';
 import {
+  characteristicsOf,
   controllerOf,
   derivedCharacteristics,
   hasCardType,
   hasKeyword,
+  hasKeywordAbility,
   isCreatureObject,
   powerOf,
 } from './layers';
-import { canBeTargetedBy, type ProtectionSource } from './keyword-abilities';
+import { canBeTargetedBy, canPlayerBeTargetedBy, type ProtectionSource } from './keyword-abilities';
+import { canGraveyardCardsBeTargeted, canPlayerLoseGame, canPlayerWinGame } from './game-rules';
 import { satisfiesTargetRestriction } from './target-restrictions';
-import { satisfiesTargetFilter, spellSatisfiesFilter } from './target-filter';
-import type { GameState, ResolutionTally, Target } from './state';
+import { graveyardCardSatisfiesFilter, satisfiesTargetFilter, spellSatisfiesFilter } from './target-filter';
+import type {
+  GameState,
+  LinkedExileReference,
+  ResolutionTally,
+  SourceCharacteristics,
+  Target,
+} from './state';
 import { apnapOrder, NOTHING_TALLIED } from './state';
 import type { Trace } from './trace';
 import { emit, withState } from './trace';
+import { counterStackEntry } from './counter';
 import type { DamageInstance } from './damage';
 import { applyDamage, gainLife } from './damage';
 import { loseLife, setLife } from './life';
+import { nextBelow } from './rng';
 import type { ReplacementEffect } from './replacement-effects';
 import { addManaToPool } from './mana';
 import { graveyardMembers, printedFilter, selectPrinted } from './zone-filter';
-import { destroyPermanent, sacrificePermanent } from './destruction';
+import { isLegalAuraEntryHost } from './attach';
+import { createRegenerationShield, destroyPermanent, sacrificePermanent } from './destruction';
+import { endGameWith } from './sba';
+import { moveExactSourceFromZone } from './exact-source-move';
+import { linkExileToSource, moveLinkedExile } from './source-linked-exile';
+import { targetIsCurrentIncarnation } from './target-incarnations';
+import { detainPermanent } from './detention';
 import {
+  createCopiedToken,
   createToken,
   drawCards,
   exileGraveyard,
+  exileHandsAndGraveyards,
   holdTapped,
   isOnBattlefield,
   millCards,
   moveObject,
+  moveObjectsToBattlefieldSimultaneously,
   putOnLibrary,
+  putObjectsOnOwnersLibrariesThenShuffle,
   revealTopCards,
+  revealTopCardToHand,
+  revealUntilCreatureCards,
+  revealUntilLandToGraveyard,
+  shuffleHandAndGraveyardIntoLibrary,
   shuffleGraveyardIntoLibrary,
   shuffleLibrary,
+  skipNextUntap,
   tapObject,
   tryObject,
   untapObject,
@@ -91,6 +129,7 @@ export function sameTarget(a: Target, b: Target): boolean {
     case 'player':
       return b.kind === 'player' && a.player === b.player;
     case 'permanent':
+    case 'card':
     case 'spell':
       return b.kind === a.kind && a.oid === b.oid;
     default:
@@ -117,6 +156,7 @@ function matchesTargetKind(
   if (wanted === 'triggeringCreature') {
     return target !== null && target.kind === 'permanent' && isOnBattlefield(state, target.oid);
   }
+  if (wanted === 'triggeringPlayer') return target !== null && target.kind === 'player';
   if (isSourceBodyOnlyTarget(wanted)) {
     // The slot never carries a real target — `target-choices.ts` fills it with
     // the same `null` placeholder `noTarget` uses, because the referent is the
@@ -136,6 +176,7 @@ function matchesTargetKind(
     // and neither of those is a fact the kernel's target machinery reads.
     return target === null;
   }
+  if (isSourceAttachmentTarget(wanted)) return target === null;
   if (isReferentTarget(wanted)) {
     // The third retained referent, and it answers exactly as the source-body
     // arm above does and for the same reason: the slot carries the `null`
@@ -147,6 +188,23 @@ function matchesTargetKind(
     // and `validateActivation`, which walk every slot through it before any
     // resolution happens. `mtg-nhyv.75`.
     return target === null;
+  }
+  if (wanted === 'targetCardInYourGraveyard') {
+    return (
+      target?.kind === 'card' &&
+      state.players[chooser].graveyard.includes(target.oid) &&
+      state.objects[target.oid]?.zone === 'graveyard'
+    );
+  }
+  if (wanted === 'targetCardInAGraveyard') {
+    return target?.kind === 'card' && state.objects[target.oid]?.zone === 'graveyard';
+  }
+  if (wanted === 'targetCardInOpponentsGraveyard') {
+    return (
+      target?.kind === 'card' &&
+      !state.players[chooser].graveyard.includes(target.oid) &&
+      state.objects[target.oid]?.zone === 'graveyard'
+    );
   }
   if (target === null || target.kind === 'spell') return false;
   const legalCreature =
@@ -179,6 +237,35 @@ function matchesTargetKind(
     // readings coincide.
     return legalCreature && target.kind === 'permanent' && controllerOf(state, target.oid) !== chooser;
   }
+  if (wanted === 'targetCreatureOpponentControls') {
+    return (
+      legalCreature && target.kind === 'permanent' && controllerOf(state, target.oid) === opponentOf(chooser)
+    );
+  }
+  if (wanted === 'targetNonlandPermanentOpponentControls') {
+    return (
+      target.kind === 'permanent' &&
+      isOnBattlefield(state, target.oid) &&
+      !hasCardType(state, target.oid, 'land') &&
+      controllerOf(state, target.oid) === opponentOf(chooser)
+    );
+  }
+  if (wanted === 'targetNonlandPermanentYouDontControl') {
+    return (
+      target.kind === 'permanent' &&
+      isOnBattlefield(state, target.oid) &&
+      !hasCardType(state, target.oid, 'land') &&
+      controllerOf(state, target.oid) !== chooser
+    );
+  }
+  if (wanted === 'targetPermanentYouNeitherOwnNorControl') {
+    return (
+      target.kind === 'permanent' &&
+      isOnBattlefield(state, target.oid) &&
+      controllerOf(state, target.oid) !== chooser &&
+      tryObject(state, target.oid)?.owner !== chooser
+    );
+  }
   if (wanted === 'targetArtifactOrEnchantment') {
     // The CR 608.2b recheck of the third space `targetChoicesForEffects`
     // enumerates, asked the same way that enumeration asks it: through
@@ -193,10 +280,22 @@ function matchesTargetKind(
       (hasCardType(state, target.oid, 'artifact') || hasCardType(state, target.oid, 'enchantment'))
     );
   }
+  if (wanted === 'targetArtifactYouDontControl') {
+    return (
+      target.kind === 'permanent' &&
+      isOnBattlefield(state, target.oid) &&
+      hasCardType(state, target.oid, 'artifact') &&
+      controllerOf(state, target.oid) !== chooser
+    );
+  }
   const legalPlaneswalker =
     target.kind === 'permanent' &&
     isOnBattlefield(state, target.oid) &&
     hasCardType(state, target.oid, 'planeswalker');
+  const legalBattle =
+    target.kind === 'permanent' &&
+    isOnBattlefield(state, target.oid) &&
+    hasCardType(state, target.oid, 'battle');
   if (wanted === 'targetPermanent') {
     // The widest object space, so the kind itself asks only "is it still a
     // permanent" — CR 110.1, an object on the battlefield. Everything that
@@ -214,7 +313,7 @@ function matchesTargetKind(
     // Grizzly Bears is a card whose text and behavior disagree.
     return target.kind === 'player' || legalPlaneswalker;
   }
-  return target.kind === 'player' || legalCreature || legalPlaneswalker;
+  return target.kind === 'player' || legalCreature || legalPlaneswalker || legalBattle;
 }
 
 /** True when no slot before `index` already chose `target`. */
@@ -248,8 +347,17 @@ export function isTargetStillLegal(
   index: number,
   chooser: PlayerId,
   source?: ProtectionSource,
+  targetIncarnation?: number | null,
 ): boolean {
   const target = targets[index] ?? null;
+  if (
+    target !== null &&
+    targetIncarnation !== undefined &&
+    targetIncarnation !== null &&
+    !targetIsCurrentIncarnation(state, target, targetIncarnation)
+  ) {
+    return false;
+  }
   const recheck: TargetRecheck = EFFECT_EXECUTION[effect.kind].recheck;
   switch (recheck) {
     case 'untargeted':
@@ -271,7 +379,19 @@ export function isTargetStillLegal(
       // having stopped being a spell — which the lines above already caught.
       // It is written anyway because the day a vocabulary member does change a
       // spell's type, the recheck that was never written is the bug.
-      const spellFilter = effect.kind === 'counterSpell' ? effect.spellFilter : undefined;
+      const spellFilter = isSpellTargetEffect(effect) ? effect.spellFilter : undefined;
+      const targetEntry = state.stack.find((entry) => entry.oid === target.oid);
+      if (
+        (effect.kind === 'counterSpell' &&
+          'spellSelection' in effect &&
+          effect.spellSelection === 'targetSpellYouDontControl' &&
+          targetEntry?.controller === chooser) ||
+        (effect.kind === 'copySpell' &&
+          effect.spellSelection === 'targetSpellYouControl' &&
+          targetEntry?.controller !== chooser)
+      ) {
+        return false;
+      }
       return spellFilter === undefined || spellSatisfiesFilter(state, target.oid, spellFilter);
     }
     case 'printedMode': {
@@ -297,10 +417,10 @@ export function isTargetStillLegal(
  * object, and so belongs to that caller and not to this one.
  *
  * Extracted for `survivingMultipleTargets`, which rechecks every member of a
- * `TargetSpec.count` slot ("up to two target creatures", `mtg-kg44`) through
+ * plural target slot through
  * the exact rule a single-target slot is rechecked by, rather than a second,
  * hand-copied version of it that could drift. `distinct` never reaches a
- * counted slot at all — `checkTargetCount` (`@mtg/dsl`) refuses the
+ * plural slot at all — `checkTargetCardinality` (`@mtg/dsl`) refuses the
  * combination — so there is nothing that caller is missing by skipping it.
  */
 function isLegalSingleObject(
@@ -310,7 +430,54 @@ function isLegalSingleObject(
   chooser: PlayerId,
   source?: ProtectionSource,
 ): boolean {
-  if (!matchesTargetKind(state, effect.target.kind, target, chooser)) return false;
+  if (effect.kind === 'exileTarget' && effect.creatureBattlefieldOrGraveyard === true) {
+    if (target?.kind === 'permanent') {
+      return (
+        target.oid !== source &&
+        isOnBattlefield(state, target.oid) &&
+        hasCardType(state, target.oid, 'creature') &&
+        (source === undefined || canBeTargetedBy(state, target.oid, source, chooser))
+      );
+    }
+    if (target?.kind !== 'card' || !canGraveyardCardsBeTargeted(state)) return false;
+    const object = tryObject(state, target.oid);
+    return (
+      object?.zone === 'graveyard' && graveyardCardSatisfiesFilter(state, target.oid, effect.target.filter!)
+    );
+  }
+  if (effect.kind === 'dealDamage' && effect.opponentPlayerOrPlaneswalkerOnly === true) {
+    if (target?.kind === 'player' && target.player !== opponentOf(chooser)) return false;
+  }
+  if (
+    effect.kind === 'exileTarget' &&
+    effect.sameNameCohort !== undefined &&
+    target?.kind === 'permanent' &&
+    characteristicsOf(state, target.oid).name === effect.sameNameCohort.excludedName
+  ) {
+    return false;
+  }
+  return isLegalTargetSpec(state, effect.target, target, chooser, source);
+}
+
+/** One printed target selector, shared by ordinary and ordered-pair slots. */
+function isLegalTargetSpec(
+  state: GameState,
+  spec: TargetSpec,
+  target: Target | null,
+  chooser: PlayerId,
+  source?: ProtectionSource,
+): boolean {
+  if (!matchesTargetKind(state, spec.kind, target, chooser)) return false;
+  if (target?.kind === 'card' && !canGraveyardCardsBeTargeted(state)) return false;
+  if (
+    spec.excludeSource === true &&
+    typeof source === 'string' &&
+    target?.kind === 'permanent' &&
+    target.oid === source
+  ) {
+    return false;
+  }
+  if (target?.kind === 'player' && !canPlayerBeTargetedBy(state, target.player, chooser)) return false;
   if (
     source !== undefined &&
     target?.kind === 'permanent' &&
@@ -321,11 +488,11 @@ function isLegalSingleObject(
   // CR 608.2b rechecks every restriction the spell printed, not only the
   // one the kind carries: a creature that grew past "power 3 or less" after
   // being targeted is no longer a legal target, and the spell fizzles.
-  const restriction = targetRestrictionOf(effect.target);
+  const restriction = targetRestrictionOf(spec);
   if (
     restriction !== null &&
-    target?.kind === 'permanent' &&
-    !satisfiesTargetRestriction(state, target.oid, restriction)
+    ((target?.kind === 'permanent' && !satisfiesTargetRestriction(state, target.oid, restriction)) ||
+      (target?.kind === 'player' && !satisfiesTargetRestriction(state, target.player, restriction)))
   ) {
     return false;
   }
@@ -335,16 +502,17 @@ function isLegalSingleObject(
   // (CR 506.4), and a permanent a continuous effect turned black is no
   // longer a legal Doom Blade target — both fall out of asking the layer
   // walk rather than the printed card.
-  const filter = targetFilterOf(effect.target);
-  if (filter !== null && target?.kind === 'permanent' && !satisfiesTargetFilter(state, target.oid, filter)) {
-    return false;
+  const filter = targetFilterOf(spec);
+  if (filter !== null) {
+    if (target?.kind === 'permanent' && !satisfiesTargetFilter(state, target.oid, filter)) return false;
+    if (target?.kind === 'card' && !graveyardCardSatisfiesFilter(state, target.oid, filter)) return false;
   }
   return true;
 }
 
 /**
- * CR 608.2b's partial-survivor half of a `TargetSpec.count` slot ("up to two
- * target creatures", `mtg-kg44`): every chosen member is rechecked
+ * CR 608.2b's partial-survivor half of a plural target slot: every chosen
+ * member is rechecked
  * independently, and whichever are still legal are the ones the effect
  * applies to. The slot itself is never all-or-nothing the way
  * `isTargetStillLegal`'s boolean contract is — a spell that tapped one
@@ -353,7 +521,7 @@ function isLegalSingleObject(
  * You gain 4 life" keeps its life gain when the artifact is gone.
  *
  * `stack.ts`'s `planResolution` is the only caller: it needs the survivors
- * themselves to fold into `tapPermanent`'s apply, a different question than
+ * themselves to fold into the effect's apply, a different question than
  * "is this slot still legal", the one every submission-time validator in
  * `legal.ts` asks through `isTargetStillLegal`. Two functions rather than one
  * overloaded to answer both, because a boolean and a filtered list are not
@@ -363,13 +531,22 @@ function isLegalSingleObject(
 export function survivingMultipleTargets(
   state: GameState,
   effect: TargetedEffect,
-  members: readonly ObjectId[],
+  members: readonly Target[],
   chooser: PlayerId,
   source?: ProtectionSource,
-): readonly ObjectId[] {
-  return members.filter((oid) =>
-    isLegalSingleObject(state, effect, { kind: 'permanent', oid }, chooser, source),
-  );
+  incarnations?: readonly (number | null)[],
+): readonly Target[] {
+  return members.filter((target, index) => {
+    const legal = isTargetedFight(effect)
+      ? isLegalTargetSpec(state, index === 0 ? effect.fighter : effect.target, target, chooser, source)
+      : isLegalSingleObject(state, effect, target, chooser, source);
+    if (!legal) return false;
+    if (target.kind !== 'permanent' || incarnations === undefined) return true;
+    const chosen = incarnations[index];
+    return (
+      chosen !== null && chosen !== undefined && (state.objects[target.oid]?.incarnation ?? 0) === chosen
+    );
+  });
 }
 
 /** True when every `distinct` slot in `targets` avoids the earlier slots' targets. */
@@ -390,6 +567,75 @@ function playerTarget(target: Target | null, fallback: PlayerId): PlayerId {
 
 function permanentTarget(target: Target | null): ObjectId | null {
   return target !== null && target.kind === 'permanent' ? target.oid : null;
+}
+
+function graveyardCardTarget(target: Target | null): ObjectId | null {
+  return target !== null && target.kind === 'card' ? target.oid : null;
+}
+
+/** Apply additive color/type grants to one card just moved from a graveyard. */
+export function grantOnGraveyardArrival(
+  trace: Trace,
+  oid: ObjectId,
+  grant: GraveyardArrivalGrant | undefined,
+  sourceOid: ObjectId,
+): Trace {
+  if (grant === undefined) return trace;
+  const affects = onlyObject(oid);
+  const records: ContinuousEffect[] = [];
+  const colors = grant.colors ?? [];
+  const subtypes = grant.subtypes ?? [];
+  let counter = trace.state.nextId;
+  if (colors.length > 0) {
+    records.push({
+      id: continuousEffectId(counter),
+      kind: 'colorChange',
+      layer: '5',
+      affects,
+      setColors: null,
+      addColors: colors,
+      duration: 'whileSubjectRemains',
+      timestamp: counter,
+      sourceOid,
+      enabledWhile: null,
+    });
+    counter += 1;
+  }
+  if (subtypes.length > 0) {
+    records.push({
+      id: continuousEffectId(counter),
+      kind: 'typeChange',
+      layer: '4',
+      affects,
+      addTypes: [],
+      removeTypes: [],
+      addSubtypes: subtypes,
+      removeAllSubtypes: false,
+      duration: 'whileSubjectRemains',
+      timestamp: counter,
+      sourceOid,
+      enabledWhile: null,
+    });
+    counter += 1;
+  }
+  if (records.length === 0) return trace;
+  const withRecords = withState(trace, {
+    ...trace.state,
+    nextId: counter,
+    continuous: [...trace.state.continuous, ...records],
+  });
+  return records.reduce(
+    (current, record) =>
+      emit(current, {
+        type: 'continuousEffectAdded',
+        id: record.id,
+        targetOid: oid,
+        power: 0,
+        toughness: 0,
+        layer: record.layer,
+      }),
+    withRecords,
+  );
 }
 
 /**
@@ -436,7 +682,7 @@ export function objectsInEffectScope(
 ): readonly ObjectId[] {
   switch (scope) {
     case 'creaturesThatPlayerControls':
-      return selectMatching(state.battlefield, derivedCharacteristics(state), {
+      return selectMatching(state, state.battlefield, derivedCharacteristics(state), {
         ...ANY_PERMANENT,
         cardTypes: ['creature'],
         controller: player,
@@ -449,10 +695,22 @@ export function objectsInEffectScope(
         graveyardMembers(state, player),
         printedFilter({ cardTypes: ['creature'] }),
       );
+    case 'creatureCardsInAllGraveyards':
+      return selectPrinted(
+        state,
+        ([0, 1] as const).flatMap((owner) => graveyardMembers(state, owner)),
+        printedFilter({ cardTypes: ['creature'] }),
+      );
+    case 'targetAndPermanentsItsPlayerControls':
+      return selectMatching(state, state.battlefield, derivedCharacteristics(state), {
+        ...ANY_PERMANENT,
+        controller: player,
+      }).filter((oid) => filter === undefined || satisfiesTargetFilter(state, oid, filter));
     case 'allPermanents':
     case 'permanentsYouControl':
     case 'permanentsOpponentsControl':
       return selectMatching(
+        state,
         state.battlefield,
         derivedCharacteristics(state),
         scope === 'allPermanents'
@@ -484,12 +742,16 @@ export function objectsInEffectScope(
  * changes that function and nothing in this file.
  */
 function effectScopeSubject(
+  state: GameState,
   scope: EffectScope,
   target: Target | null,
   controller: PlayerId,
 ): PlayerId | null {
-  if (EFFECT_SCOPE_SUBJECT[scope] === 'resolvingController') return controller;
-  return target !== null && target.kind === 'player' ? target.player : null;
+  const subject = EFFECT_SCOPE_SUBJECT[scope];
+  if (subject === 'resolvingController' || subject === 'allPlayers') return controller;
+  if (target === null) return null;
+  if (subject === 'targetedPlayer') return target.kind === 'player' ? target.player : null;
+  return target.kind === 'player' ? target.player : controllerOf(state, target.oid);
 }
 
 /**
@@ -513,29 +775,62 @@ export function scopedGroup(
   target: Target | null,
   controller: PlayerId,
 ): readonly ObjectId[] {
-  const subject = effectScopeSubject(scope, target, controller);
+  const subject = effectScopeSubject(state, scope, target, controller);
   return subject === null ? [] : objectsInEffectScope(state, scope, subject, filter);
+}
+
+/** One flat OR branch over a scoped permanent group, deduped in battlefield order. */
+export function scopedDamageGroup(
+  state: GameState,
+  scope: EffectScope,
+  filter: TargetFilter | undefined,
+  additionalFilter: TargetFilter | undefined,
+  target: Target | null,
+  controller: PlayerId,
+): readonly ObjectId[] {
+  const primary = scopedGroup(state, scope, filter, target, controller);
+  if (additionalFilter === undefined) return primary;
+  const additional = scopedGroup(state, scope, additionalFilter, target, controller);
+  const selected = new Set([...primary, ...additional]);
+  return state.battlefield.filter((oid) => selected.has(oid));
+}
+
+export interface RetainedDamageCohortMember {
+  readonly oid: ObjectId;
+  readonly incarnation: number;
+}
+
+/** Taps only the battlefield incarnations captured before the damage batch. */
+export function tapRetainedDamageCohort(trace: Trace, cohort: readonly RetainedDamageCohortMember[]): Trace {
+  return cohort.reduce((current, member) => {
+    const object = tryObject(current.state, member.oid);
+    return object?.zone === 'battlefield' && (object.incarnation ?? 0) === member.incarnation
+      ? tapObject(current, member.oid)
+      : current;
+  }, trace);
 }
 
 /**
  * "Exile all creatures target opponent controls", and every other sentence
  * shaped like it: one step, performed once per member of a scoped group.
  *
- * Three primitives run through here now — the scoped exile it was written for,
- * a scoped `putCounters` and `returnFromGraveyard` — and the shared part is
+ * Five primitives run through here now — scoped exile, destruction, tapping,
+ * counter placement, and return from a graveyard — and the shared part is
  * everything except which step to take. Hoisting `step` out is what keeps the
  * per-member recheck below from being written three times, each with its own
  * chance to forget it.
  *
- * The player is the target and the objects are not (CR 115.1), so hexproof and
- * shroud on the bodies are irrelevant and there is one choice to record for the
- * whole sweep. Each move goes through `moveObject` one at a time rather than
- * through a batch primitive, which is what keeps every consequence exile already
+ * In a targeted-player scope the player is the target and the objects are not
+ * (CR 115.1), so hexproof and shroud on the bodies are irrelevant and there is
+ * one choice for the whole sweep. Controller-relative spaces and all-player
+ * zones target nobody. Each move goes through `moveObject` one at a time rather
+ * than through a batch primitive, which keeps every consequence exile already
  * has — no death trigger, dropped continuous effects, CR 400.7's new object —
- * true of each member without a second implementation of any of them. The hand
- * scope needs no arm of its own here for exactly that reason: `moveObject`'s
- * switches are total over `ZoneId`, so a card leaving a hand is already a case
- * it handles.
+ * true of each member without a second implementation. The cohort is captured
+ * before the first move and no decision or priority window occurs between
+ * members. The hand scope needs no arm of its own here for exactly that reason:
+ * `moveObject`'s switches are total over `ZoneId`, so a card leaving a hand is
+ * already a case it handles.
  *
  * `tryObject` is rechecked per member because a member can leave between moves:
  * an Aura or Equipment attached to an exiled creature does not follow it, but a
@@ -576,13 +871,20 @@ function overEffectScope(
  */
 function continuousEffectGroup(
   effect: EffectOf<'pumpUntilEndOfTurn'> | EffectOf<'grantKeywordUntilEndOfTurn'>,
-  ctx: { readonly trace: Trace; readonly target: Target | null; readonly controller: PlayerId },
+  ctx: {
+    readonly trace: Trace;
+    readonly target: Target | null;
+    readonly controller: PlayerId;
+    readonly referentOid?: ObjectId;
+  },
 ): readonly ObjectId[] {
   if (effect.scope === undefined) {
     const oid = permanentTarget(ctx.target);
     return oid === null ? [] : [oid];
   }
-  return scopedGroup(ctx.trace.state, effect.scope, effect.scopeFilter, ctx.target, ctx.controller);
+  const group = scopedGroup(ctx.trace.state, effect.scope, effect.scopeFilter, ctx.target, ctx.controller);
+  if (effect.kind !== 'pumpUntilEndOfTurn' || effect.excludeReferent !== true) return group;
+  return ctx.referentOid === undefined ? group : group.filter((oid) => oid !== ctx.referentOid);
 }
 
 /**
@@ -626,13 +928,23 @@ function damageInstance(
   controller: PlayerId,
   target: Target,
   amount: number,
+  preventable: boolean,
   sourceCard?: Card,
+  sourceCharacteristics?: SourceCharacteristics,
+  sourceIncarnation?: number,
+  exileDamagedCreatureIfItWouldDieThisTurn?: true,
 ): DamageInstance | null {
-  const deathtouch = isOnBattlefield(state, sourceOid) && hasKeyword(state, sourceOid, 'deathtouch');
-  const lifelink = isOnBattlefield(state, sourceOid) && hasKeyword(state, sourceOid, 'lifelink');
+  const capturedSourceIncarnation = sourceIncarnation ?? state.objects[sourceOid]?.incarnation ?? 0;
+  const sourceHas = (keyword: 'deathtouch' | 'lifelink'): boolean =>
+    sourceCharacteristics?.keywords?.includes(keyword) ??
+    sourceCard?.keywords.includes(keyword) ??
+    (isOnBattlefield(state, sourceOid) && hasKeyword(state, sourceOid, keyword));
+  const deathtouch = sourceHas('deathtouch');
+  const lifelink = sourceHas('lifelink');
   if (target.kind === 'player') {
     return {
       sourceOid,
+      sourceIncarnation: capturedSourceIncarnation,
       ...(sourceCard === undefined ? {} : { sourceCard }),
       controller,
       recipient: { kind: 'player', player: target.player },
@@ -640,11 +952,16 @@ function damageInstance(
       deathtouch,
       lifelink,
       combat: false,
+      preventable,
+      ...(exileDamagedCreatureIfItWouldDieThisTurn === undefined
+        ? {}
+        : { exileDamagedCreatureIfItWouldDieThisTurn }),
     };
   }
   if (target.kind === 'spell') return null;
   return {
     sourceOid,
+    sourceIncarnation: capturedSourceIncarnation,
     ...(sourceCard === undefined ? {} : { sourceCard }),
     controller,
     recipient: { kind: 'permanent', oid: target.oid },
@@ -652,7 +969,44 @@ function damageInstance(
     deathtouch,
     lifelink,
     combat: false,
+    preventable,
+    ...(exileDamagedCreatureIfItWouldDieThisTurn === undefined
+      ? {}
+      : { exileDamagedCreatureIfItWouldDieThisTurn }),
   };
+}
+
+/** Resolve Izzet Staticaster's one simultaneous target-relative damage batch. */
+export function applyDamageToTargetAndCreaturesWithSameName(
+  trace: Trace,
+  sourceOid: ObjectId,
+  controller: PlayerId,
+  targetOid: ObjectId,
+  sourceCard?: Card,
+  sourceCharacteristics?: SourceCharacteristics,
+  sourceIncarnation?: number,
+): Trace {
+  if (!isCreatureObject(trace.state, targetOid)) return trace;
+  const targetName = characteristicsOf(trace.state, targetOid).name;
+  const instances = trace.state.battlefield
+    .filter(
+      (oid) => isCreatureObject(trace.state, oid) && characteristicsOf(trace.state, oid).name === targetName,
+    )
+    .map((oid) =>
+      damageInstance(
+        trace.state,
+        sourceOid,
+        controller,
+        { kind: 'permanent', oid },
+        1,
+        true,
+        sourceCard,
+        sourceCharacteristics,
+        sourceIncarnation,
+      ),
+    )
+    .filter((instance): instance is DamageInstance => instance !== null);
+  return instances.length === 0 ? trace : applyDamage(trace, instances);
 }
 
 /**
@@ -703,26 +1057,60 @@ function exiledSince(trace: Trace, since: ResolutionMark): number {
   return count;
 }
 
+/** Battlefield objects this resolution exiled, including tokens. */
+function permanentsExiledSince(trace: Trace, since: ResolutionMark): number {
+  return trace.events
+    .slice(since)
+    .filter((event) => event.type === 'zoneChanged' && event.from === 'battlefield' && event.to === 'exile')
+    .length;
+}
+
+/** Cards this resolution actually moved from a graveyard into a library. */
+function graveyardCardsShuffledSince(trace: Trace, since: ResolutionMark): number {
+  return trace.events
+    .slice(since)
+    .filter((event) => event.type === 'zoneChanged' && event.from === 'graveyard' && event.to === 'library')
+    .length;
+}
+
+/** Permanents this resolution actually sacrificed. */
+function permanentsSacrificedSince(trace: Trace, since: ResolutionMark): number {
+  return trace.events.slice(since).filter((event) => event.type === 'permanentSacrificed').length;
+}
+
 /**
- * How many permanents `controller` controls match `filter` right now.
+ * How many permanents in `controller`'s domain match `filter` right now. A
+ * `null` controller is the whole battlefield.
  *
  * `@mtg/dsl`'s `CountFilterSchema` cannot import `ObjectFilter` — `@mtg/dsl`
  * has zero dependencies and `@mtg/kernel` depends on it, never the other way
  * — so this is the one place a DSL-authored `CountFilter` becomes a kernel
  * `ObjectFilter`: `undefined` becomes `null` ("no constraint") and
- * `controller` is supplied by the caller rather than carried on the filter,
- * matching `CountFilterSchema`'s own docblock (this DSL never counts an
- * opponent's side). `objectsInEffectScope` makes the identical translation
- * for `EffectScope`.
+ * `controller` and source exclusion are supplied by the count rather than
+ * carried on the characteristic filter. `objectsInEffectScope` makes the
+ * analogous translation for `EffectScope`.
  */
-function countMatching(state: GameState, filter: CountFilter, controller: PlayerId): number {
+function countMatching(
+  state: GameState,
+  filter: CountFilter,
+  controller: PlayerId | null,
+  excludeSource = false,
+  sourceOid?: ObjectId,
+): number {
+  if (excludeSource && sourceOid === undefined) {
+    throw new Error('a count excluding its source was evaluated without a source object');
+  }
   return selectMatching(
+    state,
     state.battlefield,
     derivedCharacteristics(state),
     objectFilter({
       cardTypes: filter.cardTypes ?? null,
       subtypes: filter.subtypes ?? null,
+      names: filter.names ?? null,
+      keywordAbilities: filter.keywordAbilities ?? null,
       controller,
+      excludeOids: excludeSource && sourceOid !== undefined ? [sourceOid] : null,
     }),
   ).length;
 }
@@ -749,11 +1137,13 @@ function countWithCounter(
   controller: PlayerId,
 ): number {
   const matching = selectMatching(
+    state,
     state.battlefield,
     derivedCharacteristics(state),
     objectFilter({
       cardTypes: filter.cardTypes ?? null,
       subtypes: filter.subtypes ?? null,
+      names: filter.names ?? null,
       controller,
     }),
   );
@@ -783,6 +1173,7 @@ function countWithCounter(
  */
 function countLandsWithSubtype(state: GameState, subtype: string, controller: PlayerId | null): number {
   return selectMatching(
+    state,
     state.battlefield,
     derivedCharacteristics(state),
     objectFilter({ cardTypes: ['land'], subtypes: [subtype], controller }),
@@ -816,18 +1207,67 @@ function damageDealtSince(trace: Trace, since: ResolutionMark): number {
 }
 
 /**
+ * Direct life loss this resolution has produced so far.
+ *
+ * `lifeChanged` is the finished event, so its negative delta is the amount the
+ * player actually lost. The reason check is load-bearing: damage also lowers a
+ * life total, but Blood Tithe's linked amount is Forge's `AFLifeLost`, which is
+ * populated by `LoseLife` rather than by `DealDamage`.
+ */
+function lifeLostSince(trace: Trace, since: ResolutionMark): number {
+  let total = 0;
+  for (const event of trace.events.slice(since)) {
+    if (event.type !== 'lifeChanged' || event.reason !== 'lifeLoss' || event.delta >= 0) continue;
+    total -= event.delta;
+  }
+  return total;
+}
+
+/** The card a linked top-card reveal moved to this controller's hand. */
+function revealedCardSince(trace: Trace, since: ResolutionMark, controller: PlayerId): Card | null {
+  const events = trace.events.slice(since);
+  for (const [index, event] of events.entries()) {
+    if (event.type !== 'libraryTopRevealed' || event.player !== controller || event.oids.length !== 1) {
+      continue;
+    }
+    const oid = event.oids[0];
+    if (oid === undefined) continue;
+    const moved = events
+      .slice(index + 1)
+      .some(
+        (candidate) =>
+          candidate.type === 'zoneChanged' &&
+          candidate.oid === oid &&
+          candidate.from === 'library' &&
+          candidate.to === 'hand' &&
+          candidate.owner === controller,
+      );
+    if (!moved) continue;
+    return trace.state.objects[oid]?.card ?? null;
+  }
+  return null;
+}
+
+/**
  * What the resolution has done, banked half plus the half this reduction can
  * see.
  *
  * The one function `scry.ts` calls when it banks a tally at a pause, so the two
- * fields cannot fall out of step with each other or with the two `…Since`
- * readers above: adding a third resolution-scoped amount means a field on
+ * fields cannot fall out of step with each other or with the three `…Since`
+ * readers above: adding another resolution-scoped amount means a field on
  * `ResolutionTally` and a line here, and nothing at any of the pausing sites.
  */
 export function tallyThrough(trace: Trace, since: ResolutionMark, before: ResolutionTally): ResolutionTally {
   return {
     exiled: before.exiled + exiledSince(trace, since),
+    exiledPermanents: before.exiledPermanents + permanentsExiledSince(trace, since),
+    graveyardCardsShuffled: (before.graveyardCardsShuffled ?? 0) + graveyardCardsShuffledSince(trace, since),
     damage: before.damage + damageDealtSince(trace, since),
+    lifeLost: before.lifeLost + lifeLostSince(trace, since),
+    sacrificedPermanents: (before.sacrificedPermanents ?? 0) + permanentsSacrificedSince(trace, since),
+    ...(before.sacrificedPermanentPower === undefined
+      ? {}
+      : { sacrificedPermanentPower: before.sacrificedPermanentPower }),
   };
 }
 
@@ -844,11 +1284,13 @@ export function tallyThrough(trace: Trace, since: ResolutionMark, before: Resolu
 function greatestPowerAmong(state: GameState, filter: CountFilter, controller: PlayerId): number {
   const map = derivedCharacteristics(state);
   const matching = selectMatching(
+    state,
     state.battlefield,
     map,
     objectFilter({
       cardTypes: filter.cardTypes ?? null,
       subtypes: filter.subtypes ?? null,
+      names: filter.names ?? null,
       controller,
     }),
   );
@@ -885,15 +1327,29 @@ export function evaluateAmount(
   since: ResolutionMark,
   controller: PlayerId,
   before: ResolutionTally = NOTHING_TALLIED,
+  sourceOid?: ObjectId,
+  target?: Target | null,
 ): number {
   if (isLiteralAmount(amount)) return amount;
   switch (amount.kind) {
     case 'exiledThisResolution':
       return before.exiled + exiledSince(trace, since);
+    case 'permanentsExiledThisResolution':
+      return before.exiledPermanents + permanentsExiledSince(trace, since);
+    case 'cardsShuffledFromGraveyardThisResolution':
+      return (before.graveyardCardsShuffled ?? 0) + graveyardCardsShuffledSince(trace, since);
     case 'cardsInGraveyard':
       return graveyardMembers(trace.state, amount.whose === 'each' ? 'each' : controller).length;
+    case 'controllerLifeTotal':
+      return trace.state.players[controller].life;
     case 'countMatching':
-      return countMatching(trace.state, amount.filter, controller);
+      return countMatching(
+        trace.state,
+        amount.filter,
+        amount.whose === 'each' ? null : controller,
+        amount.excludeSource === true,
+        sourceOid,
+      );
     case 'countWithCounter':
       return countWithCounter(trace.state, amount.filter, amount.counters, controller);
     case 'countMatchingOpponent':
@@ -907,6 +1363,46 @@ export function evaluateAmount(
       return greatestPowerAmong(trace.state, amount.among, controller);
     case 'damageDealtThisResolution':
       return before.damage + damageDealtSince(trace, since);
+    case 'lifeLostThisResolution':
+      return before.lifeLost + lifeLostSince(trace, since);
+    case 'thatCreatureToughness':
+      throw new Error(
+        'that-creature-toughness amount resolved outside effect application; use ApplyContext.number',
+      );
+    case 'triggeringCreaturePower':
+      throw new Error(
+        'triggering-creature-power amount resolved outside effect application; use ApplyContext.number',
+      );
+    case 'triggeringCreatureToughness':
+      throw new Error(
+        'triggering-creature-toughness amount resolved outside effect application; use ApplyContext.number',
+      );
+    case 'triggeringDamageAmount':
+      throw new Error('triggering-damage amount resolved outside trigger resolution planning');
+    case 'paidSacrificePower':
+      throw new Error(
+        'paid-sacrifice-power amount resolved outside effect application; use ApplyContext.number',
+      );
+    case 'paidSacrificeToughness':
+      throw new Error(
+        'paid-sacrifice-toughness amount resolved outside effect application; use ApplyContext.number',
+      );
+    case 'paidDiscardManaValue':
+      throw new Error(
+        'paid-discard-mana-value amount resolved outside effect application; use ApplyContext.number',
+      );
+    case 'sacrificedPermanentPowerThisResolution':
+      return Math.max(0, before.sacrificedPermanentPower ?? 0);
+    case 'halfTargetLibraryRoundedDown':
+      if (target === undefined || target === null || target.kind !== 'player') {
+        throw new Error('half-target-library amount resolved without a player target');
+      }
+      return Math.floor(trace.state.players[target.player].library.length / 2);
+    case 'revealedCardManaValueThisResolution': {
+      const card = revealedCardSince(trace, since, controller);
+      if (card === null || card.kind === 'land') return 0;
+      return manaValue(card.manaCost);
+    }
     case 'ratePer':
       // CR 609.2 in one multiplication. The count is read here, once, at the
       // moment the effect applies, and the number that leaves this function is
@@ -915,7 +1411,7 @@ export function evaluateAmount(
       // A rate that wanted to keep re-reading the board would not be an amount
       // at all; it would be `statBonusPer`, whose value the layer walk
       // recomputes on every pass.
-      return amount.rate * evaluateAmount(trace, amount.each, since, controller, before);
+      return amount.rate * evaluateAmount(trace, amount.each, since, controller, before, sourceOid, target);
     case 'chosenX':
       // The chosen X is a fact about the spell that is resolving, not about the
       // board `evaluateAmount` sees — it lives on the (already-popped)
@@ -924,6 +1420,8 @@ export function evaluateAmount(
       // (outside effect application, e.g. from a policy that has no context)
       // is a caller bug, not a value this function can honestly produce.
       throw new Error('chosen-X amount resolved outside effect application; use ApplyContext.number');
+    case 'triggeringSpellChosenColorCount':
+      throw new Error('chosen-color count resolved outside trigger planning');
     default:
       return assertNever(amount, 'evaluateAmount');
   }
@@ -958,6 +1456,14 @@ interface ApplyContext {
   readonly since: ResolutionMark;
   /** The resolving spell's chosen X, or `null` for an ability or a fixed cost. */
   readonly x: number | null;
+  /** Copiable characteristics when the resolving source is a spell copy. */
+  readonly sourceCard?: Card;
+  /** Source values retained solely for creating a delayed record. */
+  readonly delayedSourceCard?: Card;
+  /** Printed ability index retained from the stack object. */
+  readonly sourceAbilityIndex?: number;
+  /** Damage-relevant layer-6 values fixed before an ability source can leave. */
+  readonly sourceCharacteristics?: SourceCharacteristics;
   /**
    * A printed quantity, resolved against the game as it stands at `trace`.
    *
@@ -968,16 +1474,28 @@ interface ApplyContext {
    * to reach past it would be reading the board on its own clock.
    */
   readonly number: (amount: PumpAmount) => number;
+  /** Layer-derived LKI retained while the resolution plan still had the target. */
+  readonly referentToughness?: number;
+  /** Earlier legal player target whose hand is read live by a linked amount. */
+  readonly referentPlayer?: PlayerId;
+  /** Earlier creature target retained when a later scoped cohort excludes it. */
+  readonly referentOid?: ObjectId;
   /**
-   * Surviving members of a `TargetSpec.count` slot ("up to two target
-   * creatures"), added for `mtg-kg44`. `undefined` for every ordinary
-   * single-target or targetless effect; `target` stays `null` for a counted
+   * Surviving members of a plural target slot. `undefined` for every ordinary
+   * single-target or targetless effect; `target` stays `null` for a plural
    * slot regardless, so a row that does not read this field sees the
    * targetless case it already handles rather than a silently wrong single
-   * target. Only `tapPermanent`'s row reads it today — see
-   * `TARGET_COUNT_EFFECT_KINDS` in `@mtg/dsl`.
+   * target. Only effect kinds admitted by the DSL cardinality tables read it.
    */
-  readonly multiTarget?: readonly ObjectId[];
+  readonly multiTarget?: readonly Target[];
+  /** Shares paired by index with `multiTarget` for divided-as-chosen damage. */
+  readonly damageAllocation?: readonly number[];
+  /** Source-linked exile retained by the trigger that is resolving. */
+  readonly sourceLinkedExile?: readonly LinkedExileReference[];
+  /** The resolving ability source incarnation that must still be current. */
+  readonly sourceBattlefieldIncarnation?: number;
+  /** The source incarnation fixed when the resolving ability entered the stack. */
+  readonly sourceIncarnationAtStackCreation?: number;
 }
 
 /**
@@ -997,10 +1515,72 @@ interface ApplyContext {
  * not have.
  */
 interface EffectExecution<K extends AnyEffectKind = AnyEffectKind> {
-  readonly recheck: EffectOf<K> extends { readonly target: TargetSpec }
+  readonly recheck: K extends 'exileGraveyard'
     ? TargetRecheck
-    : Exclude<TargetRecheck, 'printedMode'>;
+    : Extract<EffectOf<K>, { readonly target: TargetSpec }> extends never
+      ? Exclude<TargetRecheck, 'printedMode'>
+      : TargetRecheck;
   readonly apply: (effect: EffectOf<K>, ctx: ApplyContext) => Trace;
+}
+
+/** One layer-6 until-end-of-turn grant over a group fixed at resolution. */
+function grantKeywordToGroupUntilEndOfTurn(
+  trace: Trace,
+  sourceOid: ObjectId,
+  group: readonly ObjectId[],
+  keyword: EffectOf<'grantKeywordUntilEndOfTurn'>['keyword'],
+  removedKeywordAbility: EffectOf<'grantKeywordUntilEndOfTurn'>['removeKeywordAbility'],
+): Trace {
+  if (group.length === 0) return trace;
+  const id = continuousEffectId(trace.state.nextId);
+  const removed =
+    removedKeywordAbility === undefined
+      ? new Set<ObjectId>()
+      : new Set(group.filter((oid) => hasKeywordAbility(trace.state, oid, removedKeywordAbility)));
+  const grantsKeywordAbility = isGrantableKeywordAbilityKind(keyword);
+  const continuousEffect: ContinuousEffect = {
+    id,
+    kind: 'abilityChange',
+    layer: '6',
+    affects: objectFilter({ oids: [...group] }),
+    addKeywords: grantsKeywordAbility ? [] : [keyword],
+    addKeywordAbilities: grantsKeywordAbility ? [{ kind: keyword }] : [],
+    removeKeywords: [],
+    removeKeywordAbilities: removedKeywordAbility === undefined ? [] : [{ kind: removedKeywordAbility }],
+    addAbilities: [],
+    prohibitActivation: false,
+    removeAll: false,
+    duration: 'endOfTurn',
+    timestamp: trace.state.nextId,
+    sourceOid,
+    enabledWhile: null,
+  };
+  const state: GameState = {
+    ...trace.state,
+    nextId: trace.state.nextId + 1,
+    continuous: [...trace.state.continuous, continuousEffect],
+  };
+  return group.reduce(
+    (current, oid) => {
+      const afterRemoval = removed.has(oid)
+        ? emit(current, {
+            type: 'keywordAbilityRemoved',
+            id,
+            targetOid: oid,
+            keywordAbility: 'defender',
+            layer: '6',
+          })
+        : current;
+      return emit(afterRemoval, {
+        type: 'keywordGranted',
+        id,
+        targetOid: oid,
+        keyword,
+        layer: '6',
+      });
+    },
+    withState(trace, state),
+  );
 }
 
 /**
@@ -1018,35 +1598,251 @@ export type EffectExecutionTable = { readonly [K in AnyEffectKind]: EffectExecut
  */
 type EffectExecutionRow = EffectExecutionTable[AnyEffectKind];
 
+type DamageReplacementTrigger = Extract<ReplacementEffect['trigger'], { readonly kind: 'damage' }>;
+
+/** Registers one nondepleting CR 615 shield through the shared replacement pipeline. */
+function addTurnLongDamagePrevention(ctx: ApplyContext, trigger: DamageReplacementTrigger): Trace {
+  const state = ctx.trace.state;
+  const shield: ReplacementEffect = {
+    id: preventionEffectId(state.nextId),
+    sourceOid: ctx.sourceOid,
+    controller: ctx.controller,
+    timestamp: state.nextId,
+    duration: 'endOfTurn',
+    selfReplacement: false,
+    trigger,
+    modification: { kind: 'preventDamage', amount: 'all' },
+  };
+  return withState(ctx.trace, {
+    ...state,
+    replacements: [...state.replacements, shield],
+    nextId: state.nextId + 1,
+  });
+}
+
+/** Adds one layer-2 control record and its matching replay event. */
+function addControlEffect(
+  ctx: ApplyContext,
+  targetOid: ObjectId,
+  controller: PlayerId,
+  duration: 'endOfTurn' | 'whileSubjectRemains',
+): Trace {
+  const id = continuousEffectId(ctx.trace.state.nextId);
+  const continuousEffect: ControlEffect = {
+    id,
+    kind: 'control',
+    layer: '2',
+    affects: objectFilter({ oids: [targetOid] }),
+    controller,
+    duration,
+    timestamp: ctx.trace.state.nextId,
+    sourceOid: ctx.sourceOid,
+    enabledWhile: null,
+  };
+  const state: GameState = {
+    ...ctx.trace.state,
+    nextId: ctx.trace.state.nextId + 1,
+    continuous: [...ctx.trace.state.continuous, continuousEffect],
+  };
+  return emit(withState(ctx.trace, state), {
+    type: 'controlEffectAdded',
+    id,
+    targetOid,
+    controller,
+    layer: continuousEffect.layer,
+  });
+}
+
+/** Adds one target-incarnation-bound layer-4 subtype and its replay record. */
+function addSubtypeEffect(ctx: ApplyContext, targetOid: ObjectId, subtype: string): Trace {
+  const id = continuousEffectId(ctx.trace.state.nextId);
+  const continuousEffect: TypeChangeEffect = {
+    id,
+    kind: 'typeChange',
+    layer: '4',
+    affects: objectFilter({ oids: [targetOid] }),
+    addTypes: [],
+    removeTypes: [],
+    addSubtypes: [subtype],
+    removeAllSubtypes: false,
+    duration: 'whileSubjectRemains',
+    timestamp: ctx.trace.state.nextId,
+    sourceOid: ctx.sourceOid,
+    enabledWhile: null,
+  };
+  const state: GameState = {
+    ...ctx.trace.state,
+    nextId: ctx.trace.state.nextId + 1,
+    continuous: [...ctx.trace.state.continuous, continuousEffect],
+  };
+  return emit(withState(ctx.trace, state), {
+    type: 'subtypeAdded',
+    id,
+    targetOid,
+    subtype,
+    layer: continuousEffect.layer,
+  });
+}
+
+/** Applies CR 701.12 to two live creature incarnations as one damage event. */
+export function fightCreatures(trace: Trace, first: ObjectId, second: ObjectId): Trace {
+  const state = trace.state;
+  const bothFight =
+    isOnBattlefield(state, first) &&
+    isCreatureObject(state, first) &&
+    isOnBattlefield(state, second) &&
+    isCreatureObject(state, second);
+  if (!bothFight) return trace;
+  const dealt = damageInstance(
+    state,
+    first,
+    controllerOf(state, first),
+    { kind: 'permanent', oid: second },
+    powerOf(state, first),
+    true,
+    undefined,
+    undefined,
+    state.objects[first]?.incarnation ?? 0,
+  );
+  const struckBack = damageInstance(
+    state,
+    second,
+    controllerOf(state, second),
+    { kind: 'permanent', oid: first },
+    powerOf(state, second),
+    true,
+    undefined,
+    undefined,
+    state.objects[second]?.incarnation ?? 0,
+  );
+  const instances = [dealt, struckBack].filter((made): made is DamageInstance => made !== null);
+  return instances.length === 0 ? trace : applyDamage(trace, instances);
+}
+
 export const EFFECT_EXECUTION: EffectExecutionTable = {
   dealDamage: {
     recheck: 'printedMode',
-    // `scope` turns the same primitive into a sweeper, and this is the one of
-    // the four that does *not* go through `overEffectScope`. CR 120.3: damage
-    // one source deals to several objects at once is dealt simultaneously, and
-    // `applyDamage` already takes a list precisely so it can do that — it
-    // aggregates lifelink into one life gain and checks protection per
-    // recipient. Looping one instance at a time would deal a sweeper's damage
-    // in N separate events and gain life N times, which is a different card.
+    // `scope` and `players` turn the same primitive into a sweeper, and this is
+    // the one of the four that does *not* go through `overEffectScope`. CR
+    // 120.3: damage one source deals to several objects and players at once is
+    // dealt simultaneously, and `applyDamage` already takes a list precisely
+    // so it can do that — it aggregates lifelink into one life gain and checks
+    // protection per recipient. Looping one group or one instance at a time
+    // would split one event into several and change the card.
     apply: (effect, ctx) => {
       const amount = ctx.number(effect.amount);
-      const instance = (target: Target): DamageInstance | null =>
-        damageInstance(ctx.trace.state, ctx.sourceOid, ctx.controller, target, amount);
-      if (effect.scope !== undefined) {
-        const group = scopedGroup(
+      const instance = (target: Target, targetAmount = amount): DamageInstance | null =>
+        damageInstance(
+          ctx.trace.state,
+          ctx.sourceOid,
+          ctx.controller,
+          target,
+          targetAmount,
+          effect.preventable !== false,
+          ctx.sourceCard,
+          ctx.sourceCharacteristics,
+          ctx.sourceIncarnationAtStackCreation,
+          effect.exileDamagedCreatureIfItWouldDieThisTurn,
+        );
+      if (effect.eachScopedPermanentDealsToItsController === true) {
+        if (effect.scope === undefined) return ctx.trace;
+        const sources = scopedDamageGroup(
           ctx.trace.state,
           effect.scope,
           effect.scopeFilter,
+          effect.additionalScopeFilter,
           ctx.target,
           ctx.controller,
         );
-        const instances = group
-          .map((oid) => instance({ kind: 'permanent', oid }))
+        const instances = sources
+          .map((sourceOid) => {
+            const object = tryObject(ctx.trace.state, sourceOid);
+            if (object?.zone !== 'battlefield') return null;
+            const controller = controllerOf(ctx.trace.state, sourceOid);
+            return damageInstance(
+              ctx.trace.state,
+              sourceOid,
+              controller,
+              { kind: 'player', player: controller },
+              amount,
+              effect.preventable !== false,
+              undefined,
+              undefined,
+              object.incarnation ?? 0,
+            );
+          })
           .filter((made): made is DamageInstance => made !== null);
         return instances.length === 0 ? ctx.trace : applyDamage(ctx.trace, instances);
       }
-      if (ctx.target === null) return ctx.trace;
-      const single = instance(ctx.target);
+      if (effect.scope !== undefined || effect.players !== undefined) {
+        const permanentOids =
+          effect.scope === undefined
+            ? []
+            : scopedDamageGroup(
+                ctx.trace.state,
+                effect.scope,
+                effect.scopeFilter,
+                effect.additionalScopeFilter,
+                ctx.target,
+                ctx.controller,
+              );
+        const retained =
+          effect.tapScopeGroup === true
+            ? permanentOids.map((oid) => ({
+                oid,
+                incarnation: tryObject(ctx.trace.state, oid)?.incarnation ?? 0,
+              }))
+            : [];
+        const permanentTargets = permanentOids.map((oid): Target => ({ kind: 'permanent', oid }));
+        const playerTargets =
+          effect.players === undefined
+            ? []
+            : playersInSweep(ctx.trace.state, effect.players, ctx.controller).map((player): Target => ({
+                kind: 'player',
+                player,
+              }));
+        const directTargets =
+          effect.scope === 'targetAndPermanentsItsPlayerControls' && ctx.target !== null ? [ctx.target] : [];
+        const scopedAmount = effect.scopeAmount === undefined ? amount : ctx.number(effect.scopeAmount);
+        const instances = [
+          ...directTargets.map((target) => instance(target, amount)),
+          ...permanentTargets.map((target) => instance(target, scopedAmount)),
+          ...playerTargets.map((target) => instance(target, amount)),
+        ].filter((made): made is DamageInstance => made !== null);
+        if (instances.length === 0) return ctx.trace;
+        const damaged = applyDamage(ctx.trace, instances);
+        if (retained.length === 0) return damaged;
+        const pending = damaged.state.pendingDamagePrevention;
+        return pending === undefined
+          ? tapRetainedDamageCohort(damaged, retained)
+          : withState(damaged, {
+              ...damaged.state,
+              pendingDamagePrevention: { ...pending, postDamageTaps: retained },
+            });
+      }
+      if (ctx.multiTarget !== undefined) {
+        if (ctx.multiTarget.length === 0) return ctx.trace;
+        const amounts =
+          effect.division?.kind === 'each'
+            ? ctx.multiTarget.map(() => amount)
+            : effect.division?.kind === 'evenlyRoundedDown'
+              ? ctx.multiTarget.map(() => Math.floor(amount / ctx.multiTarget!.length))
+              : (ctx.damageAllocation ?? []);
+        const instances = ctx.multiTarget
+          .map((target, index) => {
+            const targetAmount = amounts[index];
+            if (targetAmount === undefined) {
+              throw new Error(`missing damage amount for plural target ${String(index)}`);
+            }
+            return instance(target, targetAmount);
+          })
+          .filter((made): made is DamageInstance => made !== null);
+        return instances.length === 0 ? ctx.trace : applyDamage(ctx.trace, instances);
+      }
+      const target: Target | null =
+        ctx.target ?? (effect.target.kind === 'noTarget' ? { kind: 'player', player: ctx.controller } : null);
+      if (target === null) return ctx.trace;
+      const single = instance(target);
       return single === null ? ctx.trace : applyDamage(ctx.trace, [single]);
     },
   },
@@ -1073,32 +1869,12 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     // source and the source's lifelink gains its own controller life, without
     // either being special-cased. A 0-power fighter deals no damage rather than
     // an instance of zero: `applyDamage` skips a non-positive amount.
-    apply: (_effect, ctx) => {
-      const oid = permanentTarget(ctx.target);
-      if (oid === null) return ctx.trace;
-      const state = ctx.trace.state;
-      const bothFight =
-        isOnBattlefield(state, ctx.sourceOid) &&
-        isCreatureObject(state, ctx.sourceOid) &&
-        isOnBattlefield(state, oid) &&
-        isCreatureObject(state, oid);
-      if (!bothFight) return ctx.trace;
-      const dealt = damageInstance(
-        state,
-        ctx.sourceOid,
-        ctx.controller,
-        { kind: 'permanent', oid },
-        powerOf(state, ctx.sourceOid),
-      );
-      const struckBack = damageInstance(
-        state,
-        oid,
-        controllerOf(state, oid),
-        { kind: 'permanent', oid: ctx.sourceOid },
-        powerOf(state, oid),
-      );
-      const instances = [dealt, struckBack].filter((made): made is DamageInstance => made !== null);
-      return instances.length === 0 ? ctx.trace : applyDamage(ctx.trace, instances);
+    apply: (effect, ctx) => {
+      const pair = isTargetedFight(effect) ? ctx.multiTarget : undefined;
+      const sourceOid = pair === undefined ? ctx.sourceOid : permanentTarget(pair[0] ?? null);
+      const oid = pair === undefined ? permanentTarget(ctx.target) : permanentTarget(pair[1] ?? null);
+      if (sourceOid === null || oid === null || (pair !== undefined && pair.length !== 2)) return ctx.trace;
+      return fightCreatures(ctx.trace, sourceOid, oid);
     },
   },
   destroyPermanent: {
@@ -1123,7 +1899,23 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
       }
       const oid = permanentTarget(ctx.target);
       if (oid === null) return ctx.trace;
+      if (effect.controllerLibraryFollowup === 'revealUntilLandToGraveyard') {
+        const player = controllerOf(ctx.trace.state, oid);
+        return revealUntilLandToGraveyard(destroyPermanent(ctx.trace, oid, 'destroyEffect'), player);
+      }
       return destroyPermanent(ctx.trace, oid, 'destroyEffect');
+    },
+  },
+  destroyAttachedPermanents: {
+    recheck: 'printedMode',
+    apply: (effect, ctx) => {
+      const host = permanentTarget(ctx.target);
+      if (host === null) return ctx.trace;
+      const attached = ctx.trace.state.battlefield.filter((oid) => {
+        const object = tryObject(ctx.trace.state, oid);
+        return object?.attachedTo === host && satisfiesTargetFilter(ctx.trace.state, oid, effect.filter);
+      });
+      return attached.reduce((current, oid) => destroyPermanent(current, oid, 'destroyEffect'), ctx.trace);
     },
   },
   exileTarget: {
@@ -1151,15 +1943,86 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
         return overEffectScope(
           ctx.trace,
           effect.scope,
-          undefined,
+          effect.scopeFilter,
           ctx.target,
           ctx.controller,
           (current, oid) => moveObject(current, oid, 'exile'),
         );
       }
-      const oid = permanentTarget(ctx.target);
+      if (effect.creatureBattlefieldOrGraveyard === true && ctx.multiTarget !== undefined) {
+        const oids = ctx.multiTarget.flatMap((target) =>
+          target.kind === 'permanent' || target.kind === 'card' ? [target.oid] : [],
+        );
+        const movedToExile = oids.reduce(
+          (current, candidate) => moveObject(current, candidate, 'exile'),
+          ctx.trace,
+        );
+        return linkExileToSource(movedToExile, ctx.sourceOid, ctx.sourceBattlefieldIncarnation, oids);
+      }
+      const oid = permanentTarget(ctx.target) ?? graveyardCardTarget(ctx.target);
       if (oid === null || tryObject(ctx.trace.state, oid) === undefined) return ctx.trace;
-      return moveObject(ctx.trace, oid, 'exile');
+      const before = tryObject(ctx.trace.state, oid);
+      const cohort =
+        effect.sameNameCohort === undefined || before?.zone !== 'battlefield'
+          ? [oid]
+          : (() => {
+              const targetName = characteristicsOf(ctx.trace.state, oid).name;
+              return ctx.trace.state.battlefield.filter(
+                (candidate) => characteristicsOf(ctx.trace.state, candidate).name === targetName,
+              );
+            })();
+      const movedToExile = cohort.reduce(
+        (current, candidate) => moveObject(current, candidate, 'exile'),
+        ctx.trace,
+      );
+      const moved =
+        effect.linkToSource === true
+          ? linkExileToSource(movedToExile, ctx.sourceOid, ctx.sourceBattlefieldIncarnation, cohort)
+          : movedToExile;
+      if (effect.returnAtNextEndStep === undefined || before === undefined) return moved;
+      const exiled = tryObject(moved.state, oid);
+      if (
+        exiled === undefined ||
+        exiled.zone !== 'exile' ||
+        (exiled.incarnation ?? 0) !== (before.incarnation ?? 0) + 1
+      ) {
+        return moved;
+      }
+      const sourceCard =
+        ctx.delayedSourceCard ?? ctx.sourceCard ?? tryObject(moved.state, ctx.sourceOid)?.card;
+      if (sourceCard === undefined) return moved;
+      const id = moved.state.nextId;
+      const dueTurn =
+        moved.state.turn.step === 'end' || moved.state.turn.step === 'cleanup'
+          ? moved.state.turn.number + 1
+          : moved.state.turn.number;
+      const delayed = {
+        id,
+        sourceOid: ctx.sourceOid,
+        sourceCard,
+        sourceAbilityIndex: ctx.sourceAbilityIndex ?? 0,
+        controller: ctx.controller,
+        targetOid: oid,
+        targetIncarnation: exiled.incarnation ?? 0,
+        dueTurn,
+        from: 'exile' as const,
+        destination: 'battlefield' as const,
+        tapped: true as const,
+        under: 'owner' as const,
+      };
+      const scheduled = withState(moved, {
+        ...moved.state,
+        nextId: id + 1,
+        delayedZoneChanges: [...(moved.state.delayedZoneChanges ?? []), delayed],
+      });
+      return emit(scheduled, {
+        type: 'delayedZoneChangeScheduled',
+        id,
+        source: ctx.sourceOid,
+        target: oid,
+        targetIncarnation: delayed.targetIncarnation,
+        dueTurn,
+      });
     },
   },
   pumpUntilEndOfTurn: {
@@ -1245,6 +2108,9 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
         addKeywords: [keyword],
         addKeywordAbilities: [],
         removeKeywords: [],
+        removeKeywordAbilities: [],
+        addAbilities: [],
+        prohibitActivation: false,
         removeAll: false,
         duration: 'endOfTurn',
         timestamp: pumped.state.nextId,
@@ -1280,6 +2146,14 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     apply: (effect, ctx) => {
       const count = ctx.number(effect.count);
       if (effect.players === undefined) {
+        if (ctx.multiTarget !== undefined) {
+          const selected = new Set(
+            ctx.multiTarget.flatMap((target) => (target.kind === 'player' ? [target.player] : [])),
+          );
+          return apnapOrder(ctx.trace.state)
+            .filter((player) => selected.has(player))
+            .reduce((current, player) => drawCards(current, player, count), ctx.trace);
+        }
         return drawCards(ctx.trace, playerTarget(ctx.target, ctx.controller), count);
       }
       return playersInSweep(ctx.trace.state, effect.players, ctx.controller).reduce(
@@ -1290,8 +2164,25 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
   },
   gainLife: {
     recheck: 'printedMode',
-    apply: (effect, ctx) =>
-      gainLife(ctx.trace, playerTarget(ctx.target, ctx.controller), ctx.number(effect.amount), false),
+    apply: (effect, ctx) => {
+      let amount: number;
+      if (effect.amountFrom === 'thatPlayersHandSize') {
+        if (ctx.referentPlayer === undefined) {
+          throw new Error('that-player-hand-size gain resolved without a retained player');
+        }
+        amount = ctx.trace.state.players[ctx.referentPlayer].hand.length;
+      } else {
+        amount = ctx.number(effect.amount);
+      }
+      if (ctx.multiTarget !== undefined) {
+        return ctx.multiTarget.reduce(
+          (current, target) =>
+            target.kind === 'player' ? gainLife(current, target.player, amount, false) : current,
+          ctx.trace,
+        );
+      }
+      return gainLife(ctx.trace, playerTarget(ctx.target, ctx.controller), amount, false);
+    },
   },
   revealHand: {
     recheck: 'printedMode',
@@ -1308,6 +2199,30 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
         player: target.player,
         oids: [...trace.state.players[target.player].hand],
       });
+    },
+  },
+  revealRandomCardFromHand: {
+    recheck: 'printedMode',
+    // The hand stays hidden except for the one oid carried by the reveal event.
+    // An empty hand has no random outcome, so it advances neither state nor RNG.
+    apply: (_effect, ctx) => {
+      const { target, trace } = ctx;
+      if (target === null || target.kind !== 'player') return trace;
+      const hand = trace.state.players[target.player].hand;
+      if (hand.length === 0) return trace;
+      const [index, rng] = nextBelow(trace.state.rng, hand.length);
+      const oid = hand[index];
+      if (oid === undefined) throw new Error('random hand reveal selected outside the hand');
+      const advanced = withState(trace, { ...trace.state, rng });
+      return emit(advanced, { type: 'handRevealed', player: target.player, oids: [oid] });
+    },
+  },
+  playRandomHandCardWithoutPayingManaCost: {
+    recheck: 'printedMode',
+    apply: () => {
+      throw new Error(
+        'playRandomHandCardWithoutPayingManaCost must be applied through the interruptible resolution runner',
+      );
     },
   },
   // CR 701.19 is applied by the interruptible resolution runner, not by this
@@ -1330,18 +2245,77 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     // is told apart from a countered original at this point: the original
     // still resolves the ordinary way (moved to its owner's graveyard), the
     // copy is simply removed from the stack.
-    apply: (_effect, ctx) => {
+    apply: (effect, ctx) => {
       const { target, trace } = ctx;
       if (target === null || target.kind !== 'spell') return trace;
-      const countered = emit(trace, { type: 'spellCountered', oid: target.oid, by: ctx.sourceOid });
-      const entry = countered.state.stack.find((candidate) => candidate.oid === target.oid);
-      if (entry?.copiedSpell !== undefined) {
-        return withState(countered, {
-          ...countered.state,
-          stack: countered.state.stack.filter((candidate) => candidate.oid !== target.oid),
-        });
+      if (effect.dealDamageToControllerEqualToSpellPower !== true) {
+        return counterStackEntry(
+          trace,
+          target.oid,
+          ctx.sourceOid,
+          ctx.sourceCard ?? ctx.sourceOid,
+          effect.destination ?? 'graveyard',
+        );
       }
-      return moveObject(countered, target.oid, 'graveyard');
+      const entry = trace.state.stack.find((candidate) => candidate.oid === target.oid);
+      if (entry === undefined || entry.ability !== null) return trace;
+      const power = characteristicsOf(trace.state, target.oid).power ?? 0;
+      const countered = counterStackEntry(
+        trace,
+        target.oid,
+        ctx.sourceOid,
+        ctx.sourceCard ?? ctx.sourceOid,
+        effect.destination ?? 'graveyard',
+      );
+      const instance = damageInstance(
+        countered.state,
+        ctx.sourceOid,
+        ctx.controller,
+        { kind: 'player', player: entry.controller },
+        power,
+        true,
+        ctx.sourceCard,
+        ctx.sourceCharacteristics,
+        ctx.sourceIncarnationAtStackCreation,
+      );
+      return instance === null ? countered : applyDamage(countered, [instance]);
+    },
+  },
+  changeSpellTargets: {
+    recheck: 'spellOnStack',
+    apply: () => {
+      throw new Error('changeSpellTargets must be applied through the interruptible resolution runner');
+    },
+  },
+  copySpell: {
+    recheck: 'spellOnStack',
+    apply: () => {
+      throw new Error('copySpell must be applied through the interruptible resolution runner');
+    },
+  },
+  copyNextInstantOrSorceryThisTurn: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) => {
+      if (ctx.delayedSourceCard === undefined) return ctx.trace;
+      const id = ctx.trace.state.nextId;
+      const delayed = {
+        id,
+        sourceOid: ctx.sourceOid,
+        sourceCard: ctx.delayedSourceCard,
+        sourceAbilityIndex: ctx.sourceAbilityIndex ?? 0,
+        controller: ctx.controller,
+      };
+      const scheduled = withState(ctx.trace, {
+        ...ctx.trace.state,
+        nextId: id + 1,
+        delayedSpellCopies: [...(ctx.trace.state.delayedSpellCopies ?? []), delayed],
+      });
+      return emit(scheduled, {
+        type: 'delayedSpellCopyScheduled',
+        id,
+        source: ctx.sourceOid,
+        player: ctx.controller,
+      });
     },
   },
   createToken: {
@@ -1349,10 +2323,44 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     apply: (effect, ctx) => {
       let current = ctx.trace;
       const count = ctx.number(effect.count);
+      const token =
+        effect.token.creationPowerToughness === undefined
+          ? effect.token
+          : {
+              ...effect.token,
+              power: ctx.number(effect.token.creationPowerToughness),
+              toughness: ctx.number(effect.token.creationPowerToughness),
+            };
       for (let index = 0; index < count; index += 1) {
-        current = createToken(current, ctx.controller, effect.token);
+        current = createToken(current, ctx.controller, token);
       }
       return current;
+    },
+  },
+  createTokenCopyOfSelf: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) => {
+      if (ctx.delayedSourceCard === undefined) {
+        throw new Error('createTokenCopyOfSelf resolved without retained source copiable values');
+      }
+      return createCopiedToken(ctx.trace, ctx.controller, ctx.delayedSourceCard);
+    },
+  },
+  createEmblem: {
+    recheck: 'untargeted',
+    apply: (effect, ctx) => {
+      const id = emblemId(ctx.trace.state.nextId);
+      const state: GameState = {
+        ...ctx.trace.state,
+        nextId: ctx.trace.state.nextId + 1,
+        emblems: [...ctx.trace.state.emblems, { id, controller: ctx.controller, spec: effect.emblem }],
+      };
+      return emit(withState(ctx.trace, state), {
+        type: 'emblemCreated',
+        id,
+        player: ctx.controller,
+        name: effect.emblem.name,
+      });
     },
   },
   tapPermanent: {
@@ -1378,8 +2386,8 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
       // 608.2b already filtered these in `stack.ts`) is tapped in turn.
       if (ctx.multiTarget !== undefined) {
         let current = ctx.trace;
-        for (const oid of ctx.multiTarget) {
-          current = tap(current, oid);
+        for (const target of ctx.multiTarget) {
+          if (target.kind === 'permanent') current = tap(current, target.oid);
         }
         return current;
       }
@@ -1390,10 +2398,14 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
   returnToHand: {
     recheck: 'printedMode',
     apply: (_effect, ctx) => {
-      const oid = permanentTarget(ctx.target);
+      const oid = permanentTarget(ctx.target) ?? graveyardCardTarget(ctx.target);
       if (oid === null || tryObject(ctx.trace.state, oid) === undefined) return ctx.trace;
       return moveObject(ctx.trace, oid, 'hand');
     },
+  },
+  moveSourceLinkedExile: {
+    recheck: 'untargeted',
+    apply: (effect, ctx) => moveLinkedExile(ctx.trace, ctx.sourceLinkedExile ?? [], effect.destination),
   },
   millCards: {
     recheck: 'printedMode',
@@ -1414,8 +2426,162 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     // makes Steel Overseer's own board readable at all: `permanentsYouControl`
     // names the region and the filter names the bodies, and an `undefined` here
     // would put a +1/+1 counter on every land the caster controls.
+    //
+    // The optional keyword rider consumes this same frozen group rather than
+    // deriving the board a second time. That is Ajani's “those creatures”:
+    // counters persist, the keyword expires, and neither follows a later
+    // entrant or a new incarnation of a member that left.
     apply: (effect, ctx) => {
       const count = ctx.number(effect.count);
+      if (count <= 0) return ctx.trace;
+      const targetOid = permanentTarget(ctx.target);
+      if (effect.timing === 'nextEndStep') {
+        if (
+          targetOid === null ||
+          ctx.sourceIncarnationAtStackCreation === undefined ||
+          ctx.delayedSourceCard === undefined
+        ) {
+          return ctx.trace;
+        }
+        const target = tryObject(ctx.trace.state, targetOid);
+        if (
+          target?.zone !== 'battlefield' ||
+          (target.incarnation ?? 0) !== ctx.sourceIncarnationAtStackCreation
+        ) {
+          return ctx.trace;
+        }
+        const id = ctx.trace.state.nextId;
+        const dueTurn =
+          ctx.trace.state.turn.step === 'end' || ctx.trace.state.turn.step === 'cleanup'
+            ? ctx.trace.state.turn.number + 1
+            : ctx.trace.state.turn.number;
+        const delayed = {
+          id,
+          sourceOid: ctx.sourceOid,
+          sourceCard: ctx.delayedSourceCard,
+          sourceAbilityIndex: ctx.sourceAbilityIndex ?? 0,
+          controller: ctx.controller,
+          targetOid,
+          targetIncarnation: target.incarnation ?? 0,
+          dueTurn,
+          counter: effect.counter,
+          count,
+        };
+        const scheduled = withState(ctx.trace, {
+          ...ctx.trace.state,
+          nextId: id + 1,
+          delayedCounterPlacements: [...(ctx.trace.state.delayedCounterPlacements ?? []), delayed],
+        });
+        return emit(scheduled, {
+          type: 'delayedCounterPlacementScheduled',
+          id,
+          source: ctx.sourceOid,
+          target: targetOid,
+          targetIncarnation: delayed.targetIncarnation,
+          dueTurn,
+          counter: effect.counter,
+          count,
+        });
+      }
+      const group =
+        effect.scope === undefined
+          ? targetOid === null
+            ? []
+            : [targetOid]
+          : scopedGroup(ctx.trace.state, effect.scope, effect.scopeFilter, ctx.target, ctx.controller);
+      const recipientColor = effect.recipientCondition?.color;
+      const eligible =
+        recipientColor === undefined
+          ? group
+          : group.filter((oid) => characteristicsOf(ctx.trace.state, oid).colors.includes(recipientColor));
+      const withCounters = eligible.reduce(
+        (current, oid) => placeCounters(current, oid, effect.counter, count),
+        ctx.trace,
+      );
+      return effect.keyword === undefined
+        ? withCounters
+        : grantKeywordToGroupUntilEndOfTurn(withCounters, ctx.sourceOid, eligible, effect.keyword, undefined);
+    },
+  },
+  petrifyCreature: {
+    recheck: 'printedMode',
+    apply: (_effect, ctx) => {
+      const oid = permanentTarget(ctx.target);
+      if (oid === null) return ctx.trace;
+      const marked = placeCounters(ctx.trace, oid, 'petrification', 1);
+      const object = tryObject(marked.state, oid);
+      if (object?.zone !== 'battlefield') return marked;
+      const timestamp = marked.state.nextId;
+      const common = {
+        timestamp,
+        sourceOid: ctx.sourceOid,
+        duration: 'whileSubjectRemains' as const,
+        affects: onlyObject(oid),
+        enabledWhile: null,
+      };
+      const effects: readonly ContinuousEffect[] = [
+        {
+          ...common,
+          id: continuousEffectId(timestamp),
+          kind: 'typeChange',
+          layer: '4',
+          addTypes: ['artifact'],
+          removeTypes: [],
+          addSubtypes: [],
+          removeAllSubtypes: false,
+        },
+        {
+          ...common,
+          id: continuousEffectId(timestamp + 1),
+          kind: 'colorChange',
+          layer: '5',
+          setColors: [],
+          addColors: [],
+        },
+        {
+          ...common,
+          id: continuousEffectId(timestamp + 2),
+          kind: 'abilityChange',
+          layer: '6',
+          addKeywords: [],
+          removeKeywords: [],
+          addKeywordAbilities: [{ kind: 'defender' }],
+          removeKeywordAbilities: [],
+          addAbilities: [],
+          prohibitActivation: true,
+          removeAll: false,
+        },
+      ];
+      return withState(marked, {
+        ...marked.state,
+        nextId: timestamp + effects.length,
+        continuous: [...marked.state.continuous, ...effects],
+      });
+    },
+  },
+  doubleSourceCounters: {
+    recheck: 'untargeted',
+    apply: (effect, ctx) => {
+      const source = tryObject(ctx.trace.state, ctx.sourceOid);
+      const expectedIncarnation = ctx.sourceIncarnationAtStackCreation;
+      if (
+        expectedIncarnation === undefined ||
+        source?.zone !== 'battlefield' ||
+        (source.incarnation ?? 0) !== expectedIncarnation
+      ) {
+        return ctx.trace;
+      }
+      return placeCounters(
+        ctx.trace,
+        ctx.sourceOid,
+        effect.counter,
+        counterCount(source.counters, effect.counter),
+      );
+    },
+  },
+  regeneratePermanent: {
+    recheck: 'printedMode',
+    apply: (effect, ctx) => {
       if (effect.scope !== undefined) {
         return overEffectScope(
           ctx.trace,
@@ -1423,11 +2589,12 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
           effect.scopeFilter,
           ctx.target,
           ctx.controller,
-          (current, oid) => placeCounters(current, oid, effect.counter, count),
+          (current, oid) => createRegenerationShield(current, oid, controllerOf(current.state, oid)),
         );
       }
       const oid = permanentTarget(ctx.target);
-      return oid === null ? ctx.trace : placeCounters(ctx.trace, oid, effect.counter, count);
+      if (oid === null) return ctx.trace;
+      return createRegenerationShield(ctx.trace, oid, controllerOf(ctx.trace.state, oid));
     },
   },
   returnFromGraveyard: {
@@ -1437,10 +2604,10 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     // anything written here — it resets status, clears damage and counters,
     // marks the arrival summoning-sick and mints the arrival its enter-the-
     // battlefield triggers fire from. It is also what decides whose the creature
-    // is: a card sitting in a graveyard is controlled by its owner, and
-    // `moveObject` carries that controller onto the battlefield with it, so a
-    // Blood Moon raises each player's dead for that player and needs no
-    // control-changing machinery the DSL has no word for.
+    // is: absent `control`, a card sitting in a graveyard is controlled by its
+    // owner and `moveObject` carries that controller onto the battlefield.
+    // `control: 'you'` is the explicit exception used by effects that raise an
+    // opponent's card under the resolving controller while preserving owner.
     //
     // The identity consequence is the one worth naming out loud, because
     // something outside the kernel reads it: an object's *copy number* is fixed
@@ -1453,10 +2620,43 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     // CR 400.7 sentence above is why it needs no other difference: a card that
     // arrives in a hand is a new object there too, and every consequence the
     // battlefield arm spells out is `moveObject`'s rather than this row's.
-    apply: (effect, ctx) =>
-      overEffectScope(ctx.trace, effect.scope, undefined, ctx.target, ctx.controller, (current, oid) =>
-        moveObject(current, oid, effect.destination === 'hand' ? 'hand' : 'battlefield'),
-      ),
+    apply: (effect, ctx) => {
+      if (effect.fromBattlefieldThisTurn === true) {
+        const cohort = ctx.trace.state.turn.battlefieldToGraveyardThisTurn.filter((entry) => {
+          const object = tryObject(ctx.trace.state, entry.oid);
+          return (
+            object?.zone === 'graveyard' &&
+            object.owner === ctx.controller &&
+            object.token === false &&
+            (object.incarnation ?? 0) === entry.incarnation &&
+            isPermanentCard(object.card)
+          );
+        });
+        return moveObjectsToBattlefieldSimultaneously(
+          ctx.trace,
+          cohort.map((entry) => ({ oid: entry.oid })),
+        );
+      }
+      if (effect.scope === undefined) {
+        const oid = graveyardCardTarget(ctx.target);
+        if (oid === null) return ctx.trace;
+        const moved = moveObject(
+          ctx.trace,
+          oid,
+          effect.destination === 'hand' ? 'hand' : 'battlefield',
+          effect.control === 'you' ? { controller: ctx.controller } : {},
+        );
+        return grantOnGraveyardArrival(moved, oid, effect.alsoBecomes, ctx.sourceOid);
+      }
+      return overEffectScope(ctx.trace, effect.scope, undefined, ctx.target, ctx.controller, (current, oid) =>
+        moveObject(
+          current,
+          oid,
+          effect.destination === 'hand' ? 'hand' : 'battlefield',
+          effect.control === 'you' ? { controller: ctx.controller } : {},
+        ),
+      );
+    },
   },
   addMana: {
     recheck: 'untargeted',
@@ -1501,6 +2701,14 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     // from, the same place `shuffleLibrary` above reads it.
     apply: (effect, ctx) => revealTopCards(ctx.trace, ctx.controller, effect.count),
   },
+  revealTopCardToHand: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) => revealTopCardToHand(ctx.trace, ctx.controller),
+  },
+  revealUntilCreatureCards: {
+    recheck: 'untargeted',
+    apply: (effect, ctx) => revealUntilCreatureCards(ctx.trace, ctx.controller, ctx.number(effect.count)),
+  },
   putOnLibrary: {
     recheck: 'printedMode',
     apply: (effect, ctx) => {
@@ -1509,14 +2717,31 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
       return putOnLibrary(ctx.trace, oid, effect.position);
     },
   },
+  putSourceAndTargetOnOwnersLibrariesThenShuffle: {
+    recheck: 'printedMode',
+    apply: (_effect, ctx) => {
+      const target = permanentTarget(ctx.target);
+      if (target === null) return ctx.trace;
+      const source = tryObject(ctx.trace.state, ctx.sourceOid);
+      const sourceIsCurrent =
+        ctx.sourceBattlefieldIncarnation !== undefined &&
+        source?.zone === 'battlefield' &&
+        (source.incarnation ?? 0) === ctx.sourceBattlefieldIncarnation;
+      return putObjectsOnOwnersLibrariesThenShuffle(ctx.trace, [
+        ...(sourceIsCurrent ? [ctx.sourceOid] : []),
+        target,
+      ]);
+    },
+  },
   exileGraveyard: {
-    recheck: 'untargeted',
+    recheck: 'printedMode',
     // `'each'` is two calls rather than one pass over a merged list, because a
     // graveyard is a per-player array and merging them would invent an order
     // between two seats that no rule states. Owner order — this player, then
     // the other — is the order `players` is in, which is derived from the
     // position and therefore reproduces on replay.
     apply: (effect, ctx) => {
+      if (hasTarget(effect)) return exileGraveyard(ctx.trace, playerTarget(ctx.target, ctx.controller));
       const opponent = opponentOf(ctx.controller);
       if (effect.whose === 'you') return exileGraveyard(ctx.trace, ctx.controller);
       if (effect.whose === 'opponent') return exileGraveyard(ctx.trace, opponent);
@@ -1554,6 +2779,28 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
       throw new Error('searchLibrary must be applied through the interruptible resolution runner');
     },
   },
+  // Its first zone move supplies a dynamic filter and its second half asks the
+  // searching player a CR 701.23b question, so this reaches the interruptible
+  // runner before the synchronous table for the same reason `searchLibrary`
+  // does. The target remains a printed target and is rechecked normally.
+  exileNonbasicGraveyardAndMatchingLibrary: {
+    recheck: 'printedMode',
+    apply: () => {
+      throw new Error('linked graveyard/library search reached synchronous effect execution');
+    },
+  },
+  eachPlayerNamesCardThenRevealsTop: {
+    recheck: 'untargeted',
+    apply: () => {
+      throw new Error('card-name choice reached synchronous effect execution');
+    },
+  },
+  nameNonlandCardAndExileMatchingOpponentZones: {
+    recheck: 'printedMode',
+    apply: () => {
+      throw new Error('named opponent-zone exile reached synchronous effect execution');
+    },
+  },
   // CR 701.8's two discards are applied by the interruptible resolution runner
   // for the reason the two rows above give, with one addition: the choice is
   // owed by a seat that is not always the resolution's controller.
@@ -1575,6 +2822,12 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     recheck: 'printedMode',
     apply: () => {
       throw new Error('chooseDiscard must be applied through the interruptible resolution runner');
+    },
+  },
+  chooseFromRevealedHand: {
+    recheck: 'printedMode',
+    apply: () => {
+      throw new Error('chooseFromRevealedHand must be applied through the interruptible resolution runner');
     },
   },
   // CR 701.17's edict, applied by the interruptible resolution runner for
@@ -1606,21 +2859,48 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
   loseLife: {
     recheck: 'printedMode',
     apply: (effect, ctx) => {
-      const amount = ctx.number(effect.amount);
       if (effect.players === undefined) {
-        return loseLife(ctx.trace, playerTarget(ctx.target, ctx.controller), amount);
+        const player = playerTarget(ctx.target, ctx.controller);
+        const amount =
+          effect.amountFrom === 'triggeringPlayerLifeHalfRoundedUp'
+            ? Math.ceil(ctx.trace.state.players[player].life / 2)
+            : ctx.number(effect.amount);
+        return loseLife(ctx.trace, player, amount);
       }
+      const amount = ctx.number(effect.amount);
       return playersInSweep(ctx.trace.state, effect.players, ctx.controller).reduce(
         (current, player) => loseLife(current, player, amount),
         ctx.trace,
       );
     },
   },
-  // CR 118.5. Untargeted, so the player is always the controller — `setLife`
-  // itself decides which direction this is and which reason it reports.
+  // CR 118.5. Untargeted: absence names the controller and a scope walks APNAP.
   setLife: {
     recheck: 'untargeted',
-    apply: (effect, ctx) => setLife(ctx.trace, ctx.controller, ctx.number(effect.amount)),
+    apply: (effect, ctx) => {
+      const amount = ctx.number(effect.amount);
+      if (effect.players === undefined) return setLife(ctx.trace, ctx.controller, amount);
+      return playersInSweep(ctx.trace.state, effect.players, ctx.controller).reduce(
+        (current, player) => setLife(current, player, amount),
+        ctx.trace,
+      );
+    },
+  },
+  loseGame: {
+    recheck: 'printedMode',
+    apply: (_effect, ctx) => {
+      const player = playerTarget(ctx.target, ctx.controller);
+      return canPlayerLoseGame(ctx.trace.state, player)
+        ? endGameWith(ctx.trace, opponentOf(player), player, 'spellOrAbility')
+        : ctx.trace;
+    },
+  },
+  winGame: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) =>
+      canPlayerWinGame(ctx.trace.state, ctx.controller)
+        ? endGameWith(ctx.trace, ctx.controller, opponentOf(ctx.controller), 'spellOrAbility')
+        : ctx.trace,
   },
   // Fog (CR 615.1), and the whole of it is one registered replacement effect.
   //
@@ -1637,29 +2917,47 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
   // step and the second one too.
   preventCombatDamage: {
     recheck: 'untargeted',
+    apply: (_effect, ctx) =>
+      addTurnLongDamagePrevention(ctx, {
+        kind: 'damage',
+        toPlayer: null,
+        toPermanent: null,
+        toController: null,
+        toPermanentCardType: null,
+        fromSource: null,
+        fromSpellSource: null,
+        combatOnly: true,
+      }),
+  },
+  // Druid's Deliverance is Fog's one-sided sibling. `toPlayer` fixes the
+  // resolving controller as the only recipient, while `combatOnly` preserves
+  // the printed restriction and leaves damage to permanents and noncombat
+  // damage untouched. The effect targets nothing: the controller is carried
+  // by the resolving stack entry rather than chosen when the spell is cast.
+  preventCombatDamageToYou: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) =>
+      addTurnLongDamagePrevention(ctx, {
+        kind: 'damage',
+        toPlayer: ctx.controller,
+        toPermanent: null,
+        toController: null,
+        toPermanentCardType: null,
+        fromSource: null,
+        fromSpellSource: null,
+        combatOnly: true,
+      }),
+  },
+  detainPermanent: {
+    recheck: 'printedMode',
     apply: (_effect, ctx) => {
-      const state = ctx.trace.state;
-      const shield: ReplacementEffect = {
-        id: preventionEffectId(state.nextId),
-        sourceOid: ctx.sourceOid,
-        controller: ctx.controller,
-        timestamp: state.nextId,
-        duration: 'endOfTurn',
-        selfReplacement: false,
-        trigger: {
-          kind: 'damage',
-          toPlayer: null,
-          toPermanent: null,
-          fromSource: null,
-          combatOnly: true,
-        },
-        modification: { kind: 'preventDamage', amount: 'all' },
-      };
-      return withState(ctx.trace, {
-        ...state,
-        replacements: [...state.replacements, shield],
-        nextId: state.nextId + 1,
-      });
+      const targets = ctx.multiTarget ?? (ctx.target === null ? [] : [ctx.target]);
+      return targets.reduce((current, target) => {
+        const subject = permanentTarget(target);
+        return subject === null
+          ? current
+          : withState(current, detainPermanent(current.state, ctx.sourceOid, subject, ctx.controller));
+      }, ctx.trace);
     },
   },
   // Dawn Charm's first mode, and the row above with two fields swapped rather
@@ -1679,7 +2977,84 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     apply: (_effect, ctx) => {
       const oid = permanentTarget(ctx.target);
       if (oid === null) return ctx.trace;
+      return addTurnLongDamagePrevention(ctx, {
+        kind: 'damage',
+        toPlayer: null,
+        toPermanent: oid,
+        toController: null,
+        toPermanentCardType: null,
+        fromSource: null,
+        fromSpellSource: null,
+        combatOnly: false,
+      });
+    },
+  },
+  chooseBlockersThisCombat: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) =>
+      withState(ctx.trace, {
+        ...ctx.trace.state,
+        combat: { ...ctx.trace.state.combat, blockDeclarationAuthority: ctx.controller },
+      }),
+  },
+  // Safe Passage's state-aware sibling to the two shields above. One
+  // replacement record covers both printed recipients: `toController` matches
+  // the protected player directly and resolves the controller of a permanent
+  // when damage would be dealt; the card-type field narrows only that permanent
+  // half to creatures. No object list is frozen at resolution, so a later
+  // control change moves a creature into or out of the shield exactly when the
+  // continuous prevention effect says it should.
+  preventAllDamageToYouAndCreaturesYouControl: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) =>
+      addTurnLongDamagePrevention(ctx, {
+        kind: 'damage',
+        toPlayer: null,
+        toPermanent: null,
+        toController: ctx.controller,
+        toPermanentCardType: 'creature',
+        fromSource: null,
+        fromSpellSource: null,
+        combatOnly: false,
+      }),
+  },
+  // Vengeful Archon's numeric CR 615 shield. The target is rechecked while
+  // the activation resolves and then retained on the replacement record; the
+  // prevention recipient is the activating player, not that target. X=0
+  // installs nothing, while a positive pool is consumed by the shared
+  // replacement pipeline across as many later damage events as it reaches.
+  preventNextDamageToYouAndRetaliate: {
+    recheck: 'printedMode',
+    apply: (effect, ctx) => {
+      const amount = ctx.number(effect.amount);
+      const plainShield = effect.target.kind === 'noTarget';
+      if (amount <= 0) return ctx.trace;
       const state = ctx.trace.state;
+      const source = tryObject(state, ctx.sourceOid);
+      let followUp: ReplacementEffect['damageReplacementFollowUp'];
+      if (!plainShield) {
+        const chosen = ctx.target;
+        if (chosen === null || chosen.kind === 'spell') return ctx.trace;
+        const target = chosen.kind === 'permanent' ? tryObject(state, chosen.oid) : undefined;
+        if (chosen.kind === 'permanent' && target === undefined) return ctx.trace;
+        followUp =
+          chosen.kind === 'player'
+            ? {
+                kind: 'dealDamage',
+                target: { kind: 'player', player: chosen.player },
+                sourceBattlefieldIncarnation:
+                  ctx.sourceIncarnationAtStackCreation ?? source?.incarnation ?? 0,
+                amountFrom: 'preventedDamage',
+              }
+            : {
+                kind: 'dealDamage',
+                target: { kind: 'permanent', oid: chosen.oid },
+                sourceBattlefieldIncarnation:
+                  ctx.sourceIncarnationAtStackCreation ?? source?.incarnation ?? 0,
+                amountFrom: 'preventedDamage',
+                targetBattlefieldIncarnation: target?.incarnation ?? 0,
+              };
+      }
       const shield: ReplacementEffect = {
         id: preventionEffectId(state.nextId),
         sourceOid: ctx.sourceOid,
@@ -1689,18 +3064,70 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
         selfReplacement: false,
         trigger: {
           kind: 'damage',
-          toPlayer: null,
-          toPermanent: oid,
+          toPlayer: ctx.controller,
+          toPermanent: null,
+          toController: null,
+          toPermanentCardType: null,
           fromSource: null,
+          fromSpellSource: null,
           combatOnly: false,
         },
-        modification: { kind: 'preventDamage', amount: 'all' },
+        modification: { kind: 'preventDamage', amount },
+        ...(followUp === undefined ? {} : { damageReplacementFollowUp: followUp }),
       };
       return withState(ctx.trace, {
         ...state,
         replacements: [...state.replacements, shield],
         nextId: state.nextId + 1,
       });
+    },
+  },
+  // Silence changes whether a player may begin casting; it does not touch a
+  // spell already on the stack. Store the affected seats at resolution so the
+  // rule survives the source spell moving to the graveyard and so a later
+  // control change cannot rewrite who the printed "your opponents" named.
+  cantCastSpellsThisTurn: {
+    recheck: 'untargeted',
+    apply: (effect, ctx) => {
+      const state = ctx.trace.state;
+      const rules = playersInSweep(state, effect.players, ctx.controller).map((player) => ({
+        rule: 'cantCastSpells' as const,
+        sourceOid: ctx.sourceOid,
+        player,
+      }));
+      return withState(ctx.trace, {
+        ...state,
+        turnPlayerRules: [...state.turnPlayerRules, ...rules],
+      });
+    },
+  },
+  protectSpellsAndCreaturesFromSpellColorsThisTurn: {
+    recheck: 'untargeted',
+    apply: (effect, ctx) => {
+      const state = ctx.trace.state;
+      const common = {
+        sourceOid: ctx.sourceOid,
+        player: ctx.controller,
+        colors: [...effect.colors],
+      };
+      return withState(ctx.trace, {
+        ...state,
+        turnPlayerRules: [
+          ...state.turnPlayerRules,
+          { rule: 'spellsCantBeCounteredBySpellColors', ...common },
+          { rule: 'creaturesCantBeTargetedBySpellColors', ...common },
+        ],
+      });
+    },
+  },
+  // The interruptible runner owns the RNG transition and then feeds the
+  // selected ordinary effects back through itself. Keeping this row throwing
+  // makes the total execution table honest without creating a second, partial
+  // effect interpreter here.
+  flipCoin: {
+    recheck: 'untargeted',
+    apply: () => {
+      throw new Error('flipCoin must be applied through the interruptible resolution runner');
     },
   },
   // `chooseFromGraveyard` is applied by the interruptible resolution runner for
@@ -1721,6 +3148,214 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     apply: () => {
       throw new Error('chooseFromGraveyard must be applied through the interruptible resolution runner');
     },
+  },
+  chooseFromBattlefield: {
+    recheck: 'untargeted',
+    apply: () => {
+      throw new Error('chooseFromBattlefield must be applied through the interruptible resolution runner');
+    },
+  },
+  populate: {
+    recheck: 'untargeted',
+    apply: () => {
+      throw new Error('populate must be applied through the interruptible resolution runner');
+    },
+  },
+  returnSourceFromGraveyard: {
+    recheck: 'untargeted',
+    apply: (effect, ctx) => {
+      const source = tryObject(ctx.trace.state, ctx.sourceOid);
+      if (source === undefined || source.zone !== 'graveyard' || source.owner !== ctx.controller) {
+        return ctx.trace;
+      }
+      return moveExactSourceFromZone(
+        ctx.trace,
+        source.oid,
+        ctx.sourceIncarnationAtStackCreation,
+        'graveyard',
+        effect.destination === 'hand' ? 'hand' : 'battlefield',
+        effect.destination === 'hand' ? {} : { tapped: true, controller: source.owner },
+      );
+    },
+  },
+  returnDepartedSourceToOwnerHand: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) =>
+      moveExactSourceFromZone(
+        ctx.trace,
+        ctx.sourceOid,
+        ctx.sourceIncarnationAtStackCreation,
+        'graveyard',
+        'hand',
+      ),
+  },
+  putDepartedSourceOnTopOfOwnerLibrary: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) => {
+      const source = tryObject(ctx.trace.state, ctx.sourceOid);
+      if (
+        source === undefined ||
+        source.zone !== 'graveyard' ||
+        ctx.sourceIncarnationAtStackCreation === undefined ||
+        (source.incarnation ?? 0) !== ctx.sourceIncarnationAtStackCreation
+      ) {
+        return ctx.trace;
+      }
+      return putOnLibrary(ctx.trace, source.oid, 'top');
+    },
+  },
+  shuffleSourceIntoOwnerLibrary: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) => {
+      const source = tryObject(ctx.trace.state, ctx.sourceOid);
+      if (
+        source === undefined ||
+        source.zone !== 'graveyard' ||
+        ctx.sourceIncarnationAtStackCreation === undefined ||
+        (source.incarnation ?? 0) !== ctx.sourceIncarnationAtStackCreation
+      ) {
+        return ctx.trace;
+      }
+      const moved = moveExactSourceFromZone(
+        ctx.trace,
+        ctx.sourceOid,
+        ctx.sourceIncarnationAtStackCreation,
+        'graveyard',
+        'library',
+      );
+      return shuffleLibrary(moved, source.owner);
+    },
+  },
+  returnSourceAuraAttached: {
+    recheck: 'printedMode',
+    apply: (_effect, ctx) => {
+      const target = permanentTarget(ctx.target);
+      const source = tryObject(ctx.trace.state, ctx.sourceOid);
+      const expected = ctx.sourceIncarnationAtStackCreation;
+      const sourceCard = ctx.sourceCard ?? source?.card;
+      if (
+        target === null ||
+        source === undefined ||
+        source.zone !== 'graveyard' ||
+        expected === undefined ||
+        (source.incarnation ?? 0) !== expected + 1 ||
+        sourceCard === undefined ||
+        !isAuraCard(sourceCard) ||
+        !isLegalAuraEntryHost(ctx.trace.state, sourceCard, target)
+      ) {
+        return ctx.trace;
+      }
+      return moveObject(ctx.trace, source.oid, 'battlefield', {
+        controller: source.owner,
+        auraHost: target,
+      });
+    },
+  },
+  setColorsUntilEndOfTurn: {
+    recheck: 'printedMode',
+    apply: (effect, ctx) => {
+      const oid = permanentTarget(ctx.target);
+      if (oid === null) return ctx.trace;
+      const state = ctx.trace.state;
+      const colorChange: ContinuousEffect = {
+        id: continuousEffectId(state.nextId),
+        kind: 'colorChange',
+        layer: '5',
+        affects: objectFilter({ oids: [oid] }),
+        setColors: [...effect.colors],
+        addColors: [],
+        duration: 'endOfTurn',
+        timestamp: state.nextId,
+        sourceOid: ctx.sourceOid,
+        enabledWhile: null,
+      };
+      return withState(ctx.trace, {
+        ...state,
+        continuous: [...state.continuous, colorChange],
+        nextId: state.nextId + 1,
+      });
+    },
+  },
+  attacksThisTurnIfAble: {
+    recheck: 'printedMode',
+    apply: (_effect, ctx) => {
+      const oid = permanentTarget(ctx.target);
+      if (oid === null) return ctx.trace;
+      const state = ctx.trace.state;
+      return withState(ctx.trace, {
+        ...state,
+        turnCombatRules: [
+          ...state.turnCombatRules,
+          { rule: 'attacksThisTurnIfAble', sourceOid: ctx.sourceOid, subject: oid },
+        ],
+      });
+    },
+  },
+  cantBlockThisTurn: {
+    recheck: 'printedMode',
+    apply: (_effect, ctx) => {
+      const oid = permanentTarget(ctx.target);
+      if (oid === null) return ctx.trace;
+      const state = ctx.trace.state;
+      return withState(ctx.trace, {
+        ...state,
+        turnCombatRules: [
+          ...state.turnCombatRules,
+          { rule: 'cantBlockThisTurn', sourceOid: ctx.sourceOid, subject: oid },
+        ],
+      });
+    },
+  },
+  blocksThisTurnIfAble: {
+    recheck: 'printedMode',
+    apply: (effect, ctx) => {
+      const target = permanentTarget(ctx.target);
+      const subjects =
+        effect.scope === undefined
+          ? target === null
+            ? []
+            : [target]
+          : scopedGroup(ctx.trace.state, effect.scope, effect.scopeFilter, ctx.target, ctx.controller);
+      if (subjects.length === 0) return ctx.trace;
+      const state = ctx.trace.state;
+      return withState(ctx.trace, {
+        ...state,
+        turnCombatRules: [
+          ...state.turnCombatRules,
+          ...subjects.map((subject) => ({
+            rule: 'blocksThisTurnIfAble' as const,
+            sourceOid: ctx.sourceOid,
+            subject,
+          })),
+        ],
+      });
+    },
+  },
+  shuffleHandsAndGraveyardsIntoLibraries: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) =>
+      playersInSweep(ctx.trace.state, 'eachPlayer', ctx.controller).reduce(
+        (current, player) => shuffleHandAndGraveyardIntoLibrary(current, player),
+        ctx.trace,
+      ),
+  },
+  exileHandsAndGraveyards: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) =>
+      exileHandsAndGraveyards(ctx.trace, playersInSweep(ctx.trace.state, 'eachPlayer', ctx.controller)),
+  },
+  exileThisSpell: {
+    recheck: 'untargeted',
+    apply: (_effect, ctx) => {
+      const source = tryObject(ctx.trace.state, ctx.sourceOid);
+      return source?.zone === 'stack' ? moveObject(ctx.trace, source.oid, 'exile') : ctx.trace;
+    },
+  },
+  castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts: {
+    recheck: 'untargeted',
+    // The interruptible resolution runner owns this instruction because each
+    // copy needs a complete cast declaration before the resolution can resume.
+    apply: (_effect, ctx) => ctx.trace,
   },
   grantKeywordUntilEndOfTurn: {
     recheck: 'printedMode',
@@ -1767,52 +3402,28 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     // what the CR 704.5g sweep asks, and neither looks at `keywords`.
     apply: (effect, ctx) => {
       const group = continuousEffectGroup(effect, ctx);
-      if (group.length === 0) return ctx.trace;
-      const id = continuousEffectId(ctx.trace.state.nextId);
-      const granted = isGrantableKeywordAbilityKind(effect.keyword)
-        ? { addKeywords: [], addKeywordAbilities: [{ kind: effect.keyword }] }
-        : { addKeywords: [effect.keyword], addKeywordAbilities: [] };
-      const continuousEffect: ContinuousEffect = {
-        id,
-        kind: 'abilityChange',
-        layer: '6',
-        affects: objectFilter({ oids: [...group] }),
-        ...granted,
-        removeKeywords: [],
-        removeAll: false,
-        duration: 'endOfTurn',
-        timestamp: ctx.trace.state.nextId,
-        sourceOid: ctx.sourceOid,
-        // CR 611.2c, and `pumpUntilEndOfTurn`'s reason verbatim: a condition on
-        // a grant is a static ability's vocabulary, not a resolved effect's.
-        enabledWhile: null,
-      };
-      const state: GameState = {
-        ...ctx.trace.state,
-        nextId: ctx.trace.state.nextId + 1,
-        continuous: [...ctx.trace.state.continuous, continuousEffect],
-      };
-      return group.reduce(
-        (current, oid) =>
-          emit(current, {
-            type: 'keywordGranted',
-            id,
-            targetOid: oid,
-            keyword: effect.keyword,
-            layer: '6',
-          }),
-        withState(ctx.trace, state),
+      return [effect.keyword, ...(effect.additionalKeywords ?? [])].reduce(
+        (current, keyword) =>
+          grantKeywordToGroupUntilEndOfTurn(
+            current,
+            ctx.sourceOid,
+            group,
+            keyword,
+            keyword === effect.keyword ? effect.removeKeywordAbility : undefined,
+          ),
+        ctx.trace,
       );
     },
   },
-  // The two turn-scoped CR 508/509 rules. Both write one record into
+  // The unblockable and defender-naming turn-scoped CR 508/509 rules below.
+  // Each writes one record into
   // `state.turnCombatRules` (`state.ts` argues why that array exists rather
   // than a `ContinuousEffect` member or a duration on the static) and neither
   // emits an event, following `preventAllDamageToTarget` above: what changed is
   // a legality, and the log already shows the legality's consequence when the
   // declaration is made.
   //
-  // `recheck: 'printedMode'` for both, the same answer `grantKeywordUntilEndOfTurn`
+  // `recheck: 'printedMode'` for each, the same answer `grantKeywordUntilEndOfTurn`
   // gives: each has a target, so CR 608.2b has something to find illegal, and a
   // creature that left the battlefield between announcement and resolution
   // should not pick up a rule.
@@ -1871,6 +3482,19 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
     apply: (_effect, ctx) => {
       const oid = permanentTarget(ctx.target);
       return oid === null ? ctx.trace : untapObject(ctx.trace, oid);
+    },
+  },
+  untapPermanents: {
+    recheck: 'untargeted',
+    apply: () => {
+      throw new Error('untapPermanents must be applied through the interruptible resolution runner');
+    },
+  },
+  skipNextUntap: {
+    recheck: 'printedMode',
+    apply: (_effect, ctx) => {
+      const oid = permanentTarget(ctx.target);
+      return oid === null ? ctx.trace : skipNextUntap(ctx.trace, oid);
     },
   },
   // CR 701.17, and `sacrificePermanent` rather than `destroyPermanent` is the
@@ -1958,6 +3582,227 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
       });
     },
   },
+  animateLandWhileSourceOnBattlefield: {
+    recheck: 'printedMode',
+    apply: (effect, ctx) => {
+      const target = permanentTarget(ctx.target);
+      const source = tryObject(ctx.trace.state, ctx.sourceOid);
+      if (
+        target === null ||
+        ctx.sourceBattlefieldIncarnation === undefined ||
+        source?.zone !== 'battlefield' ||
+        (source.incarnation ?? 0) !== ctx.sourceBattlefieldIncarnation
+      ) {
+        return ctx.trace;
+      }
+      const state = ctx.trace.state;
+      const timestamp = state.nextId;
+      const common = {
+        timestamp,
+        sourceOid: ctx.sourceOid,
+        duration: 'whileSourceAndSubjectRemain' as const,
+        affects: onlyObject(target),
+        enabledWhile: null,
+      };
+      const effects: readonly ContinuousEffect[] = [
+        {
+          ...common,
+          id: continuousEffectId(timestamp),
+          kind: 'typeChange',
+          layer: '4',
+          addTypes: ['creature'],
+          removeTypes: [],
+          addSubtypes: [...effect.subtypes],
+          removeAllSubtypes: false,
+        },
+        {
+          ...common,
+          id: continuousEffectId(timestamp + 1),
+          kind: 'colorChange',
+          layer: '5',
+          setColors: [...effect.colors],
+          addColors: [],
+        },
+        {
+          ...common,
+          id: continuousEffectId(timestamp + 2),
+          kind: 'ptSet',
+          layer: '7b',
+          power: effect.power,
+          toughness: effect.toughness,
+        },
+      ];
+      const installed = withState(ctx.trace, {
+        ...state,
+        nextId: timestamp + effects.length,
+        continuous: [...state.continuous, ...effects],
+      });
+      return emit(installed, {
+        type: 'permanentAnimated',
+        effectIds: effects.map((record) => record.id),
+        sourceOid: ctx.sourceOid,
+        targetOid: target,
+        power: effect.power,
+        toughness: effect.toughness,
+        colors: effect.colors,
+        subtypes: effect.subtypes,
+      });
+    },
+  },
+  animateSourceUntilEndOfTurn: {
+    recheck: 'printedMode',
+    apply: (effect, ctx) => {
+      const target = permanentTarget(ctx.target);
+      const source = tryObject(ctx.trace.state, ctx.sourceOid);
+      if (
+        target === null ||
+        target !== ctx.sourceOid ||
+        ctx.sourceBattlefieldIncarnation === undefined ||
+        source?.zone !== 'battlefield' ||
+        (source.incarnation ?? 0) !== ctx.sourceBattlefieldIncarnation
+      ) {
+        return ctx.trace;
+      }
+      const state = ctx.trace.state;
+      const timestamp = state.nextId;
+      const common = {
+        timestamp,
+        sourceOid: ctx.sourceOid,
+        duration: 'endOfTurn' as const,
+        affects: onlyObject(target),
+        enabledWhile: null,
+      };
+      const effects: readonly ContinuousEffect[] = [
+        {
+          ...common,
+          id: continuousEffectId(timestamp),
+          kind: 'typeChange',
+          layer: '4',
+          addTypes: ['creature'],
+          removeTypes: [],
+          addSubtypes: [...effect.subtypes],
+          removeAllSubtypes: true,
+        },
+        {
+          ...common,
+          id: continuousEffectId(timestamp + 1),
+          kind: 'colorChange',
+          layer: '5',
+          setColors: [...effect.colors],
+          addColors: [],
+        },
+        {
+          ...common,
+          id: continuousEffectId(timestamp + 2),
+          kind: 'abilityChange',
+          layer: '6',
+          addKeywords: [...effect.keywords],
+          removeKeywords: [],
+          addKeywordAbilities: [],
+          removeKeywordAbilities: [],
+          addAbilities: [],
+          prohibitActivation: false,
+          removeAll: false,
+        },
+        {
+          ...common,
+          id: continuousEffectId(timestamp + 3),
+          kind: 'ptSet',
+          layer: '7b',
+          power: effect.power,
+          toughness: effect.toughness,
+        },
+      ];
+      const installed = withState(ctx.trace, {
+        ...state,
+        nextId: timestamp + effects.length,
+        continuous: [...state.continuous, ...effects],
+      });
+      return emit(installed, {
+        type: 'permanentAnimated',
+        effectIds: effects.map((record) => record.id),
+        sourceOid: ctx.sourceOid,
+        targetOid: target,
+        power: effect.power,
+        toughness: effect.toughness,
+        colors: effect.colors,
+        subtypes: effect.subtypes,
+      });
+    },
+  },
+  gainControlUntilEndOfTurn: {
+    recheck: 'printedMode',
+    // CR 613.1b: control-changing effects live in layer 2. The record is the
+    // same one an attached control Aura writes; only its lifetime differs.
+    // Keeping the primitive this small lets cards compose control, untap, and
+    // haste without a card-shaped execution branch.
+    apply: (_effect, ctx) => {
+      const oid = permanentTarget(ctx.target);
+      if (oid === null) return ctx.trace;
+      return addControlEffect(ctx, oid, ctx.controller, 'endOfTurn');
+    },
+  },
+  gainControl: {
+    recheck: 'printedMode',
+    apply: (_effect, ctx) => {
+      const oid = permanentTarget(ctx.target);
+      if (oid === null) return ctx.trace;
+      return addControlEffect(ctx, oid, ctx.controller, 'whileSubjectRemains');
+    },
+  },
+  exchangeControl: {
+    recheck: 'printedMode',
+    apply: (effect, ctx) => {
+      const pair =
+        effect.exchangeSource === true
+          ? ctx.sourceBattlefieldIncarnation === undefined ||
+            tryObject(ctx.trace.state, ctx.sourceOid)?.zone !== 'battlefield' ||
+            (tryObject(ctx.trace.state, ctx.sourceOid)?.incarnation ?? 0) !== ctx.sourceBattlefieldIncarnation
+            ? null
+            : ([{ kind: 'permanent', oid: ctx.sourceOid }, ctx.target] as const)
+          : ctx.multiTarget;
+      if (pair?.length !== 2) return ctx.trace;
+      const first = permanentTarget(pair[0] ?? null);
+      const second = permanentTarget(pair[1] ?? null);
+      if (first === null || second === null) return ctx.trace;
+      const firstController = controllerOf(ctx.trace.state, first);
+      const secondController = controllerOf(ctx.trace.state, second);
+      if (firstController === secondController) return ctx.trace;
+      const firstChanged = addControlEffect(ctx, first, secondController, 'whileSubjectRemains');
+      return addControlEffect(
+        { ...ctx, trace: firstChanged },
+        second,
+        firstController,
+        'whileSubjectRemains',
+      );
+    },
+  },
+  addSubtype: {
+    recheck: 'printedMode',
+    apply: (effect, ctx) => {
+      const oid = permanentTarget(ctx.target);
+      if (oid === null) return ctx.trace;
+      return addSubtypeEffect(ctx, oid, effect.subtype);
+    },
+  },
+  targetPlayerGainsControlOfSelfPermanent: {
+    recheck: 'printedMode',
+    apply: (_effect, ctx) => {
+      const source = tryObject(ctx.trace.state, ctx.sourceOid);
+      if (
+        ctx.sourceBattlefieldIncarnation === undefined ||
+        source?.zone !== 'battlefield' ||
+        (source.incarnation ?? 0) !== ctx.sourceBattlefieldIncarnation ||
+        ctx.target?.kind !== 'player'
+      ) {
+        return ctx.trace;
+      }
+      return addControlEffect(ctx, ctx.sourceOid, ctx.target.player, 'whileSubjectRemains');
+    },
+  },
+  reorderTopLibrary: { recheck: 'untargeted', apply: (_effect, ctx) => ctx.trace },
+  selectFromTopLibrary: { recheck: 'untargeted', apply: (_effect, ctx) => ctx.trace },
+  separateTopLibraryIntoPiles: { recheck: 'untargeted', apply: (_effect, ctx) => ctx.trace },
 };
 
 /**
@@ -1968,35 +3813,6 @@ export const EFFECT_EXECUTION: EffectExecutionTable = {
  * and a counter on a card in a graveyard is a fact CR 611.2c gives no meaning
  * to.
  */
-function placeCounters(trace: Trace, oid: ObjectId, kind: CounterKind, count: number): Trace {
-  const object = tryObject(trace.state, oid);
-  if (object === undefined || object.zone !== 'battlefield') return trace;
-  const counters = addCounters(object.counters, kind, count);
-  const state: GameState = {
-    ...trace.state,
-    objects: { ...trace.state.objects, [oid]: { ...object, counters } },
-  };
-  const placed = withState(trace, state);
-  // `countersChanged` reports the +1/+1 and -1/-1 totals and nothing else,
-  // so a kind that moves neither has nothing to say through it and stays
-  // silent rather than emitting an event whose numbers did not move. The
-  // event that names a counter kind is `mtg-bc2.132.8`'s follow-up, and it
-  // is a change to the replay log schema in `@mtg/ui` as much as to this
-  // file.
-  if (
-    counters.plusOnePlusOne === object.counters.plusOnePlusOne &&
-    counters.minusOneMinusOne === object.counters.minusOneMinusOne
-  ) {
-    return placed;
-  }
-  return emit(placed, {
-    type: 'countersChanged',
-    oid,
-    plusOnePlusOne: counters.plusOnePlusOne,
-    minusOneMinusOne: counters.minusOneMinusOne,
-  });
-}
-
 /**
  * Applies one resolved effect. Targets have already been rechecked.
  *
@@ -2021,7 +3837,23 @@ export function applyEffect(
   since: ResolutionMark,
   x: number | null = null,
   before: ResolutionTally = NOTHING_TALLIED,
-  multiTarget?: readonly ObjectId[],
+  multiTarget?: readonly Target[],
+  damageAllocation?: readonly number[],
+  referentToughness?: number,
+  sourceLinkedExile?: readonly LinkedExileReference[],
+  sourceBattlefieldIncarnation?: number,
+  sourceCard?: Card,
+  paidSacrificePower?: number,
+  paidSacrificeToughness?: number,
+  paidDiscardManaValue?: number,
+  sourceIncarnationAtStackCreation?: number,
+  sourceAbilityIndex?: number,
+  delayedSourceCard?: Card,
+  sourceCharacteristics?: SourceCharacteristics,
+  triggeringCreaturePower?: number,
+  triggeringCreatureToughness?: number,
+  referentOid?: ObjectId,
+  referentPlayer?: PlayerId,
 ): Trace {
   const ctx: ApplyContext = {
     trace,
@@ -2035,12 +3867,59 @@ export function applyEffect(
     // rather than set it — the same conditional-spread shape the rest of this
     // file already uses for optional context fields.
     ...(multiTarget !== undefined ? { multiTarget } : {}),
+    ...(damageAllocation !== undefined ? { damageAllocation } : {}),
+    ...(referentToughness !== undefined ? { referentToughness } : {}),
+    ...(referentPlayer !== undefined ? { referentPlayer } : {}),
+    ...(referentOid !== undefined ? { referentOid } : {}),
+    ...(sourceLinkedExile !== undefined ? { sourceLinkedExile } : {}),
+    ...(sourceBattlefieldIncarnation !== undefined ? { sourceBattlefieldIncarnation } : {}),
+    ...(sourceCard !== undefined ? { sourceCard } : {}),
+    ...(sourceCharacteristics !== undefined ? { sourceCharacteristics } : {}),
+    ...(sourceIncarnationAtStackCreation !== undefined ? { sourceIncarnationAtStackCreation } : {}),
+    ...(sourceAbilityIndex !== undefined ? { sourceAbilityIndex } : {}),
+    ...(delayedSourceCard !== undefined ? { delayedSourceCard } : {}),
     number: (amount) => {
       if (!isLiteralAmount(amount) && amount.kind === 'chosenX') {
         if (x === null) throw new Error('chosen-X amount resolved without an X spell value');
         return x;
       }
-      return evaluateAmount(trace, amount, since, controller, before);
+      if (!isLiteralAmount(amount) && amount.kind === 'thatCreatureToughness') {
+        if (referentToughness === undefined) {
+          throw new Error('that-creature-toughness amount resolved without retained LKI');
+        }
+        return referentToughness;
+      }
+      if (!isLiteralAmount(amount) && amount.kind === 'triggeringCreaturePower') {
+        if (triggeringCreaturePower === undefined) {
+          throw new Error('triggering-creature-power amount resolved without retained LKI');
+        }
+        return triggeringCreaturePower;
+      }
+      if (!isLiteralAmount(amount) && amount.kind === 'triggeringCreatureToughness') {
+        if (triggeringCreatureToughness === undefined) {
+          throw new Error('triggering-creature-toughness amount resolved without retained LKI');
+        }
+        return triggeringCreatureToughness;
+      }
+      if (!isLiteralAmount(amount) && amount.kind === 'paidSacrificePower') {
+        if (paidSacrificePower === undefined) {
+          throw new Error('paid-sacrifice-power amount resolved without retained LKI');
+        }
+        return paidSacrificePower;
+      }
+      if (!isLiteralAmount(amount) && amount.kind === 'paidSacrificeToughness') {
+        if (paidSacrificeToughness === undefined) {
+          throw new Error('paid-sacrifice-toughness amount resolved without retained LKI');
+        }
+        return paidSacrificeToughness;
+      }
+      if (!isLiteralAmount(amount) && amount.kind === 'paidDiscardManaValue') {
+        if (paidDiscardManaValue === undefined) {
+          throw new Error('paid-discard-mana-value amount resolved without retained cost value');
+        }
+        return paidDiscardManaValue;
+      }
+      return evaluateAmount(trace, amount, since, controller, before, sourceOid, target);
     },
   };
   const execution: EffectExecutionRow = EFFECT_EXECUTION[effect.kind];
@@ -2052,4 +3931,68 @@ export function applyEffect(
   // where a mistake would actually be made.
   const run = execution.apply as (e: Effect, c: ApplyContext) => Trace;
   return run(effect, ctx);
+}
+
+/** Resolves an Overload replacement list without widening the ordinary Effect schema. */
+export function applyOverloadEffects(
+  trace: Trace,
+  sourceOid: ObjectId,
+  controller: PlayerId,
+  effects: readonly OverloadEffect[],
+  x: number | null,
+  sourceCard?: Card,
+): Trace {
+  let current = trace;
+  const since = trace.events.length;
+  const applySelected = (effect: Effect, target: Target | null): Trace =>
+    applyEffect(
+      current,
+      sourceOid,
+      controller,
+      effect,
+      target,
+      since,
+      x,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      sourceCard,
+    );
+  for (const effect of effects) {
+    if (!isOverloadOnlyEffect(effect)) {
+      current = applySelected(effect, null);
+      continue;
+    }
+    if (effect.kind === 'counterSpell') {
+      const opposing = current.state.stack
+        .filter((entry) => entry.ability === null && entry.controller !== controller)
+        .map((entry) => entry.oid)
+        .reverse();
+      for (const oid of opposing) {
+        current = counterStackEntry(current, oid, sourceOid, sourceCard ?? sourceOid);
+      }
+      continue;
+    }
+    if (effect.kind === 'dealDamage') {
+      current = applySelected({ ...effect, scope: 'permanentsOpponentsControl' }, null);
+      continue;
+    }
+    const ownSide = effect.kind === 'cantBeBlockedThisTurn';
+    const group = current.state.battlefield
+      .filter((oid) =>
+        ownSide
+          ? controllerOf(current.state, oid) === controller
+          : controllerOf(current.state, oid) !== controller,
+      )
+      .filter((oid) => satisfiesTargetFilter(current.state, oid, effect.scopeFilter));
+    const memberEffect = overloadEffectForMember(effect);
+    for (const oid of group) {
+      const target: Target = { kind: 'permanent', oid };
+      current = applySelected(memberEffect, target);
+    }
+  }
+  return current;
 }

@@ -11,11 +11,12 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createElement as h } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, configure, screen, waitFor } from '@testing-library/react';
+import { cleanup, configure, screen, waitFor, within } from '@testing-library/react';
 import { EXAMPLE_CARDS } from '@mtg/dsl';
 import { LabApp } from '../src/dev/LabApp';
 import { mount } from '../src/mount';
 import { hashSource } from '../src/app/router';
+import { DECK_OPEN_PARAM, deckOpenParam } from '../src/routes/deck/open';
 
 /**
  * How long an assertion here may take to come true, which is not the same knob
@@ -120,11 +121,12 @@ describe('LabApp', () => {
     app.unmount();
   });
 
-  it('badges the shell with the set the numbers are about', async () => {
-    // `mtg-ihtz`: the badge used to read the statistics log alone and print a
-    // bare count, so a lab opened on one set wore another set's number on every
-    // route with nothing to say so. The measured run leads now, and both
-    // branches name their set code.
+  it('says how many games were analyzed on Analysis, and not in the app header', async () => {
+    // `mtg-ihtz` put this count in the shell bar and named the set beside it,
+    // because a bare count wore another set's number on every route. The UI
+    // pass took the whole badge off the header instead: a measurement over a
+    // deck you are building is a number with no page to be about. This is the
+    // page it is about, and the toolbar a line below names the run.
     const run: unknown = JSON.parse(readFileSync(RUN_FIXTURE, 'utf8'));
     vi.stubGlobal('fetch', (url: string) =>
       url === 'analysis.json'
@@ -135,19 +137,9 @@ describe('LabApp', () => {
     documentOf().body.innerHTML = '<div id="root"></div>';
     const app = mount('root', h(LabApp, { analysisUrl: 'analysis.json', cards: EXAMPLE_CARDS }));
     await waitFor(() => {
-      expect(screen.getByText('TGR · 5,400 games analyzed')).toBeTruthy();
+      expect(screen.getByText('5,400 games analyzed')).toBeTruthy();
     });
-    app.unmount();
-  });
-
-  it('says nothing has been analyzed rather than showing a count of nothing', async () => {
-    stubFetch('', false);
-    setHash('#/analysis');
-    documentOf().body.innerHTML = '<div id="root"></div>';
-    const app = mount('root', h(LabApp, { analysisUrl: 'analysis.json', cards: EXAMPLE_CARDS }));
-    await waitFor(() => {
-      expect(screen.getByText('no set analyzed yet')).toBeTruthy();
-    });
+    expect(within(screen.getByRole('banner')).queryByText(/games analyzed/)).toBeNull();
     app.unmount();
   });
 
@@ -176,14 +168,22 @@ describe('LabApp', () => {
         ? Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(JSON.parse(deck)) })
         : Promise.resolve({ ok: false, status: 404, text: () => Promise.resolve('') }),
     );
-    setHash('#/deck');
+    // The link that names the staged deck, not the bare tab: since `mtg-nuk3`
+    // the Decks tab lands on the library and a deck takes the whole route when
+    // it is opened, so an arrival that names no deck draws shelves and no mana
+    // base. This is what a person following a link to that deck arrives with.
+    setHash(`#/deck?${DECK_OPEN_PARAM}=${deckOpenParam({ kind: 'artifact' })}`);
     documentOf().body.innerHTML = '<div id="root"></div>';
     const app = mount(
       'root',
       h(LabApp, { replayUrl: 'missing.jsonl', deckUrl: 'deck.json', cards: EXAMPLE_CARDS }),
     );
     await waitFor(() => {
-      expect(screen.getByText('Mana base')).toBeTruthy();
+      // The pane's own title, which is the deck: it counts the cards that
+      // arrived. It used to be `Mana base`, and `mtg-z4q6` put that behind the
+      // head's button, where a heading proves the fetch landed and a button
+      // would only prove the screen did.
+      expect(screen.getByRole('heading', { name: /^Main deck: \d+$/u })).toBeTruthy();
     });
     app.unmount();
   });

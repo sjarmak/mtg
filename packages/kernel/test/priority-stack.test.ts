@@ -3,7 +3,7 @@ import type { Action, GameState } from '@mtg/kernel';
 import {
   eventsOfType,
   legalActions,
-  pendingDecision,
+  ownedDecision,
   playerOf,
   reduce,
   reduceAll,
@@ -233,12 +233,11 @@ describe('timing', () => {
 
   it('reports the decision it is waiting on', () => {
     const start = scenario({ battlefield: mountains(1) });
-    const decision = pendingDecision(start.state);
+    const decision = ownedDecision(start.state);
     expect(decision?.kind).toBe('priority');
     expect(decision?.player).toBe(0);
     expect(decision?.options.some((action) => action.type === 'passPriority')).toBe(true);
-    // Conceding is legal but never enumerated, so a uniform sampler cannot pick it.
-    expect(decision?.options.some((action) => action.type === 'concede')).toBe(false);
+    expect(decision?.options.at(-1)).toEqual({ type: 'concede', player: 0 });
     expect(validateAction(start.state, { type: 'concede', player: 0 })).toBeNull();
   });
 });

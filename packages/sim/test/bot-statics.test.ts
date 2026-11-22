@@ -16,6 +16,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Action, GameState } from '@mtg/kernel';
 import { pendingDecision, scenario, validateAction } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { DEFAULT_GREEDY_CONFIG, boardCreatureValue, decideGreedy, printedCardValue } from '@mtg/sim';
 import { parseCard } from '@mtg/dsl';
 import type { AbilityInput, Card, CardInput } from '@mtg/dsl';
@@ -87,7 +88,10 @@ const BLANK_BANNER = banner('Plain Banner', []);
 function decide(state: GameState, player: 0 | 1 = 0): Action {
   const decision = pendingDecision(state, 512);
   if (decision === null) throw new Error('no decision pending');
-  const action = decideGreedy({ state, player, decision }, config);
+  const action = decideGreedy(
+    { state: observeState(state, player, 'test/bot-statics.test.ts:90'), player, decision },
+    config,
+  );
   expect(validateAction(state, action)).toBeNull();
   return action;
 }
@@ -162,6 +166,38 @@ describe('an anthem artifact in hand', () => {
     expect(action.type).toBe('castSpell');
     if (action.type !== 'castSpell') return;
     expect(start.state.objects[action.oid]?.card.name).toBe('Banner of the Goddess');
+  });
+
+  it('prices parameterless and landwalk grants while explicitly leaving protection unpriced', () => {
+    const configured = {
+      ...config.cast,
+      staticAbilityReach: 1,
+      keywordValue: { ...config.cast.keywordValue, flying: 2 },
+      grantedKeywordAbilityValue: {
+        ...config.cast.grantedKeywordAbilityValue,
+        indestructible: 3,
+      },
+      grantedLandwalkValue: 4,
+    };
+    const bundle: AbilityInput = {
+      kind: 'static',
+      scope: 'creaturesYouControl',
+      subtype: null,
+      modification: {
+        kind: 'grantKeywordAbilities',
+        grants: [
+          { kind: 'keyword', keyword: 'flying' },
+          { kind: 'keyword', keyword: 'indestructible' },
+          { kind: 'landwalk', landType: 'Island' },
+          { kind: 'protection', quality: { kind: 'color', color: 'B' } },
+          { kind: 'protection', quality: { kind: 'subtype', subtype: 'Dragon' } },
+        ],
+      },
+    };
+
+    expect(printedCardValue(configured, banner('Banner of the Goddess', [bundle]))).toBe(
+      printedCardValue(configured, BLANK_BANNER) + 9,
+    );
   });
 });
 

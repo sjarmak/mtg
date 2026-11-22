@@ -125,7 +125,7 @@ describe('17lands column contract', () => {
   it('emits exactly the expected column set', () => {
     const log = firstLog();
     const row = replayRow(log);
-    const expected = new Set([...expectedReplayColumns(log.turns), ...Object.keys(log.extras)]);
+    const expected = new Set([...expectedReplayColumns(log.turns, log.cards), ...Object.keys(log.extras)]);
     expect(new Set(Object.keys(row))).toEqual(expected);
   });
 
@@ -184,10 +184,34 @@ describe('17lands column contract', () => {
 
   it('prefixes every column of ours with sim_ so it can never shadow theirs', () => {
     const log = firstLog();
-    const known = new Set(expectedReplayColumns(log.turns));
+    const known = new Set(expectedReplayColumns(log.turns, log.cards));
     for (const column of Object.keys(replayRow(log))) {
       if (known.has(column)) continue;
       expect(column.startsWith('sim_')).toBe(true);
+    }
+  });
+
+  it('seeds every deck card with a deck_ column and keeps sideboard_ at zero', () => {
+    const log = firstLog();
+    const row = replayRow(log);
+    const names = Object.keys(log.cards);
+    expect(names.length).toBeGreaterThan(0);
+    for (const name of names) {
+      expect(row).toHaveProperty(`deck_${name}`);
+      expect(row).toHaveProperty(`opening_hand_${name}`);
+      expect(row).toHaveProperty(`drawn_${name}`);
+      expect(row[`sideboard_${name}`]).toBe(0);
+      expect(row[`deck_${name}`]).toBeGreaterThan(0);
+    }
+  });
+
+  it('never counts a card as both drawn and still in the opening hand', () => {
+    for (const log of run.logs) {
+      for (const [name, stats] of Object.entries(log.cards)) {
+        expect(stats.opening_hand + stats.drawn, `${name} exceeds its deck count`).toBeLessThanOrEqual(
+          stats.deck,
+        );
+      }
     }
   });
 });

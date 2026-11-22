@@ -117,9 +117,9 @@ function availabilitySection(availability: CubeAvailability | null): readonly st
     '## Availability',
     '',
     `${plural(availability.drafts, 'seeded draft')} of ${String(availability.seats)} seats at ` +
-      `${String(availability.cardsPerSeat)} cards each — ${String(availability.seatDrafts)} seat-drafts, seed \`${availability.seed}\`.`,
-    `A deck needs ${plural(availability.spellsRequired, 'spell')}; each archetype's deal below is what one seat is ` +
-      'handed before a single pick, so a deal under that is a pod too shallow for this list rather than a thin archetype.',
+      `${String(availability.cardsPerSeat)} cards each — ${String(availability.seatDrafts)} seat-drafts, seed \`${availability.seed}\`, bot \`${availability.botPolicy}\`.`,
+    `A deck needs ${plural(availability.spellsRequired, 'spell')}; each archetype's deal below is the expected number one seat is ` +
+      'handed before a single pick, so a deal under that makes the pod too shallow to judge the list alone.',
     '',
     ...availability.archetypes.map((archetype) => {
       const held =

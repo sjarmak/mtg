@@ -21,6 +21,7 @@ const IdSchema = z.string().regex(/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i
 
 const ColorLetterSchema = z.enum(['W', 'U', 'B', 'R', 'G']);
 export type ColorLetter = z.infer<typeof ColorLetterSchema>;
+const ManaLetterSchema = z.enum(['W', 'U', 'B', 'R', 'G', 'C']);
 
 const StringMapSchema = z.record(z.string(), z.string());
 
@@ -82,6 +83,7 @@ export const ScryfallCardSchema = z.looseObject({
   type_line: z.string().min(1),
   color_identity: z.array(ColorLetterSchema),
   colors: z.array(ColorLetterSchema).optional(),
+  produced_mana: z.array(ManaLetterSchema).optional(),
   keywords: z.array(z.string()).default([]),
   mana_cost: z.string().optional(),
   oracle_text: z.string().optional(),

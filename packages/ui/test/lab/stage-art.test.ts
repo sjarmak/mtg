@@ -11,11 +11,14 @@
  * here is the wiring: one request per distinct illustration, a copy into the
  * served directory, and the rewrite.
  */
+import { mkdirSync, mkdtempSync, existsSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CachedImage } from '@mtg/image-cache';
 import { readDeckArtifact } from '../../src/lab/deck-artifact';
 import type { DeckArtifact, DeckArtifactEntry } from '../../src/lab/deck-artifact';
-import { stageDeckArt } from '../../tools/stage-art';
+import { clearStagedFlatArt, describeClearedFlatArt, stageDeckArt } from '../../tools/stage-art';
 import type { StageArtOptions } from '../../tools/stage-art';
 
 const BOLT = 'https://cards.scryfall.io/art_crop/front/a/b/bolt.jpg?1783920066';
@@ -142,6 +145,19 @@ describe('staging a deck’s art', () => {
     expect(staged.deck.spells[0]?.art?.src).toBe(BOLT);
   });
 
+  it('stages the sideboard too, and does not invent one for a deck that has none', async () => {
+    const base = deckOf([entry('Lightning Bolt', BOLT)]);
+    const withBoard: DeckArtifact = { ...base, sideboard: [entry('Goblin Guide', GUIDE)] };
+    const staged = await stageDeckArt(withBoard, harness());
+    expect(staged.fetched).toBe(2);
+    expect(staged.deck.sideboard?.[0]?.art?.src.startsWith('art/')).toBe(true);
+    // Absent stays absent: `../../src/routes/deck/OpenDeckScreen.ts` draws a
+    // pane for a deck that carries an empty sideboard and none for a deck that
+    // was never asked, so a rewrite that materialized the field would add a pane.
+    const untouched = await stageDeckArt(base, harness());
+    expect('sideboard' in untouched.deck).toBe(false);
+  });
+
   it('leaves a card that never had art alone', async () => {
     const staged = await stageDeckArt(deckOf([entry('Goblin Guide', null)]), harness());
     expect(staged.deck.spells[0]?.art).toBeNull();
@@ -151,5 +167,38 @@ describe('staging a deck’s art', () => {
   it('still parses as a deck artifact after the rewrite', async () => {
     const staged = await stageDeckArt(deckOf([entry('Lightning Bolt', BOLT)]), harness());
     expect(readDeckArtifact(JSON.parse(JSON.stringify(staged.deck)), 'staged').ok).toBe(true);
+  });
+});
+
+/**
+ * `mtg-cax8`, 2026-08-23. `npm run play` cleared the flat `art.json` and left
+ * the directory it named, so every older run's rasters stayed on disk with
+ * nothing reading them: 11 GB on this machine. The manifest and the pictures
+ * leave together or the second one is garbage nobody can attribute.
+ */
+describe('clearing the art an older launcher staged flat', () => {
+  function publicDirWith(files: readonly (readonly [string, number])[]): string {
+    const root = mkdtempSync(join(tmpdir(), 'mtg-flat-art-'));
+    mkdirSync(join(root, 'art'), { recursive: true });
+    for (const [name, size] of files) writeFileSync(join(root, 'art', name), new Uint8Array(size));
+    return root;
+  }
+
+  it('removes the directory and reports what it held', () => {
+    const root = publicDirWith([
+      ['a.png', 1_000_000],
+      ['b.png', 3_000_000],
+    ]);
+    const cleared = clearStagedFlatArt(root);
+    expect(cleared).toEqual({ files: 2, bytes: 4_000_000 });
+    expect(existsSync(join(root, 'art'))).toBe(false);
+    expect(describeClearedFlatArt(cleared)).toContain('2 illustration(s) (4 MB)');
+  });
+
+  it('says nothing, and does nothing, when no older run left one', () => {
+    const root = mkdtempSync(join(tmpdir(), 'mtg-flat-art-none-'));
+    const cleared = clearStagedFlatArt(root);
+    expect(cleared).toEqual({ files: 0, bytes: 0 });
+    expect(describeClearedFlatArt(cleared)).toBe('');
   });
 });

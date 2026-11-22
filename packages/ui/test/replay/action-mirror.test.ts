@@ -146,6 +146,14 @@ describe('the log schema mirrors the kernel action', () => {
     expect(actionFieldsCovered).toBe(true);
   });
 
+  it('retains the token chosen for Populate', () => {
+    expect(ActionSchema.parse({ type: 'choosePopulateToken', player: 0, token: 'o1' })).toEqual({
+      type: 'choosePopulateToken',
+      player: 0,
+      token: 'o1',
+    });
+  });
+
   it('records a game whose bots pay for an activated ability', () => {
     const activations = recordedActions().filter((action) => action.type === 'activateAbility');
     expect(activations.length).toBeGreaterThan(0);
@@ -170,6 +178,129 @@ describe('the log schema mirrors the kernel action', () => {
     });
   });
 
+  it('retains a fixed mana quantity that distinguishes granted mana abilities', () => {
+    expect(
+      ActionSchema.parse({
+        type: 'activateManaAbility',
+        player: 0,
+        oid: 'o1',
+        color: 'B',
+        abilityIndex: 0,
+        amount: 4,
+      }),
+    ).toEqual({
+      type: 'activateManaAbility',
+      player: 0,
+      oid: 'o1',
+      color: 'B',
+      abilityIndex: 0,
+      amount: 4,
+    });
+  });
+
+  it('retains a spell alternative and the permanents paid for it', () => {
+    expect(
+      ActionSchema.parse({
+        type: 'castSpell',
+        player: 0,
+        oid: 'o1',
+        targets: [],
+        castingCost: 'alternative',
+        sacrifices: ['o2', 'o3', 'o4'],
+      }),
+    ).toEqual({
+      type: 'castSpell',
+      player: 0,
+      oid: 'o1',
+      targets: [],
+      castingCost: 'alternative',
+      sacrifices: ['o2', 'o3', 'o4'],
+    });
+  });
+
+  it('retains Overload on complete and staged spell casts', () => {
+    expect(
+      ActionSchema.parse({
+        type: 'castSpell',
+        player: 0,
+        oid: 'o1',
+        targets: [null],
+        castingCost: 'overload',
+      }),
+    ).toEqual({
+      type: 'castSpell',
+      player: 0,
+      oid: 'o1',
+      targets: [null],
+      castingCost: 'overload',
+    });
+    expect(
+      ActionSchema.parse({
+        type: 'beginCastSpell',
+        player: 0,
+        oid: 'o1',
+        targets: [null],
+        castingCost: 'overload',
+      }),
+    ).toEqual({
+      type: 'beginCastSpell',
+      player: 0,
+      oid: 'o1',
+      targets: [null],
+      castingCost: 'overload',
+    });
+  });
+
+  it('retains cards discarded by complete and staged spell casts', () => {
+    expect(
+      ActionSchema.parse({
+        type: 'castSpell',
+        player: 0,
+        oid: 'o1',
+        targets: [],
+        discards: ['o2'],
+      }),
+    ).toEqual({ type: 'castSpell', player: 0, oid: 'o1', targets: [], discards: ['o2'] });
+    expect(
+      ActionSchema.parse({
+        type: 'beginCastSpell',
+        player: 0,
+        oid: 'o1',
+        targets: [null],
+        discards: ['o3'],
+      }),
+    ).toEqual({ type: 'beginCastSpell', player: 0, oid: 'o1', targets: [null], discards: ['o3'] });
+  });
+
+  it('retains the explicit decline for an optional transformed cast', () => {
+    expect(ActionSchema.parse({ type: 'declineFreeCast', player: 1, oid: 'o8' })).toEqual({
+      type: 'declineFreeCast',
+      player: 1,
+      oid: 'o8',
+    });
+  });
+
+  it('accepts an activation that names the permanents its cohort cost taps', () => {
+    const paid = ActionSchema.parse({
+      type: 'activateAbility',
+      player: 0,
+      oid: 'o1',
+      abilityIndex: 0,
+      targets: [{ kind: 'permanent', oid: 'o9' }, null],
+      sacrifices: [],
+      taps: ['o1', 'o2', 'o3', 'o4', 'o5'],
+    });
+    expect(paid).toEqual({
+      type: 'activateAbility',
+      player: 0,
+      oid: 'o1',
+      abilityIndex: 0,
+      targets: [{ kind: 'permanent', oid: 'o9' }, null],
+      sacrifices: [],
+      taps: ['o1', 'o2', 'o3', 'o4', 'o5'],
+    });
+  });
+
   it('retains X and copied-spell identity in a stack snapshot', () => {
     expect(
       StackEntrySchema.parse({
@@ -179,6 +310,7 @@ describe('the log schema mirrors the kernel action', () => {
         source: null,
         copiedFrom: 'o1',
         chosenX: 3,
+        mode: null,
         triggerContext: null,
         sourceCharacteristics: null,
         targets: [{ kind: 'player', player: 1 }],
@@ -190,15 +322,35 @@ describe('the log schema mirrors the kernel action', () => {
       source: null,
       copiedFrom: 'o1',
       chosenX: 3,
-      // Omitted on input, the way a pre-`mtg-7si0` record would be: `.default(null)`
-      // backfills it rather than requiring every already-recorded stack entry to
-      // carry the key (`log-schema.ts` says why this field skips the usual
-      // version-bump-plus-required-field treatment).
       mode: null,
       triggerContext: null,
       sourceCharacteristics: null,
       targets: [{ kind: 'player', player: 1 }],
     });
+  });
+
+  it('retains the source ability index for a modal activated ability', () => {
+    expect(
+      StackEntrySchema.parse({
+        oid: 'ab1',
+        controller: 0,
+        card: 'o1',
+        source: 'o1',
+        abilityIndex: 2,
+        copiedFrom: null,
+        chosenX: null,
+        mode: 1,
+        triggerContext: null,
+        sourceCharacteristics: null,
+        targets: [],
+      }),
+    ).toEqual(
+      expect.objectContaining({
+        source: 'o1',
+        abilityIndex: 2,
+        mode: 1,
+      }),
+    );
   });
 
   it('retains a trigger referent outside the chosen-target tuple', () => {
@@ -210,6 +362,7 @@ describe('the log schema mirrors the kernel action', () => {
         source: 'o1',
         copiedFrom: null,
         chosenX: null,
+        mode: null,
         triggerContext: {
           kind: 'controlledCreatureAttacksAlone',
           triggeringCreature: 'o2',
@@ -254,6 +407,173 @@ describe('the log schema mirrors the kernel action', () => {
     });
   });
 
+  it('preserves a tagged Battle defender in actions and events', () => {
+    const defender = { kind: 'battle' as const, oid: 'battle-1' };
+    expect(
+      ActionSchema.parse({
+        type: 'declareAttackers',
+        player: 0,
+        attackers: [{ oid: 'attacker-1', defender }],
+      }),
+    ).toEqual({ type: 'declareAttackers', player: 0, attackers: [{ oid: 'attacker-1', defender }] });
+    expect(
+      EventSchema.parse({
+        type: 'attackersDeclared',
+        player: 0,
+        attacks: [{ oid: 'attacker-1', defender }],
+      }),
+    ).toEqual({ type: 'attackersDeclared', player: 0, attacks: [{ oid: 'attacker-1', defender }] });
+  });
+
+  it('parses a delayed zone-change schedule without losing its incarnation', () => {
+    expect(
+      EventSchema.parse({
+        type: 'delayedZoneChangeScheduled',
+        id: 4,
+        source: 'maze',
+        target: 'attacker',
+        targetIncarnation: 2,
+        dueTurn: 7,
+      }),
+    ).toEqual({
+      type: 'delayedZoneChangeScheduled',
+      id: 4,
+      source: 'maze',
+      target: 'attacker',
+      targetIncarnation: 2,
+      dueTurn: 7,
+    });
+  });
+
+  it('parses counter removal and delayed placement with exact counts and incarnation', () => {
+    expect(
+      EventSchema.parse({
+        type: 'counterRemoved',
+        oid: 'hydra',
+        counter: 'plusOnePlusOne',
+        count: 3,
+      }),
+    ).toEqual({ type: 'counterRemoved', oid: 'hydra', counter: 'plusOnePlusOne', count: 3 });
+    expect(
+      EventSchema.parse({
+        type: 'delayedCounterPlacementScheduled',
+        id: 5,
+        source: 'hydra',
+        target: 'hydra',
+        targetIncarnation: 2,
+        dueTurn: 7,
+        counter: 'plusOnePlusOne',
+        count: 2,
+      }),
+    ).toEqual({
+      type: 'delayedCounterPlacementScheduled',
+      id: 5,
+      source: 'hydra',
+      target: 'hydra',
+      targetIncarnation: 2,
+      dueTurn: 7,
+      counter: 'plusOnePlusOne',
+      count: 2,
+    });
+  });
+
+  it('records generic plural targets and upgrades the legacy object-id spelling', () => {
+    expect(
+      ActionSchema.parse({
+        type: 'castSpell',
+        player: 0,
+        oid: 'spell-1',
+        targets: [null],
+        multiTargets: {
+          0: [
+            { kind: 'player', player: 0 },
+            { kind: 'player', player: 1 },
+          ],
+        },
+      }),
+    ).toEqual({
+      type: 'castSpell',
+      player: 0,
+      oid: 'spell-1',
+      targets: [null],
+      multiTargets: {
+        0: [
+          { kind: 'player', player: 0 },
+          { kind: 'player', player: 1 },
+        ],
+      },
+    });
+
+    expect(
+      ActionSchema.parse({
+        type: 'castSpell',
+        player: 0,
+        oid: 'spell-1',
+        targets: [null],
+        multiTargets: { 0: ['creature-1'] },
+      }),
+    ).toEqual({
+      type: 'castSpell',
+      player: 0,
+      oid: 'spell-1',
+      targets: [null],
+      multiTargets: { 0: [{ kind: 'permanent', oid: 'creature-1' }] },
+    });
+
+    expect(
+      ActionSchema.parse({
+        type: 'chooseTriggerTargets',
+        player: 0,
+        oid: 'inferno-trigger',
+        targets: [null],
+        multiTargets: {
+          0: [
+            { kind: 'player', player: 1 },
+            { kind: 'permanent', oid: 'creature-1' },
+          ],
+        },
+        damageAllocations: { 0: [2, 1] },
+      }),
+    ).toEqual({
+      type: 'chooseTriggerTargets',
+      player: 0,
+      oid: 'inferno-trigger',
+      targets: [null],
+      multiTargets: {
+        0: [
+          { kind: 'player', player: 1 },
+          { kind: 'permanent', oid: 'creature-1' },
+        ],
+      },
+      damageAllocations: { 0: [2, 1] },
+    });
+
+    expect(
+      EventSchema.parse({
+        type: 'triggerTargetsChosen',
+        oid: 'inferno-trigger',
+        source: 'inferno-titan',
+        targets: [null],
+        multiTargets: {
+          0: [
+            { kind: 'player', player: 1 },
+            { kind: 'permanent', oid: 'creature-1' },
+          ],
+        },
+        damageAllocations: { 0: [2, 1] },
+      }),
+    ).toMatchObject({
+      type: 'triggerTargetsChosen',
+      multiTargets: {
+        0: [
+          { kind: 'player', player: 1 },
+          { kind: 'permanent', oid: 'creature-1' },
+        ],
+      },
+      damageAllocations: { 0: [2, 1] },
+    });
+  });
+
   it('rejects an untagged object defender in actions and events', () => {
     expect(() =>
       ActionSchema.parse({
@@ -272,7 +592,7 @@ describe('the log schema mirrors the kernel action', () => {
   });
 
   it('identifies new tagged-defender logs while retaining legacy numeric-defender headers', () => {
-    expect(EVENT_LOG_SCHEMA_VERSION).toBe('mtg-ui/event-log/8');
+    expect(EVENT_LOG_SCHEMA_VERSION).toBe('mtg-ui/event-log/10');
     expect(
       HeaderRecordSchema.parse({
         record: 'header',

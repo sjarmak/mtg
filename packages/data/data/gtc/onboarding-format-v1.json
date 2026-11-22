@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "gtc",
+  "name": "Gatecrash",
+  "sourceCodes": ["GTC", "RTR"],
+  "products": [{ "id": "gtc-draft", "setCode": "GTC", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["gtc-draft", "gtc-draft", "gtc-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["gtc-draft", "gtc-draft", "gtc-draft", "gtc-draft", "gtc-draft", "gtc-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

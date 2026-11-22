@@ -9,9 +9,11 @@
  * Every consumer must handle `null` as "Forge is not installed" and degrade to
  * a labeled skip. A missing engine is never a pass.
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { ForgeSetExport } from './transpile';
+import { writeForgeSet } from './write-set';
 
 const JAR_PATTERN = /^forge-gui-desktop-(.+)-jar-with-dependencies\.jar$/;
 
@@ -112,4 +114,17 @@ export function ensureForgeProfile(install: ForgeInstall): string {
     mkdirSync(dir, { recursive: true });
   }
   return path;
+}
+
+/** Writes only a previously completed group of exports into Forge's isolated profile. */
+export function materializeForgeProfile(
+  install: ForgeInstall,
+  exports: readonly ForgeSetExport[],
+): readonly string[] {
+  if (resolve(install.customDir) !== resolve(install.userDir, 'custom')) {
+    throw new Error('refusing to replace a Forge custom directory outside the selected user profile');
+  }
+  rmSync(install.customDir, { recursive: true, force: true });
+  const profile = ensureForgeProfile(install);
+  return [profile, ...exports.flatMap((exported) => writeForgeSet(install.customDir, exported))];
 }

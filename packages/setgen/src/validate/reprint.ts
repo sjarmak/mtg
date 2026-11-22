@@ -103,8 +103,22 @@ export function effectSignature(card: Card): string | null {
   return canonicalJson({ modal: card.modes !== undefined, effects });
 }
 
+/**
+ * The cost of a card in a reprint group.
+ *
+ * `mtg-odaj`. This once returned the literal `{0}` for an uncastable card, and
+ * that was unambiguous only while no card could cost zero. Free spells became
+ * legal DSL in `4c75dd51`, and a genuine free spell prints `{0}` too. The
+ * branch is gone rather than re-spelled, because it was unreachable: a group is
+ * keyed by `effectSignature`, which returns null for anything that is not an
+ * instant or a sorcery, and every one of those is castable. The guard states
+ * that invariant where a future caller would break it.
+ */
 function costOf(card: Card): string {
-  return isCastable(card) ? formatManaCost(card.manaCost) : '{0}';
+  if (!isCastable(card)) {
+    throw new Error(`reprintGroups: ${card.name} is a land, which effectSignature does not key`);
+  }
+  return formatManaCost(card.manaCost);
 }
 
 /** One line of oracle text, for a finding message that has to stay one line. */

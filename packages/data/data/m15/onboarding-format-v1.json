@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "m15",
+  "name": "Magic 2015",
+  "sourceCodes": ["M15"],
+  "products": [{ "id": "m15-draft", "setCode": "M15", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["m15-draft", "m15-draft", "m15-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["m15-draft", "m15-draft", "m15-draft", "m15-draft", "m15-draft", "m15-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

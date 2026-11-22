@@ -13,13 +13,12 @@
  *     zeros the reader has to notice is the same defect one indirection later,
  *     so the last column names the pools outright.
  *  2. **Every shape gets a row, including the ones nothing prints.** A census
- *     that lists only what it found cannot say what is missing. Seven of the
- *     twenty-five shapes were printed by no committed set at all until one
- *     night moved all seven: `mtg-yxt1` printed a toll clause on a flagship
- *     common, and `mtg-07ym` committed a twelve-card fixture that prints the
- *     other six. The count is zero today, and the row is what will report the
- *     next one — a census that dropped a row once it filled would have to be
- *     re-taught the shape to notice it emptying again.
+ *     that lists only what it found cannot say what is missing. Several shapes
+ *     were printed by no committed set until the flagship gained a toll clause
+ *     and Lantern Fen became the small fixture that prints the remaining
+ *     structural cases. The count is zero today, and the row is what will
+ *     report the next one — a census that dropped a row once it filled would
+ *     have to be re-taught the shape to notice it emptying again.
  *  3. **A pool is an argument.** `main([])` fails with the usage line rather
  *     than defaulting to a path, for the reason `--out` on the reduced reference
  *     emitter has no default: a census that answers about whichever set was

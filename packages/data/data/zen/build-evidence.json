@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "zen",
+  "formatSha256": "5ae93d39d406257f0f4e0321af0e5f14df1810c98b8586baa9a70b1513ca097c",
+  "sourceSha256": "6799a8c589e274ebdb349484da52a1efdd631bd8dcdacdd87a125f6e5976c0d0",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "6799a8c589e274ebdb349484da52a1efdd631bd8dcdacdd87a125f6e5976c0d0",
+    "recipe.json": "e4461306c5e80e3a7ff08b5f0b15eb7f2e8cc0b2f4603308d4a26310ffb29cae",
+    "zen-printed-catalog-v1.json": "28d8d75f84a63634cba6356e3283f39a3bc9e9f2279a8c2d22d5003fdac5af65",
+    "zen-limited-format-v1.json": "97c0c0ad554f65f9a93446df99150e9f05c52b9925cd6704a1ae801a977c7a18"
+  },
+  "catalogs": [
+    {
+      "code": "ZEN",
+      "cards": 269,
+      "contentSha256": "caacc45fc6280ca35ff61e5c8caed0fff6ab438969fd3999ee4bc4bf431da02f"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1839.3352869999999,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 234,
+    "printings": 269
+  }
+}

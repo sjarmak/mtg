@@ -1,0 +1,4556 @@
+/** Offline integrity checks for the Forge controller-family review of all 600 positions. */
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { describe, expect, it } from 'vitest';
+import {
+  LEGACY_CUBE_DECISION_FAMILIES,
+  LEGACY_CUBE_DECISION_LEDGER_PATH,
+  LEGACY_CUBE_DECISION_LEDGER_SHA256,
+  LEGACY_CUBE_AURA_TARGET_PROBE,
+  LEGACY_CUBE_AURA_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_BANESLAYER_PROTECTION_PROBE,
+  LEGACY_CUBE_BANESLAYER_PROTECTION_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_BANESLAYER_PROTECTION_SAFE_POSITIONS,
+  LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_PROBE,
+  LEGACY_CUBE_ANNOUNCED_NUMBER_SAFE_POSITIONS,
+  LEGACY_CUBE_STATED_ORDERING_SAFE_POSITIONS,
+  LEGACY_CUBE_STATED_DISTRIBUTION_SAFE_POSITIONS,
+  LEGACY_CUBE_STATED_RETARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_OPEN_CARD_NAMING_SAFE_POSITIONS,
+  LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_SAFE_POSITIONS,
+  LEGACY_CUBE_CHOSEN_COST_PAYMENT_REFUSED_POSITIONS,
+  LEGACY_CUBE_DISCARD_OR_SOURCE_SACRIFICE_COST_SAFE_POSITIONS,
+  LEGACY_CUBE_BOUNDED_MULTI_SELECTION_SAFE_POSITIONS,
+  LEGACY_CUBE_CHART_A_COURSE_DISCARD_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_CHART_A_COURSE_DISCARD_PROBE,
+  LEGACY_CUBE_CHART_A_COURSE_DISCARD_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_LEVEL_UP_PROBE,
+  LEGACY_CUBE_REVIEWED_LEVEL_UP_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_REVIEWED_LEVEL_UP_SAFE_POSITIONS,
+  LEGACY_CUBE_SELFLESS_SPIRIT_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_SELFLESS_SPIRIT_PROBE,
+  LEGACY_CUBE_SELFLESS_SPIRIT_SAFE_POSITIONS,
+  LEGACY_CUBE_REMORSEFUL_CLERIC_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_REMORSEFUL_CLERIC_PROBE,
+  LEGACY_CUBE_REMORSEFUL_CLERIC_SAFE_POSITIONS,
+  LEGACY_CUBE_COLDSTEEL_HEART_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_COLDSTEEL_HEART_PROBE,
+  LEGACY_CUBE_COLDSTEEL_HEART_SAFE_POSITIONS,
+  LEGACY_CUBE_EXTINCTION_EVENT_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_EXTINCTION_EVENT_PROBE,
+  LEGACY_CUBE_EXTINCTION_EVENT_SAFE_POSITIONS,
+  LEGACY_CUBE_FETTERS_AURA_TARGET_PROBE,
+  LEGACY_CUBE_FETTERS_AURA_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_FALL_AURA_TARGET_PROBE,
+  LEGACY_CUBE_FALL_AURA_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_OPTIONAL_TRIGGER_CONFIRM_SAFE_POSITIONS,
+  LEGACY_CUBE_EQUIP_TARGET_PROBE,
+  LEGACY_CUBE_EQUIP_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_GENERATED_OBJECT_SAFE_POSITIONS,
+  LEGACY_CUBE_ALTERNATE_COST_COHORTS,
+  LEGACY_CUBE_ALTERNATE_COST_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_ALTERNATE_COST_PROBE,
+  LEGACY_CUBE_ALTERNATE_COST_SAFE_POSITIONS,
+  LEGACY_CUBE_OPTIONAL_DECIDER_YOU_COHORTS,
+  LEGACY_CUBE_OPTIONAL_DECIDER_YOU_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_OPTIONAL_DECIDER_YOU_PREEXISTING_SAFE_POSITIONS,
+  LEGACY_CUBE_OPTIONAL_DECIDER_YOU_PROBE,
+  LEGACY_CUBE_OPTIONAL_DECIDER_YOU_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_COHORTS,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_PROBE,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_SAFE_POSITIONS,
+  LEGACY_CUBE_ALTERNATE_MODE_COHORTS,
+  LEGACY_CUBE_ALTERNATE_MODE_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_ALTERNATE_MODE_PROBE,
+  LEGACY_CUBE_ALTERNATE_MODE_SAFE_POSITIONS,
+  LEGACY_CUBE_STATED_ORDERING_TRIGGER_TARGET_PROBE,
+  LEGACY_CUBE_STATED_ORDERING_TRIGGER_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_COHORTS,
+  LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_PROBE,
+  LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_COUNTER_TYPE_CHOICE_COHORTS,
+  LEGACY_CUBE_REVIEWED_COUNTER_TYPE_CHOICE_PROBE,
+  LEGACY_CUBE_REVIEWED_COUNTER_TYPE_CHOICE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_TARGET_COHORTS,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_TARGET_PROBE,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_PHYREXIAN_SPELL_COST_COHORTS,
+  LEGACY_CUBE_REVIEWED_PHYREXIAN_SPELL_COST_PROBE,
+  LEGACY_CUBE_REVIEWED_PHYREXIAN_SPELL_COST_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_CASCADE_COHORTS,
+  LEGACY_CUBE_REVIEWED_CASCADE_PROBE,
+  LEGACY_CUBE_REVIEWED_CASCADE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_REPEATABLE_MODE_COHORTS,
+  LEGACY_CUBE_REVIEWED_REPEATABLE_MODE_PROBE,
+  LEGACY_CUBE_REVIEWED_REPEATABLE_MODE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_MULTIPLE_TARGET_COHORTS,
+  LEGACY_CUBE_REVIEWED_MULTIPLE_TARGET_PROBE,
+  LEGACY_CUBE_REVIEWED_MULTIPLE_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_MANA_COMBO_COHORTS,
+  LEGACY_CUBE_REVIEWED_MANA_COMBO_PROBE,
+  LEGACY_CUBE_REVIEWED_MANA_COMBO_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_CRYPTIC_COMMAND_COHORTS,
+  LEGACY_CUBE_REVIEWED_CRYPTIC_COMMAND_PROBE,
+  LEGACY_CUBE_REVIEWED_CRYPTIC_COMMAND_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_PRISMARI_COMMAND_COHORTS,
+  LEGACY_CUBE_REVIEWED_PRISMARI_COMMAND_PROBE,
+  LEGACY_CUBE_REVIEWED_PRISMARI_COMMAND_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_BLESSED_ALLIANCE_COHORTS,
+  LEGACY_CUBE_REVIEWED_BLESSED_ALLIANCE_PROBE,
+  LEGACY_CUBE_REVIEWED_BLESSED_ALLIANCE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_KALITAS_COHORTS,
+  LEGACY_CUBE_REVIEWED_KALITAS_PROBE,
+  LEGACY_CUBE_REVIEWED_KALITAS_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_URO_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_KROXA_PROBE,
+  LEGACY_CUBE_REVIEWED_KROXA_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_TITAN_ESCAPE_COST_PROBE,
+  LEGACY_CUBE_REVIEWED_ENGINEERED_EXPLOSIVES_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_PHANTASMAL_IMAGE_COHORTS,
+  LEGACY_CUBE_REVIEWED_PHANTASMAL_IMAGE_PROBE,
+  LEGACY_CUBE_REVIEWED_PHANTASMAL_IMAGE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_COHORTS,
+  LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_PROBE,
+  LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_COHORTS,
+  LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_PROBE,
+  LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_COHORTS,
+  LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_PROBE,
+  LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_COHORTS,
+  LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_PROBE,
+  LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_RESIDUAL_GENERATED_TOKEN_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_MULTI_TARGET_TRANSFORMATION_PROBE,
+  LEGACY_CUBE_REVIEWED_MULTI_TARGET_TRANSFORMATION_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_PLANESWALKER_UNLESS_SACRIFICE_PROBE,
+  LEGACY_CUBE_REVIEWED_PLANESWALKER_UNLESS_SACRIFICE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_COPY_SPELL_RETARGET_PROBE,
+  LEGACY_CUBE_REVIEWED_COPY_SPELL_RETARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_COHORTS,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_PROBE,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_KARN_LIBERATED_COHORTS,
+  LEGACY_CUBE_REVIEWED_KARN_LIBERATED_PROBE,
+  LEGACY_CUBE_REVIEWED_KARN_LIBERATED_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_RATTLECLAW_MYSTIC_COHORTS,
+  LEGACY_CUBE_REVIEWED_RATTLECLAW_MYSTIC_PROBE,
+  LEGACY_CUBE_REVIEWED_RATTLECLAW_MYSTIC_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_COHORTS,
+  LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_PROBE,
+  LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_BARAL_COHORTS,
+  LEGACY_CUBE_REVIEWED_BARAL_PROBE,
+  LEGACY_CUBE_REVIEWED_BARAL_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_UNLESS_COST_COHORTS,
+  LEGACY_CUBE_REVIEWED_UNLESS_COST_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_REVIEWED_UNLESS_COST_PROBE,
+  LEGACY_CUBE_REVIEWED_UNLESS_COST_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_COUNTER_UNLESS_COST_COHORTS,
+  LEGACY_CUBE_REVIEWED_COUNTER_UNLESS_COST_PROBE,
+  LEGACY_CUBE_REVIEWED_COUNTER_UNLESS_COST_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_MISCALCULATION_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_MAUL_OF_THE_SKYCLAVES_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_EMBERCLEAVE_COHORTS,
+  LEGACY_CUBE_REVIEWED_EMBERCLEAVE_PROBE,
+  LEGACY_CUBE_REVIEWED_EMBERCLEAVE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_LIVING_WEAPON_COHORTS,
+  LEGACY_CUBE_REVIEWED_LIVING_WEAPON_PROBE,
+  LEGACY_CUBE_REVIEWED_LIVING_WEAPON_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_FORETELL_COHORTS,
+  LEGACY_CUBE_REVIEWED_FORETELL_PROBE,
+  LEGACY_CUBE_REVIEWED_FORETELL_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_SATYR_WAYFINDER_COHORTS,
+  LEGACY_CUBE_REVIEWED_SATYR_WAYFINDER_PROBE,
+  LEGACY_CUBE_REVIEWED_SATYR_WAYFINDER_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_BLUE_LIBRARY_SELECTION_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_GIDEON_GARRUK_BLOODLINE_COHORTS,
+  LEGACY_CUBE_REVIEWED_GIDEON_GARRUK_BLOODLINE_PROBE,
+  LEGACY_CUBE_REVIEWED_GIDEON_GARRUK_BLOODLINE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_HIDEAWAY_COHORTS,
+  LEGACY_CUBE_REVIEWED_HIDEAWAY_PROBE,
+  LEGACY_CUBE_REVIEWED_HIDEAWAY_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_FIRE_AND_ICE_COHORTS,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_FIRE_AND_ICE_PROBE,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_FIRE_AND_ICE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_FEAST_AND_FAMINE_COHORTS,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_FEAST_AND_FAMINE_PROBE,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_FEAST_AND_FAMINE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_LIGHT_AND_SHADOW_COHORTS,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_LIGHT_AND_SHADOW_PROBE,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_LIGHT_AND_SHADOW_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_BODY_AND_MIND_COHORTS,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_BODY_AND_MIND_PROBE,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_BODY_AND_MIND_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_HEARTH_AND_HOME_COHORTS,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_HEARTH_AND_HOME_PROBE,
+  LEGACY_CUBE_REVIEWED_SWORD_OF_HEARTH_AND_HOME_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_UMEZAWAS_JITTE_COHORTS,
+  LEGACY_CUBE_REVIEWED_UMEZAWAS_JITTE_PROBE,
+  LEGACY_CUBE_REVIEWED_UMEZAWAS_JITTE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_BIRGI_COHORTS,
+  LEGACY_CUBE_REVIEWED_BIRGI_PROBE,
+  LEGACY_CUBE_REVIEWED_BIRGI_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_BIRTHING_POD_COHORTS,
+  LEGACY_CUBE_REVIEWED_BIRTHING_POD_PROBE,
+  LEGACY_CUBE_REVIEWED_BIRTHING_POD_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_RANGER_CAPTAIN_OF_EOS_COHORTS,
+  LEGACY_CUBE_REVIEWED_RANGER_CAPTAIN_OF_EOS_PROBE,
+  LEGACY_CUBE_REVIEWED_RANGER_CAPTAIN_OF_EOS_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_FORBID_COHORTS,
+  LEGACY_CUBE_REVIEWED_FORBID_PROBE,
+  LEGACY_CUBE_REVIEWED_FORBID_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_REVEILLARK_COHORTS,
+  LEGACY_CUBE_REVIEWED_REVEILLARK_PROBE,
+  LEGACY_CUBE_REVIEWED_REVEILLARK_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_BLOODCHIEFS_THIRST_COHORTS,
+  LEGACY_CUBE_REVIEWED_BLOODCHIEFS_THIRST_PROBE,
+  LEGACY_CUBE_REVIEWED_BLOODCHIEFS_THIRST_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_PRIMAL_MIGHT_COHORTS,
+  LEGACY_CUBE_REVIEWED_PRIMAL_MIGHT_PROBE,
+  LEGACY_CUBE_REVIEWED_PRIMAL_MIGHT_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_REORDER_OR_SHUFFLE_COHORTS,
+  LEGACY_CUBE_REVIEWED_REORDER_OR_SHUFFLE_PROBE,
+  LEGACY_CUBE_REVIEWED_REORDER_OR_SHUFFLE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_ANIMATE_DEAD_COHORTS,
+  LEGACY_CUBE_REVIEWED_ANIMATE_DEAD_PROBE,
+  LEGACY_CUBE_REVIEWED_ANIMATE_DEAD_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_HEARTLESS_ACT_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_HUNTMASTER_COHORTS,
+  LEGACY_CUBE_REVIEWED_HUNTMASTER_PROBE,
+  LEGACY_CUBE_REVIEWED_HUNTMASTER_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_REMAINING_PLANESWALKER_COHORTS,
+  LEGACY_CUBE_REVIEWED_REMAINING_PLANESWALKER_PROBE,
+  LEGACY_CUBE_REVIEWED_REMAINING_PLANESWALKER_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_FINAL_SIX_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_PIA_SIEGE_GANG_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_TREACHERY_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_AGADEEMS_AWAKENING_COHORTS,
+  LEGACY_CUBE_REVIEWED_AGADEEMS_AWAKENING_PROBE,
+  LEGACY_CUBE_REVIEWED_AGADEEMS_AWAKENING_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_MODAL_LAND_SPELL_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_CONVOKE_COHORTS,
+  LEGACY_CUBE_REVIEWED_CONVOKE_PROBE,
+  LEGACY_CUBE_REVIEWED_CONVOKE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_DELVE_COHORTS,
+  LEGACY_CUBE_REVIEWED_DELVE_PROBE,
+  LEGACY_CUBE_REVIEWED_DELVE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_FREE_COUNTERSPELL_COHORTS,
+  LEGACY_CUBE_REVIEWED_FREE_COUNTERSPELL_PROBE,
+  LEGACY_CUBE_REVIEWED_FREE_COUNTERSPELL_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_LEGIONS_LANDING_COHORTS,
+  LEGACY_CUBE_REVIEWED_LEGIONS_LANDING_PROBE,
+  LEGACY_CUBE_REVIEWED_LEGIONS_LANDING_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_GILDED_GOOSE_COHORTS,
+  LEGACY_CUBE_REVIEWED_GILDED_GOOSE_PROBE,
+  LEGACY_CUBE_REVIEWED_GILDED_GOOSE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_SKYCLAVE_APPARITION_COHORTS,
+  LEGACY_CUBE_REVIEWED_SKYCLAVE_APPARITION_PROBE,
+  LEGACY_CUBE_REVIEWED_SKYCLAVE_APPARITION_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_PATH_TO_EXILE_COHORTS,
+  LEGACY_CUBE_REVIEWED_PATH_TO_EXILE_PROBE,
+  LEGACY_CUBE_REVIEWED_PATH_TO_EXILE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_GLEN_ELENDRA_ARCHMAGE_COHORTS,
+  LEGACY_CUBE_REVIEWED_GLEN_ELENDRA_ARCHMAGE_PROBE,
+  LEGACY_CUBE_REVIEWED_GLEN_ELENDRA_ARCHMAGE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_RECURRING_NIGHTMARE_COHORTS,
+  LEGACY_CUBE_REVIEWED_RECURRING_NIGHTMARE_PROBE,
+  LEGACY_CUBE_REVIEWED_RECURRING_NIGHTMARE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_PRIEST_OF_FELL_RITES_COHORTS,
+  LEGACY_CUBE_REVIEWED_PRIEST_OF_FELL_RITES_PROBE,
+  LEGACY_CUBE_REVIEWED_PRIEST_OF_FELL_RITES_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_SMUGGLERS_COPTER_COHORTS,
+  LEGACY_CUBE_REVIEWED_SMUGGLERS_COPTER_PROBE,
+  LEGACY_CUBE_REVIEWED_SMUGGLERS_COPTER_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_CRYPTBREAKER_COHORTS,
+  LEGACY_CUBE_REVIEWED_CRYPTBREAKER_PROBE,
+  LEGACY_CUBE_REVIEWED_CRYPTBREAKER_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_MYR_BATTLESPHERE_COHORTS,
+  LEGACY_CUBE_REVIEWED_MYR_BATTLESPHERE_PROBE,
+  LEGACY_CUBE_REVIEWED_MYR_BATTLESPHERE_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_TREASURE_COHORT_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_CHAMPION_OF_WITS_PROBE,
+  LEGACY_CUBE_REVIEWED_CHAMPION_OF_WITS_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_UTOPIA_SPRAWL_COHORTS,
+  LEGACY_CUBE_REVIEWED_UTOPIA_SPRAWL_PROBE,
+  LEGACY_CUBE_REVIEWED_UTOPIA_SPRAWL_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_SPLINTER_TWIN_COHORTS,
+  LEGACY_CUBE_REVIEWED_SPLINTER_TWIN_PROBE,
+  LEGACY_CUBE_REVIEWED_SPLINTER_TWIN_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_LINGERING_SOULS_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_OPTIONAL_GENERATED_TOKEN_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_GLORYBRINGER_COHORTS,
+  LEGACY_CUBE_REVIEWED_GLORYBRINGER_PROBE,
+  LEGACY_CUBE_REVIEWED_GLORYBRINGER_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_GRIM_LAVAMANCER_COHORTS,
+  LEGACY_CUBE_REVIEWED_GRIM_LAVAMANCER_PROBE,
+  LEGACY_CUBE_REVIEWED_GRIM_LAVAMANCER_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_GIFTS_UNGIVEN_COHORTS,
+  LEGACY_CUBE_REVIEWED_GIFTS_UNGIVEN_PROBE,
+  LEGACY_CUBE_REVIEWED_GIFTS_UNGIVEN_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_COHORTS,
+  LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_PROBE,
+  LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_COHORTS,
+  LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_PROBE,
+  LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_COMPANION_COHORTS,
+  LEGACY_CUBE_REVIEWED_COMPANION_SAFE_POSITIONS,
+  LEGACY_CUBE_REVIEWED_YORION_COMPANION_PROBE,
+  LEGACY_CUBE_REVIEWED_OBOSH_COMPANION_PROBE,
+  LEGACY_CUBE_GENERATED_TOKEN_AUDIT,
+  LEGACY_CUBE_ORDINARY_COMBAT_PROBE,
+  LEGACY_CUBE_ORDINARY_COMBAT_SAFE_POSITIONS,
+  LEGACY_CUBE_ORDINARY_COMBAT_SINGLE_TARGET_PROBE,
+  LEGACY_CUBE_ORDINARY_COMBAT_SINGLE_TARGET_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_ORDINARY_COMBAT_SINGLE_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_ORDINARY_COMBAT_TRIGGER_TARGET_PROBE,
+  LEGACY_CUBE_ORDINARY_COMBAT_TRIGGER_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_PALADIN_CLASS_PROBE,
+  LEGACY_CUBE_PALADIN_CLASS_SAFE_POSITIONS,
+  LEGACY_CUBE_SHOCKLAND_OPTIONAL_COST_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_SHOCKLAND_PROBE,
+  LEGACY_CUBE_SHOCKLAND_SAFE_POSITIONS,
+  LEGACY_CUBE_TRIGGER_TARGET_EXCLUDED_POSITIONS,
+  LEGACY_CUBE_TRIGGER_TARGET_PROBE,
+  LEGACY_CUBE_TRIGGER_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_ORDINARY_MANA_PAYMENT_AUDIT,
+  LEGACY_CUBE_ORDINARY_MANA_PAYMENT_PROBE,
+  LEGACY_CUBE_ORDINARY_MANA_PAYMENT_UNSAFE_POSITIONS,
+  LEGACY_CUBE_PRIORITY_ONLY_PROBE,
+  LEGACY_CUBE_PRIORITY_ONLY_SAFE_POSITIONS,
+  LEGACY_CUBE_SINGLE_TARGET_PROBE,
+  LEGACY_CUBE_SINGLE_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_SINGLE_STACK_TARGET_PROBE,
+  LEGACY_CUBE_SINGLE_STACK_TARGET_SAFE_POSITIONS,
+  LEGACY_CUBE_SINGLE_ZONE_CARD_PROBE,
+  LEGACY_CUBE_SINGLE_ZONE_CARD_SAFE_POSITIONS,
+  LEGACY_CUBE_VRASKA_GENERATED_TOKEN_PROBE,
+  LEGACY_CUBE_VRASKA_GENERATED_TOKEN_SAFE_POSITIONS,
+  classifyLegacyCubeForgeScript,
+  classifyForgeControllerCallback,
+  legacyCubeBridgeCardFamilySafeNames,
+  legacyCubeAuraTargetProfileRefusals,
+  legacyCubeBaneslayerProtectionProfileRefusals,
+  legacyCubeChartACourseDiscardProfileRefusals,
+  legacyCubeReviewedLevelUpProfileRefusals,
+  legacyCubeSelflessSpiritProfileRefusals,
+  legacyCubeRemorsefulClericProfileRefusals,
+  legacyCubeColdsteelHeartProfileRefusals,
+  legacyCubeFallAuraTargetProfileRefusals,
+  legacyCubeFettersAuraTargetProfileRefusals,
+  legacyCubeEquipTargetProfileRefusals,
+  legacyCubePaladinClassProfileRefusals,
+  legacyCubeShocklandProfileRefusals,
+  legacyCubeDecisionLedgerContentSha256,
+  legacyCubeOrdinaryCombatSingleTargetRefusals,
+  legacyCubeOrdinaryCombatTriggeredSingleTargetRefusals,
+  legacyCubeMandatoryTriggeredSingleTargetRefusals,
+  legacyCubeOrdinaryManaPaymentRefusals,
+  resolveLegacyCubeGeneratedScriptDependencies,
+  loadLegacyCubeDecisionLedger,
+  loadLegacyCubePrintedCatalog,
+  loadLegacyCubeProvenance,
+  officialLegacyCubeDecisionEntries,
+  verifyForgePlayerControllerSurface,
+  verifyLegacyCubeDecisionBridgeSource,
+  verifyLegacyCubeDecisionLedger,
+  verifyLegacyCubeDecisionScript,
+  verifyLegacyCubeDecisionSyntax,
+  verifyLegacyCubeGeneratedScriptDependencies,
+  type LegacyCubeDecisionLedger,
+} from '@mtg/data';
+
+const sha256 = (bytes: Uint8Array): string => createHash('sha256').update(bytes).digest('hex');
+
+function copyOf(ledger: LegacyCubeDecisionLedger): LegacyCubeDecisionLedger {
+  return structuredClone(ledger);
+}
+
+describe('Legacy Cube Forge decision-family ledger', () => {
+  const provenance = loadLegacyCubeProvenance();
+  const ledger = loadLegacyCubeDecisionLedger();
+  const entries = officialLegacyCubeDecisionEntries(ledger);
+
+  it('pins one classified Forge script per official position', () => {
+    expect(sha256(readFileSync(LEGACY_CUBE_DECISION_LEDGER_PATH))).toBe(LEGACY_CUBE_DECISION_LEDGER_SHA256);
+    expect(entries).toHaveLength(600);
+    expect(entries.map((entry) => entry.position)).toEqual(
+      Array.from({ length: 600 }, (_unused, index) => index + 1),
+    );
+    expect(new Set(entries.map((entry) => entry.forgeScript))).toHaveLength(600);
+    expect(entries.every((entry) => entry.families.length > 0)).toBe(true);
+    expect(() => verifyLegacyCubeDecisionLedger(ledger, provenance)).not.toThrow();
+  });
+
+  it('binds every promoted shockland to its source-attested current Oracle text', () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    const expected = [
+      [535, 'Stomping Ground', 'Land — Mountain Forest', '{R}', '{G}'],
+      [538, 'Watery Grave', 'Land — Island Swamp', '{U}', '{B}'],
+      [542, 'Breeding Pool', 'Land — Forest Island', '{G}', '{U}'],
+      [547, 'Godless Shrine', 'Land — Plains Swamp', '{W}', '{B}'],
+      [565, 'Steam Vents', 'Land — Island Mountain', '{U}', '{R}'],
+      [569, 'Temple Garden', 'Land — Forest Plains', '{G}', '{W}'],
+      [575, 'Blood Crypt', 'Land — Swamp Mountain', '{B}', '{R}'],
+      [581, 'Hallowed Fountain', 'Land — Plains Island', '{W}', '{U}'],
+      [593, 'Overgrown Tomb', 'Land — Swamp Forest', '{B}', '{G}'],
+      [595, 'Sacred Foundry', 'Land — Mountain Plains', '{R}', '{W}'],
+    ] as const;
+
+    for (const [position, name, typeLine, first, second] of expected) {
+      expect(catalog.cards[position - 1]).toMatchObject({
+        position,
+        name,
+        typeLine,
+        oracleText:
+          `({T}: Add ${first} or ${second}.)\n` +
+          "As this land enters, you may pay 2 life. If you don't, it enters tapped.",
+      });
+    }
+  });
+
+  it('binds both promoted Equipment to their source-attested current Oracle text', () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    expect(catalog.cards[494]).toMatchObject({
+      position: 495,
+      name: 'Grafted Wargear',
+      manaCost: '{3}',
+      typeLine: 'Artifact — Equipment',
+      oracleText:
+        'Equipped creature gets +3/+2.\n' +
+        'Whenever this Equipment becomes unattached from a permanent, sacrifice that permanent.\n' +
+        'Equip {0} ({0}: Attach to target creature you control. Equip only as a sorcery.)',
+    });
+    expect(catalog.cards[515]).toMatchObject({
+      position: 516,
+      name: 'Lightning Greaves',
+      manaCost: '{2}',
+      typeLine: 'Artifact — Equipment',
+      oracleText:
+        "Equipped creature has haste and shroud. (It can't be the target of spells or abilities.)\nEquip {0}",
+    });
+  });
+
+  it('binds Control Magic to its source-attested current Oracle text', () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    expect(catalog.cards[106]).toMatchObject({
+      position: 107,
+      name: 'Control Magic',
+      manaCost: '{2}{U}{U}',
+      typeLine: 'Enchantment — Aura',
+      oracleText: 'Enchant creature\nYou control enchanted creature.',
+    });
+  });
+
+  it('binds Baneslayer Angel to its source-attested current Oracle text', () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    expect(catalog.cards[35]).toMatchObject({
+      position: 36,
+      name: 'Baneslayer Angel',
+      manaCost: '{3}{W}{W}',
+      typeLine: 'Creature — Angel',
+      power: '5',
+      toughness: '5',
+      oracleText: 'Flying, first strike, lifelink, protection from Demons and from Dragons',
+    });
+  });
+
+  it('binds Chart a Course to its source-attested current Oracle text', () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    expect(catalog.cards[127]).toMatchObject({
+      position: 128,
+      name: 'Chart a Course',
+      manaCost: '{1}{U}',
+      typeLine: 'Sorcery',
+      oracleText: 'Draw two cards. Then discard a card unless you attacked this turn.',
+    });
+  });
+
+  it('binds Student of Warfare to its source-attested current Oracle text', () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    expect(catalog.cards[5]).toMatchObject({
+      position: 6,
+      name: 'Student of Warfare',
+      manaCost: '{W}',
+      typeLine: 'Creature — Human Knight',
+      oracleText:
+        'Level up {W} ({W}: Put a level counter on this. Level up only as a sorcery.)\n' +
+        'LEVEL 2-6\n3/3\nFirst strike\nLEVEL 7+\n4/4\nDouble strike',
+    });
+  });
+
+  it('binds Selfless Spirit to its source-attested current Oracle text', () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    expect(catalog.cards[11]).toMatchObject({
+      position: 12,
+      name: 'Selfless Spirit',
+      manaCost: '{1}{W}',
+      typeLine: 'Creature — Spirit Cleric',
+      power: '2',
+      toughness: '1',
+      oracleText:
+        'Flying\nSacrifice this creature: Creatures you control gain indestructible until end of turn.',
+    });
+  });
+
+  it('binds Remorseful Cleric to its source-attested current Oracle text', () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    expect(catalog.cards[9]).toMatchObject({
+      position: 10,
+      name: 'Remorseful Cleric',
+      manaCost: '{1}{W}',
+      typeLine: 'Creature — Spirit Cleric',
+      power: '2',
+      toughness: '1',
+      oracleText: "Flying\nSacrifice this creature: Exile target player's graveyard.",
+    });
+  });
+
+  it('binds Coldsteel Heart to its source-attested current Oracle text', () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    expect(catalog.cards[503]).toMatchObject({
+      position: 504,
+      name: 'Coldsteel Heart',
+      manaCost: '{2}',
+      typeLine: 'Snow Artifact',
+      oracleText:
+        'This artifact enters tapped.\n' +
+        'As this artifact enters, choose a color.\n' +
+        '{T}: Add one mana of the chosen color.',
+    });
+  });
+
+  it("binds Faith's Fetters to its source-attested current Oracle text", () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    expect(catalog.cards[58]).toMatchObject({
+      position: 59,
+      name: "Faith's Fetters",
+      manaCost: '{3}{W}',
+      typeLine: 'Enchantment — Aura',
+      oracleText:
+        'Enchant permanent\n' +
+        'When this Aura enters, you gain 4 life.\n' +
+        "Enchanted permanent can't attack or block, and its activated abilities can't be activated unless they're mana abilities.",
+    });
+  });
+
+  it('binds Fall from Favor to its source-attested current Oracle text', () => {
+    const catalog = loadLegacyCubePrintedCatalog();
+    expect(catalog.cards[159]).toMatchObject({
+      position: 160,
+      name: 'Fall from Favor',
+      manaCost: '{2}{U}',
+      typeLine: 'Enchantment — Aura',
+      oracleText:
+        'Enchant creature\n' +
+        'When this Aura enters, tap enchanted creature and you become the monarch.\n' +
+        "Enchanted creature doesn't untap during its controller's untap step unless that player is the monarch.",
+    });
+  });
+
+  it('gives every closed family a corpus representative and an explicit bridge verdict', () => {
+    expect(ledger.families.map((family) => family.tag)).toEqual(LEGACY_CUBE_DECISION_FAMILIES);
+    for (const family of ledger.families) {
+      expect(family.representativePositions.length).toBeGreaterThan(0);
+      expect(['supported', 'unsupported']).toContain(family.bridgeStatus);
+      for (const position of family.representativePositions) {
+        if (family.scope === 'card') expect(entries[position - 1]?.families).toContain(family.tag);
+      }
+    }
+    expect(ledger.families.filter((family) => family.scope === 'match').map((family) => family.tag)).toEqual([
+      'mulligan',
+      'starting-player',
+    ]);
+    expect(ledger.families.find((family) => family.tag === 'pregame-actions')).toMatchObject({
+      scope: 'card',
+      representativePositions: [444, 455],
+    });
+    expect(ledger.bridgeReview.universalMatchFamilies).toEqual(['mulligan', 'starting-player']);
+    expect(ledger.bridgeReview).toMatchObject({
+      bead: 'mtg-fp4l',
+      capability: 'priority-universal-and-bounded-card-profiles-v133',
+      sessionHumanControlled: false,
+      ordinaryManaPayment: LEGACY_CUBE_ORDINARY_MANA_PAYMENT_AUDIT,
+      generatedTokenScripts: LEGACY_CUBE_GENERATED_TOKEN_AUDIT,
+    });
+    expect(
+      ledger.families.filter((family) => family.bridgeStatus === 'supported').map((family) => family.tag),
+    ).toEqual(['priority', 'mulligan', 'starting-player', 'pregame-actions']);
+    expect(
+      ledger.controllerSurface.abstractCallbacks
+        .filter((callback) => callback.bridgeOwnership === 'wire')
+        .map((callback) => callback.signature.match(/\s([A-Za-z0-9]+)\(/)?.[1])
+        .sort(),
+    ).toEqual([
+      'announceRequirements',
+      'applyManaToCost',
+      'arrangeForScry',
+      'arrangeForSurveil',
+      'assignCombatDamage',
+      'chooseBinary',
+      'chooseCardName',
+      'chooseCardName',
+      'chooseCardsForConvokeOrImprovise',
+      'chooseCardsForCost',
+      'chooseCardsForEffect',
+      'chooseCardsForEffectMultiple',
+      'chooseCardsForSplice',
+      'chooseCardsForZoneChange',
+      'chooseCardsPile',
+      'chooseCardsToDelve',
+      'chooseCardsToDiscardFrom',
+      'chooseCardsToDiscardToMaximumHandSize',
+      'chooseCardsToDiscardUnlessType',
+      'chooseCardsToRevealFromHand',
+      'chooseColor',
+      'chooseColorAllowColorless',
+      'chooseColors',
+      'chooseCounterType',
+      'chooseEntitiesForEffect',
+      'chooseFlipResult',
+      'chooseKeywordForPump',
+      'chooseManaFromPool',
+      'chooseModeForAbility',
+      'chooseNewTargetsFor',
+      'chooseNumber',
+      'chooseNumber',
+      'chooseNumberForCostReduction',
+      'chooseNumberForKeywordCost',
+      'chooseOptionalCosts',
+      'choosePermanentsToDestroy',
+      'choosePermanentsToSacrifice',
+      'choosePlayerToAssistPayment',
+      'chooseProtectionType',
+      'chooseSaToActivateFromOpeningHand',
+      'chooseSector',
+      'chooseSingleCardFace',
+      'chooseSingleCardFace',
+      'chooseSingleCardForZoneChange',
+      'chooseSingleCardState',
+      'chooseSingleEntityForEffect',
+      'chooseSingleReplacementEffect',
+      'chooseSingleSpellForEffect',
+      'chooseSingleStaticAbility',
+      'chooseSomeType',
+      'chooseSpellAbilitiesForEffect',
+      'chooseSpellAbilityToPlay',
+      'chooseStartingPlayer',
+      'chooseTarget',
+      'chooseTargetsFor',
+      'confirmAction',
+      'confirmBidAction',
+      'confirmPayment',
+      'confirmReplacementEffect',
+      'confirmStaticApplication',
+      'confirmTrigger',
+      'declareAttackers',
+      'declareBlockers',
+      'divideShield',
+      'enlistAttackers',
+      'exertAttackers',
+      'getAbilityToPlay',
+      'getCostDecisionMaker',
+      'helpPayForAssistSpell',
+      'mulliganKeepHand',
+      'orderAndPlaySimultaneousSa',
+      'orderAttackers',
+      'orderBlocker',
+      'orderBlockers',
+      'orderCosts',
+      'orderMoveToZoneList',
+      'orderSimultaneousSa',
+      'payCombatCost',
+      'payCostDuringRoll',
+      'payCostToPreventEffect',
+      'payManaCost',
+      'playChosenSpellAbility',
+      'playSaFromPlayEffect',
+      'playTrigger',
+      'specifyManaCombo',
+      'tuckCardsViaMulligan',
+      'vote',
+      'willPutCardOnTop',
+    ]);
+    expect(
+      ledger.controllerSurface.abstractCallbacks.filter((callback) =>
+        callback.signature.includes('payManaCost'),
+      ),
+    ).toEqual([expect.objectContaining({ families: ['mana-x'], bridgeOwnership: 'wire' })]);
+    expect(
+      ledger.controllerSurface.abstractCallbacks.find((callback) =>
+        callback.signature.includes('mulliganKeepHand'),
+      ),
+    ).toMatchObject({ families: ['mulligan'], bridgeOwnership: 'wire' });
+    expect(
+      ledger.controllerSurface.abstractCallbacks.find((callback) =>
+        callback.signature.includes('orderAndPlaySimultaneousSa'),
+      ),
+    ).toMatchObject({ families: ['ordering'], bridgeOwnership: 'wire' });
+    expect(
+      ledger.controllerSurface.abstractCallbacks.find((callback) =>
+        callback.signature.includes('chooseStartingHand'),
+      ),
+    ).toMatchObject({ families: ['mulligan'], bridgeOwnership: 'inherited-ai' });
+    expect(
+      ledger.controllerSurface.abstractCallbacks.find((callback) =>
+        callback.signature.includes('chooseSaToActivateFromOpeningHand'),
+      ),
+    ).toMatchObject({ families: ['pregame-actions'], bridgeOwnership: 'wire' });
+  });
+
+  it('derives each bounded bridge capability profile from recorded runtime evidence', () => {
+    expect(legacyCubeBridgeCardFamilySafeNames(ledger)).toHaveLength(606);
+    expect(legacyCubeBridgeCardFamilySafeNames(ledger)).toEqual(
+      [...legacyCubeBridgeCardFamilySafeNames(ledger)].sort((left, right) => left.localeCompare(right)),
+    );
+    expect(entries.filter((entry) => entry.cardFamilySafe).map((entry) => entry.position)).toEqual(
+      [
+        ...LEGACY_CUBE_PRIORITY_ONLY_SAFE_POSITIONS,
+        ...LEGACY_CUBE_SINGLE_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_SINGLE_STACK_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_SINGLE_ZONE_CARD_SAFE_POSITIONS,
+        ...LEGACY_CUBE_ORDINARY_COMBAT_SAFE_POSITIONS,
+        ...LEGACY_CUBE_ORDINARY_COMBAT_SINGLE_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_VRASKA_GENERATED_TOKEN_SAFE_POSITIONS,
+        ...LEGACY_CUBE_ORDINARY_COMBAT_TRIGGER_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_TRIGGER_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_PALADIN_CLASS_SAFE_POSITIONS,
+        ...LEGACY_CUBE_SHOCKLAND_SAFE_POSITIONS,
+        ...LEGACY_CUBE_EQUIP_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_AURA_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_BANESLAYER_PROTECTION_SAFE_POSITIONS,
+        ...LEGACY_CUBE_CHART_A_COURSE_DISCARD_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_LEVEL_UP_SAFE_POSITIONS,
+        ...LEGACY_CUBE_SELFLESS_SPIRIT_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REMORSEFUL_CLERIC_SAFE_POSITIONS,
+        ...LEGACY_CUBE_COLDSTEEL_HEART_SAFE_POSITIONS,
+        ...LEGACY_CUBE_EXTINCTION_EVENT_SAFE_POSITIONS,
+        ...LEGACY_CUBE_FETTERS_AURA_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_FALL_AURA_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_OPTIONAL_TRIGGER_CONFIRM_SAFE_POSITIONS,
+        ...LEGACY_CUBE_BOUNDED_MULTI_SELECTION_SAFE_POSITIONS,
+        ...LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_ANNOUNCED_NUMBER_SAFE_POSITIONS,
+        ...LEGACY_CUBE_STATED_ORDERING_SAFE_POSITIONS,
+        ...LEGACY_CUBE_STATED_DISTRIBUTION_SAFE_POSITIONS,
+        ...LEGACY_CUBE_STATED_RETARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_OPEN_CARD_NAMING_SAFE_POSITIONS,
+        ...LEGACY_CUBE_DISCARD_OR_SOURCE_SACRIFICE_COST_SAFE_POSITIONS,
+        ...LEGACY_CUBE_GENERATED_OBJECT_SAFE_POSITIONS,
+        ...LEGACY_CUBE_STATED_ORDERING_TRIGGER_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_COUNTER_TYPE_CHOICE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_OPTIONAL_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_PHYREXIAN_SPELL_COST_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_CASCADE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_REPEATABLE_MODE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_MULTIPLE_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_BLESSED_ALLIANCE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_KALITAS_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_URO_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_KROXA_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_MANA_COMBO_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_CRYPTIC_COMMAND_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_PRISMARI_COMMAND_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_ENGINEERED_EXPLOSIVES_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_PHANTASMAL_IMAGE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_RESIDUAL_GENERATED_TOKEN_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_MULTI_TARGET_TRANSFORMATION_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_PLANESWALKER_UNLESS_SACRIFICE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_COPY_SPELL_RETARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_KARN_LIBERATED_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_RATTLECLAW_MYSTIC_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_BARAL_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_UNLESS_COST_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_COUNTER_UNLESS_COST_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_MISCALCULATION_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_MAUL_OF_THE_SKYCLAVES_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_EMBERCLEAVE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_LIVING_WEAPON_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_FORETELL_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_SATYR_WAYFINDER_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_BLUE_LIBRARY_SELECTION_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_GIDEON_GARRUK_BLOODLINE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_HIDEAWAY_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_SWORD_OF_FIRE_AND_ICE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_SWORD_OF_FEAST_AND_FAMINE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_SWORD_OF_LIGHT_AND_SHADOW_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_SWORD_OF_BODY_AND_MIND_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_SWORD_OF_HEARTH_AND_HOME_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_UMEZAWAS_JITTE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_BIRGI_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_BIRTHING_POD_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_RANGER_CAPTAIN_OF_EOS_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_FORBID_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_REVEILLARK_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_BLOODCHIEFS_THIRST_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_PRIMAL_MIGHT_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_REORDER_OR_SHUFFLE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_ANIMATE_DEAD_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_HEARTLESS_ACT_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_HUNTMASTER_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_REMAINING_PLANESWALKER_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_FINAL_SIX_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_AGADEEMS_AWAKENING_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_MODAL_LAND_SPELL_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_CONVOKE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_DELVE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_FREE_COUNTERSPELL_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_LEGIONS_LANDING_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_GILDED_GOOSE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_SKYCLAVE_APPARITION_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_PATH_TO_EXILE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_GLEN_ELENDRA_ARCHMAGE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_RECURRING_NIGHTMARE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_PRIEST_OF_FELL_RITES_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_SMUGGLERS_COPTER_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_CRYPTBREAKER_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_MYR_BATTLESPHERE_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_TREASURE_COHORT_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_CHAMPION_OF_WITS_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_PIA_SIEGE_GANG_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_TREACHERY_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_UTOPIA_SPRAWL_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_SPLINTER_TWIN_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_LINGERING_SOULS_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_OPTIONAL_GENERATED_TOKEN_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_GLORYBRINGER_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_GRIM_LAVAMANCER_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_GIFTS_UNGIVEN_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_COMPANION_SAFE_POSITIONS,
+        ...LEGACY_CUBE_ALTERNATE_COST_SAFE_POSITIONS,
+        ...LEGACY_CUBE_OPTIONAL_DECIDER_YOU_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_SAFE_POSITIONS,
+        ...LEGACY_CUBE_ALTERNATE_MODE_SAFE_POSITIONS,
+      ]
+        .filter(
+          (position) =>
+            !new Set<number>(LEGACY_CUBE_CHOSEN_COST_PAYMENT_REFUSED_POSITIONS).has(position) ||
+            new Set<number>([
+              ...LEGACY_CUBE_REVIEWED_GILDED_GOOSE_SAFE_POSITIONS,
+              ...LEGACY_CUBE_REVIEWED_CONVOKE_SAFE_POSITIONS,
+              ...LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_SAFE_POSITIONS,
+              ...LEGACY_CUBE_REVIEWED_KALITAS_SAFE_POSITIONS,
+              ...LEGACY_CUBE_REVIEWED_FINAL_SIX_SAFE_POSITIONS,
+            ]).has(position),
+        )
+        .sort((left, right) => left - right),
+    );
+    expect(ledger.auditedCards.filter((entry) => entry.cardFamilySafe)).toHaveLength(606);
+    expect(entries.filter((entry) => entry.cardFamilySafe)).toHaveLength(600);
+    expect(ledger.bridgeReview.sessionHumanControlled).toBe(false);
+    expect(LEGACY_CUBE_REVIEWED_HUNTMASTER_COHORTS).toEqual([
+      {
+        families: ['priority', 'targets', 'optional-costs', 'combat'],
+        positions: [417],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_HUNTMASTER_PROBE.id),
+    ).toMatchObject({
+      position: null,
+      correctedName: null,
+      cardNames: ['Huntmaster of the Fells'],
+      families: ['priority', 'targets', 'optional-costs', 'combat'],
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_REMAINING_PLANESWALKER_COHORTS).toEqual([
+      {
+        positions: [3],
+        families: ['priority', 'targets', 'optional-costs', 'combat'],
+        generatedObjects: 'none',
+      },
+      {
+        positions: [86],
+        families: ['priority', 'targets', 'optional-costs', 'zone-card-selection', 'combat'],
+        generatedObjects: 'none',
+      },
+      {
+        positions: [303],
+        families: ['priority', 'targets', 'combat', 'replacement-trigger-choices'],
+        generatedObjects: 'pinned-token-scripts-v1',
+      },
+      {
+        positions: [378],
+        families: [
+          'priority',
+          'targets',
+          'optional-costs',
+          'zone-card-selection',
+          'combat',
+          'replacement-trigger-choices',
+        ],
+        generatedObjects: 'pinned-token-scripts-v1',
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_REMAINING_PLANESWALKER_PROBE.id),
+    ).toMatchObject({
+      position: null,
+      correctedName: null,
+      cardNames: [
+        'Kytheon, Hero of Akros',
+        "Jace, Vryn's Prodigy",
+        'Chandra, Acolyte of Flame',
+        'Nissa, Vastwood Seer',
+      ],
+      families: [
+        'priority',
+        'targets',
+        'optional-costs',
+        'zone-card-selection',
+        'combat',
+        'replacement-trigger-choices',
+      ],
+      outcome: 'completed',
+    });
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_CHAMPION_OF_WITS_PROBE.id),
+    ).toMatchObject({
+      position: 95,
+      correctedName: 'Champion of Wits',
+      cardNames: ['Champion of Wits'],
+      families: ['priority', 'optional-costs', 'mana-x', 'zone-card-selection', 'combat'],
+      outcome: 'completed',
+    });
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_MULTI_TARGET_TRANSFORMATION_PROBE.id,
+      ),
+    ).toMatchObject({
+      cardNames: ['Terastodon', 'Oko, Thief of Crowns', 'Saheeli, Sublime Artificer'],
+      families: ['priority', 'targets', 'combat'],
+      outcome: 'completed',
+    });
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_PLANESWALKER_UNLESS_SACRIFICE_PROBE.id,
+      ),
+    ).toMatchObject({
+      cardNames: ['Garruk Relentless', 'Daretti, Ingenious Iconoclast', 'Grist, the Hunger Tide'],
+      families: ['priority', 'targets', 'optional-costs', 'zone-card-selection', 'combat'],
+      outcome: 'completed',
+    });
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_COPY_SPELL_RETARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Malicious Affliction', 'Chain Lightning'],
+      families: ['priority', 'targets', 'optional-costs', 'replacement-trigger-choices'],
+      outcome: 'completed',
+    });
+    expect(ledger.runtimeProbes.find((probe) => probe.outcome === 'completed')).toMatchObject({
+      id: 'mtg-bc2.151.11-observed-priority-and-universal-match',
+      families: ['priority', 'mulligan', 'starting-player'],
+      outcome: 'completed',
+    });
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_PRIORITY_ONLY_PROBE.id),
+    ).toMatchObject({
+      cardNames: expect.arrayContaining(['Honor of the Pure', 'Woodland Cemetery']),
+      families: ['priority'],
+      outcome: 'completed',
+    });
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_SINGLE_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: expect.arrayContaining(['Condemn', 'Vindicate', 'Rishadan Port']),
+      families: ['priority', 'targets'],
+      outcome: 'completed',
+    });
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_STATED_ORDERING_TRIGGER_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: [
+        'Elite Spellbinder',
+        'Kitesail Freebooter',
+        'Archon of Cruelty',
+        'Sheoldred, Whispering One',
+        'Ulamog, the Infinite Gyre',
+      ],
+      families: ['priority', 'targets', 'zone-card-selection', 'combat'],
+      outcome: 'completed',
+    });
+    expect(
+      LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_COHORTS.flatMap((cohort) => cohort.positions).sort(
+        (left, right) => left - right,
+      ),
+    ).toEqual(LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_SAFE_POSITIONS);
+    expect(LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_SAFE_POSITIONS).toEqual([
+      28, 38, 54, 57, 92, 100, 104, 110, 114, 117, 118, 174, 179, 184, 191, 192, 218, 266, 305, 320, 323, 346,
+      406, 407, 409, 416, 421, 448, 460, 484, 485, 526,
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: [
+        'Restoration Angel',
+        'Sun Titan',
+        'Solitude',
+        'Cast Out',
+        'Stratus Dancer',
+        'Pestermite',
+        'Vendilion Clique',
+        'Venser, Shaper Savant',
+        'Riftwing Cloudskate',
+        'Frost Titan',
+        'Torrential Gearhulk',
+        'Bone Shredder',
+        'Gatekeeper of Malakir',
+        'Gonti, Lord of Luxury',
+        'Shriekmaw',
+        'Cavalier of Night',
+        'Necromancy',
+        'Flametongue Yearling',
+        'Outpost Siege',
+        'Chandra, Torch of Defiance',
+        'Avalanche Riders',
+        'Reclamation Sage',
+        'Eternal Witness',
+        'Den Protector',
+        'Zareth San, the Trickster',
+        'Klothys, God of Destiny',
+        'Tidehollow Sculler',
+        'Teferi, Hero of Dominaria',
+        'Showdown of the Skalds',
+        'Ulamog, the Ceaseless Hunger',
+        'Emrakul, the Promised End',
+        'Duplicant',
+      ],
+      families: LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-trigger-target-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_COUNTER_TYPE_CHOICE_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_COUNTER_TYPE_CHOICE_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_COUNTER_TYPE_CHOICE_SAFE_POSITIONS).toEqual([71]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_COUNTER_TYPE_CHOICE_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Elspeth Conquers Death'],
+      families: LEGACY_CUBE_REVIEWED_COUNTER_TYPE_CHOICE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(
+      LEGACY_CUBE_REVIEWED_OPTIONAL_TARGET_COHORTS.flatMap((cohort) => cohort.positions).sort(
+        (left, right) => left - right,
+      ),
+    ).toEqual(LEGACY_CUBE_REVIEWED_OPTIONAL_TARGET_SAFE_POSITIONS);
+    expect(LEGACY_CUBE_REVIEWED_OPTIONAL_TARGET_SAFE_POSITIONS).toEqual([387, 445]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_OPTIONAL_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Nissa, Who Shakes the World', 'Teferi, Time Raveler'],
+      families: LEGACY_CUBE_REVIEWED_OPTIONAL_TARGET_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(
+      LEGACY_CUBE_REVIEWED_PHYREXIAN_SPELL_COST_COHORTS.flatMap((cohort) => cohort.positions).sort(
+        (left, right) => left - right,
+      ),
+    ).toEqual(LEGACY_CUBE_REVIEWED_PHYREXIAN_SPELL_COST_SAFE_POSITIONS);
+    expect(LEGACY_CUBE_REVIEWED_PHYREXIAN_SPELL_COST_SAFE_POSITIONS).toEqual([474, 493]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_PHYREXIAN_SPELL_COST_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Dismember', 'Porcelain Legionnaire'],
+      families: LEGACY_CUBE_REVIEWED_PHYREXIAN_SPELL_COST_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_CASCADE_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_CASCADE_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_CASCADE_SAFE_POSITIONS).toEqual([415, 427]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_CASCADE_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Bloodbraid Elf', 'Shardless Agent'],
+      families: LEGACY_CUBE_REVIEWED_CASCADE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_REPEATABLE_MODE_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_REPEATABLE_MODE_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_REPEATABLE_MODE_SAFE_POSITIONS).toEqual([151, 238, 307]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_REPEATABLE_MODE_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Mystic Confluence', 'Wretched Confluence', 'Fiery Confluence'],
+      families: LEGACY_CUBE_REVIEWED_REPEATABLE_MODE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_MULTIPLE_TARGET_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_MULTIPLE_TARGET_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_MULTIPLE_TARGET_SAFE_POSITIONS).toEqual([402]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_MULTIPLE_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Plow Under'],
+      families: LEGACY_CUBE_REVIEWED_MULTIPLE_TARGET_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_MANA_COMBO_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_MANA_COMBO_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_MANA_COMBO_SAFE_POSITIONS).toEqual([507]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_MANA_COMBO_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Coalition Relic'],
+      families: LEGACY_CUBE_REVIEWED_MANA_COMBO_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_CRYPTIC_COMMAND_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_CRYPTIC_COMMAND_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_CRYPTIC_COMMAND_SAFE_POSITIONS).toEqual([149]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_CRYPTIC_COMMAND_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Cryptic Command'],
+      families: LEGACY_CUBE_REVIEWED_CRYPTIC_COMMAND_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_PRISMARI_COMMAND_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_PRISMARI_COMMAND_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_PRISMARI_COMMAND_SAFE_POSITIONS).toEqual([434]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_PRISMARI_COMMAND_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Prismari Command'],
+      families: LEGACY_CUBE_REVIEWED_PRISMARI_COMMAND_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_BLESSED_ALLIANCE_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_BLESSED_ALLIANCE_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_BLESSED_ALLIANCE_SAFE_POSITIONS).toEqual([80]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_BLESSED_ALLIANCE_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Blessed Alliance'],
+      families: LEGACY_CUBE_REVIEWED_BLESSED_ALLIANCE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_KALITAS_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_KALITAS_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_KALITAS_SAFE_POSITIONS).toEqual([186]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_KALITAS_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Kalitas, Traitor of Ghet'],
+      families: LEGACY_CUBE_REVIEWED_KALITAS_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[185]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-kalitas-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'pinned-token-scripts-v1',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_KALITAS_PROBE.id,
+      generatedScriptDependencies: [expect.objectContaining({ name: 'b_2_2_zombie' })],
+    });
+    expect(LEGACY_CUBE_REVIEWED_PHANTASMAL_IMAGE_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_PHANTASMAL_IMAGE_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_PHANTASMAL_IMAGE_SAFE_POSITIONS).toEqual([89]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_PHANTASMAL_IMAGE_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Phantasmal Image'],
+      families: LEGACY_CUBE_REVIEWED_PHANTASMAL_IMAGE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_SAFE_POSITIONS).toEqual([82, 458]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Delver of Secrets', 'Velomachus Lorehold'],
+      families: LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-peek-and-reveal-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_PEEK_AND_REVEAL_PROBE.id,
+      });
+    }
+    expect(
+      LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_COHORTS.flatMap((cohort) => cohort.positions),
+    ).toEqual(LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_SAFE_POSITIONS);
+    expect(LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_SAFE_POSITIONS).toEqual([430, 479, 518]);
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_PROBE.id,
+      ),
+    ).toMatchObject({
+      cardNames: ['Koma, Cosmos Serpent', 'Retrofitter Foundry', 'Treasure Map'],
+      families: LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-generated-token-sacrifice-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'pinned-token-scripts-v1',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_GENERATED_TOKEN_SACRIFICE_PROBE.id,
+      });
+      expect(entries[position - 1]?.generatedScriptDependencies.length).toBeGreaterThan(0);
+    }
+    expect(
+      LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_COHORTS.flatMap((cohort) => cohort.positions),
+    ).toEqual(LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_SAFE_POSITIONS);
+    expect(LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_SAFE_POSITIONS).toEqual([181, 345, 389]);
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_PROBE.id,
+      ),
+    ).toMatchObject({
+      cardNames: ['Liliana, the Last Hope', 'Ranger Class', "Vivien, Monsters' Advocate"],
+      families: LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-generated-object-bounded-choice-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'pinned-token-scripts-v1',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_GENERATED_OBJECT_BOUNDED_CHOICE_PROBE.id,
+      });
+      expect(entries[position - 1]?.generatedScriptDependencies.length).toBeGreaterThan(0);
+    }
+    expect(
+      LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_COHORTS.flatMap((cohort) => cohort.positions),
+    ).toEqual(LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_SAFE_POSITIONS);
+    expect(LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_SAFE_POSITIONS).toEqual([132, 254]);
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_PROBE.id,
+      ),
+    ).toMatchObject({
+      cardNames: ['Shark Typhoon', 'Ragavan, Nimble Pilferer'],
+      families: LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-alternate-cost-generated-object-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'pinned-token-scripts-v1',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_ALTERNATE_COST_GENERATED_OBJECT_PROBE.id,
+      });
+      expect(entries[position - 1]?.generatedScriptDependencies.length).toBeGreaterThan(0);
+    }
+    expect(
+      LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_COHORTS.flatMap((cohort) => cohort.positions),
+    ).toEqual(LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_SAFE_POSITIONS);
+    expect(LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_SAFE_POSITIONS).toEqual([97, 496]);
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_PROBE.id,
+      ),
+    ).toMatchObject({
+      cardNames: ['Glasspool Mimic', 'Phyrexian Metamorph'],
+      families: LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[96]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-optional-copy-replacement-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_PROBE.id,
+    });
+    expect(entries[495]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-optional-copy-replacement-v1',
+        manaPayment: 'phyrexian-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_OPTIONAL_COPY_REPLACEMENT_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_KARN_LIBERATED_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_KARN_LIBERATED_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_KARN_LIBERATED_SAFE_POSITIONS).toEqual([481]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_KARN_LIBERATED_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Karn Liberated'],
+      families: LEGACY_CUBE_REVIEWED_KARN_LIBERATED_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_RATTLECLAW_MYSTIC_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_RATTLECLAW_MYSTIC_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_RATTLECLAW_MYSTIC_SAFE_POSITIONS).toEqual([337]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_RATTLECLAW_MYSTIC_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Rattleclaw Mystic'],
+      families: LEGACY_CUBE_REVIEWED_RATTLECLAW_MYSTIC_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_SAFE_POSITIONS).toEqual([274]);
+    expect(LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_EXCLUDED_POSITIONS).toEqual([]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Lightning Phoenix'],
+      families: LEGACY_CUBE_REVIEWED_LIGHTNING_PHOENIX_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_BARAL_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_BARAL_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_BARAL_SAFE_POSITIONS).toEqual([85]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_BARAL_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Baral, Chief of Compliance'],
+      families: LEGACY_CUBE_REVIEWED_BARAL_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(
+      LEGACY_CUBE_REVIEWED_UNLESS_COST_COHORTS.flatMap((cohort) => cohort.positions).sort(
+        (left, right) => left - right,
+      ),
+    ).toEqual(LEGACY_CUBE_REVIEWED_UNLESS_COST_SAFE_POSITIONS);
+    expect(LEGACY_CUBE_REVIEWED_UNLESS_COST_SAFE_POSITIONS).toEqual([11, 461]);
+    expect(LEGACY_CUBE_REVIEWED_UNLESS_COST_EXCLUDED_POSITIONS).toEqual([]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_UNLESS_COST_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Esper Sentinel', 'Nahiri, the Harbinger'],
+      families: LEGACY_CUBE_REVIEWED_UNLESS_COST_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_GLORYBRINGER_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_GLORYBRINGER_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_GLORYBRINGER_SAFE_POSITIONS).toEqual([273]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_GLORYBRINGER_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Glorybringer'],
+      families: LEGACY_CUBE_REVIEWED_GLORYBRINGER_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_REVIEWED_GRIM_LAVAMANCER_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_GRIM_LAVAMANCER_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_GRIM_LAVAMANCER_SAFE_POSITIONS).toEqual([246]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_GRIM_LAVAMANCER_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Grim Lavamancer'],
+      families: LEGACY_CUBE_REVIEWED_GRIM_LAVAMANCER_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[245]).toMatchObject({
+      correctedName: 'Grim Lavamancer',
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-grim-lavamancer-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_GRIM_LAVAMANCER_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_GIFTS_UNGIVEN_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_GIFTS_UNGIVEN_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_GIFTS_UNGIVEN_SAFE_POSITIONS).toEqual([158]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_GIFTS_UNGIVEN_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Gifts Ungiven'],
+      families: LEGACY_CUBE_REVIEWED_GIFTS_UNGIVEN_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[157]).toMatchObject({
+      correctedName: 'Gifts Ungiven',
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-gifts-ungiven-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_GIFTS_UNGIVEN_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_SAFE_POSITIONS).toEqual([223]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Liliana of the Veil'],
+      families: LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[222]).toMatchObject({
+      correctedName: 'Liliana of the Veil',
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-liliana-two-piles-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_SAFE_POSITIONS).toEqual([144]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_PROBE.id),
+    ).toMatchObject({
+      position: 144,
+      correctedName: 'Fact or Fiction',
+      cardNames: ['Fact or Fiction'],
+      families: LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[143]).toMatchObject({
+      correctedName: 'Fact or Fiction',
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-fact-or-fiction-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_COMPANION_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_COMPANION_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_COMPANION_SAFE_POSITIONS).toEqual([444, 455]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_YORION_COMPANION_PROBE.id),
+    ).toMatchObject({
+      position: 444,
+      cardNames: ['Yorion, Sky Nomad'],
+      families: LEGACY_CUBE_REVIEWED_YORION_COMPANION_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_OBOSH_COMPANION_PROBE.id),
+    ).toMatchObject({
+      position: 455,
+      cardNames: ['Obosh, the Preypiercer'],
+      families: LEGACY_CUBE_REVIEWED_OBOSH_COMPANION_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[443]).toMatchObject({
+      correctedName: 'Yorion, Sky Nomad',
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-companion-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_YORION_COMPANION_PROBE.id,
+    });
+    expect(entries[454]).toMatchObject({
+      correctedName: 'Obosh, the Preypiercer',
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-companion-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_OBOSH_COMPANION_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_COUNTER_UNLESS_COST_COHORTS.flatMap((cohort) => cohort.positions)).toEqual(
+      LEGACY_CUBE_REVIEWED_COUNTER_UNLESS_COST_SAFE_POSITIONS,
+    );
+    expect(LEGACY_CUBE_REVIEWED_COUNTER_UNLESS_COST_SAFE_POSITIONS).toEqual([42, 122, 131, 140]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_COUNTER_UNLESS_COST_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Mana Tithe', 'Pact of Negation', 'Mana Leak', 'Supreme Will'],
+      families: LEGACY_CUBE_REVIEWED_COUNTER_UNLESS_COST_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const [position, name] of [
+      [42, 'Mana Tithe'],
+      [122, 'Pact of Negation'],
+      [131, 'Mana Leak'],
+      [140, 'Supreme Will'],
+    ] as const) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: name,
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-counter-unless-cost-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_COUNTER_UNLESS_COST_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_SATYR_WAYFINDER_COHORTS).toEqual([
+      {
+        positions: [341],
+        families: ['priority', 'zone-card-selection', 'combat', 'replacement-trigger-choices'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_SATYR_WAYFINDER_PROBE.id),
+    ).toMatchObject({
+      position: 341,
+      cardNames: ['Satyr Wayfinder'],
+      families: LEGACY_CUBE_REVIEWED_SATYR_WAYFINDER_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[340]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-satyr-wayfinder-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_SATYR_WAYFINDER_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_GIDEON_GARRUK_BLOODLINE_COHORTS).toEqual([
+      {
+        positions: [25],
+        families: ['priority', 'targets', 'naming-text-numbers'],
+      },
+      { positions: [194], families: ['priority', 'optional-costs', 'combat'] },
+      { positions: [384], families: ['priority', 'targets', 'combat'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_GIDEON_GARRUK_BLOODLINE_PROBE.id,
+      ),
+    ).toMatchObject({
+      position: 25,
+      cardNames: ['Gideon Blackblade', 'Bloodline Keeper', 'Garruk Wildspeaker'],
+      families: LEGACY_CUBE_REVIEWED_GIDEON_GARRUK_BLOODLINE_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const [position, name, generatedObjects] of [
+      [25, 'Gideon Blackblade', 'none'],
+      [194, 'Bloodline Keeper', 'pinned-token-scripts-v1'],
+      [384, 'Garruk Wildspeaker', 'pinned-token-scripts-v1'],
+    ] as const) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: name,
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-gideon-garruk-bloodline-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects,
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_GIDEON_GARRUK_BLOODLINE_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_HIDEAWAY_COHORTS).toEqual([
+      {
+        positions: [79, 120],
+        families: ['priority', 'zone-card-selection', 'replacement-trigger-choices'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_HIDEAWAY_PROBE.id),
+    ).toMatchObject({
+      position: 79,
+      cardNames: ['Windbrisk Heights', 'Shelldock Isle'],
+      families: LEGACY_CUBE_REVIEWED_HIDEAWAY_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const [position, name] of [
+      [79, 'Windbrisk Heights'],
+      [120, 'Shelldock Isle'],
+    ] as const) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: name,
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-hideaway-four-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_HIDEAWAY_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_ALTERNATE_COST_SAFE_POSITIONS).toHaveLength(30);
+    expect(LEGACY_CUBE_ALTERNATE_COST_EXCLUDED_POSITIONS).toHaveLength(13);
+    expect(
+      LEGACY_CUBE_ALTERNATE_COST_COHORTS.flatMap((cohort) => cohort.positions).sort(
+        (left, right) => left - right,
+      ),
+    ).toEqual(LEGACY_CUBE_ALTERNATE_COST_SAFE_POSITIONS);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_ALTERNATE_COST_PROBE.id),
+    ).toMatchObject({
+      cardNames: [
+        'Timeless Dragon',
+        'Terminus',
+        'Mulldrifter',
+        'Ancestral Vision',
+        'Cyclonic Rift',
+        'Into the Roil',
+        'Temporal Mastery',
+        'Skyclave Shade',
+        'Dread Return',
+        'Unburial Rites',
+        'Collective Brutality',
+        'Zurgo Bellstriker',
+        'Burst Lightning',
+        'Faithless Looting',
+        'Firebolt',
+        'Shivan Fire',
+        'Ancient Grudge',
+        'Collective Defiance',
+        'Through the Breach',
+        'Roil Eruption',
+        "Devil's Play",
+        'Bonfire of the Damned',
+        'Rift Bolt',
+        'Sweltering Suns',
+        'Search for Tomorrow',
+        'Tooth and Nail',
+        'Rift Sower',
+        'Fallen Shinobi',
+        'Damn',
+        'Everflowing Chalice',
+      ],
+      families: LEGACY_CUBE_ALTERNATE_COST_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_ALTERNATE_COST_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-alternate-cost-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_ALTERNATE_COST_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_KROXA_SAFE_POSITIONS).toEqual([453]);
+    expect(entries[452]).toMatchObject({
+      correctedName: "Kroxa, Titan of Death's Hunger",
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-kroxa-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_KROXA_PROBE.id,
+    });
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_KROXA_PROBE.id),
+    ).toMatchObject({
+      cardNames: ["Kroxa, Titan of Death's Hunger"],
+      families: LEGACY_CUBE_REVIEWED_KROXA_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_TITAN_ESCAPE_COST_PROBE.id),
+    ).toMatchObject({
+      cardNames: ["Uro, Titan of Nature's Wrath", "Kroxa, Titan of Death's Hunger"],
+      families: LEGACY_CUBE_REVIEWED_TITAN_ESCAPE_COST_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(LEGACY_CUBE_OPTIONAL_DECIDER_YOU_SAFE_POSITIONS).toHaveLength(6);
+    expect(LEGACY_CUBE_OPTIONAL_DECIDER_YOU_EXCLUDED_POSITIONS).toHaveLength(17);
+    expect(LEGACY_CUBE_OPTIONAL_DECIDER_YOU_PREEXISTING_SAFE_POSITIONS).toEqual([116, 171, 426]);
+    expect(
+      LEGACY_CUBE_OPTIONAL_DECIDER_YOU_COHORTS.flatMap((cohort) => cohort.positions).sort(
+        (left, right) => left - right,
+      ),
+    ).toEqual(LEGACY_CUBE_OPTIONAL_DECIDER_YOU_SAFE_POSITIONS);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_OPTIONAL_DECIDER_YOU_PROBE.id),
+    ).toMatchObject({
+      cardNames: [
+        'Recruiter of the Guard',
+        'Spellseeker',
+        'Tamiyo, the Moon Sage',
+        'Ilharg, the Raze-Boar',
+        'Court of Bounty',
+        'Mimic Vat',
+      ],
+      families: LEGACY_CUBE_OPTIONAL_DECIDER_YOU_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_OPTIONAL_DECIDER_YOU_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-optional-decider-you-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_OPTIONAL_DECIDER_YOU_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_SAFE_POSITIONS).toEqual([13, 41, 363, 488, 519]);
+    expect(LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_EXCLUDED_POSITIONS).toEqual([26, 378]);
+    expect(
+      LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_COHORTS.flatMap((cohort) => cohort.positions).sort(
+        (left, right) => left - right,
+      ),
+    ).toEqual(LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_SAFE_POSITIONS);
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_PROBE.id,
+      ),
+    ).toMatchObject({
+      cardNames: [
+        'Stoneforge Mystic',
+        'Land Tax',
+        'Primeval Titan',
+        'Solemn Simulacrum',
+        'Golos, Tireless Pilgrim',
+      ],
+      families: LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-optional-library-search-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_OPTIONAL_LIBRARY_SEARCH_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_ALTERNATE_MODE_SAFE_POSITIONS).toHaveLength(8);
+    expect(LEGACY_CUBE_ALTERNATE_MODE_EXCLUDED_POSITIONS).toHaveLength(14);
+    expect(
+      LEGACY_CUBE_ALTERNATE_MODE_COHORTS.flatMap((cohort) => cohort.positions).sort(
+        (left, right) => left - right,
+      ),
+    ).toEqual(LEGACY_CUBE_ALTERNATE_MODE_SAFE_POSITIONS);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_ALTERNATE_MODE_PROBE.id),
+    ).toMatchObject({
+      cardNames: [
+        'Archangel Avacyn',
+        'Thing in the Ice',
+        'Brazen Borrower',
+        'Valki, God of Lies',
+        'Murderous Rider',
+        'Embereth Shieldbreaker',
+        'Bonecrusher Giant',
+        'Tangled Florahedron',
+      ],
+      families: LEGACY_CUBE_ALTERNATE_MODE_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_ALTERNATE_MODE_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-alternate-mode-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_ALTERNATE_MODE_PROBE.id,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_SINGLE_STACK_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Negate', 'Remand', 'Remove Soul', 'Counterspell'],
+      families: ['priority', 'targets'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_SINGLE_STACK_TARGET_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'singleton-stack-target-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+        },
+        runtimeProbeId: LEGACY_CUBE_SINGLE_STACK_TARGET_PROBE.id,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_SINGLE_ZONE_CARD_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Entomb', 'Farseek', 'Rampant Growth'],
+      families: ['priority', 'zone-card-selection'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_SINGLE_ZONE_CARD_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'singleton-library-zone-card-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+        },
+        runtimeProbeId: LEGACY_CUBE_SINGLE_ZONE_CARD_PROBE.id,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_ORDINARY_COMBAT_PROBE.id),
+    ).toMatchObject({
+      cardNames: expect.arrayContaining(['Monastery Swiftspear', 'Noble Hierarch', 'Wurmcoil Engine']),
+      families: ['priority', 'combat'],
+      outcome: 'completed',
+    });
+    const chosenCostRefused = new Set<number>(LEGACY_CUBE_CHOSEN_COST_PAYMENT_REFUSED_POSITIONS);
+    for (const position of LEGACY_CUBE_ORDINARY_COMBAT_SAFE_POSITIONS.filter(
+      (candidate) => !chosenCostRefused.has(candidate),
+    )) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'ordinary-combat-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+        },
+        runtimeProbeId: LEGACY_CUBE_ORDINARY_COMBAT_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_CHOSEN_COST_PAYMENT_REFUSED_POSITIONS).toEqual([]);
+    for (const position of LEGACY_CUBE_CHOSEN_COST_PAYMENT_REFUSED_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: false,
+        bridgeCapabilityProfile: null,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_ORDINARY_COMBAT_SINGLE_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: [
+        'Elspeth, Knight-Errant',
+        'Gideon Jura',
+        'Whip of Erebos',
+        'Kiki-Jiki, Mirror Breaker',
+        'Arbor Elf',
+        'Scavenging Ooze',
+        'Beast Within',
+        "Mishra's Factory",
+      ],
+      families: ['priority', 'targets', 'combat'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_ORDINARY_COMBAT_SINGLE_TARGET_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'ordinary-combat-and-mandatory-singleton-nonstack-target-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+        },
+        runtimeProbeId: LEGACY_CUBE_ORDINARY_COMBAT_SINGLE_TARGET_PROBE.id,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_ORDINARY_COMBAT_TRIGGER_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: [
+        'Luminarch Aspirant',
+        'Flickerwisp',
+        'Snapcaster Mage',
+        "Man-o'-War",
+        'Sower of Temptation',
+        "Geralf's Messenger",
+        'Nekrataal',
+        'Ravenous Chupacabra',
+        'Zealous Conscripts',
+        'Questing Beast',
+        'Acidic Slime',
+        'Woodfall Primus',
+        'Dragonlord Silumgar',
+        'Niv-Mizzet, Parun',
+      ],
+      families: ['priority', 'targets', 'combat'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_ORDINARY_COMBAT_TRIGGER_TARGET_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'ordinary-combat-and-mandatory-singleton-trigger-target-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_ORDINARY_COMBAT_TRIGGER_TARGET_PROBE.id,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_TRIGGER_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Journey to Nowhere', 'Banishing Light', 'Oblivion Ring'],
+      families: ['priority', 'targets'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_TRIGGER_TARGET_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'mandatory-singleton-trigger-target-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_TRIGGER_TARGET_PROBE.id,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_PALADIN_CLASS_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Paladin Class'],
+      families: ['priority', 'targets'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_PALADIN_CLASS_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'paladin-class-installed-trigger-target-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_PALADIN_CLASS_PROBE.id,
+      });
+    }
+    expect(ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_SHOCKLAND_PROBE.id)).toMatchObject({
+      cardNames: [
+        'Stomping Ground',
+        'Watery Grave',
+        'Breeding Pool',
+        'Godless Shrine',
+        'Steam Vents',
+        'Temple Garden',
+        'Blood Crypt',
+        'Hallowed Fountain',
+        'Overgrown Tomb',
+        'Sacred Foundry',
+      ],
+      families: ['priority', 'optional-costs'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_SHOCKLAND_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'shockland-pay-two-life-entry-replacement-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_SHOCKLAND_PROBE.id,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_EQUIP_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Grafted Wargear', 'Lightning Greaves'],
+      families: ['priority', 'targets'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_EQUIP_TARGET_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'mandatory-singleton-equip-target-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_EQUIP_TARGET_PROBE.id,
+      });
+    }
+    expect(ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_AURA_TARGET_PROBE.id)).toMatchObject(
+      {
+        cardNames: ['Control Magic'],
+        families: ['priority', 'targets'],
+        outcome: 'completed',
+      },
+    );
+    for (const position of LEGACY_CUBE_AURA_TARGET_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: 'Control Magic',
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'mandatory-singleton-aura-target-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_AURA_TARGET_PROBE.id,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_FETTERS_AURA_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: ["Faith's Fetters"],
+      families: ['priority', 'targets'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_FETTERS_AURA_TARGET_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: "Faith's Fetters",
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'mandatory-singleton-fetters-aura-target-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_FETTERS_AURA_TARGET_PROBE.id,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_FALL_AURA_TARGET_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Fall from Favor'],
+      families: ['priority', 'targets'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_FALL_AURA_TARGET_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: 'Fall from Favor',
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'mandatory-singleton-fall-aura-target-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_FALL_AURA_TARGET_PROBE.id,
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_BANESLAYER_PROTECTION_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Baneslayer Angel'],
+      families: ['priority', 'combat', 'naming-text-numbers'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_BANESLAYER_PROTECTION_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: 'Baneslayer Angel',
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'ordinary-combat-baneslayer-protection-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_BANESLAYER_PROTECTION_PROBE.id,
+      });
+    }
+    expect(
+      [
+        ...LEGACY_CUBE_BANESLAYER_PROTECTION_SAFE_POSITIONS,
+        ...LEGACY_CUBE_BANESLAYER_PROTECTION_EXCLUDED_POSITIONS,
+      ].sort((left, right) => left - right),
+    ).toEqual(
+      entries
+        .filter(
+          (entry) =>
+            JSON.stringify(entry.families) === JSON.stringify(['priority', 'combat', 'naming-text-numbers']),
+        )
+        .map((entry) => entry.position),
+    );
+    // All four refused positions were later admitted under other profiles: phase
+    // 3 wires the choose-one callbacks the protection and card-type choices of
+    // three of them reach rather than fixing the quality the way this profile
+    // does, and phase 8 wires the name the fourth takes out of every card ever
+    // printed. What survives is the assertion this list is for: the Baneslayer
+    // profile itself reaches exactly its own positions, and none of the four
+    // carries it.
+    const boundedEnumeratedChoice = new Set<number>(LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_SAFE_POSITIONS);
+    const openCardNaming = new Set<number>(LEGACY_CUBE_OPEN_CARD_NAMING_SAFE_POSITIONS);
+    for (const position of LEGACY_CUBE_BANESLAYER_PROTECTION_EXCLUDED_POSITIONS) {
+      const topLevel = boundedEnumeratedChoice.has(position)
+        ? 'bounded-enumerated-choice-v1'
+        : openCardNaming.has(position)
+          ? 'open-card-naming-v1'
+          : null;
+      expect(entries[position - 1]).toMatchObject(
+        topLevel === null
+          ? { cardFamilySafe: false, bridgeCapabilityProfile: null }
+          : { cardFamilySafe: true, bridgeCapabilityProfile: { topLevel } },
+      );
+    }
+    expect(
+      LEGACY_CUBE_BANESLAYER_PROTECTION_EXCLUDED_POSITIONS.filter((position) =>
+        boundedEnumeratedChoice.has(position),
+      ),
+    ).toEqual([22, 66, 76]);
+    expect(
+      LEGACY_CUBE_BANESLAYER_PROTECTION_EXCLUDED_POSITIONS.filter((position) => openCardNaming.has(position)),
+    ).toEqual([491]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_CHART_A_COURSE_DISCARD_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Chart a Course'],
+      families: ['priority', 'zone-card-selection'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_CHART_A_COURSE_DISCARD_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: 'Chart a Course',
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'draw-two-conditional-singleton-discard-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_CHART_A_COURSE_DISCARD_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_CHART_A_COURSE_DISCARD_EXCLUDED_POSITIONS).toEqual([
+      85, 86, 87, 88, 95, 138, 141, 145, 172, 189, 196, 223, 253, 284, 433, 434, 450, 453, 471, 478, 517,
+    ]);
+    // Several refused positions were later admitted by wider exact profiles,
+    // which read the same scripts under their own refusal predicates. The
+    // assertion that survives is the one this list is for: the Chart a Course
+    // profile itself reaches exactly one position.
+    const boundedMultiSelection = new Set<number>(LEGACY_CUBE_BOUNDED_MULTI_SELECTION_SAFE_POSITIONS);
+    const statedOrderingTriggerTarget = new Set<number>(
+      LEGACY_CUBE_STATED_ORDERING_TRIGGER_TARGET_SAFE_POSITIONS,
+    );
+    const reviewedAlternateCost = new Set<number>(LEGACY_CUBE_ALTERNATE_COST_SAFE_POSITIONS);
+    const reviewedBaral = new Set<number>(LEGACY_CUBE_REVIEWED_BARAL_SAFE_POSITIONS);
+    const reviewedLilianaTwoPiles = new Set<number>(LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_SAFE_POSITIONS);
+    const reviewedGeneratedObjects = new Set<number>(LEGACY_CUBE_GENERATED_OBJECT_SAFE_POSITIONS);
+    const reviewedPrismariCommand = new Set<number>(LEGACY_CUBE_REVIEWED_PRISMARI_COMMAND_SAFE_POSITIONS);
+    const reviewedSwordOfFeastAndFamine = new Set<number>(
+      LEGACY_CUBE_REVIEWED_SWORD_OF_FEAST_AND_FAMINE_SAFE_POSITIONS,
+    );
+    const reviewedSmugglersCopter = new Set<number>(LEGACY_CUBE_REVIEWED_SMUGGLERS_COPTER_SAFE_POSITIONS);
+    const reviewedChampionOfWits = new Set<number>(LEGACY_CUBE_REVIEWED_CHAMPION_OF_WITS_SAFE_POSITIONS);
+    const reviewedKroxa = new Set<number>(LEGACY_CUBE_REVIEWED_KROXA_SAFE_POSITIONS);
+    const reviewedRemainingPlaneswalkers = new Set<number>(
+      LEGACY_CUBE_REVIEWED_REMAINING_PLANESWALKER_SAFE_POSITIONS,
+    );
+    for (const position of LEGACY_CUBE_CHART_A_COURSE_DISCARD_EXCLUDED_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject(
+        reviewedRemainingPlaneswalkers.has(position)
+          ? {
+              cardFamilySafe: true,
+              bridgeCapabilityProfile: {
+                topLevel: 'stated-ordering-and-reviewed-remaining-planeswalkers-v1',
+              },
+            }
+          : reviewedKroxa.has(position)
+            ? {
+                cardFamilySafe: true,
+                bridgeCapabilityProfile: {
+                  topLevel: 'stated-ordering-and-reviewed-kroxa-v1',
+                },
+              }
+            : reviewedChampionOfWits.has(position)
+              ? {
+                  cardFamilySafe: true,
+                  bridgeCapabilityProfile: {
+                    topLevel: 'stated-ordering-and-reviewed-champion-of-wits-v1',
+                  },
+                }
+              : reviewedSmugglersCopter.has(position)
+                ? {
+                    cardFamilySafe: true,
+                    bridgeCapabilityProfile: {
+                      topLevel: 'stated-ordering-and-reviewed-smugglers-copter-v1',
+                    },
+                  }
+                : reviewedSwordOfFeastAndFamine.has(position)
+                  ? {
+                      cardFamilySafe: true,
+                      bridgeCapabilityProfile: {
+                        topLevel: 'stated-ordering-and-reviewed-sword-of-feast-and-famine-v1',
+                      },
+                    }
+                  : reviewedPrismariCommand.has(position)
+                    ? {
+                        cardFamilySafe: true,
+                        bridgeCapabilityProfile: {
+                          topLevel: 'stated-ordering-and-reviewed-prismari-command-v1',
+                        },
+                      }
+                    : reviewedGeneratedObjects.has(position)
+                      ? {
+                          cardFamilySafe: true,
+                          bridgeCapabilityProfile: {
+                            topLevel: 'stated-ordering-and-pinned-generated-token-v1',
+                          },
+                        }
+                      : reviewedLilianaTwoPiles.has(position)
+                        ? {
+                            cardFamilySafe: true,
+                            bridgeCapabilityProfile: {
+                              topLevel: 'stated-ordering-and-reviewed-liliana-two-piles-v1',
+                            },
+                          }
+                        : reviewedBaral.has(position)
+                          ? {
+                              cardFamilySafe: true,
+                              bridgeCapabilityProfile: {
+                                topLevel: 'stated-ordering-and-reviewed-baral-triggered-loot-v1',
+                              },
+                            }
+                          : boundedMultiSelection.has(position)
+                            ? {
+                                cardFamilySafe: true,
+                                bridgeCapabilityProfile: { topLevel: 'bounded-multi-selection-v1' },
+                              }
+                            : statedOrderingTriggerTarget.has(position)
+                              ? {
+                                  cardFamilySafe: true,
+                                  bridgeCapabilityProfile: {
+                                    topLevel: 'stated-ordering-trigger-target-and-reviewed-hidden-hand-v1',
+                                  },
+                                }
+                              : reviewedAlternateCost.has(position)
+                                ? {
+                                    cardFamilySafe: true,
+                                    bridgeCapabilityProfile: {
+                                      topLevel: 'stated-ordering-and-reviewed-alternate-cost-v1',
+                                    },
+                                  }
+                                : position === 145
+                                  ? {
+                                      cardFamilySafe: true,
+                                      bridgeCapabilityProfile: { topLevel: 'announced-number-v1' },
+                                    }
+                                  : { cardFamilySafe: false, bridgeCapabilityProfile: null },
+      );
+    }
+    expect(
+      LEGACY_CUBE_CHART_A_COURSE_DISCARD_EXCLUDED_POSITIONS.filter((position) =>
+        boundedMultiSelection.has(position),
+      ),
+    ).toEqual([87, 88, 138, 141, 172, 189, 433, 450, 471]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_LEVEL_UP_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Student of Warfare', 'Joraga Treespeaker', 'Hexdrinker'],
+      families: ['priority', 'optional-costs', 'combat'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_REVIEWED_LEVEL_UP_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'ordinary-combat-reviewed-level-up-v2',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_LEVEL_UP_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_LEVEL_UP_SAFE_POSITIONS).toEqual([6, 330, 380]);
+    expect(LEGACY_CUBE_REVIEWED_LEVEL_UP_EXCLUDED_POSITIONS).toEqual([]);
+    for (const position of LEGACY_CUBE_REVIEWED_LEVEL_UP_EXCLUDED_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({ cardFamilySafe: false, bridgeCapabilityProfile: null });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_SELFLESS_SPIRIT_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Selfless Spirit'],
+      families: ['priority', 'optional-costs', 'zone-card-selection', 'combat'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_SELFLESS_SPIRIT_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: 'Selfless Spirit',
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'ordinary-combat-selfless-spirit-self-sacrifice-indestructible-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_SELFLESS_SPIRIT_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_SELFLESS_SPIRIT_EXCLUDED_POSITIONS).toEqual([]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REMORSEFUL_CLERIC_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Remorseful Cleric'],
+      families: ['priority', 'targets', 'optional-costs', 'zone-card-selection', 'combat'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_REMORSEFUL_CLERIC_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: 'Remorseful Cleric',
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'ordinary-combat-remorseful-cleric-self-sacrifice-target-graveyard-exile-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REMORSEFUL_CLERIC_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REMORSEFUL_CLERIC_EXCLUDED_POSITIONS).toEqual([]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_COLDSTEEL_HEART_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Coldsteel Heart'],
+      families: ['priority', 'naming-text-numbers'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_COLDSTEEL_HEART_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: 'Coldsteel Heart',
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'coldsteel-heart-entry-color-chosen-mana-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_COLDSTEEL_HEART_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_COLDSTEEL_HEART_EXCLUDED_POSITIONS).toEqual([76, 367]);
+    // Iona names its color through `chooseColor` rather than through this
+    // profile's fixed entry choice, so phase 3 admits it; Utopia Sprawl reaches
+    // a later whole-card profile that also closes its attachment target.
+    for (const position of LEGACY_CUBE_COLDSTEEL_HEART_EXCLUDED_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject(
+        position === 76
+          ? { cardFamilySafe: true, bridgeCapabilityProfile: { topLevel: 'bounded-enumerated-choice-v1' } }
+          : {
+              cardFamilySafe: true,
+              bridgeCapabilityProfile: { topLevel: 'stated-ordering-and-reviewed-utopia-sprawl-v1' },
+            },
+      );
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_EXTINCTION_EVENT_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Extinction Event'],
+      families: ['priority', 'naming-text-numbers'],
+      outcome: 'completed',
+    });
+    for (const position of LEGACY_CUBE_EXTINCTION_EVENT_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: 'Extinction Event',
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'extinction-event-odd-even-exile-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_EXTINCTION_EVENT_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_EXTINCTION_EVENT_EXCLUDED_POSITIONS).toEqual([]);
+    expect(
+      [
+        ...LEGACY_CUBE_SHOCKLAND_SAFE_POSITIONS,
+        ...LEGACY_CUBE_SHOCKLAND_OPTIONAL_COST_EXCLUDED_POSITIONS,
+      ].sort((left, right) => left - right),
+    ).toEqual(
+      entries
+        .filter((entry) => JSON.stringify(entry.families) === JSON.stringify(['priority', 'optional-costs']))
+        .map((entry) => entry.position),
+    );
+    expect(
+      [
+        ...LEGACY_CUBE_SINGLE_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_SINGLE_STACK_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_TRIGGER_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_PALADIN_CLASS_SAFE_POSITIONS,
+        ...LEGACY_CUBE_EQUIP_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_AURA_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_FETTERS_AURA_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_FALL_AURA_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_REVIEWED_MAUL_OF_THE_SKYCLAVES_SAFE_POSITIONS,
+        ...LEGACY_CUBE_TRIGGER_TARGET_EXCLUDED_POSITIONS,
+      ].sort((left, right) => left - right),
+    ).toEqual(
+      entries
+        .filter((entry) => JSON.stringify(entry.families) === JSON.stringify(['priority', 'targets']))
+        .map((entry) => entry.position),
+    );
+    expect(LEGACY_CUBE_REVIEWED_EMBERCLEAVE_COHORTS).toEqual([
+      { positions: [312], families: ['priority', 'targets'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_EMBERCLEAVE_PROBE.id),
+    ).toMatchObject({
+      position: 312,
+      cardNames: ['Embercleave'],
+      families: LEGACY_CUBE_REVIEWED_EMBERCLEAVE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[311]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-embercleave-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_EMBERCLEAVE_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_LIVING_WEAPON_COHORTS).toEqual([
+      { positions: [480, 525], families: ['priority', 'targets', 'combat'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_LIVING_WEAPON_PROBE.id),
+    ).toMatchObject({
+      position: null,
+      cardNames: ['Kaldra Compleat', 'Batterskull'],
+      families: LEGACY_CUBE_REVIEWED_LIVING_WEAPON_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const [position, name] of [
+      [480, 'Kaldra Compleat'],
+      [525, 'Batterskull'],
+    ] as const) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: name,
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-living-weapon-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'pinned-token-scripts-v1',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_LIVING_WEAPON_PROBE.id,
+        generatedScriptDependencies: [
+          {
+            name: 'b_0_0_phyrexian_germ',
+            sha256: 'e1d99eccbd54d2dffc1dcf6934defcdbdd678d1b44c4a41ff884685f097c7fcb',
+          },
+        ],
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_FORETELL_COHORTS).toEqual([
+      { positions: [49], families: ['priority', 'optional-costs', 'mana-x', 'combat'] },
+      { positions: [119], families: ['priority', 'optional-costs', 'combat'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_FORETELL_PROBE.id),
+    ).toMatchObject({
+      position: null,
+      cardNames: ['Starnheim Unleashed', "Alrund's Epiphany"],
+      families: LEGACY_CUBE_REVIEWED_FORETELL_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const [position, name, token, sha256] of [
+      [
+        49,
+        'Starnheim Unleashed',
+        'w_4_4_angel_warrior_flying_vigilance',
+        '9612abb5be48c8702d8b4d9c9b5e93f24b45e16964ed709db9a8e9a18c297383',
+      ],
+      [
+        119,
+        "Alrund's Epiphany",
+        'u_1_1_bird_flying',
+        '7ace29905d9c3b235fb4f8e0e5aa90f595d7b8416629b8ed4d350746bc40adf8',
+      ],
+    ] as const) {
+      expect(entries[position - 1]).toMatchObject({
+        correctedName: name,
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-foretell-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'pinned-token-scripts-v1',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_FORETELL_PROBE.id,
+        generatedScriptDependencies: [{ name: token, sha256 }],
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_SWORD_OF_FIRE_AND_ICE_COHORTS).toEqual([
+      { positions: [521], families: ['priority', 'targets'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_SWORD_OF_FIRE_AND_ICE_PROBE.id),
+    ).toMatchObject({
+      position: 521,
+      cardNames: ['Sword of Fire and Ice'],
+      families: LEGACY_CUBE_REVIEWED_SWORD_OF_FIRE_AND_ICE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[520]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-sword-of-fire-and-ice-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_SWORD_OF_FIRE_AND_ICE_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_SWORD_OF_FEAST_AND_FAMINE_COHORTS).toEqual([
+      { positions: [478], families: ['priority', 'targets', 'zone-card-selection'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_SWORD_OF_FEAST_AND_FAMINE_PROBE.id,
+      ),
+    ).toMatchObject({
+      position: 478,
+      cardNames: ['Sword of Feast and Famine'],
+      families: LEGACY_CUBE_REVIEWED_SWORD_OF_FEAST_AND_FAMINE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[477]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-sword-of-feast-and-famine-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_SWORD_OF_FEAST_AND_FAMINE_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_SWORD_OF_LIGHT_AND_SHADOW_COHORTS).toEqual([
+      { positions: [487], families: ['priority', 'targets', 'replacement-trigger-choices'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_SWORD_OF_LIGHT_AND_SHADOW_PROBE.id,
+      ),
+    ).toMatchObject({
+      position: 487,
+      cardNames: ['Sword of Light and Shadow'],
+      families: LEGACY_CUBE_REVIEWED_SWORD_OF_LIGHT_AND_SHADOW_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[486]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-sword-of-light-and-shadow-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_SWORD_OF_LIGHT_AND_SHADOW_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_SWORD_OF_BODY_AND_MIND_COHORTS).toEqual([
+      { positions: [509], families: ['priority', 'targets', 'combat'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_SWORD_OF_BODY_AND_MIND_PROBE.id),
+    ).toMatchObject({
+      position: 509,
+      cardNames: ['Sword of Body and Mind'],
+      families: LEGACY_CUBE_REVIEWED_SWORD_OF_BODY_AND_MIND_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[508]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-sword-of-body-and-mind-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'pinned-token-scripts-v1',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_SWORD_OF_BODY_AND_MIND_PROBE.id,
+      generatedScriptDependencies: [
+        {
+          kind: 'token-script',
+          name: 'g_2_2_wolf',
+          sha256: 'b8053732fe7bd6c36028610c05c5203a1a9e7c8866222a9d082fd21b2c20112f',
+        },
+      ],
+    });
+    expect(LEGACY_CUBE_REVIEWED_SWORD_OF_HEARTH_AND_HOME_COHORTS).toEqual([
+      { positions: [508], families: ['priority', 'targets', 'zone-card-selection'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find(
+        (probe) => probe.id === LEGACY_CUBE_REVIEWED_SWORD_OF_HEARTH_AND_HOME_PROBE.id,
+      ),
+    ).toMatchObject({
+      position: 508,
+      cardNames: ['Sword of Hearth and Home'],
+      families: LEGACY_CUBE_REVIEWED_SWORD_OF_HEARTH_AND_HOME_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[507]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-sword-of-hearth-and-home-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_SWORD_OF_HEARTH_AND_HOME_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_UMEZAWAS_JITTE_COHORTS).toEqual([
+      { positions: [506], families: ['priority', 'targets', 'modes'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_UMEZAWAS_JITTE_PROBE.id),
+    ).toMatchObject({
+      position: 506,
+      cardNames: ["Umezawa's Jitte"],
+      families: LEGACY_CUBE_REVIEWED_UMEZAWAS_JITTE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[505]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-umezawas-jitte-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_UMEZAWAS_JITTE_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_BIRGI_COHORTS).toEqual([
+      {
+        positions: [265],
+        families: ['priority', 'optional-costs', 'zone-card-selection', 'combat'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_BIRGI_PROBE.id),
+    ).toMatchObject({
+      position: 265,
+      cardNames: ['Birgi, God of Storytelling'],
+      families: LEGACY_CUBE_REVIEWED_BIRGI_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[264]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-birgi-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_BIRGI_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_BIRTHING_POD_COHORTS).toEqual([
+      {
+        positions: [382],
+        families: ['priority', 'optional-costs', 'mana-x', 'zone-card-selection'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_BIRTHING_POD_PROBE.id),
+    ).toMatchObject({
+      position: 382,
+      cardNames: ['Birthing Pod'],
+      families: LEGACY_CUBE_REVIEWED_BIRTHING_POD_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[381]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-birthing-pod-v1',
+        manaPayment: 'phyrexian-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_BIRTHING_POD_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_RANGER_CAPTAIN_OF_EOS_COHORTS).toEqual([
+      {
+        positions: [26],
+        families: [
+          'priority',
+          'optional-costs',
+          'zone-card-selection',
+          'combat',
+          'replacement-trigger-choices',
+        ],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_RANGER_CAPTAIN_OF_EOS_PROBE.id),
+    ).toMatchObject({
+      position: 26,
+      cardNames: ['Ranger-Captain of Eos'],
+      families: LEGACY_CUBE_REVIEWED_RANGER_CAPTAIN_OF_EOS_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[25]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-ranger-captain-of-eos-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_RANGER_CAPTAIN_OF_EOS_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_FORBID_COHORTS).toEqual([
+      {
+        positions: [142],
+        families: ['priority', 'targets', 'optional-costs'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_FORBID_PROBE.id),
+    ).toMatchObject({
+      position: 142,
+      cardNames: ['Forbid'],
+      families: LEGACY_CUBE_REVIEWED_FORBID_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[141]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-forbid-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_FORBID_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_REVEILLARK_COHORTS).toEqual([
+      {
+        positions: [32],
+        families: ['priority', 'targets', 'optional-costs', 'combat'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_REVEILLARK_PROBE.id),
+    ).toMatchObject({
+      position: 32,
+      cardNames: ['Reveillark'],
+      families: LEGACY_CUBE_REVIEWED_REVEILLARK_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[31]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-reveillark-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_REVEILLARK_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_BLOODCHIEFS_THIRST_COHORTS).toEqual([
+      {
+        positions: [230],
+        families: ['priority', 'targets', 'optional-costs'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_BLOODCHIEFS_THIRST_PROBE.id),
+    ).toMatchObject({
+      position: 230,
+      cardNames: ["Bloodchief's Thirst"],
+      families: LEGACY_CUBE_REVIEWED_BLOODCHIEFS_THIRST_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[229]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-bloodchiefs-thirst-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_BLOODCHIEFS_THIRST_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_PRIMAL_MIGHT_COHORTS).toEqual([
+      {
+        positions: [344],
+        families: ['priority', 'targets', 'mana-x'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_PRIMAL_MIGHT_PROBE.id),
+    ).toMatchObject({
+      position: 344,
+      cardNames: ['Primal Might'],
+      families: LEGACY_CUBE_REVIEWED_PRIMAL_MIGHT_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[343]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-primal-might-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_PRIMAL_MIGHT_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_REORDER_OR_SHUFFLE_COHORTS).toEqual([
+      {
+        positions: [125],
+        families: ['priority', 'zone-card-selection', 'ordering', 'replacement-trigger-choices'],
+      },
+      {
+        positions: [130],
+        families: ['priority', 'targets', 'zone-card-selection', 'ordering', 'replacement-trigger-choices'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_REORDER_OR_SHUFFLE_PROBE.id),
+    ).toMatchObject({
+      position: 125,
+      cardNames: ['Ponder', 'Portent'],
+      families: LEGACY_CUBE_REVIEWED_REORDER_OR_SHUFFLE_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const index of [124, 129]) {
+      expect(entries[index]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-reorder-or-shuffle-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_REORDER_OR_SHUFFLE_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_ANIMATE_DEAD_COHORTS).toEqual([
+      { positions: [210], families: ['priority', 'targets', 'combat'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_ANIMATE_DEAD_PROBE.id),
+    ).toMatchObject({
+      position: 210,
+      cardNames: ['Animate Dead'],
+      families: LEGACY_CUBE_REVIEWED_ANIMATE_DEAD_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[209]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-animate-dead-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_ANIMATE_DEAD_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_AGADEEMS_AWAKENING_COHORTS).toEqual([
+      {
+        positions: [236],
+        families: ['priority', 'targets', 'optional-costs', 'mana-x'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_AGADEEMS_AWAKENING_PROBE.id),
+    ).toMatchObject({
+      position: 236,
+      cardNames: ["Agadeem's Awakening", 'Agadeem, the Undercrypt'],
+      families: LEGACY_CUBE_REVIEWED_AGADEEMS_AWAKENING_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[235]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-agadeems-awakening-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_AGADEEMS_AWAKENING_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_CONVOKE_COHORTS).toEqual([
+      { positions: [33], families: ['priority', 'mana-x', 'zone-card-selection', 'combat'] },
+      { positions: [58, 310], families: ['priority', 'targets', 'mana-x', 'zone-card-selection'] },
+      { positions: [400], families: ['priority', 'mana-x', 'zone-card-selection'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_CONVOKE_PROBE.id),
+    ).toMatchObject({
+      position: 33,
+      cardNames: ['Venerated Loxodon', 'Conclave Tribunal', 'Stoke the Flames', 'Chord of Calling'],
+      families: LEGACY_CUBE_REVIEWED_CONVOKE_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const index of [32, 57, 309, 399]) {
+      expect(entries[index]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-convoke-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_CONVOKE_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_DELVE_COHORTS).toEqual([
+      {
+        positions: [111, 195, 462],
+        families: ['priority', 'mana-x', 'zone-card-selection', 'combat'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_DELVE_PROBE.id),
+    ).toMatchObject({
+      position: 111,
+      cardNames: ['Murktide Regent', 'Tasigur, the Golden Fang', 'Hogaak, Arisen Necropolis'],
+      families: LEGACY_CUBE_REVIEWED_DELVE_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const index of [110, 194, 461]) {
+      expect(entries[index]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-delve-v1',
+          manaPayment: 'announced-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_DELVE_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_FREE_COUNTERSPELL_COHORTS).toEqual([
+      {
+        positions: [143, 150, 155],
+        families: ['priority', 'targets', 'optional-costs'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_FREE_COUNTERSPELL_PROBE.id),
+    ).toMatchObject({
+      position: 143,
+      cardNames: ['Force of Negation', 'Force of Will', 'Daze'],
+      families: LEGACY_CUBE_REVIEWED_FREE_COUNTERSPELL_PROBE.families,
+      outcome: 'completed',
+    });
+    for (const index of [142, 149, 154]) {
+      expect(entries[index]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-free-counterspell-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_REVIEWED_FREE_COUNTERSPELL_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_REVIEWED_LEGIONS_LANDING_COHORTS).toEqual([
+      {
+        positions: [4],
+        families: ['priority', 'optional-costs', 'combat'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_LEGIONS_LANDING_PROBE.id),
+    ).toMatchObject({
+      position: 4,
+      cardNames: ["Legion's Landing"],
+      families: LEGACY_CUBE_REVIEWED_LEGIONS_LANDING_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[3]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-legions-landing-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'pinned-token-scripts-v1',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_LEGIONS_LANDING_PROBE.id,
+      generatedScriptDependencies: [
+        {
+          name: 'w_1_1_vampire_lifelink',
+          sha256: '5a52a19dd6dfd9ad5c48c6bce21d0038a52d5a30ff22d1b19f866132e0226fb5',
+        },
+      ],
+    });
+    expect(LEGACY_CUBE_REVIEWED_GILDED_GOOSE_COHORTS).toEqual([
+      {
+        positions: [334],
+        families: ['priority', 'optional-costs', 'mana-x', 'zone-card-selection', 'combat'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_GILDED_GOOSE_PROBE.id),
+    ).toMatchObject({
+      position: 334,
+      cardNames: ['Gilded Goose', 'Lightning Bolt'],
+      families: LEGACY_CUBE_REVIEWED_GILDED_GOOSE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[333]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-gilded-goose-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'pinned-token-scripts-v1',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_GILDED_GOOSE_PROBE.id,
+      generatedScriptDependencies: [
+        {
+          name: 'c_a_food_sac',
+          sha256: '7b6aa427661e3a0cb1b50e7eb9a25a10f1a13ca83dde81eebc07ea345eebdadf',
+        },
+      ],
+    });
+    expect(LEGACY_CUBE_REVIEWED_SKYCLAVE_APPARITION_COHORTS).toEqual([
+      {
+        positions: [18],
+        families: ['priority', 'targets', 'combat'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_SKYCLAVE_APPARITION_PROBE.id),
+    ).toMatchObject({
+      position: 18,
+      cardNames: ['Skyclave Apparition'],
+      families: LEGACY_CUBE_REVIEWED_SKYCLAVE_APPARITION_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[17]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-skyclave-apparition-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'pinned-token-scripts-v1',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_SKYCLAVE_APPARITION_PROBE.id,
+      generatedScriptDependencies: [
+        {
+          name: 'u_x_x_illusion',
+          sha256: '3cd1abf38ecee9637b787d33b6b3192feb56a95e423f24395b907a350f372507',
+        },
+      ],
+    });
+    expect(LEGACY_CUBE_REVIEWED_PATH_TO_EXILE_COHORTS).toEqual([
+      {
+        positions: [44],
+        families: ['priority', 'targets', 'zone-card-selection', 'replacement-trigger-choices'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_PATH_TO_EXILE_PROBE.id),
+    ).toMatchObject({
+      position: 44,
+      cardNames: ['Path to Exile'],
+      families: LEGACY_CUBE_REVIEWED_PATH_TO_EXILE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[43]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-path-to-exile-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_PATH_TO_EXILE_PROBE.id,
+      generatedScriptDependencies: [],
+    });
+    expect(LEGACY_CUBE_REVIEWED_GLEN_ELENDRA_ARCHMAGE_COHORTS).toEqual([
+      {
+        positions: [105],
+        families: ['priority', 'targets', 'optional-costs', 'zone-card-selection', 'combat'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_GLEN_ELENDRA_ARCHMAGE_PROBE.id),
+    ).toMatchObject({
+      position: 105,
+      cardNames: ['Glen Elendra Archmage'],
+      families: LEGACY_CUBE_REVIEWED_GLEN_ELENDRA_ARCHMAGE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[104]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-glen-elendra-archmage-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_GLEN_ELENDRA_ARCHMAGE_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_RECURRING_NIGHTMARE_COHORTS).toEqual([
+      {
+        positions: [220],
+        families: ['priority', 'targets', 'optional-costs', 'zone-card-selection'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_RECURRING_NIGHTMARE_PROBE.id),
+    ).toMatchObject({
+      position: 220,
+      cardNames: ['Recurring Nightmare'],
+      families: LEGACY_CUBE_REVIEWED_RECURRING_NIGHTMARE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[219]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-recurring-nightmare-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_RECURRING_NIGHTMARE_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_PRIEST_OF_FELL_RITES_COHORTS).toEqual([
+      {
+        positions: [424],
+        families: ['priority', 'targets', 'optional-costs', 'zone-card-selection', 'combat'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_PRIEST_OF_FELL_RITES_PROBE.id),
+    ).toMatchObject({
+      position: 424,
+      cardNames: ['Priest of Fell Rites'],
+      families: LEGACY_CUBE_REVIEWED_PRIEST_OF_FELL_RITES_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[423]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-priest-of-fell-rites-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_PRIEST_OF_FELL_RITES_PROBE.id,
+      generatedScriptDependencies: [],
+    });
+    expect(LEGACY_CUBE_REVIEWED_UTOPIA_SPRAWL_COHORTS).toEqual([
+      { positions: [367], families: ['priority', 'targets', 'naming-text-numbers'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_UTOPIA_SPRAWL_PROBE.id),
+    ).toMatchObject({
+      position: 367,
+      cardNames: ['Utopia Sprawl'],
+      families: LEGACY_CUBE_REVIEWED_UTOPIA_SPRAWL_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[366]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-utopia-sprawl-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_UTOPIA_SPRAWL_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_SPLINTER_TWIN_COHORTS).toEqual([
+      { positions: [309], families: ['priority', 'targets'] },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_SPLINTER_TWIN_PROBE.id),
+    ).toMatchObject({
+      position: 309,
+      cardNames: ['Splinter Twin'],
+      families: LEGACY_CUBE_REVIEWED_SPLINTER_TWIN_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[308]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-splinter-twin-v1',
+        manaPayment: 'announced-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_SPLINTER_TWIN_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_SMUGGLERS_COPTER_COHORTS).toEqual([
+      {
+        positions: [517],
+        families: ['priority', 'optional-costs', 'zone-card-selection', 'combat'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_SMUGGLERS_COPTER_PROBE.id),
+    ).toMatchObject({
+      position: 517,
+      cardNames: ["Smuggler's Copter"],
+      families: LEGACY_CUBE_REVIEWED_SMUGGLERS_COPTER_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[516]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-smugglers-copter-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'none',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_SMUGGLERS_COPTER_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_CRYPTBREAKER_COHORTS).toEqual([
+      {
+        positions: [161],
+        families: ['priority', 'optional-costs', 'zone-card-selection', 'combat'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_CRYPTBREAKER_PROBE.id),
+    ).toMatchObject({
+      position: 161,
+      cardNames: ['Cryptbreaker'],
+      families: LEGACY_CUBE_REVIEWED_CRYPTBREAKER_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[160]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-cryptbreaker-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'pinned-token-scripts-v1',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_CRYPTBREAKER_PROBE.id,
+    });
+    expect(LEGACY_CUBE_REVIEWED_MYR_BATTLESPHERE_COHORTS).toEqual([
+      {
+        positions: [501],
+        families: ['priority', 'optional-costs', 'mana-x', 'combat', 'replacement-trigger-choices'],
+      },
+    ]);
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_REVIEWED_MYR_BATTLESPHERE_PROBE.id),
+    ).toMatchObject({
+      position: 501,
+      cardNames: ['Myr Battlesphere'],
+      families: LEGACY_CUBE_REVIEWED_MYR_BATTLESPHERE_PROBE.families,
+      outcome: 'completed',
+    });
+    expect(entries[500]).toMatchObject({
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'stated-ordering-and-reviewed-myr-battlesphere-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'pinned-token-scripts-v1',
+      },
+      runtimeProbeId: LEGACY_CUBE_REVIEWED_MYR_BATTLESPHERE_PROBE.id,
+    });
+    for (const position of LEGACY_CUBE_TRIGGER_TARGET_EXCLUDED_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject(
+        position === 71
+          ? {
+              cardFamilySafe: true,
+              bridgeCapabilityProfile: {
+                topLevel: 'stated-ordering-and-reviewed-counter-type-choice-v1',
+              },
+            }
+          : position === 309
+            ? {
+                cardFamilySafe: true,
+                bridgeCapabilityProfile: {
+                  topLevel: 'stated-ordering-and-reviewed-splinter-twin-v1',
+                },
+              }
+            : position === 312
+              ? {
+                  cardFamilySafe: true,
+                  bridgeCapabilityProfile: {
+                    topLevel: 'stated-ordering-and-reviewed-embercleave-v1',
+                  },
+                }
+              : position === 445
+                ? {
+                    cardFamilySafe: true,
+                    bridgeCapabilityProfile: {
+                      topLevel: 'stated-ordering-and-reviewed-optional-target-v1',
+                    },
+                  }
+                : position === 402
+                  ? {
+                      cardFamilySafe: true,
+                      bridgeCapabilityProfile: {
+                        topLevel: 'stated-ordering-and-reviewed-plow-under-v1',
+                      },
+                    }
+                  : position === 521
+                    ? {
+                        cardFamilySafe: true,
+                        bridgeCapabilityProfile: {
+                          topLevel: 'stated-ordering-and-reviewed-sword-of-fire-and-ice-v1',
+                        },
+                      }
+                    : { cardFamilySafe: false, bridgeCapabilityProfile: null },
+      );
+    }
+    expect(
+      [
+        ...LEGACY_CUBE_ORDINARY_COMBAT_SINGLE_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_ORDINARY_COMBAT_SINGLE_TARGET_EXCLUDED_POSITIONS,
+        ...LEGACY_CUBE_VRASKA_GENERATED_TOKEN_SAFE_POSITIONS,
+        ...LEGACY_CUBE_ORDINARY_COMBAT_TRIGGER_TARGET_SAFE_POSITIONS,
+        ...LEGACY_CUBE_STATED_RETARGET_SAFE_POSITIONS,
+      ].sort((left, right) => left - right),
+    ).toEqual(
+      entries
+        .filter(
+          (entry) => JSON.stringify(entry.families) === JSON.stringify(['priority', 'targets', 'combat']),
+        )
+        .map((entry) => entry.position),
+    );
+    for (const position of LEGACY_CUBE_ORDINARY_COMBAT_SINGLE_TARGET_EXCLUDED_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject(
+        position === 18
+          ? {
+              cardFamilySafe: true,
+              bridgeCapabilityProfile: {
+                topLevel: 'stated-ordering-and-reviewed-skyclave-apparition-v1',
+              },
+            }
+          : position === 308
+            ? { cardFamilySafe: true, bridgeCapabilityProfile: { topLevel: 'announced-number-v1' } }
+            : position === 246
+              ? {
+                  cardFamilySafe: true,
+                  bridgeCapabilityProfile: {
+                    topLevel: 'stated-ordering-and-reviewed-grim-lavamancer-v1',
+                  },
+                }
+              : position === 110 || position === 416
+                ? {
+                    cardFamilySafe: true,
+                    bridgeCapabilityProfile: {
+                      topLevel: 'stated-ordering-and-reviewed-trigger-target-v1',
+                    },
+                  }
+                : position === 509
+                  ? {
+                      cardFamilySafe: true,
+                      bridgeCapabilityProfile: {
+                        topLevel: 'stated-ordering-and-reviewed-sword-of-body-and-mind-v1',
+                      },
+                    }
+                  : position === 210
+                    ? {
+                        cardFamilySafe: true,
+                        bridgeCapabilityProfile: {
+                          topLevel: 'stated-ordering-and-reviewed-animate-dead-v1',
+                        },
+                      }
+                    : position === 480 || position === 525
+                      ? {
+                          cardFamilySafe: true,
+                          bridgeCapabilityProfile: {
+                            topLevel: 'stated-ordering-and-reviewed-living-weapon-v1',
+                          },
+                        }
+                      : position === 384
+                        ? {
+                            cardFamilySafe: true,
+                            bridgeCapabilityProfile: {
+                              topLevel: 'stated-ordering-and-reviewed-gideon-garruk-bloodline-v1',
+                            },
+                          }
+                        : position === 396 || position === 429 || position === 437
+                          ? {
+                              cardFamilySafe: true,
+                              bridgeCapabilityProfile: {
+                                topLevel: 'stated-ordering-and-reviewed-multi-target-transformation-v1',
+                              },
+                            }
+                          : { cardFamilySafe: false, bridgeCapabilityProfile: null },
+      );
+    }
+    for (const position of LEGACY_CUBE_ORDINARY_MANA_PAYMENT_UNSAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'stated-ordering-and-reviewed-phyrexian-spell-cost-v1',
+          manaPayment: 'phyrexian-mana-payment-v1',
+        },
+      });
+    }
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_ORDINARY_MANA_PAYMENT_PROBE.id),
+    ).toMatchObject({
+      cardNames: expect.arrayContaining(['Plains', 'Island', 'Swamp', 'Mountain', 'Forest']),
+      outcome: 'completed',
+    });
+  });
+
+  it('records exact completed evidence for every admitted high-risk card', () => {
+    const highRisk = entries.filter((entry) => entry.risk === 'high');
+    expect(highRisk.length).toBeGreaterThan(0);
+    for (const entry of highRisk) {
+      expect(entry.families.length).toBeGreaterThanOrEqual(4);
+      expect(entry.cardFamilySafe).toBe(true);
+      expect(ledger.runtimeProbes.find((probe) => probe.id === entry.runtimeProbeId)).toMatchObject({
+        outcome: 'completed',
+      });
+    }
+  });
+
+  it('rejects a deleted or duplicate position', () => {
+    const deleted = copyOf(ledger);
+    deleted.auditedCards = deleted.auditedCards.filter((entry) => entry.position !== 600);
+    expect(() => verifyLegacyCubeDecisionLedger(deleted, provenance)).toThrow(/exactly 600/i);
+
+    const duplicate = copyOf(ledger);
+    duplicate.auditedCards[599] = structuredClone(duplicate.auditedCards[0]!);
+    expect(() => verifyLegacyCubeDecisionLedger(duplicate, provenance)).toThrow(
+      /position.*duplicate|out of order/i,
+    );
+  });
+
+  it('rejects unknown family tags and a Forge script checksum drift', () => {
+    const unknown = copyOf(ledger);
+    (unknown.auditedCards[0] as unknown as { families: string[] }).families = [
+      'priority',
+      'new-unreviewed-callback',
+    ];
+    expect(() => verifyLegacyCubeDecisionLedger(unknown, provenance)).toThrow(/unknown.*family/i);
+
+    expect(() =>
+      verifyLegacyCubeDecisionScript(entries[0]!, new TextEncoder().encode('drift'), ledger.syntaxInventory),
+    ).toThrow(/script checksum drift/i);
+  });
+
+  it('refuses unreviewed script grammar and PlayerController callbacks', () => {
+    const unknownScript = new TextEncoder().encode(
+      'Name:Hostile Probe\nManaCost:1 U\nTypes:Sorcery\nA:SP$ ChooseDragon | ChooseDragon$ True\nOracle:Probe.\n',
+    );
+    expect(() => verifyLegacyCubeDecisionSyntax(unknownScript, ledger.syntaxInventory)).toThrow(
+      /unknown Forge decision syntax/i,
+    );
+
+    const callbackDrift = new TextEncoder().encode(
+      'public abstract class forge.game.player.PlayerController {\n' +
+        '  public abstract boolean chooseDragon(forge.game.card.Card);\n' +
+        '}\n',
+    );
+    expect(() => verifyForgePlayerControllerSurface(ledger, callbackDrift)).toThrow(/javap checksum drift/i);
+    expect(() =>
+      classifyForgeControllerCallback('public abstract boolean chooseDragon(forge.game.card.Card)'),
+    ).toThrow(/unmapped abstract PlayerController callback/i);
+  });
+
+  it('rejects changing an existing choice token into a non-choice disposition', () => {
+    const changed = copyOf(ledger);
+    const targetToken = changed.syntaxInventory.find(
+      (row) => row.kind === 'parameter-key' && row.token === 'ValidTgts',
+    );
+    if (targetToken === undefined) throw new Error('fixture has no ValidTgts review');
+    targetToken.disposition = 'non-choice';
+    targetToken.families = [];
+    expect(() => verifyLegacyCubeDecisionLedger(changed, provenance)).toThrow(
+      /syntax review drift.*ValidTgts/i,
+    );
+  });
+
+  it('never treats an absent current-looking token as non-choice by default', () => {
+    const currentLooking = new TextEncoder().encode(
+      'Name:Hostile Probe\nManaCost:1 U\nTypes:Sorcery\nA:SP$ ManaChoice | Amount$ 2\nOracle:Probe.\n',
+    );
+    expect(() => verifyLegacyCubeDecisionSyntax(currentLooking, ledger.syntaxInventory)).toThrow(
+      /unknown Forge decision syntax ability-api "ManaChoice"/i,
+    );
+  });
+
+  it('classifies unresolved ChangeZone card products by their parameter combination', () => {
+    const scripts = [
+      'Name:Entomb\nManaCost:B\nTypes:Instant\nA:SP$ ChangeZone | Origin$ Library | Destination$ Graveyard | ChangeType$ Card | ChangeNum$ 1 | Mandatory$ True\n',
+      'Name:Show and Tell\nManaCost:2 U\nTypes:Sorcery\nA:SP$ ChangeZone | Origin$ Hand | Destination$ Battlefield | ChangeType$ Creature,Artifact,Enchantment,Land | DefinedPlayer$ Player | ChangeNum$ 1\n',
+      'Name:Dermotaxi\nManaCost:2\nTypes:Artifact Vehicle\nSVar:Imprint:DB$ ChangeZone | Imprint$ True | ChangeType$ Creature | ChangeNum$ 1 | Origin$ Graveyard | Destination$ Exile | Chooser$ You\n',
+    ];
+    for (const script of scripts) {
+      expect(
+        classifyLegacyCubeForgeScript(new TextEncoder().encode(script), ledger.syntaxInventory).families,
+      ).toContain('zone-card-selection');
+    }
+    const defined =
+      'Name:Automatic Return\nManaCost:3 B B\nTypes:Sorcery\nSVar:Return:DB$ ChangeZone | Defined$ Remembered | Origin$ Exile | Destination$ Battlefield\n';
+    expect(
+      classifyLegacyCubeForgeScript(new TextEncoder().encode(defined), ledger.syntaxInventory).families,
+    ).not.toContain('zone-card-selection');
+  });
+
+  it('does not erase optional clone replacements or triggered payments from combat cards', () => {
+    const metamorph = new TextEncoder().encode(
+      'Name:Phyrexian Metamorph\nManaCost:3 UP\nTypes:Artifact Creature Phyrexian Shapeshifter\nPT:0/0\n' +
+        'K:ETBReplacement:Copy:DBCopy:Optional\n' +
+        'SVar:DBCopy:DB$ Clone | Choices$ Creature.Other,Artifact.Other\n',
+    );
+    expect(classifyLegacyCubeForgeScript(metamorph, ledger.syntaxInventory).families).toEqual([
+      'priority',
+      'mana-x',
+      'zone-card-selection',
+      'combat',
+      'replacement-trigger-choices',
+    ]);
+
+    const phoenix = new TextEncoder().encode(
+      'Name:Lightning Phoenix\nManaCost:2 R\nTypes:Creature Phoenix\nPT:2/2\n' +
+        'T:Mode$ Phase | Execute$ TrigReturn\n' +
+        'SVar:TrigReturn:AB$ ChangeZone | Cost$ R | Defined$ Self | Origin$ Graveyard | Destination$ Battlefield\n',
+    );
+    expect(classifyLegacyCubeForgeScript(phoenix, ledger.syntaxInventory).families).toEqual([
+      'priority',
+      'optional-costs',
+      'combat',
+    ]);
+  });
+
+  it('keeps ordinary mana payment closed against every unsupported payment shape', () => {
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(['Name:Mana Payment Probe', ...lines, 'Types:Sorcery'].join('\n'));
+
+    expect(
+      legacyCubeOrdinaryManaPaymentRefusals(
+        script([
+          'ManaCost:1 W/U 2/R',
+          'A:AB$ Mana | Cost$ T | Produced$ W U R | SpellDescription$ Add mana.',
+          'A:AB$ Mana | Cost$ SubCounter<3/P1P1> | Produced$ R | SpellDescription$ Add mana.',
+        ]),
+      ),
+    ).toEqual([]);
+
+    const hostile = [
+      ['ManaCost:X R', 'X mana cost'],
+      ['ManaCost:1 WP', 'Phyrexian mana cost'],
+      ['ManaCost:1 S', 'snow mana cost'],
+      ['ManaCost:2 R', 'K:Convoke', 'special payment keyword'],
+      ['ManaCost:2 R', 'S:Alternate:SP$ Draw | Mode$ AlternativeCost', 'alternative or additional cost'],
+      ['ManaCost:2 R', 'K:AlternateAdditionalCost:Sac<1/Creature>', 'alternative or additional cost'],
+      ['ManaCost:2 R', 'A:AB$ Mana | Cost$ T | Produced$ Any', 'any-color announcement'],
+      [
+        'ManaCost:2 R',
+        'A:AB$ Mana | Cost$ T | Produced$ R | RestrictValid$ Spell.Creature',
+        'restricted mana',
+      ],
+      ['ManaCost:2 R', 'A:AB$ Mana | Cost$ PayLife<1> T | Produced$ R', 'mana-source cost PayLife<1> T'],
+    ] as const;
+    for (const row of hostile) {
+      const expected = row[row.length - 1];
+      expect(legacyCubeOrdinaryManaPaymentRefusals(script(row.slice(0, -1)))).toContain(expected);
+    }
+  });
+
+  it('keeps the ordinary-combat direct-target composition closed against adjacent target shapes', () => {
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(
+        ['Name:Combat Target Probe', 'ManaCost:2 G', 'Types:Creature Beast', 'PT:3/3', ...lines].join('\n'),
+      );
+
+    expect(
+      legacyCubeOrdinaryCombatSingleTargetRefusals(
+        script([
+          'A:AB$ Pump | Cost$ T | ValidTgts$ Creature.YouCtrl | NumAtt$ +1 | NumDef$ +1',
+          'A:AB$ Destroy | Cost$ SubCounter<2/LOYALTY> | ValidTgts$ Creature.tapped',
+        ]),
+      ),
+    ).toEqual([]);
+
+    const hostile = [
+      [
+        'T:Mode$ ChangesZone | Execute$ TrigDestroy',
+        'SVar:TrigDestroy:DB$ Destroy | ValidTgts$ Creature',
+        'trigger target',
+      ],
+      ['A:AB$ Pump | ValidTgts$ Creature | TargetMin$ 0 | TargetMax$ 1', 'optional target'],
+      ['A:AB$ Pump | ValidTgts$ Creature | TargetMin$ 2 | TargetMax$ 2', 'multiple targets'],
+      ['A:AB$ DealDamage | ValidTgts$ Creature | DividedAsYouChoose$ 3', 'divided targets'],
+      ['K:Equip:2', 'attachment target'],
+      ['K:Enchant:Creature', 'attachment target'],
+      ['A:AB$ ChangeTargets | TargetType$ Spell | DefinedMagnet$ Self', 'retarget ability'],
+      [
+        'A:AB$ Pump | ValidTgts$ Artifact | SubAbility$ CopyTarget',
+        'SVar:CopyTarget:DB$ Clone | ValidTgts$ Creature',
+        'nested target block',
+      ],
+      ['A:AB$ Counter | ValidTgts$ Card | TgtZone$ Stack', 'stack target'],
+      ['A:AB$ ChangeZone | ValidTgts$ Card | TgtZone$ Stack,Battlefield', 'multiple target zones'],
+      ['A:AB$ DealDamage | Cost$ R T ExileFromGrave<2/Card> | ValidTgts$ Any', 'choice cost'],
+      ['A:AB$ Pump | ValidTgts$ Creature | TargetingPlayer$ Opponent', 'delegated target'],
+      ['A:AB$ Token | TokenScript$ c_a_treasure_sac', 'transitive generated-object decision source'],
+    ] as const;
+    for (const row of hostile) {
+      const expected = row[row.length - 1];
+      expect(legacyCubeOrdinaryCombatSingleTargetRefusals(script(row.slice(0, -1)))).toContain(expected);
+    }
+  });
+
+  it('admits only mandatory singleton triggered targets in the triggered-target profile', () => {
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(
+        ['Name:Triggered Target Probe', 'ManaCost:2 G', 'Types:Creature Beast', 'PT:3/3', ...lines].join(
+          '\n',
+        ),
+      );
+
+    const supported = [
+      [
+        'T:Mode$ ChangesZone | Execute$ TrigDestroy',
+        'SVar:TrigDestroy:DB$ Destroy | ValidTgts$ Creature.OppCtrl',
+      ],
+      [
+        'T:Mode$ ChangesZone | Execute$ TrigPump',
+        'SVar:TrigPump:DB$ Pump | ValidTgts$ Instant.YouCtrl,Sorcery.YouCtrl | TgtZone$ Graveyard',
+      ],
+      [
+        'T:Mode$ ChangesZone | Execute$ TrigLoseLife',
+        'SVar:TrigLoseLife:DB$ LoseLife | ValidTgts$ Opponent | LifeAmount$ 2',
+      ],
+      [
+        'T:Mode$ DamageDone | ValidTarget$ Opponent | Execute$ MoreDamage',
+        'SVar:MoreDamage:DB$ DealDamage | ValidTgts$ Planeswalker.ControlledBy TriggeredTarget',
+      ],
+    ] as const;
+    for (const lines of supported) {
+      expect(legacyCubeOrdinaryCombatTriggeredSingleTargetRefusals(script(lines))).toEqual([]);
+      expect(legacyCubeMandatoryTriggeredSingleTargetRefusals(script(lines))).toEqual([]);
+    }
+
+    const hostile = [
+      [['A:AB$ Destroy | ValidTgts$ Creature'], 'missing mandatory singleton trigger target'],
+      [
+        [
+          'K:Class:3:4 W:AddTrigger$ TriggerAttackersDeclared',
+          'SVar:TriggerAttackersDeclared:Mode$ AttackersDeclared | Execute$ TrigPump',
+          'SVar:TrigPump:DB$ Pump | ValidTgts$ Creature.attacking',
+        ],
+        'missing mandatory singleton trigger target',
+      ],
+      [
+        [
+          'T:Mode$ ChangesZone | Execute$ TrigDestroy',
+          'SVar:TrigDestroy:DB$ Destroy | ValidTgts$ Creature | TargetMin$ 0 | TargetMax$ 1',
+        ],
+        'optional target',
+      ],
+      [
+        [
+          'T:Mode$ ChangesZone | Execute$ TrigDestroy',
+          'SVar:TrigDestroy:DB$ Destroy | ValidTgts$ Permanent | TargetMin$ 2 | TargetMax$ 2',
+        ],
+        'multiple targets',
+      ],
+      [
+        [
+          'T:Mode$ ChangesZone | Execute$ TrigBounce',
+          'SVar:TrigBounce:DB$ ChangeZone | ValidTgts$ Permanent,Card.inZoneStack | TgtZone$ Stack,Battlefield',
+        ],
+        'multiple target zones',
+      ],
+      [
+        [
+          'T:Mode$ ChangesZone | Execute$ TrigExile',
+          'SVar:TrigExile:DB$ ChangeZone | ValidTgts$ Opponent | Origin$ Hand | Destination$ Exile | Chooser$ You | ChangeType$ Card.nonLand | ChangeNum$ 1',
+        ],
+        'nested zone-card selection',
+      ],
+      [
+        [
+          'T:Mode$ Phase | Execute$ TrigExile',
+          'SVar:TrigExile:DB$ ChangeZone | ValidTgts$ Card | TgtZone$ Graveyard | SubAbility$ AddMana',
+          'SVar:AddMana:DB$ Mana | Produced$ Combo R G | Amount$ 1',
+        ],
+        'independent mana-color choice',
+      ],
+      [
+        [
+          'T:Mode$ ChangesZone | Execute$ TrigDestroy',
+          'SVar:TrigDestroy:DB$ Destroy | ValidTgts$ Creature | SubAbility$ MoreTargets',
+          'SVar:MoreTargets:DB$ Pump | ValidTgts$ Creature',
+        ],
+        'nested target block',
+      ],
+      [
+        [
+          'T:Mode$ ChangesZone | Execute$ TrigDestroy',
+          'SVar:TrigDestroy:DB$ Destroy | ValidTgts$ Creature | SubAbility$ MakeToken',
+          'SVar:MakeToken:DB$ Token | TokenScript$ c_a_treasure_sac',
+        ],
+        'generated-object dependency',
+      ],
+    ] as const;
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeOrdinaryCombatTriggeredSingleTargetRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('admits only the exact Paladin Class installed trigger-target profile', () => {
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(
+        ['Name:Paladin Class', 'ManaCost:W', 'Types:Enchantment Class', ...lines].join('\n'),
+      );
+    const supported: readonly string[] = [
+      'S:Mode$ RaiseCost | ValidCard$ Card | Activator$ Opponent | ValidSpell$ Spell | Amount$ 1 | Condition$ PlayerTurn',
+      'K:Class:2:2 W:AddStaticAbility$ SPump',
+      'SVar:SPump:Mode$ Continuous | Affected$ Creature.YouCtrl | AddPower$ 1 | AddToughness$ 1 | Secondary$ True',
+      'K:Class:3:4 W:AddTrigger$ TriggerAttackersDeclared',
+      'SVar:TriggerAttackersDeclared:Mode$ AttackersDeclared | AttackingPlayer$ You | TriggerZones$ Battlefield | Execute$ TrigPump | Secondary$ True',
+      'SVar:TrigPump:DB$ Pump | ValidTgts$ Creature.attacking | NumAtt$ +X | NumDef$ +X | KW$ Double Strike',
+      'SVar:X:Count$Valid Creature.attacking/Minus.1',
+    ];
+    expect(legacyCubePaladinClassProfileRefusals(script(supported))).toEqual([]);
+
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [supported.with(1, 'K:Class:2:1 W:AddStaticAbility$ SPump'), 'level-two cost or shape'],
+      [supported.with(3, 'K:Class:4:4 W:AddTrigger$ TriggerAttackersDeclared'), 'level-three cost or shape'],
+      [
+        supported.with(
+          5,
+          'SVar:TrigPump:DB$ Pump | ValidTgts$ Creature.attacking | TargetMin$ 0 | TargetMax$ 1 | NumAtt$ +X | NumDef$ +X | KW$ Double Strike',
+        ),
+        'optional target',
+      ],
+      [
+        supported.with(
+          5,
+          'SVar:TrigPump:DB$ Pump | ValidTgts$ Creature.attacking | TargetMin$ 2 | TargetMax$ 2 | NumAtt$ +X | NumDef$ +X | KW$ Double Strike',
+        ),
+        'multiple targets',
+      ],
+      [supported.with(5, 'SVar:TrigPump:DB$ Pump | ValidTgts$ Creature'), 'exact Paladin trigger effect'],
+      [[...supported, 'A:AB$ Destroy | ValidTgts$ Creature'], 'non-Class target'],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubePaladinClassProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('admits only the exact shockland pay-two-life entry replacement', () => {
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(
+        ['Name:Stomping Ground', 'ManaCost:no cost', 'Types:Land Mountain Forest', ...lines].join('\n'),
+      );
+    const replacement =
+      "R:Event$ Moved | ValidCard$ Card.Self | Destination$ Battlefield | ReplaceWith$ DBTap | ReplacementResult$ Updated | Description$ As CARDNAME enters, you may pay 2 life. If you don't, it enters tapped.";
+    const tap =
+      'SVar:DBTap:DB$ Tap | ETB$ True | Defined$ Self | UnlessCost$ PayLife<2> | UnlessPayer$ You | StackDescription$ enters tapped.';
+    expect(legacyCubeShocklandProfileRefusals(script([replacement, tap]))).toEqual([]);
+
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [[replacement.replace('pay 2 life', 'pay 3 life'), tap], 'replacement description'],
+      [[replacement.replace('Destination$ Battlefield', 'Destination$ Graveyard'), tap], 'entry replacement'],
+      [[replacement.replace('ValidCard$ Card.Self', 'ValidCard$ Land.YouCtrl'), tap], 'entry replacement'],
+      [[replacement, tap.replace('PayLife<2>', 'PayLife<3>')], 'pay-two-life cost'],
+      [[replacement, tap.replace('Defined$ Self', 'Defined$ You')], 'self tap effect'],
+      [[replacement, tap.replace('UnlessPayer$ You', 'UnlessPayer$ Opponent')], 'local payer'],
+      [[replacement, tap, 'A:AB$ Mana | Cost$ T | Produced$ Any'], 'additional choice surface'],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeShocklandProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('admits only the two exact mandatory-singleton Equip target scripts', () => {
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(
+        ['Name:Grafted Wargear', 'ManaCost:3', 'Types:Artifact Equipment', ...lines].join('\n'),
+      );
+    const supported: readonly string[] = [
+      'K:Equip:0',
+      'S:Mode$ Continuous | Affected$ Creature.EquippedBy | AddPower$ 3 | AddToughness$ 2 | Description$ Equipped creature gets +3/+2.',
+      'T:Mode$ Unattached | ValidAttachment$ Card.Self | ValidObject$ Permanent | Execute$ TrigSac | TriggerDescription$ Whenever CARDNAME becomes unattached from a permanent, sacrifice that permanent.',
+      'SVar:TrigSac:DB$ SacrificeAll | Defined$ TriggeredObjectLKICopy | Controller$ You',
+    ];
+    expect(legacyCubeEquipTargetProfileRefusals(script(supported))).toEqual([]);
+
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [supported.with(0, 'K:Equip:1'), 'Equip cost or cohort'],
+      [supported.with(0, 'K:Enchant:Creature'), 'Equipment attachment shape'],
+      [[...supported, 'SVar:AttachAILogic:Pump'], 'auto-attach or Aura surface'],
+      [
+        [...supported, 'A:AB$ Pump | ValidTgts$ Creature | TargetMin$ 0 | TargetMax$ 1'],
+        'extra target block',
+      ],
+      [
+        [...supported, 'A:AB$ Pump | ValidTgts$ Creature | TargetMin$ 2 | TargetMax$ 2'],
+        'extra target block',
+      ],
+      [[...supported, 'A:AB$ Pump | ValidTgts$ Creature.OppCtrl'], 'extra target block'],
+      [[...supported, 'A:AB$ ChangeZone | ValidTgts$ Card | TgtZone$ Graveyard'], 'extra target block'],
+      [
+        supported.with(2, supported[2]!.replace('ValidObject$ Permanent', 'ValidObject$ Creature')),
+        'exact Grafted Wargear trigger',
+      ],
+      [
+        [
+          ...supported,
+          'T:Mode$ DamageDone | Execute$ TrigDamage',
+          'SVar:TrigDamage:DB$ DealDamage | ValidTgts$ Any',
+        ],
+        'extra target block',
+      ],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeEquipTargetProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('admits only the exact mandatory-singleton Control Magic Aura target', () => {
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(
+        ['Name:Control Magic', 'ManaCost:2 U U', 'Types:Enchantment Aura', ...lines].join('\n'),
+      );
+    const supported: readonly string[] = [
+      'K:Enchant:Creature',
+      'SVar:AttachAILogic:GainControl',
+      'S:Mode$ Continuous | Affected$ Card.EnchantedBy | GainControl$ You | Description$ You control enchanted creature.',
+      'Oracle:Enchant creature\\nYou control enchanted creature.',
+    ];
+    expect(legacyCubeAuraTargetProfileRefusals(script(supported))).toEqual([]);
+
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [supported.with(0, 'K:Enchant:Permanent'), 'Enchant creature shape'],
+      [supported.with(0, 'K:Equip:2'), 'Aura attachment shape'],
+      [supported.with(1, 'SVar:AttachAILogic:Pump'), 'exact Control Magic semantics'],
+      [
+        supported.with(2, supported[2]!.replace('GainControl$ You', 'GainControl$ Opponent')),
+        'exact Control Magic semantics',
+      ],
+      [[...supported, 'A:AB$ Pump | ValidTgts$ Creature | TargetMin$ 0 | TargetMax$ 1'], 'optional target'],
+      [[...supported, 'A:AB$ Pump | ValidTgts$ Creature | TargetMin$ 2 | TargetMax$ 2'], 'multiple targets'],
+      [[...supported, 'A:AB$ Destroy | ValidTgts$ Land'], 'noncreature target'],
+      [[...supported, 'A:AB$ Pump | ValidTgts$ Creature | TgtZone$ Graveyard'], 'nonbattlefield target'],
+      [[...supported, 'T:Mode$ ChangesZone | Execute$ TrigGainLife'], 'trigger surface'],
+      [[...supported, 'A:AB$ Draw | Cost$ T'], 'activated surface'],
+      [
+        [...supported, 'A:SP$ ChangeZone | ValidTgts$ Creature | Origin$ Battlefield | Destination$ Library'],
+        'ordering-sensitive destination',
+      ],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeAuraTargetProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it("admits only the exact Faith's Fetters Aura, trigger, and attached prohibition", () => {
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(
+        ["Name:Faith's Fetters", 'ManaCost:3 W', 'Types:Enchantment Aura', ...lines].join('\n'),
+      );
+    const supported: readonly string[] = [
+      'K:Enchant:Permanent',
+      'SVar:AttachAITgts:Creature',
+      'SVar:AttachAILogic:Curse',
+      'T:Mode$ ChangesZone | Origin$ Any | Destination$ Battlefield | ValidCard$ Card.Self | Execute$ TrigGainLife | TriggerDescription$ When CARDNAME enters, you gain 4 life.',
+      'SVar:TrigGainLife:DB$ GainLife | LifeAmount$ 4',
+      "S:Mode$ CantAttack,CantBlock,CantBeActivated | ValidCard$ Card.EnchantedBy | ValidSA$ Activated.!ManaAbility | Description$ Enchanted permanent can't attack or block, and its activated abilities can't be activated unless they're mana abilities.",
+      'DeckHas:Ability$LifeGain',
+      "Oracle:Enchant permanent\\nWhen Faith's Fetters enters, you gain 4 life.\\nEnchanted permanent can't attack or block, and its activated abilities can't be activated unless they're mana abilities.",
+    ];
+    expect(legacyCubeFettersAuraTargetProfileRefusals(script(supported))).toEqual([]);
+
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [supported.with(0, 'K:Enchant:Creature'), 'Enchant permanent shape'],
+      [supported.with(0, 'K:Equip:4'), 'Aura attachment shape'],
+      [supported.with(1, 'SVar:AttachAITgts:Permanent'), "exact Faith's Fetters semantics"],
+      [supported.with(2, 'SVar:AttachAILogic:Pump'), "exact Faith's Fetters semantics"],
+      [
+        supported.with(3, supported[3]!.replace('Destination$ Battlefield', 'Destination$ Graveyard')),
+        'exact four-life entry trigger',
+      ],
+      [supported.with(4, 'SVar:TrigGainLife:DB$ GainLife | LifeAmount$ 3'), 'exact four-life entry trigger'],
+      [
+        supported.with(5, supported[5]!.replace('CantAttack,CantBlock,', 'CantAttack,')),
+        'exact attached prohibition',
+      ],
+      [
+        supported.with(5, supported[5]!.replace('Activated.!ManaAbility', 'Activated')),
+        'exact attached prohibition',
+      ],
+      [[...supported, 'A:AB$ Pump | ValidTgts$ Permanent | TargetMin$ 0 | TargetMax$ 1'], 'optional target'],
+      [[...supported, 'A:AB$ Pump | ValidTgts$ Permanent | TargetMin$ 2 | TargetMax$ 2'], 'multiple targets'],
+      [[...supported, 'A:AB$ Pump | ValidTgts$ Permanent | TgtZone$ Graveyard'], 'nonbattlefield target'],
+      [[...supported, 'R:Event$ Moved | Destination$ Battlefield'], 'replacement surface'],
+      [[...supported, 'SVar:Extra:DB$ Draw | NumCards$ 1'], 'additional Aura ability'],
+      [[...supported, 'A:AB$ Token | TokenScript$ c_1_1_soldier'], 'additional decision surface'],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeFettersAuraTargetProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('admits only the exact Fall from Favor Aura, entry chain, and conditional untap lock', () => {
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(
+        ['Name:Fall from Favor', 'ManaCost:2 U', 'Types:Enchantment Aura', ...lines].join('\n'),
+      );
+    const supported: readonly string[] = [
+      'K:Enchant:Creature',
+      'SVar:AttachAITgts:Card.cmcGE2',
+      'T:Mode$ ChangesZone | ValidCard$ Card.Self | Origin$ Any | Destination$ Battlefield | Execute$ TrigTap | TriggerDescription$ When CARDNAME enters, tap enchanted creature and you become the monarch.',
+      'SVar:TrigTap:DB$ Tap | Defined$ Enchanted | SubAbility$ DBMonarch',
+      'SVar:DBMonarch:DB$ BecomeMonarch',
+      "R:Event$ Untap | ValidCard$ Creature.EnchantedBy+ControlledBy EnchantedController.!isMonarch | ValidStepTurnToController$ You | Layer$ CantHappen | Description$ Enchanted creature doesn't untap during its controller's untap step unless that player is the monarch.",
+      "Oracle:Enchant creature\\nWhen Fall from Favor enters, tap enchanted creature and you become the monarch.\\nEnchanted creature doesn't untap during its controller's untap step unless that player is the monarch.",
+    ];
+    expect(legacyCubeFallAuraTargetProfileRefusals(script(supported))).toEqual([]);
+
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [supported.with(0, 'K:Enchant:Permanent'), 'Enchant creature shape'],
+      [supported.with(0, 'K:Equip:2'), 'Aura attachment shape'],
+      [supported.with(1, 'SVar:AttachAITgts:Creature'), 'exact Fall from Favor semantics'],
+      [
+        supported.with(2, supported[2]!.replace('Destination$ Battlefield', 'Destination$ Graveyard')),
+        'exact tap-and-monarch entry trigger',
+      ],
+      [
+        supported.with(3, 'SVar:TrigTap:DB$ Untap | Defined$ Enchanted'),
+        'exact tap-and-monarch entry trigger',
+      ],
+      [supported.with(4, 'SVar:DBMonarch:DB$ Draw'), 'exact tap-and-monarch entry trigger'],
+      [
+        supported.with(5, supported[5]!.replace('Event$ Untap', 'Event$ Moved')),
+        'exact conditional untap prevention',
+      ],
+      [
+        supported.with(5, supported[5]!.replace('EnchantedController.!isMonarch', 'EnchantedController')),
+        'exact conditional untap prevention',
+      ],
+      [[...supported, 'A:AB$ Pump | ValidTgts$ Creature | TargetMin$ 0 | TargetMax$ 1'], 'optional target'],
+      [[...supported, 'A:AB$ Pump | ValidTgts$ Creature | TargetMin$ 2 | TargetMax$ 2'], 'multiple targets'],
+      [[...supported, 'A:AB$ Pump | ValidTgts$ Creature | TgtZone$ Graveyard'], 'nonbattlefield target'],
+      [[...supported, 'SVar:Extra:DB$ Draw | NumCards$ 1'], 'additional Aura ability'],
+      [[...supported, 'A:AB$ Token | TokenScript$ c_1_1_soldier'], 'additional decision surface'],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeFallAuraTargetProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('admits only the exact Baneslayer Angel fixed-keyword profile', () => {
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(
+        ['Name:Baneslayer Angel', 'ManaCost:3 W W', 'Types:Creature Angel', 'PT:5/5', ...lines].join('\n'),
+      );
+    const supported: readonly string[] = [
+      'K:Flying',
+      'K:First Strike',
+      'K:Lifelink',
+      'K:Protection:Demon',
+      'K:Protection:Dragon',
+      'Oracle:Flying, first strike, lifelink, protection from Demons and from Dragons',
+    ];
+    expect(legacyCubeBaneslayerProtectionProfileRefusals(script(supported))).toEqual([]);
+
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [supported.with(0, 'K:Reach'), 'exact keyword sequence'],
+      [supported.with(1, 'K:Double Strike'), 'exact keyword sequence'],
+      [supported.with(2, 'K:Vigilance'), 'exact keyword sequence'],
+      [supported.with(3, 'K:Protection:Angel'), 'fixed Demon protection'],
+      [supported.with(4, 'K:Protection:Choice'), 'fixed Dragon protection'],
+      [
+        supported.with(5, 'Oracle:Flying, first strike, lifelink, protection from Demons and from Angels'),
+        'exact Oracle text',
+      ],
+      [[...supported, 'A:AB$ Pump | Cost$ W'], 'additional mechanic'],
+      [[...supported, 'T:Mode$ Attacks | Execute$ TrigDraw'], 'additional mechanic'],
+      [[...supported, 'S:Mode$ Continuous | AddPower$ 1'], 'additional mechanic'],
+      [[...supported, 'SVar:Extra:DB$ Draw | NumCards$ 1'], 'additional mechanic'],
+      [[...supported, 'R:Event$ DamageDone | Prevent$ True'], 'additional mechanic'],
+      [[...supported, 'K:Protection:White'], 'additional mechanic'],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeBaneslayerProtectionProfileRefusals(script(lines))).toContain(expected);
+    }
+
+    expect(
+      legacyCubeBaneslayerProtectionProfileRefusals(
+        new TextEncoder().encode(
+          ['Name:Banisher Angel', 'ManaCost:3 W W', 'Types:Creature Angel', 'PT:5/5', ...supported].join(
+            '\n',
+          ),
+        ),
+      ),
+    ).toContain('exact identity');
+    expect(
+      legacyCubeBaneslayerProtectionProfileRefusals(
+        new TextEncoder().encode(
+          ['Name:Baneslayer Angel', 'ManaCost:4 W', 'Types:Creature Angel', 'PT:5/5', ...supported].join(
+            '\n',
+          ),
+        ),
+      ),
+    ).toContain('exact mana cost');
+    expect(
+      legacyCubeBaneslayerProtectionProfileRefusals(
+        new TextEncoder().encode(
+          ['Name:Baneslayer Angel', 'ManaCost:3 W W', 'Types:Creature Demon', 'PT:5/5', ...supported].join(
+            '\n',
+          ),
+        ),
+      ),
+    ).toContain('exact creature type');
+    expect(
+      legacyCubeBaneslayerProtectionProfileRefusals(
+        new TextEncoder().encode(
+          ['Name:Baneslayer Angel', 'ManaCost:3 W W', 'Types:Creature Angel', 'PT:5/6', ...supported].join(
+            '\n',
+          ),
+        ),
+      ),
+    ).toContain('exact combat stats');
+  });
+
+  it('admits only the exact Chart a Course conditional singleton-discard profile', () => {
+    const exact = [
+      'Name:Chart a Course',
+      'ManaCost:1 U',
+      'Types:Sorcery',
+      'A:SP$ Draw | NumCards$ 2 | SubAbility$ DBDiscard | SpellDescription$ Draw two cards. Then discard a card unless you attacked this turn.',
+      'SVar:DBDiscard:DB$ Discard | Mode$ TgtChoose | ConditionCheckSVar$ RaidTest | ConditionSVarCompare$ EQ0',
+      'SVar:RaidTest:Count$AttackersDeclared',
+      'Oracle:Draw two cards. Then discard a card unless you attacked this turn.',
+    ];
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(`${lines.join('\n')}\n`);
+
+    expect(legacyCubeChartACourseDiscardProfileRefusals(script(exact))).toEqual([]);
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [exact.map((line) => line.replace('NumCards$ 2', 'NumCards$ 3')), 'exact draw-two root'],
+      [
+        exact.map((line) => line.replace('SubAbility$ DBDiscard', 'SubAbility$ Other')),
+        'exact draw-two root',
+      ],
+      [exact.map((line) => line.replace('Mode$ TgtChoose', 'Mode$ Random')), 'exact singleton discard'],
+      [
+        exact.map((line) => line.replace('ConditionCheckSVar$ RaidTest', 'ConditionCheckSVar$ Other')),
+        'exact singleton discard',
+      ],
+      [
+        exact.map((line) => line.replace('ConditionSVarCompare$ EQ0', 'ConditionSVarCompare$ GE1')),
+        'exact singleton discard',
+      ],
+      [
+        exact.map((line) => line.replace('Count$AttackersDeclared', 'Count$CardsInYourHand')),
+        'exact attacked-this-turn condition',
+      ],
+      [[...exact, 'SVar:Extra:DB$ Draw | NumCards$ 1'], 'additional mechanic'],
+      [[...exact, 'T:Mode$ Attacks | Execute$ Extra'], 'additional mechanic'],
+      [[...exact, 'K:Flashback:2 U'], 'additional mechanic'],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeChartACourseDiscardProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('admits only the three exact reviewed Level up scripts', () => {
+    const student = [
+      'Name:Student of Warfare',
+      'ManaCost:W',
+      'Types:Creature Human Knight',
+      'PT:1/1',
+      'K:Level up:W',
+      'S:Mode$ Continuous | Affected$ Card.Self | SetPower$ 3 | SetToughness$ 3 | AddKeyword$ First Strike | IsPresent$ Card.Self+counters_GE2_LEVEL+counters_LE6_LEVEL | Description$ LEVEL 2-6 3/3 First strike',
+      'S:Mode$ Continuous | Affected$ Card.Self | SetPower$ 4 | SetToughness$ 4 | AddKeyword$ Double Strike | IsPresent$ Card.Self+counters_GE7_LEVEL | Description$ LEVEL 7+ 4/4 Double strike',
+      'Oracle:Level up {W} ({W}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 2-6\\n3/3\\nFirst strike\\nLEVEL 7+\\n4/4\\nDouble strike',
+    ];
+    const joraga = [
+      'Name:Joraga Treespeaker',
+      'ManaCost:G',
+      'Types:Creature Elf Druid',
+      'PT:1/1',
+      'K:Level up:1 G',
+      'S:Mode$ Continuous | Affected$ Card.Self | SetPower$ 1 | SetToughness$ 2 | AddAbility$ ABMana | IsPresent$ Card.Self+counters_GE1_LEVEL+counters_LE4_LEVEL | Description$ LEVEL 1-4 1/2 {T}: Add {G}{G}.',
+      'SVar:ABMana:AB$ Mana | Cost$ T | Produced$ G | Amount$ 2 | SpellDescription$ Add {G}{G}.',
+      'S:Mode$ Continuous | Affected$ Card.Self | SetPower$ 1 | SetToughness$ 4 | IsPresent$ Card.Self+counters_GE5_LEVEL',
+      'S:Mode$ Continuous | Affected$ Elf.YouCtrl | AddAbility$ ABMana | IsPresent$ Card.Self+counters_GE5_LEVEL | Description$ LEVEL 5+ 1/4 Elves you control have "{T}: Add {G}{G}."',
+      'DeckHints:Type$Elf',
+      'Oracle:Level up {1}{G} ({1}{G}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 1-4\\n1/2\\n{T}: Add {G}{G}.\\nLEVEL 5+\\n1/4\\nElves you control have "{T}: Add {G}{G}."',
+    ];
+    const hexdrinker = [
+      'Name:Hexdrinker',
+      'ManaCost:G',
+      'Types:Creature Snake',
+      'PT:2/1',
+      'K:Level up:1',
+      'S:Mode$ Continuous | Affected$ Card.Self | SetPower$ 4 | SetToughness$ 4 | AddKeyword$ Protection:Instant:instants | IsPresent$ Card.Self+counters_GE3_LEVEL+counters_LT8_LEVEL | Description$ LEVEL 3-7 4/4 Protection from instants',
+      'S:Mode$ Continuous | Affected$ Card.Self | SetPower$ 6 | SetToughness$ 6 | AddKeyword$ Protection from everything | IsPresent$ Card.Self+counters_GE8_LEVEL | Description$ LEVEL 8+ 6/6 Protection from everything',
+      'Oracle:Level up {1} ({1}: Put a level counter on this. Level up only as a sorcery.)\\nLEVEL 3-7\\n4/4\\nProtection from instants\\nLEVEL 8+\\n6/6\\nProtection from everything',
+    ];
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(`${lines.join('\n')}\n`);
+
+    for (const exact of [student, joraga, hexdrinker]) {
+      expect(legacyCubeReviewedLevelUpProfileRefusals(script(exact))).toEqual([]);
+    }
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [student.with(0, 'Name:Student of Conflict'), 'exact reviewed identity'],
+      [student.with(4, 'K:Level up:1 W'), 'exact reviewed level-up script'],
+      [
+        student.with(5, student[5]!.replace('counters_GE2_LEVEL', 'counters_GE3_LEVEL')),
+        'exact reviewed level-up script',
+      ],
+      [[...student, 'K:Flying'], 'exact reviewed level-up script'],
+      [joraga.with(4, 'K:Level up:G'), 'exact reviewed level-up script'],
+      [joraga.with(6, joraga[6]!.replace('Amount$ 2', 'Amount$ 3')), 'exact reviewed level-up script'],
+      [joraga.toSpliced(7, 1), 'exact reviewed level-up script'],
+      [hexdrinker.with(4, 'K:Level up:2'), 'exact reviewed level-up script'],
+      [
+        hexdrinker.with(5, hexdrinker[5]!.replace('counters_GE3_LEVEL', 'counters_GE2_LEVEL')),
+        'exact reviewed level-up script',
+      ],
+      [
+        hexdrinker.with(6, hexdrinker[6]!.replace('6 | SetToughness$ 6', '7 | SetToughness$ 7')),
+        'exact reviewed level-up script',
+      ],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeReviewedLevelUpProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('admits only Selfless Spirit exact self-sacrifice team-indestructible profile', () => {
+    const exact = [
+      'Name:Selfless Spirit',
+      'ManaCost:1 W',
+      'Types:Creature Spirit Cleric',
+      'PT:2/1',
+      'K:Flying',
+      'A:AB$ PumpAll | Cost$ Sac<1/CARDNAME> | ValidCards$ Creature.YouCtrl | KW$ Indestructible | SpellDescription$ Creatures you control gain indestructible until end of turn.',
+      'Oracle:Flying\\nSacrifice Selfless Spirit: Creatures you control gain indestructible until end of turn.',
+    ];
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(`${lines.join('\n')}\n`);
+
+    expect(legacyCubeSelflessSpiritProfileRefusals(script(exact))).toEqual([]);
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [exact.with(0, 'Name:Dauntless Escort'), 'exact identity'],
+      [exact.with(1, 'ManaCost:2 W'), 'exact mana cost'],
+      [exact.with(2, 'Types:Creature Spirit Soldier'), 'exact creature type'],
+      [exact.with(3, 'PT:2/2'), 'exact combat stats'],
+      [exact.with(4, 'K:Vigilance'), 'exact flying keyword'],
+      [
+        exact.with(5, exact[5]!.replace('Sac<1/CARDNAME>', 'Sac<1/Creature>')),
+        'exact self-sacrifice team-indestructible activation',
+      ],
+      [
+        exact.with(5, exact[5]!.replace('Creature.YouCtrl', 'Creature')),
+        'exact self-sacrifice team-indestructible activation',
+      ],
+      [
+        exact.with(5, exact[5]!.replace('KW$ Indestructible', 'KW$ Hexproof')),
+        'exact self-sacrifice team-indestructible activation',
+      ],
+      [
+        exact.with(5, `${exact[5]!} | Duration$ Permanent`),
+        'exact self-sacrifice team-indestructible activation',
+      ],
+      [exact.with(6, exact[6]!.replace('Selfless Spirit', 'this creature')), 'exact installed Oracle text'],
+      [[...exact, 'A:AB$ Draw | Cost$ Sac<1/CARDNAME>'], 'additional mechanic'],
+      [[...exact, 'T:Mode$ Dies | Execute$ TrigDraw'], 'additional mechanic'],
+      [[...exact, 'SVar:Extra:DB$ PumpAll | KW$ Hexproof'], 'additional mechanic'],
+      [[...exact, 'K:Flash'], 'additional mechanic'],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeSelflessSpiritProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('admits only Remorseful Cleric exact self-sacrifice target-graveyard-exile profile', () => {
+    const exact = [
+      'Name:Remorseful Cleric',
+      'ManaCost:1 W',
+      'Types:Creature Spirit Cleric',
+      'PT:2/1',
+      'K:Flying',
+      "A:AB$ ChangeZoneAll | Cost$ Sac<1/CARDNAME> | ValidTgts$ Player | Origin$ Graveyard | ChangeType$ Card | IsCurse$ True | Destination$ Exile | SpellDescription$ Exile all cards from target player's graveyard.",
+      "Oracle:Flying\\nSacrifice Remorseful Cleric: Exile all cards from target player's graveyard.",
+    ];
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(`${lines.join('\n')}\n`);
+
+    expect(legacyCubeRemorsefulClericProfileRefusals(script(exact))).toEqual([]);
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [exact.with(0, 'Name:Tormods Cryptkeeper'), 'exact identity'],
+      [exact.with(1, 'ManaCost:2 W'), 'exact mana cost'],
+      [exact.with(2, 'Types:Creature Spirit Soldier'), 'exact creature type'],
+      [exact.with(3, 'PT:2/2'), 'exact combat stats'],
+      [exact.with(4, 'K:Vigilance'), 'exact flying keyword'],
+      [
+        exact.with(5, exact[5]!.replace('Sac<1/CARDNAME>', 'Sac<1/Creature>')),
+        'exact self-sacrifice target-graveyard-exile activation',
+      ],
+      [
+        exact.with(5, exact[5]!.replace('ValidTgts$ Player', 'ValidTgts$ Opponent')),
+        'exact self-sacrifice target-graveyard-exile activation',
+      ],
+      [
+        exact.with(5, exact[5]!.replace('Origin$ Graveyard', 'Origin$ Hand')),
+        'exact self-sacrifice target-graveyard-exile activation',
+      ],
+      [
+        exact.with(5, exact[5]!.replace('ChangeType$ Card', 'ChangeType$ Creature')),
+        'exact self-sacrifice target-graveyard-exile activation',
+      ],
+      [
+        exact.with(5, exact[5]!.replace('Destination$ Exile', 'Destination$ Hand')),
+        'exact self-sacrifice target-graveyard-exile activation',
+      ],
+      [
+        exact.with(5, `${exact[5]!} | TargetMax$ 2`),
+        'exact self-sacrifice target-graveyard-exile activation',
+      ],
+      [exact.with(6, exact[6]!.replace('Remorseful Cleric', 'this creature')), 'exact installed Oracle text'],
+      [exact.with(4, exact[5]!).with(5, exact[4]!), 'exact script order and multiplicity'],
+      [[...exact.slice(0, 6), exact[5]!, exact[6]!], 'exact script order and multiplicity'],
+      [[...exact.slice(0, 5), exact[4]!, ...exact.slice(5)], 'exact script order and multiplicity'],
+      [[...exact, exact[6]!], 'exact script order and multiplicity'],
+      [[...exact, 'A:AB$ Draw | Cost$ Sac<1/CARDNAME>'], 'additional mechanic'],
+      [[...exact, 'T:Mode$ Dies | Execute$ TrigDraw'], 'additional mechanic'],
+      [[...exact, 'SVar:Extra:DB$ ChangeZoneAll | Origin$ Graveyard'], 'additional mechanic'],
+      [[...exact, 'K:Flash'], 'additional mechanic'],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeRemorsefulClericProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('admits only the exact Coldsteel Heart entry-color and chosen-mana profile', () => {
+    const exact = [
+      'Name:Coldsteel Heart',
+      'ManaCost:2',
+      'Types:Snow Artifact',
+      'R:Event$ Moved | ValidCard$ Card.Self | Destination$ Battlefield | ReplacementResult$ Updated | ReplaceWith$ ETBTapped | Description$ CARDNAME enters tapped.',
+      'SVar:ETBTapped:DB$ Tap | Defined$ Self | ETB$ True',
+      'K:ETBReplacement:Other:ChooseColor',
+      'SVar:ChooseColor:DB$ ChooseColor | Defined$ You | AILogic$ MostProminentInComputerDeck | SpellDescription$ As CARDNAME enters, choose a color.',
+      'A:AB$ Mana | Cost$ T | Produced$ Chosen | SpellDescription$ Add one mana of the chosen color.',
+      'Oracle:Coldsteel Heart enters tapped.\\nAs Coldsteel Heart enters, choose a color.\\n{T}: Add one mana of the chosen color.',
+    ];
+    const script = (lines: readonly string[]): Uint8Array =>
+      new TextEncoder().encode(`${lines.join('\n')}\n`);
+
+    expect(legacyCubeColdsteelHeartProfileRefusals(script(exact))).toEqual([]);
+    const hostile: readonly (readonly [readonly string[], string])[] = [
+      [exact.with(0, 'Name:Warmsteel Heart'), 'exact identity'],
+      [exact.with(1, 'ManaCost:3'), 'exact mana cost'],
+      [exact.with(2, 'Types:Artifact'), 'exact snow artifact type'],
+      [
+        exact.with(3, exact[3]!.replace('Destination$ Battlefield', 'Destination$ Graveyard')),
+        'exact tapped-entry replacement',
+      ],
+      [exact.with(4, exact[4]!.replace('Defined$ Self', 'Defined$ You')), 'exact tapped-entry effect'],
+      [exact.with(5, 'K:ETBReplacement:Other:ChooseColors'), 'exact entry color-choice keyword'],
+      [exact.with(6, exact[6]!.replace('Defined$ You', 'Defined$ Opponent')), 'exact single-color choice'],
+      [exact.with(6, exact[6]!.replace('ChooseColor', 'ChooseColors')), 'exact single-color choice'],
+      [exact.with(7, exact[7]!.replace('Cost$ T', 'Cost$ 1 T')), 'exact chosen-color mana ability'],
+      [
+        exact.with(7, exact[7]!.replace('Produced$ Chosen', 'Produced$ Any')),
+        'exact chosen-color mana ability',
+      ],
+      [
+        exact.with(8, exact[8]!.replace('Coldsteel Heart enters tapped.', 'This artifact enters tapped.')),
+        'exact installed Oracle text',
+      ],
+      [exact.with(4, exact[5]!).with(5, exact[4]!), 'exact script order and multiplicity'],
+      [[...exact, exact[6]!], 'exact script order and multiplicity'],
+      [[...exact, 'A:AB$ Draw | Cost$ T'], 'additional mechanic'],
+      [[...exact, 'T:Mode$ ChangesZone | Execute$ TrigDraw'], 'additional mechanic'],
+    ];
+    for (const [lines, expected] of hostile) {
+      expect(legacyCubeColdsteelHeartProfileRefusals(script(lines))).toContain(expected);
+    }
+  });
+
+  it('resolves generated token scripts transitively and fails closed on their exact graph', () => {
+    const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
+    const card = encode('A:AB$ Token | TokenScript$ outer_token');
+    const scripts = new Map([
+      ['outer_token', encode('Name:Outer\nTypes:Artifact\nA:AB$ Token | TokenScript$ inner_token\n')],
+      ['inner_token', encode('Name:Inner\nTypes:Creature Construct\nPT:1/1\n')],
+    ]);
+    const dependencies = resolveLegacyCubeGeneratedScriptDependencies(
+      card,
+      (name) => scripts.get(name),
+      ledger.syntaxInventory,
+    );
+
+    expect(dependencies.map((dependency) => dependency.name)).toEqual(['inner_token', 'outer_token']);
+    expect(dependencies.find((dependency) => dependency.name === 'outer_token')?.dependencies).toEqual([
+      'inner_token',
+    ]);
+    expect(() =>
+      resolveLegacyCubeGeneratedScriptDependencies(card, () => undefined, ledger.syntaxInventory),
+    ).toThrow(/missing generated token script outer_token/i);
+
+    const vraska = entries[LEGACY_CUBE_VRASKA_GENERATED_TOKEN_SAFE_POSITIONS[0] - 1]!;
+    expect(vraska).toMatchObject({
+      correctedName: 'Vraska, Relic Seeker',
+      cardFamilySafe: true,
+      bridgeCapabilityProfile: {
+        topLevel: 'ordinary-combat-target-and-pinned-generated-token-v1',
+        manaPayment: 'ordinary-mana-payment-v1',
+        generatedObjects: 'pinned-token-scripts-v1',
+      },
+      runtimeProbeId: LEGACY_CUBE_VRASKA_GENERATED_TOKEN_PROBE.id,
+      generatedScriptDependencies: [
+        {
+          kind: 'token-script',
+          name: 'b_2_2_pirate_menace',
+          file: 'b_2_2_pirate_menace.txt',
+          sha256: 'fbe20d37475bc3b1e7150d97da0015e917885801f63643961ef9372bb04dfba8',
+          dependencies: [],
+        },
+        {
+          kind: 'token-script',
+          name: 'c_a_treasure_sac',
+          file: 'c_a_treasure_sac.txt',
+          sha256: '46065834254234a119bb538b9228b0703e9786870c040b4d4b9366540b3a1d52',
+          dependencies: [],
+        },
+      ],
+    });
+    expect(
+      ledger.runtimeProbes.find((probe) => probe.id === LEGACY_CUBE_VRASKA_GENERATED_TOKEN_PROBE.id),
+    ).toMatchObject({
+      cardNames: ['Vraska, Relic Seeker'],
+      families: ['priority', 'targets', 'combat'],
+      outcome: 'completed',
+    });
+
+    const vraskaCard = encode(
+      'Name:Vraska, Relic Seeker\nManaCost:4 B G\nTypes:Legendary Planeswalker Vraska\nLoyalty:6\n' +
+        'A:AB$ Token | Cost$ AddCounter<2/LOYALTY> | Planeswalker$ True | TokenScript$ b_2_2_pirate_menace | TokenOwner$ You | SpellDescription$ Create a 2/2 black Pirate creature token with menace.\n' +
+        'A:AB$ Destroy | Cost$ SubCounter<3/LOYALTY> | Planeswalker$ True | ValidTgts$ Artifact,Creature,Enchantment | TgtPrompt$ Select target artifact, creature, or enchantment | AILogic$ MinLoyalty.4 | SubAbility$ DBTreasure | SpellDescription$ Destroy target artifact, creature, or enchantment. Create a Treasure token.\n' +
+        'SVar:DBTreasure:DB$ Token | TokenScript$ c_a_treasure_sac | TokenOwner$ You\n' +
+        'A:AB$ SetLife | Cost$ SubCounter<10/LOYALTY> | Planeswalker$ True | Ultimate$ True | ValidTgts$ Player | LifeAmount$ 1\n',
+    );
+    const exactTokenScripts = new Map([
+      [
+        'b_2_2_pirate_menace',
+        encode(
+          'Name:Pirate Token\nManaCost:no cost\nColors:black\nTypes:Creature Pirate\nPT:2/2\nK:Menace\nOracle:Menace\n',
+        ),
+      ],
+      [
+        'c_a_treasure_sac',
+        encode(
+          'Name:Treasure Token\nManaCost:no cost\nTypes:Artifact Treasure\nA:AB$ Mana | Cost$ T Sac<1/CARDNAME/this token> | Produced$ Any | Amount$ 1 | SpellDescription$ Add one mana of any color.\nOracle:{T}, Sacrifice this token: Add one mana of any color.\n',
+        ),
+      ],
+    ]);
+    const exact = vraska.generatedScriptDependencies.map((dependency) => ({
+      name: dependency.name,
+      bytes: exactTokenScripts.get(dependency.name)!,
+    }));
+    expect(() =>
+      verifyLegacyCubeGeneratedScriptDependencies(vraska, vraskaCard, exact, ledger.syntaxInventory),
+    ).not.toThrow();
+    const drifted = exact.map((dependency) =>
+      dependency.name === 'c_a_treasure_sac'
+        ? { ...dependency, bytes: encode(`${new TextDecoder().decode(dependency.bytes)}# drift\n`) }
+        : dependency,
+    );
+    expect(() =>
+      verifyLegacyCubeGeneratedScriptDependencies(vraska, vraskaCard, drifted, ledger.syntaxInventory),
+    ).toThrow(/generated token script checksum drift/i);
+    expect(() =>
+      verifyLegacyCubeGeneratedScriptDependencies(vraska, vraskaCard, exact.slice(1), ledger.syntaxInventory),
+    ).toThrow(/missing generated token script b_2_2_pirate_menace/i);
+    expect(() =>
+      verifyLegacyCubeGeneratedScriptDependencies(
+        vraska,
+        vraskaCard,
+        [...exact, { name: 'unexpected_token', bytes: encode('Name:Unexpected\nTypes:Artifact\n') }],
+        ledger.syntaxInventory,
+      ),
+    ).toThrow(/unexpected generated token script/i);
+  });
+
+  it('rejects claiming a card safe outside a bounded profile or without a completed probe', () => {
+    const outsideProfile = copyOf(ledger);
+    const reviewed = outsideProfile.auditedCards.find(
+      (entry) => entry.cardFamilySafe && entry.bridgeCapabilityProfile !== null,
+    );
+    if (reviewed === undefined) throw new Error('fixture has no reviewed capability profile');
+    reviewed.bridgeCapabilityProfile = null;
+    expect(() => verifyLegacyCubeDecisionLedger(outsideProfile, provenance)).toThrow(
+      /bounded capability-profile review drift/i,
+    );
+
+    const unproven = copyOf(ledger);
+    const priorityOnly = unproven.auditedCards.find(
+      (entry) => entry.families.length === 1 && entry.families[0] === 'priority',
+    );
+    if (priorityOnly === undefined) throw new Error('fixture has no priority-only position');
+    priorityOnly.runtimeProbeId = null;
+    expect(() => verifyLegacyCubeDecisionLedger(unproven, provenance)).toThrow(/safe.*runtime probe/i);
+  });
+
+  it('rejects weakening or duplicating the universal match-family declaration', () => {
+    const duplicated = copyOf(ledger);
+    duplicated.bridgeReview.universalMatchFamilies = ['mulligan', 'mulligan'];
+    duplicated.contentSha256 = legacyCubeDecisionLedgerContentSha256(duplicated);
+    expect(() => verifyLegacyCubeDecisionLedger(duplicated, provenance)).toThrow(/universal match families/i);
+
+    const cardDependent = copyOf(ledger);
+    cardDependent.bridgeReview.universalMatchFamilies = ['mulligan', 'pregame-actions'];
+    cardDependent.contentSha256 = legacyCubeDecisionLedgerContentSha256(cardDependent);
+    expect(() => verifyLegacyCubeDecisionLedger(cardDependent, provenance)).toThrow(
+      /universal match families/i,
+    );
+
+    const wrongScope = copyOf(ledger);
+    const pregame = wrongScope.families.find((family) => family.tag === 'pregame-actions');
+    if (pregame === undefined) throw new Error('fixture has no pregame-actions family');
+    pregame.scope = 'match';
+    wrongScope.contentSha256 = legacyCubeDecisionLedgerContentSha256(wrongScope);
+    expect(() => verifyLegacyCubeDecisionLedger(wrongScope, provenance)).toThrow(
+      /family scope.*pregame-actions/i,
+    );
+  });
+
+  it('rejects handing a landed universal callback back to inherited AI', () => {
+    const changed = copyOf(ledger);
+    const callback = changed.controllerSurface.abstractCallbacks.find((row) =>
+      row.signature.includes('chooseStartingPlayer'),
+    );
+    if (callback === undefined) throw new Error('fixture has no chooseStartingPlayer callback');
+    callback.bridgeOwnership = 'inherited-ai';
+    changed.contentSha256 = legacyCubeDecisionLedgerContentSha256(changed);
+    expect(() => verifyLegacyCubeDecisionLedger(changed, provenance)).toThrow(
+      /callback attestation drift.*chooseStartingPlayer/i,
+    );
+  });
+
+  it('rejects bridge family status or evidence drift after recomputing the content hash', () => {
+    const wrongStatus = copyOf(ledger);
+    const mulligan = wrongStatus.families.find((family) => family.tag === 'mulligan');
+    if (mulligan === undefined) throw new Error('fixture has no mulligan family');
+    mulligan.bridgeStatus = 'unsupported';
+    wrongStatus.contentSha256 = legacyCubeDecisionLedgerContentSha256(wrongStatus);
+    expect(() => verifyLegacyCubeDecisionLedger(wrongStatus, provenance)).toThrow(
+      /bridge family evidence drift.*mulligan/i,
+    );
+
+    const wrongEvidence = copyOf(ledger);
+    const startingPlayer = wrongEvidence.families.find((family) => family.tag === 'starting-player');
+    if (startingPlayer === undefined) throw new Error('fixture has no starting-player family');
+    startingPlayer.bridgeEvidence = 'unattested';
+    wrongEvidence.contentSha256 = legacyCubeDecisionLedgerContentSha256(wrongEvidence);
+    expect(() => verifyLegacyCubeDecisionLedger(wrongEvidence, provenance)).toThrow(
+      /bridge family evidence drift.*starting-player/i,
+    );
+  });
+
+  it('pins the bridge implementation that owns the newly supported callbacks', () => {
+    expect(ledger.bridgeReview.source).toBe('packages/forge-export/bridge/ForgeBridge.java');
+    expect(ledger.bridgeReview.sourceSha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(() => verifyLegacyCubeDecisionBridgeSource(ledger, new TextEncoder().encode('drift'))).toThrow(
+      /Forge bridge source checksum drift/i,
+    );
+    const bridgeSource = readFileSync(ledger.bridgeReview.source, 'utf8');
+    expect(bridgeSource).toContain('Forge reached exert outside reviewed-single-source-exert-v1');
+    expect(bridgeSource).toContain('Forge reached enlist outside ordinary-combat-v1');
+    expect(bridgeSource).toContain('Forge reached an attack cost outside ordinary-combat-v1');
+    expect(bridgeSource).toContain('Forge reached a block cost outside ordinary-combat-v1');
+    expect(bridgeSource).toContain(
+      'Forge reached alternative combat-damage assignment outside ordinary-combat-v1',
+    );
+
+    const weakenedProbe = copyOf(ledger);
+    const completed = weakenedProbe.runtimeProbes.find((probe) => probe.outcome === 'completed');
+    if (completed === undefined) throw new Error('fixture has no completed match probe');
+    completed.families = ['priority'];
+    weakenedProbe.contentSha256 = legacyCubeDecisionLedgerContentSha256(weakenedProbe);
+    expect(() => verifyLegacyCubeDecisionLedger(weakenedProbe, provenance)).toThrow(
+      /completed bridge match probe evidence drift/i,
+    );
+  });
+
+  it('admits a bounded enumerated choice only where the bridge wires the callback that asks it', () => {
+    // `mtg-fp4l` phase 3. A choose-one is the choose-many loop run once, so the
+    // question this asserts is not that the shape is new but that the nine
+    // admitted positions are exactly the ones whose whole added surface is a
+    // choice out of a list Forge has already enumerated, and that the ten
+    // refused ones each name a shape the bridge throws on rather than answers.
+    expect(LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_SAFE_POSITIONS).toEqual([
+      1, 5, 22, 52, 66, 76, 425, 515, 524,
+    ]);
+    for (const position of LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_SAFE_POSITIONS) {
+      expect(entries[position - 1]).toMatchObject({
+        cardFamilySafe: true,
+        bridgeCapabilityProfile: {
+          topLevel: 'bounded-enumerated-choice-v1',
+          manaPayment: 'ordinary-mana-payment-v1',
+          generatedObjects: 'none',
+        },
+        runtimeProbeId: LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_PROBE.id,
+      });
+    }
+    expect(LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_EXCLUDED_POSITIONS).toEqual([
+      25, 144, 223, 279, 305, 367, 419, 435, 491, 556,
+    ]);
+    // Eight of those ten are admitted now, and the list still names them, which
+    // is the two statements being about different things rather than a
+    // contradiction. A position is excluded here when this profile's signature
+    // covers it and this profile's boundary refuses it, and that stays true of
+    // all ten: an enumerated choice has no reviewed token for a division and
+    // none for a naming. Phase 6 wrote a profile against the first of those
+    // shapes, so 279, 419 and 435 reach it, and phase 8 wrote one against the
+    // second, so 491 reaches that. The derived-amount extension admits 556
+    // through the announced-number profile, and the reviewed trigger-target
+    // profile owns Outpost Siege at 305. The assertion follows each card rather than
+    // dropping it -- asserting nothing about them would let a later phase admit
+    // them under any profile at all without this test noticing.
+    const distributed = new Set<number>(LEGACY_CUBE_STATED_DISTRIBUTION_SAFE_POSITIONS);
+    const named = new Set<number>(LEGACY_CUBE_OPEN_CARD_NAMING_SAFE_POSITIONS);
+    const reviewedTriggerTarget = new Set<number>(LEGACY_CUBE_REVIEWED_TRIGGER_TARGET_SAFE_POSITIONS);
+    const reviewedLilianaTwoPiles = new Set<number>(LEGACY_CUBE_REVIEWED_LILIANA_TWO_PILES_SAFE_POSITIONS);
+    const reviewedFactOrFiction = new Set<number>(LEGACY_CUBE_REVIEWED_FACT_OR_FICTION_SAFE_POSITIONS);
+    for (const position of LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_EXCLUDED_POSITIONS) {
+      const topLevel = distributed.has(position)
+        ? 'stated-distribution-v1'
+        : reviewedLilianaTwoPiles.has(position)
+          ? 'stated-ordering-and-reviewed-liliana-two-piles-v1'
+          : reviewedFactOrFiction.has(position)
+            ? 'stated-ordering-and-reviewed-fact-or-fiction-v1'
+            : named.has(position)
+              ? 'open-card-naming-v1'
+              : reviewedTriggerTarget.has(position)
+                ? 'stated-ordering-and-reviewed-trigger-target-v1'
+                : position === 367
+                  ? 'stated-ordering-and-reviewed-utopia-sprawl-v1'
+                  : position === 25
+                    ? 'stated-ordering-and-reviewed-gideon-garruk-bloodline-v1'
+                    : position === 556
+                      ? 'announced-number-v1'
+                      : null;
+      expect(entries[position - 1]).toMatchObject(
+        topLevel === null
+          ? { cardFamilySafe: false, bridgeCapabilityProfile: null }
+          : { cardFamilySafe: true, bridgeCapabilityProfile: { topLevel } },
+      );
+    }
+    expect(
+      LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_EXCLUDED_POSITIONS.filter((position) =>
+        distributed.has(position),
+      ),
+    ).toEqual([279, 419, 435]);
+    expect(
+      LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_EXCLUDED_POSITIONS.filter((position) => named.has(position)),
+    ).toEqual([491]);
+    // A probe naming no card would admit nobody, and a probe naming a card the
+    // ledger refused would admit somebody the audit did not reach.
+    const probe = ledger.runtimeProbes.find(
+      (candidate) => candidate.id === LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_PROBE.id,
+    );
+    expect(probe).toMatchObject({ kind: 'observed-forge-session', outcome: 'completed' });
+    expect(probe?.cardNames).toEqual(
+      LEGACY_CUBE_BOUNDED_ENUMERATED_CHOICE_SAFE_POSITIONS.map(
+        (position) => entries[position - 1]?.correctedName,
+      ),
+    );
+    // The two families the wired callbacks reach stay unsupported: wiring every
+    // callback a cohort reaches is not wiring every shape the family has.
+    for (const tag of ['naming-text-numbers', 'piles-votes'] as const) {
+      expect(ledger.families.find((family) => family.tag === tag)?.bridgeStatus).toBe('unsupported');
+    }
+  });
+});

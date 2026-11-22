@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "m10",
+  "archetypes": [
+    {
+      "id": "white-blue-flyers",
+      "name": "White-Blue Flyers",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Stormfront Pegasus",
+        "physicalId": "m10-printed-v1:0035:d2429a15-ccbe-463c-9218-968709d9e878"
+      },
+      "plan": "Hold the ground with efficient defenders while flyers and tempo interaction win the race."
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Divination",
+        "physicalId": "m10-printed-v1:0049:3102cec9-1cdc-4946-a2dd-caf04eaa8b97"
+      },
+      "plan": "Trade removal and counterspells for opposing threats, then pull ahead with card draw and evasive finishers."
+    },
+    {
+      "id": "black-red-sacrifice",
+      "name": "Black-Red Sacrifice",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Vampire Aristocrat",
+        "physicalId": "m10-printed-v1:0117:9bac0b9c-0077-44c8-8982-4e7b7e7ad398"
+      },
+      "plan": "Pressure life totals, steal a blocker with Act of Treason, and sacrifice it to Vampire Aristocrat."
+    },
+    {
+      "id": "red-green-ramp",
+      "name": "Red-Green Ramp",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Rampant Growth",
+        "physicalId": "m10-printed-v1:0201:78472540-b085-4ee1-848c-de4631274919"
+      },
+      "plan": "Accelerate into large green creatures and use red damage to clear blockers or finish the opponent."
+    },
+    {
+      "id": "green-white-creatures",
+      "name": "Green-White Creatures",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Prized Unicorn",
+        "physicalId": "m10-printed-v1:0199:cde88869-5202-43e9-b0eb-4e40a50d311e"
+      },
+      "plan": "Build a broad creature battlefield, then force favorable blocks with Prized Unicorn or finish with Overrun."
+    }
+  ]
+}

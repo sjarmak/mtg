@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "gpt",
+  "name": "Guildpact / Ravnica: City of Guilds",
+  "sourceCodes": ["GPT", "RAV"],
+  "products": [
+    {
+      "id": "gpt-draft",
+      "setCode": "GPT",
+      "boosterKey": "draft"
+    },
+    {
+      "id": "rav-draft",
+      "setCode": "RAV",
+      "boosterKey": "draft"
+    }
+  ],
+  "draft": {
+    "seats": 8,
+    "rounds": ["gpt-draft", "rav-draft", "rav-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["gpt-draft", "gpt-draft", "rav-draft", "rav-draft", "rav-draft", "rav-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

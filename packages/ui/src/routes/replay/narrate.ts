@@ -20,6 +20,12 @@ import { abilityLabel } from '../../log/ability-names';
 import { seatPossessive } from '../../seat';
 import type { ReplayGameLog } from './read-log';
 
+function battlefieldCard(game: ReplayGameLog, snapshot: LogSnapshot, oid: string) {
+  const permanent = snapshot.battlefield.find((entry) => entry.oid === oid);
+  if (permanent === undefined) return null;
+  return permanent.copiedCard ?? game.objects.get(oid)?.card ?? null;
+}
+
 /** What the replay route calls a name book; `LogNames` is the shared shape. */
 export type ReplayNames = LogNames;
 
@@ -49,11 +55,11 @@ function abilityLabels(game: ReplayGameLog): ReadonlyMap<string, string> {
     for (const entry of step.state.stack) {
       if (labels.has(entry.oid)) continue;
       if (entry.source !== null) {
-        const source = game.objects.get(entry.source);
+        const source = entry.sourceCard ?? battlefieldCard(game, step.state, entry.source);
         // The phrase itself comes from `log/ability-names.ts`, which says it for
         // the live log: two spellings of one label is how one board starts reading
         // two ways.
-        if (source !== undefined) labels.set(entry.oid, abilityLabel(source.card.name));
+        if (source !== null) labels.set(entry.oid, abilityLabel(source.name));
         continue;
       }
       if (entry.copiedFrom !== null) {
@@ -116,7 +122,21 @@ export function namesFor(game: ReplayGameLog, seq: number): ReplayNames {
     ? [first.deck, second.deck]
     : [`${first.deck} (seat 0)`, `${second.deck} (seat 1)`];
   const abilities = abilityLabels(game);
-  const named = (oid: string): string => game.objects.get(oid)?.card.name ?? abilities.get(oid) ?? oid;
+  const step = game.steps[seq];
+  const frame = step?.state;
+  const activeDecisionCard = (oid: string): ReturnType<typeof battlefieldCard> => {
+    const decision = step?.decision;
+    if (decision?.kind !== 'freeCast' || decision.activeCard === undefined) return null;
+    return decision.options.some((option) => 'oid' in option && option.oid === oid)
+      ? decision.activeCard
+      : null;
+  };
+  const named = (oid: string): string =>
+    (frame === undefined ? null : battlefieldCard(game, frame, oid))?.name ??
+    activeDecisionCard(oid)?.name ??
+    game.objects.get(oid)?.card.name ??
+    abilities.get(oid) ??
+    oid;
   return {
     player: (id: LogPlayerId) => labels[id],
     card: named,
@@ -130,7 +150,8 @@ export function namesFor(game: ReplayGameLog, seq: number): ReplayNames {
       const object = game.objects.get(oid);
       if (object === undefined) return oid;
       const controller = controllerAt(game, seq, oid) ?? object.owner;
-      return `${seatPossessive(labels[controller])} ${object.card.name}`;
+      const card = frame === undefined ? activeDecisionCard(oid) : battlefieldCard(game, frame, oid);
+      return `${seatPossessive(labels[controller])} ${(card ?? object.card).name}`;
     },
   };
 }

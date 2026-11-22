@@ -15,7 +15,7 @@ import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { Card as DslCard } from '@mtg/dsl';
-import { BASIC_LANDS, EXAMPLE_CARDS, isCastable } from '@mtg/dsl';
+import { BASIC_LANDS, EXAMPLE_CARDS, isCastable, mana } from '@mtg/dsl';
 import { Card } from '../src/card/Card';
 import { ManaPips } from '../src/card/ManaPips';
 import { PlayerStatus } from '../src/board/PlayerStatus';
@@ -25,6 +25,7 @@ import {
   PRINTED_SYMBOL_SET,
   SYMBOL_SETS,
   SYMBOL_TOKENS,
+  symbolAssetName,
   symbolArt,
   symbolSetFrom,
 } from '../src/card/symbols';
@@ -58,7 +59,7 @@ describe('the staged local set', () => {
       const art = symbolArt(token, 'local');
       expect(art?.kind, `${token} is referenced`).toBe('image');
       if (art?.kind !== 'image') continue;
-      expect(art.href).toBe(`${LOCAL_SYMBOL_BASE}${token}.svg`);
+      expect(art.href).toBe(`${LOCAL_SYMBOL_BASE}${symbolAssetName(token)}.svg`);
       expect(namesAHost(art.href), `${token} stays on this origin`).toBe(false);
     }
   });
@@ -99,6 +100,18 @@ function castable(): DslCard {
 }
 
 describe('one card, one vocabulary', () => {
+  it('gives repeated hybrid pips unique keys and a multicolor fallback disc', () => {
+    const rendered = ManaPips({ cost: mana({ hybrid: { 'W/U': 2 } }), symbols: 'original' });
+    const props = rendered.props as {
+      readonly children: readonly { readonly key: string | null }[];
+    };
+    const children = props.children;
+    expect(new Set(children.map((child) => child.key)).size).toBe(2);
+
+    const markup = renderToStaticMarkup(rendered);
+    expect(markup.match(/data-pip="m"/g)).toHaveLength(2);
+  });
+
   it('draws the title bar cost from the set the rules box is drawn from', () => {
     // The face used to hold two vocabularies at once: the rules box asked the
     // registry and the title bar drew `anatomy.ts`'s own pip whatever the set

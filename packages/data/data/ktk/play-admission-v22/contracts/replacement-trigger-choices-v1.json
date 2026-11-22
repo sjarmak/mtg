@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-controller-contract-receipt",
+  "id": "replacement-trigger-choices-v1",
+  "engineRuntime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "protocolVersion": 2
+  },
+  "decisionFamilies": [
+    "replacement-trigger-choices"
+  ],
+  "sourceRegions": [
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        public boolean confirmTrigger(WrappedAbility wrapper) {",
+      "endMarker": "        public boolean willPutCardOnTop(Card card) {",
+      "sha256": "8d26e41f570178cbba7a2a4ab9f78643f6e3360080b8f5262e614796d50624d2"
+    }
+  ],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "scenarioReceiptIds": [
+        "binding-mummy-local-replacement-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "scenarioReceiptIds": [
+        "binding-mummy-engine-replacement-v1"
+      ]
+    }
+  ],
+  "evidence": {
+    "scenarioReceipts": [
+      {
+        "receiptId": "binding-mummy-engine-replacement-v1",
+        "file": {
+          "path": "scenarios/binding-mummy-engine-replacement-v1.json",
+          "sha256": "95ab2f0b87ed9a8dcefafb1423d732b6bf9dc08490f959f787337b0f6fa82df4"
+        }
+      },
+      {
+        "receiptId": "binding-mummy-local-replacement-v1",
+        "file": {
+          "path": "scenarios/binding-mummy-local-replacement-v1.json",
+          "sha256": "70831aafcc0d4a50f31fc54447c903d8f8bd29d485dcc1f36a67a3872cbabc02"
+        }
+      }
+    ]
+  }
+}

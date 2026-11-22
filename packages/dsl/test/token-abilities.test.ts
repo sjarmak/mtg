@@ -244,13 +244,11 @@ describe('a token is held to the rules its own card type is held to', () => {
 
 describe('what a token may not do', () => {
   /**
-   * The one narrowing: a token's abilities are the card vocabulary minus
-   * `createToken`. An effect that carries a token, inside an ability that a
-   * token carries, is a schema with no bottom and a Forge export with no place
-   * to declare the inner token — `collectTokenFiles` walks the tokens a *card*
-   * declares.
+   * One nested token generation is the finite Mitotic Slime tier. Its child is
+   * the leaf: admitting another `createToken` there would remove the structural
+   * bottom the schema and every surface walk rely on.
    */
-  it('cannot carry an ability that creates another token', () => {
+  it('cannot carry a token whose ability creates a third token generation', () => {
     const found = validateCard(
       maker({
         name: 'Chest',
@@ -262,7 +260,16 @@ describe('what a token may not do', () => {
               {
                 kind: 'createToken',
                 count: 1,
-                token: { name: 'Trophy Horn' },
+                token: {
+                  name: 'Trophy Horn',
+                  abilities: [
+                    {
+                      kind: 'triggered',
+                      condition: 'selfDies',
+                      effects: [{ kind: 'createToken', count: 1, token: { name: 'Shard' } }],
+                    },
+                  ],
+                },
               },
             ],
           },
@@ -270,10 +277,12 @@ describe('what a token may not do', () => {
       }),
     );
     expect(found.length).toBeGreaterThan(0);
-    expect(found[0]?.path).toContain('effects[0].token.abilities[0].effects[0]');
+    expect(found[0]?.path).toContain(
+      'effects[0].token.abilities[0].effects[0].token.abilities[0].effects[0]',
+    );
   });
 
-  it('holds more than two abilities to the same cap a card is held to', () => {
+  it('keeps the deliberately narrower two-ability cap on embedded tokens', () => {
     const three = Array.from({ length: 3 }, (_ignored, index) => ({
       kind: 'triggered',
       condition: 'selfEnters',

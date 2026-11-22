@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-controller-contract-receipt",
+  "id": "naming-text-numbers-v1",
+  "engineRuntime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "protocolVersion": 2
+  },
+  "decisionFamilies": [
+    "naming-text-numbers"
+  ],
+  "sourceRegions": [
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        public ICardFace chooseSingleCardFace(\n                SpellAbility ability, String prompt, Predicate<ICardFace> filter, String logic) {",
+      "endMarker": "        public List<OptionalCostValue> chooseOptionalCosts(",
+      "sha256": "00c81f9aff3f37b0eef5e68df9c31053878360ecaa9d85044c8d268277cf1daf"
+    },
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        public int chooseNumber(SpellAbility ability, String message, int minimum, int maximum) {",
+      "endMarker": "         * How much of a variable cost reduction to apply.",
+      "sha256": "9014fd01a3857ac9825287c272317e421b1608e1bc59bc10fba9b3c3ed561c40"
+    }
+  ],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "scenarioReceiptIds": [
+        "dispossess-local-name-v1",
+        "hailfire-local-number-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "scenarioReceiptIds": [
+        "hailfire-engine-number-v1"
+      ]
+    }
+  ],
+  "evidence": {
+    "scenarioReceipts": [
+      {
+        "receiptId": "dispossess-local-name-v1",
+        "file": {
+          "path": "scenarios/dispossess-local-name-v1.json",
+          "sha256": "fe0e5a392644809462778fa82811c32840b7d8d57165eafa0aa3169e5253bea3"
+        }
+      },
+      {
+        "receiptId": "hailfire-engine-number-v1",
+        "file": {
+          "path": "scenarios/hailfire-engine-number-v1.json",
+          "sha256": "68acf651f820ef6731fe65f69cce2efc33dcf7177cb0e0fae8aaced468212ead"
+        }
+      },
+      {
+        "receiptId": "hailfire-local-number-v1",
+        "file": {
+          "path": "scenarios/hailfire-local-number-v1.json",
+          "sha256": "cf8bf33346cc44ac1f568f7acd85d843fd52e7a303ed8fd51ec59e725a4e4812"
+        }
+      }
+    ]
+  }
+}

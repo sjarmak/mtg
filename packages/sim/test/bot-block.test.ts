@@ -13,7 +13,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Action, GameState, ObjectId, PlayerId } from '@mtg/kernel';
 import { pendingDecision, reduce, scenario, validateAction } from '@mtg/kernel';
-import { DEFAULT_GREEDY_CONFIG, chooseBlocks } from '@mtg/sim';
+import { observeState } from '@mtg/kernel';
+import { DEFAULT_GREEDY_CONFIG, chooseBlocks, decideGreedy } from '@mtg/sim';
 import { creature, creatureWithStatic } from './cards';
 
 const config = DEFAULT_GREEDY_CONFIG;
@@ -84,6 +85,27 @@ function blocksFor(position: Position, me: PlayerId): readonly { blocker: string
 }
 
 describe('block policy', () => {
+  it('declines voluntary blocks when the attacker controls the declaration', () => {
+    const position = attackingPosition(
+      1,
+      [{ card: creature('Raider', 2, 2) }],
+      [{ card: creature('Guard', 3, 3) }],
+    );
+    const authorityState: GameState = {
+      ...position.state,
+      combat: { ...position.state.combat, blockDeclarationAuthority: 1 },
+      turn: { ...position.state.turn, awaitingPlayer: 1 },
+    };
+    const decision = pendingDecision(authorityState, 1);
+    if (decision?.kind !== 'declareBlockers') throw new Error('authority block decision disappeared');
+    const action = decideGreedy(
+      { state: observeState(authorityState, 1, 'test/bot-block.test.ts:100'), player: 1, decision },
+      DEFAULT_GREEDY_CONFIG,
+    );
+    expect(action).toEqual({ type: 'declareBlockers', player: 1, blocks: [] });
+    expect(validateAction(authorityState, action)).toBeNull();
+  });
+
   it('takes a block that kills the attacker and survives', () => {
     const position = attackingPosition(
       1,

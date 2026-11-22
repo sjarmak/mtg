@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "m11",
+  "formatSha256": "81a3157caf0feceaafd443a610a7edcbaa76ee5bc61c3b46b1855078349ba74a",
+  "sourceSha256": "82f33d7f74d089824069ff23cb10165347dc0297f6a093b1dd9e80841fbb134a",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "82f33d7f74d089824069ff23cb10165347dc0297f6a093b1dd9e80841fbb134a",
+    "recipe.json": "65e4014139751b20b65e71aa64b92b55ef2fca4e2af026b701d865e4feb63d7f",
+    "m11-printed-catalog-v1.json": "a053bd25e9b8a5ba6f222779997f02011367a6a6a10ba70fe950f2c2b15a05fc",
+    "m11-limited-format-v1.json": "b2aca7f0e60a6df5f2beae7e9475ef9cdd8f3b2fc52cd85a5486af34fbabd7b2"
+  },
+  "catalogs": [
+    {
+      "code": "M11",
+      "cards": 249,
+      "contentSha256": "ea0c6153e664b1c21aed2054a7bd0af617700997d3836f7977be809d5eec5dfe"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1067.628782,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 234,
+    "printings": 249
+  }
+}

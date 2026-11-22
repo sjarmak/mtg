@@ -20,6 +20,12 @@ export interface ForgeAbility {
   readonly params: readonly ForgeParam[];
 }
 
+/** A rendered `DB$` body and the `SVar:` name other abilities use to reach it. */
+export interface NamedSubAbility {
+  readonly name: string;
+  readonly rendered: string;
+}
+
 /** Characters that would break the line/pipe grammar if embedded in a value. */
 const UNSAFE_SCRIPT_CHARS = /[\r\n|]/;
 
@@ -55,6 +61,15 @@ export function renderActivatedAbility(ability: ForgeAbility): string {
 /** `DB$ GainLife | LifeAmount$ 2` — the sub-ability form used inside `SVar:`. */
 export function renderSubAbility(ability: ForgeAbility): string {
   return renderAbility('DB$', ability);
+}
+
+/** Renders a straight `SVar:` chain, linking every body to the next by name. */
+export function renderNamedSubAbilityChain(bodies: readonly NamedSubAbility[]): readonly string[] {
+  return bodies.map((body, position) => {
+    const next = bodies[position + 1];
+    const rendered = next === undefined ? body.rendered : `${body.rendered} | SubAbility$ ${next.name}`;
+    return `SVar:${body.name}:${rendered}`;
+  });
 }
 
 /**

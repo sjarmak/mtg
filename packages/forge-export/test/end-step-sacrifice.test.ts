@@ -132,8 +132,8 @@ describe('the deck hint on an ability effect rather than a spell effect', () => 
 });
 
 describe('the two legality tables, which must agree about this effect', () => {
-  it('lists the one retained referent on the row and in the DSL', () => {
-    expect([...FORGE_EFFECTS.sacrificeSelf.targets]).toEqual(['selfCreature']);
-    expect([...legalTargetsFor('sacrificeSelf')]).toEqual(['selfCreature']);
+  it('lists both retained source referents on the row and in the DSL', () => {
+    expect([...FORGE_EFFECTS.sacrificeSelf.targets]).toEqual(['selfCreature', 'selfPermanent']);
+    expect([...legalTargetsFor('sacrificeSelf')]).toEqual(['selfCreature', 'selfPermanent']);
   });
 });

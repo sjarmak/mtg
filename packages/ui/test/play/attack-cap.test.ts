@@ -72,8 +72,12 @@ const LISTED_BOARD = Math.floor(Math.log2(DEFAULT_ENUMERATION_CAP));
 function crowd(count: number): GameState {
   return scenario({
     seed: 'ui/attack-cap',
-    battlefield: Array.from({ length: count }, () => ({
-      card: BRUISER,
+    battlefield: Array.from({ length: count }, (_, index) => ({
+      card: {
+        ...BRUISER,
+        id: `${BRUISER.id}-${String(index)}`,
+        name: `${BRUISER.name} ${String(index + 1)}`,
+      },
       controller: 0 as PlayerId,
       summoningSick: false,
     })),
@@ -128,6 +132,26 @@ function attackersOf(action: Action): readonly ObjectId[] {
 }
 
 describe('a board past the enumeration cap', () => {
+  it('does not submit a one-creature enumeration step as the whole staged attack', () => {
+    const session = seated(crowd(LISTED_BOARD + 1));
+    const decision = session.pending;
+    if (decision === null || decision.kind !== 'declareAttackers') throw new Error('no attack to declare');
+    const first = decision.eligible[0];
+    if (first === undefined) throw new Error('the capped board has no first attacker');
+    expect(asksInSteps(decision)).toBe(true);
+
+    for (const wanted of [[], [first]] as const) {
+      const choice = attackChoice(session.state, decision, new Set(wanted.map(String)));
+      if (choice === null) throw new Error('the complete staged attack has no choice');
+      expect(typeof choice).not.toBe('number');
+      expect(attackersOf(choice as Action)).toEqual(wanted);
+
+      const applied = choose(session, choice);
+      expect(applied.state.combat.attacksSettled).toBeUndefined();
+      expect(applied.pending?.kind).not.toBe('declareAttackers');
+    }
+  });
+
   it('declares a set no index names, by clicking and confirming', () => {
     const session = seated(crowd(12));
     const board = session.state.battlefield;

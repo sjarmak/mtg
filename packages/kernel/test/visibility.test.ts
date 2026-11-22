@@ -20,9 +20,12 @@ import {
   concealedFrom,
   createGame,
   createSession,
+  agentView,
   humanSeat,
+  pendingDecision,
   seatEvent,
   seatState,
+  simpleAgent,
   stateFingerprint,
 } from '@mtg/kernel';
 import { lands, MOUNTAIN } from './cards';
@@ -48,10 +51,70 @@ function named(state: GameState, oid: ObjectId): boolean {
 }
 
 describe('what a seat may see', () => {
+  it('builds an agent view that is invariant to hidden identities, order, and randomness', () => {
+    const state = opened();
+    const decision = pendingDecision(state);
+    if (decision === null) throw new Error('the opened game owes a decision');
+    const opponentHand = [...state.players[1].hand].reverse();
+    const ownLibrary = [...state.players[0].library].reverse();
+    const opponentLibrary = [...state.players[1].library].reverse();
+    const changed: GameState = {
+      ...state,
+      players: [
+        { ...state.players[0], library: ownLibrary },
+        { ...state.players[1], hand: opponentHand, library: opponentLibrary },
+      ],
+      rng: { a: 1, b: 2, c: 3, d: 4 },
+      config: { ...state.config, seed: 'different-hidden-game' },
+    };
+
+    const changedDecision = pendingDecision(changed);
+    if (changedDecision === null) throw new Error('the changed game owes a decision');
+    const first = agentView(state, decision.player, decision, 'same-delivery');
+    const second = agentView(changed, changedDecision.player, changedDecision, 'same-delivery');
+    expect(stateFingerprint(first.state)).toBe(stateFingerprint(second.state));
+    expect(first.decision).toEqual(second.decision);
+    const bot = simpleAgent('observation-invariance');
+    expect(bot.decide(first)).toEqual(bot.decide(second));
+  });
+
   it('keeps the cards in its own hand', () => {
     const state = opened();
     const view = seatState(state, 0, 'viewer');
     for (const oid of state.players[0].hand) expect(named(view, oid)).toBe(true);
+  });
+
+  it('sends a pending free-cast card only to the seat choosing whether to cast it', () => {
+    const state = opened();
+    const oid = state.players[0].hand.find((candidate) => state.objects[candidate]?.card.kind !== 'land');
+    const object = oid === undefined ? undefined : state.objects[oid];
+    if (oid === undefined || object === undefined || object.card.kind === 'land') {
+      throw new Error('the visibility fixture dealt no castable card');
+    }
+    const pending: GameState = {
+      ...state,
+      turn: { ...state.turn, priority: null, awaiting: 'freeCast', awaitingPlayer: 0 },
+      pendingFreeCast: {
+        player: 0,
+        oid,
+        from: 'hand',
+        card: object.card,
+        sourceOid: oid,
+        controller: 0,
+        remaining: [],
+        x: null,
+        objectToGraveyard: null,
+        tally: { exiled: 0, exiledPermanents: 0, damage: 0, lifeLost: 0 },
+        deferredTriggers: [],
+      },
+    };
+
+    const chooser = seatState(pending, 0, 'free-cast-chooser');
+    const opponent = seatState(pending, 1, 'free-cast-opponent');
+    expect(chooser.pendingFreeCast?.card).toEqual(object.card);
+    expect(chooser.objects[oid]?.card).toEqual(object.card);
+    expect(opponent.pendingFreeCast).toBeUndefined();
+    expect(opponent.objects[oid]).toBeUndefined();
   });
 
   it('drops the cards in the other seat hand and keeps the count', () => {
@@ -93,7 +156,9 @@ describe('what a seat may see', () => {
     // a stack are the same rule with a different list.
     let session = createSession(SETUP, [humanSeat('One'), humanSeat('Two')]);
     for (let step = 0; step < 12 && session.pending !== null; step += 1) {
-      session = choose(session, session.pending.options.length - 1);
+      const index = session.pending.options.findLastIndex((option) => option.type !== 'concede');
+      if (index < 0) throw new Error('the player was offered no move except concession');
+      session = choose(session, index);
     }
     const view = seatState(session.state, 0, 'viewer');
     for (const oid of session.state.battlefield) expect(named(view, oid)).toBe(true);
@@ -196,6 +261,14 @@ describe('concealment cannot reach a reducer', () => {
     {
       file: 'backend-projection.ts',
       why: "turns a concealed position into @mtg/engine's per-seat projection, and imports nothing that could reduce one",
+    },
+    {
+      file: 'agent-view.ts',
+      why: 'projects privileged state before it crosses the agent boundary and imports no reducer',
+    },
+    {
+      file: 'agent-view.ts',
+      why: 'constructs an agent observation and projects the result of a caller-owned preview callback',
     },
   ];
   /** A value from any of these is a way back into the game. */

@@ -26,64 +26,27 @@
 import { z } from 'zod';
 import {
   CardSchema,
+  ColorSchema,
+  CounterKindSchema,
   KeywordSchema,
   ManaCostSchema,
   MAX_CHOSEN_X,
+  STATE_TRIGGER_CONDITIONS,
   TRIGGERING_CREATURE_CONDITIONS,
+  TRIGGERING_PLAYER_CONDITIONS,
+  TRIGGERING_STACK_OBJECT_CONDITIONS,
   TriggerConditionSchema,
 } from '@mtg/dsl';
 
-/**
- * Bump on any change to record shapes or semantics.
- *
- * `/2` is `activateAbility` growing a required `sacrifices`. Adding a whole
- * record *variant* left older files readable and went unbumped (c3fb0f6);
- * adding a required field to a variant that already existed does not, because
- * every `activateAbility` record written under `/1` now fails `strictObject`.
- * A file that still claimed `/1` would fail on the field rather than on the
- * version, which is the wrong error to hand somebody holding an old log.
- *
- * `/3` is two required fields inside `SnapshotSchema`, and they are the same
- * shape of change one level down: a snapshot is not a record variant, but every
- * `state` a `/2` file carries has neither field anywhere in it.
- * `BoardPermanentSchema.attachedTo` is CR 701.3a attachment, which reached the
- * kernel (`@mtg/kernel`'s `attachedTo`) while the viewer went on drawing two
- * unrelated permanents where a creature was carrying a weapon; the alternative
- * to the bump was an optional field, which would have made "this log predates
- * attachment" and "this permanent is attached to nothing" the same value.
- * `StackEntrySchema.source` is what an activated ability on the stack points at,
- * and its own docblock says what was broken without it.
- *
- * `/4` retains physical card identity, copied-from object, and chosen X for
- * every stack entry. `/5` additionally widens an attack's defender from a
- * numeric player to the tagged union that can name a planeswalker. `/6` adds
- * non-target trigger context. `/7` adds last-known source characteristics and
- * regeneration evidence. `/8` adds scry actions, decisions, and events.
- * Readers keep every released grammar distinct while the producer writes `/8`.
- *
- * Hand discard (`chooseDiscards`, `handDiscard`, `activateAbility.discards`)
- * lands under `/8` unbumped, and the first paragraph is the whole argument: a
- * new record *variant* and a new decision kind widen what a reader accepts
- * without invalidating a line already written, and `discards` is optional, so
- * every `activateAbility` record in every `/8` file on disk still parses. The
- * two events the lane emits (`cardsDiscarded`, `handRevealed`) predate it.
- *
- * An activated ability's announced X (`mtg-nhyv.17`) lands under `/8` unbumped
- * on the same argument, taken twice. `activateAbility.x` is optional, so a
- * record written before an ability could announce one parses unchanged. The
- * `abilityActivated` event's `chosenX` is *not* optional — the kernel's event
- * requires it — but it carries `.default(null)`, which reads an older line back
- * as "announced nothing", which is what an older line meant. Neither is a
- * required field appearing on an existing variant with no value to give it,
- * which is the change `/2` says has to bump.
- */
-export const EVENT_LOG_SCHEMA_VERSION = 'mtg-ui/event-log/8';
-const READABLE_EVENT_LOG_SCHEMA_VERSIONS = [
+export const EVENT_LOG_SCHEMA_VERSION = 'mtg-ui/event-log/10';
+export const READABLE_EVENT_LOG_SCHEMA_VERSIONS = [
   'mtg-ui/event-log/3',
   'mtg-ui/event-log/4',
   'mtg-ui/event-log/5',
   'mtg-ui/event-log/6',
   'mtg-ui/event-log/7',
+  'mtg-ui/event-log/8',
+  'mtg-ui/event-log/9',
   EVENT_LOG_SCHEMA_VERSION,
 ] as const;
 
@@ -92,8 +55,10 @@ const ObjectIdSchema = z.string().min(1);
 const CombatDefenderSchema = z.union([
   PlayerIdSchema,
   z.strictObject({ kind: z.literal('planeswalker'), oid: ObjectIdSchema }),
+  z.strictObject({ kind: z.literal('battle'), oid: ObjectIdSchema }),
 ]);
 const CountSchema = z.int().min(0);
+const CastingCostChoiceSchema = z.enum(['mana', 'alternative', 'overload', 'withoutMana']);
 
 export const STEP_NAMES = [
   'untap',
@@ -114,28 +79,120 @@ export const STEP_NAMES = [
 const StepSchema = z.enum(STEP_NAMES);
 const ZoneSchema = z.enum(['library', 'hand', 'battlefield', 'graveyard', 'exile', 'stack']);
 const ManaColorSchema = z.enum(['W', 'U', 'B', 'R', 'G', 'C']);
-const EndReasonSchema = z.enum(['lifeZero', 'emptyLibrary', 'concede', 'turnLimit']);
+const EndReasonSchema = z.enum(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']);
 const LifeReasonSchema = z.enum(['damage', 'lifelink', 'gainLife', 'lifeLoss']);
 const DestroyReasonSchema = z.enum(['lethalDamage', 'deathtouch', 'zeroToughness', 'destroyEffect']);
-const ReplaceableKindSchema = z.enum(['damage', 'draw', 'lifeGain', 'destroy', 'enters']);
+const ReplaceableKindSchema = z.enum([
+  'damage',
+  'draw',
+  'lifeGain',
+  'destroy',
+  'discard',
+  'enters',
+  'zoneChange',
+]);
 
 export const TargetSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('player'), player: PlayerIdSchema }),
   z.strictObject({ kind: z.literal('permanent'), oid: ObjectIdSchema }),
+  z.strictObject({ kind: z.literal('card'), oid: ObjectIdSchema }),
   z.strictObject({ kind: z.literal('spell'), oid: ObjectIdSchema }),
 ]);
 
 const TargetSlotSchema = z.union([TargetSchema, z.null()]);
+
+/**
+ * Plural targets were originally serialized as bare battlefield object ids.
+ * Accept that old spelling and normalize it to the generic target value the
+ * kernel now stores; new records always write the tagged form.
+ */
+const MultiTargetMemberSchema = z.union([
+  TargetSchema,
+  ObjectIdSchema.transform((oid) => ({ kind: 'permanent' as const, oid })),
+]);
+const DamageAllocationsSchema = z.record(z.string(), z.array(z.int().positive()));
 
 const DamageTargetSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('player'), player: PlayerIdSchema }),
   z.strictObject({ kind: z.literal('permanent'), oid: ObjectIdSchema }),
 ]);
 
+/**
+ * How a spell was paid for, mirroring `@mtg/kernel`'s `CastingCostChoice`.
+ *
+ * Named once here and spelled out rather than imported, because this route may
+ * not reach the kernel at all: a viewer that can ask the engine is a second
+ * engine that can disagree with the first, and `../../../test/replay/record.test.ts`
+ * fails the build if this file imports one. What keeps the two in step is the
+ * `MutuallyAssignable` guard in that test, which is `never` -- a compile error
+ * -- on the day the kernel grows a fifth way to pay for a spell. `overload`
+ * joined the kernel with the Return to Ravnica work and this enum still named
+ * three, so a recorded game in which anything was overloaded would have been
+ * refused by its own recorder.
+ */
+export const CASTING_COST_CHOICES = ['mana', 'alternative', 'overload', 'withoutMana'] as const;
+
+/** One of `CASTING_COST_CHOICES`. */
+export type LogCastingCostChoice = (typeof CASTING_COST_CHOICES)[number];
+
 /** The action alphabet, mirroring `@mtg/kernel`'s `Action`. */
 export const ActionSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('passPriority'), player: PlayerIdSchema }),
   z.strictObject({ type: z.literal('playLand'), player: PlayerIdSchema, oid: ObjectIdSchema }),
+  z.strictObject({
+    type: z.literal('chooseEntryCopy'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    copyOf: z.union([ObjectIdSchema, z.null()]),
+  }),
+  z.strictObject({
+    type: z.literal('chooseEntryCounterPermanent'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    permanent: ObjectIdSchema,
+  }),
+  z.strictObject({
+    type: z.literal('chooseEntryAuraHost'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    host: ObjectIdSchema,
+  }),
+  z.strictObject({
+    type: z.literal('chooseEntryTimestampNext'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+  }),
+  z.strictObject({
+    type: z.literal('chooseEntryCharacteristics'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    mode: z.int().nonnegative(),
+  }),
+  z.strictObject({
+    type: z.literal('chooseEntryOptionalCounter'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    accept: z.boolean(),
+  }),
+  z.strictObject({
+    type: z.literal('chooseEntryPayLife'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    life: z.int().positive(),
+    pay: z.boolean(),
+  }),
+  z.strictObject({
+    type: z.literal('chooseEntryPlayer'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    chosen: PlayerIdSchema,
+  }),
+  z.strictObject({
+    type: z.literal('chooseEntryColors'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    colors: z.tuple([ColorSchema, ColorSchema]),
+  }),
   z.strictObject({
     type: z.literal('castSpell'),
     player: PlayerIdSchema,
@@ -162,20 +219,57 @@ export const ActionSchema = z.discriminatedUnion('type', [
      */
     mode: CountSchema.exactOptional(),
     /**
-     * `TargetSpec.count`'s side-channel choice ("up to two target creatures",
-     * `mtg-kg44`), mirroring `@mtg/kernel`'s `Action['castSpell'].multiTargets`
+     * A plural target slot's side-channel choice, mirroring
+     * `@mtg/kernel`'s `Action['castSpell'].multiTargets`
      * — `exactOptional` for the same backward-compatible reason `x` and `mode`
-     * are: an old log with no counted-slot cast still parses. Keyed by string
+     * are: an old log with no plural-target cast still parses. Keyed by string
      * rather than `CountSchema` because a JSON object's own keys are strings
      * regardless of what the kernel's `Record<number, …>` declares them as;
      * `StackEntry.multiTargets`' docblock in `@mtg/kernel` has the full shape.
      */
-    multiTargets: z.record(z.string(), z.array(ObjectIdSchema)).exactOptional(),
+    multiTargets: z.record(z.string(), z.array(MultiTargetMemberSchema)).exactOptional(),
+    /** The printed price, a typed alternative, Overload, or an effect-instructed free cast. */
+    castingCost: CastingCostChoiceSchema.exactOptional(),
+    damageAllocations: DamageAllocationsSchema.exactOptional(),
+    /** Permanents paid as this spell's additional sacrifice cost. */
+    sacrifices: z.array(ObjectIdSchema).exactOptional(),
+    /** Cards paid as this spell's additional discard cost. */
+    discards: z.array(ObjectIdSchema).exactOptional(),
+  }),
+  z.strictObject({
+    type: z.literal('beginCastSpell'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    targets: z.array(TargetSlotSchema),
+    x: CountSchema.exactOptional(),
+    mode: CountSchema.exactOptional(),
+    castingCost: CastingCostChoiceSchema.exactOptional(),
+    sacrifices: z.array(ObjectIdSchema).exactOptional(),
+    discards: z.array(ObjectIdSchema).exactOptional(),
+  }),
+  z.strictObject({
+    type: z.literal('choosePluralTarget'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    target: TargetSlotSchema,
+  }),
+  z.strictObject({
+    type: z.literal('allocateDividedDamage'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    amount: CountSchema,
   }),
   z.strictObject({
     type: z.literal('activateManaAbility'),
     player: PlayerIdSchema,
     oid: ObjectIdSchema,
+    color: ManaColorSchema,
+    abilityIndex: CountSchema.exactOptional(),
+    amount: CountSchema.exactOptional(),
+  }),
+  z.strictObject({
+    type: z.literal('chooseManaColor'),
+    player: PlayerIdSchema,
     color: ManaColorSchema,
   }),
   z.strictObject({
@@ -183,7 +277,11 @@ export const ActionSchema = z.discriminatedUnion('type', [
     player: PlayerIdSchema,
     oid: ObjectIdSchema,
     abilityIndex: CountSchema,
+    /** CR 700.2 mode announced for a modal activated ability. */
+    mode: CountSchema.exactOptional(),
     targets: z.array(TargetSlotSchema),
+    multiTargets: z.record(z.string(), z.array(MultiTargetMemberSchema)).exactOptional(),
+    damageAllocations: DamageAllocationsSchema.exactOptional(),
     /**
      * The permanents the activation cost ate (`ActivationCost.sacrificeOther`),
      * always present and empty when the cost names none. Required rather than
@@ -191,6 +289,8 @@ export const ActionSchema = z.discriminatedUnion('type', [
      * nothing", the same reason the kernel's action carries it that way.
      */
     sacrifices: z.array(ObjectIdSchema),
+    /** The optional cohort chosen for `ActivationCost.tapMatching`. */
+    taps: z.array(ObjectIdSchema).exactOptional(),
     /**
      * The cards the activation cost discarded (`ActivationCost.discard`), CR
      * 601.2h. Optional rather than required, which is the opposite choice from
@@ -232,11 +332,18 @@ export const ActionSchema = z.discriminatedUnion('type', [
     blocks: z.array(z.strictObject({ blocker: ObjectIdSchema, attacker: ObjectIdSchema })),
     /** `declareAttackers.settled`, for the creatures that could block. */
     settled: CountSchema.exactOptional(),
+    /** Within-one-blocker progress for an unlimited-capacity blocker. */
+    attackerChoicesSettled: CountSchema.exactOptional(),
   }),
   z.strictObject({
     type: z.literal('orderBlockers'),
     player: PlayerIdSchema,
     orders: z.array(z.strictObject({ attacker: ObjectIdSchema, blockers: z.array(ObjectIdSchema) })),
+  }),
+  z.strictObject({
+    type: z.literal('orderAttackers'),
+    player: PlayerIdSchema,
+    orders: z.array(z.strictObject({ blocker: ObjectIdSchema, attackers: z.array(ObjectIdSchema) })),
   }),
   z.strictObject({ type: z.literal('discard'), player: PlayerIdSchema, oids: z.array(ObjectIdSchema) }),
   /**
@@ -248,6 +355,11 @@ export const ActionSchema = z.discriminatedUnion('type', [
     type: z.literal('keepHand'),
     player: PlayerIdSchema,
     bottom: z.array(ObjectIdSchema),
+  }),
+  z.strictObject({
+    type: z.literal('chooseOpeningHandAction'),
+    player: PlayerIdSchema,
+    oid: z.union([ObjectIdSchema, z.null()]),
   }),
   /**
    * CR 603.3d and CR 603.3b: the two answers a triggered ability asks for.
@@ -261,6 +373,8 @@ export const ActionSchema = z.discriminatedUnion('type', [
     player: PlayerIdSchema,
     oid: ObjectIdSchema,
     targets: z.array(TargetSlotSchema),
+    multiTargets: z.record(z.string(), z.array(MultiTargetMemberSchema)).exactOptional(),
+    damageAllocations: DamageAllocationsSchema.exactOptional(),
   }),
   z.strictObject({
     type: z.literal('answerOptionalTrigger'),
@@ -299,10 +413,43 @@ export const ActionSchema = z.discriminatedUnion('type', [
    */
   z.strictObject({ type: z.literal('keepLegend'), player: PlayerIdSchema, oid: ObjectIdSchema }),
   z.strictObject({
+    type: z.literal('declineFreeCast'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+  }),
+  z.strictObject({
+    type: z.literal('allocateDamagePrevention'),
+    player: PlayerIdSchema,
+    sourceOid: ObjectIdSchema,
+    amount: CountSchema,
+  }),
+  z.strictObject({
     type: z.literal('scry'),
     player: PlayerIdSchema,
     top: z.array(ObjectIdSchema),
     bottom: z.array(ObjectIdSchema),
+  }),
+  z.strictObject({
+    type: z.literal('orderTopLibrary'),
+    player: PlayerIdSchema,
+    cards: z.array(ObjectIdSchema),
+  }),
+  z.strictObject({
+    type: z.literal('selectFromTopLibrary'),
+    player: PlayerIdSchema,
+    chosen: z.union([ObjectIdSchema, z.null()]),
+    rest: z.array(ObjectIdSchema),
+  }),
+  z.strictObject({
+    type: z.literal('separateTopLibraryPiles'),
+    player: PlayerIdSchema,
+    first: z.array(ObjectIdSchema),
+    second: z.array(ObjectIdSchema),
+  }),
+  z.strictObject({
+    type: z.literal('chooseTopLibraryPile'),
+    player: PlayerIdSchema,
+    pile: z.union([z.literal(0), z.literal(1)]),
   }),
   /**
    * CR 701.19a: the card a search took, or `null` for failing to find. Nullable
@@ -315,6 +462,11 @@ export const ActionSchema = z.discriminatedUnion('type', [
     type: z.literal('searchLibrary'),
     player: PlayerIdSchema,
     found: z.union([ObjectIdSchema, z.null()]),
+  }),
+  z.strictObject({
+    type: z.literal('chooseSearchDestination'),
+    player: PlayerIdSchema,
+    one: ObjectIdSchema,
   }),
   /**
    * The card a resolving effect took out of a graveyard, or `null` for taking
@@ -329,6 +481,39 @@ export const ActionSchema = z.discriminatedUnion('type', [
     type: z.literal('chooseFromGraveyard'),
     player: PlayerIdSchema,
     chosen: z.union([ObjectIdSchema, z.null()]),
+  }),
+  z.strictObject({
+    type: z.literal('chooseFromRevealedHand'),
+    player: PlayerIdSchema,
+    chosen: z.union([ObjectIdSchema, z.null()]),
+  }),
+  z.strictObject({
+    type: z.literal('chooseFromBattlefield'),
+    player: PlayerIdSchema,
+    chosen: ObjectIdSchema,
+  }),
+  z.strictObject({
+    type: z.literal('choosePopulateToken'),
+    player: PlayerIdSchema,
+    token: ObjectIdSchema,
+  }),
+  z.strictObject({
+    type: z.literal('chooseCardName'),
+    player: PlayerIdSchema,
+    name: z.string(),
+  }),
+  z.strictObject({
+    type: z.literal('chooseNamedZoneExile'),
+    player: PlayerIdSchema,
+    oid: z.union([ObjectIdSchema, z.null()]),
+  }),
+  z.strictObject({
+    type: z.literal('chooseSpellTargets'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    targets: z.array(TargetSlotSchema),
+    multiTargets: z.record(z.string(), z.array(MultiTargetMemberSchema)).exactOptional(),
+    damageAllocations: DamageAllocationsSchema.exactOptional(),
   }),
   /**
    * CR 701.8a: which cards a resolving effect discards. Its own variant rather
@@ -345,7 +530,7 @@ export const ActionSchema = z.discriminatedUnion('type', [
     oids: z.array(ObjectIdSchema),
   }),
   /**
-   * CR 701.17a: which creature the target player sacrificed. `keepLegend`'s
+   * CR 701.17a: which permanent the affected player sacrificed. `keepLegend`'s
    * shape above — one `oid` naming the choice made, never a list of what was
    * declined — because both rules offer no "none of these" arm: a legal
    * candidate always exists when either decision is asked at all.
@@ -354,6 +539,11 @@ export const ActionSchema = z.discriminatedUnion('type', [
     type: z.literal('sacrificePermanent'),
     player: PlayerIdSchema,
     oid: ObjectIdSchema,
+  }),
+  z.strictObject({
+    type: z.literal('choosePermanentToUntap'),
+    player: PlayerIdSchema,
+    oid: z.union([ObjectIdSchema, z.null()]),
   }),
   z.strictObject({ type: z.literal('concede'), player: PlayerIdSchema }),
 ]);
@@ -364,6 +554,12 @@ const BlockSchema = z.strictObject({ attacker: ObjectIdSchema, blockers: z.array
 /** The kernel's `GameEvent` union, one strict variant per record it emits. */
 export const EventSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('gameStarted'), seed: z.string(), startingPlayer: PlayerIdSchema }),
+  z.strictObject({
+    type: z.literal('emblemCreated'),
+    id: z.string(),
+    player: PlayerIdSchema,
+    name: z.string(),
+  }),
   z.strictObject({ type: z.literal('libraryShuffled'), player: PlayerIdSchema, cards: CountSchema }),
   z.strictObject({ type: z.literal('cardDrawn'), player: PlayerIdSchema, oid: ObjectIdSchema }),
   z.strictObject({ type: z.literal('drawFromEmptyLibrary'), player: PlayerIdSchema }),
@@ -375,6 +571,30 @@ export const EventSchema = z.discriminatedUnion('type', [
     active: PlayerIdSchema,
   }),
   z.strictObject({ type: z.literal('stepEnded'), turn: z.int(), step: StepSchema }),
+  z.strictObject({
+    type: z.literal('delayedCounterPlacementScheduled'),
+    id: z.int(),
+    source: ObjectIdSchema,
+    target: ObjectIdSchema,
+    targetIncarnation: z.int().nonnegative(),
+    dueTurn: z.int().positive(),
+    counter: CounterKindSchema,
+    count: z.int().positive(),
+  }),
+  z.strictObject({
+    type: z.literal('delayedZoneChangeScheduled'),
+    id: z.int(),
+    source: ObjectIdSchema,
+    target: ObjectIdSchema,
+    targetIncarnation: z.int().nonnegative(),
+    dueTurn: z.int().positive(),
+  }),
+  z.strictObject({
+    type: z.literal('delayedSpellCopyScheduled'),
+    id: z.int(),
+    source: ObjectIdSchema,
+    player: PlayerIdSchema,
+  }),
   z.strictObject({ type: z.literal('permanentUntapped'), oid: ObjectIdSchema }),
   z.strictObject({ type: z.literal('untapSkipped'), oid: ObjectIdSchema }),
   z.strictObject({ type: z.literal('permanentTapped'), oid: ObjectIdSchema }),
@@ -400,6 +620,8 @@ export const EventSchema = z.discriminatedUnion('type', [
     player: PlayerIdSchema,
     oid: ObjectIdSchema,
     targets: z.array(TargetSlotSchema),
+    multiTargets: z.record(z.string(), z.array(MultiTargetMemberSchema)).exactOptional(),
+    damageAllocations: DamageAllocationsSchema.exactOptional(),
     chosenX: z.union([z.int().min(0).max(MAX_CHOSEN_X), z.null()]),
   }),
   z.strictObject({
@@ -408,7 +630,15 @@ export const EventSchema = z.discriminatedUnion('type', [
     oid: ObjectIdSchema,
     copiedFrom: ObjectIdSchema,
     targets: z.array(TargetSlotSchema),
+    multiTargets: z.record(z.string(), z.array(MultiTargetMemberSchema)).exactOptional(),
+    damageAllocations: DamageAllocationsSchema.exactOptional(),
     chosenX: z.union([z.int().min(0).max(MAX_CHOSEN_X), z.null()]),
+  }),
+  z.strictObject({
+    type: z.literal('spellTargetsChanged'),
+    player: PlayerIdSchema,
+    oid: ObjectIdSchema,
+    targets: z.array(TargetSchema),
   }),
   z.strictObject({
     type: z.literal('abilityActivated'),
@@ -417,6 +647,8 @@ export const EventSchema = z.discriminatedUnion('type', [
     source: ObjectIdSchema,
     index: CountSchema,
     targets: z.array(TargetSlotSchema),
+    multiTargets: z.record(z.string(), z.array(MultiTargetMemberSchema)).exactOptional(),
+    damageAllocations: DamageAllocationsSchema.exactOptional(),
     /**
      * `spellCast`'s field on the other announcement (`mtg-nhyv.17`). The kernel
      * requires it, so this cannot be `exactOptional` the way the *action*'s `x`
@@ -436,13 +668,19 @@ export const EventSchema = z.discriminatedUnion('type', [
     oid: ObjectIdSchema,
     source: ObjectIdSchema,
     index: CountSchema,
-    condition: TriggerConditionSchema,
+    condition: z.union([
+      TriggerConditionSchema,
+      z.enum(STATE_TRIGGER_CONDITIONS),
+      z.literal('siegeDefeated'),
+    ]),
   }),
   z.strictObject({
     type: z.literal('triggerTargetsChosen'),
     oid: ObjectIdSchema,
     source: ObjectIdSchema,
     targets: z.array(TargetSlotSchema),
+    multiTargets: z.record(z.string(), z.array(MultiTargetMemberSchema)).exactOptional(),
+    damageAllocations: DamageAllocationsSchema.exactOptional(),
   }),
   z.strictObject({ type: z.literal('triggerDeclined'), oid: ObjectIdSchema, source: ObjectIdSchema }),
   z.strictObject({
@@ -452,9 +690,16 @@ export const EventSchema = z.discriminatedUnion('type', [
     why: z.string(),
   }),
   z.strictObject({ type: z.literal('spellCountered'), oid: ObjectIdSchema, by: ObjectIdSchema }),
+  z.strictObject({ type: z.literal('abilityCountered'), oid: ObjectIdSchema, by: ObjectIdSchema }),
+  z.strictObject({ type: z.literal('freeCastDeclined'), oid: ObjectIdSchema, player: PlayerIdSchema }),
   z.strictObject({ type: z.literal('spellFizzled'), oid: ObjectIdSchema }),
   z.strictObject({ type: z.literal('spellDeclined'), oid: ObjectIdSchema, player: PlayerIdSchema }),
-  z.strictObject({ type: z.literal('unlessPaid'), oid: ObjectIdSchema, player: PlayerIdSchema }),
+  z.strictObject({
+    type: z.literal('unlessPaid'),
+    oid: ObjectIdSchema,
+    player: PlayerIdSchema,
+    source: ObjectIdSchema.optional(),
+  }),
   z.strictObject({ type: z.literal('resolutionBegan'), oid: ObjectIdSchema }),
   z.strictObject({
     type: z.literal('effectSkipped'),
@@ -468,6 +713,11 @@ export const EventSchema = z.discriminatedUnion('type', [
     from: ZoneSchema,
     to: ZoneSchema,
     owner: PlayerIdSchema,
+    lastKnownController: PlayerIdSchema.exactOptional(),
+    attachedSources: z.array(ObjectIdSchema).exactOptional(),
+    departingCreaturePower: z.int().exactOptional(),
+    departingCreatureToughness: z.int().exactOptional(),
+    departingBattlefieldIncarnation: z.int().min(0).exactOptional(),
   }),
   z.strictObject({
     type: z.literal('permanentEntered'),
@@ -505,6 +755,14 @@ export const EventSchema = z.discriminatedUnion('type', [
     plusOnePlusOne: z.int(),
     minusOneMinusOne: z.int(),
     loyalty: z.int().optional(),
+    defense: z.int().optional(),
+  }),
+  z.strictObject({ type: z.literal('battleDefeated'), oid: ObjectIdSchema }),
+  z.strictObject({
+    type: z.literal('counterRemoved'),
+    oid: ObjectIdSchema,
+    counter: CounterKindSchema,
+    count: z.int().positive(),
   }),
   z.strictObject({
     type: z.literal('lifeChanged'),
@@ -522,10 +780,41 @@ export const EventSchema = z.discriminatedUnion('type', [
     layer: z.string(),
   }),
   z.strictObject({
+    type: z.literal('permanentAnimated'),
+    effectIds: z.array(z.string()).min(1),
+    sourceOid: ObjectIdSchema,
+    targetOid: ObjectIdSchema,
+    power: z.int(),
+    toughness: z.int(),
+    colors: z.array(ColorSchema).min(1),
+    subtypes: z.array(z.string().min(1)).min(1),
+  }),
+  z.strictObject({
+    type: z.literal('controlEffectAdded'),
+    id: z.string(),
+    targetOid: ObjectIdSchema,
+    controller: PlayerIdSchema,
+    layer: z.literal('2'),
+  }),
+  z.strictObject({
+    type: z.literal('subtypeAdded'),
+    id: z.string(),
+    targetOid: ObjectIdSchema,
+    subtype: z.string().min(1),
+    layer: z.literal('4'),
+  }),
+  z.strictObject({
     type: z.literal('keywordGranted'),
     id: z.string(),
     targetOid: ObjectIdSchema,
     keyword: KeywordSchema,
+    layer: z.string(),
+  }),
+  z.strictObject({
+    type: z.literal('keywordAbilityRemoved'),
+    id: z.string(),
+    targetOid: ObjectIdSchema,
+    keywordAbility: z.literal('defender'),
     layer: z.string(),
   }),
   z.strictObject({ type: z.literal('continuousEffectsExpired'), ids: z.array(z.string()) }),
@@ -555,6 +844,11 @@ export const EventSchema = z.discriminatedUnion('type', [
     attacker: ObjectIdSchema,
     blockers: z.array(ObjectIdSchema),
   }),
+  z.strictObject({
+    type: z.literal('attackerOrderChosen'),
+    blocker: ObjectIdSchema,
+    attackers: z.array(ObjectIdSchema),
+  }),
   z.strictObject({ type: z.literal('combatDamageStep'), firstStrike: z.boolean() }),
   z.strictObject({ type: z.literal('cardsMilled'), player: PlayerIdSchema, oids: z.array(ObjectIdSchema) }),
   z.strictObject({
@@ -562,6 +856,12 @@ export const EventSchema = z.discriminatedUnion('type', [
     player: PlayerIdSchema,
     count: CountSchema,
     bottom: CountSchema,
+  }),
+  z.strictObject({
+    type: z.literal('coinFlipped'),
+    player: PlayerIdSchema,
+    sourceOid: ObjectIdSchema,
+    result: z.enum(['win', 'loss']),
   }),
   z.strictObject({
     type: z.literal('cardsDiscarded'),
@@ -575,6 +875,11 @@ export const EventSchema = z.discriminatedUnion('type', [
   }),
   z.strictObject({
     type: z.literal('libraryTopRevealed'),
+    player: PlayerIdSchema,
+    oids: z.array(ObjectIdSchema),
+  }),
+  z.strictObject({
+    type: z.literal('libraryCardsRevealed'),
     player: PlayerIdSchema,
     oids: z.array(ObjectIdSchema),
   }),
@@ -641,6 +946,8 @@ const ManaPoolSchema = z.strictObject({
  */
 export const BoardPermanentSchema = z.strictObject({
   oid: ObjectIdSchema,
+  /** Current layer-1 copiable face when it differs from the physical card. */
+  copiedCard: CardSchema.optional(),
   controller: PlayerIdSchema,
   tapped: z.boolean(),
   summoningSick: z.boolean(),
@@ -649,11 +956,16 @@ export const BoardPermanentSchema = z.strictObject({
   minusCounters: CountSchema,
   /** Present in `/5` recordings; absent in released `/3` and `/4` snapshots. */
   loyalty: CountSchema.optional(),
+  /** Current Battle defense and protector; absent before Battle support. */
+  defense: CountSchema.optional(),
+  protector: PlayerIdSchema.optional(),
   power: z.union([z.int(), z.null()]),
   toughness: z.union([z.int(), z.null()]),
   attachedTo: z.union([ObjectIdSchema, z.null()]),
   attacking: z.boolean(),
   blocking: z.boolean(),
+  /** Active CR 701.29 restriction; absent means unrestricted, including in legacy logs. */
+  detained: z.literal(true).optional(),
 });
 
 export const SeatStateSchema = z.strictObject({
@@ -676,76 +988,101 @@ export const SeatStateSchema = z.strictObject({
  * had nothing to draw. The first recorded game to activate anything but a mana
  * ability is what found that, which is `equip.test.ts`.
  */
-export const StackEntrySchema = z.strictObject({
-  oid: ObjectIdSchema,
-  controller: PlayerIdSchema,
-  /** The physical card whose face this spell or ability uses. */
-  card: ObjectIdSchema,
-  source: z.union([ObjectIdSchema, z.null()]),
-  copiedFrom: z.union([ObjectIdSchema, z.null()]),
-  chosenX: z.union([z.int().min(0).max(MAX_CHOSEN_X), z.null()]),
-  triggerContext: z.union([
-    z.strictObject({
-      // The conditions that retain a creature from their own event, taken from
-      // the DSL's one list rather than restated here. Restating them is what
-      // went wrong: `selfBlocksOrIsBlockedByGreaterPower` joined the kernel's
-      // `TriggerContextKind` and this enum still named two, so the first
-      // recorded game in which a flurry-rush trigger reached the stack was
-      // refused by its own recorder and the launcher stopped with a schema
-      // error naming neither the card nor the condition. The list is in
-      // `@mtg/dsl` and not in `@mtg/kernel` because this route may not import
-      // the kernel at all (`record.test.ts` fails the build if it does): a
-      // viewer that can reach the engine is a second engine that can disagree
-      // with the first. Importing it keeps a rejected log the answer for a kind
-      // the kernel does not have, and never for one it does.
-      kind: z.enum(TRIGGERING_CREATURE_CONDITIONS),
-      triggeringCreature: ObjectIdSchema,
-    }),
-    z.null(),
-  ]),
-  sourceCharacteristics: z.union([
-    z.strictObject({
-      colors: z.array(z.enum(['W', 'U', 'B', 'R', 'G'])),
-      subtypes: z.array(z.string()),
-    }),
-    z.null(),
-  ]),
-  /**
-   * CR 700.2's chosen mode (`mtg-bc2.152.4`), mirroring `@mtg/kernel`'s
-   * `StackEntry.mode` — `null` for every ability entry and for a spell with no
-   * `modes` to choose among, an index into `card.modes` otherwise.
-   *
-   * `.default(null)` rather than required-plus-a-version-bump, unlike
-   * `chosenX`/`copiedFrom`/`triggerContext`/`sourceCharacteristics` above:
-   * those fields' bumps (`/4`, `/6`, `/7`) each paired with a backfill branch
-   * in `read-log.ts`'s per-version `migrateStep`, and that file already keys
-   * three branches to the literal `/8` string for scry's own bump — bumping
-   * this file's version without updating them would silently misclassify
-   * every freshly-recorded `/9` game as pre-`/8` for scry migration, which is
-   * a worse bug than the one this field fixes. `mtg-7si0` is scoped to this
-   * file, `record-replay.ts` and `frame.ts`; a `/9` bump that pairs correctly
-   * with `read-log.ts` is a follow-up. `.default(null)` means an already-
-   * recorded `/8` file's stack entry — which never carried this key — reads
-   * as "no mode chosen," indistinguishable here from the true case; the
-   * producer (`record-replay.ts`'s `snapshotOf`) always writes the key
-   * explicitly going forward, and `StackEntryKeysCovered` there is what
-   * catches the next kernel field this transform would otherwise drop
-   * silently, the way this one was.
-   */
-  mode: z.union([CountSchema, z.null()]).default(null),
-  targets: z.array(TargetSlotSchema),
-  /**
-   * The objects chosen for a counted slot ("up to two target creatures",
-   * `mtg-kg44`), keyed by the slot's index in `targets`. Absent rather than
-   * `null` when the entry has no counted slot, which is every entry in every
-   * committed fixture: the kernel's own field is optional for the same reason,
-   * and an omitted key leaves a `/8` file byte-identical to what it already is.
-   * The frame does not draw these yet; the log carries them so that the day a
-   * counted spell reaches a recorded stack, the record is not missing the half
-   * of the cast that says what it hit.
-   */
-  multiTargets: z.record(z.string(), z.array(ObjectIdSchema)).optional(),
-});
+export const StackEntrySchema = z
+  .strictObject({
+    oid: ObjectIdSchema,
+    controller: PlayerIdSchema,
+    /** The physical card whose face this spell or ability uses. */
+    card: ObjectIdSchema,
+    /** Copiable source values retained for an ability's stack incarnation. */
+    sourceCard: CardSchema.optional(),
+    source: z.union([ObjectIdSchema, z.null()]),
+    /** Printed ability slot for an activated ability; absent on spells and legacy logs. */
+    abilityIndex: CountSchema.exactOptional(),
+    copiedFrom: z.union([ObjectIdSchema, z.null()]),
+    chosenX: z.union([z.int().min(0).max(MAX_CHOSEN_X), z.null()]),
+    triggerContext: z.union([
+      z.strictObject({
+        // The conditions that retain a creature from their own event, taken from
+        // the DSL's one list rather than restated here. Restating them is what
+        // went wrong: `selfBlocksOrIsBlockedByGreaterPower` joined the kernel's
+        // `TriggerContextKind` and this enum still named two, so the first
+        // recorded game in which a flurry-rush trigger reached the stack was
+        // refused by its own recorder and the launcher stopped with a schema
+        // error naming neither the card nor the condition. The list is in
+        // `@mtg/dsl` and not in `@mtg/kernel` because this route may not import
+        // the kernel at all (`record.test.ts` fails the build if it does): a
+        // viewer that can reach the engine is a second engine that can disagree
+        // with the first. Importing it keeps a rejected log the answer for a kind
+        // the kernel does not have, and never for one it does.
+        kind: z.enum(TRIGGERING_CREATURE_CONDITIONS),
+        triggeringCreature: ObjectIdSchema,
+        // New recordings retain CR 400.7 identity. Optional keeps event-log v6
+        // and v7 recordings readable; the viewer does not resolve abilities.
+        triggeringCreatureIncarnation: z.int().min(0).optional(),
+        // Present for event-derived quantities; optional keeps older logs valid.
+        triggeringCreaturePower: z.int().optional(),
+        triggeringCreatureToughness: z.int().optional(),
+      }),
+      z.strictObject({
+        kind: z.enum(TRIGGERING_STACK_OBJECT_CONDITIONS),
+        triggeringStackObject: ObjectIdSchema,
+      }),
+      z.strictObject({
+        kind: z.literal('selfDealsCombatDamageToPlayer'),
+        triggeringPlayer: PlayerIdSchema,
+        triggeringDamageAmount: z.int().positive(),
+      }),
+      z.strictObject({
+        kind: z.enum(TRIGGERING_PLAYER_CONDITIONS),
+        triggeringPlayer: PlayerIdSchema,
+      }),
+      z.strictObject({
+        kind: z.literal('selfIsDealtDamage'),
+        triggeringDamageAmount: z.int().positive(),
+        chosenPlayer: PlayerIdSchema,
+      }),
+      z.null(),
+    ]),
+    sourceCharacteristics: z.union([
+      z.strictObject({
+        colors: z.array(z.enum(['W', 'U', 'B', 'R', 'G'])),
+        subtypes: z.array(z.string()),
+      }),
+      z.null(),
+    ]),
+    /** The casting price selected for this spell; absent on abilities and pre-/9 logs. */
+    castingCost: CastingCostChoiceSchema.exactOptional(),
+    mode: z.union([CountSchema, z.null()]),
+    targets: z.array(TargetSlotSchema),
+    /**
+     * The targets chosen for a plural slot, keyed by the slot's index in
+     * `targets`. Absent rather than `null` when the entry has no plural slot,
+     * which is every entry in every
+     * committed fixture: the kernel's own field is optional for the same reason,
+     * and an omitted key leaves a pre-/9 file byte-identical to what it already is.
+     * The frame does not draw these yet; the log carries them so that the day a
+     * plural-target spell reaches a recorded stack, the record is not missing the half
+     * of the cast that says what it hit.
+     */
+    multiTargets: z.record(z.string(), z.array(MultiTargetMemberSchema)).optional(),
+    damageAllocations: DamageAllocationsSchema.optional(),
+    /** Layer-derived LKI retained from the spell's paid sacrifice. */
+    paidSacrificePower: z.int().optional(),
+    paidSacrificeToughness: z.int().optional(),
+    paidDiscardManaValue: z.int().nonnegative().optional(),
+    /** Rules-created Siege defeat marker for an intrinsic ability entry. */
+    siegeDefeat: z.literal(true).optional(),
+  })
+  .superRefine((entry, ctx) => {
+    if (entry.source !== null && entry.castingCost !== undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['castingCost'],
+        message: 'an ability stack entry cannot carry a spell casting cost',
+      });
+    }
+  });
 
 /**
  * The board after a step. Deliberately holds no priority marker: priority
@@ -762,23 +1099,50 @@ export const SnapshotSchema = z.strictObject({
 });
 
 const DecisionKindSchema = z.enum([
+  'cardName',
+  'namedZoneExile',
   // CR 103.4, asked before turn 1 and the only decision a game can hold while
   // `turn.number` is still 0.
   'mulligan',
+  'openingHandAction',
   'priority',
+  'manaColor',
   'declareAttackers',
   'declareBlockers',
   'orderBlockers',
+  'orderAttackers',
   'discard',
   // CR 603.3d and CR 603.3b. Both are stops inside the settle loop rather than
   // priority windows, which the log does not have to model: a decision is a
   // decision, and the record already carries the kind, the options and the
   // index chosen.
   'triggerTargets',
+  'pluralTargets',
+  'damageAllocation',
+  'topLibraryOrder',
+  'topLibrarySelect',
+  'topLibraryPartition',
+  'topLibraryPile',
   'optionalTrigger',
   // CR 601.2c, `optionalTrigger`'s shape widened to a spell (`mtg-bc2.152.4`):
   // still a stop inside the settle loop rather than a priority window.
   'may',
+  // CR 115.7d and CR 707.10c: the resolving spell's controller chooses a
+  // replacement target tuple for another spell, or for a copy being created.
+  'spellTargets',
+  // A resolving effect revealed a card and now requires its complete cast declaration.
+  'freeCast',
+  // CR 614.12 and CR 707.9: the entering permanent's controller either
+  // snapshots one creature's copiable values or declines the replacement.
+  'entryCopy',
+  'entryCounter',
+  'entryAura',
+  'entryTimestampOrder',
+  'entryCharacteristics',
+  'entryOptionalCounter',
+  'entryPayLife',
+  'entryPlayer',
+  'entryColors',
   // CR 118.8, the same stop addressed to the seat the spell is aimed at rather
   // than to a seat the card names (`mtg-3zjg`).
   'unless',
@@ -791,10 +1155,14 @@ const DecisionKindSchema = z.enum([
   // resolution mid-way (`@mtg/kernel`'s `scry.ts` runs both), and neither is a
   // priority window.
   'searchLibrary',
+  'searchDestination',
   // The one stop `scry.ts` runs on a zone both seats can already see, which is
   // why it carries no CR cite for the pause itself: nothing in the rules
   // licenses looking, because nothing was hidden.
   'graveyardChoice',
+  'revealedHandChoice',
+  'battlefieldChoice',
+  'populate',
   // CR 701.8a, the third stop `scry.ts` runs. Distinct from `discard` above,
   // which is the CR 514.1 cleanup step: this one is a resolution paused
   // mid-way, and the seat it asks is not always the seat losing the cards.
@@ -804,6 +1172,8 @@ const DecisionKindSchema = z.enum([
   // than a graveyard). Distinct from every other member: the asked seat is
   // always the effect's target, never the caster.
   'permanentSacrifice',
+  'permanentUntap',
+  'damagePrevention',
 ]);
 
 /**
@@ -818,6 +1188,8 @@ const DecisionKindSchema = z.enum([
 export const DecisionSchema = z.strictObject({
   kind: DecisionKindSchema,
   player: PlayerIdSchema,
+  /** Active face for an effect-instructed cast; absent on old logs and other decisions. */
+  activeCard: CardSchema.exactOptional(),
   optionCount: CountSchema,
   truncated: z.boolean(),
   complete: z.boolean(),

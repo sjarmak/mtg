@@ -11,7 +11,14 @@
  */
 import { describe, expect, it } from 'vitest';
 import { buildDeck } from '@mtg/deckbuild';
-import { DEFAULT_PACKS_PER_SEAT, draftedPools, runDraft } from '@mtg/draft-export';
+import type { Card, CardInput } from '@mtg/dsl';
+import { parseCard } from '@mtg/dsl';
+import {
+  DEFAULT_NATIVE_DRAFT_BOT_POLICY,
+  DEFAULT_PACKS_PER_SEAT,
+  draftedPools,
+  runDraft,
+} from '@mtg/draft-export';
 import {
   cubeBoosterRecipe,
   DEFAULT_AVAILABILITY_DRAFTS,
@@ -74,6 +81,7 @@ describe('drafting the finished list', () => {
     const availability = measured(measure());
 
     expect(availability.seats).toBe(CRITERIA.seats);
+    expect(availability.botPolicy).toBe(DEFAULT_NATIVE_DRAFT_BOT_POLICY);
     expect(availability.drafts).toBe(DRAFTS);
     expect(availability.seatDrafts).toBe(DRAFTS * CRITERIA.seats);
     for (const archetype of availability.archetypes) {
@@ -342,7 +350,9 @@ describe('the deal a share is read against', () => {
       B: CARDS_PER_FULL_COLOR,
       G: CARDS_PER_FULL_COLOR,
     });
-    const deeper = [30, 45, 60, 90].map((cardsPerSeat) => firstArchetype(measureSet(set, { cardsPerSeat })));
+    const deeper = [30, 45, 60, 90].map((cardsPerSeat) =>
+      firstArchetype(measureSet(set, { cardsPerSeat }, 1)),
+    );
 
     expect(new Set(deeper.map((archetype) => archetype.castable)).size).toBe(1);
     for (const [index, archetype] of deeper.entries()) {
@@ -351,11 +361,11 @@ describe('the deal a share is read against', () => {
     }
   });
 
-  it('separates a pod too shallow to field anything from a list that is thin', () => {
+  it('separates a shallow pod from a deeper one over the same list', () => {
     // One list, two pods. Under the shallow one the deal is short of the spells
-    // a deck needs and no seat assembles the archetype; the same list under a
-    // deeper pod does. A zero read without the deal beside it cannot tell those
-    // apart, and that is the whole complaint the baseline answers.
+    // a deck needs and few seats assemble the archetype; the same list under a
+    // deeper pod does better. The deal beside the observed share distinguishes
+    // the pod constraint from the fixed list.
     const set = draftableSet({
       W: CARDS_PER_FULL_COLOR,
       U: CARDS_PER_FULL_COLOR,
@@ -363,13 +373,13 @@ describe('the deal a share is read against', () => {
       G: CARDS_PER_FULL_COLOR,
       R: CARDS_PER_FULL_COLOR,
     });
-    const shallow = measureSet(set, { cardsPerSeat: 45 });
-    const deep = measureSet(set, { cardsPerSeat: 90 });
+    const shallow = measureSet(set, { cardsPerSeat: 45 }, 1);
+    const deep = measureSet(set, { cardsPerSeat: 90 }, 1);
     const shallowAzorius = firstArchetype(shallow);
     const deepAzorius = firstArchetype(deep);
 
     expect(shallowAzorius.dealtCastable).toBeLessThan(shallow.spellsRequired);
-    expect(shallowAzorius.share).toBe(0);
+    expect(shallowAzorius.share).toBeLessThan(deepAzorius.share);
     expect(deepAzorius.dealtCastable).toBeGreaterThan(deep.spellsRequired);
     expect(deepAzorius.share).toBeGreaterThan(0);
     expect(deepAzorius.castable).toBe(shallowAzorius.castable);
@@ -489,9 +499,13 @@ describe('the pod a measurement runs', () => {
     expect(availability.cardsPerSeat).toBeLessThan(criteria.cardsPerSeat);
   });
 
-  it('runs as many drafts as it was asked for, defaulting to a stated number', () => {
+  it('runs as many drafts as it was asked for', () => {
     expect(measured(measure(7)).drafts).toBe(7);
-    expect(measured(measureAvailability(ENTRIES, CRITERIA, POOL.draftable, {})).drafts).toBe(
+  });
+
+  it('defaults to the stated draft count', () => {
+    const small = draftableCriteria({ seats: 2, cardsPerSeat: 3 });
+    expect(measured(measureAvailability(ENTRIES, small, POOL.draftable, {})).drafts).toBe(
       DEFAULT_AVAILABILITY_DRAFTS,
     );
   });
@@ -690,5 +704,117 @@ describe('the pool a cube was cut from', () => {
 
   it('carries none when the cube came from the store, which is what makes it undraftable', () => {
     expect(fixturePool([]).draftable).toBeUndefined();
+  });
+});
+
+/**
+ * Why `--allow-multiples` stays refused rather than minting a synthetic id per
+ * copy, which was the open half of `mtg-bc2.139`.
+ *
+ * The decision rests on a measurement and so does this suite. The first case is
+ * the control that settled it: hold every input fixed but identity, and a
+ * minted list reads exactly what a list of that many distinct cards reads. The
+ * second is the reason the copies could not have mattered anyway — the runtime
+ * deals each pack independently, so a singleton list is already dealt twice to
+ * a quarter of its cards and never to a third of them.
+ *
+ * Both build their lists here rather than through `setCubePool`, which refuses a
+ * set naming a card twice. That refusal is not in the way of the question: a
+ * mint would happen after the pool, on the way into `runDraft`, and these are
+ * the lists it would hand over.
+ */
+describe('minting a synthetic id per copy, which is the option not taken', () => {
+  /**
+   * Copy `n` of a card: the same cost, stats, colors and rarity, under an id
+   * and a collector number the runtime accepts. `rename` is the only thing that
+   * separates a copy from a distinct card, which is the whole experiment.
+   */
+  function variant(card: Card, copy: number, rename: boolean): Card {
+    if (copy === 0) return card;
+    const source = JSON.parse(JSON.stringify(card)) as Record<string, unknown>;
+    delete source['oracleText'];
+    return parseCard({
+      ...source,
+      id: `${card.id}-v${String(copy + 1)}`,
+      ...(rename ? { name: `${card.name} Twin ${String(copy + 1)}` } : {}),
+      set: { code: card.set.code, collectorNumber: card.set.collectorNumber + 10000 * copy },
+    } as CardInput);
+  }
+
+  /** The list a mint would hand `runDraft`, with white doubled one way or the other. */
+  function whiteDoubled(rename: boolean): {
+    readonly measurement: AvailabilityMeasured;
+    readonly names: ReadonlySet<string>;
+  } {
+    const cards = DRAFTABLE_SET.cards.flatMap((card) =>
+      card.colors.includes('W') ? [variant(card, 0, rename), variant(card, 1, rename)] : [card],
+    );
+    const availability = measureAvailability(
+      cards.map((card) => ({ card: candidateFromDslCard(card), count: 1, archetypes: [], reason: 'minted' })),
+      draftableCriteria({ singleton: false, size: cards.length }),
+      new Map(cards.map((card) => [card.id, card] as const)),
+      { drafts: DRAFTS, seed: 'minted/v0' },
+    );
+    return { measurement: measured(availability), names: new Set(cards.map((card) => card.name)) };
+  }
+
+  it('reads exactly what the same list of distinct cards reads, which is the wrong cube', () => {
+    const copies = whiteDoubled(false);
+    const twins = whiteDoubled(true);
+
+    // The two lists really are two lists: one holds 34 white cards twice, the
+    // other holds 68 white cards once, and the second half of each pair is the
+    // same card in every way but its name and id.
+    expect(twins.names.size - copies.names.size).toBe(CARDS_PER_FULL_COLOR);
+
+    // Not "within noise": the same integers. Nothing between the list and the
+    // share can see that two entries are one card, so the two lists draft
+    // identically, build identically and tally identically.
+    expect(copies.measurement.archetypes).toStrictEqual(twins.measurement.archetypes);
+    expect(copies.measurement.seatDrafts).toBe(twins.measurement.seatDrafts);
+    expect(copies.measurement.cardsPerSeat).toBe(twins.measurement.cardsPerSeat);
+    // And the equality is not the equality of two zeroes.
+    expect(copies.measurement.archetypes.some((archetype) => archetype.assembled > 0)).toBe(true);
+  });
+
+  it('moves the number a great deal, which is the half the bead had backwards', () => {
+    const singleton = measured(measure(DRAFTS, 'minted/v0'));
+    const doubled = whiteDoubled(false).measurement;
+    const azorius = (from: AvailabilityMeasured): ArchetypeAvailability => {
+      const found = from.archetypes.find((archetype) => archetype.name === 'azorius control');
+      if (found === undefined) throw new Error('the fixture states azorius control');
+      return found;
+    };
+
+    // The refusal is not "copies barely register". They register hard, in the
+    // deal and in the ceiling both; they just register as list size.
+    expect(azorius(doubled).castable).toBeGreaterThan(azorius(singleton).castable);
+    expect(azorius(doubled).dealtCastable).toBeGreaterThan(azorius(singleton).dealtCastable);
+  });
+});
+
+describe('the scarcity a copy count would encode', () => {
+  it('is already gone, because the runtime deals each pack from the whole list again', () => {
+    // The pod is the size of the list — four seats of 24 over 96 cards — so a
+    // physical cube would deal every card exactly once and none of them twice.
+    const recipe = cubeBoosterRecipe(DRAFTABLE_SET.cards, 8);
+    const result = runDraft(DRAFTABLE_SET.cards, {
+      seed: 'scarcity/v0',
+      seats: 4,
+      packs: DEFAULT_PACKS_PER_SEAT,
+      recipe,
+    });
+    const dealt = new Map<string, number>();
+    for (const pool of draftedPools(result)) {
+      for (const card of pool) dealt.set(card.id, (dealt.get(card.id) ?? 0) + 1);
+    }
+    expect([...dealt.values()].reduce((sum, count) => sum + count, 0)).toBe(DRAFTABLE_SET.cards.length);
+
+    const never = DRAFTABLE_SET.cards.filter((card) => (dealt.get(card.id) ?? 0) === 0).length;
+    const twice = DRAFTABLE_SET.cards.filter((card) => (dealt.get(card.id) ?? 0) > 1).length;
+    // Measured across five seeds: about 30% never dealt and about 25% dealt
+    // more than once. A fifth is the floor, not the reading.
+    expect(never).toBeGreaterThan(DRAFTABLE_SET.cards.length / 5);
+    expect(twice).toBeGreaterThan(DRAFTABLE_SET.cards.length / 5);
   });
 });

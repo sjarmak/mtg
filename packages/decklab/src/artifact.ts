@@ -25,9 +25,11 @@ import type { CurveBucket } from '@mtg/deckbuild';
 import { CASTABILITY_TARGET, HEAVY_CASTABILITY_TARGET } from './assemble';
 import type { AssembledDeck, CastabilityCheck } from './assemble';
 import type { BuiltDeck } from './build';
+import type { ConstructedFormatContract, ConstructedSelectionPolicy } from './constructed-policy';
 import { enumerateCriteria } from './criteria';
 import type { Criterion, DeckFormat } from './criteria';
 import type { LandCountSource } from './land-plan';
+import { FormatlessStoreBuildError } from './pool';
 import type { Inclusion } from './verify';
 import { deckPrice } from './verify';
 
@@ -110,6 +112,11 @@ export interface DeckArtifact {
   readonly totalCards: number;
   readonly priceUsd: number;
   readonly universeSize: number;
+  /** Exact construction context and selector identity, carried for attribution. */
+  readonly construction: {
+    readonly format: ConstructedFormatContract;
+    readonly selection: ConstructedSelectionPolicy;
+  };
   readonly landPlan: {
     readonly count: number;
     readonly source: LandCountSource;
@@ -242,9 +249,18 @@ function toHistogram(deck: AssembledDeck): Readonly<Record<CurveBucket, number>>
  *
  * The store is read here and nowhere downstream, so the result survives being
  * copied to a machine that has neither the database nor a model.
+ *
+ * A store deck is the only deck this writes. Every per-card field below is read
+ * off a printing — the art URL, the artist, the price — and a deck built over a
+ * staged set has none of them: its art lives in that set's own manifest and it
+ * was never printed at all. So a set-backed deck is refused here by name rather
+ * than written with three fields invented and a `format` that means nothing. The
+ * document a set-backed deck deserves is its own, and the workbench lane is
+ * where it lands.
  */
 export function toDeckArtifact(built: BuiltDeck, store: DataStore): DeckArtifact {
   const { criteria, deck } = built;
+  if (criteria.format === undefined) throw new FormatlessStoreBuildError();
   return {
     version: DECK_ARTIFACT_VERSION,
     prompt: criteria.prompt,
@@ -255,6 +271,7 @@ export function toDeckArtifact(built: BuiltDeck, store: DataStore): DeckArtifact
     totalCards: deck.totalCards,
     priceUsd: deckPrice([...deck.spells, ...deck.lands]),
     universeSize: built.universeSize,
+    construction: built.construction,
     landPlan: { count: built.landPlan.count, source: built.landPlan.source, reason: built.landPlan.reason },
     spells: deck.spells.map((inclusion) => toEntry(store, inclusion)),
     lands: deck.lands.map((inclusion) => toEntry(store, inclusion)),

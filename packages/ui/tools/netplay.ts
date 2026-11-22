@@ -49,16 +49,19 @@ import { randomUUID } from 'node:crypto';
 import { networkInterfaces } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseCard } from '@mtg/dsl';
 import type { Card } from '@mtg/dsl';
 import { createTable, dealPreconTable, dealSealedTable, serveTable } from '@mtg/netplay';
-import { linkBlock } from './netplay-links';
+import { gameplayDir, resolveDataDir } from './data-path';
+import { setIdentitySources } from './gameplay-identity';
+import { gameplayRecorder } from './gameplay-recorder';
+import { linkBlock, tableInvite } from './netplay-links';
 import { readNetplayArgs } from './netplay-args';
 import { selectPreconPair } from './netplay-decks';
 import { resolveSet } from './resolve-set';
 import type { ResolvedSet } from './resolve-set';
 import { flagshipOnly, SET_CANDIDATES } from './set-candidates';
 import { choosePreconFile, preconCandidatesFor } from './stage-precons';
+import { cardsInDocument } from './set-file';
 
 const UI_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REPO_ROOT = resolve(UI_ROOT, '..', '..');
@@ -69,13 +72,11 @@ function fail(message: string): never {
 }
 
 function cardsOf(document: ResolvedSet): readonly Card[] {
-  const parsed: unknown = JSON.parse(document.json);
-  if (typeof parsed !== 'object' || parsed === null || !('cards' in parsed)) {
-    fail(`${document.path} has no "cards" array`);
+  try {
+    return cardsInDocument(document.json, document.path);
+  } catch (cause: unknown) {
+    fail(cause instanceof Error ? cause.message : String(cause));
   }
-  const { cards } = parsed as { cards: unknown };
-  if (!Array.isArray(cards)) fail(`${document.path} has no "cards" array`);
-  return cards.map((card: unknown) => parseCard(card));
 }
 
 async function main(): Promise<void> {
@@ -115,11 +116,33 @@ async function main(): Promise<void> {
           plan,
         });
   const table = createTable(dealt.spec);
-  const server = await serveTable({ table, port: args.apiPort, host: '127.0.0.1' });
+  // The same block the terminal prints, handed to the server so the host's page
+  // can draw it too. `netplay-links.ts` builds both from one place; the page's
+  // half is `../src/routes/play/LanInvite.ts`, and the reason it exists is that
+  // a link nobody can act on without scrolling back through stdout is a link on
+  // the wrong screen.
+  const links = {
+    names: args.names,
+    tokens,
+    port: args.webPort,
+    interfaces: networkInterfaces(),
+  } as const;
+  const gameplayRoot = resolveDataDir(gameplayDir(REPO_ROOT), REPO_ROOT);
+  const server = await serveTable({
+    table,
+    port: args.apiPort,
+    host: '127.0.0.1',
+    invite: tableInvite(links),
+    recorder: gameplayRecorder({
+      root: gameplayRoot,
+      sets: setIdentitySources([{ set: document, selected: true }]),
+    }),
+  });
 
   process.stdout.write(
     `\nPrepared ${precons.chosen === null ? 'sealed decks' : 'preconstructed decks'} from ${document.what}.\n` +
       `  ${document.path}\n` +
+      `Recording the finished game under ${gameplayRoot}\n` +
       // Printed with the flag that brings it back, because a seed nobody can
       // act on is decoration: without `--seed` every run of this launcher deals
       // a different table, which is the point, and this line is the only way
@@ -131,13 +154,10 @@ async function main(): Promise<void> {
       'Vite serves the page on every interface and proxies /api to it, so the other\n' +
       'player reaches the game through one of the addresses below and nothing else\n' +
       'is exposed.\n\n' +
-      linkBlock({
-        names: args.names,
-        tokens,
-        port: args.webPort,
-        interfaces: networkInterfaces(),
-      }) +
-      '\nThe tab Vite opens by itself is the hot-seat lab; the links above are this table.\n\n',
+      linkBlock(links) +
+      '\nThe tab Vite opens by itself is the local lab, one person against a bot; the links above are this table.\n' +
+      'Open the first link and the page draws the second one for you, with a code to\n' +
+      'scan; it goes away once the other player arrives.\n\n',
   );
 
   // The staging and the web server, unchanged. `play.ts` resolves the same

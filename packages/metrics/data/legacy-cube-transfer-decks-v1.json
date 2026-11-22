@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "catalogSha256": "65e32dd53edc2583c555ccf6922406229a2f6056ad21862370365b329bf5367c",
+  "cases": [
+    {
+      "id": "overturf-2021-05-19-white-deck",
+      "split": "tuning",
+      "source": {
+        "author": "Ryan Overturf",
+        "url": "https://articles.starcitygames.com/magic-the-gathering/select/is-elite-spellbinder-a-first-pick-in-legacy-cube/",
+        "published": "2021-05-19",
+        "session": "overturf-spellbinder-2021-05",
+        "origin": "human",
+        "environment": "transfer",
+        "locator": "Mono-White Aggro deck table: 23 spells and 17 Plains. Same session as the opening-pack example; not a separate holdout. Reported 2-1 result is not a quality label."
+      },
+      "kind": "deck",
+      "cards": [
+        { "name": "Blade Splicer", "count": 1 },
+        { "name": "Clarion Spirit", "count": 1 },
+        { "name": "Cloudgoat Ranger", "count": 1 },
+        { "name": "Containment Priest", "count": 1 },
+        { "name": "Elite Spellbinder", "count": 1 },
+        { "name": "Flickerwisp", "count": 1 },
+        { "name": "Giver of Runes", "count": 1 },
+        { "name": "Glorious Protector", "count": 1 },
+        { "name": "Hero of Bladehold", "count": 1 },
+        { "name": "Kytheon, Hero of Akros // Gideon, Battle-Forged", "count": 1 },
+        { "name": "Mother of Runes", "count": 1 },
+        { "name": "Porcelain Legionnaire", "count": 1 },
+        { "name": "Restoration Angel", "count": 1 },
+        { "name": "Student of Warfare", "count": 1 },
+        { "name": "Thalia, Guardian of Thraben", "count": 1 },
+        { "name": "Maul of the Skyclaves", "count": 1 },
+        { "name": "Conclave Tribunal", "count": 1 },
+        { "name": "Glorious Anthem", "count": 1 },
+        { "name": "Honor of the Pure", "count": 1 },
+        { "name": "Legion's Landing // Adanto, the First Fort", "count": 1 },
+        { "name": "Oust", "count": 1 },
+        { "name": "Spectral Procession", "count": 1 },
+        { "name": "Unexpectedly Absent", "count": 1 },
+        { "name": "Plains", "count": 17 }
+      ]
+    }
+  ]
+}

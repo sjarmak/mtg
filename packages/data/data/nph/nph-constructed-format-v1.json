@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "nph",
+  "name": "New Phyrexia",
+  "sources": [
+    {
+      "code": "NPH",
+      "catalogFormat": "nph-printed-v1",
+      "catalogSha256": "826cb243cd5145b11045e098da63de89eae8d0e3a7c3920000e8431c8884f74b",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/NPH.json",
+        "sha256": "d49915c6f0ec7f6204b5726c085d87f0ec5f9c960f3f92bffab3e617b937e4a9",
+        "version": "5.3.0+20260917"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "red-white-artifacts",
+      "name": "Red-White Artifacts",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "nph-printed-v1:0019:2616aa0e-8413-4e63-877c-bffd5263f552",
+          "name": "Porcelain Legionnaire",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0020:ca100248-fcd6-41ed-8d75-bcb473845edd",
+          "name": "Puresteel Paladin",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0004:b8e56a28-713b-4a13-a601-1128cf117539",
+          "name": "Blade Splicer",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0096:2f510946-34de-4c12-8998-f61887d1a0e1",
+          "name": "Slash Panther",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0007:496634f9-1271-4be7-bad5-364bb87a6962",
+          "name": "Dispatch",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0139:abbaf916-067d-4834-a55c-b400fe0d8c1f",
+          "name": "Immolating Souleater",
+          "count": 3
+        },
+        {
+          "physicalId": "nph-printed-v1:0016:859d2b91-63af-4700-8ca5-b1756aa6639b",
+          "name": "Master Splicer",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0161:fab5bc6c-8943-4078-866a-5d02f9be0eef",
+          "name": "Sword of War and Peace",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0130:cd114ec3-d286-4c70-a122-3043bc53cc88",
+          "name": "Batterskull",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0086:a54a2a30-b96a-49c7-9151-1f4b0d4a4413",
+          "name": "Gut Shot",
+          "count": 3
+        },
+        {
+          "physicalId": "nph-printed-v1:0166:db0c6f01-42be-40a1-becb-085f54750830",
+          "name": "Plains",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "id": "blue-black-infect",
+      "name": "Blue-Black Infect",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "nph-printed-v1:0029:cddaebde-a060-4510-8c97-68432d931987",
+          "name": "Blighted Agent",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0045:bd27f71a-cd22-4b5e-9536-3e160111875a",
+          "name": "Spined Thopter",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0049:d89b312b-cc90-4f08-ae2e-043a79e51156",
+          "name": "Viral Drake",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0038:61e9c6df-1c84-4eab-9076-a4feb6347c10",
+          "name": "Mental Misstep",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0057:064dfdeb-485f-473e-9fa0-8fdb7638cdc6",
+          "name": "Dismember",
+          "count": 3
+        },
+        {
+          "physicalId": "nph-printed-v1:0048:70305148-23bd-41dd-9de5-13cf5ae591ae",
+          "name": "Vapor Snag",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0047:fff5a09e-9276-44b8-b374-4b84aebd47cc",
+          "name": "Tezzeret's Gambit",
+          "count": 3
+        },
+        {
+          "physicalId": "nph-printed-v1:0063:9d5c8ba8-d9f4-440c-8e0b-93699df6343e",
+          "name": "Grim Affliction",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0032:28432161-023b-4a98-b92a-55dc6d936cd1",
+          "name": "Corrupted Resolve",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0168:61a25790-29ac-4fc6-afd8-9c4063f4284d",
+          "name": "Island",
+          "count": 20
+        },
+        {
+          "physicalId": "nph-printed-v1:0170:267d4321-4411-499c-a476-70c805abf02a",
+          "name": "Swamp",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "id": "green-blue-proliferate",
+      "name": "Green-Blue Proliferate",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "nph-printed-v1:0049:d89b312b-cc90-4f08-ae2e-043a79e51156",
+          "name": "Viral Drake",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0111:8b94f4c6-b518-43b3-be52-e889d1f3ea38",
+          "name": "Glistener Elf",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0029:cddaebde-a060-4510-8c97-68432d931987",
+          "name": "Blighted Agent",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0047:fff5a09e-9276-44b8-b374-4b84aebd47cc",
+          "name": "Tezzeret's Gambit",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0116:af2d23da-70a1-49ba-91bf-c110cc4bbedc",
+          "name": "Mutagenic Growth",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0123:c16b90ff-d256-4ac6-b687-3430b8c80dd7",
+          "name": "Triumph of the Hordes",
+          "count": 3
+        },
+        {
+          "physicalId": "nph-printed-v1:0035:995486ce-58bb-4753-a812-0ca73ef1a235",
+          "name": "Gitaxian Probe",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0045:bd27f71a-cd22-4b5e-9536-3e160111875a",
+          "name": "Spined Thopter",
+          "count": 1
+        },
+        {
+          "physicalId": "nph-printed-v1:0168:61a25790-29ac-4fc6-afd8-9c4063f4284d",
+          "name": "Island",
+          "count": 15
+        },
+        {
+          "physicalId": "nph-printed-v1:0174:37a8d9ff-291a-4862-b2e8-3db520cc9ae4",
+          "name": "Forest",
+          "count": 17
+        }
+      ]
+    },
+    {
+      "id": "black-red-infect-control",
+      "name": "Black-Red Infect Control",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "nph-printed-v1:0082:7b200986-f553-4156-8f5e-37678db09687",
+          "name": "Fallen Ferromancer",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0092:2fb022a3-5f9e-491e-8340-087e33f927d6",
+          "name": "Razor Swine",
+          "count": 3
+        },
+        {
+          "physicalId": "nph-printed-v1:0077:bcb1b486-e336-4e88-b635-b6ff18cb4841",
+          "name": "Whispering Specter",
+          "count": 3
+        },
+        {
+          "physicalId": "nph-printed-v1:0075:5823990c-8d40-4352-8d34-74332934adb2",
+          "name": "Toxic Nim",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0057:064dfdeb-485f-473e-9fa0-8fdb7638cdc6",
+          "name": "Dismember",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0100:aa88011c-a19d-4faa-8da6-86b9980cd571",
+          "name": "Volt Charge",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0063:9d5c8ba8-d9f4-440c-8e0b-93699df6343e",
+          "name": "Grim Affliction",
+          "count": 3
+        },
+        {
+          "physicalId": "nph-printed-v1:0061:7a20b5a2-8613-49ed-b5cc-7cae9d0e0850",
+          "name": "Geth's Verdict",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0143:8c418159-b5d1-48e9-9a31-707f49d6733b",
+          "name": "Lashwrithe",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0170:267d4321-4411-499c-a476-70c805abf02a",
+          "name": "Swamp",
+          "count": 20
+        },
+        {
+          "physicalId": "nph-printed-v1:0172:9af1a73f-e2ab-4832-b9a0-5bd9643f4fd3",
+          "name": "Mountain",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "green-white-golems",
+      "name": "Green-White Golems",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "nph-printed-v1:0126:273b982d-bca2-4418-8618-c711d28fc901",
+          "name": "Vital Splicer",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0004:b8e56a28-713b-4a13-a601-1128cf117539",
+          "name": "Blade Splicer",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0016:859d2b91-63af-4700-8ca5-b1756aa6639b",
+          "name": "Master Splicer",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0114:2d2c6a6d-5b59-47d7-b290-df3640d9555f",
+          "name": "Maul Splicer",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0007:496634f9-1271-4be7-bad5-364bb87a6962",
+          "name": "Dispatch",
+          "count": 4
+        },
+        {
+          "physicalId": "nph-printed-v1:0103:ce5b6d19-22e3-4f57-8f4d-a17e982286c7",
+          "name": "Beast Within",
+          "count": 3
+        },
+        {
+          "physicalId": "nph-printed-v1:0019:2616aa0e-8413-4e63-877c-bffd5263f552",
+          "name": "Porcelain Legionnaire",
+          "count": 3
+        },
+        {
+          "physicalId": "nph-printed-v1:0129:abd3350b-89fb-40b4-a942-28e0c8c274aa",
+          "name": "Alloy Myr",
+          "count": 2
+        },
+        {
+          "physicalId": "nph-printed-v1:0155:d13563c7-abe0-4760-9b4c-841de47dbc46",
+          "name": "Shrine of Loyal Legions",
+          "count": 1
+        },
+        {
+          "physicalId": "nph-printed-v1:0009:b66390d6-1649-4bfa-92d3-77664650d552",
+          "name": "Elesh Norn, Grand Cenobite",
+          "count": 1
+        },
+        {
+          "physicalId": "nph-printed-v1:0166:db0c6f01-42be-40a1-becb-085f54750830",
+          "name": "Plains",
+          "count": 18
+        },
+        {
+          "physicalId": "nph-printed-v1:0174:37a8d9ff-291a-4862-b2e8-3db520cc9ae4",
+          "name": "Forest",
+          "count": 14
+        }
+      ]
+    }
+  ],
+  "contentSha256": "ff4a0a02da919fded695e94f289759253d38fba465baf26af262f152da58983b"
+}

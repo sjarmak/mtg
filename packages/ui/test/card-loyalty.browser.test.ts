@@ -69,7 +69,13 @@ import { parseCard } from '@mtg/dsl';
 import type { Card as DslCard } from '@mtg/dsl';
 import { describe, expect } from 'vitest';
 import { Shell } from '../src/app/Shell';
-import { LOYALTY_FIT_STEPS, rulesFitStep, textBoxBlocks, textBoxCost } from '../src/card/anatomy';
+import {
+  LOYALTY_BADGE_POINTS,
+  LOYALTY_FIT_STEPS,
+  rulesFitStep,
+  textBoxBlocks,
+  textBoxCost,
+} from '../src/card/anatomy';
 import { CardsRoute } from '../src/routes/CardsRoute';
 import { uiStyleSheet } from '../src/styles/index';
 import { browserIt, launchChrome, measurePage, reason, shutdownChrome } from './support/chrome';
@@ -136,12 +142,6 @@ const FLAVORED = walker({
       cost: FREE,
       loyaltyCost: 1,
       effects: [{ kind: 'gainLife', amount: 2, target: { kind: 'noTarget' } }],
-    },
-    {
-      kind: 'activated',
-      cost: FREE,
-      loyaltyCost: -3,
-      effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }],
     },
   ],
 });
@@ -253,7 +253,11 @@ const ULTIMATE = walker({
     {
       kind: 'activated',
       cost: FREE,
-      loyaltyCost: -8,
+      // Three glyphs, which is the widest cost the type can state and the one
+      // the badge was too narrow for. `-8` stood here and no face on this page
+      // printed a three-glyph cost, so the defect the playtester reported on Jace
+      // Beleren was not reachable by the gate that exists to catch it.
+      loyaltyCost: -10,
       effects: [
         {
           kind: 'returnFromGraveyard',
@@ -284,7 +288,7 @@ function pageHtml(): string {
       onSelectMode: () => undefined,
       children: h(CardsRoute, {
         cards: FACES,
-        route: { mode: 'cards', params: {} },
+        route: { mode: 'cards', sub: 'gallery', params: {} },
         onSetParams: () => undefined,
       }),
     }),
@@ -302,6 +306,37 @@ function pageHtml(): string {
  * two are meant to meet, since the reservation is derived from the shield.
  */
 const EPS = 0.5;
+
+/**
+ * The air the badge's ground must leave around the cost it holds, in pixels.
+ *
+ * Reported by the playtester on 2026-08-24 against Jace Beleren: "the black
+ * background on those values doesn't extend enough past the number on the
+ * right." Measured, the ground was not merely tight, it was *inside* the
+ * glyphs. At 1440x900 the badge drew 19.02px wide and the ink of `−10` was
+ * 18.77px, so the ground had 0.12px on each side before the clip-path was
+ * applied at all -- and the clip takes 16% off each end at the row's top and
+ * bottom edges, which is 3.04px of it, so the outer glyphs were painted over
+ * nothing.
+ *
+ * The badge is a *hexagon*, so the check has to be made against the ground the
+ * clip leaves rather than against the element's box: the tapered ends are the
+ * part a number can hang off. `BADGE_TAPER` below is the inset the silhouette
+ * states, read off the same array both faces are drawn from.
+ *
+ * A whole pixel of air rather than a hairline, because the quantity being
+ * protected is the ground reading as a ground -- a minus sign that ends flush
+ * with the black looks clipped whether or not it is.
+ */
+const BADGE_AIR_PX = 1;
+
+/** The horizontal inset of the badge silhouette, from the outline itself. */
+/** Two decimals, for the same reason the reading rounds: a message, not a test. */
+function round2(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+const BADGE_TAPER = Math.min(...LOYALTY_BADGE_POINTS.map(([x]) => x).filter((x) => x > 0));
 
 /** One read of every planeswalker face on the page. It mutates nothing. */
 const MEASURE = `(() => {
@@ -325,12 +360,23 @@ const MEASURE = `(() => {
       shieldText: shield.textContent,
       clientHeight: text.clientHeight,
       scrollHeight: text.scrollHeight,
-      lines: [...text.querySelectorAll('.mtg-card__line')].map((line) => ({
-        loyalty: line.getAttribute('data-loyalty'),
-        badges: line.querySelectorAll('.mtg-card__loyalty').length,
-        words: (line.textContent ?? '').slice(0, 48),
-        rect: box(line),
-      })),
+      lines: [...text.querySelectorAll('.mtg-card__line')].map((line) => {
+        const badge = line.querySelector('.mtg-card__loyalty');
+        let ink = null;
+        if (badge !== null) {
+          const range = document.createRange();
+          range.selectNodeContents(badge);
+          ink = box(range);
+        }
+        return {
+          loyalty: line.getAttribute('data-loyalty'),
+          badges: line.querySelectorAll('.mtg-card__loyalty').length,
+          words: (line.textContent ?? '').slice(0, 48),
+          rect: box(line),
+          badge: badge === null ? null : box(badge),
+          ink: ink,
+        };
+      }),
     });
   }
   return { viewport: [window.innerWidth, window.innerHeight], faces: faces };
@@ -348,6 +394,10 @@ interface LineReading {
   readonly badges: number;
   readonly words: string;
   readonly rect: Rect;
+  /** The badge's painted box, or null on a row that states no cost. */
+  readonly badge: Rect | null;
+  /** The cost's own ink, measured as a range over the badge's text. */
+  readonly ink: Rect | null;
 }
 
 interface FaceReading {
@@ -408,6 +458,7 @@ describe('the planeswalker face a browser draws', () => {
           expect(reading.faces.length, `${where}: planeswalker faces measured`).toBe(FACES.length);
 
           const covered: string[] = [];
+          const spilled: string[] = [];
           const cut: string[] = [];
           const under: string[] = [];
           for (const face of reading.faces) {
@@ -434,6 +485,21 @@ describe('the planeswalker face a browser draws', () => {
                 expect(line.badges, `${where}: ${card.id} drew a badge on an uncosted row`).toBe(0);
               } else {
                 expect(line.badges, `${where}: ${card.id} row ${line.loyalty} badge`).toBe(1);
+                // Defect 4: the cost printed outside its own ground. The badge
+                // is a hexagon, so the ground a glyph can sit on is the box
+                // less the silhouette's taper at each end.
+                const badge = line.badge;
+                const ink = line.ink;
+                if (badge === null || ink === null) {
+                  throw new Error(`${where}: ${card.id} row ${String(line.loyalty)} measured no badge`);
+                }
+                const taper = (badge.right - badge.left) * BADGE_TAPER;
+                const ground = { left: badge.left + taper, right: badge.right - taper };
+                if (ink.left < ground.left + BADGE_AIR_PX || ink.right > ground.right - BADGE_AIR_PX) {
+                  spilled.push(
+                    `${card.id}: ${String(line.loyalty)} inks ${String(ink.left)}..${String(ink.right)} on a ground of ${String(round2(ground.left))}..${String(round2(ground.right))}`,
+                  );
+                }
               }
               // Defect 1: the shield painted over the words.
               if (overlaps(face.shield, line.rect)) {
@@ -494,6 +560,10 @@ describe('the planeswalker face a browser draws', () => {
           expect(
             under,
             `${where}: the estimate came in under the browser on ${String(under.length)} walker faces: ${under.join(' | ')}`,
+          ).toEqual([]);
+          expect(
+            spilled,
+            `${where}: ${String(spilled.length)} costs printed past their own ground: ${spilled.join(' | ')}`,
           ).toEqual([]);
           console.log(
             `${where}: ${String(reading.faces.length)} planeswalker faces, no covered row, no cut row, no under-estimate`,

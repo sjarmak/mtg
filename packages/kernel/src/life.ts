@@ -15,6 +15,7 @@ import type { PlayerId } from './ids';
 import type { Trace } from './trace';
 import { emit, updatePlayer, withState } from './trace';
 import { gainLife } from './damage';
+import { recordLifeLostThisTurn } from './life-history';
 
 /**
  * A player loses life (CR 119.3).
@@ -33,7 +34,11 @@ import { gainLife } from './damage';
  */
 export function loseLife(trace: Trace, player: PlayerId, amount: number): Trace {
   if (amount <= 0) return trace;
-  const state = updatePlayer(trace.state, player, (seat) => ({ ...seat, life: seat.life - amount }));
+  const state = recordLifeLostThisTurn(
+    updatePlayer(trace.state, player, (seat) => ({ ...seat, life: seat.life - amount })),
+    player,
+    amount,
+  );
   return emit(withState(trace, state), {
     type: 'lifeChanged',
     player,

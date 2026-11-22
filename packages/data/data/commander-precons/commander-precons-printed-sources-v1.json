@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-10-10T17:41:59.855Z",
+  "sources": [
+    {
+      "code": "C17",
+      "mtgjson": {
+        "file": "C17-d2e5b3493e01c494e0f49a0c09782df19956cc7d55ee4a55abc3bedc298b399c.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/C17.json",
+        "sha256": "d2e5b3493e01c494e0f49a0c09782df19956cc7d55ee4a55abc3bedc298b399c",
+        "meta": {
+          "date": "2026-10-10",
+          "version": "5.3.0+20261010"
+        }
+      },
+      "scryfall": {
+        "file": "C17-b511004a039c9240b16cdf049b34960945d713ab83d607b2ac1f706af3165186.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Ac17+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "b511004a039c9240b16cdf049b34960945d713ab83d607b2ac1f706af3165186",
+        "cards": 309
+      }
+    },
+    {
+      "code": "ALA",
+      "mtgjson": {
+        "file": "ALA-79a3abb179ad42521c8526bd85930fdf2563c16c5359242446171adb011f3b6c.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/ALA.json",
+        "sha256": "79a3abb179ad42521c8526bd85930fdf2563c16c5359242446171adb011f3b6c",
+        "meta": {
+          "date": "2026-10-10",
+          "version": "5.3.0+20261010"
+        }
+      },
+      "scryfall": {
+        "file": "ALA-7f3f8e23bdcea1c9dd415c4dbc36e449277748e462c008ce5d6d461ea202fd40.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Aala+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "7f3f8e23bdcea1c9dd415c4dbc36e449277748e462c008ce5d6d461ea202fd40",
+        "cards": 250
+      }
+    },
+    {
+      "code": "C13",
+      "mtgjson": {
+        "file": "C13-84a130a55a84d187064ce3e486b3cd5328341e06eb697044fb9ab93b0d0974d9.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/C13.json",
+        "sha256": "84a130a55a84d187064ce3e486b3cd5328341e06eb697044fb9ab93b0d0974d9",
+        "meta": {
+          "date": "2026-10-10",
+          "version": "5.3.0+20261010"
+        }
+      },
+      "scryfall": {
+        "file": "C13-e30793f9520be569b7e0f66bed6f3fde57a34aef079d67a6ddca51be580342d2.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Ac13+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "e30793f9520be569b7e0f66bed6f3fde57a34aef079d67a6ddca51be580342d2",
+        "cards": 356
+      }
+    },
+    {
+      "code": "CMA",
+      "mtgjson": {
+        "file": "CMA-fcecb254a3c22d23f9a21c646b74a8a1b449de7f07d16d0f5ace2c98ca402f1a.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/CMA.json",
+        "sha256": "fcecb254a3c22d23f9a21c646b74a8a1b449de7f07d16d0f5ace2c98ca402f1a",
+        "meta": {
+          "date": "2026-10-10",
+          "version": "5.3.0+20261010"
+        }
+      },
+      "scryfall": {
+        "file": "CMA-a25fbeee938ae06448e7477bf56a3a2aac98a08f649cac1bb449092d064feaf7.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Acma+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "a25fbeee938ae06448e7477bf56a3a2aac98a08f649cac1bb449092d064feaf7",
+        "cards": 320
+      }
+    },
+    {
+      "code": "C16",
+      "mtgjson": {
+        "file": "C16-d3818890247b796d83e9248b6b3b48c5b6b8ba11e883e0821042cb75f73aed2d.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/C16.json",
+        "sha256": "d3818890247b796d83e9248b6b3b48c5b6b8ba11e883e0821042cb75f73aed2d",
+        "meta": {
+          "date": "2026-10-10",
+          "version": "5.3.0+20261010"
+        }
+      },
+      "scryfall": {
+        "file": "C16-126d802ce227d1470d90d79382bff9799e294de8a72c048ae013d01b5c67eb28.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Ac16+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "126d802ce227d1470d90d79382bff9799e294de8a72c048ae013d01b5c67eb28",
+        "cards": 351
+      }
+    },
+    {
+      "code": "CMM",
+      "mtgjson": {
+        "file": "CMM-1fd20ee307782c3552c2b0f6cfea36eb225b64420469aef871037bc8ba8518a2.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/CMM.json",
+        "sha256": "1fd20ee307782c3552c2b0f6cfea36eb225b64420469aef871037bc8ba8518a2",
+        "meta": {
+          "date": "2026-10-10",
+          "version": "5.3.0+20261010"
+        }
+      },
+      "scryfall": {
+        "file": "CMM-6b49320c4c98e876811ad88938375eabde1c9e35a70e2ec9653799b635d15e48.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Acmm+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "6b49320c4c98e876811ad88938375eabde1c9e35a70e2ec9653799b635d15e48",
+        "cards": 1067
+      }
+    }
+  ]
+}

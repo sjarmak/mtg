@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "sacred-cat-cost-cancel-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0027:08891c78-13c1-4d84-aa9c-78346b3b7d18"],
+      "decisionFamilies": ["embalm-exile-cost-decline-preserves-source-and-retry"],
+      "assertions": ["canceling 'Sacred Cat' exile leaves the source available for a successful retry"],
+      "testFile": "packages/forge-export/test/observed-akh-token-cancel.integration.test.ts"
+    },
+    {
+      "id": "pouncer-cost-cancel-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0002:865e267d-450c-4eeb-b61d-bd0ec5d8534a"],
+      "decisionFamilies": ["eternalize-exile-cost-decline-preserves-source-and-retry"],
+      "assertions": ["canceling 'Adorned Pouncer' exile leaves the source available for a successful retry"],
+      "testFile": "packages/forge-export/test/observed-akh-token-cancel.integration.test.ts"
+    }
+  ]
+}

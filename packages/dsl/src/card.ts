@@ -17,18 +17,21 @@
  * validators require it to match the renderer exactly.
  */
 import { z } from 'zod';
-import { AbilitySchema } from './abilities';
+import { ChosenXSchema } from './amount';
+import { AbilitySchema, ActivatedAbilitySchema, TriggeredAbilitySchema } from './abilities';
 import {
   AuraStaticModificationSchema,
   CantAttackModificationSchema,
   CantBeBlockedModificationSchema,
   CantBlockModificationSchema,
+  SacrificeMatchingSchema,
   StatBonusPerModificationSchema,
 } from './ability-shape';
 import {
   BasicLandTypeSchema,
   CARD_ID_PATTERN,
   ColorSchema,
+  COLORS,
   FLAVOR_TEXT_MAX_LENGTH,
   KeywordSchema,
   ManaColorSchema,
@@ -36,13 +39,19 @@ import {
   SET_CODE_PATTERN,
   SupertypeSchema,
 } from './vocabulary';
-import { ManaCostSchema } from './mana';
+import { manaValue, ManaCostSchema } from './mana';
 import { CardEffectSchema } from './effects';
+import { CounterKindSchema } from './counters';
 import { ModesSchema } from './modal';
 import { MayChooserSchema } from './may';
 import { UnlessClauseSchema } from './unless';
 import { CostReductionSchema } from './cost-reduction';
 import { CharacteristicPowerToughnessSchema } from './characteristic-values';
+import { canonicalJson } from './canonical-json';
+import { KeywordAbilitySchema } from './keyword-ability';
+import { OverloadProfileSchema } from './overload';
+export { KeywordAbilitySchema, ProtectionQualitySchema } from './keyword-ability';
+export type { KeywordAbility, ProtectionQuality } from './keyword-ability';
 
 export const SetRefSchema = z.strictObject({
   code: z.string().regex(SET_CODE_PATTERN, 'set code must be 3-5 uppercase alphanumerics'),
@@ -51,28 +60,103 @@ export const SetRefSchema = z.strictObject({
 
 export type SetRef = z.infer<typeof SetRefSchema>;
 
-/** The bounded qualities Protection may name in the M11/M13 execution slice. */
-export const ProtectionQualitySchema = z.discriminatedUnion('kind', [
-  z.strictObject({ kind: z.literal('color'), color: ColorSchema }),
-  z.strictObject({ kind: z.literal('subtype'), subtype: z.string() }),
-]);
+/** Hand-authored engine capacity; generator-facing schemas set their own lower budget. */
+export const MAX_CARD_ABILITIES = 4;
 
 /**
- * Keyword abilities whose rules consequences are wider than layer-6's flat
- * evergreen vocabulary. They are engine-only card data: the set generator's
- * `KeywordSchema` and model answer schemas remain unchanged.
+ * A source-relative restriction on choosing this permanent as a target.
+ *
+ * This is not a keyword ability. Gaea's Revenge prints a static rule whose
+ * answer depends on the current color of the spell or ability source, from
+ * either controller. Keeping it as its own characteristic prevents the rule
+ * from acquiring hexproof's opponent-only exception or Protection's damage,
+ * blocking, and attachment consequences.
  */
-export const KeywordAbilitySchema = z.discriminatedUnion('kind', [
-  z.strictObject({ kind: z.literal('defender') }),
-  z.strictObject({ kind: z.literal('landwalk'), landType: BasicLandTypeSchema }),
-  z.strictObject({ kind: z.literal('hexproof') }),
-  z.strictObject({ kind: z.literal('indestructible') }),
-  z.strictObject({ kind: z.literal('protection'), quality: ProtectionQualitySchema }),
-  z.strictObject({ kind: z.literal('doubleStrike') }),
+export const TargetingRestrictionSchema = z.discriminatedUnion('kind', [
+  z.strictObject({ kind: z.literal('sourceLacksColor'), color: ColorSchema }),
 ]);
 
-export type ProtectionQuality = z.infer<typeof ProtectionQualitySchema>;
-export type KeywordAbility = z.infer<typeof KeywordAbilitySchema>;
+export type TargetingRestriction = z.infer<typeof TargetingRestrictionSchema>;
+
+/**
+ * A rule that changes deck legality rather than any game state.
+ *
+ * It is card-level data instead of an `Ability`: no stack, turn, zone or
+ * battlefield event can execute "A deck can have any number ...". The deck
+ * builder is the reader and the Oracle renderer is the human-facing proof that
+ * the clause was not dropped. Optionality keeps every existing card's parsed
+ * shape and fingerprint byte-stable.
+ */
+export const DeckConstructionRuleSchema = z.discriminatedUnion('kind', [
+  z.strictObject({ kind: z.literal('anyNumberOfThisCard') }),
+]);
+export type DeckConstructionRule = z.infer<typeof DeckConstructionRuleSchema>;
+
+/**
+ * A card action available during the pregame procedure because this card is in
+ * its owner's opening hand.
+ *
+ * Card-level data rather than an `Ability`: it is used before the first turn,
+ * while the card is in hand, and never goes on the stack. The one member is the
+ * shared Leyline rule. Keeping it as a discriminated union makes later opening-
+ * hand actions (reveal, exile, or conditional actions such as Gemstone
+ * Caverns) additive without turning this member into a bag of nullable fields.
+ * The independently declared set-generator card schemas expose no matching
+ * field, so this remains hand-authored engine vocabulary.
+ */
+export const OpeningHandActionSchema = z.discriminatedUnion('kind', [
+  z.strictObject({ kind: z.literal('beginOnBattlefield') }),
+]);
+export type CardOpeningHandAction = z.infer<typeof OpeningHandActionSchema>;
+
+const permanentOpeningHandShape = {
+  openingHandAction: OpeningHandActionSchema.optional(),
+};
+
+/**
+ * The one hand-authored alternative-cost shape the native kernel can pay.
+ *
+ * CR 118.9 changes only the spell's mana payment; these two non-mana parts are
+ * paid together while the spell is cast. `SacrificeMatchingSchema` is the same
+ * current-characteristic predicate used by activated and additional costs, so
+ * "black creature" has one typed meaning across all three call sites. The
+ * independently declared model card schemas have no corresponding field.
+ */
+export const SpellAlternativeCostSchema = z.strictObject({
+  payLife: z.int().min(1),
+  sacrificeMatching: SacrificeMatchingSchema.extend({ count: z.int().min(1).max(4) }),
+});
+
+export type SpellAlternativeCost = z.infer<typeof SpellAlternativeCostSchema>;
+
+/** A spell-level prohibition evaluated against the casting player's own turns. */
+export const CastingRestrictionSchema = z.discriminatedUnion('kind', [
+  z.strictObject({
+    kind: z.literal('prohibitedPlayerTurns'),
+    turns: z
+      .array(z.int().min(1).max(20))
+      .min(1)
+      .max(6)
+      .refine((turns) => turns.every((turn, index) => index === 0 || turn > (turns[index - 1] ?? 0)), {
+        message: 'prohibited player turns must be strictly increasing',
+      }),
+  }),
+]);
+
+export type CastingRestriction = z.infer<typeof CastingRestrictionSchema>;
+
+const castableCostShape = {
+  alternativeCost: SpellAlternativeCostSchema.optional(),
+  /** Hand-authored engine vocabulary; independently declared model cards cannot emit it. */
+  castingRestriction: CastingRestrictionSchema.optional(),
+  /**
+   * Source-faithful face presentation for the uncommon cards that print the
+   * payment gloss above their rules text. The symbol and colors are derived
+   * from the structured cost; no authored prose can disagree with the cost.
+   * Independently declared model card schemas expose no matching field.
+   */
+  printedHybridManaReminder: z.literal(true).optional(),
+};
 
 const baseShape = {
   id: z.string().regex(CARD_ID_PATTERN, 'card id must be a lowercase slug'),
@@ -84,6 +168,32 @@ const baseShape = {
   subtypes: z.array(z.string()).default([]),
   keywords: z.array(KeywordSchema).default([]),
   keywordAbilities: z.array(KeywordAbilitySchema).max(6).optional(),
+  /**
+   * Source-faithful grouping and order for printed keyword lines.
+   *
+   * The rules meaning remains in `keywords` and `keywordAbilities`; this
+   * optional view may only rearrange those exact entries. Generated cards omit
+   * it and retain the canonical renderer order. Exact reference translations
+   * use it when Oracle groups two vocabularies on one line or chooses a
+   * card-specific order such as "Reach, trample".
+   */
+  keywordLineGroups: z
+    .array(
+      z
+        .array(z.union([KeywordSchema, KeywordAbilitySchema]))
+        .min(1)
+        .max(6),
+    )
+    .min(1)
+    .max(6)
+    .optional(),
+  /**
+   * Static targeting rules carried as copiable characteristics. The generator
+   * schemas have no corresponding field; exact reference cards author them by
+   * hand. An array admits independently printed restrictions without making a
+   * later second rule a schema migration.
+   */
+  targetingRestrictions: z.array(TargetingRestrictionSchema).max(COLORS.length).optional(),
   effects: z.array(CardEffectSchema).default([]),
   /**
    * CR 700.2's "Choose one —" family: a modal spell's effects, one list per
@@ -115,10 +225,11 @@ const baseShape = {
   /**
    * CR 113 abilities printed on the card. Legal only on permanents that stay on
    * the battlefield; `checkAbilities` enforces that per card kind, the way
-   * `checkEffects` enforces the spell-only rule for `effects`. The cap of two is
-   * a New World Order budget rather than a technical limit.
+   * `checkEffects` enforces the spell-only rule for `effects`.
+   * `MAX_CARD_ABILITIES` is the hand-authored engine envelope; model-facing
+   * schemas remain narrower where their set-design budget calls for it.
    */
-  abilities: z.array(AbilitySchema).max(3).default([]),
+  abilities: z.array(AbilitySchema).max(MAX_CARD_ABILITIES).default([]),
   /**
    * CR 601.2f: while this permanent is on the battlefield, spells of the
    * named class cost less for its controller to cast. `null` is an ordinary
@@ -129,6 +240,19 @@ const baseShape = {
    * `checkPlacement` states for `abilities`, for the same reason.
    */
   costReduction: CostReductionSchema.nullable().default(null),
+  deckConstruction: DeckConstructionRuleSchema.optional(),
+  /**
+   * CR 101.2 / 701.5: an attempt to counter this object while it is a spell
+   * does nothing.
+   *
+   * Card-level data rather than an effect, because it changes what another
+   * spell or ability may do to this one on the stack; it is never something
+   * this card performs as it resolves. Optionality preserves every existing
+   * card fingerprint. The independently declared model card schemas expose no
+   * corresponding field, so this remains hand-authored without a generator
+   * guard that could drift.
+   */
+  cannotBeCountered: z.literal(true).optional(),
   oracleText: z.string().optional(),
   /**
    * The card's flavor text: prose, set in italics at the foot of the text box,
@@ -173,29 +297,189 @@ const baseShape = {
  * `replacement-effects.ts`'s job and not this field's. Planeswalkers print it
  * zero times as well.
  */
-export const PermanentEntryReplacementSchema = z.strictObject({ kind: z.literal('entersTapped') });
+const EntersTappedSchema = z.strictObject({ kind: z.literal('entersTapped') });
+const PayLifeOrEntersTappedSchema = z.strictObject({
+  kind: z.literal('payLifeOrEntersTapped'),
+  life: z.int().min(1).max(20),
+});
+const OpponentsLifeLostThisTurnSchema = z.strictObject({
+  kind: z.literal('opponentsLifeLostThisTurn'),
+});
+const EntersWithCountersSchema = z.strictObject({
+  kind: z.literal('entersWithCounters'),
+  counter: z.enum(['plusOnePlusOne', 'minusOneMinusOne', 'charge']),
+  count: z.union([z.int().min(1).max(20), ChosenXSchema, OpponentsLifeLostThisTurnSchema]),
+});
+const EntersAsCopyOfCreatureSchema = z.strictObject({
+  kind: z.literal('entersAsCopyOfCreature'),
+});
+const PutCounterOnControlledPermanentSchema = z.strictObject({
+  kind: z.literal('putCounterOnControlledPermanent'),
+  permanentType: z.enum(['artifact', 'creature', 'enchantment', 'land', 'planeswalker']),
+  counter: CounterKindSchema,
+  count: z.int().min(1).max(20),
+});
+
+/**
+ * One complete copiable form selected before a creature enters.
+ *
+ * These are additions to the printed creature rather than replacements for an
+ * open-ended bag of characteristics: every mode sets base P/T, while the only
+ * optional deltas are printed creature subtypes and keywords. That is enough
+ * for the measured Primal Clay family without admitting arbitrary card data or
+ * a free-text mode whose kernel meaning could drift from its printed face.
+ */
+function uniqueEntries(values: readonly unknown[]): boolean {
+  return new Set(values.map(canonicalJson)).size === values.length;
+}
+
+export const EntryCharacteristicModeSchema = z.strictObject({
+  power: z.int().min(-20).max(20),
+  toughness: z.int().min(-20).max(20),
+  addSubtypes: z
+    .array(z.string().min(1).max(40))
+    .min(1)
+    .max(6)
+    .refine(uniqueEntries, 'entry characteristic subtypes must be unique')
+    .optional(),
+  addKeywords: z
+    .array(KeywordSchema)
+    .min(1)
+    .max(6)
+    .refine(uniqueEntries, 'entry characteristic keywords must be unique')
+    .optional(),
+  addKeywordAbilities: z
+    .array(KeywordAbilitySchema)
+    .min(1)
+    .max(6)
+    .refine(uniqueEntries, 'entry characteristic keyword abilities must be unique')
+    .optional(),
+});
+
+function entryCharacteristicModeIdentity(mode: z.infer<typeof EntryCharacteristicModeSchema>): string {
+  return canonicalJson({
+    power: mode.power,
+    toughness: mode.toughness,
+    addSubtypes: [...(mode.addSubtypes ?? [])].sort(),
+    addKeywords: [...(mode.addKeywords ?? [])].sort(),
+    addKeywordAbilities: [...(mode.addKeywordAbilities ?? [])].sort((left, right) =>
+      canonicalJson(left).localeCompare(canonicalJson(right)),
+    ),
+  });
+}
+
+const EntersAsCharacteristicChoiceSchema = z.strictObject({
+  kind: z.literal('entersAsCharacteristicChoice'),
+  modes: z
+    .array(EntryCharacteristicModeSchema)
+    .min(2)
+    .max(6)
+    .refine(
+      (modes) => new Set(modes.map(entryCharacteristicModeIdentity)).size === modes.length,
+      'entry characteristic modes must be distinct',
+    ),
+});
+
+export const SharedPermanentEntryReplacementSchema = z.discriminatedUnion('kind', [
+  EntersTappedSchema,
+  EntersWithCountersSchema,
+  EntersAsCopyOfCreatureSchema,
+  PutCounterOnControlledPermanentSchema,
+]);
+
+export const PermanentEntryReplacementSchema = z.discriminatedUnion('kind', [
+  EntersTappedSchema,
+  EntersWithCountersSchema,
+  EntersAsCopyOfCreatureSchema,
+  PutCounterOnControlledPermanentSchema,
+  EntersAsCharacteristicChoiceSchema,
+  z.strictObject({ kind: z.literal('choosePlayer') }),
+]);
 
 export const CreatureCardSchema = z.strictObject({
   ...baseShape,
+  ...permanentOpeningHandShape,
+  ...castableCostShape,
   kind: z.literal('creature'),
   manaCost: ManaCostSchema,
   /** Artifact creatures fill the colorless slot of a generated set. */
   artifact: z.boolean().default(false),
   power: z.int(),
   toughness: z.int(),
+  /**
+   * Rakdos's closed turn-life-loss casting bundle: the same opposing loss
+   * unlocks this card and reduces creature spells its controller casts.
+   * Kept atomic and absent from every independently declared model schema.
+   */
+  opponentsLifeLostThisTurnCasting: z.literal(true).optional(),
+  /**
+   * Palisade Giant's closed CR 614 contract. Its one validated static marker
+   * supplies layer-6 ability presence/loss while this field keeps the player,
+   * other-permanent scope, exclusion, and self destination atomic and outside
+   * every generator-visible ability tuple.
+   */
+  redirectControllerAndOtherPermanentsDamageToSelf: z.literal(true).optional(),
   entryReplacement: PermanentEntryReplacementSchema.optional(),
 });
 
+/**
+ * A non-mana payment made while an instant or sorcery is cast.
+ *
+ * The measured members are a current-characteristic permanent sacrifice and a
+ * single card discarded from the caster's hand. They live on spell cards
+ * rather than in `ManaCostSchema`: mana value and colored pips do not change
+ * when a spell has another payment, while casting legality and stack state do.
+ * The union keeps the two payments mutually exclusive until a printed card
+ * proves they need to compose. The independently declared set-generator
+ * schemas have no corresponding field, so both remain hand-authored engine
+ * vocabulary.
+ */
+export const SpellAdditionalCostSchema = z.union([
+  z.strictObject({
+    sacrificeMatching: SacrificeMatchingSchema.extend({ count: z.int().min(1).max(4) }),
+  }),
+  z.strictObject({ discard: z.literal(1) }),
+]);
+
+export type SpellAdditionalCost = z.infer<typeof SpellAdditionalCostSchema>;
+
+/** A generic casting-cost increase derived from the finalized target choice. */
+export const TargetCostIncreaseSchema = z.strictObject({
+  genericPerTargetBeyondFirst: z.int().min(1).max(20),
+});
+
+/** Hand-authored source presentation: effect indexes that begin a new printed paragraph. */
+const PrintedEffectParagraphBreaksSchema = z
+  .array(z.int().min(1))
+  .max(2)
+  .refine((breaks) => breaks.every((value, index) => index === 0 || value > breaks[index - 1]!), {
+    message: 'printed effect paragraph breaks must be strictly increasing',
+  });
+
 export const InstantCardSchema = z.strictObject({
   ...baseShape,
+  ...castableCostShape,
   kind: z.literal('instant'),
   manaCost: ManaCostSchema,
+  additionalCost: SpellAdditionalCostSchema.optional(),
+  targetCostIncrease: TargetCostIncreaseSchema.optional(),
+  /** Hand-authored alternate price plus structured replacement effects. */
+  overload: OverloadProfileSchema.optional(),
+  /** Presentation only; independently declared model cards cannot emit it. */
+  printedEffectParagraphBreaks: PrintedEffectParagraphBreaksSchema.optional(),
 });
 
 export const SorceryCardSchema = z.strictObject({
   ...baseShape,
+  ...castableCostShape,
   kind: z.literal('sorcery'),
   manaCost: ManaCostSchema,
+  additionalCost: SpellAdditionalCostSchema.optional(),
+  targetCostIncrease: TargetCostIncreaseSchema.optional(),
+  /** Hand-authored alternate price plus structured replacement effects. */
+  overload: OverloadProfileSchema.optional(),
+  /** Presentation only; independently declared model cards cannot emit it. */
+  printedEffectParagraphBreaks: PrintedEffectParagraphBreaksSchema.optional(),
 });
 
 /**
@@ -207,9 +491,17 @@ export const SorceryCardSchema = z.strictObject({
  */
 export const ArtifactCardSchema = z.strictObject({
   ...baseShape,
+  ...permanentOpeningHandShape,
+  ...castableCostShape,
   kind: z.literal('artifact'),
   manaCost: ManaCostSchema,
-  entryReplacement: PermanentEntryReplacementSchema.optional(),
+  entryReplacement: z
+    .discriminatedUnion('kind', [
+      ...SharedPermanentEntryReplacementSchema.options,
+      z.strictObject({ kind: z.literal('chooseTwoColors') }),
+      z.strictObject({ kind: z.literal('chooseCardName') }),
+    ])
+    .optional(),
 });
 
 /**
@@ -299,7 +591,27 @@ export const AuraLandwalkModificationSchema = z.strictObject({
  */
 export const AuraUntapModificationSchema = z.strictObject({ kind: z.literal('doesNotUntap') });
 
+/** The enchanted creature's activated abilities cannot be activated. */
+export const AuraActivationLockModificationSchema = z.strictObject({
+  kind: z.literal('cantActivateAbilities'),
+});
+
+/** A layer-6 triggered ability granted to the enchanted creature. */
+export const AuraTriggeredAbilityGrantSchema = z.strictObject({
+  kind: z.literal('grantTriggeredAbility'),
+  ability: TriggeredAbilitySchema,
+});
+
+/** A layer-6 activated ability granted to the enchanted permanent. */
+export const AuraActivatedAbilityGrantSchema = z.strictObject({
+  kind: z.literal('grantActivatedAbility'),
+  ability: ActivatedAbilitySchema,
+});
+
 export const AURA_MODIFICATION_LIMITS = { min: 1, max: 2 } as const;
+
+/** Hand-authored Auras may carry a third restriction or use only abilities. */
+const ENGINE_AURA_MODIFICATION_LIMITS = { min: 0, max: 3 } as const;
 
 /**
  * The Aura clause, over whichever modification union is wanted.
@@ -308,10 +620,14 @@ export const AURA_MODIFICATION_LIMITS = { min: 1, max: 2 } as const;
  * modifications they admit — and a second literal of `enchant` and the length
  * bounds would be a second thing to keep in step.
  */
-function auraClause<M extends z.ZodType>(modification: M) {
+function auraClause<E extends z.ZodType, M extends z.ZodType>(
+  enchant: E,
+  modification: M,
+  limits: { min: number; max: number },
+) {
   return z.strictObject({
-    enchant: z.literal('creature'),
-    modifications: z.array(modification).min(AURA_MODIFICATION_LIMITS.min).max(AURA_MODIFICATION_LIMITS.max),
+    enchant,
+    modifications: z.array(modification).min(limits.min).max(limits.max),
   });
 }
 
@@ -367,7 +683,10 @@ export const ModelAuraModificationSchema = z.union([
 export const AuraModificationSchema = z.union([
   ModelAuraModificationSchema,
   AuraUntapModificationSchema,
+  AuraActivationLockModificationSchema,
   StatBonusPerModificationSchema,
+  AuraTriggeredAbilityGrantSchema,
+  AuraActivatedAbilityGrantSchema,
 ]);
 
 /** Which property of the enchanted creature one modification changes. */
@@ -395,10 +714,43 @@ export const AURA_MODIFICATION_KINDS: readonly ModelAuraModificationKind[] = [
 ];
 
 /** The bounded Aura subset justified by the M11/M13 reference corpus. */
-export const AuraSchema = auraClause(AuraModificationSchema);
+export const AuraSchema = auraClause(
+  z.enum(['creature', 'artifactOrCreature', 'land', 'nonlandPermanent']),
+  AuraModificationSchema,
+  ENGINE_AURA_MODIFICATION_LIMITS,
+).extend({
+  /**
+   * Righteous Authority's closed layer-7c capability: +1/+1 per card in the
+   * enchanted creature controller's live hand. Hidden-zone counts are not
+   * battlefield tallies, so this stays outside the model-facing Aura union.
+   */
+  enchantedControllerHandSizeBonus: z.literal(true).optional(),
+  /**
+   * Urban Burgeoning's turn-based-action permission for its enchanted land.
+   *
+   * This is an Aura clause rather than a characteristic modification: untap
+   * steps do not use the stack or grant priority, and Forge represents it as
+   * `Mode$ UntapOtherPlayer`. Keeping it beside `modifications` also leaves
+   * that shared exhaustive union—and every generator-visible schema—unchanged.
+   */
+  untapsDuringEachOtherPlayersUntapStep: z.literal(true).optional(),
+  /** Hand-authored Oracle ordering for Auras whose static clause precedes their abilities. */
+  printedModificationsBeforeAbilities: z.literal(true).optional(),
+});
 
 /** That clause narrowed to what a fill batch may answer with. */
-export const ModelAuraSchema = auraClause(ModelAuraModificationSchema);
+export const ModelAuraSchema = auraClause(
+  z.literal('creature'),
+  ModelAuraModificationSchema,
+  AURA_MODIFICATION_LIMITS,
+);
+
+/** Mana Bloom's source-bound chosen-X charge-counter entry replacement. */
+const EnchantmentEntryReplacementSchema = z.strictObject({
+  kind: z.literal('entersWithCounters'),
+  counter: z.literal('charge'),
+  count: ChosenXSchema,
+});
 
 /**
  * Noncreature enchantment permanent. `aura` is absent for blanket
@@ -406,9 +758,14 @@ export const ModelAuraSchema = auraClause(ModelAuraModificationSchema);
  */
 export const EnchantmentCardSchema = z.strictObject({
   ...baseShape,
+  ...permanentOpeningHandShape,
+  ...castableCostShape,
   kind: z.literal('enchantment'),
   manaCost: ManaCostSchema,
   aura: AuraSchema.optional(),
+  entryReplacement: EnchantmentEntryReplacementSchema.optional(),
+  /** Source-faithful presentation only; entry semantics remain in `entryReplacement`. */
+  printedEntryReference: z.literal('thisEnchantment').optional(),
 });
 
 /**
@@ -425,7 +782,9 @@ export const EnchantmentCardSchema = z.strictObject({
  * mana base that only a land has ever been printed asking about itself.
  */
 export const LandEntryReplacementSchema = z.discriminatedUnion('kind', [
-  PermanentEntryReplacementSchema,
+  EntersTappedSchema,
+  EntersWithCountersSchema,
+  PayLifeOrEntersTappedSchema,
   z.strictObject({
     kind: z.literal('entersTappedUnlessControlsLandSubtype'),
     landTypes: z.array(BasicLandTypeSchema).min(1).max(2),
@@ -434,19 +793,77 @@ export const LandEntryReplacementSchema = z.discriminatedUnion('kind', [
 
 export const LandCardSchema = z.strictObject({
   ...baseShape,
+  ...permanentOpeningHandShape,
   kind: z.literal('land'),
   /** Present exactly on Basic lands; nonbasic land types live in `subtypes`. */
   basicLandType: BasicLandTypeSchema.optional(),
   producesMana: z.array(ManaColorSchema).max(6).default([]),
   entryReplacement: LandEntryReplacementSchema.optional(),
+  /** Source-faithful presentation only; land entry semantics remain in `entryReplacement`. */
+  printedEntryReference: z.literal('thisLand').optional(),
+  /** Source-faithful presentation for lands whose intrinsic mana reminder precedes entry text. */
+  printedManaAbilityFirst: z.literal(true).optional(),
 });
 
 /** A planeswalker permanent. Loyalty is source state, never power/toughness. */
 export const PlaneswalkerCardSchema = z.strictObject({
   ...baseShape,
+  ...permanentOpeningHandShape,
+  ...castableCostShape,
   kind: z.literal('planeswalker'),
   manaCost: ManaCostSchema,
   startingLoyalty: z.int(),
+});
+
+const transformedFacePhysicalFields = {
+  id: true,
+  rarity: true,
+  set: true,
+  manaCost: true,
+  alternativeCost: true,
+  castingRestriction: true,
+  printedHybridManaReminder: true,
+} as const;
+
+/**
+ * The rules-bearing face of a transforming double-faced card.
+ *
+ * Physical identity, rarity, set position, and mana cost belong to the whole
+ * card and are supplied by the front when this face becomes a spell. The face
+ * otherwise reuses the ordinary card schemas, so a transformed creature,
+ * permanent, instant, or sorcery has exactly the abilities and validation
+ * surface its single-faced counterpart has.
+ */
+export const TransformBackFaceSchema = z.discriminatedUnion('kind', [
+  CreatureCardSchema.omit({
+    ...transformedFacePhysicalFields,
+    openingHandAction: true,
+  }),
+  InstantCardSchema.omit(transformedFacePhysicalFields),
+  SorceryCardSchema.omit(transformedFacePhysicalFields),
+  ArtifactCardSchema.omit({
+    ...transformedFacePhysicalFields,
+    openingHandAction: true,
+  }),
+  EnchantmentCardSchema.omit({
+    ...transformedFacePhysicalFields,
+    openingHandAction: true,
+  }),
+  PlaneswalkerCardSchema.omit({
+    ...transformedFacePhysicalFields,
+    openingHandAction: true,
+  }),
+]);
+
+/** A Battle permanent. Its current defense lives in defense counters. */
+export const BattleCardSchema = z.strictObject({
+  ...baseShape,
+  ...permanentOpeningHandShape,
+  ...castableCostShape,
+  kind: z.literal('battle'),
+  manaCost: ManaCostSchema,
+  defense: z.int().min(1).max(20),
+  backFace: TransformBackFaceSchema.optional(),
 });
 
 export const CardSchema = z.discriminatedUnion('kind', [
@@ -457,6 +874,7 @@ export const CardSchema = z.discriminatedUnion('kind', [
   LandCardSchema,
   PlaneswalkerCardSchema,
   EnchantmentCardSchema,
+  BattleCardSchema,
 ]);
 
 export type Card = z.infer<typeof CardSchema>;
@@ -473,7 +891,38 @@ export type AuraLandwalkModification = z.infer<typeof AuraLandwalkModificationSc
 export type AuraModification = z.infer<typeof AuraModificationSchema>;
 export type LandEntryReplacement = z.infer<typeof LandEntryReplacementSchema>;
 export type PermanentEntryReplacement = z.infer<typeof PermanentEntryReplacementSchema>;
+export type EntryCharacteristicMode = z.infer<typeof EntryCharacteristicModeSchema>;
 export type PlaneswalkerCard = z.infer<typeof PlaneswalkerCardSchema>;
+export type BattleCard = z.infer<typeof BattleCardSchema>;
+export type TransformBackFace = z.infer<typeof TransformBackFaceSchema>;
+
+/** Materializes a DFC's active back face with the physical front's identity. */
+export function transformedBackFaceOf(card: BattleCard): CastableCard | null {
+  if (card.backFace === undefined) return null;
+  return CardSchema.parse({
+    ...card.backFace,
+    id: card.id,
+    rarity: card.rarity,
+    set: card.set,
+    manaCost: {},
+  }) as CastableCard;
+}
+
+/** The pregame action printed by this permanent, if any. */
+export function openingHandActionOf(card: Card): CardOpeningHandAction | undefined {
+  switch (card.kind) {
+    case 'creature':
+    case 'artifact':
+    case 'enchantment':
+    case 'land':
+    case 'planeswalker':
+    case 'battle':
+      return card.openingHandAction;
+    case 'instant':
+    case 'sorcery':
+      return undefined;
+  }
+}
 
 /** Every card variant that carries a mana cost (everything except lands). */
 export type CastableCard = Extract<Card, { manaCost: unknown }>;
@@ -520,16 +969,24 @@ export function isBasicLand(card: Card): boolean {
  * worst shape this repository can ship. Widening the union of kinds that carry
  * the field is now an edit to `Card` alone.
  */
-export function printedEntryReplacement(card: Card): LandEntryReplacement | undefined {
+export function printedEntryReplacement(
+  card: Card,
+):
+  | LandEntryReplacement
+  | PermanentEntryReplacement
+  | { readonly kind: 'chooseTwoColors' }
+  | { readonly kind: 'chooseCardName' }
+  | undefined {
   switch (card.kind) {
     case 'land':
     case 'artifact':
     case 'creature':
+    case 'enchantment':
       return card.entryReplacement;
     case 'instant':
     case 'sorcery':
-    case 'enchantment':
     case 'planeswalker':
+    case 'battle':
       return undefined;
   }
 }
@@ -611,6 +1068,5 @@ export function isPermanentCard(card: Card): boolean {
 /** Mana value of a card; lands are 0. */
 export function cardManaValue(card: Card): number {
   if (!isCastable(card)) return 0;
-  const { manaCost } = card;
-  return manaCost.generic + manaCost.W + manaCost.U + manaCost.B + manaCost.R + manaCost.G;
+  return manaValue(card.manaCost);
 }

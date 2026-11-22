@@ -8,13 +8,16 @@
  * forgotten in the other is the regression `artifact-enchantment-target.test.ts`
  * was written for. Both callers land here.
  *
- * The characteristic half is not evaluated here at all: it is compiled to an
+ * The list-valued characteristic half is compiled to an
  * `ObjectFilter` and handed to `matchesFilter`, the same function the CR 613
  * layer walk uses to decide who an anthem reaches. That is the whole point of
  * `TargetFilterSchema` being a subset of `ObjectFilter` rather than a filter
  * type of its own — a removal spell that says "black creature" and a lord that
  * says "black creature" have to reach the same bodies, and two evaluators would
- * eventually disagree about one of them (`mtg-6y4g`).
+ * eventually disagree about one of them (`mtg-6y4g`). The numeric mana-value
+ * ceiling is checked beside that call because `ObjectFilter` has no numeric
+ * range field; it reads copiable values on the battlefield and printed values
+ * in a graveyard.
  *
  * The combat half is evaluated here, because it is not a characteristic. CR
  * 506.4 makes "attacking" a property of the *combat* rather than of the object:
@@ -22,14 +25,15 @@
  * and it stops being true the moment the combat ends. So the filter is answered
  * in two pieces against two sources, and this module is where the seam is.
  */
-import type { TargetFilter } from '@mtg/dsl';
-import { assertNever } from '@mtg/dsl';
+import type { Card, Color, TargetFilter } from '@mtg/dsl';
+import { assertNever, cardManaValue } from '@mtg/dsl';
 import type { ObjectFilter } from './continuous';
 import { objectFilter } from './continuous';
-import { matchesFilter, printedCharacteristics } from './characteristics';
+import { matchesFilter, printedCardCharacteristics } from './characteristics';
 import type { ObjectId } from './ids';
-import { characteristicsOf } from './layers';
+import { characteristicsOf, copiableValuesOf } from './layers';
 import type { GameState } from './state';
+import { spellCard } from './stack-spell';
 
 /**
  * The DSL filter as a kernel filter.
@@ -71,7 +75,17 @@ export function targetObjectFilter(filter: TargetFilter): ObjectFilter {
     colors: filter.colors ?? null,
     excludeColors: filter.excludeColors ?? null,
     keywords: filter.keywords ?? null,
+    excludeKeywords: filter.excludeKeywords ?? null,
   });
+}
+
+function satisfiesManaValueBound(card: Card, filter: TargetFilter): boolean {
+  return filter.maxManaValue === undefined || cardManaValue(card) <= filter.maxManaValue;
+}
+
+/** Ultimate Price: exactly one current color, excluding colorless and multicolored objects. */
+function satisfiesColorShape(colors: readonly Color[], filter: TargetFilter): boolean {
+  return filter.monocolored !== true || colors.length === 1;
 }
 
 /** CR 506.4: is this permanent an attacking creature right now? */
@@ -96,7 +110,25 @@ export function isBlocking(state: GameState, oid: ObjectId): boolean {
  * about a creature that grows past "power 3 or less".
  */
 export function satisfiesTargetFilter(state: GameState, oid: ObjectId, filter: TargetFilter): boolean {
-  if (!matchesFilter(targetObjectFilter(filter), oid, characteristicsOf(state, oid))) return false;
+  const object = state.objects[oid];
+  const current = object === undefined ? null : characteristicsOf(state, oid);
+  if (
+    object === undefined ||
+    current === null ||
+    !matchesFilter(targetObjectFilter(filter), oid, current, object.token) ||
+    !satisfiesColorShape(current.colors, filter)
+  ) {
+    return false;
+  }
+  if (!satisfiesManaValueBound(copiableValuesOf(state, oid), filter)) return false;
+  if (
+    filter.dealtDamageThisTurn === true &&
+    !(state.turn.damageSourcesThisTurn ?? []).some(
+      (source) => source.oid === oid && source.incarnation === (object.incarnation ?? 0),
+    )
+  ) {
+    return false;
+  }
   const combat = filter.combat;
   if (combat === undefined) return true;
   switch (combat) {
@@ -109,6 +141,19 @@ export function satisfiesTargetFilter(state: GameState, oid: ObjectId, filter: T
     default:
       return assertNever(combat, 'satisfiesTargetFilter');
   }
+}
+
+/** Does a card in a non-battlefield public zone satisfy its printed filter? */
+export function graveyardCardSatisfiesFilter(state: GameState, oid: ObjectId, filter: TargetFilter): boolean {
+  const object = state.objects[oid];
+  if (object?.zone !== 'graveyard' || filter.combat !== undefined || filter.dealtDamageThisTurn !== undefined)
+    return false;
+  const current = printedCardCharacteristics(object.card, object.owner);
+  return (
+    matchesFilter(targetObjectFilter(filter), oid, current, object.token) &&
+    satisfiesColorShape(current.colors, filter) &&
+    satisfiesManaValueBound(object.card, filter)
+  );
 }
 
 /**
@@ -130,7 +175,15 @@ export function satisfiesTargetFilter(state: GameState, oid: ObjectId, filter: T
  * place the field is admitted, and one field must not have two meanings.
  */
 export function spellSatisfiesFilter(state: GameState, oid: ObjectId, filter: TargetFilter): boolean {
-  const object = state.objects[oid];
-  if (object === undefined) return false;
-  return matchesFilter(targetObjectFilter(filter), oid, printedCharacteristics(object));
+  if (filter.dealtDamageThisTurn !== undefined) return false;
+  const entry = state.stack.find((candidate) => candidate.oid === oid && candidate.ability === null);
+  if (entry === undefined) return false;
+  const card = spellCard(state, entry);
+  if (card === null) return false;
+  const current = printedCardCharacteristics(card, entry.controller);
+  return (
+    matchesFilter(targetObjectFilter(filter), oid, current, state.objects[oid]?.token ?? false) &&
+    satisfiesColorShape(current.colors, filter) &&
+    satisfiesManaValueBound(card, filter)
+  );
 }

@@ -10,10 +10,13 @@
  * held, on a real disk rather than an injected one, because the defect is
  * whether two `copy` calls land on the same inode.
  */
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { EXAMPLE_CARDS, setBasics, setTokens } from '@mtg/dsl';
+import { encodePng } from '@mtg/raster';
 import { readSetIndex } from '../../src/lab/set-index';
 import type { ResolvedSet, ResolveResult, SetCandidate } from '../../tools/resolve-set';
 import { readSetLibrary, stageSetBundles, stagedSetStem } from '../../tools/stage-set-bundles';
@@ -23,44 +26,77 @@ interface SetSpec {
   readonly code: string;
   readonly name: string;
   readonly cardIds: readonly string[];
+  /** Explicit artifact kind, used to distinguish official reduced documents. */
+  readonly kind?: string;
+  /** Cards written verbatim, for a set whose card has to do something in particular. */
+  readonly cards?: readonly unknown[];
   readonly reduced?: boolean;
+  /** The set block's declared origin, as `reducedReferenceSetDocument` writes it. */
+  readonly origin?: string;
   /** A reduced printing's `reduction` block, when the document carries one. */
   readonly reduction?: Readonly<Record<string, unknown>>;
+  /**
+   * The set file's own name, for a test where the name is the subject.
+   *
+   * `set.json` is what every emitter in this repository writes and so is the
+   * default here, but the curated-preferences path is keyed on this filename
+   * (`preferencesPathFor`), so a test about picks has to be able to write
+   * `<stem>.set.json` the way the fixtures do.
+   */
+  readonly file?: string;
+}
+
+/** One picture of one card, written beside the set. */
+interface Illustration {
+  readonly file: string;
+  readonly bytes: string;
+}
+
+/** A card's pictures, in the order the collation adopted them. */
+type SetArt = Readonly<Record<string, Illustration | readonly Illustration[]>>;
+
+function illustrations(value: Illustration | readonly Illustration[]): readonly Illustration[] {
+  return 'file' in value ? [value] : value;
 }
 
 function setJson(spec: SetSpec): string {
   return JSON.stringify({
+    ...(spec.kind === undefined ? {} : { kind: spec.kind }),
     set: {
       code: spec.code,
       name: spec.name,
-      ...(spec.reduced === true ? { reduced: true } : {}),
+      ...(spec.reduced === undefined ? {} : { reduced: spec.reduced }),
+      ...(spec.origin === undefined ? {} : { origin: spec.origin }),
     },
     ...(spec.reduction === undefined ? {} : { reduction: spec.reduction }),
-    cards: spec.cardIds.map((id) => ({ id, name: id })),
+    // Real DSL cards, not `{ id, name }` shims: `resolveSet` parses every card
+    // before a set reaches staging, and staging now derives a set's tokens and
+    // basics from the parsed cards rather than reading ids off the raw JSON.
+    cards: spec.cards ?? spec.cardIds.map((id) => ({ ...EXAMPLE_CARDS[0], id, name: id })),
   });
 }
 
 /** A set on disk, optionally with its own art manifest and rasters beside it. */
-function writeSet(
-  root: string,
-  dir: string,
-  spec: SetSpec,
-  art: Readonly<Record<string, { readonly file: string; readonly bytes: string }>> = {},
-): ResolvedSet {
+function writeSet(root: string, dir: string, spec: SetSpec, art: SetArt = {}): ResolvedSet {
   const home = join(root, dir);
   mkdirSync(home, { recursive: true });
-  const path = join(home, 'set.json');
+  const path = join(home, spec.file ?? 'set.json');
   const json = setJson(spec);
   writeFileSync(path, json, 'utf8');
-  const entries = Object.entries(art);
+  const entries = Object.entries(art).map(([id, value]) => [id, illustrations(value)] as const);
   if (entries.length > 0) {
-    for (const [, { file, bytes }] of entries) writeFileSync(join(home, file), bytes, 'utf8');
+    for (const [, pictures] of entries) {
+      for (const { file, bytes } of pictures) writeFileSync(join(home, file), bytes, 'utf8');
+    }
     writeFileSync(
       join(home, 'art.json'),
       JSON.stringify({
         formatVersion: 2,
         art: Object.fromEntries(
-          entries.map(([id, { file }]) => [id, [{ href: `./${file}`, alt: `${id} illustration` }]]),
+          entries.map(([id, pictures]) => [
+            id,
+            pictures.map(({ file }) => ({ href: `./${file}`, alt: `${id} illustration` })),
+          ]),
         ),
       }),
       'utf8',
@@ -78,6 +114,43 @@ function scratch(): string {
 }
 
 describe('staging one bundle per set', () => {
+  it('reuses cached web rasters after clearing bundles and re-encodes only a changed source', async () => {
+    const root = scratch();
+    const firstBytes = encodePng({ width: 8, height: 8, data: new Uint8Array(8 * 8 * 4).fill(17) });
+    const secondBytes = encodePng({ width: 8, height: 8, data: new Uint8Array(8 * 8 * 4).fill(34) });
+    const set = writeSet(root, 'cached', { code: 'AAA', name: 'cache fixture', cardIds: ['one', 'two'] });
+    writeFileSync(
+      join(root, 'cached', 'art.json'),
+      JSON.stringify({
+        formatVersion: 2,
+        art: {
+          one: [{ href: './one.png', alt: 'one' }],
+          two: [{ href: './two.png', alt: 'two' }],
+        },
+      }),
+      'utf8',
+    );
+    writeFileSync(join(root, 'cached', 'one.png'), firstBytes);
+    writeFileSync(join(root, 'cached', 'two.png'), secondBytes);
+
+    const first = await stageSetBundles(library(set), join(root, 'public'), root);
+    const second = await stageSetBundles(library(set), join(root, 'public'), root);
+    const firstArt = first.bundles[0]?.art;
+    const secondArt = second.bundles[0]?.art;
+    if (firstArt?.status !== 'staged' || secondArt?.status !== 'staged')
+      throw new Error('art was not staged');
+    expect(firstArt.staged).toMatchObject({ encoded: 2, reused: 0 });
+    expect(secondArt.staged).toMatchObject({ encoded: 0, reused: 2 });
+
+    const changed = join(root, 'cached', 'one.png');
+    writeFileSync(changed, encodePng({ width: 8, height: 8, data: new Uint8Array(8 * 8 * 4).fill(51) }));
+    utimesSync(changed, new Date(), new Date(Date.now() + 60_000));
+    const third = await stageSetBundles(library(set), join(root, 'public'), root);
+    const thirdArt = third.bundles[0]?.art;
+    if (thirdArt?.status !== 'staged') throw new Error('art was not staged');
+    expect(thirdArt.staged).toMatchObject({ encoded: 1, reused: 1 });
+  });
+
   it('keys each set’s rasters under that set, so a shared basename cannot overwrite', async () => {
     const root = scratch();
     // The same card id in both sets, illustrated by the same filename with
@@ -121,6 +194,34 @@ describe('staging one bundle per set', () => {
     );
   });
 
+  // `mtg-uzacz`. M11, M13 and RTR keep every collector position, so the emitter
+  // writes `reduced: false` beside `origin: 'official'`; the row has to say
+  // "whole printing" rather than "partial", and still file under Magic.
+  it('stages a complete reference build as official and not partial', async () => {
+    const root = scratch();
+    const whole = writeSet(root, 'whole', {
+      code: 'M11',
+      name: 'Magic 2011',
+      cardIds: ['m11-1'],
+      reduced: false,
+      origin: 'official',
+    });
+
+    await stageSetBundles(library(whole), join(root, 'public'), root);
+
+    const read = readSetIndex(
+      JSON.parse(readFileSync(join(root, 'public', 'sets', 'index.json'), 'utf8')),
+      'index.json',
+    );
+    if (!read.ok) throw new Error(read.message);
+    expect(read.index.sets[0]).toMatchObject({
+      stem: 'm11',
+      name: 'Magic 2011',
+      reduced: false,
+      origin: 'official',
+    });
+  });
+
   it('writes an index the page can read, with the launcher’s choice first and selected', async () => {
     const root = scratch();
     const flagship = writeSet(root, 'flagship', { code: 'AAA', name: 'First Set', cardIds: ['one', 'two'] });
@@ -142,6 +243,11 @@ describe('staging one bundle per set', () => {
     expect(read.index.sets.map((row) => row.stem)).toEqual(['aaa', 'bbb']);
     expect(read.index.sets.map((row) => row.cardCount)).toEqual([2, 1]);
     expect(read.index.sets.map((row) => row.reduced)).toEqual([false, true]);
+    // The origin is derived from each document here, not from the row's own
+    // `reduced`: the picker groups by it (`mtg-tewc.1`), and a row that carried
+    // the wrong one would file a printing under the heading for sets this lab
+    // made. `../lab/set-origin.test.ts` holds the decision itself.
+    expect(read.index.sets.map((row) => row.origin)).toEqual(['custom', 'official']);
     expect(read.index.sets.map((row) => row.setUrl)).toEqual(['sets/aaa/set.json', 'sets/bbb/set.json']);
     // No art run beside either set, which is the ordinary state of a checkout
     // that has not paid for one: the row says so by carrying no art url at all
@@ -192,6 +298,60 @@ describe('staging one bundle per set', () => {
     expect((JSON.parse(staged) as { reduction: { collation: unknown } }).reduction.collation).toEqual(
       collation,
     );
+  });
+
+  it('stages an official reduced set as exact illustration crops for the shared frame', async () => {
+    const root = scratch();
+    const source = EXAMPLE_CARDS[0];
+    if (source === undefined) throw new Error('the DSL example-card fixture is empty');
+    const corpusDir = join(root, 'packages', 'data', 'data');
+    mkdirSync(corpusDir, { recursive: true });
+    writeFileSync(
+      join(corpusDir, 'reference-sets-v1.json'),
+      JSON.stringify({
+        sets: [
+          {
+            code: 'M11',
+            cards: [
+              {
+                name: 'Ajani Goldmane',
+                number: '1',
+                layout: 'normal',
+                otherFaceIds: [],
+                identifiers: { scryfallId: '2d911053-a026-4b20-ba2d-dbcc367c1413' },
+              },
+            ],
+          },
+        ],
+      }),
+      'utf8',
+    );
+    const printing = writeSet(root, 'reference', {
+      code: 'M11',
+      name: 'Magic 2011 (reduced)',
+      kind: 'position-reduced-reference-set-document',
+      cardIds: ['m11-1'],
+      cards: [{ ...source, id: 'm11-1', set: { code: 'M11', collectorNumber: 1 } }],
+      reduced: true,
+    });
+
+    const staging = await stageSetBundles(library(printing), join(root, 'public'), root);
+    const row = staging.index.sets[0];
+    expect(row).toMatchObject({
+      stem: 'm11',
+      artUrl: 'sets/m11/art.json',
+    });
+    expect(JSON.parse(readFileSync(join(root, 'public', 'sets', 'm11', 'art.json'), 'utf8'))).toEqual({
+      formatVersion: 2,
+      art: {
+        'm11-1': [
+          {
+            href: 'https://api.scryfall.com/cards/2d911053-a026-4b20-ba2d-dbcc367c1413?format=image&version=art_crop',
+            alt: 'Ajani Goldmane illustration, M11 #1',
+          },
+        ],
+      },
+    });
   });
 
   it('clears the previous run’s bundles, so a set that is gone is gone', async () => {
@@ -274,5 +434,125 @@ describe('reading the library off the candidate list', () => {
   it('names a file that is there and is not a set, and says nothing about one that is not there', () => {
     const result = readSetLibrary(candidates, chosen, { read });
     expect(result.refused).toEqual(['/broken/set.json is not a set this build can read']);
+  });
+});
+
+describe('a manifest is ranked on the set’s surfaces, not its card list', () => {
+  it('stages art that covers only a token and a basic, which the card list cannot see', async () => {
+    const root = scratch();
+    // One card, and it mints a token. `token-bear` and the five basics appear in
+    // no card list, so scoring on the card list scored this manifest zero and
+    // `chooseArtManifest` discarded it as another set's art (`mtg-zzf`).
+    const minter = EXAMPLE_CARDS.find((card) => setTokens([card]).length > 0);
+    if (minter === undefined) throw new Error('no example card mints a token');
+    const token = setTokens([minter])[0];
+    const swamp = setBasics([minter])[0];
+    if (token === undefined || swamp === undefined) throw new Error('no token or basic to illustrate');
+
+    const set = writeSet(
+      root,
+      'minter',
+      { code: 'AAA', name: 'Token minter set', cardIds: [minter.id], cards: [minter] },
+      {
+        [token.card.id]: { file: 'bear.png', bytes: 'bear-picture' },
+        [swamp.id]: { file: 'swamp.png', bytes: 'swamp-picture' },
+      },
+    );
+
+    const staging = await stageSetBundles(library(set), join(root, 'public'), root);
+    const bundle = staging.bundles[0];
+    if (bundle === undefined) throw new Error('nothing staged');
+    expect(bundle.art.status).toBe('staged');
+    if (bundle.art.status !== 'staged') return;
+    // Two of the set's surfaces are illustrated and the printed card is not, which
+    // is a real state and not an empty one.
+    expect(bundle.art.covered).toBe(2);
+    expect(bundle.art.total).toBeGreaterThan(2);
+    expect(readFileSync(join(root, 'public', 'sets', 'aaa', 'art', 'bear.png'), 'utf8')).toBe('bear-picture');
+  });
+});
+
+/**
+ * Curated picks reach the picker, because there is one staging path and it runs
+ * them.
+ *
+ * `mtg-36pg` reported the opposite: that the set picker bundles art at a
+ * different moment from `npm run play` and skips the reordering, so a named card
+ * draws whichever illustration the collation adopted first — including one
+ * somebody explicitly decided against. That is the failure `data/art-preferences`
+ * exists to prevent, and it would be invisible on a board that paints fine.
+ *
+ * The report is no longer true and nothing pinned it. `npm run play` builds the
+ * library and calls `stageSetBundles` for every set in it, the picker reads what
+ * that wrote, and `stageArt` calls `applyArtPreferences` before a single raster
+ * is copied — one function, one moment, both paths. These tests are what makes
+ * that a fact about the code rather than about the day it was read.
+ *
+ * The sets here are written as `example-set.set.json` rather than the `set.json`
+ * every emitter in this repository actually writes, because the curated-picks
+ * path is keyed on that filename and the generic one keys three different sets
+ * to one file. That is `mtg-sb5u`, and it is a different bug from this one.
+ */
+describe('a curated pick leads, down the one path that stages a set', () => {
+  const sha = (bytes: string): string =>
+    createHash('sha256').update(Buffer.from(bytes, 'utf8')).digest('hex');
+
+  function curate(root: string, stem: string, picks: Readonly<Record<string, readonly string[]>>): string {
+    const dir = join(root, 'data', 'art-preferences');
+    mkdirSync(dir, { recursive: true });
+    const path = join(dir, `${stem}.json`);
+    writeFileSync(path, JSON.stringify(picks), 'utf8');
+    return path;
+  }
+
+  /** One card's staged illustrations, in the order the page will read them. */
+  function stagedOrder(root: string, stem: string, id: string): readonly string[] {
+    const manifest = JSON.parse(readFileSync(join(root, 'public', 'sets', stem, 'art.json'), 'utf8')) as {
+      art: Record<string, readonly { href: string }[]>;
+    };
+    return (manifest.art[id] ?? []).map((entry) => entry.href);
+  }
+
+  const twoPictures: SetArt = {
+    one: [
+      { file: 'first.png', bytes: 'the-one-adopted-first' },
+      { file: 'second.png', bytes: 'the-one-somebody-chose' },
+    ],
+  };
+
+  it('moves the chosen raster to position zero, which is the one a named card paints', async () => {
+    const root = scratch();
+    const set = writeSet(
+      root,
+      'curated',
+      { code: 'AAA', name: 'A Curated Set', cardIds: ['one'], file: 'example-set.set.json' },
+      twoPictures,
+    );
+    const picks = curate(root, 'example-set', { one: [sha('the-one-somebody-chose')] });
+
+    const staging = await stageSetBundles(library(set), join(root, 'public'), root);
+
+    expect(stagedOrder(root, 'aaa', 'one')).toEqual(['sets/aaa/art/second.png', 'sets/aaa/art/first.png']);
+    const bundle = staging.bundles[0];
+    if (bundle === undefined || bundle.art.status !== 'staged') throw new Error('nothing staged');
+    expect(bundle.art.preferences.path).toBe(picks);
+    expect(bundle.art.preferences.reordered).toEqual(['one']);
+  });
+
+  it('leaves the collation’s order alone when nobody has picked, which is the ordinary case', async () => {
+    const root = scratch();
+    const set = writeSet(
+      root,
+      'uncurated',
+      { code: 'AAA', name: 'An Uncurated Set', cardIds: ['one'], file: 'example-set.set.json' },
+      twoPictures,
+    );
+
+    const staging = await stageSetBundles(library(set), join(root, 'public'), root);
+
+    expect(stagedOrder(root, 'aaa', 'one')).toEqual(['sets/aaa/art/first.png', 'sets/aaa/art/second.png']);
+    const bundle = staging.bundles[0];
+    if (bundle === undefined || bundle.art.status !== 'staged') throw new Error('nothing staged');
+    expect(bundle.art.preferences.path).toBeNull();
   });
 });

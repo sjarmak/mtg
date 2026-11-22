@@ -11,7 +11,13 @@ import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { Color, ModelAbility, ModelEffect, ModelEffectKind } from '@mtg/dsl';
+import type {
+  Color,
+  ControlledCreatureCounterOnEntryModelAbility,
+  ModelAbility,
+  ModelEffect,
+  ModelEffectKind,
+} from '@mtg/dsl';
 import { COLORS, isModelEffectKind } from '@mtg/dsl';
 import type { SliceRarityRules } from '@mtg/design-data';
 import { SLICE_RARITIES } from '@mtg/design-data';
@@ -271,9 +277,25 @@ function effectFor(kind: ModelEffectKind, colors: readonly Color[], nonce: numbe
  * nothing, and it sits on every color's pie, so it says nothing about the slot
  * beyond satisfying it.
  */
-function abilityFor(slot: Slot): ModelAbility[] {
+function abilityFor(slot: Slot): (ModelAbility | ControlledCreatureCounterOnEntryModelAbility)[] {
   if (slot.abilityKinds.includes('triggered')) {
     const condition = slot.triggerConditions[0] ?? 'selfDies';
+    if (condition === 'anotherControlledCreatureEnters') {
+      return [
+        {
+          kind: 'triggered',
+          condition,
+          effects: [
+            {
+              kind: 'putCounters',
+              counter: 'plusOnePlusOne',
+              count: 1,
+              target: { kind: 'targetCreatureYouControl' },
+            },
+          ],
+        },
+      ];
+    }
     return [
       {
         kind: 'triggered',

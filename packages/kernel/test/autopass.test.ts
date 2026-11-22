@@ -75,6 +75,7 @@ import {
   withFullControl,
   yieldPriority,
 } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { instant, lands, MOUNTAIN } from './cards';
 
 /**
@@ -148,7 +149,11 @@ function asBotWould(agent: PlayerAgent): (session: GameSession) => number {
   return (session: GameSession): number => {
     const decision = session.pending;
     if (decision === null) throw new Error('asBotWould: nothing is pending');
-    const wanted = agent.decide({ state: session.state, player: decision.player, decision });
+    const wanted = agent.decide({
+      state: observeState(session.state, decision.player, 'test/autopass.test.ts:151'),
+      player: decision.player,
+      decision,
+    });
     const key = JSON.stringify(wanted);
     const index = decision.options.findIndex((option) => JSON.stringify(option) === key);
     if (index < 0) throw new Error(`asBotWould: the bot chose a "${wanted.type}" nobody enumerated`);
@@ -248,6 +253,8 @@ function everyDecision(
 describe('the settled-decision predicate', () => {
   const asked = everyDecision();
 
+  const ruleOptions = (decision: Decision) => decision.options.filter((option) => option.type !== 'concede');
+
   it('fires on exactly the decisions the kernel enumerated one option for', () => {
     // Neither the stack nor the stop set appears in this condition and neither
     // can: the kernel puts `passPriority` in every priority it enumerates, so a
@@ -256,10 +263,10 @@ describe('the settled-decision predicate', () => {
     // rules that would have read it are both gated on an answer being
     // available, and there is never one here.
     for (const { state, decision } of asked) {
-      const alone = decision.options.length === 1 && decision.complete;
+      const alone = ruleOptions(decision).length === 1 && decision.complete;
       expect(
         settledChoice(decision, NO_STOPS),
-        `${decision.kind} with ${String(decision.options.length)} options in ${state.turn.step}`,
+        `${decision.kind} with ${String(ruleOptions(decision).length)} options in ${state.turn.step}`,
       ).toBe(alone ? 0 : null);
     }
   });
@@ -269,7 +276,7 @@ describe('the settled-decision predicate', () => {
     // argued: every priority enumerated with one option is one `canRespond`
     // calls dead, so no stop and no stack can want a question at it.
     const single = asked.filter(
-      (entry) => entry.decision.kind === 'priority' && entry.decision.options.length === 1,
+      (entry) => entry.decision.kind === 'priority' && ruleOptions(entry.decision).length === 1,
     );
     expect(single.length, 'no single-option priority arose').toBeGreaterThan(0);
     for (const { state, decision } of single) {
@@ -283,7 +290,7 @@ describe('the settled-decision predicate', () => {
     // at `<= 2` options has to go RED. It can only do that if the sample above
     // contains a priority enumerated with exactly two — the pass and one play.
     const priorities = asked.filter((entry) => entry.decision.kind === 'priority');
-    const counts = new Set(priorities.map((entry) => entry.decision.options.length));
+    const counts = new Set(priorities.map((entry) => ruleOptions(entry.decision).length));
     expect(counts, 'no single-option priority arose, so the predicate is untested').toContain(1);
     expect(counts, 'no two-option priority arose, so the mutation would not be caught').toContain(2);
   });
@@ -302,12 +309,12 @@ describe('the settled-decision predicate', () => {
     expect(kinds).toContain('declareBlockers');
     for (const { decision } of others) {
       const settled = settledChoice(decision, NO_STOPS);
-      expect(settled).toBe(decision.options.length === 1 && decision.complete ? 0 : null);
+      expect(settled).toBe(ruleOptions(decision).length === 1 && decision.complete ? 0 : null);
     }
     // The sample must hold a declaration with a real choice in it, or the line
     // above is one branch asserted twice. The forced one it does not reach on
     // its own is built below.
-    const counts = new Set(others.map((entry) => entry.decision.options.length));
+    const counts = new Set(others.map((entry) => ruleOptions(entry.decision).length));
     expect(counts, 'no real declaration arose, so the mutation would not be caught').toContain(2);
   });
 
@@ -319,7 +326,7 @@ describe('the settled-decision predicate', () => {
     if (decision.kind !== 'declareBlockers') throw new Error('the flying board asked something else');
     // Three creatures able to block something, and nothing they can block.
     expect(decision.eligible).toHaveLength(3);
-    expect(decision.options).toHaveLength(1);
+    expect(ruleOptions(decision)).toHaveLength(1);
     expect(decision.complete).toBe(true);
     expect(settledChoice(decision, NO_STOPS)).toBe(0);
 
@@ -399,10 +406,12 @@ function flyingAttack(): { readonly state: GameState; readonly decision: Decisio
     battlefield: [
       { card: mint('Cliff Kite', true), controller: 0, summoningSick: false },
       { card: mint('Ash Kite', true), controller: 0, summoningSick: false },
+      ...lands(MOUNTAIN, 2).map((card) => ({ card, controller: 0 as const })),
       { card: mint('Pit Warden', false), controller: 1, summoningSick: false },
       { card: mint('Gate Warden', false), controller: 1, summoningSick: false },
       { card: mint('Road Warden', false), controller: 1, summoningSick: false },
     ],
+    hands: [[TRICK], []],
     active: 0,
     turn: 6,
     step: 'declareAttackers',
@@ -416,7 +425,10 @@ function flyingAttack(): { readonly state: GameState; readonly decision: Decisio
     const decision = pendingDecision(state);
     if (decision === null) break;
     if (decision.kind === 'declareBlockers') return { state, decision };
-    const option = decision.options[decision.options.length - 1];
+    const option =
+      decision.kind === 'priority'
+        ? decision.options.find((candidate) => candidate.type === 'passPriority')
+        : decision.options[decision.options.length - 1];
     if (option === undefined) throw new Error('a decision on the way to blockers was empty');
     state = reduce(state, option).state;
   }
@@ -487,6 +499,24 @@ describe('the recorded game does not know the structural rule was on', () => {
 });
 
 describe('stops', () => {
+  it('stops for the active player after blockers are declared by default', () => {
+    expect(hasStop(DEFAULT_STOPS, 'yourTurn', 'declareBlockers')).toBe(true);
+  });
+
+  it('does not auto-pass the active player after blockers when they can respond', () => {
+    const { state, decision } = flyingAttack();
+    if (decision.kind !== 'declareBlockers') throw new Error('the flying board asked something else');
+    const declared = decision.options[0];
+    if (declared === undefined) throw new Error('the flying board offered no blocker declaration');
+    const after = reduce(state, declared).state;
+    const priority = pendingDecision(after);
+    if (priority?.kind !== 'priority')
+      throw new Error('the flying board did not grant priority after blockers');
+    expect(priority.player).toBe(0);
+    expect(canRespond(priority)).toBe(true);
+    expect(unstoppedPassChoice(after, priority, DEFAULT_AUTO_PASS)).toBeNull();
+  });
+
   /**
    * Both main phases plus `beginCombat` on one named side of the table.
    *
@@ -691,7 +721,10 @@ describe('a spell the player cannot answer', () => {
     // test states its own, so the two cannot drift without this failing.
     for (const { decision } of sample) {
       const byHand = decision.options.some(
-        (option) => option.type !== 'passPriority' && option.type !== 'activateManaAbility',
+        (option) =>
+          option.type !== 'passPriority' &&
+          option.type !== 'activateManaAbility' &&
+          option.type !== 'concede',
       );
       expect(canRespond(decision)).toBe(byHand);
     }

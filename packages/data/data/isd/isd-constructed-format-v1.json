@@ -1,0 +1,625 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "isd",
+  "name": "Innistrad",
+  "sources": [
+    {
+      "code": "ISD",
+      "catalogFormat": "isd-printed-v1",
+      "catalogSha256": "95fe8d23da0e04b7fe3fd67551560f8fad1c6e36f1cc33bd8fb881e74d04a4e0",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/ISD.json",
+        "sha256": "eb1f82901b98e81649d9fdf7533dd3a7bb6b4a523cc4ad601bdbea3985d00708",
+        "version": "5.3.0+20260914"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-spirits",
+      "name": "White-Blue Spirits",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0014:846a2f9e-ad4f-4666-b152-fdeab7559d86",
+          "name": "Feeling of Dread",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0022:fe1eb098-7128-4ec8-8218-51fdde3e8326",
+          "name": "Midnight Haunting",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0007:790cdf67-80d6-4ade-aecf-f77120b509b0",
+          "name": "Chapel Geist",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0042:d24d9bd7-5721-4436-a86f-35e376727f46",
+          "name": "Voiceless Spirit",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0060:0013620d-8e17-4246-86bf-71eafd51b806",
+          "name": "Invisible Stalker",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0045:129905ef-5b3b-4860-923c-109a7d7cad80",
+          "name": "Battleground Geist",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0244:1d5569e3-278c-4cf3-860e-712010333fe6",
+          "name": "Moorland Haunt",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0250:d595ba72-3334-48f4-9ea9-a43f5e824aa8",
+          "name": "Plains",
+          "count": 21
+        },
+        {
+          "physicalId": "isd-printed-v1:0253:cf258641-b73c-4813-8a23-da47cf79eca5",
+          "name": "Island",
+          "count": 15
+        }
+      ]
+    },
+    {
+      "id": "blue-black-zombies",
+      "name": "Blue-Black Zombies",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0055:eb22ae62-6207-4693-87cf-7adf0fc1fe29",
+          "name": "Forbidden Alchemy",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0043:ce4d00f2-30e6-41d5-b997-c66350fe783c",
+          "name": "Armored Skaab",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0084:717f4592-6c81-43ac-8975-f6d5d6710310",
+          "name": "Undead Alchemist",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0099:5db15c5f-80b7-4f7f-985a-9bbec3199ad9",
+          "name": "Endless Ranks of the Dead",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0101:2b8c1b10-2155-404a-8f20-eb8f643849d6",
+          "name": "Ghoulcaller's Chant",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0109:3e2c5a8f-c03a-40ab-8390-ff6b5b654717",
+          "name": "Moan of the Unhallowed",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0087:260a4544-a1eb-4d07-943f-0401ae288e13",
+          "name": "Army of the Damned",
+          "count": 1
+        },
+        {
+          "physicalId": "isd-printed-v1:0245:ef058312-6926-49f8-ae72-a8d60fedbf6c",
+          "name": "Nephalia Drownyard",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0253:cf258641-b73c-4813-8a23-da47cf79eca5",
+          "name": "Island",
+          "count": 17
+        },
+        {
+          "physicalId": "isd-printed-v1:0256:a5a14894-2936-4fc4-b6a5-f9c73c32b177",
+          "name": "Swamp",
+          "count": 21
+        }
+      ]
+    },
+    {
+      "id": "black-red-vampires",
+      "name": "Black-Red Vampires",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0158:4afab3a6-95e3-4786-94f2-d9aa7365a4de",
+          "name": "Rakish Heir",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0164:9c16cf74-f9e0-4d80-9a29-b91dec0b6b38",
+          "name": "Stromkirk Noble",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0131:68d2452e-309d-44ae-9360-9d6e22a15e2b",
+          "name": "Bloodcrazed Neonate",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0123:48105c2e-ee36-4117-b56b-3440298da995",
+          "name": "Vampire Interloper",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0141:b9c09887-6d2b-48b4-a483-16b8a45babd0",
+          "name": "Falkenrath Marauders",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0136:11a18883-8990-40a0-bcb2-e01d0e82bfad",
+          "name": "Curse of Stalked Prey",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0132:6960f2da-6b84-4680-8ab2-f0567a5d1b0a",
+          "name": "Brimstone Volley",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0124:ee4c6135-eee9-43ec-bbe8-76912352dcac",
+          "name": "Victim of Night",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0256:a5a14894-2936-4fc4-b6a5-f9c73c32b177",
+          "name": "Swamp",
+          "count": 20
+        },
+        {
+          "physicalId": "isd-printed-v1:0259:17de9f2c-e051-404c-8ec0-c35f500efd67",
+          "name": "Mountain",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "red-green-werewolves",
+      "name": "Red-Green Werewolves",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0176:25b54a1d-e201-453b-9173-b04e06ee6fb7",
+          "name": "Daybreak Ranger",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0193:dd8ca448-f734-4cb9-b1d5-790eed9a4b2d",
+          "name": "Mayor of Avabruck",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0182:57f0907f-74f4-4d86-93df-f2e50c9d0b2f",
+          "name": "Gatstaf Shepherd",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0152:ec00d2d2-6597-474a-9353-345bbedfe57e",
+          "name": "Kruin Outlaw",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0149:bb90a6f1-c7f2-4c2e-ab1e-59c5c7937841",
+          "name": "Instigator Gang",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0132:6960f2da-6b84-4680-8ab2-f0567a5d1b0a",
+          "name": "Brimstone Volley",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0195:57153c3f-9e55-418c-b67b-36901f29f9c1",
+          "name": "Moonmist",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0180:02a35eac-b962-466e-a4da-a4010c68ef16",
+          "name": "Full Moon's Rise",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0243:4a8447fe-7368-470a-911a-1083ec6cc831",
+          "name": "Kessig Wolf Run",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0259:17de9f2c-e051-404c-8ec0-c35f500efd67",
+          "name": "Mountain",
+          "count": 13
+        },
+        {
+          "physicalId": "isd-printed-v1:0262:b606f644-1728-4cb3-90ed-121838875de1",
+          "name": "Forest",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "green-white-humans",
+      "name": "Green-White Humans",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0206:e9654ae7-af2c-4956-be3a-68befa33f523",
+          "name": "Travel Preparations",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0006:f7314414-c2d2-48ed-af2c-764cf0207c62",
+          "name": "Champion of the Parish",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0011:652c3bbb-cac8-47ad-81de-41e954e17a29",
+          "name": "Doomed Traveler",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0187:1203ae4f-4d69-490f-8a7c-dadbefa6d697",
+          "name": "Hamlet Captain",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0193:dd8ca448-f734-4cb9-b1d5-790eed9a4b2d",
+          "name": "Mayor of Avabruck",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0239:b5f73443-2fe8-424f-8e71-fc7ce1f3a3eb",
+          "name": "Gavony Township",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0250:d595ba72-3334-48f4-9ea9-a43f5e824aa8",
+          "name": "Plains",
+          "count": 19
+        },
+        {
+          "physicalId": "isd-printed-v1:0262:b606f644-1728-4cb3-90ed-121838875de1",
+          "name": "Forest",
+          "count": 17
+        }
+      ]
+    },
+    {
+      "id": "white-black-reanimator",
+      "name": "White-Black Reanimator",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0122:2794c82b-e5ce-4369-894e-bf56c6402ae1",
+          "name": "Unburial Rites",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0089:f271addb-e267-4397-b181-f1eaeabbfe71",
+          "name": "Bloodgift Demon",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0112:f0d74c3e-8370-419b-808d-96b8d9306024",
+          "name": "Reaper from the Abyss",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0017:5d51355e-55fa-43bb-a5de-fc55ac7b6446",
+          "name": "Geist-Honored Monk",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0015:f1e4c7d8-11a5-40fe-962b-7e938bf08616",
+          "name": "Fiend Hunter",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0086:4dc2eec4-7e68-45d5-8736-6b32a47c671b",
+          "name": "Altar's Reap",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0224:863e7c2a-698c-4dce-a10b-ca58e4affa57",
+          "name": "Ghoulcaller's Bell",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0124:ee4c6135-eee9-43ec-bbe8-76912352dcac",
+          "name": "Victim of Night",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0115:5c6da820-dfb9-4b61-aff8-56dfc9f4894e",
+          "name": "Sever the Bloodline",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0242:b3c1a371-5ded-4a3a-bf96-503c4f1a665d",
+          "name": "Isolated Chapel",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0250:d595ba72-3334-48f4-9ea9-a43f5e824aa8",
+          "name": "Plains",
+          "count": 15
+        },
+        {
+          "physicalId": "isd-printed-v1:0256:a5a14894-2936-4fc4-b6a5-f9c73c32b177",
+          "name": "Swamp",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "blue-red-flashback",
+      "name": "Blue-Red Flashback",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0139:2ba3ab3e-d16c-492f-a860-6d8efcadf679",
+          "name": "Desperate Ravings",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0083:53e44060-a9a2-4095-9f5b-f60297525315",
+          "name": "Think Twice",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0078:9e5b279e-4670-4a1e-87d0-3cab7e4f9e58",
+          "name": "Snapcaster Mage",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0133:fd403810-840b-46ac-ae6e-5df23ce16fec",
+          "name": "Burning Vengeance",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0144:1b856f31-ac80-4338-95a5-3f8acda74cfe",
+          "name": "Geistflame",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0132:6960f2da-6b84-4680-8ab2-f0567a5d1b0a",
+          "name": "Brimstone Volley",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0075:a18dea16-d535-4310-94ff-836645253d73",
+          "name": "Silent Departure",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0140:c80596a4-b464-4b9e-8186-94a1c44838eb",
+          "name": "Devil's Play",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0053:5d778082-bcdb-423a-b16f-57ac0d4dace7",
+          "name": "Dissipate",
+          "count": 1
+        },
+        {
+          "physicalId": "isd-printed-v1:0248:4968b65d-50e5-4d7e-b78b-cdada1cbf7a7",
+          "name": "Sulfur Falls",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0253:cf258641-b73c-4813-8a23-da47cf79eca5",
+          "name": "Island",
+          "count": 15
+        },
+        {
+          "physicalId": "isd-printed-v1:0259:17de9f2c-e051-404c-8ec0-c35f500efd67",
+          "name": "Mountain",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "black-green-graveyard",
+      "name": "Black-Green Graveyard",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0203:f97007af-6642-4105-8d8c-4223681e1cf9",
+          "name": "Spider Spawning",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0196:52a1dabd-82df-4814-9d64-bf7bf9c1018d",
+          "name": "Mulch",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0171:75f3d9eb-462c-41b5-ad1a-baab7dc5eac3",
+          "name": "Boneyard Wurm",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0205:37068a41-bc5c-44b9-a307-5d3919794233",
+          "name": "Splinterfright",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0124:ee4c6135-eee9-43ec-bbe8-76912352dcac",
+          "name": "Victim of Night",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0119:f77e0f88-2285-4b59-9165-9948c75d77a3",
+          "name": "Tribute to Hunger",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0105:ac506c17-adc8-49c6-9d8d-43db7cb1ec9d",
+          "name": "Liliana of the Veil",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0189:fae22886-da03-49f2-873c-98a7ea2ee17d",
+          "name": "Kessig Cagebreakers",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0115:5c6da820-dfb9-4b61-aff8-56dfc9f4894e",
+          "name": "Sever the Bloodline",
+          "count": 1
+        },
+        {
+          "physicalId": "isd-printed-v1:0249:67139101-ec5e-434b-be3a-21338cc33840",
+          "name": "Woodland Cemetery",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0256:a5a14894-2936-4fc4-b6a5-f9c73c32b177",
+          "name": "Swamp",
+          "count": 17
+        },
+        {
+          "physicalId": "isd-printed-v1:0262:b606f644-1728-4cb3-90ed-121838875de1",
+          "name": "Forest",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "red-white-aggro",
+      "name": "Red-White Aggro",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0028:514fe7de-16b2-42c0-adb1-f0af1c89cfd6",
+          "name": "Rally the Peasants",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0006:f7314414-c2d2-48ed-af2c-764cf0207c62",
+          "name": "Champion of the Parish",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0011:652c3bbb-cac8-47ad-81de-41e954e17a29",
+          "name": "Doomed Traveler",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0164:9c16cf74-f9e0-4d80-9a29-b91dec0b6b38",
+          "name": "Stromkirk Noble",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0022:fe1eb098-7128-4ec8-8218-51fdde3e8326",
+          "name": "Midnight Haunting",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0019:0dd21f5e-d284-4072-87b9-7f0e6140fe60",
+          "name": "Intangible Virtue",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0132:6960f2da-6b84-4680-8ab2-f0567a5d1b0a",
+          "name": "Brimstone Volley",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0144:1b856f31-ac80-4338-95a5-3f8acda74cfe",
+          "name": "Geistflame",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0238:fd7e1bf9-bd6a-48e3-9331-178e5142c06a",
+          "name": "Clifftop Retreat",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0250:d595ba72-3334-48f4-9ea9-a43f5e824aa8",
+          "name": "Plains",
+          "count": 15
+        },
+        {
+          "physicalId": "isd-printed-v1:0259:17de9f2c-e051-404c-8ec0-c35f500efd67",
+          "name": "Mountain",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "green-blue-self-mill",
+      "name": "Green-Blue Self-Mill",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "isd-printed-v1:0043:ce4d00f2-30e6-41d5-b997-c66350fe783c",
+          "name": "Armored Skaab",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0052:a4c03171-5ff0-4f79-bb03-16decf7d34ce",
+          "name": "Deranged Assistant",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0196:52a1dabd-82df-4814-9d64-bf7bf9c1018d",
+          "name": "Mulch",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0171:75f3d9eb-462c-41b5-ad1a-baab7dc5eac3",
+          "name": "Boneyard Wurm",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0205:37068a41-bc5c-44b9-a307-5d3919794233",
+          "name": "Splinterfright",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0083:53e44060-a9a2-4095-9f5b-f60297525315",
+          "name": "Think Twice",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0066:265aaa73-1a1e-4282-a860-f7c422f21db3",
+          "name": "Memory's Journey",
+          "count": 2
+        },
+        {
+          "physicalId": "isd-printed-v1:0189:fae22886-da03-49f2-873c-98a7ea2ee17d",
+          "name": "Kessig Cagebreakers",
+          "count": 3
+        },
+        {
+          "physicalId": "isd-printed-v1:0241:72f15306-56fe-4643-bb4c-4c7c12378d01",
+          "name": "Hinterland Harbor",
+          "count": 4
+        },
+        {
+          "physicalId": "isd-printed-v1:0253:cf258641-b73c-4813-8a23-da47cf79eca5",
+          "name": "Island",
+          "count": 14
+        },
+        {
+          "physicalId": "isd-printed-v1:0262:b606f644-1728-4cb3-90ed-121838875de1",
+          "name": "Forest",
+          "count": 14
+        }
+      ]
+    }
+  ],
+  "contentSha256": "a965f9a1539fd9cba2c01076f37e8fc8906e558f1a7c3ffe518e9f5b9ad10759"
+}

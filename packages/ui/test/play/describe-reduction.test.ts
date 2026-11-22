@@ -2,10 +2,11 @@
  * The launcher saying out loud that the set it is about to open is a reduced
  * one, and which cards are not in it.
  *
- * A reduced M11 prints about half of the printing's 249 collector positions and
- * the missing half is not a random half. A person who deals a pool from it and
- * cannot find Llanowar Elves has to be able to learn from the launcher whether
- * the card was refused, and by what — the alternative is a set that looks like a
+ * A reduced M11 once printed about half of the printing's 249 collector
+ * positions (the shipped builds now keep all of them, and the launcher says so),
+ * and the missing half was not a random half. A person who deals a pool from a
+ * partial build and cannot find Llanowar Elves has to be able to learn from the
+ * launcher whether the card was refused, and by what — the alternative is a set that looks like a
  * broken M11 rather than a working reduction. So the test that matters here is
  * that a refused card's name and reason survive to stdout, not that a count does.
  *
@@ -13,9 +14,55 @@
  * so these fixtures are the JSON shape rather than the schema's type, which is
  * also what a stale file on disk would look like.
  */
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { REDUCTION_DROPS_SHOWN, describeReduction, readSetReduction } from '../../tools/describe-reduction';
+import { BASIC_LAND_TYPES, basicLand } from '@mtg/dsl';
+import {
+  REDUCTION_DROPS_SHOWN,
+  describeReduction,
+  describeSetReduction,
+  readDealtCollation,
+  readSetReduction,
+} from '../../tools/describe-reduction';
 import type { ResolvedSet } from '../../tools/resolve-set';
+
+/**
+ * Real cards, because the pack sizes are now read by the reader that deals the
+ * pack and that reader checks every sheet against the card list beside it. A
+ * sheet naming ids nothing prints is refused, which is the right answer and not
+ * the one these fixtures are about. `tideglass-reach` prints 68 commons and no
+ * basic land, so the five basics are added here: they are what
+ * `withoutBasicLands` takes back out, and without them there is no fourteen.
+ */
+const CARDS: readonly unknown[] = (
+  JSON.parse(
+    readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        '..',
+        '..',
+        '..',
+        'setgen',
+        'fixtures',
+        'sets',
+        'tideglass-reach.set.json',
+      ),
+      'utf8',
+    ),
+  ) as { readonly cards: readonly unknown[] }
+).cards;
+
+const BASICS = BASIC_LAND_TYPES.map((type, index) => basicLand(type, 'TDG', 900 + index));
+const COMMON_IDS = CARDS.filter(
+  (card): card is { id: string; rarity: string } =>
+    typeof card === 'object' && card !== null && (card as { rarity?: unknown }).rarity === 'common',
+).map((card) => card.id);
+
+function weights(ids: readonly string[]): Record<string, number> {
+  return Object.fromEntries(ids.map((id) => [id, 1]));
+}
 
 function resolved(document: unknown): ResolvedSet {
   return {
@@ -24,6 +71,25 @@ function resolved(document: unknown): ResolvedSet {
     what: 'the reduced M11',
     cardCount: 2,
     json: JSON.stringify(document),
+  };
+}
+
+/** The block for a printing whose fifteen-card pack spends one slot on a basic. */
+function landedCollation(): Record<string, unknown> {
+  return {
+    fillsAPack: true,
+    sheets: [
+      { name: 'common', sourceCards: 68, cards: COMMON_IDS.length, weights: weights(COMMON_IDS) },
+      {
+        name: 'basic',
+        sourceCards: 20,
+        cards: BASICS.length,
+        weights: weights(BASICS.map((card) => card.id)),
+      },
+    ],
+    emptiedSheets: [],
+    boosters: [{ contents: { common: 14, basic: 1 }, weight: 1, packSize: 15 }],
+    unfillableBoosters: 0,
   };
 }
 
@@ -39,12 +105,22 @@ function drop(collectorNumber: number, name: string, refusal: unknown = null): u
   };
 }
 
-/** A sheet's card-to-weight map, as deep as the sheet says it is. */
-function sheetWeights(code: string, cards: number): Record<string, number> {
-  return Object.fromEntries(Array.from({ length: cards }, (_, index) => [`${code}-${String(index + 1)}`, 1]));
+/** The block for a printing whose pack holds no basic land at all. */
+function landlessCollation(): Record<string, unknown> {
+  const ids = COMMON_IDS.slice(0, 15);
+  return {
+    fillsAPack: true,
+    sheets: [{ name: 'rareMythic', sourceCards: 68, cards: ids.length, weights: weights(ids) }],
+    emptiedSheets: [],
+    boosters: [
+      { contents: { rareMythic: 15 }, weight: 31, packSize: 15 },
+      { contents: { rareMythic: 15 }, weight: 9, packSize: 15 },
+    ],
+    unfillableBoosters: 0,
+  };
 }
 
-function reducedDocument(drops: readonly unknown[]): unknown {
+function reducedDocument(drops: readonly unknown[], collation: unknown = landlessCollation()): unknown {
   return {
     formatVersion: 1,
     kind: 'position-reduced-reference-set-document',
@@ -63,19 +139,10 @@ function reducedDocument(drops: readonly unknown[]): unknown {
         kept: { positions: 249 - drops.length, byRarity: [{ rarity: 'common', positions: 82 }], byColor: [] },
         dropped: { positions: drops.length, byRarity: [{ rarity: 'rare', positions: 43 }], byColor: [] },
       },
-      collation: {
-        fillsAPack: true,
-        sheets: [{ name: 'rareMythic', sourceCards: 68, cards: 13, weights: sheetWeights('m11', 13) }],
-        emptiedSheets: [],
-        boosters: [
-          { contents: { rareMythic: 1 }, weight: 31, packSize: 15 },
-          { contents: { rareMythic: 1 }, weight: 9, packSize: 15 },
-        ],
-        unfillableBoosters: 0,
-      },
+      collation,
       drops,
     },
-    cards: [],
+    cards: [...CARDS, ...BASICS],
   };
 }
 
@@ -97,7 +164,7 @@ describe('readSetReduction', () => {
     expect(reduction?.sourceName).toBe('Magic 2011');
     expect(reduction?.sourcePositions).toBe(249);
     expect([reduction?.kept, reduction?.dropped]).toEqual([248, 1]);
-    expect(reduction?.sheets).toEqual([['rareMythic', 13, 68]]);
+    expect(reduction?.sheets).toEqual([['rareMythic', 15, 68]]);
     expect(reduction?.fillsAPack).toBe(true);
     // The identity-level refusal wins over the position-level one, and its named
     // vocabulary gaps come with it.
@@ -131,30 +198,46 @@ describe('readSetReduction', () => {
   });
 });
 
+describe('readDealtCollation', () => {
+  it('reads the pack the lab will deal, basics already out', () => {
+    const dealt = readDealtCollation(resolved(reducedDocument([], landedCollation())));
+
+    expect(dealt.kind).toBe('ready');
+    if (dealt.kind !== 'ready') return;
+    expect(dealt.basicLands.printedPackSizes).toEqual([15]);
+    expect(dealt.basicLands.dealtPackSizes).toEqual([14]);
+    expect(dealt.basicLands.droppedSheets).toEqual(['basic']);
+  });
+
+  it('is silent about a document it cannot read a card list off', () => {
+    expect(readDealtCollation({ ...resolved({}), json: 'not json at all' }).kind).toBe('none');
+    expect(readDealtCollation(resolved({ cards: 'not an array' })).kind).toBe('none');
+    expect(readDealtCollation(resolved({ cards: [{ kind: 'not a card' }] })).kind).toBe('none');
+  });
+});
+
 describe('describeReduction', () => {
   it('says nothing at all about a set that was not reduced', () => {
-    expect(describeReduction(null)).toBe('');
+    expect(describeReduction(null, { kind: 'none' })).toBe('');
   });
 
   it('names the reduction, the sheet that lost its depth, and the cards that are gone', () => {
-    const printed = describeReduction(
-      readSetReduction(
-        resolved(
-          reducedDocument([
-            drop(191, 'Llanowar Elves', {
-              code: 'NONEXACT_EVIDENCE',
-              detail: 'the translation approximated the printed text',
-              missing: [],
-            }),
-            drop(1, 'Ajani Goldmane'),
-          ]),
-        ),
+    const printed = describeSetReduction(
+      resolved(
+        reducedDocument([
+          drop(191, 'Llanowar Elves', {
+            code: 'NONEXACT_EVIDENCE',
+            detail: 'the translation approximated the printed text',
+            missing: [],
+          }),
+          drop(1, 'Ajani Goldmane'),
+        ]),
       ),
     );
 
     expect(printed).toContain('REDUCED');
     expect(printed).toContain("247 of Magic 2011's 249 collector positions");
-    expect(printed).toContain('rareMythic 13/68');
+    expect(printed).toContain('rareMythic 15/68');
     expect(printed).toContain('15-card packs still fill, and the lab deals them from these sheets.');
     // Both refusal codes are tallied, and the named card is printed with its reason.
     expect(printed).toContain('NONEXACT_EVIDENCE 1');
@@ -164,11 +247,20 @@ describe('describeReduction', () => {
     expect(printed).toContain('reduction.drops');
   });
 
+  it('calls a build that refused nothing complete, and still says what its packs hold', () => {
+    const printed = describeSetReduction(resolved(reducedDocument([])));
+
+    expect(printed).toContain('This is a complete build of Magic 2011: all 249 collector positions');
+    expect(printed).toContain('15-card packs still fill, and the lab deals them from these sheets.');
+    expect(printed).not.toContain('REDUCED');
+    expect(printed).not.toContain('refused');
+  });
+
   it('prints a bounded sample and says how many it did not print', () => {
     const drops = Array.from({ length: REDUCTION_DROPS_SHOWN + 5 }, (_unused, index) =>
       drop(index + 1, `Refused Card ${String(index + 1)}`),
     );
-    const printed = describeReduction(readSetReduction(resolved(reducedDocument(drops))));
+    const printed = describeSetReduction(resolved(reducedDocument(drops)));
 
     expect(printed).toContain(
       `#${String(REDUCTION_DROPS_SHOWN)} Refused Card ${String(REDUCTION_DROPS_SHOWN)}`,
@@ -187,10 +279,48 @@ describe('describeReduction', () => {
     };
     delete document.reduction.collation.boosters;
 
-    const printed = describeReduction(readSetReduction(resolved(document)));
+    const printed = describeSetReduction(resolved(document));
 
     expect(printed).toContain('carries no booster configuration, so the lab deals its own');
     expect(printed).not.toContain('15-card packs');
+  });
+
+  /**
+   * `mtg-1wk9`. The launcher printed the printing's fifteen and claimed the lab
+   * dealt it, while the page above the same packs said fourteen. Both numbers
+   * now, and the dealt one comes from the reader that deals it.
+   */
+  it('prints the dealt pack size beside the printed one when a basic slot is taken out', () => {
+    const printed = describeSetReduction(resolved(reducedDocument([], landedCollation())));
+
+    expect(printed).toContain(
+      '15-card packs still fill, and the lab deals them from these sheets at 14, without the basic lands.',
+    );
+  });
+
+  it('keeps the one-number sentence for a printing whose packs hold no basic', () => {
+    const printed = describeSetReduction(resolved(reducedDocument([])));
+
+    expect(printed).toContain('15-card packs still fill, and the lab deals them from these sheets.');
+    expect(printed).not.toContain('without the basic lands');
+  });
+
+  // A stale `set.json` beside a fresh collation is the failure this repository
+  // keeps meeting, and the route already prints the reader's own message above
+  // the pool it dealt instead. Stdout says the same thing rather than repeating
+  // a claim about sheets nothing will deal from.
+  it('says the lab cannot deal a collation naming cards the set does not print', () => {
+    const stale = landlessCollation() as { sheets: { weights: Record<string, number> }[] };
+    // Fifteen of them, so the slot is still shallower than its sheet and what
+    // the reader refuses is the ids rather than the depth.
+    stale.sheets[0]!.weights = Object.fromEntries(
+      Array.from({ length: 15 }, (_unused, index) => [`m11-not-a-card-${String(index)}`, 1]),
+    );
+
+    const printed = describeSetReduction(resolved(reducedDocument([], stale)));
+
+    expect(printed).toContain('15-card packs still fill, but the lab cannot deal them:');
+    expect(printed).not.toContain('deals them from these sheets');
   });
 
   it('says plainly when the reduced pool cannot fill a pack', () => {
@@ -199,6 +329,6 @@ describe('describeReduction', () => {
     };
     document.reduction.collation.fillsAPack = false;
 
-    expect(describeReduction(readSetReduction(resolved(document)))).toContain('No pack configuration fills.');
+    expect(describeSetReduction(resolved(document))).toContain('No pack configuration fills.');
   });
 });

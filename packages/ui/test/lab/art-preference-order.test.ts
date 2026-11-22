@@ -155,6 +155,41 @@ describe('preferencesPathFor', () => {
     expect(preferencesPathFor('/out/tideglass-reach.set.json', root)).toBeNull();
   });
 
+  /**
+   * `set.json` is the name every emitter here writes, so it names no set. Three
+   * different sets used to resolve to `data/art-preferences/set.json` and read
+   * each other's picks (`mtg-sb5u`); the directory is what carries the identity
+   * at that point, which is `stagedSetStem`'s rule and its reasoning.
+   */
+  it('keys a generically named set on its directory, so two of them are two files', () => {
+    const root = mkdtempSync(join(tmpdir(), 'art-prefs-generic-'));
+    mkdirSync(join(root, 'data', 'art-preferences'), { recursive: true });
+    for (const name of ['xmp', 'm11', 'm13', 'set']) {
+      writeFileSync(join(root, 'data', 'art-preferences', `${name}.json`), '{}');
+    }
+
+    const at = (path: string): string | null => preferencesPathFor(path, root);
+    const file = (name: string): string => join(root, 'data', 'art-preferences', `${name}.json`);
+    expect(at('/out/XMP/set.json')).toBe(file('xmp'));
+    expect(at('/out/reference/m11/set.json')).toBe(file('m11'));
+    expect(at('/out/reference/m13/set.json')).toBe(file('m13'));
+    // Every one of them distinct, which is the whole claim.
+    expect(
+      new Set([at('/out/XMP/set.json'), at('/out/reference/m11/set.json'), at('/out/reference/m13/set.json')])
+        .size,
+    ).toBe(3);
+    // And a file actually named `set.json` is reached by nothing, since no set
+    // is named `set`.
+    expect([at('/out/XMP/set.json'), at('/out/reference/m11/set.json')]).not.toContain(file('set'));
+  });
+
+  it('returns null rather than a path built out of nothing', () => {
+    const root = mkdtempSync(join(tmpdir(), 'art-prefs-nothing-'));
+    mkdirSync(join(root, 'data', 'art-preferences'), { recursive: true });
+    writeFileSync(join(root, 'data', 'art-preferences', 'set.json'), '{}');
+    expect(preferencesPathFor('set.json', root)).toBeNull();
+  });
+
   it('returns the manifest untouched when the set has no preferences file', () => {
     const { dir, manifest } = fixture();
     const root = mkdtempSync(join(tmpdir(), 'art-prefs-empty-'));

@@ -24,6 +24,54 @@ export const FLAGSHIP_BRIEF = join('packages', 'setgen', 'briefs', 'tideglass-re
 const REPO_ROOT = join(import.meta.dirname, '..', '..', '..');
 
 /**
+ * The set code a staged document stamps on itself, or null when it has none.
+ *
+ * Structural rather than schema-checked, for `reduced-notice.ts`'s reason: this
+ * only decides which of several files on disk to prefer or to offer, and
+ * `resolveSet` is the one place that reports a document nobody can read.
+ */
+export function setCodeOf(json: string): string | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    return null;
+  }
+  if (typeof parsed !== 'object' || parsed === null || !('set' in parsed)) return null;
+  const { set } = parsed as { set: unknown };
+  if (typeof set !== 'object' || set === null || !('code' in set)) return null;
+  const { code } = set as { code: unknown };
+  return typeof code === 'string' ? code : null;
+}
+
+/**
+ * Sets the lab does not offer, whatever a run leaves on disk.
+ *
+ * Tideglass Reach is the prototype the pipeline was built on. It is still the
+ * fixture most of the test suite reads and it stays exactly where it is; what
+ * it stopped being is something a person opening the lab is asked to choose
+ * between. It reaches the picker as `out/slice/set/set.json`, the most recent
+ * slice run, so demoting it by position is not available — the next slice of
+ * the flagship belongs in that same slot.
+ */
+export const RETIRED_CODES: readonly string[] = ['TGR'];
+
+/** Drops the retired sets from a list of candidates. */
+export function offerable(candidates: readonly SetCandidate[]): readonly SetCandidate[] {
+  return candidates.filter((candidate) => {
+    let json: string;
+    try {
+      json = readFileSync(candidate.path, 'utf8');
+    } catch {
+      // Kept, so `resolveSet` stays the one place that says a set is broken.
+      return true;
+    }
+    const code = setCodeOf(json);
+    return code === null || !RETIRED_CODES.includes(code);
+  });
+}
+
+/**
  * True when a set document is the flagship.
  *
  * Ordering alone could not make the flagship the default. `out/slice/set/set.json`
@@ -36,17 +84,7 @@ const REPO_ROOT = join(import.meta.dirname, '..', '..', '..');
  * candidates to prefer, and `resolveSet` is what reports a broken document.
  */
 export function isFlagshipSet(json: string): boolean {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(json);
-  } catch {
-    return false;
-  }
-  if (typeof parsed !== 'object' || parsed === null || !('set' in parsed)) return false;
-  const { set } = parsed as { set: unknown };
-  if (typeof set !== 'object' || set === null || !('code' in set)) return false;
-  const { code } = set as { code: unknown };
-  return code === FLAGSHIP_CODE;
+  return setCodeOf(json) === FLAGSHIP_CODE;
 }
 
 /**
@@ -228,7 +266,6 @@ export const SET_CANDIDATES: readonly SetCandidate[] = setCandidates(REPO_ROOT);
  * and `SET_CANDIDATES` keeps meaning what every caller of `resolveSet` already
  * reads it as.
  */
-export const LIBRARY_CANDIDATES: readonly SetCandidate[] = [
-  ...SET_CANDIDATES,
-  ...referenceSetCandidates(REPO_ROOT),
-];
+export function libraryCandidates(repoRoot: string): readonly SetCandidate[] {
+  return offerable([...setCandidates(repoRoot), ...referenceSetCandidates(repoRoot)]);
+}

@@ -38,13 +38,8 @@
  * door for a move that is genuinely constructed — a click-built block
  * declaration is one — and this lane did not need it.
  */
-import { createElement, Fragment, useCallback, useMemo } from 'react';
-import type {
-  KeyboardEvent as ReactKeyboardEvent,
-  MouseEvent as ReactMouseEvent,
-  ReactElement,
-  ReactNode,
-} from 'react';
+import { createElement, useCallback, useMemo } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import type {
   AutoPassSettings,
   BeatSet,
@@ -55,37 +50,33 @@ import type {
   YieldBoundary,
 } from '@mtg/kernel';
 import { holdsOwnTopOfStack, passIndex } from '@mtg/kernel';
-import { GameLog } from '../../log/GameLog';
+import { PlayRail } from './PlayRail';
+import { findInspected } from './inspect';
+import { usePointing } from './pointing';
 import { useBoardMotion } from '../../motion';
 import type { LogNames } from '../../log/narrate';
 import { castPlansFor } from './cast';
 import type { CastPlan } from './cast';
 import { attackControls, blockControls, useAttackStaging } from './combat';
-import { askToggle, useAskCollapse } from './ask-collapse';
 import { beatOnBoard, beatShowsMotion } from './beat-motion';
-import { askAlert, askFlyout, useAskFlyout } from './ask-flyout';
 import type { AskSlot } from './ask-flyout';
-import { asClosest, asFocusable } from './focus';
+import { askOpensItself } from './ask-opens';
 import { ownedName } from './naming';
 import { usePassKey } from './pass-key';
 import { useCoarsePointer } from './pointer';
 import { boardPosition, nameOf } from './position';
 import type { PositionArt, SeatNames } from './position';
+import { landDropNote } from './land-drop';
 import { priorityFoot } from './priority';
-import { railToggle, useRailCollapse } from './rail-collapse';
-import {
-  buildPrompt,
-  choicesByObject,
-  describeStep,
-  describeTurn,
-  playableFromHand,
-  stepLabel,
-} from './prompt';
+import { buildPrompt, choicesByObject, describeEnd, describeStep, describeTurn, stepLabel } from './prompt';
 import type { PlayChoice } from './prompt';
 import { beatPanel, promptPanel, resultPanel, waitingPanel } from './rail';
 import { useTableSelection } from './selection';
-import { playTable } from './table';
-import { playDetails, playToolbar, stepBar } from './toolbar';
+import { stepBar } from './toolbar';
+import { PlaySurface } from './PlaySurface';
+import { usePace } from './pace-preference';
+import type { TriggerYield } from './trigger-yields';
+import { triggerYieldControl } from './trigger-yields';
 
 export interface PlayViewProps {
   /**
@@ -107,6 +98,7 @@ export interface PlayViewProps {
    */
   readonly onChoose: (choice: Choice) => void;
   readonly onNewGame?: (() => void) | undefined;
+  readonly status?: ReactNode | undefined;
   /**
    * Who the table is waiting on, when it is not this viewer and the game is not
    * over.
@@ -156,6 +148,31 @@ export interface PlayViewProps {
   readonly autoPass?: AutoPassSettings | undefined;
   readonly onAutoPass?: ((next: AutoPassSettings) => void) | undefined;
   readonly onYield?: ((boundary: YieldBoundary) => void) | undefined;
+  /**
+   * The third yield: an optional trigger whose answer the player has settled
+   * (`mtg-bz2.7`, `./trigger-yields.ts`).
+   *
+   * Two halves in two places, and both are optional together in the way every
+   * other control on this view is: `onTriggerYield` puts the pair of controls on
+   * an optional trigger's prompt, and `triggerYields` plus `onClearTriggerYield`
+   * put the list of settled answers on the auto-pass panel. A caller with the
+   * first and not the rest would offer a setting with no way back, so
+   * `@mtg/netplay` and the replay frames pass none of them and draw neither.
+   */
+  readonly onTriggerYield?: ((yielded: TriggerYield) => void) | undefined;
+  readonly triggerYields?: readonly TriggerYield[] | undefined;
+  readonly onClearTriggerYield?: ((key: string) => void) | undefined;
+  /**
+   * The take-back and whether the kernel would move on it (`mtg-bz2.15`).
+   *
+   * Passed through rather than held, like every other control on this view: the
+   * rewind belongs to whoever owns the session, which is `LiveGame.ts`. A caller
+   * with no `onUndo` draws no control - `@mtg/netplay` owns no undo across a
+   * wire, and a button that rewound one seat's client would be a board the two
+   * players no longer share.
+   */
+  readonly canUndo?: boolean | undefined;
+  readonly onUndo?: (() => void) | undefined;
 }
 
 // Re-exported from the shell so a caller has one import for the surface, and
@@ -166,12 +183,15 @@ export { ASK_ALERT_STATUS_LABEL, ASK_FLYOUT_LABEL, askAlertText } from './ask-fl
 export { BEAT_MOTION_STATUS_LABEL, beatShowsMotion } from './beat-motion';
 export type { AskSlot } from './ask-flyout';
 export { PASS_LABEL } from './pass';
+export { UNDO_LABEL } from './undo';
 export { HELD_OVER_YOUR_OWN, PASS_KEY_STATUS_LABEL, PRIORITY_LABEL, PRIORITY_STATUS_LABEL } from './priority';
 export { SIDE_PANEL_KEY, SIDE_PANEL_LABEL } from './rail-collapse';
 export { ASK_PANEL_LABEL } from './ask-collapse';
 export { pickerLabel } from './picker';
 export { CAST_BACK_LABEL, castCancelLabel, castLabel } from './cast-panel';
 export { DECLARE_BACK_LABEL, DECLARE_CLEAR_LABEL } from './declare-panel';
+export { TRIGGER_YIELD_LABEL } from './rail';
+export { clearTriggerYieldLabel, TRIGGER_YIELDS_LABEL, triggerYieldRowText } from './TurnStops';
 
 export function PlayView(props: PlayViewProps): ReactElement {
   const { session, viewer, names, onChoose, onAutoPass, onYield } = props;
@@ -179,6 +199,15 @@ export function PlayView(props: PlayViewProps): ReactElement {
   // Read once for the whole view: the strip's words for a halt and whether a
   // halt arrives drawn are the only two answers it changes, and both are below.
   const coarse = useCoarsePointer();
+  // Which card is being read (`mtg-aqxi.1`). One delegated focus handler on the
+  // shell below, for the reason the Escape and click handlers are there: four
+  // zones draw slots, and a prop threaded through all four is four chances for
+  // one of them to be forgotten.
+  // And which objects are being pointed at from the log (`./pointing.ts`,
+  // `mtg-47o`). Held here rather than in the rail because the two ends are in
+  // two different columns: the sentence that names the object is in the rail and
+  // the object is on the board, and this is the one component that holds both.
+  const pointing = usePointing();
   const decision = session.pending;
   // `session.result`, not `decision === null`: a remote seat is also handed no
   // decision while its opponent is still deciding, and `awaitingName` is what
@@ -204,7 +233,15 @@ export function PlayView(props: PlayViewProps): ReactElement {
   // Read before the panels are built rather than after, because a beat now asks
   // it two questions: whether there is any motion to be reported by (`reduced`)
   // and how to end the motion it is reported by (`cut`).
-  const motion = useBoardMotion({ events: session.events, viewer });
+  //
+  // The pace is this view's own (`mtg-kwu`), unlike the beats above it: it is a
+  // preference of the person watching rather than a setting of the game, so it
+  // is read here instead of arriving as a prop, and every caller of this view
+  // gets the control without knowing it exists. It reaches the motion layer,
+  // which scales the plan and writes the attribute the board's sheets multiply
+  // their own durations by, and it reaches nothing else.
+  const pace = usePace();
+  const motion = useBoardMotion({ events: session.events, viewer, pace: pace.pace });
   const { cut: cutMotion } = motion;
   /*
    * Whether this pause is being drawn as movement on the table instead of as a
@@ -264,9 +301,9 @@ export function PlayView(props: PlayViewProps): ReactElement {
     decisions: session.decisions,
   });
 
-  const playable = prompt === null ? new Set<string>() : playableFromHand(prompt);
   // Clicking is the same enumeration read from the other end. A key with no
-  // entry here is a card with nothing to do, on either side of the table.
+  // entry here is a card with nothing to do, in either hand or on either side of
+  // the table (`mtg-bz2.9`).
   const byObject: ReadonlyMap<string, readonly PlayChoice[]> =
     prompt === null ? new Map<string, readonly PlayChoice[]>() : choicesByObject(prompt);
   // Casting is the one move that is staged rather than submitted on the click
@@ -286,6 +323,7 @@ export function PlayView(props: PlayViewProps): ReactElement {
     state: session.state,
     names,
     onChoose,
+    coarse,
   });
   // Declaring an attack is the second staged move (`combat.ts`, `mtg-bz2.5`),
   // and the reason it is not in `useTableSelection` beside the staged cast is
@@ -336,8 +374,6 @@ export function PlayView(props: PlayViewProps): ReactElement {
    * replays of one game disagree — and it is not a `SessionOptions` field
    * either, because it changes nothing the kernel asks.
    */
-  const rail = useRailCollapse();
-  const ask = useAskCollapse();
   /*
    * The ask column's one panel, built once and then placed.
    *
@@ -358,6 +394,17 @@ export function PlayView(props: PlayViewProps): ReactElement {
    * hiding one with CSS would put two `Legal moves` groups in the document, and
    * a screen reader and a test both read the document rather than the sheet.
    */
+  /*
+   * The pair of controls that settle this trigger's answer, or null everywhere
+   * else (`./trigger-yields.ts`, `mtg-bz2.7`).
+   *
+   * Null at every decision that is not an optional trigger, and at every caller
+   * that owns no session to keep the setting in; `./trigger-yields.ts` argues
+   * why one predicate decides both whether the yield can be keyed and whether
+   * it is offered.
+   */
+  const yieldControl = triggerYieldControl(session.state, decision, props.onTriggerYield);
+
   const askPanel = beatIsOnBoard
     ? null
     : beat !== null
@@ -366,7 +413,14 @@ export function PlayView(props: PlayViewProps): ReactElement {
         ? (props.awaitingName ?? null) === null
           ? resultPanel(session, names, props.onNewGame)
           : waitingPanel(props.awaitingName ?? '', session.decisions)
-        : promptPanel(prompt, onChoose, session.decisions, selection.declaration, selection.ordering);
+        : promptPanel(
+            prompt,
+            onChoose,
+            session.decisions,
+            selection.declaration,
+            selection.ordering,
+            yieldControl,
+          );
   /*
    * And what the strip has to say about it, which is a different question from
    * which panel it is. `ask-flyout.ts`'s `AskSlot` says why these are the five:
@@ -385,31 +439,6 @@ export function PlayView(props: PlayViewProps): ReactElement {
           ? { kind: 'report' }
           : { kind: 'idle' }
         : { kind: 'decision', count: prompt.choices.length };
-  const flyout = useAskFlyout({
-    collapsed: ask.collapsed,
-    slot: askSlot,
-    decisions: session.decisions,
-    events: session.events.length,
-    // The opening hand, and no other ask on this route, arrives already drawn.
-    // The playtester, 2026-08-22: "If the only option is keep or mulligan you
-    // shouldn't need to click into 'waiting' it should just show you a keep or
-    // mulligan button option immediately." `ask-flyout.ts` argues why this one
-    // is not the always-up menu she objected to three days earlier — there is no
-    // board under the box yet, and every other ask leaves something on the table
-    // to press while this one leaves nothing at all. The decision's kind is what
-    // says so, rather than the size of its enumeration: a priority window with
-    // two legal moves is two options over a live board.
-    //
-    // A halt does too, but only for a finger. the playtester, in the same message:
-    // "There should be an easy way to continue passing priority since pressing
-    // space isn't an option on mobile easily." A halt has one move in it,
-    // `passAt` is null in one so the fixed pass is drawn disabled, and the board
-    // under the box is stopped. On a fine pointer `usePassKey` above binds the
-    // space key to exactly this Continue, so the panel is a second way in and
-    // does not need drawing; `pointer.ts` says why the question is the input and
-    // not the width, and `askAlert` below moves the strip's own words with it.
-    opensItself: (coarse && askSlot.kind === 'halt') || (decision !== null && decision.kind === 'mulligan'),
-  });
   const stepText = describeStep(session.state, names);
 
   /*
@@ -441,164 +470,67 @@ export function PlayView(props: PlayViewProps): ReactElement {
         onYield,
         beats: props.beats,
         onBeats: props.onBeats,
+        pace: pace.pace,
+        onPace: pace.setPace,
+        triggerYields: props.triggerYields,
+        onClearTriggerYield: props.onClearTriggerYield,
       });
 
-  const table = playTable({
-    position,
-    playable,
-    byObject,
-    selection,
-    staging,
-    // One slot, two declarations, and never both at once: the kernel asks for
-    // attackers or for blockers, so `attackControls` is null through the whole
-    // of a block and `blockControls` through the whole of an attack. Both draw
-    // in the band rather than only in the rail, which is the asymmetry
-    // `combat.ts` records — an attack confirmed two inches under the creature
-    // that was staged and a block confirmed in a side column.
-    combat: attackControls(staging, onChoose) ?? blockControls(selection.declaration, onChoose),
-    askCollapsed: ask.collapsed,
-    askHead: askToggle(ask),
-    railCollapsed: rail.collapsed,
-    railHead: railToggle(rail),
-    // The move that lets the top of the stack resolve, on the object it is about
-    // (`mtg-atq`). It is `passAt` — the same index the ask column's `Turn` entry
-    // carries and the same one the fixed pass and the space key take — so the
-    // enumeration stays the one authority and this is a third door to it. Null
-    // whenever the kernel enumerated no pass, which draws no button rather than a
-    // dead one; `../../board/StackZone.ts` says why that is the opposite choice
-    // from the fixed pass and right for the opposite reason.
-    onResolve: passAt === null ? null : onPass,
-    // The two columns hold two different kinds of thing, which is the whole of
-    // `mtg-rgc.4`: what is being asked goes in the pod column, between the two
-    // seats, and what has already happened goes in the side rail. They shared
-    // one column until this bead, and under a crowded board neither of them
-    // could give way to the other — measured at 89 log lines, two of them
-    // visible, at every viewport and both permanent counts.
-    //
-    // The panel that answers the current question, and under it the foot that
-    // holds the fixed pass (`priority.ts`). The foot is `flex: none` and the
-    // panel takes what is left, so a column that used to be a panel between two
-    // pods is a panel and a button between two pods.
-    //
-    // Shut, the panel is not here at all — it is in the flyout below, and the
-    // strip carries the alert in its place (`ask-flyout.ts`, `mtg-li0o`). The
-    // foot is in both states, because the fixed pass is the one move that keeps
-    // its home whatever the column's width (`pass.ts`).
-    // What the shut column shows instead of the panel `styles/board/rail.ts`
-    // stops drawing in it: the same panel, in a box over the board's left
-    // region, wide enough that the moves come out in columns rather than in
-    // three-line labels. Null in the open column, where the panel is in the
-    // column and this would be a second copy of it.
-    askFlyout: askFlyout(flyout.open, askSlot, askPanel),
-    // The pause, drawn as the one control the motion needs rather than as a
-    // panel the motion has to wait behind (`beat-motion.ts`, `mtg-gt4q`). Null
-    // whenever the beat took the panel path, which is every combat beat and
-    // every beat at all under `prefers-reduced-motion: reduce`.
-    beat: beatIsOnBoard && beat !== null ? beatOnBoard(beat, session.state, names, continuePress) : null,
-    prompt: createElement(
-      Fragment,
-      null,
-      playDetails({ stepText, choicesMade: session.choices.length, stepsDrawn: steps !== null }),
-      ask.collapsed ? null : askPanel,
-      // The alert, on the strip and only on the strip. It is the fallback
-      // The playtester named — "or if that doesnt work well then at least get an
-      // alert" — and it is also the way back into a flyout that was dismissed,
-      // so it draws whether or not the flyout is on screen. It is not a
-      // `.mtg-panel`, which is what the shut-column rule hides, so it survives
-      // the collapse the way the disclosure and the fixed pass do.
-      ask.collapsed ? askAlert(askSlot, flyout.open, flyout.toggle, coarse) : null,
-      // Null once the game is over (`mtg-a1d6`): the group says who holds
-      // priority and offers the one button that spends it, and a finished game
-      // has settled neither question — `passAt` is already null by then, since
-      // the kernel has stopped enumerating anything, but the group and its two
-      // live regions would still sit in the document naming a holder left over
-      // from the turn the game ended on. `resultPanel`, two lines up, is what
-      // this slot shows instead.
-      gameOver
-        ? null
-        : priorityFoot({
-            holder: session.state.turn.priority,
-            names,
-            stackDepth: session.state.stack.length,
-            // The kernel's own predicate, so the sentence and the auto-pass rule
-            // that keeps the window open cannot disagree about what the window is.
-            overYourOwn: decision !== null && holdsOwnTopOfStack(session.state, decision),
-            stepText: stepLabel(session.state.turn.step),
-            passAt,
-            onPass,
-            keyNote: passKeyNote,
-          }),
-    ),
-    // The turn structure and the turn, built above so game details can read
-    // whether it exists.
+  const priority = gameOver
+    ? null
+    : priorityFoot({
+        holder: session.state.turn.priority,
+        names,
+        stackDepth: session.state.stack.length,
+        overYourOwn: decision !== null && holdsOwnTopOfStack(session.state, decision),
+        stepText: stepLabel(session.state.turn.step),
+        passAt,
+        onPass,
+        keyNote: passKeyNote,
+        canYield: passAt !== null,
+        onYield,
+        canUndo: props.canUndo ?? false,
+        onUndo: props.onUndo,
+        landNote: landDropNote(prompt),
+      });
+
+  return createElement(PlaySurface, {
+    seatName: names[viewer],
+    slot: askSlot,
+    panel: askPanel,
+    priority,
     steps,
-    // The history, in the rail rather than under the table for the reason the
-    // move list was (`rail.ts`, `styles/board/rail.ts`): height on this route
-    // belongs to the cards. `Board` puts the stack over it and the two
-    // graveyards under it.
-    rail: createElement(GameLog, { events: session.events, names: logNames, viewer }),
-  });
-
-  const toolbar = playToolbar(props.toolbar ?? null);
-
-  return createElement(
-    'div',
-    {
-      className: 'mtg-play',
-      /*
-       * The motion layer attaches here (`../../motion/`, `mtg-ncg`).
-       *
-       * This element rather than the board inside it, for two reasons that both
-       * point the same way: it is the element that survives every re-render of
-       * the table, so the snapshot the layer keeps of where each card was is
-       * never invalidated by anything but a route change; and the plane a
-       * traveling card is drawn on is `position: fixed`, so it has to hang off
-       * an ancestor that declares no transform, no filter and no containment.
-       *
-       * The view stays presentational. The hook reads `session.events`, which
-       * this component already has, holds nothing the kernel can see, and gives
-       * back a ref: no prop of this view changed, no caller was touched, and a
-       * server render attaches nothing at all.
-       */
-      ref: motion.ref,
-      // Focusable without being in the tab order, because the handler below has
-      // somewhere to put the ring. `styles/views.ts` takes the outline off it:
-      // the ring arrives here programmatically, so nothing should be drawn as
-      // though a player had tabbed to the table itself.
-      tabIndex: -1,
-      /*
-       * A pointer press on a panel header hands the ring back to the table.
-       *
-       * `mtg-s9p`, measured in a browser on 2026-08-13: after clicking the "You
-       * graveyard" header to read it, five consecutive Space presses left the
-       * game exactly where it was. The graveyard, the log and the turn badge are
-       * the three disclosures on this route, and all three are buttons, so the
-       * click that opened one left `document.activeElement` on it. `pass-key.ts`
-       * then refuses every press for the rest of the game, which is correct
-       * there — the browser activates a focused button on both keys, so firing
-       * as well would submit two things for one press — and wrong here, because
-       * the ring was parked on a control nobody was using.
-       *
-       * The fix is the parking, not the refusal. A pointer press is the gesture
-       * that leaves the ring somewhere the player is not looking, and a keyboard
-       * one is the gesture that means it: a click synthesized from Enter or
-       * Space carries `detail === 0`, and that press is a player who tabbed to
-       * the header and wants to stay there to read what they opened. So the
-       * keyboard keeps the ring, which is what the ARIA disclosure pattern asks
-       * for, and the mouse gives it back.
-       *
-       * On the shell rather than on the three headers, and that is forced as
-       * well as tidier: `../../log/GameLog.ts` is the log's own file and every
-       * disclosure that route ever grows would need the same three lines. One
-       * handler on the element they all sit inside is the same reasoning the
-       * Escape handler below is written from.
-       */
-      onClick: (event: ReactMouseEvent<HTMLDivElement>): void => {
-        if (event.detail === 0) return;
-        const pressed = asClosest(event.target);
-        if (pressed === null || pressed.closest('[aria-expanded]') === null) return;
-        asFocusable(event.currentTarget)?.focus();
-      },
+    stepText: gameOver ? describeEnd(session.state, names) : stepText,
+    choicesMade: session.choices.length,
+    decisions: session.decisions,
+    events: session.events.length,
+    opensItself: (coarse && askSlot.kind === 'halt') || askOpensItself(decision),
+    ...(props.status === undefined ? {} : { status: props.status }),
+    toolbar: props.toolbar,
+    rootRef: motion.ref,
+    inspect: (key): ReturnType<typeof findInspected> => findInspected(position, key),
+    contextRail: (inspected, reveal): ReactNode =>
+      createElement(PlayRail, {
+        entries: position.stack.entries,
+        events: session.events,
+        names: logNames,
+        viewer,
+        inspected,
+        reveal,
+        onPoint: pointing.onPoint,
+      }),
+    table: {
+      position,
+      viewer,
+      byObject,
+      selection,
+      pointed: pointing.keys,
+      staging,
+      combat: attackControls(staging, onChoose) ?? blockControls(selection.declaration, onChoose),
+      onResolve: passAt === null ? null : onPass,
+      beat: beatIsOnBoard && beat !== null ? beatOnBoard(beat, session.state, names, continuePress) : null,
+    },
+    onEscape: (): boolean => {
       /*
        * Escape closes an open picker, caught here rather than on the panel.
        *
@@ -621,32 +553,19 @@ export function PlayView(props: PlayViewProps): ReactElement {
        * one thing the open picker's bookkeeping does without (`selection.ts`);
        * a second click on the card is the way back from out there.
        */
-      onKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>): void => {
-        if (event.key !== 'Escape') return;
-        // The open question of a combat declaration is the second thing Escape
-        // closes, and it is closed first because it is the one drawn over the
-        // cards: a player who opened it by pressing a creature is standing on
-        // the board, and the panel's Back button is a column away from them.
-        // Never both — a declaration is a decision with no picker in it.
-        const declaration = selection.declaration;
-        if (declaration !== null && declaration.stage.kind === 'target') {
-          event.stopPropagation();
-          declaration.back('board');
-          return;
-        }
-        if (selection.openKey === null) return;
-        event.stopPropagation();
-        selection.dismiss();
-      },
+      // The open question of a combat declaration is the second thing Escape
+      // closes, and it is closed first because it is the one drawn over the
+      // cards: a player who opened it by pressing a creature is standing on
+      // the board, and the panel's Back button is a column away from them.
+      // Never both — a declaration is a decision with no picker in it.
+      const declaration = selection.declaration;
+      if (declaration !== null && declaration.stage.kind === 'target') {
+        declaration.back('board');
+        return true;
+      }
+      if (selection.openKey === null) return false;
+      selection.dismiss();
+      return true;
     },
-    toolbar,
-    // One child, and that is the change `mtg-crw` makes here. The priority band
-    // used to be this element's second child — a horizontal row spanning the
-    // table, `flex: none` on the column that carries the viewport's height down
-    // to the mat, so it cost 36.9 CSS px of that column at every viewport
-    // whatever the game was doing. The pass it held is in the ask column now
-    // (`priority.ts`), where it costs the board nothing. `styles/views.ts` says
-    // why the wrapper survives its own contents.
-    createElement('div', { className: 'mtg-play__table' }, table),
-  );
+  });
 }

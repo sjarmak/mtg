@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "formatId": "isd",
+  "archetypes": [
+    {
+      "id": "white-blue-spirits",
+      "name": "White-Blue Spirits",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Feeling of Dread",
+        "physicalId": "isd-printed-v1:0014:846a2f9e-ad4f-4666-b152-fdeab7559d86"
+      },
+      "plan": "Build around Feeling of Dread: Build an evasive Spirit force, use flashback and tap effects to control races, and attack through the air."
+    },
+    {
+      "id": "blue-black-zombies",
+      "name": "Blue-Black Zombies",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Forbidden Alchemy",
+        "physicalId": "isd-printed-v1:0055:eb22ae62-6207-4693-87cf-7adf0fc1fe29"
+      },
+      "plan": "Build around Forbidden Alchemy: Fill the graveyard and recur Zombies so removal trades become temporary setbacks rather than lost resources."
+    },
+    {
+      "id": "black-red-vampires",
+      "name": "Black-Red Vampires",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Rakish Heir",
+        "physicalId": "isd-printed-v1:0158:4afab3a6-95e3-4786-94f2-d9aa7365a4de"
+      },
+      "plan": "Build around Rakish Heir: Pressure with Vampires, preserve attack triggers with removal, and snowball tribal bonuses across combat steps."
+    },
+    {
+      "id": "red-green-werewolves",
+      "name": "Red-Green Werewolves",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Daybreak Ranger // Nightfall Predator",
+        "physicalId": "isd-printed-v1:0176:25b54a1d-e201-453b-9173-b04e06ee6fb7"
+      },
+      "plan": "Build around Daybreak Ranger // Nightfall Predator: Develop Werewolves, pass selectively to transform them, and use instant-speed plays to keep the larger faces active."
+    },
+    {
+      "id": "green-white-humans",
+      "name": "Green-White Humans",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Travel Preparations",
+        "physicalId": "isd-printed-v1:0206:e9654ae7-af2c-4956-be3a-68befa33f523"
+      },
+      "plan": "Build around Travel Preparations: Curve Humans into tribal or enter-the-battlefield bonuses, go wide, and attack with a strengthened team."
+    },
+    {
+      "id": "white-black-reanimator",
+      "name": "White-Black Reanimator",
+      "colors": ["W", "B"],
+      "signpost": {
+        "name": "Unburial Rites",
+        "physicalId": "isd-printed-v1:0122:2794c82b-e5ce-4369-894e-bf56c6402ae1"
+      },
+      "plan": "Build around Unburial Rites: Stock the graveyard with valuable creatures, then return them to the battlefield for a mana and card advantage."
+    },
+    {
+      "id": "blue-red-flashback",
+      "name": "Blue-Red Flashback",
+      "colors": ["U", "R"],
+      "signpost": {
+        "name": "Desperate Ravings",
+        "physicalId": "isd-printed-v1:0139:2ba3ab3e-d16c-492f-a860-6d8efcadf679"
+      },
+      "plan": "Build around Desperate Ravings: Fill the graveyard with instants and sorceries, cast them twice, and use the resulting card advantage to control combat."
+    },
+    {
+      "id": "black-green-graveyard",
+      "name": "Black-Green Graveyard",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Spider Spawning",
+        "physicalId": "isd-printed-v1:0203:f97007af-6642-4105-8d8c-4223681e1cf9"
+      },
+      "plan": "Build around Spider Spawning: Trade creatures and mill selectively so graveyard payoffs turn spent cards into a late-game advantage."
+    },
+    {
+      "id": "red-white-aggro",
+      "name": "Red-White Aggro",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Rally the Peasants",
+        "physicalId": "isd-printed-v1:0028:514fe7de-16b2-42c0-adb1-f0af1c89cfd6"
+      },
+      "plan": "Build around Rally the Peasants: Curve low-cost attackers into combat tricks and burn, widening the board enough to punish slow starts."
+    },
+    {
+      "id": "green-blue-self-mill",
+      "name": "Green-Blue Self-Mill",
+      "colors": ["U", "G"],
+      "signpost": {
+        "name": "Memory's Journey",
+        "physicalId": "isd-printed-v1:0066:265aaa73-1a1e-4282-a860-f7c422f21db3"
+      },
+      "plan": "Build around Memory's Journey: Mill creatures and flashback cards deliberately, then turn graveyard volume into threats and card advantage."
+    }
+  ]
+}

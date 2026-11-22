@@ -15,9 +15,21 @@ import { App } from '../src/app/App';
 import type { UiViews } from '../src/app/App';
 import { Shell } from '../src/app/Shell';
 import { LabApp } from '../src/dev/LabApp';
-import { DEFAULT_MODE, MODE_LABELS, UI_MODES, hashSource, parseHash, routeHash } from '../src/app/router';
+import {
+  DEFAULT_MODE,
+  DEFAULT_SUBS,
+  MODE_LABELS,
+  PRIMARY_MODES,
+  UI_MODES,
+  UI_SUBS,
+  hashSource,
+  parseHash,
+  routeAt,
+  routeHash,
+} from '../src/app/router';
+import type { RouteAt } from '../src/app/router';
 import { uiStyleSheet } from '../src/styles/index';
-import { routeScope } from '../src/styles/tokens';
+import { routeScope, subScope } from '../src/styles/tokens';
 
 afterEach(cleanup);
 
@@ -33,19 +45,37 @@ function currentHash(): string {
   return source.location.hash;
 }
 
+/** Every (mode, section) pair the router can land on. */
+const EVERY_AT: readonly RouteAt[] = UI_MODES.flatMap((mode) =>
+  UI_SUBS[mode].map((sub) => routeAt(mode, sub)),
+);
+
+/**
+ * One view per mode, each naming the section it was asked for, so a test can
+ * read which (mode, sub) the router handed it straight off the screen.
+ */
 const VIEWS: UiViews = {
-  play: () => h('p', null, 'play view'),
-  draft: () => h('p', null, 'draft view'),
-  deck: () => h('p', null, 'deck view'),
-  analysis: (router) => h('p', null, `analysis:${router.route.params['run'] ?? 'none'}`),
-  replay: (router) => h('p', null, `replay:${router.route.params['game'] ?? 'none'}`),
-  cards: () => h('p', null, 'cards view'),
+  play: (router) => h('p', null, `play:${router.route.sub}`),
+  customize: (router) => h('p', null, `customize:${router.route.sub}`),
+  cards: (router) => h('p', null, `cards:${router.route.sub}`),
+  analysis: (router) =>
+    h(
+      'p',
+      null,
+      `analysis:${router.route.sub}:${router.route.params['game'] ?? router.route.params['run'] ?? 'none'}`,
+    ),
 };
 
 describe('parseHash', () => {
-  it('reads every mode', () => {
+  it('reads every mode onto its default section', () => {
     for (const mode of UI_MODES) {
-      expect(parseHash(`#/${mode}`).mode).toBe(mode);
+      expect(parseHash(`#/${mode}`)).toEqual(routeAt(mode, DEFAULT_SUBS[mode]));
+    }
+  });
+
+  it('reads every section of every mode', () => {
+    for (const at of EVERY_AT) {
+      expect(parseHash(`#/${at.mode}/${at.sub}`)).toEqual({ ...at, params: {} });
     }
   });
 
@@ -53,24 +83,94 @@ describe('parseHash', () => {
     expect(parseHash('').mode).toBe(DEFAULT_MODE);
     expect(parseHash('#/').mode).toBe(DEFAULT_MODE);
     expect(parseHash('#/nonsense').mode).toBe(DEFAULT_MODE);
-    expect(parseHash('#/cards/extra/segments').mode).toBe('cards');
+    expect(parseHash('#/cards/extra/segments')).toEqual(routeAt('cards', 'gallery'));
+    expect(parseHash('#/play/nonsense')).toEqual(routeAt('play', 'constructed'));
   });
 
   it('reads params and tolerates a missing hash marker', () => {
-    expect(parseHash('#/replay?game=3&turn=11').params).toEqual({ game: '3', turn: '11' });
-    expect(parseHash('/replay?game=3').mode).toBe('replay');
+    expect(parseHash('#/play/draft?seed=1')).toEqual(routeAt('play', 'draft', { seed: '1' }));
+    expect(parseHash('/analysis/replay?game=3')).toEqual(routeAt('analysis', 'replay', { game: '3' }));
+    expect(parseHash('#/play/commander')).toEqual(routeAt('play', 'commander'));
+  });
+
+  // A seat token names the section it belongs to: a `?table=` is a constructed
+  // game and a `?room=` is a sealed one, so a link that carries either lands on
+  // the right section without spelling it.
+  it('reads a seat token as the play section it belongs to', () => {
+    expect(parseHash('#/play?table=t-1')).toEqual(routeAt('play', 'constructed', { table: 't-1' }));
+    expect(parseHash('#/play?room=r-1')).toEqual(routeAt('play', 'sealed', { room: 'r-1' }));
+    // A spelled section wins over the token.
+    expect(parseHash('#/play/draft?room=r-1')).toEqual(routeAt('play', 'draft', { room: 'r-1' }));
+  });
+
+  // Every link this repository has written down, every bookmark and the
+  // launcher's own stdout say the retired names, and the unknown-mode rule
+  // above would land all of them on Play with no sign anything had moved. So
+  // each retired hash is read onto the section it became, with its params.
+  it('still reads the hashes the retired tabs used to have', () => {
+    expect(parseHash('#/draft?seed=1')).toEqual(routeAt('play', 'draft', { seed: '1' }));
+    expect(parseHash('#/deck?open=build')).toEqual(routeAt('customize', 'decks', { open: 'build' }));
+    expect(parseHash('#/decks')).toEqual(routeAt('customize', 'decks'));
+    expect(parseHash('#/design')).toEqual(routeAt('customize', 'sets'));
+    expect(parseHash('#/sets')).toEqual(routeAt('customize', 'sets'));
+    expect(parseHash('#/replay?game=g')).toEqual(routeAt('analysis', 'replay', { game: 'g' }));
+    expect(parseHash('#/home')).toEqual(routeAt('play', 'constructed'));
+    expect(parseHash('#/more')).toEqual(routeAt('play', 'constructed'));
+  });
+
+  // And reads them only. An alias that round-trips is a second name for a
+  // route, which is two URLs for one page and an `aria-current` comparison that
+  // fails on whichever one the link happened to use.
+  it('writes the new hash and never a retired one', () => {
+    expect(routeHash(parseHash('#/deck'))).toBe('#/customize/decks');
+    expect(routeHash(parseHash('#/replay?game=g'))).toBe('#/analysis/replay?game=g');
+  });
+});
+
+/**
+ * The destinations, as a list rather than as a rendered bar.
+ *
+ * `../src/app/Shell.ts` draws `PRIMARY_MODES`, so what that one array holds is
+ * the whole information architecture: four peers, each with a row of sections
+ * under it, and the picker in the bar is the set list on every route.
+ */
+describe('the destinations', () => {
+  it('are the four, in the order they were asked for', () => {
+    expect(PRIMARY_MODES).toEqual(['play', 'customize', 'cards', 'analysis']);
+  });
+
+  // The gate that bites when a route is added later: a mode outside the primary
+  // row is a page with no way to reach it.
+  it('leave no mode unreachable, and name no mode twice', () => {
+    expect(new Set(PRIMARY_MODES).size).toBe(PRIMARY_MODES.length);
+    expect([...PRIMARY_MODES].sort()).toEqual([...UI_MODES].sort());
+  });
+
+  it('each carry a drawn label, and every section does too', () => {
+    for (const mode of UI_MODES) {
+      expect(MODE_LABELS[mode].length, `${mode} has no label to draw`).toBeGreaterThan(0);
+      expect(UI_SUBS[mode]).toContain(DEFAULT_SUBS[mode]);
+    }
+    expect(MODE_LABELS.customize).toBe('Customize');
   });
 });
 
 describe('routeHash', () => {
-  it('round-trips a route', () => {
-    const route = { mode: 'replay' as const, params: { game: '2', turn: '7' } };
-    expect(parseHash(routeHash(route))).toEqual(route);
+  it('round-trips every section', () => {
+    for (const at of EVERY_AT) {
+      const route = { ...at, params: { game: '2', turn: '7' } };
+      expect(parseHash(routeHash(route))).toEqual(route);
+    }
+  });
+
+  it('emits the bare mode when no section is named, which lands on the default one', () => {
+    expect(routeHash({ mode: 'play' })).toBe('#/play');
+    expect(parseHash(routeHash({ mode: 'analysis' }))).toEqual(routeAt('analysis', 'explorer'));
   });
 
   it('sorts params and drops empty ones', () => {
     expect(routeHash({ mode: 'cards', params: { z: '1', a: '2', gone: '' } })).toBe('#/cards?a=2&z=1');
-    expect(routeHash({ mode: 'analysis', params: {} })).toBe('#/analysis');
+    expect(routeHash({ mode: 'analysis', sub: 'replay', params: {} })).toBe('#/analysis/replay');
   });
 });
 
@@ -81,9 +181,9 @@ describe('App', () => {
 
   it('renders the view for the current hash', async () => {
     setHash('#/replay?game=4');
-    render(h(App, { views: VIEWS, title: 'MTG Lab', subtitle: 'foundation' }));
+    render(h(App, { views: VIEWS, title: 'MTG Lab' }));
     await waitFor(() => {
-      expect(screen.getByText('replay:4')).toBeTruthy();
+      expect(screen.getByText('analysis:replay:4')).toBeTruthy();
     });
     expect(screen.getByText('MTG Lab')).toBeTruthy();
   });
@@ -102,22 +202,20 @@ describe('App', () => {
       h(App, {
         views: VIEWS,
         title: 'the flagship set',
-        subtitle: 'play, analyze, replay',
-        aside: 'TGR · 3 games · seed slice/v0',
       }),
     );
     await waitFor(() => {
-      expect(screen.getByText('play view')).toBeTruthy();
+      expect(screen.getByText('play:constructed')).toBeTruthy();
     });
     expect(screen.getByText('the flagship set')).toBeTruthy();
     const navigation = screen.getByRole('navigation', { name: 'View mode' });
-    expect(within(navigation).getByRole('link', { name: 'Draft' })).toBeTruthy();
-    expect(within(navigation).getByRole('link', { name: 'Deck' })).toBeTruthy();
+    expect(within(navigation).getByRole('link', { name: 'Customize' })).toBeTruthy();
     expect(within(navigation).getByRole('link', { name: 'Cards' })).toBeTruthy();
+    expect(within(navigation).getByRole('link', { name: 'Analysis' })).toBeTruthy();
     expect(screen.queryByText('play, analyze, replay')).toBeNull();
     expect(screen.queryByText('TGR · 3 games · seed slice/v0')).toBeNull();
     expect(uiStyleSheet()).toContain(
-      `.mtg-shell:is(${routeScope('play')}, ${routeScope('draft')}) .mtg-shell__bar {\n  gap: var(--mtg-space-2);`,
+      `.mtg-shell${routeScope('play')} .mtg-shell__bar {\n  gap: var(--mtg-space-2);`,
     );
   });
 
@@ -125,22 +223,22 @@ describe('App', () => {
     render(h(App, { views: VIEWS }));
     fireEvent.click(screen.getByRole('link', { name: 'Cards' }));
     await waitFor(() => {
-      expect(screen.getByText('cards view')).toBeTruthy();
+      expect(screen.getByText('cards:gallery')).toBeTruthy();
     });
     expect(currentHash()).toBe('#/cards');
   });
 
   it('drops the previous mode params when switching', async () => {
-    setHash('#/replay?game=9');
+    setHash('#/analysis/replay?game=9');
     render(h(App, { views: VIEWS }));
     await waitFor(() => {
-      expect(screen.getByText('replay:9')).toBeTruthy();
+      expect(screen.getByText('analysis:replay:9')).toBeTruthy();
     });
-    fireEvent.click(screen.getByRole('link', { name: 'Analysis' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Customize' }));
     await waitFor(() => {
-      expect(screen.getByText('analysis:none')).toBeTruthy();
+      expect(screen.getByText('customize:sets')).toBeTruthy();
     });
-    expect(currentHash()).toBe('#/analysis');
+    expect(currentHash()).toBe('#/customize');
   });
 
   it('mounts the token sheet, and skips it when the host owns styling', () => {
@@ -153,19 +251,34 @@ describe('App', () => {
   });
 });
 
+/**
+ * The un-hijacked click is left to the browser, and jsdom's browser follows a
+ * fragment link on a later tick, in this window (a real one would open a tab).
+ * Waiting for it keeps that navigation from landing in the next test's hash.
+ */
+async function browserFollowsLink(): Promise<void> {
+  await waitFor(() => {
+    expect(currentHash()).toBe('#/cards');
+  });
+}
+
 // A `<button>` has no `href`, so middle-click and "open in a new tab" do
 // nothing on it. Comparing two routes side by side means losing one of them.
 // The mode control is now built from real anchors carrying the hash the
 // router would put there itself, so the browser's own navigation handles the
 // cases the shell never has to know about.
 describe('mode items are real anchors', () => {
-  it('carries the exact hash routeHash() would produce for every mode', () => {
+  it('carries the exact hash routeHash() would produce for every destination', () => {
     const html = renderToStaticMarkup(
       h(Shell, { mode: 'cards', onSelectMode: () => undefined, children: null }),
     );
-    for (const mode of UI_MODES) {
+    for (const mode of PRIMARY_MODES) {
       expect(html).toContain(`href="${routeHash({ mode, params: {} })}"`);
     }
+    // And nothing else: the modes, the mark (which points at Play, already in
+    // the list) and one anchor per section of the mode on screen. A bar with
+    // one more is a bar that grew a destination without anybody deciding to.
+    expect(html.split('href=').length - 1).toBe(PRIMARY_MODES.length + 1 + UI_SUBS.cards.length);
   });
 
   it('still switches modes and updates the hash on a plain click', async () => {
@@ -173,7 +286,7 @@ describe('mode items are real anchors', () => {
     render(h(App, { views: VIEWS }));
     fireEvent.click(screen.getByRole('link', { name: 'Cards' }));
     await waitFor(() => {
-      expect(screen.getByText('cards view')).toBeTruthy();
+      expect(screen.getByText('cards:gallery')).toBeTruthy();
     });
     expect(currentHash()).toBe('#/cards');
   });
@@ -186,7 +299,7 @@ describe('mode items are real anchors', () => {
       expect(current).toBeTruthy();
     });
     // Every other mode is a plain link with no current state.
-    for (const mode of UI_MODES) {
+    for (const mode of PRIMARY_MODES) {
       if (mode === 'cards') continue;
       expect(screen.queryByRole('link', { current: 'page', name: MODE_LABELS[mode] })).toBeNull();
     }
@@ -199,16 +312,57 @@ describe('mode items are real anchors', () => {
     // The click handler bails out before calling `preventDefault` or
     // `onSelect` for anything but a plain left click, so this view and hash
     // are exactly what they were before the click.
-    expect(screen.queryByText('cards view')).toBeNull();
+    expect(screen.queryByText('cards:gallery')).toBeNull();
     expect(currentHash()).toBe('#/analysis');
+    await browserFollowsLink();
   });
 
   it('does not hijack a ctrl/cmd click either', async () => {
     setHash('#/analysis');
     render(h(App, { views: VIEWS }));
     fireEvent.click(screen.getByRole('link', { name: 'Cards' }), { ctrlKey: true });
-    expect(screen.queryByText('cards view')).toBeNull();
+    expect(screen.queryByText('cards:gallery')).toBeNull();
     expect(currentHash()).toBe('#/analysis');
+    await browserFollowsLink();
+  });
+});
+
+/**
+ * The landing counter's two callers. `goTo` is the mark and the tab row, and
+ * both mean *take me to that destination's landing screen*; `goToSub` is a
+ * move between sections of one destination, and a section row that re-landed
+ * the route on every press would throw away the game in progress
+ * (`../src/app/router.ts` on `landing`).
+ */
+describe('moving between sections', () => {
+  const COUNTED: UiViews = {
+    ...VIEWS,
+    play: (router) =>
+      h(
+        'div',
+        null,
+        h('p', null, `landing:${String(router.landing)} at ${router.route.sub}`),
+        h('button', { type: 'button', onClick: () => router.goToSub('draft') }, 'to draft'),
+        h('button', { type: 'button', onClick: () => router.goTo({ mode: 'play' }) }, 'land'),
+      ),
+  };
+
+  it('keeps the params and does not count as a landing, where a mode press does', async () => {
+    setHash('#/play?source=tgr');
+    render(h(App, { views: COUNTED }));
+    await waitFor(() => {
+      expect(screen.getByText('landing:0 at constructed')).toBeTruthy();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'to draft' }));
+    await waitFor(() => {
+      expect(screen.getByText('landing:0 at draft')).toBeTruthy();
+    });
+    expect(currentHash()).toBe('#/play/draft?source=tgr');
+    fireEvent.click(screen.getByRole('button', { name: 'land' }));
+    await waitFor(() => {
+      expect(screen.getByText('landing:1 at constructed')).toBeTruthy();
+    });
+    expect(currentHash()).toBe('#/play?source=tgr');
   });
 });
 
@@ -238,11 +392,11 @@ function findRendered(selector: string): ElementLike | null {
 // than against the markup text is what makes the two unable to agree on a name
 // while disagreeing on whether the selector matches it.
 describe('the shell stamps the route it is showing', () => {
-  it('matches the selector the token layer scopes a palette with, for every mode', () => {
-    for (const mode of UI_MODES) {
-      setHash(`#/${mode}`);
+  it('matches the selector the token layer scopes a palette with, for every mode and section', () => {
+    for (const at of EVERY_AT) {
+      setHash(routeHash(at));
       render(h(App, { views: VIEWS }));
-      expect(findRendered(`.mtg-shell${routeScope(mode)}`)).not.toBeNull();
+      expect(findRendered(`.mtg-shell${routeScope(at.mode)}${subScope(at.sub)}`)).not.toBeNull();
       cleanup();
     }
   });
@@ -271,10 +425,11 @@ describe('the segmented control has a pressed state', () => {
   });
 });
 
-// The shell mark is the one place a person can tell which set they are
-// looking at without leaving the page. "MTG Lab" over a named set says
-// nothing; the set's own name is what the mark should carry.
-describe('LabApp names the shell after the staged set', () => {
+// The mark is the lab's name, always, and it is the way home (`mtg-aqxi.17`).
+// It used to be the staged set's name, which the playtester rejected in one
+// sentence: "instead of having the set name in the upper left always that
+// should just be MTG Lab". Which set is staged is on the picker beside it.
+describe('LabApp names the shell after the lab, not the staged set', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -295,7 +450,7 @@ describe('LabApp names the shell after the staged set', () => {
     );
   }
 
-  it('shows the staged set’s name in place of the generic title', async () => {
+  it('keeps the mark reading "MTG Lab" over a named set', async () => {
     stubSetFetch('Tideglass Reach');
     render(
       h(LabApp, {
@@ -308,9 +463,30 @@ describe('LabApp names the shell after the staged set', () => {
     // Scoped to the bar: the Cards tab names the staged set over its gallery
     // too (`mtg-ihtz`), so an unscoped query answers about the wrong element.
     await waitFor(() => {
-      expect(within(screen.getByRole('banner')).getByText('Tideglass Reach')).toBeTruthy();
+      expect(within(screen.getByRole('banner')).getByText('MTG Lab')).toBeTruthy();
     });
-    expect(screen.queryByText('MTG Lab')).toBeNull();
+    expect(within(screen.getByRole('banner')).queryByText('Tideglass Reach')).toBeNull();
+  });
+
+  it('draws the mark as a link to Play', async () => {
+    // It used to lead to a landing page that listed the sets, the decks and the
+    // destinations, which is three things the destinations already hold. Play is
+    // what a person opened the lab to do; the set list is the picker beside the
+    // mark, on every route.
+    stubSetFetch('Tideglass Reach');
+    render(
+      h(LabApp, {
+        replayUrl: 'missing.jsonl',
+        setUrl: 'set.json',
+        cards: EXAMPLE_CARDS,
+      }),
+    );
+    const mark = await waitFor(() =>
+      within(screen.getByRole('banner')).getByRole('link', { name: 'MTG Lab, Play' }),
+    );
+    expect((mark as unknown as { getAttribute(name: string): string | null }).getAttribute('href')).toBe(
+      '#/play',
+    );
   });
 
   it('falls back to "MTG Lab" when the staged set has no name', async () => {

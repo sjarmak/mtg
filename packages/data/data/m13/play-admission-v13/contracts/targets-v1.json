@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-controller-contract-receipt",
+  "id": "targets-v1",
+  "engineRuntime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "protocolVersion": 2
+  },
+  "decisionFamilies": [
+    "targets"
+  ],
+  "sourceRegions": [
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        public boolean chooseTargetsFor(SpellAbility ability) {",
+      "endMarker": "        public Pair<SpellAbilityStackInstance, GameObject> chooseTarget(",
+      "sha256": "1d8bd7a0843411d7facd95ad27caef4a1e3aff91248d9304f6ed91fa8f821853"
+    }
+  ],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "scenarioReceiptIds": [
+        "ahn-crop-crasher-local-exert-scenario-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "scenarioReceiptIds": [
+        "ahn-crop-crasher-engine-exert-scenario-v1"
+      ]
+    }
+  ],
+  "evidence": {
+    "scenarioReceipts": [
+      {
+        "receiptId": "ahn-crop-crasher-engine-exert-scenario-v1",
+        "file": {
+          "path": "scenarios/ahn-crop-crasher-engine-exert-scenario-v1.json",
+          "sha256": "4eec37c4b076a0d0d2a5e74e4d4744910deaedf4383e86eff13257ae464fc34f"
+        }
+      },
+      {
+        "receiptId": "ahn-crop-crasher-local-exert-scenario-v1",
+        "file": {
+          "path": "scenarios/ahn-crop-crasher-local-exert-scenario-v1.json",
+          "sha256": "31a01cbfab0f9c14dd1d2e9ae6f70194133bf96fc5487d3c93efe1e01f568608"
+        }
+      }
+    ]
+  }
+}

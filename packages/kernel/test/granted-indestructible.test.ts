@@ -171,6 +171,7 @@ describe('a granted indestructible on the kernel', () => {
           amount: 5,
           deathtouch: false,
           lifelink: false,
+          preventable: true,
           combat: false,
         },
         {
@@ -180,6 +181,7 @@ describe('a granted indestructible on the kernel', () => {
           amount: 5,
           deathtouch: false,
           lifelink: false,
+          preventable: true,
           combat: false,
         },
       ]),

@@ -30,6 +30,7 @@ import { checkSlotFillability } from './fillable';
 import { checkMechanicsPrinted, checkSacrificeSupply, checkTokenDemand } from './mechanics';
 import { checkCardRate, checkStatFloor } from './rate';
 import { checkBlankCards, checkDesignRepeats } from './template';
+import { checkZoomCapacity } from './zoom';
 import type { PairViability } from '../archetype/index';
 import { archetypeReports, checkArchetypeViability } from './archetype';
 import type { SetFinding } from './findings';
@@ -38,6 +39,7 @@ import type { NwoResult } from './nwo';
 import { checkNewWorldOrder } from './nwo';
 import type { TertiaryUsage } from './pie';
 import { checkCardPie, checkTertiaryBudget, tertiaryUsage } from './pie';
+import type { GenerationSemanticsVersion } from '../generation-semantics';
 
 export * from './findings';
 export * from './nwo';
@@ -58,6 +60,7 @@ export {
 export type { Entry } from './composition';
 export { checkCardViolations, checkSlotConformance, checkUnfilled } from './conformance';
 export { checkSlotFillability, unfillableSlots } from './fillable';
+export { checkZoomCapacity, ZOOM_RULES_CHARACTER_CAPACITY } from './zoom';
 export {
   checkMechanicsPrinted,
   checkSacrificeSupply,
@@ -126,6 +129,7 @@ export interface ValidationInput {
   /** Why a slot has no card: the violations its last candidate produced. */
   readonly rejected?: ReadonlyMap<string, readonly Violation[]>;
   readonly tertiaryBudget: number;
+  readonly semanticsVersion?: GenerationSemanticsVersion;
 }
 
 export interface SetValidation {
@@ -164,6 +168,7 @@ export function validateGeneratedSet(input: ValidationInput): SetValidation {
 
   const nwo = checkNewWorldOrder(entries, allocation.profile.nwoRedFlagBudget);
   findings.push(
+    ...checkZoomCapacity(entries),
     ...checkTertiaryBudget(tertiary, tertiaryBudget),
     ...nwo.findings,
     ...checkCurve(entries, allocation.profile),
@@ -176,7 +181,7 @@ export function validateGeneratedSet(input: ValidationInput): SetValidation {
     ...checkBlankCards(entries, allocation.profile.rarityRules),
     ...checkCardRate(entries, allocation.profile.rarityRules),
     ...checkStatFloor(entries),
-    ...checkMechanicCoverage(entries, allocation.brief.mechanics),
+    ...checkMechanicCoverage(entries, allocation.brief.mechanics, allocation.abilityDeclines),
     ...checkMechanicKeywordUnprinted(entries, allocation.slots, allocation.brief.mechanics),
     ...checkMechanicsPrinted(entries, allocation.brief.mechanics),
     ...checkRequiredCards(entries, allocation.slots, allocation.brief.requiredCards),
@@ -187,6 +192,7 @@ export function validateGeneratedSet(input: ValidationInput): SetValidation {
       entries,
       plans: allocation.archetypes,
       profile: allocation.profile,
+      ...(input.semanticsVersion === undefined ? {} : { semanticsVersion: input.semanticsVersion }),
     }),
   );
 
@@ -195,7 +201,7 @@ export function validateGeneratedSet(input: ValidationInput): SetValidation {
     entries,
     nwo,
     tertiary,
-    archetypes: archetypeReports(entries, allocation.archetypes),
+    archetypes: archetypeReports(entries, allocation.archetypes, undefined, input.semanticsVersion),
     failingSlotIds: failingSlotIds(findings),
     ok: errors(findings).length === 0,
   };

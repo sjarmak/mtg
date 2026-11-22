@@ -27,8 +27,8 @@ import {
   textBoxBlocks,
 } from '@mtg/card-geometry';
 import type { TextBlock } from '@mtg/card-geometry';
-import { LOYALTY_BADGE_POINTS, LOYALTY_SHIELD_POINTS, collectorLine, outlinePoints } from '@mtg/ui';
-import type { SymbolSet } from '@mtg/ui';
+import { LOYALTY_BADGE_POINTS, LOYALTY_SHIELD_POINTS, collectorLine, outlinePoints } from '@mtg/render-spec';
+import type { SymbolSet } from '@mtg/render-spec';
 import { raritySeal } from './frame';
 import { BAR_PADDING, TITLE_MAX_SIZE } from './geometry';
 import type { Box, CardGeometry } from './geometry';

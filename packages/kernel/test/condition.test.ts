@@ -9,7 +9,7 @@
  * same-layer dependency, not a check the dependency pass happens to miss.
  */
 import { describe, expect, it } from 'vitest';
-import type { Condition } from '@mtg/dsl';
+import { basicLand, type Condition } from '@mtg/dsl';
 import type { ContinuousEffect, GameState, LayerContext } from '@mtg/kernel';
 import {
   affectedByEffect,
@@ -79,6 +79,12 @@ function idsOf(effects: readonly ContinuousEffect[]): readonly string[] {
 const TWO_MERFOLK: Condition = { kind: 'controlsSubtype', subtype: 'Merfolk', atLeast: 2 };
 const ANY_GLOOM: Condition = { kind: 'anyCreatureHasCounter', counter: 'gloom' };
 const THEIR_THREE: Condition = { kind: 'opponentGraveyardAtLeast', atLeast: 3 };
+const OPPONENT_UNDAMAGED: Condition = { kind: 'opponentUndamagedThisTurn' };
+const FEWER_THAN_FIVE_ISLANDS: Condition = {
+  kind: 'battlefieldCountBelow',
+  filter: { subtypes: ['Island'] },
+  fewerThan: 5,
+};
 
 /** `board()` with a stated number of cards in each seat's graveyard. */
 function boardWithGraveyards(mine: number, theirs: number): GameState {
@@ -90,6 +96,23 @@ function boardWithGraveyards(mine: number, theirs: number): GameState {
     graveyards: [
       Array.from({ length: mine }, (_, index) => creature(`Cond Mine ${String(index)}`, 1, 1)),
       Array.from({ length: theirs }, (_, index) => creature(`Cond Theirs ${String(index)}`, 1, 1)),
+    ],
+  }).state;
+}
+
+/** A split-control board proving that this condition counts both seats. */
+function boardWithIslands(mine: number, theirs: number): GameState {
+  return scenario({
+    battlefield: [
+      { card: MERFOLK_ONE, controller: 0 },
+      ...Array.from({ length: mine }, (_unused, index) => ({
+        card: basicLand('Island', 'TST', 100 + index),
+        controller: 0 as const,
+      })),
+      ...Array.from({ length: theirs }, (_unused, index) => ({
+        card: basicLand('Island', 'TST', 200 + index),
+        controller: 1 as const,
+      })),
     ],
   }).state;
 }
@@ -168,6 +191,49 @@ describe('conditionHolds (CR 611.2c): opponentGraveyardAtLeast', () => {
   it('answers false rather than throwing for a source missing from the map', () => {
     const context = contextFor(boardWithGraveyards(0, 6));
     expect(conditionHolds(context, THEIR_THREE, 'no-such-object')).toBe(false);
+  });
+});
+
+describe('conditionHolds (CR 611.2c): opponentUndamagedThisTurn', () => {
+  it('holds until the source controller opponent has been dealt damage', () => {
+    const state = board();
+    const source = oidOf(state, 'Cond Merfolk One');
+    expect(conditionHolds(contextFor(state), OPPONENT_UNDAMAGED, source)).toBe(true);
+    const damaged: GameState = {
+      ...state,
+      turn: { ...state.turn, playersDealtDamageThisTurn: [1] },
+    };
+    expect(conditionHolds(contextFor(damaged), OPPONENT_UNDAMAGED, source)).toBe(false);
+  });
+
+  it('reads the opponent of the live source controller', () => {
+    const state = board();
+    const damaged: GameState = {
+      ...state,
+      turn: { ...state.turn, playersDealtDamageThisTurn: [1] },
+    };
+    const opposingSource = oidOf(damaged, 'Cond Opposing Human');
+    expect(conditionHolds(contextFor(damaged), OPPONENT_UNDAMAGED, opposingSource)).toBe(true);
+  });
+
+  it('answers false for a missing source', () => {
+    expect(conditionHolds(contextFor(board()), OPPONENT_UNDAMAGED, 'no-such-object')).toBe(false);
+  });
+});
+
+describe('conditionHolds (CR 611.2c): battlefieldCountBelow', () => {
+  it('holds one permanent below the threshold across both players', () => {
+    const context = contextFor(boardWithIslands(2, 2));
+    expect(conditionHolds(context, FEWER_THAN_FIVE_ISLANDS, oidOf(context.state, 'Cond Merfolk One'))).toBe(
+      true,
+    );
+  });
+
+  it('stops holding at the threshold across both players', () => {
+    const context = contextFor(boardWithIslands(2, 3));
+    expect(conditionHolds(context, FEWER_THAN_FIVE_ISLANDS, oidOf(context.state, 'Cond Merfolk One'))).toBe(
+      false,
+    );
   });
 });
 

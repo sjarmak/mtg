@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-20T08:29:21.392Z",
+  "sources": [
+    {
+      "code": "ORI",
+      "mtgjson": {
+        "file": "ORI-bf9bf6550c72e5788315f1bf3c52181b07de6b00b86d9375dce4325d33a390da.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/ORI.json",
+        "sha256": "bf9bf6550c72e5788315f1bf3c52181b07de6b00b86d9375dce4325d33a390da",
+        "meta": {
+          "date": "2026-09-19",
+          "version": "5.3.0+20260919"
+        }
+      },
+      "scryfall": {
+        "file": "ORI-16ff0a5d71d9ded5185fb7e4dfa90b8915ed68f9026a2044265dce94eae0d4bb.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Aori+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "16ff0a5d71d9ded5185fb7e4dfa90b8915ed68f9026a2044265dce94eae0d4bb",
+        "cards": 288
+      }
+    }
+  ]
+}

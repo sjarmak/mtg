@@ -144,7 +144,7 @@ describe('scry in a netplay snapshot', () => {
     expect(live.snapshotFor(chooser)).toEqual(choosing);
 
     expect(decision.cards).toHaveLength(2);
-    expect(decision.options).toHaveLength(6);
+    expect(decision.options.filter((option) => option.type !== 'concede')).toHaveLength(6);
     expect(choosing.state.pendingScry?.cards).toEqual(decision.cards);
     expect(waiting.pending).toBeNull();
     expect(waiting.awaiting).toBe(chooser);

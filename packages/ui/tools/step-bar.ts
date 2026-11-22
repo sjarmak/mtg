@@ -36,6 +36,30 @@
  * 5rem cap that holds it there, which is a ledge: 5.5rem is a third line at
  * 1024x768.
  *
+ * ## What the desktop tier is worth, chrome-headless-shell 151, 2026-08-22
+ *
+ * The table above is a fit against 1024x768, and `styles/views.ts` now states a
+ * second set of numbers above 1200px wide and 40rem tall — 12px labels and a
+ * 9rem turn — because the playtester's interface pass asks for a readable bar and an
+ * unclipped turn at 1440 to 1600. Steps-row height and the near battlefield's,
+ * shipped against the two candidates:
+ *
+ *   viewport   11px / 5rem   12px / 9rem   13px / 9rem
+ *   1600x900   33.9, 316.9   35.4, 316.2   62.8, 302.4
+ *   1440x900   59.9, 303.9   72.8, 297.5   75.7, 296.0
+ *   1280x800   69.9, 271.3   72.8, 269.8   75.7, 268.4
+ *
+ * 12px is what keeps the 1600 row on one line, which is why the tier is not
+ * simply `--mtg-text-sm`. Below 1200px nothing moved: 1199x900 and 1024x768 both
+ * read 69.9 with the 5rem cap, and 844x390 is `styles/mobile.ts`'s short tier,
+ * still 40.6 with the same sideways scroll it had.
+ *
+ * **Read the boxes after two animation frames.** A `Runtime.evaluate` that
+ * injects a rule and measures in the same synchronous block reads the layout
+ * from before the injection — `getComputedStyle` included, so the stale value
+ * looks like a rule that never applied. Every number above was taken from a
+ * `requestAnimationFrame` pair after the style was appended.
+ *
  * ## What it reported before that, chrome-headless-shell 151.0.7922.47, 2026-08-16
  *
  * At all three viewports the steps strip has `scrollWidth === clientWidth` — no
@@ -79,7 +103,7 @@ import { exampleCard } from '@mtg/dsl';
 import type { GameState } from '@mtg/kernel';
 import { DEFAULT_AUTO_PASS, DEFAULT_BEATS, pendingDecision, scenario } from '@mtg/kernel';
 import { Shell } from '../src/app/Shell';
-import { GameLog } from '../src/log/GameLog';
+import { GameLog, OPEN_BY_DEFAULT } from '../src/log/GameLog';
 import { boardPosition } from '../src/routes/play/position';
 import type { SeatNames } from '../src/routes/play/position';
 import { priorityFoot } from '../src/routes/play/priority';
@@ -92,7 +116,7 @@ import {
 } from '../src/routes/play/prompt';
 import { promptPanel } from '../src/routes/play/rail';
 import { railToggle } from '../src/routes/play/rail-collapse';
-import { playTable } from '../src/routes/play/table';
+import { playTableHost } from './play-table-host';
 import { NO_STAGING } from '../src/routes/play/combat';
 import { playToolbar, stepBar } from '../src/routes/play/toolbar';
 import { uiStyleSheet } from '../src/styles/index';
@@ -134,13 +158,16 @@ function table(): string {
   const decision = pendingDecision(state);
   if (decision === null) throw new Error('the scenario left nobody to ask');
   const prompt = buildPrompt(state, decision, NAMES);
-  const rendered = playTable({
+  const rendered = playTableHost({
+    // The rig shoots from seat 0, which is the seat `boardPosition` above was
+    // handed; the id only decides which pod an aim at a player would light, and
+    // a rig stages no cast.
+    viewer: 0,
     // A rig owns no session, so nothing is being declared and nothing can be
     // staged (`../src/routes/play/combat.ts`).
     staging: NO_STAGING,
     combat: null,
     position: boardPosition(state, 0, NAMES, null),
-    playable: new Set(state.players[0].hand),
     byObject: choicesByObject(prompt),
     selection: {
       openKey: null,
@@ -194,6 +221,9 @@ function table(): string {
       events: [],
       names: { player: (id) => NAMES[id], card: () => '', target: () => '' },
       viewer: 0,
+      // A measuring rig has no player and therefore no preference: it draws the
+      // shipped default and the toggle goes nowhere.
+      disclosure: { open: OPEN_BY_DEFAULT, toggle: (): void => undefined },
     }),
     // The side panel is collapsible since `mtg-crw`; every page here draws it
     // open, which is the state these rigs have always measured.

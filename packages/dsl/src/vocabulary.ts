@@ -56,7 +56,7 @@ export const KEYWORD_PRINT_NAMES: Readonly<Record<Keyword, string>> = {
 };
 
 /**
- * The six kinds of `card.ts`'s `KeywordAbility` — the keyword-shaped grants
+ * The ten kinds of `card.ts`'s `KeywordAbility` — the keyword-shaped grants
  * whose rules consequences are wider than layer-6's flat evergreen
  * vocabulary above, so they carry their own printed line rather than joining
  * the comma-separated `KEYWORDS` one. This tuple does not derive
@@ -70,8 +70,8 @@ export const KEYWORD_PRINT_NAMES: Readonly<Record<Keyword, string>> = {
  * Every kind here needs a reminder the day a card can print it —
  * `reminder.ts`'s `ABILITY_LINE_REMINDER_TEXT` and `protectionLineReminder`
  * are where mtg-josx wrote the first five in, and `exhaustiveness.test.ts`
- * is what fails when a kind ships unreminded. `doubleStrike` is the sixth
- * and it arrived that way (`mtg-zd0y`).
+ * is what fails when a kind ships unreminded. `doubleStrike` is the sixth and
+ * it arrived that way (`mtg-zd0y`); `shroud` is the seventh (`mtg-nhyv.90`).
  *
  * **`doubleStrike` is here rather than in `KEYWORDS`, and the reason is the
  * generator rather than the rules.** It is a flat layer-6 keyword in real
@@ -85,8 +85,8 @@ export const KEYWORD_PRINT_NAMES: Readonly<Record<Keyword, string>> = {
  * and 144 carry them inside their prompt; the fixture key is
  * `sha256(system, prompt, schema)`, so a tenth name strands every one of them
  * and the bill is a live paid run. Nothing in `KEYWORD_ABILITY_KINDS` is
- * model-visible at all, which is why five keywords already live here and why
- * the sixth does too. Moving it up is a re-record, not an edit.
+ * model-visible at all, which is why six keywords already live here and why
+ * the seventh does too. Moving either one up is a re-record, not an edit.
  */
 export const KEYWORD_ABILITY_KINDS = [
   'defender',
@@ -95,6 +95,10 @@ export const KEYWORD_ABILITY_KINDS = [
   'indestructible',
   'protection',
   'doubleStrike',
+  'shroud',
+  'flash',
+  'intimidate',
+  'unleash',
 ] as const;
 
 /**
@@ -103,10 +107,10 @@ export const KEYWORD_ABILITY_KINDS = [
  *
  * A printed static ability grants a keyword to somebody *else* — "Other Knight
  * creatures you control get +1/+1 and have indestructible" (M11's Knight
- * Exemplar) — and until `mtg-nhyv.74` the six kinds above could only be printed
+ * Exemplar) — and until `mtg-nhyv.74` the seven kinds above could only be printed
  * by a card on itself, because the only field a `grantKeyword` record carries
- * is one name out of `KEYWORDS`. This tuple is the widening, and it is one
- * member rather than six because each of the other five costs something
+ * is one name out of `KEYWORDS`. This tuple is the widening, and it remains
+ * narrower than all seven because each omitted kind costs something
  * specific:
  *
  *  - `landwalk` and `protection` carry a field of their own — a land type, a
@@ -118,19 +122,12 @@ export const KEYWORD_ABILITY_KINDS = [
  *    `keywordValue`, `@mtg/sim`'s `grantKeywordScore`). A lord that handed out
  *    Defender would score as an upgrade, and the fix is a sign table in two
  *    packages rather than a name in this tuple.
- *  - `hexproof` costs only its rows in those two tables and a Forge spelling,
- *    and no card in the M11/M13 slice asks for it. It stays out until one does,
- *    exactly where `putCounters` sits.
- *
- * `doubleStrike` is the second member and it arrived the way the bullet above
- * says a name arrives: a card asked. M13's Cleaver Riot is "creatures you
- * control gain double strike until end of turn", and the whole card was
- * refusable on this enum — `grantKeywordUntilEndOfTurn` already carried the
- * scope, the kernel already ran both combat damage steps (`combat.ts` reads
- * `doubleStrike` at the first-strike check and again at the regular one), and
- * the missing word was this one. Adding it also widens the *printed* static
- * grant to "creatures you control have double strike", which is a real card
- * shape and costs nothing extra: both halves are one CR 613.1f layer-6 record.
+ *  - `hexproof` is source-proven by Ring of Evos Isle's temporary grant. It is
+ *    included here because printed and resolving grants share one vocabulary.
+ *  - `doubleStrike` is source-proven by Cleaver Riot's temporary grant. It is
+ *    included here because printed and resolving grants share one vocabulary.
+ *  - `shroud` is source-proven by M11's Whispersilk Cloak, which grants
+ *    it to the equipped creature, and it is parameterless like indestructible.
  *
  * `exhaustive.ts`'s `GrantableKeywordAbilitiesAreParameterless` is what holds
  * the first bullet to a compile error rather than a convention: a kind added
@@ -140,12 +137,18 @@ export const KEYWORD_ABILITY_KINDS = [
  * `ModelStaticModificationSchema` keeps the narrow `KeywordSchema`, and
  * `grantKeywordUntilEndOfTurn` is not inside `generatableEffects` at all, so it
  * reaches `ModelEffectSchema` no more than it reaches the static's. Measured
- * when `doubleStrike` landed: `grantKeywordUntilEndOfTurn` appears in 0 of the
+ * when `doubleStrike` landed: `grantKeywordUntilEndOfTurn` appeared in 0 of the
  * 151 recorded calls under `packages/setgen/fixtures/llm/` and `doubleStrike`
  * in 0, so the 143 whose answer schema carries the nine names keep hashing to
- * what they always did and the bill for this tuple's second member is zero.
+ * what they always did and the bill for widening this tuple was zero.
  */
-export const GRANTABLE_KEYWORD_ABILITY_KINDS = ['indestructible', 'doubleStrike'] as const;
+export const GRANTABLE_KEYWORD_ABILITY_KINDS = [
+  'indestructible',
+  'doubleStrike',
+  'shroud',
+  'hexproof',
+  'intimidate',
+] as const;
 
 export type GrantableKeywordAbilityKind = (typeof GRANTABLE_KEYWORD_ABILITY_KINDS)[number];
 
@@ -165,6 +168,9 @@ export const GRANTABLE_KEYWORD_PRINT_NAMES: Readonly<Record<GrantableKeyword, st
   ...KEYWORD_PRINT_NAMES,
   indestructible: 'indestructible',
   doubleStrike: 'double strike',
+  shroud: 'shroud',
+  hexproof: 'hexproof',
+  intimidate: 'intimidate',
 };
 
 /**
@@ -261,6 +267,17 @@ export const EFFECT_KINDS = [
  * still not this list, so promoting a kind and generating it stay two decisions.
  */
 export const UNPRICED_EFFECT_KINDS = [
+  /** CR 701.30's hand-authored, non-targeting creature-token copy action. */
+  'populate',
+  /**
+   * CR 707.2's source-copy instruction, retained as one hand-authored effect.
+   *
+   * This is not a token specification exposed to the model: the copiable
+   * values come from the resolving ability's source card, including when that
+   * permanent has left the battlefield. Keeping the effect outside the priced
+   * vocabulary prevents independent generator access to source-copy creation.
+   */
+  'createTokenCopyOfSelf',
   /**
    * CR 701.16a's action, and the last of the four still waiting.
    *
@@ -279,6 +296,23 @@ export const UNPRICED_EFFECT_KINDS = [
    * card somebody wants and nobody wants this one yet.
    */
   'revealHand',
+  /**
+   * CR 701.16a over one uniformly selected card in a hidden hand.
+   *
+   * This is not `revealHand` with a smaller count: the subset is chosen by the
+   * rules rather than by a player, so the seeded kernel RNG is part of the
+   * effect's semantics. Merfolk Spy is the first source-bound use. The effect
+   * is hand-authored only because a random hidden-zone read is not a primitive
+   * the generator has been taught to value or compose.
+   */
+  'revealRandomCardFromHand',
+  /**
+   * Reveal one uniformly selected card from an event-retained player's hand,
+   * then play it by the card-type branch Wild Evocation prints. The branch is
+   * one atomic hand-authored primitive because the selected hidden-zone object
+   * must survive from the reveal into either a land move or a cast attempt.
+   */
+  'playRandomHandCardWithoutPayingManaCost',
   /**
    * CR 701.12's action, and the one member here that is unpriced for a third
    * reason: not cost, not missing research, but that the generator must not
@@ -323,6 +357,8 @@ export const UNPRICED_EFFECT_KINDS = [
    * `ROLE_PROFILES` by the type system rather than by discipline.
    */
   'addMana',
+  /** Persistent command-zone objects are hand-authored and have no isolated price. */
+  'createEmblem',
   /**
    * The library and graveyard vocabulary `mtg-n0to` added, appended as one
    * block in the order it was built.
@@ -424,45 +460,31 @@ export const UNPRICED_EFFECT_KINDS = [
   'loseLife',
   'setLife',
   'preventCombatDamage',
+  /** Odric's one-combat permission to make the defending side's legal block declaration. */
+  'chooseBlockersThisCombat',
   /**
-   * The graveyard's other half, added by `mtg-7260`'s library-and-graveyard
-   * lane: one named card leaves a graveyard, chosen by a player rather than by
-   * a scope.
+   * A genuinely non-targeted graveyard choice, added by `mtg-7260`'s
+   * library-and-graveyard lane: one card leaves a graveyard after a player
+   * chooses it during resolution.
    *
-   * `returnFromGraveyard` already reaches a graveyard and is the *mass* form —
-   * `EFFECT_SCOPES` names a set of cards and the effect applies to every member
-   * of it, which is Living Death and not Gravedigger. Every single-card
-   * recursion M11 and M13 print is the other shape: Disentomb, Call to
-   * Mind, Archaeomancer, Nature's Spiral, Revive, Gravedigger, Vile Rebirth.
-   * All seven say *one* card and all seven leave the choosing to a player, and
-   * neither half of that sentence is expressible by narrowing a scope.
+   * `returnFromGraveyard` covers both scoped mass movement and one card named
+   * by a graveyard-card target. `returnToHand` and `exileTarget` accept the same
+   * public-zone targets. This primitive is not shorthand for those forms: a
+   * targeted card is chosen earlier and can become illegal in response, while
+   * this choice does not exist until resolution.
    *
    * Unpriced for `searchLibrary`'s third reason, stated in its paragraph above
    * and true here word for word: it stops a resolution to ask a question, so
    * admitting it to the generator would hand the model a card whose cost is a
-   * decision space rather than a number. The rider argument does not apply —
-   * Disentomb's whole text is this clause — and the research argument would not
-   * be hard to pay, since the source rules on graveyard recursion plainly
-   * enough. The pause is what keeps it here, exactly as it keeps `discardCards`
-   * here beside a Mind Rot the pie has no trouble pricing.
+   * decision space rather than a number. The pause is what keeps it here,
+   * exactly as it keeps `discardCards` here beside a Mind Rot the pie has no
+   * trouble pricing.
    *
-   * **It is a choice and not a target, and that is a divergence worth naming.**
-   * The printed cards read "target creature card in your graveyard", and a
-   * graveyard is a public zone, so CR 115.1 genuinely does let one be targeted
-   * — unlike a card in a library or a hand, where `searchLibrary` and
-   * `chooseDiscard` use a mid-resolution decision because targeting a concealed
-   * object is not a thing the rules allow at all. What the DSL lacks is the
-   * word: no `TargetKind` names a card in a graveyard, `TARGET_KINDS` is a
-   * frozen tuple two other lanes own, and widening it would have to teach
-   * `legalTargetsFor`, the restriction checker and every bot's target policy
-   * about an object that is not on the battlefield. So this reuses the
-   * machinery that already exists for the concealed zones. What that costs is
-   * one interaction: an opponent cannot make the choice illegal in response,
-   * because the choice is not made until the effect resolves. In M11 and M13
-   * the only cards that could have tried are Haunting Echoes and the
-   * sacrificial artifact that exiles a whole graveyard (M13 219), and a set
-   * that wants the interaction wants a target kind rather than a looser
-   * primitive here.
+   * **It is a choice and not a target.** A caller whose text says "target card"
+   * is invalid at the architecture boundary even when the happy-path move is
+   * identical. The hostile difference is load-bearing: a targeted object keeps
+   * its chosen oid on the stack and fizzles after a graveyard-exile response;
+   * this primitive asks from the cards that remain and may choose nothing.
    */
   'chooseFromGraveyard',
 
@@ -498,6 +520,29 @@ export const UNPRICED_EFFECT_KINDS = [
    * shown no board. A pie row would have to name one of the three.
    */
   'untapPermanent',
+
+  /**
+   * Rewind's non-targeted resolution choice: select up to a bounded number of
+   * matching permanents, then untap them. This is separate from the targeted
+   * sibling because CR 115 legality, hexproof, and the time of choice differ.
+   * It remains unpriced for the same board-dependent valuation reason.
+   */
+  'untapPermanents',
+
+  /**
+   * One permanent misses its controller's next untap step without being
+   * tapped by this effect.
+   *
+   * This is deliberately not another rider on `tapPermanent`. Frost Breath
+   * performs two instructions in one effect — tap now, then hold — while Wall
+   * of Frost performs only the second against a creature combat already
+   * tapped (or vigilance left untapped). Calling the tap primitive would
+   * change the board immediately and make vigilance wrong.
+   *
+   * Unpriced and hand-authored: the value depends on whether the permanent is
+   * tapped before that untap step, a board fact the generator does not see.
+   */
+  'skipNextUntap',
 
   /**
    * CR 613.1f, layer 6, for one turn: the combat trick the DSL could print the
@@ -541,6 +586,27 @@ export const UNPRICED_EFFECT_KINDS = [
   'cantBeBlockedThisTurn',
 
   /**
+   * CR 509.1b for one turn, on the creature doing the blocking: "target
+   * creature can't block this turn." This is the blocker-side restriction,
+   * not `cantBeBlockedThisTurn`, whose subject is an attacker.
+   *
+   * Hand-authored for the same board-dependent reason as its attacker-side
+   * sibling and retained in the same `turnCombatRules` lifetime host.
+   */
+  'cantBlockThisTurn',
+
+  /**
+   * CR 509.1c for one turn: one chosen creature, or a group fixed as the
+   * effect resolves, blocks this turn if able. The requirement participates in
+   * the joint declaration maximum with `mustBeBlockedIfAble`; it never creates
+   * a block that a restriction forbids.
+   *
+   * Hand-authored because its value is entirely a property of the combat board
+   * and because the model-facing schema must remain byte-identical.
+   */
+  'blocksThisTurnIfAble',
+
+  /**
    * CR 508.1d for one turn, with the defender named: "target creature attacks
    * you this turn if able."
    *
@@ -551,18 +617,13 @@ export const UNPRICED_EFFECT_KINDS = [
    * names the player: the requirement is satisfied only by an attack aimed at
    * the controller of the ability that imposed it, so a lured creature cannot
    * be pointed at one of that player's own planeswalkers instead. The kernel
-   * reads the player live off the imposing source rather than baking a
-   * `PlayerId` in, for the reason `ObjectFilter.controllerIsSource` gives about
-   * the same question one package over.
+   * fixes that player when the effect resolves, so a later control change does
+   * not redirect the creature the Siren already compelled.
    *
-   * No unconstrained sibling ("target creature attacks this turn if able",
-   * Courtly Provocateur's first line) and no block-side one ("blocks this turn
-   * if able", its second): each is a real printed card and neither is reachable
-   * yet — the attack-side one only because nothing in this slice needs it
-   * without the defender, and the block side because a requirement to block
-   * has to be merged into the CR 509.1c joint maximum `legal.ts` computes for
-   * `mustBeBlockedIfAble`, which is a lane rather than a member. A widening
-   * arrives with the card that needs it, not before.
+   * The defender-neutral sibling is now `attacksThisTurnIfAble`, appended for
+   * Incite. The block-side sibling is `blocksThisTurnIfAble`, whose
+   * blocker-relative requirement joins the CR 509.1c joint maximum rather than
+   * widening either attack requirement.
    */
   'attacksYouThisTurnIfAble',
   /**
@@ -624,6 +685,268 @@ export const UNPRICED_EFFECT_KINDS = [
    * (`sha256(system, prompt, schema)`) and costs nothing to ship.
    */
   'setBasePtUntilEndOfTurn',
+  /**
+   * A source card returning itself from its owner's graveyard, with no choice
+   * and therefore no target. Reassembling Skeleton and Firewing Phoenix are
+   * the source-attested pair: the activated ability itself exists in the
+   * graveyard, and its resolution moves that exact source object rather than a
+   * card selected from a zone.
+   *
+   * Hand-authored only. A model-facing effect has no surrounding
+   * `activationZone` field with which to make this meaningful, and admitting
+   * the effect alone would let the generator print a sentence the ordinary
+   * battlefield activation path cannot execute.
+   */
+  'returnSourceFromGraveyard',
+  /**
+   * Rancor's CR 400.7-sensitive return. The departure trigger retains the
+   * exact graveyard incarnation that fired; resolution moves only that card,
+   * never a later object with the same oid. Hand-authored only because its
+   * surrounding trigger condition supplies the provenance the effect needs.
+   */
+  'returnDepartedSourceToOwnerHand',
+  /**
+   * Dark Revenant's CR 400.7-sensitive library placement. A dies trigger
+   * retains the exact graveyard incarnation that fired; resolution puts only
+   * that card on top of its owner's library. Hand-authored only because its
+   * surrounding trigger supplies the source provenance the effect needs.
+   */
+  'putDepartedSourceOnTopOfOwnerLibrary',
+  /**
+   * Serra Avatar's exact-source graveyard action. The trigger retains the
+   * incarnation that entered a graveyard; resolution moves that incarnation
+   * to its owner's library and shuffles only when the move succeeds.
+   * Hand-authored only because the source provenance comes from its paired
+   * from-anywhere trigger.
+   */
+  'shuffleSourceIntoOwnerLibrary',
+  /** CR 613.1e: overwrite one creature's colors until cleanup. */
+  'setColorsUntilEndOfTurn',
+  /** CR 508.1d: the creature must attack this turn, with no defender named. */
+  'attacksThisTurnIfAble',
+  /**
+   * Time Reversal's table-wide CR 701.22 action. The plural name is the scope:
+   * every player's hand and graveyard move into their library before that
+   * library is shuffled. Keeping it distinct from the controller-only
+   * `shuffleGraveyardIntoLibrary` prevents either primitive from growing a
+   * field no other reviewed card uses.
+   */
+  'shuffleHandsAndGraveyardsIntoLibraries',
+  /**
+   * The resolving instant or sorcery leaves the stack for exile instead of
+   * taking the normal post-resolution move to its owner's graveyard.
+   * Hand-authored only: an effect this dependent on its surrounding spell has
+   * no meaningful model-facing slot in isolation.
+   */
+  'exileThisSpell',
+  /**
+   * A permanent-scoped relation between an exile action and a later ability on
+   * the same source. Hand-authored only: neither half has meaning as an
+   * isolated generator slot, and exposing it without the paired source
+   * lifecycle would let a model emit a reader with no writer.
+   */
+  'moveSourceLinkedExile',
+  /**
+   * Haunting Echoes' one-resolution relation between two zones. The first
+   * move supplies the names the second search may find, so neither half is a
+   * useful generator slot in isolation and a public remembered-name variable
+   * would let unrelated effects retain resolution-local data. Kept as one
+   * hand-authored capability for the same containment reason as the linked
+   * exile primitive immediately above it.
+   */
+  'exileNonbasicGraveyardAndMatchingLibrary',
+  /**
+   * Conundrum Sphinx's APNAP name choice followed by the linked top-card
+   * reveal and move. Hand-authored because its input is a decision rather than
+   * a generator slot and its two phases have no meaning independently.
+   */
+  'eachPlayerNamesCardThenRevealsTop',
+  'nameNonlandCardAndExileMatchingOpponentZones',
+  /**
+   * Mass Polymorph's linked library walk. Hand-authored because an unbounded
+   * public reveal and a resolution-relative count are not generator slots.
+   */
+  'revealUntilCreatureCards',
+  /**
+   * CR 613.1b for one turn: the resolving object's controller controls the
+   * chosen creature until cleanup. Act of Treason is the measured case and
+   * composes this layer-2 fact with the separate untap and haste primitives;
+   * keeping those actions separate avoids a card-shaped control effect.
+   *
+   * Hand-authored only. A control change is neither a fixed gift nor a fixed
+   * answer without the board and sacrifice outlets around it, so exposing it
+   * as an isolated generated slot would require a set-level valuation policy
+   * that no effect range can supply.
+   */
+  'gainControlUntilEndOfTurn',
+  /**
+   * CR 611.2a and 613.1b: the targeted player gains control of the permanent
+   * whose ability is resolving, for as long as that battlefield incarnation
+   * remains. Jinxed Idol is the measured card; the player is a real CR 115
+   * target while the permanent is a retained source relation.
+   *
+   * Hand-authored only. Whether giving away a permanent is an advantage or a
+   * drawback depends on the whole permanent and board, neither of which an
+   * isolated generator effect slot is shown.
+   */
+  'targetPlayerGainsControlOfSelfPermanent',
+  /**
+   * Safe Passage's turn-long CR 615 shield. It protects the resolving spell's
+   * controller and that player's creatures without targeting either, and the
+   * creature membership is read when damage would be dealt rather than when
+   * the spell resolves.
+   *
+   * Hand-authored only for Fog's set-level reason: the value is the attack or
+   * burn spell it answers, a board state the generator is never shown, and a
+   * set allowed to print these freely can make combat fail to resolve.
+   */
+  'preventAllDamageToYouAndCreaturesYouControl',
+  /**
+   * Silence's CR 601 rule change: each opponent of the resolving spell's
+   * controller cannot begin casting another spell before cleanup.
+   *
+   * This is not a counter and not a CR 613 continuous effect. Spells already
+   * on the stack remain there, while the rule is consulted at the casting
+   * legality seam and expires with the turn. Hand-authored only: its value is
+   * entirely timing-dependent, and exposing it as an isolated generator slot
+   * would let a model print a lock without seeing the game it locks.
+   */
+  'cantCastSpellsThisTurn',
+  /**
+   * Autumn's Veil's two linked turn rules. The named colors describe spell
+   * sources: those spells cannot counter this effect's controller's spells or
+   * target creatures that player controls. Abilities are deliberately outside
+   * the effect.
+   *
+   * Hand-authored only. Its value is the interaction held by another player,
+   * which the generator's isolated effect slot cannot see or price.
+   */
+  'protectSpellsAndCreaturesFromSpellColorsThisTurn',
+  /** CR 115.7: optionally replace any legal subset of a target spell's targets. */
+  'changeSpellTargets',
+  /** CR 707.10: copy a target spell without casting it, then optionally retarget it. */
+  'copySpell',
+  /** One-shot turn trigger: copy the next instant or sorcery you cast, then optionally retarget it. */
+  'copyNextInstantOrSorceryThisTurn',
+  /**
+   * CR 705's public random procedure with typed success and failure branches.
+   * Its value is entirely the instructions it gates, so teaching the generator
+   * to compose probabilistic cards remains a separate balance decision.
+   */
+  'flipCoin',
+  /**
+   * Dark Tutelage's linked hidden-zone instruction: reveal the current top
+   * card and move that exact card to the controller's hand. Hand-authored only
+   * because a library card is neither a CR 115 target nor a standalone slot a
+   * generator can price; the reveal and move are meaningful only together.
+   */
+  'revealTopCardToHand',
+  /**
+   * CR 615.1's depleting prevention shield with a linked consequence.
+   * Vengeful Archon fixes the protected player when the ability resolves,
+   * spends a numeric pool across later damage events, and deals exactly what
+   * this shield prevented to the player or planeswalker chosen on activation.
+   *
+   * Hand-authored only. The amount, retained target, source attribution, and
+   * turn duration are one stateful contract; exposing one isolated slot to the
+   * generator would provide neither enough context to price it nor a safe way
+   * to compose its two linked halves.
+   */
+  'preventNextDamageToYouAndRetaliate',
+  /**
+   * A resolved ability's source-bound land animation. Awakener Druid is the
+   * first card to exercise it: layer 4 adds creature and a creature subtype
+   * without removing land or Forest, layer 5 sets color, and layer 7b sets
+   * base power/toughness. All records end with the source incarnation.
+   *
+   * Hand-authored only. The linked duration and three-layer bundle are not an
+   * isolated effect slot the generator can safely price or compose.
+   */
+  'animateLandWhileSourceOnBattlefield',
+  /**
+   * The five RTR Keyrunes' source-bound, end-of-turn animation. Layer 4 keeps
+   * artifact and adds creature while replacing creature subtypes, layer 5
+   * sets colors, layer 6 grants the printed keywords, and layer 7b sets base
+   * power/toughness. The source incarnation and cleanup step bound the result.
+   *
+   * Hand-authored only. Exposing this bundle as an isolated model slot would
+   * let generated artifacts acquire a combat body the surrounding card was
+   * never priced or authored to support.
+   */
+  'animateSourceUntilEndOfTurn',
+  /**
+   * CR 611.2a and 613.1b without an expiry instruction: the resolving
+   * controller gains control of one creature for that battlefield
+   * incarnation. Hand-authored because an indefinite theft effect cannot be
+   * priced without the surrounding board and sacrifice outlets.
+   */
+  'gainControl',
+  /**
+   * CR 205.3 and 613.1d: add one subtype to a chosen or retained creature for
+   * that battlefield incarnation. Hand-authored because a subtype grant's
+   * value is set-level tribal policy rather than an isolated effect price.
+   */
+  'addSubtype',
+  /** Return this Aura card and attach that same incarnation to the chosen host. */
+  'returnSourceAuraAttached',
+  /** CR 701.15: create a one-use regeneration shield on a retained permanent. */
+  'regeneratePermanent',
+  /** A targeted game loss, hand-authored because it has no stable set-design price. */
+  'loseGame',
+  /** An alternate win, hand-authored because its condition defines the card. */
+  'winGame',
+  /** Double one named counter kind on the resolving ability's source. */
+  'doubleSourceCounters',
+  'reorderTopLibrary',
+  'selectFromTopLibrary',
+  'separateTopLibraryIntoPiles',
+  /** Destroy the live filtered attachments of one earlier creature referent. */
+  'destroyAttachedPermanents',
+  /**
+   * CR 701.10's atomic exchange of two targeted creatures. Hand-authored
+   * because its value is the difference between two live boards, not a stable
+   * isolated effect price.
+   */
+  'exchangeControl',
+  /**
+   * A mandatory, non-targeted choice of one permanent the resolving object's
+   * controller controls. The choice is made during resolution, so it cannot be
+   * encoded as `returnToHand` with a target without changing the response
+   * window. `TargetFilter` supplies the current battlefield characteristics;
+   * the only source-attested destination is its owner's hand.
+   *
+   * Hand-authored only for the same reason as `chooseFromGraveyard`: resolving
+   * it suspends the event stream for a player decision, whose value is a fact
+   * about the live board rather than a number the generator can price.
+   */
+  'chooseFromBattlefield',
+  /**
+   * Void Stalker's source-and-target tuck, one atomic instruction because all
+   * successful moves precede every affected-library shuffle. Splitting it into
+   * ordinary tucks and shuffles would either expose an ordered intermediate
+   * library or lose the target owner's library when control and ownership
+   * differ. Hand-authored only; the generator has no reason to compose a
+   * source-incarnation-sensitive multi-owner effect without the surrounding
+   * activated ability.
+   */
+  'putSourceAndTargetOnOwnersLibrariesThenShuffle',
+  /** Exile the pre-move cohort of every card in every hand and graveyard. */
+  'exileHandsAndGraveyards',
+  /**
+   * A filtered decision over a hand this same instruction reveals, linked to
+   * either an exact-card free cast or a same-name purge. Hand-authored because
+   * it suspends resolution on hidden information and neither linked outcome is
+   * an isolated effect the generator can price safely.
+   */
+  'chooseFromRevealedHand',
+  /** Xathrid Gorgon's permanent, target-incarnation-bound transformation. */
+  'petrifyCreature',
+  /** Cast virtual copies of graveyard cards moved to exile earlier in this resolution. */
+  'castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts',
+  /** Druid's Deliverance's hand-authored, controller-only turn-long combat shield. */
+  'preventCombatDamageToYou',
+  /** RTR's incarnation-bound action and activation prohibition until your next turn. */
+  'detainPermanent',
 ] as const;
 
 /** Every effect kind the engine can run. Appended to, never inserted into. */
@@ -686,6 +1009,16 @@ export const TARGET_KINDS = [
   /** A retained trigger referent, not a target chosen under CR 115. */
   'triggeringCreature',
   /**
+   * The player named by the event that fired this ability, retained rather
+   * than chosen. Liliana's Caress reads the player who discarded a card and
+   * makes that same player lose life; CR 115 never turns that printed "that
+   * player" into a target.
+   *
+   * Hand-authored only. It is appended outside `MODEL_TARGET_KINDS`, so exact
+   * reference support does not widen the generator's answer space.
+   */
+  'triggeringPlayer',
+  /**
    * CR 506.2's defending player, one step in: the creatures they control.
    *
    * The eighth, appended for the same reason the fifth and sixth were. It is
@@ -716,6 +1049,8 @@ export const TARGET_KINDS = [
    * distinction no common-slot answer makes.
    */
   'targetArtifactOrEnchantment',
+  /** One artifact permanent controlled by anyone other than the chooser. Hand-authored for Vandalblast. */
+  'targetArtifactYouDontControl',
   /**
    * The exact complement of the fifth member: "target creature you don't
    * control".
@@ -782,7 +1117,7 @@ export const TARGET_KINDS = [
    * The thirteenth. CR 115.6a is explicit that an object referring to itself is
    * not targeting itself, so this kind carries none of `targetCreature`'s
    * apparatus: no restriction fits it and no filter narrows it, because
-   * `TARGET_SPACES` gives it nothing to draw from — `triggeringCreature`'s own
+   * `TARGET_KIND_TRAITS` gives it nothing to draw from — `triggeringCreature`'s own
    * entry is the precedent, and for the identical reason, CR 115 does not
    * target a self-reference either.
    *
@@ -817,7 +1152,7 @@ export const TARGET_KINDS = [
    * vocabulary could not print any of the three, and the gap was two
    * independent walls — `putCounters` named no kind that reaches the source at
    * all, and `selfCreature` is refused on a card that is not a creature
-   * (`checkSelfCreatureTarget`) because the phrase it prints says "creature".
+   * (`checkSourceReferentTarget`) because the phrase it prints says "creature".
    *
    * It is a member rather than a widening of `selfCreature`, because the two
    * print different sentences and each sentence has to be true of the card
@@ -825,7 +1160,7 @@ export const TARGET_KINDS = [
    * rendered text of an artifact's own ability, which is text and behavior
    * disagreeing — the one failure this vocabulary is written to refuse.
    *
-   * What it needs that `selfCreature` needs too: an empty `TARGET_SPACES` row
+   * What it needs that `selfCreature` needs too: an empty collision-space row
    * (nothing is chosen, so nothing collides, and neither a restriction nor a
    * filter narrows it), a place in `SOURCE_BODY_ONLY_TARGETS` so a spell's own
    * effect list refuses it, and exclusion from `effectChoosesTarget` so CR
@@ -931,6 +1266,69 @@ export const TARGET_KINDS = [
    * `SVar:DBDealDamage:DB$ DealDamage | Defined$ TargetedController | NumDmg$ 2`.
    */
   'thatCreaturesController',
+  /**
+   * "Enchanted creature" — the creature a creature Aura is attached to.
+   *
+   * The eighteenth member, appended for Shiv's Embrace (M11 #156). This is a
+   * retained attachment referent rather than a CR 115 target: activating the
+   * Aura asks for no choice, and resolution reads the Aura's live attachment.
+   * It is deliberately creature-Aura-specific rather than a generic attached
+   * permanent. Equipment prints "equipped creature", and giving both phrases
+   * one kind would make the renderer lie about one of them.
+   *
+   * Hand-authored only. `MODEL_TARGET_KINDS` remains the frozen first four, so
+   * adding this engine word does not re-key any recorded generation fixture.
+   */
+  'enchantedCreature',
+  /**
+   * "Target creature an opponent controls" — a relation to the ability's
+   * controller, not merely the complement of creatures they control.
+   *
+   * The distinction is invisible in today's two-player kernel but is part of
+   * the card's contract in multiplayer and team formats: a teammate's creature
+   * is not controlled by you and is also not controlled by an opponent. This
+   * hand-authored member keeps that difference explicit without widening the
+   * frozen model vocabulary.
+   */
+  'targetCreatureOpponentControls',
+  /**
+   * "Equipped creature" — the creature an Equipment source is currently
+   * attached to. Like `enchantedCreature`, this is a retained attachment
+   * referent rather than a CR 115 target: it chooses nothing and is resolved
+   * from the source's live attachment relation when the effect resolves.
+   *
+   * Separate from the Aura word because the printed nouns and legal source
+   * types differ. Hand-authored only; the frozen model target tuple does not
+   * grow with this engine vocabulary.
+   */
+  'equippedCreature',
+  /**
+   * "Target card in your graveyard" — a visible-zone CR 115 choice made as
+   * the spell or ability is put on the stack, not while it resolves.
+   *
+   * The kind is deliberately generic and its filter supplies "artifact",
+   * "creature", or another printed characteristic. Hand-authored only: the
+   * frozen model tuple below remains the original four target kinds.
+   */
+  'targetCardInYourGraveyard',
+  /** A visible card in either player's graveyard, chosen as a CR 115 target. */
+  'targetCardInAGraveyard',
+  /**
+   * The player chosen by an earlier player-or-planeswalker slot, or the
+   * chosen planeswalker's controller. This is a retained referent rather than
+   * another CR 115 choice and stays outside the frozen model vocabulary.
+   */
+  'thatPlayerOrPlaneswalkerController',
+  /** The player fixed by this permanent's as-enters choice. Hand-authored only. */
+  'chosenPlayer',
+  /** A visible card in an opponent's graveyard, chosen as a CR 115 target. */
+  'targetCardInOpponentsGraveyard',
+  /** A nonland permanent controlled by an opponent. Hand-authored for Detain. */
+  'targetNonlandPermanentOpponentControls',
+  /** A nonland permanent controlled by anyone other than the chooser. Hand-authored for Cyclonic Rift. */
+  'targetNonlandPermanentYouDontControl',
+  /** A permanent the chooser neither owns nor controls. Hand-authored for Conjured Currency. */
+  'targetPermanentYouNeitherOwnNorControl',
 ] as const;
 export const TargetKindSchema = z.enum(TARGET_KINDS);
 
@@ -974,24 +1372,87 @@ export const MODEL_TARGET_KINDS = ['anyTarget', 'targetCreature', 'targetPlayer'
 export const ModelTargetKindSchema = z.enum(MODEL_TARGET_KINDS);
 
 /**
- * CR 113 ability kinds the DSL can express.
+ * CR 113 ability kinds the engine DSL can express.
  *
- * Three members, and they arrived one commit apart on purpose.
- * `AbilityKindsCovered` (`exhaustive.ts`) and the kernel's `assertNever` over
- * `Ability['kind']` are what keep the generator's output space equal to the
- * engine's enforceable space, and they only do that if this tuple and the
- * schema union grow together — one kind per commit. This slice is the widest
- * point of `mtg-bc2.132`: the DSL can now say every shape the kernel can run.
+ * The first three are the model-facing object ability kinds. Engine-only
+ * hand-authored shapes may extend the tuple without extending
+ * `MODEL_ABILITY_KINDS`; `ModelAbilityIsAbility` proves the required
+ * generator-to-engine containment, while `AbilityKindsCovered` and the
+ * kernel's `assertNever` arms keep this wider tuple aligned with the executable
+ * union.
  *
- * The order is the printed order: a static ability describes the permanent, a
- * trigger waits on it, and an activated ability prints last because it is the
- * one line the player has to pay for. `sortAbilities` keys the fingerprints on
- * this tuple's index, so a kind is appended rather than inserted: a card
- * printed before this commit hashes after it exactly as it did before.
+ * The first three retain their printed order: a static describes the
+ * permanent, a trigger waits on it, and an activation prints after both because
+ * it is the line the player pays for. `sortAbilities` keys fingerprints on this
+ * tuple's index, so every later engine-only kind is appended rather than
+ * inserted: a card printed before the addition keeps the same hash.
  */
-export const ABILITY_KINDS = ['static', 'triggered', 'activated'] as const;
+export const ABILITY_KINDS = [
+  'static',
+  'triggered',
+  'activated',
+  'staticPlayerRule',
+  'staticGameRule',
+  'stateTriggered',
+  'staticBundle',
+  'staticActivationRule',
+] as const;
 export const AbilityKindSchema = z.enum(ABILITY_KINDS);
 export type AbilityKind = z.infer<typeof AbilityKindSchema>;
+
+/**
+ * Live CR 604 rules that affect a player rather than modify a permanent.
+ *
+ * These are separate from `STATIC_MODIFICATION_KINDS` because no rule has an
+ * object scope, a CR 613 layer, a CR 614 event replacement, or a single combat
+ * object to modify. The two conditional restrictions read a fact about the
+ * affected player from the current turn. Player hexproof and flash casting
+ * instead change target or cast legality continuously while their source
+ * remains on the battlefield. The graveyard rule names each opponent because
+ * CR 400.3 routes a card to its owner's graveyard before the replacement asks
+ * whose graveyard it is.
+ * `validate/abilities.ts` keeps each rule paired with its one supported player
+ * scope rather than allowing the product of both scopes and every rule.
+ *
+ * Hand-authored only: `abilitiesOver` still builds every model-facing ability
+ * union from the original three kinds, so adding this tuple cannot widen a
+ * generated card or rename a recorded model fixture.
+ */
+export const STATIC_PLAYER_RULES = [
+  'cantAttackWithCreaturesIfCastSpellThisTurn',
+  'cantCastSpellsIfAttackedWithCreatureThisTurn',
+  'hasHexproof',
+  'castSpellsAsThoughFlash',
+  'castSpellsFromHandWithoutPayingManaCost',
+  'cardsToGraveyardAreExiled',
+  'cardsOrTokensToGraveyardAreExiled',
+  'instantOrSorceryCardsToGraveyardAreExiled',
+  'noMaximumHandSize',
+  'playWithTopLibraryRevealed',
+  'attackControllerOrPlaneswalkersTaxedByControlledEnchantments',
+] as const;
+export const StaticPlayerRuleSchema = z.enum(STATIC_PLAYER_RULES);
+export type StaticPlayerRule = z.infer<typeof StaticPlayerRuleSchema>;
+
+/**
+ * Live CR 101/104/119/615 rules that govern game actions rather than objects.
+ *
+ * Platinum Angel stays one paired leaf because its one printed ability shares
+ * a source lifetime and controller. Leyline of Punishment prints two separate
+ * static abilities, so its prohibitions are independent leaves reusable by a
+ * card that carries either sentence alone.
+ *
+ * Hand-authored only, like `STATIC_PLAYER_RULES`: the model-facing ability
+ * union remains the original three object-ability kinds.
+ */
+export const STATIC_GAME_RULES = [
+  'controllerCantLoseAndOpponentsCantWin',
+  'playersCantGainLife',
+  'damageCantBePrevented',
+  'cardsInGraveyardsCantBeTargets',
+] as const;
+export const StaticGameRuleSchema = z.enum(STATIC_GAME_RULES);
+export type StaticGameRule = z.infer<typeof StaticGameRuleSchema>;
 
 /**
  * Which permanents a static ability reaches. Compiles to one kernel
@@ -1001,6 +1462,23 @@ export type AbilityKind = z.infer<typeof AbilityKindSchema>;
 export const STATIC_SCOPES = ['self', 'creaturesYouControl', 'otherCreaturesYouControl'] as const;
 export const StaticScopeSchema = z.enum(STATIC_SCOPES);
 export type StaticScope = z.infer<typeof StaticScopeSchema>;
+
+/**
+ * Whole-battlefield scopes available only to hand-authored engine cards.
+ *
+ * `STATIC_SCOPES` remains the frozen model-facing tuple used in prompts and
+ * recorded answer schemas. The full card union opts into this wider schema,
+ * so a reference card can state a global rule without expanding what the set
+ * generator may invent.
+ */
+export const ENGINE_STATIC_SCOPES = [
+  ...STATIC_SCOPES,
+  'landsYouControl',
+  'allLands',
+  'allCreatures',
+] as const;
+export const EngineStaticScopeSchema = z.enum(ENGINE_STATIC_SCOPES);
+export type EngineStaticScope = z.infer<typeof EngineStaticScopeSchema>;
 
 /**
  * Which permanents a **one-shot** effect reaches when it reaches more than one.
@@ -1034,7 +1512,8 @@ export type StaticScope = z.infer<typeof StaticScopeSchema>;
  * `zone-filter.ts` is what both could share, and only the graveyard arm is
  * wired up there today.
  *
- * The last three are the **untargeted** half, appended by `mtg-9u18` for the
+ * The next three are the **untargeted board-space** group, appended by
+ * `mtg-9u18` for the
  * sweepers M11 and M13 actually print. M11's four-mana white wrath, Pyroclasm,
  * Planar Cleansing, Back to Nature, Trumpet Blast, Rain of Blades, Glorious
  * Charge, Inspired Charge and Cower in Fear say a region of the board and no
@@ -1055,6 +1534,15 @@ export type StaticScope = z.infer<typeof StaticScopeSchema>;
  * (Cower in Fear), and it reduces to the one opponent in this two-player
  * kernel; `@mtg/kernel`'s `opponentOf` is where the reduction happens, so a
  * kernel that ever seats three players changes there and not here.
+ *
+ * The penultimate member is untargeted for a different reason: it reads the union of
+ * every player's graveyard rather than a board region relative to the
+ * resolving controller. Giving it its own `allPlayers` subject keeps a caller
+ * from treating it as either a targeted-player zone or a controller-relative
+ * space. The scope already fixes both the zone and the printed creature-card
+ * filter, so validation refuses a target or a second `scopeFilter` beside it.
+ * The final member reads either the targeted player or a targeted permanent's
+ * current controller, which keeps that resolution-time relationship explicit.
  */
 export const EFFECT_SCOPES = [
   'creaturesThatPlayerControls',
@@ -1063,13 +1551,15 @@ export const EFFECT_SCOPES = [
   'allPermanents',
   'permanentsYouControl',
   'permanentsOpponentsControl',
+  'creatureCardsInAllGraveyards',
+  'targetAndPermanentsItsPlayerControls',
 ] as const;
 export const EffectScopeSchema = z.enum(EFFECT_SCOPES);
 export type EffectScope = z.infer<typeof EffectScopeSchema>;
 
 /**
- * Whom a one-shot scope reads its group off: the player the effect targeted, or
- * the player resolving it.
+ * Whom a one-shot scope reads its group off: the player the effect targeted,
+ * the player resolving it, or all players at once.
  *
  * The two words a card prints for a group differ in exactly this and in nothing
  * else. "All creatures target player controls" names a player, chooses it, and
@@ -1084,7 +1574,8 @@ export type EffectScope = z.infer<typeof EffectScopeSchema>;
  * from how it was named. `checkEffectScope` (`validate/effects.ts`), the
  * renderer and `@mtg/kernel`'s `scopedGroup` all read this one table.
  */
-export type EffectScopeSubject = 'targetedPlayer' | 'resolvingController';
+export type EffectScopeSubject =
+  'targetedPlayer' | 'resolvingController' | 'allPlayers' | 'targetedPlayerOrPermanentController';
 
 export const EFFECT_SCOPE_SUBJECT = {
   creaturesThatPlayerControls: 'targetedPlayer',
@@ -1093,10 +1584,12 @@ export const EFFECT_SCOPE_SUBJECT = {
   allPermanents: 'resolvingController',
   permanentsYouControl: 'resolvingController',
   permanentsOpponentsControl: 'resolvingController',
+  creatureCardsInAllGraveyards: 'allPlayers',
+  targetAndPermanentsItsPlayerControls: 'targetedPlayerOrPermanentController',
 } as const satisfies Readonly<Record<EffectScope, EffectScopeSubject>>;
 
 /**
- * The two halves of `EFFECT_SCOPES`, as types, read off the table above rather
+ * The subject families of `EFFECT_SCOPES`, as types, read off the table above rather
  * than spelled out a second time.
  *
  * A consumer that can only handle one half says so in its signature and gets
@@ -1104,11 +1597,11 @@ export const EFFECT_SCOPE_SUBJECT = {
  * tables are keyed `TargetedPlayerScope`, because `ChangeZoneAll` needs an
  * `Origin$` and a space scope has no zone to name. Written as a mapped type
  * over the const table so that appending a scope to `EFFECT_SCOPES` and
- * answering the subject question puts it in exactly one of these two, and every
+ * answering the subject question puts it in exactly one of these three, and every
  * table keyed by them fails to compile until it says what the new member does.
  * That is the whole reason the table above is `as const satisfies` rather than
  * annotated: an annotation would widen every value to `EffectScopeSubject` and
- * these two would both come out `never`.
+ * these types would all come out `never`.
  */
 export type ScopesWithSubject<S extends EffectScopeSubject> = {
   [K in EffectScope]: (typeof EFFECT_SCOPE_SUBJECT)[K] extends S ? K : never;
@@ -1116,17 +1609,22 @@ export type ScopesWithSubject<S extends EffectScopeSubject> = {
 
 export type TargetedPlayerScope = ScopesWithSubject<'targetedPlayer'>;
 export type SpaceScope = ScopesWithSubject<'resolvingController'>;
+export type AllPlayersScope = ScopesWithSubject<'allPlayers'>;
 
 /**
  * The narrowing the type above describes, at run time.
  *
  * TypeScript does not narrow a key from a lookup into its own table, so a
- * caller holding an `EffectScope` and needing a `SpaceScope` needs this
- * predicate rather than a comparison. It reads the same table the type is
+ * caller holding an `EffectScope` and needing one subject family needs these
+ * predicates rather than a comparison. They read the same table the types are
  * derived from, so the two cannot disagree.
  */
 export function isSpaceScope(scope: EffectScope): scope is SpaceScope {
   return EFFECT_SCOPE_SUBJECT[scope] === 'resolvingController';
+}
+
+export function isAllPlayersScope(scope: EffectScope): scope is AllPlayersScope {
+  return EFFECT_SCOPE_SUBJECT[scope] === 'allPlayers';
 }
 
 /**
@@ -1161,16 +1659,16 @@ export type PlayerScope = z.infer<typeof PlayerScopeSchema>;
 
 /**
  * What a static ability does: P/T (CR 613.4c, layer 7c), a keyword (CR 613.1f,
- * layer 6), a characteristic-defining P/T (CR 613.4a, layer 7a), one of the
- * two doublers, or one of the six combat restrictions `mtg-t3ik` appended.
+ * layer 6), a characteristic-defining P/T (CR 613.4a, layer 7a), one of four
+ * replacement effects, or one of eleven combat restrictions.
  *
- * The first three are layers, and for as long as they were the only members
+ * The characteristic-changing members are layers, and for as long as they were the only members
  * this tuple could say so: each compiles to one `ContinuousEffect` and the
- * CR 613 walk resolves it. The two appended by `mtg-vobp` are not layers and
+ * CR 613 walk resolves it. The replacements are not layers and
  * are not modifications of anything in a scope — CR 614 replacement effects
  * change an event before it happens, which the layer system never sees. They
  * live here anyway because a static ability is exactly where Magic prints them
- * (Furnace of Rath, Rhox Faithmender) and because the alternative was a fourth
+ * (Furnace of Rath, Rhox Faithmender, Obstinate Baloth) and because the alternative was a fourth
  * ability kind whose only difference from `static` is which kernel array it
  * registers into. `packages/kernel/src/static-replacements.ts` is that array's
  * registration, written beside `registerStatics` rather than inside it for the
@@ -1193,13 +1691,13 @@ export type PlayerScope = z.infer<typeof PlayerScopeSchema>;
  * hand-authored is `attacksEachCombatIfAble` (CR 508.1d), `mustBeBlockedIfAble`
  * (CR 509.1c) and `blockOnlyCreaturesWithKeyword` (CR 509.1b's own worked
  * example is "this creature can block only creatures with flying").
- * `cantBeBlockedBySubtype` (`mtg-nhyv.57`) is the seventh, Juggernaut's "can't
+ * `cantBeBlockedBySubtype` (`mtg-nhyv.57`) is Juggernaut's "can't
  * be blocked by Walls", and it is the one CR 509.1b restriction whose second
  * permanent no scope on this ability can reach — `ability-shape.ts` argues why
- * it carries a field where five of its neighbors do not. None of the seven
+ * it carries a field where five of its neighbors do not. None of the eleven
  * compiles to a `ContinuousEffect` — none changes a printed characteristic, so
  * there is no layer to put it in — and none is a CR 614 replacement either, so
- * `classifyStaticModification` (`static-modification-class.ts`) sorts all seven
+ * `classifyStaticModification` (`static-modification-class.ts`) sorts all eleven
  * into a third class, `'combat'`, that the kernel's attack- and
  * block-declaration legality reads directly rather than through the layer walk
  * or `state.replacements`.
@@ -1214,17 +1712,32 @@ export type PlayerScope = z.infer<typeof PlayerScopeSchema>;
 export const STATIC_MODIFICATION_KINDS = [
   'statBonus',
   'grantKeyword',
+  'grantKeywordAbilities',
+  'grantTriggeredAbility',
+  'grantAnyColorManaAbility',
   'definePt',
   'statBonusPer',
+  'statBonusPerColor',
+  'addSubtype',
   'doubleDamage',
   'doubleLifeGain',
+  'doublePlusOnePlusOneCountersOnCreaturesYouControl',
+  'discardedByOpponentEntersBattlefield',
+  'preventDamageToSelfAndRemoveCounters',
   'cantAttack',
   'cantBlock',
   'cantBeBlocked',
   'attacksEachCombatIfAble',
   'mustBeBlockedIfAble',
+  'canBlockAnyNumber',
+  'canAttackAsThoughNoDefender',
   'blockOnlyCreaturesWithKeyword',
   'cantBeBlockedBySubtype',
+  'cantAttackWithoutAnyOf',
+  'cantAttackOrBlock',
+  'cantAttackOrBlockAlone',
+  'preventCombatDamage',
+  'damageCannotReduceControllerLifeBelow',
 ] as const;
 export const StaticModificationKindSchema = z.enum(STATIC_MODIFICATION_KINDS);
 export type StaticModificationKind = z.infer<typeof StaticModificationKindSchema>;
@@ -1275,9 +1788,52 @@ export const TRIGGER_CONDITIONS = [
   'selfEnters',
   'selfAttacks',
   'selfDies',
+  /** Any battlefield departure, regardless of the destination zone. */
+  'selfLeavesBattlefield',
+  /** The source moved specifically from the battlefield to a graveyard. */
+  'selfPutIntoGraveyardFromBattlefield',
+  /** The source card moved from any zone into a graveyard. */
+  'selfPutIntoGraveyardFromAnywhere',
+  /** The creature this Aura enchanted died; retain that creature's controller. */
+  'enchantedCreatureDies',
+  /** The land this Aura currently enchants became tapped; retain that land's controller. */
+  'enchantedLandBecomesTapped',
+  /**
+   * CR 603.2c: the source became the target of a spell or ability.
+   *
+   * This is one condition across the four target-choice records the kernel
+   * emits: casting a spell, copying a spell, activating an ability, and choosing
+   * targets for a triggered ability. The target chooser and the source's
+   * controller are irrelevant; only the source object's id is compared.
+   *
+   * Hand-authored only: it is deliberately absent from
+   * `MODEL_TRIGGER_CONDITIONS`, so adding exact Phantom Beast support does not
+   * widen the generator's output schema or invalidate recorded fixtures.
+   */
+  'selfBecomesTarget',
+  /**
+   * This permanent became the target of a stack object controlled by an
+   * opponent of its controller.
+   *
+   * Frost Titan is narrower than `selfBecomesTarget` in the one place that
+   * matters: a friendly spell or ability does not fire it. The matching stack
+   * object is retained as event context rather than chosen as a CR 115 target,
+   * because the trigger must be able to counter either a spell or an ability
+   * and ordinary `TargetSpec` deliberately exposes only targetable spells.
+   *
+   * Hand-authored only: the generator's frozen trigger subset does not gain a
+   * clause whose stack-reference semantics it has not been taught to compose.
+   */
+  'selfBecomesTargetByOpponent',
   'controlledCreatureAttacksAlone',
+  /** The source itself attacked and no other creature attacked in this declaration. */
+  'selfAttacksAlone',
+  /** The source and at least three other creatures attacked in this declaration. */
+  'selfAndThreeOthersAttack',
   /** CR 603.6b: the beginning of your upkeep step. */
   'beginningOfYourUpkeep',
+  /** CR 603.6b: the beginning of every player's upkeep step. */
+  'beginningOfEachPlayersUpkeep',
   /** CR 603.6b: the beginning of your end step. */
   'beginningOfYourEndStep',
   /**
@@ -1291,6 +1847,28 @@ export const TRIGGER_CONDITIONS = [
    * anything else already on the battlefield".
    */
   'anotherControlledPermanentEnters',
+  /**
+   * A land with one declared basic land subtype entered under this ability's
+   * controller. The subtype is carried by the triggered ability's
+   * `landSubtype` field rather than baked into five condition names, so one
+   * kernel event path covers Plains through Forest and nonbasic lands with a
+   * basic land type correctly.
+   *
+   * Hand-authored only. The paired `triggerZone` field can make the source
+   * function from its owner's graveyard; neither declaration widens the model
+   * schema or invalidates recorded generation fixtures.
+   */
+  'controlledLandSubtypeEnters',
+  /**
+   * A creature enters under this permanent's controller, including this
+   * permanent itself when it is a creature. This is deliberately distinct
+   * from the `anotherControlledCreatureEnters` sibling: Leyline of Vitality's
+   * source text has no source exclusion, and a future creature with the same
+   * wording must see its own arrival.
+   *
+   * Hand-authored only: it remains outside `MODEL_TRIGGER_CONDITIONS`.
+   */
+  'controlledCreatureEnters',
   /**
    * The creature-filtered sibling of `anotherControlledPermanentEnters`. Most
    * printed cards asking "another creature enters" mean exactly that and not
@@ -1320,6 +1898,8 @@ export const TRIGGER_CONDITIONS = [
    * unwidened.
    */
   'selfDealsCombatDamageToPlayer',
+  /** A controlled creature dealt combat damage to a player; retain that creature and the final amount. */
+  'controlledCreatureDealsCombatDamageToPlayer',
   /**
    * CR 509.1h / CR 603.6: the source was declared as a blocker.
    *
@@ -1330,6 +1910,35 @@ export const TRIGGER_CONDITIONS = [
    * `selfAttacks` reads `attack.oid`.
    */
   'selfBlocks',
+  /**
+   * The creature enchanted by this Aura was declared as an attacker or blocker.
+   *
+   * The source is the Aura, not the creature. The kernel reads the live
+   * attachment when combat is declared, so moving the Aura moves the watch and
+   * an unattached Aura watches nothing. Hand-authored only: the generator has
+   * no attachment-relative trigger vocabulary.
+   */
+  'enchantedCreatureAttacksOrBlocks',
+  /**
+   * The creature enchanted by this Aura became a target of one spell or ability.
+   * The live attachment is read when the target event is recorded, and repeated
+   * target slots on one stack object still form one event. Hand-authored only.
+   */
+  'enchantedCreatureBecomesTarget',
+  /**
+   * CR 509.3b: the source blocked one particular creature.
+   *
+   * Unlike `selfBlocks`, this condition names the opposing creature and fires
+   * once per such pairing. That distinction matters when another effect lets
+   * one creature block more than one attacker: "whenever this creature
+   * blocks" fires once, while "whenever this creature blocks a creature"
+   * fires once for each creature it blocked. The paired creature is retained
+   * as `triggeringCreature`; CR 115 does not make it a target.
+   *
+   * Hand-authored only. The generator cannot name the retained referent and
+   * this member is deliberately absent from `MODEL_TRIGGER_CONDITIONS`.
+   */
+  'selfBlocksCreature',
   /**
    * CR 119.3 / CR 702.15e: the controller gained life, lifelink included.
    *
@@ -1480,16 +2089,15 @@ export const TRIGGER_CONDITIONS = [
    * controller-filtered readings of the same event and stay separate for that
    * reason rather than for a color one.
    *
-   * The second is the color, and it is five members because a `TriggerCondition`
-   * is an enum every reader dispatches on by name. A color field on the
-   * triggered ability would have to be printed by `TRIGGER_PRINT_TEMPLATES`,
-   * compiled by `@mtg/forge-export`'s `FORGE_TRIGGER_MODES`, and priced by
-   * `@mtg/sim`'s `DEFAULT_TRIGGER_VALUE` and `@mtg/deckbuild`'s
-   * `DEFAULT_TRIGGER_FIRE_COUNT` — four `Record`s that are already total over
-   * this tuple — so the parameter would buy one member and owe four hand-written
-   * five-way switches keyed on it. `COLOR_CAST_TRIGGER_CONDITIONS` below is the
-   * single map from a color to its member, so nothing assembles a member name by
-   * concatenating a letter onto a prefix.
+   * The second is the color, and it is five members because each artifact
+   * watches every player for exactly one color. The engine-only `spellColors`
+   * field instead refines `youCastSpell`: it watches only its controller and
+   * treats several listed colors as one any-of filter, so a multicolored spell
+   * fires once. Neither shape can stand in for the other without changing who
+   * triggers it or how many triggers a multicolored spell creates.
+   * `COLOR_CAST_TRIGGER_CONDITIONS` below is the single map from a color to this
+   * cycle's member, so nothing assembles a member name by concatenating a letter
+   * onto a prefix.
    *
    * A multicolored spell answers each of its colors exactly once (CR 105.2b),
    * which is what the printed cards do: one white-blue spell gains a life off a
@@ -1564,6 +2172,34 @@ export const TRIGGER_CONDITIONS = [
    */
   'anotherControlledCreatureWithPowerThreeOrGreaterEnters',
   /**
+   * CR 121.1: this permanent's controller drew one card.
+   *
+   * `drawCards` emits one `cardDrawn` event for each card actually moved from
+   * the library to the hand, so this member keeps Magic's per-card granularity:
+   * drawing two cards fires it twice, while a failed draw from an empty library
+   * fires it zero times. The source is not the drawn card. Like `youGainLife`,
+   * the kernel scans the drawing player's battlefield and the ordinary
+   * ability-list check decides which permanents print this condition.
+   *
+   * Hand-authored only: deliberately absent from `MODEL_TRIGGER_CONDITIONS`, so
+   * exact Jace's Erasure support does not widen the generator schema or change
+   * recorded fixture keys.
+   */
+  'youDrawCard',
+  /**
+   * One card was discarded by an opponent of this permanent's controller.
+   *
+   * The kernel's discard record may carry several cards because one effect
+   * can discard a batch. This condition is nevertheless per card: CR 603.2
+   * sees each discarded card as the event Liliana's Caress names, so a batch
+   * of two produces two triggers. The discarding seat is retained as a player
+   * referent for `triggeringPlayer` and is never a CR 115 target.
+   *
+   * Hand-authored only: deliberately absent from
+   * `MODEL_TRIGGER_CONDITIONS`, preserving generator containment.
+   */
+  'opponentDiscardsCard',
+  /**
    * CR 603.6b again, and the unfiltered reading of it: the end step began, on
    * anybody's turn.
    *
@@ -1584,6 +2220,28 @@ export const TRIGGER_CONDITIONS = [
    * the generator's output space stays inside the engine's enforceable space.
    */
   'beginningOfEndStep',
+  /**
+   * Any other creature entered the battlefield, under either player's control.
+   * The event retains that creature so an effect may read its power at
+   * resolution. Hand-authored only: the model-facing condition tuple remains
+   * frozen.
+   */
+  'anotherCreatureEnters',
+  /**
+   * A creature controlled by this permanent's controller moved from the
+   * battlefield to a graveyard. The departed battlefield incarnation is the
+   * retained creature referent, so effects may read its last-known power after
+   * CR 400.7 has made the graveyard object a new incarnation.
+   *
+   * Hand-authored only: the model-facing trigger tuple remains frozen.
+   */
+  'controlledCreatureDies',
+  /** Hand-authored: one match for each +1/+1 counter removed from the source. */
+  'selfPlusOnePlusOneCounterRemoved',
+  /** A creature attacks this permanent's controller or a planeswalker they control. */
+  'creatureAttacksYouOrPlaneswalkerYouControl',
+  /** The source permanent was dealt a nonzero amount of damage. */
+  'selfIsDealtDamage',
 ] as const;
 export const TriggerConditionSchema = z.enum(TRIGGER_CONDITIONS);
 export type TriggerCondition = z.infer<typeof TriggerConditionSchema>;
@@ -1591,11 +2249,13 @@ export type TriggerCondition = z.infer<typeof TriggerConditionSchema>;
 /**
  * The conditions that retain a creature from their own triggering event.
  *
- * Each of the three names a body nobody chose: exalted's lone attacker,
- * the creature a `selfDealsCombatDamageToCreature` trigger just damaged, and
- * the larger creature a `selfBlocksOrIsBlockedByGreaterPower` trigger just met
- * in a block. CR 115 targets none of them, which is why `triggeringCreature` is
- * a retained referent rather than a target kind a spell may choose.
+ * Each name holds a body nobody chose: exalted's lone attacker, the creature a
+ * `selfDealsCombatDamageToCreature` trigger just damaged, each creature a
+ * `selfBlocksCreature` trigger just blocked, the larger creature a
+ * `selfBlocksOrIsBlockedByGreaterPower` trigger just met in a block, and the
+ * creature one of the other-creature entry conditions just saw. CR 115 targets
+ * none of them, which is why `triggeringCreature` is a retained referent rather
+ * than a target kind a spell may choose.
  *
  * It is one list because three places have to agree on it and two of them
  * already drifted. `validate/abilities.ts` decides which abilities may print a
@@ -1610,17 +2270,45 @@ export type TriggerCondition = z.infer<typeof TriggerConditionSchema>;
  *
  * What is *not* here is exalted's extra clause: the condition retains its
  * attacker only inside the one canonical envelope `isExaltedAbility` checks,
- * while the other two retain one on every ability that prints them. That is a
+ * while the other conditions retain one on every ability that prints them. That is a
  * fact about an ability rather than about a condition, so it stays at the call
  * site that has the ability in hand.
  */
 export const TRIGGERING_CREATURE_CONDITIONS = [
+  'selfAttacks',
   'controlledCreatureAttacksAlone',
   'selfDealsCombatDamageToCreature',
+  'selfBlocksCreature',
   'selfBlocksOrIsBlockedByGreaterPower',
+  'anotherCreatureEnters',
+  'anotherControlledCreatureEnters',
+  'controlledCreatureDies',
+  'controlledCreatureDealsCombatDamageToPlayer',
 ] as const satisfies readonly TriggerCondition[];
 
 export type TriggeringCreatureCondition = (typeof TRIGGERING_CREATURE_CONDITIONS)[number];
+
+/** Conditions that retain the spell-or-ability object that caused them. */
+export const TRIGGERING_STACK_OBJECT_CONDITIONS = [
+  'selfBecomesTargetByOpponent',
+] as const satisfies readonly TriggerCondition[];
+
+export type TriggeringStackObjectCondition = (typeof TRIGGERING_STACK_OBJECT_CONDITIONS)[number];
+
+/** Conditions that retain the player named by their triggering event. */
+export const TRIGGERING_PLAYER_CONDITIONS = [
+  'opponentDiscardsCard',
+  /** Only the castFromGraveyardByAnyPlayer refinement retains its caster. */
+  'youCastSpell',
+  'selfDealsCombatDamageToPlayer',
+  'enchantedCreatureDies',
+  'enchantedLandBecomesTapped',
+  'beginningOfEachPlayersUpkeep',
+  'creatureAttacksYouOrPlaneswalkerYouControl',
+  'selfAttacksAlone',
+] as const satisfies readonly TriggerCondition[];
+
+export type TriggeringPlayerCondition = (typeof TRIGGERING_PLAYER_CONDITIONS)[number];
 
 /**
  * Conditions exposed to the set generator, frozen before exalted widened the
@@ -1640,18 +2328,38 @@ export const TRIGGER_PRINT_TEMPLATES: Readonly<Record<TriggerCondition, string>>
   selfEnters: 'When {name} enters the battlefield,',
   selfAttacks: 'Whenever {name} attacks,',
   selfDies: 'When {name} dies,',
+  selfLeavesBattlefield: 'When {name} leaves the battlefield,',
+  selfPutIntoGraveyardFromBattlefield: 'When {name} is put into a graveyard from the battlefield,',
+  selfPutIntoGraveyardFromAnywhere: 'When {name} is put into a graveyard from anywhere,',
+  enchantedCreatureDies: 'When enchanted creature dies,',
+  enchantedLandBecomesTapped: 'Whenever enchanted land becomes tapped,',
+  selfBecomesTarget: 'When {name} becomes the target of a spell or ability,',
+  selfBecomesTargetByOpponent:
+    'Whenever {name} becomes the target of a spell or ability an opponent controls,',
   controlledCreatureAttacksAlone: 'Whenever a creature you control attacks alone,',
+  selfAttacksAlone: 'Whenever {name} attacks alone,',
+  selfAndThreeOthersAttack: 'Whenever {name} and at least three other creatures attack,',
   selfDiesNotSacrificed: "When {name} dies, if it wasn't sacrificed,",
   selfDealsCombatDamageToCreature: 'Whenever {name} deals combat damage to a creature,',
   beginningOfYourUpkeep: 'At the beginning of your upkeep,',
+  beginningOfEachPlayersUpkeep: "At the beginning of each player's upkeep,",
   beginningOfYourEndStep: 'At the beginning of your end step,',
   beginningOfEndStep: 'At the beginning of the end step,',
+  anotherCreatureEnters: 'Whenever another creature enters,',
+  controlledCreatureDies: 'Whenever a creature you control dies,',
   anotherControlledPermanentEnters: 'Whenever another permanent you control enters the battlefield,',
-  anotherControlledCreatureEnters: 'Whenever another creature you control enters the battlefield,',
+  controlledLandSubtypeEnters: 'Whenever a {subtype} you control enters,',
+  controlledCreatureEnters: 'Whenever a creature you control enters,',
+  anotherControlledCreatureEnters: 'Whenever another creature you control enters,',
   youCastSpell: 'Whenever you cast a spell,',
   youCastInstantOrSorcery: 'Whenever you cast an instant or sorcery spell,',
   selfDealsCombatDamageToPlayer: 'Whenever {name} deals combat damage to a player,',
+  controlledCreatureDealsCombatDamageToPlayer:
+    'Whenever a creature you control deals combat damage to a player,',
   selfBlocks: 'Whenever {name} blocks,',
+  enchantedCreatureAttacksOrBlocks: 'When enchanted creature attacks or blocks,',
+  enchantedCreatureBecomesTarget: 'When enchanted creature becomes the target of a spell or ability,',
+  selfBlocksCreature: 'Whenever {name} blocks a creature,',
   youGainLife: 'Whenever you gain life,',
   selfBlocksOrIsBlockedByGreaterPower:
     'Whenever {name} blocks or becomes blocked by a creature with greater power,',
@@ -1664,6 +2372,12 @@ export const TRIGGER_PRINT_TEMPLATES: Readonly<Record<TriggerCondition, string>>
   opponentDealtNoncombatDamage: 'Whenever an opponent is dealt noncombat damage,',
   anotherControlledCreatureWithPowerThreeOrGreaterEnters:
     'Whenever another creature you control with power 3 or greater enters the battlefield,',
+  youDrawCard: 'Whenever you draw a card,',
+  opponentDiscardsCard: 'Whenever an opponent discards a card,',
+  selfPlusOnePlusOneCounterRemoved: 'Whenever a +1/+1 counter is removed from {name},',
+  creatureAttacksYouOrPlaneswalkerYouControl:
+    'Whenever a creature attacks you or a planeswalker you control,',
+  selfIsDealtDamage: 'Whenever {name} is dealt damage,',
 };
 
 /**
@@ -1698,6 +2412,7 @@ export const CARD_KINDS = [
   'land',
   'enchantment',
   'planeswalker',
+  'battle',
 ] as const;
 export const CardKindSchema = z.enum(CARD_KINDS);
 export type CardKind = z.infer<typeof CardKindSchema>;
@@ -1739,6 +2454,7 @@ export const PERMANENT_CARD_KINDS: readonly CardKind[] = [
   'land',
   'enchantment',
   'planeswalker',
+  'battle',
 ];
 
 /** Card kinds that use the stack and then go to the graveyard. */

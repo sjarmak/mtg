@@ -34,6 +34,9 @@
  * half a ladder gets wrong by taxing the widths that never needed it.
  * `tools/rail-split.ts` prints the numbers.
  *
+ * The second test is the other end of the same sentence — what happens once
+ * the ladder has run out — and `LONG_WORD` below carries its argument.
+ *
  * # Proved able to fail
  *
  * With the `font-size` on `.mtg-choice__label` in `src/styles/views.ts` cut
@@ -47,6 +50,16 @@
  *
  * Nine breaks over eight labels, because one two-word name is broken twice.
  *
+ * And with `overflow-wrap: break-word` deleted from the same rule, which is
+ * the declaration the second test exists for:
+ *
+ *     "Cast EmberflowThornhideWindriderLightning" draws 174px inside a 130px
+ *     column, so it is past the column's edge: expected 174 to be less than
+ *     or equal to 130
+ *
+ * At 1440x900, the widest column the table has, so it is past the edge at
+ * every width below it too.
+ *
  * The neutral `@mtg/dsl` example set, so the file exports publicly (`AGENTS.md`).
  */
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
@@ -54,7 +67,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { exampleCard } from '@mtg/dsl';
+import { exampleCard, parseCard } from '@mtg/dsl';
+import type { Card } from '@mtg/dsl';
 import { DEFAULT_AUTO_PASS, humanSeat, pendingDecision, scenario } from '@mtg/kernel';
 import type { GameSession } from '@mtg/kernel';
 import { describe, expect } from 'vitest';
@@ -74,6 +88,54 @@ const DRAKE = exampleCard('slc-windrider-drake');
 const LABEL_PX = 0.8125 * 16;
 
 /**
+ * One word no column on this surface can hold, built out of the set's own.
+ *
+ * `mtg-o0ke`. The ladder above is the step before the last resort; this is the
+ * last resort. `src/styles/ask-fit.ts` states its own floor — at the bottom
+ * rung a nine-character word wants about 45px, so a word past roughly thirteen
+ * characters still breaks in a narrow column — and `overflow-wrap: break-word`
+ * on `.mtg-choice__label` is what happens then. Nothing measured it, so the
+ * next stylesheet edit could drop the declaration and the suite would stay
+ * green.
+ *
+ * The fixture is the whole difficulty. Every name in the neutral example set
+ * fits its column at full size, so an assertion written against that data
+ * passes with the rule and without it, which is worse than no test. So the
+ * name is synthetic and says so: the first word of four example cards run
+ * together, 36 characters, no set would print it, and that is the point.
+ *
+ * Sized against a measurement rather than a guess, and the run re-measures it
+ * rather than trusting this paragraph. The label is at the ladder's bottom
+ * rung at every width the table supports, so 9.1px type gives a character
+ * about 4.8px and the word wants 173.6px, against columns of 130px at
+ * 1440x900 and 1280x800, 111px at 1024x768 and 77px at 810x1080. A first
+ * draft used three words and 27 characters, which wanted 132.8px and cleared
+ * the widest column by 2.8 - a fixture that would stop being pathological the
+ * next time the ask column got wider, and the sanity assertion below caught
+ * it. The test builds a `white-space: pre` probe in the label's own computed
+ * font and fails if the word turns out to fit after all.
+ */
+const LONG_WORD = [RAIDER, GUARDIAN, DRAKE, LASH]
+  .map((card) => card.name.split(' ')[0] ?? card.name)
+  .join('');
+
+// Through `parseCard`, like every card in the example set it is built from,
+// so a fixture that stops being a legal card fails at import rather than
+// drawing something the surface would never be handed.
+const LONG: Card = parseCard({
+  kind: 'creature',
+  id: 'ask-fit-long-word',
+  name: LONG_WORD,
+  rarity: 'common',
+  set: { code: RAIDER.set.code, collectorNumber: 99 },
+  manaCost: { R: 1 },
+  colors: ['R'],
+  subtypes: ['Beast'],
+  power: 1,
+  toughness: 1,
+});
+
+/**
  * A board with something on it and a hand worth playing from.
  *
  * `tools/touch-targets.ts`'s position, because that is the parked table the
@@ -82,7 +144,7 @@ const LABEL_PX = 0.8125 * 16;
  * enumerates a list of moves whose labels carry card names rather than a pass
  * and a concession.
  */
-function skirmish(): GameSession {
+function skirmish(extra: readonly Card[] = []): GameSession {
   const built = scenario({
     seed: 'ui/ask-fit',
     battlefield: [
@@ -97,7 +159,7 @@ function skirmish(): GameSession {
       { card: RAIDER, controller: 1, summoningSick: false },
     ],
     hands: [
-      [MOUNTAIN, RAIDER, LASH, GUARDIAN, DRAKE],
+      [MOUNTAIN, RAIDER, LASH, GUARDIAN, DRAKE, ...extra],
       [MOUNTAIN, RAIDER],
     ],
     active: 0,
@@ -196,6 +258,60 @@ interface Reading {
   readonly viewport: readonly [number, number];
   readonly labels: readonly Label[];
   readonly midWord: readonly string[];
+}
+
+/**
+ * The overflow reading, and the probe that keeps it from being vacuous.
+ *
+ * `need` is the width the longest word wants when nothing may wrap it: a
+ * `white-space: pre` span in the label's own computed font, measured and
+ * removed. `client` is the column the label actually got. A fixture where
+ * `need` is not comfortably over `client` is not testing `overflow-wrap` at
+ * all, so the run asserts that first and the rule second.
+ */
+interface Overflow {
+  readonly viewport: readonly [number, number];
+  readonly text: string;
+  readonly font: number;
+  readonly scroll: number;
+  readonly client: number;
+  readonly need: number;
+  readonly lines: number;
+}
+
+function overflowScript(word: string): string {
+  return `(() => {
+  const round = (value) => Math.round(value * 10) / 10;
+  const word = ${JSON.stringify(word)};
+  let found = null;
+  for (const element of document.querySelectorAll('.mtg-prompt .mtg-choice__label')) {
+    if (element.textContent.includes(word)) { found = element; break; }
+  }
+  if (found === null) throw new Error('no move label carries the long word');
+  const style = getComputedStyle(found);
+  const probe = document.createElement('span');
+  probe.style.position = 'absolute';
+  probe.style.left = '-9999px';
+  probe.style.top = '0';
+  probe.style.whiteSpace = 'pre';
+  probe.style.font = style.font;
+  probe.style.letterSpacing = style.letterSpacing;
+  probe.textContent = word;
+  document.body.appendChild(probe);
+  const need = probe.getBoundingClientRect().width;
+  probe.remove();
+  const box = found.getBoundingClientRect();
+  const line = parseFloat(style.lineHeight);
+  return {
+    viewport: [window.innerWidth, window.innerHeight],
+    text: found.textContent,
+    font: round(parseFloat(style.fontSize)),
+    scroll: found.scrollWidth,
+    client: found.clientWidth,
+    need: round(need),
+    lines: Number.isFinite(line) && line > 0 ? Math.round(box.height / line) : 0,
+  };
+})()`;
 }
 
 /**
@@ -300,6 +416,81 @@ describe('a move label shrinks down its ladder before it breaks a word', () => {
         throw new AggregateError(
           cleanupErrors,
           `ask fit Chrome run or cleanup failed: ${cleanupErrors.map((error) => error.message).join('; ')}`,
+        );
+      }
+    },
+    180_000,
+  );
+
+  browserIt(
+    'keeps a word too long for any rung inside the column instead of past its edge',
+    async () => {
+      const directory = await mkdtemp(join(tmpdir(), 'mtg-ask-break-'));
+      const file = join(directory, 'break-word.html');
+      await writeFile(file, page(skirmish([LONG]), 'break-word'), 'utf8');
+
+      let chrome: Awaited<ReturnType<typeof launchChrome>> | null = null;
+      let bodyError: unknown;
+      try {
+        chrome = await launchChrome(join(directory, 'chrome'));
+        for (const [width, height] of VIEWPORTS) {
+          const where = `${String(width)}x${String(height)}`;
+          const result = (await measurePage(
+            chrome.client,
+            file,
+            width,
+            height,
+            overflowScript(LONG_WORD),
+            where,
+          )) as unknown as Overflow;
+          console.log(
+            `${where}: ${String(LONG_WORD.length)} characters want ${String(result.need)}px in a ${String(result.client)}px column at ${String(result.font)}px, drawn ${String(result.scroll)}px over ${String(result.lines)} lines`,
+          );
+
+          expect(result.viewport, `${where}: viewport`).toEqual([width, height]);
+          // The fixture, before the rule. A word that fits is a word this test
+          // learns nothing from, and the example set is full of them.
+          expect(
+            result.need,
+            `${where}: the fixture word wants only ${String(result.need)}px and the column is ${String(result.client)}px, so nothing here is being contained`,
+          ).toBeGreaterThan(result.client * 1.2);
+          // The bead. Without `overflow-wrap: break-word` the word is one
+          // unbreakable line and the label's scroll width is the word's.
+          expect(
+            result.scroll,
+            `${where}: ${JSON.stringify(result.text)} draws ${String(result.scroll)}px inside a ${String(result.client)}px column, so it is past the column's edge`,
+          ).toBeLessThanOrEqual(result.client);
+          // And it was broken rather than clipped: a single line at this width
+          // would mean the overflow was hidden, not wrapped.
+          expect(
+            result.lines,
+            `${where}: the long word was contained on one line, which is a clip and not a break`,
+          ).toBeGreaterThan(1);
+        }
+      } catch (error: unknown) {
+        bodyError = error;
+      }
+
+      const cleanupErrors: Error[] = [];
+      if (chrome !== null) {
+        try {
+          await shutdownChrome(chrome);
+        } catch (error) {
+          cleanupErrors.push(error instanceof Error ? error : new Error(String(error)));
+        }
+      }
+      try {
+        await rm(directory, { recursive: true, force: true });
+      } catch (error) {
+        cleanupErrors.push(new Error(`could not remove Chrome fixture ${directory}: ${reason(error)}`));
+      }
+      if (bodyError !== undefined) {
+        cleanupErrors.unshift(bodyError instanceof Error ? bodyError : new Error(String(bodyError)));
+      }
+      if (cleanupErrors.length > 0) {
+        throw new AggregateError(
+          cleanupErrors,
+          `break-word Chrome run or cleanup failed: ${cleanupErrors.map((error) => error.message).join('; ')}`,
         );
       }
     },

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "dgm",
+  "formatSha256": "4a201837bf67cf9245b9ec9fde6bca673ebc51ab80b574e38e455a4d210b4bad",
+  "sourceSha256": "130fd21596f5e3d22c83306f7729920c5eaf15efee8c9519e33c79c065d9bb3b",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "130fd21596f5e3d22c83306f7729920c5eaf15efee8c9519e33c79c065d9bb3b",
+    "recipe.json": "ac7faa11d7671a3ec18ea8a9321eaad1a221c1ae68b58eca4dd6e4cdb5203733",
+    "dgm-printed-catalog-v1.json": "1dc3a391f1ed4f7717098c74d5c530558db7e5c9aec79117f34255e25d743062",
+    "gtc-printed-catalog-v1.json": "7829cf9c1edbba2586103b76d8c7981562120cff440214fbe2458e0c2f63e55d",
+    "rtr-printed-catalog-v1.json": "0f6efead90b96d20452aa21321084d05b485b77c3735e1e4a9a062ba972073f3",
+    "dgm-limited-format-v1.json": "1b9b88293395335ae6a5042482d75951fc31aca1be1954d35182f76acc7403b6"
+  },
+  "catalogs": [
+    {
+      "code": "DGM",
+      "cards": 156,
+      "contentSha256": "edafb6d66d5329df195c8d3c2f71fed2487c94d6dbdfb8efbd0b6244fe759063"
+    },
+    {
+      "code": "GTC",
+      "cards": 249,
+      "contentSha256": "515aaffb14562be9f9fad0bb0a71686af871966f83258a0c343c028456deeccb"
+    },
+    {
+      "code": "RTR",
+      "cards": 274,
+      "contentSha256": "b26f72507bfb6b98db9e565a8af04769d04db8b4cdc327e3b037bd294958a845"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 3149.651889,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 649,
+    "printings": 679
+  }
+}

@@ -49,7 +49,12 @@ describe('archetype reservation keeps a role for every spell it plans', () => {
   });
 
   it('allocates a set at the size the flagship states', () => {
-    const slots = allocateSlots(parseBrief({ ...TEST_BRIEF, targetSize: 250 })).slots;
-    expect(slots).toHaveLength(250);
+    // The size is named once and asserted against itself (`mtg-gvb7`). The claim
+    // is the allocator's -- ask for a size, get that many slots -- and it was
+    // written as a literal on both sides, which reads as a pin on the flagship
+    // and is not one: no fixture is loaded here at all.
+    const targetSize = 250;
+    const slots = allocateSlots(parseBrief({ ...TEST_BRIEF, targetSize })).slots;
+    expect(slots).toHaveLength(targetSize);
   });
 });

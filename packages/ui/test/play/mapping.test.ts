@@ -52,6 +52,7 @@ const STATED: PlayPrompt = {
   headline: 'Priority',
   explain: 'A prompt written out rather than enumerated.',
   choices: [PASS, AIM_AT_BEAR, AIM_AT_OGRE, ORDER],
+  textInput: null,
   truncated: false,
 };
 

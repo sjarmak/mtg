@@ -19,6 +19,7 @@
  * and a stack are things you hold, not places on the table, and Magic Online
  * agrees by drawing the hand outside both bands entirely.
  */
+import { MICRO_LABEL } from '../number';
 import { TABLE } from './geometry';
 
 export const ZONE_CSS = `
@@ -33,7 +34,7 @@ export const ZONE_CSS = `
 .mtg-zone[data-tone='rail'] { background: var(--mtg-surface-rail); border-color: var(--mtg-line); }
 .mtg-zone__head { display: flex; align-items: baseline; gap: var(--mtg-space-2); }
 .mtg-zone__label {
-  font-size: var(--mtg-text-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  ${MICRO_LABEL}
   color: var(--mtg-ink-faint);
 }
 .mtg-zone__count { font-family: var(--mtg-font-mono); font-size: var(--mtg-text-xs); color: var(--mtg-ink-muted); }
@@ -141,8 +142,9 @@ export const ZONE_CSS = `
  * payable.** ./hand.ts turns this row's content box into --hand-slot and then
  * into --board-face, so a bare padding-inline would take 8px off the row and a
  * seventh of that — 1.14px — off every permanent on the table. What that buys
- * against is ../card.ts's BOARD_RULES_MIN_REM: the rules box goes when the
- * face's *content* box reaches 4rem, which on the face this was measured on —
+ * against is ../card.ts's BOARD_RULES_PANEL_MAX_REM: the rules box leaves the
+ * column and draws as a panel over the picture's foot when the face's *content*
+ * box reaches 4rem — it went entirely until mtg-8kc — which on the face this was measured on —
  * 4px of border and 4px of padding a side, before mtg-iqyc made the band a
  * share of the width — was an 80.00px face against a board face of 82.61px at
  * 1280x800 with four a side. So the headroom there was 2.61px rather than the
@@ -160,13 +162,18 @@ export const ZONE_CSS = `
  * leaves the row wrapping with visible overflow, so there is nothing to reserve
  * against and ../../../test/board.test.ts pins that reading.
  *
- * The mana band under this row is a scroll container too (./lands.ts) and still
- * clips its first tile at 0.00px, measured at both seats at all four viewports.
- * That is a tile rather than a card — no rules box, no name bar — and it is
- * left to mtg-7i50 rather than folded in here.
+ * The mana band under this row is a scroll container too (./lands.ts), and
+ * mtg-7i50 measured it clipping its first tile at 0.00px at both seats at all
+ * four viewports, so it joins the selector. A tile is smaller than a card — no
+ * rules box, no name bar — but it wears ./slot.ts's castable ring and its own
+ * hover scale, and both were being cut at the clip edge. It costs the band
+ * nothing: a tile is a stated LAND_TILE_HEIGHT_REM rather than a share of the
+ * row, and ../../../test/play/band-edge.browser.test.ts holds the count of
+ * tiles that fit before it scrolls alongside the clearance it now has.
  */
 ${TABLE} .mtg-zone__body[data-layout='board'],
-${TABLE} .mtg-board__spells {
+${TABLE} .mtg-board__spells,
+${TABLE} .mtg-lands {
   padding-inline: var(--mtg-space-1);
   margin-inline: calc(-1 * var(--mtg-space-1));
 }

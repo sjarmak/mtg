@@ -25,12 +25,7 @@ import {
   batchWantsZoneReach,
   buildFillPrompt,
   FillBatchSchema,
-  FillBatchWithAbilitiesAndSpellPermanentsAndZoneReachSchema,
-  FillBatchWithAbilitiesAndZoneReachSchema,
-  FillBatchWithMechanicsAndSpellPermanentsAndZoneReachSchema,
-  FillBatchWithMechanicsAndZoneReachSchema,
-  FillBatchWithSpellPermanentsAndZoneReachSchema,
-  FillBatchWithZoneReachSchema,
+  fillSchemaForCapabilities,
   fillSchemaFor,
   isZoneReachingRole,
   parseBrief,
@@ -38,6 +33,23 @@ import {
 } from '@mtg/setgen';
 import type { SetBrief, SetBriefInput, Slot } from '@mtg/setgen';
 import { TEST_BRIEF } from './helpers';
+const FillBatchWithZoneReachSchema = fillSchemaForCapabilities(['zoneReach']);
+const FillBatchWithAbilitiesAndZoneReachSchema = fillSchemaForCapabilities(['abilities', 'zoneReach']);
+const FillBatchWithMechanicsAndZoneReachSchema = fillSchemaForCapabilities(['setMechanics', 'zoneReach']);
+const FillBatchWithSpellPermanentsAndZoneReachSchema = fillSchemaForCapabilities([
+  'spellPermanents',
+  'zoneReach',
+]);
+const FillBatchWithAbilitiesAndSpellPermanentsAndZoneReachSchema = fillSchemaForCapabilities([
+  'abilities',
+  'spellPermanents',
+  'zoneReach',
+]);
+const FillBatchWithMechanicsAndSpellPermanentsAndZoneReachSchema = fillSchemaForCapabilities([
+  'setMechanics',
+  'spellPermanents',
+  'zoneReach',
+]);
 
 /** Large enough that the derivation prints a rare tier; the default 20 does not. */
 const LARGE = 250;

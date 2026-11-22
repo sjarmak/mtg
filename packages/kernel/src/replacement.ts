@@ -32,11 +32,15 @@
  * CR 616.1 gives the choice to the affected player, and `affectedPlayerFor`
  * computes exactly that. The kernel's own call sites pass no chooser and get
  * `earliestTimestamp`, which is deterministic and therefore replay-safe. The
- * DSL cannot yet emit a replacement ability, so no game the generator can
- * produce reaches a real multi-candidate choice; when it can, the chooser
- * becomes an agent decision and this seam is where it plugs in. Tests drive the
- * seam directly with explicit choosers, which is how the ordering rule is
- * proved rather than assumed.
+ * generator cannot emit a replacement ability, so no generated game
+ * reaches a real multi-candidate choice. Hand-authored reference cards can now
+ * contribute one, including an event-local replacement from a card in hand and
+ * Safe Passage's live recipient scope. Kernel call sites still use the replay-
+ * safe default until a gameplay decision surface exposes that choice; this
+ * chooser seam is where the agent decision plugs in. Tests drive the seam
+ * directly with explicit choosers and with a redirect that makes a live scope
+ * newly applicable, which is how the ordering loop is proved rather than
+ * assumed.
  */
 import type { PlayerId } from './ids';
 import { controllerOf } from './layers';
@@ -82,9 +86,14 @@ export function affectedPlayerFor(state: GameState, event: ReplaceableEvent): Pl
         : controllerOf(state, event.recipient.oid);
     case 'draw':
     case 'lifeGain':
+    case 'discard':
       return event.player;
+    case 'counterPlacement':
+      return event.controller;
     case 'destroy':
       return controllerOf(state, event.oid);
+    case 'zoneChange':
+      return event.owner;
     case 'enters':
       return event.controller;
   }
@@ -97,6 +106,17 @@ export interface ReplacementOutcome {
   readonly replacements: readonly ReplacementEffect[];
   /** Ids of the effects that applied, in the order they applied. */
   readonly appliedIds: readonly string[];
+  /** Numeric prevention performed by each exact shield, in application order. */
+  readonly preventions: readonly {
+    readonly effect: ReplacementEffect;
+    readonly recipient: Extract<ReplaceableEvent, { readonly kind: 'damage' }>['recipient'];
+    readonly amount: number;
+  }[];
+  /** Non-prevention instructions attached to damage replacements that applied. */
+  readonly damageFollowUps: readonly {
+    readonly effect: ReplacementEffect;
+    readonly amount: number;
+  }[];
 }
 
 /**
@@ -104,12 +124,14 @@ export interface ReplacementOutcome {
  * so the shield can be reduced by exactly that much (CR 615.3).
  */
 function applyDamageModification(
+  state: GameState,
   event: Extract<ReplaceableEvent, { kind: 'damage' }>,
   modification: ReplacementModification,
 ): { readonly event: ReplaceableEvent | null; readonly spent: number } {
   switch (modification.kind) {
     case 'preventDamage': {
-      if (modification.amount === 'all') return { event: null, spent: 0 };
+      if (!event.preventable) return { event, spent: 0 };
+      if (modification.amount === 'all') return { event: null, spent: event.amount };
       const prevented = Math.min(modification.amount, event.amount);
       const remaining = event.amount - prevented;
       return { event: remaining <= 0 ? null : { ...event, amount: remaining }, spent: prevented };
@@ -118,6 +140,11 @@ function applyDamageModification(
       return { event: { ...event, amount: event.amount + modification.amount }, spent: 0 };
     case 'multiplyDamage':
       return { event: { ...event, amount: event.amount * modification.factor }, spent: 0 };
+    case 'damageToLifeFloor': {
+      if (event.recipient.kind !== 'player') return { event, spent: 0 };
+      const amount = Math.max(0, state.players[event.recipient.player].life - modification.minimum);
+      return { event: { ...event, amount }, spent: 0 };
+    }
     case 'redirectDamage':
       return { event: { ...event, recipient: modification.to }, spent: 0 };
     default:
@@ -126,10 +153,11 @@ function applyDamageModification(
 }
 
 function applyModification(
+  state: GameState,
   event: ReplaceableEvent,
   modification: ReplacementModification,
 ): { readonly event: ReplaceableEvent | null; readonly spent: number } {
-  if (event.kind === 'damage') return applyDamageModification(event, modification);
+  if (event.kind === 'damage') return applyDamageModification(state, event, modification);
   if (event.kind === 'draw') {
     if (modification.kind === 'skipDraw') return { event: null, spent: 0 };
     if (modification.kind === 'drawAdditional') {
@@ -143,15 +171,33 @@ function applyModification(
     }
     return { event, spent: 0 };
   }
+  if (event.kind === 'counterPlacement') {
+    if (modification.kind === 'multiplyCounterPlacement') {
+      return { event: { ...event, count: event.count * modification.factor }, spent: 0 };
+    }
+    return { event, spent: 0 };
+  }
   if (event.kind === 'destroy') {
     return modification.kind === 'regenerate' ? { event: null, spent: 0 } : { event, spent: 0 };
+  }
+  if (event.kind === 'discard') {
+    return modification.kind === 'putDiscardedOntoBattlefield'
+      ? { event: { ...event, destination: 'battlefield' }, spent: 0 }
+      : { event, spent: 0 };
+  }
+  if (event.kind === 'zoneChange') {
+    return modification.kind === 'moveToZone'
+      ? { event: { ...event, destination: modification.destination }, spent: 0 }
+      : { event, spent: 0 };
   }
   if (modification.kind === 'entersTapped') return { event: { ...event, tapped: true }, spent: 0 };
   if (modification.kind === 'entersWithCounters') {
     const counters =
       modification.counter === 'plusOnePlusOne'
         ? { plusOnePlusOne: event.plusOnePlusOne + modification.count }
-        : { minusOneMinusOne: event.minusOneMinusOne + modification.count };
+        : modification.counter === 'minusOneMinusOne'
+          ? { minusOneMinusOne: event.minusOneMinusOne + modification.count }
+          : { charge: event.charge + modification.count };
     return { event: { ...event, ...counters }, spent: 0 };
   }
   return { event, spent: 0 };
@@ -161,7 +207,7 @@ function applyModification(
  * Spends `spent` points of a prevention pool, dropping the effect once the
  * shield is used up. `'all'` shields never deplete.
  */
-function consume(effect: ReplacementEffect, spent: number): ReplacementEffect | null {
+export function consumeReplacementEffect(effect: ReplacementEffect, spent: number): ReplacementEffect | null {
   const modification = effect.modification;
   if (modification.kind === 'regenerate') return null;
   if (modification.kind !== 'preventDamage' || modification.amount === 'all' || spent <= 0) {
@@ -201,13 +247,19 @@ export function applyReplacements(
   additionalEffects: readonly ReplacementEffect[] = [],
 ): ReplacementOutcome {
   if (state.replacements.length === 0 && additionalEffects.length === 0) {
-    return { event, replacements: state.replacements, appliedIds: [] };
+    return { event, replacements: state.replacements, appliedIds: [], preventions: [], damageFollowUps: [] };
   }
 
   let current: ReplaceableEvent | null = event;
   const persistentIds = new Set(state.replacements.map((effect) => effect.id));
   let effects: readonly ReplacementEffect[] = [...state.replacements, ...additionalEffects];
   const applied: string[] = [];
+  const preventions: {
+    readonly effect: ReplacementEffect;
+    readonly recipient: Extract<ReplaceableEvent, { readonly kind: 'damage' }>['recipient'];
+    readonly amount: number;
+  }[] = [];
+  const damageFollowUps: { readonly effect: ReplacementEffect; readonly amount: number }[] = [];
 
   // CR 614.5 caps the loop: each pass strikes one more effect off, so the run
   // can never be longer than the effect list. One spare pass is the one that
@@ -221,7 +273,14 @@ export function applyReplacements(
     const live: ReplaceableEvent = current;
     const candidates = effects
       .filter((effect) => !applied.includes(effect.id))
-      .filter((effect) => triggerMatches(effect.trigger, live))
+      .filter((effect) => triggerMatches(state, effect, live))
+      .filter(
+        (effect) =>
+          live.kind !== 'damage' ||
+          live.preventable ||
+          effect.modification.kind !== 'preventDamage' ||
+          effect.damageReplacementFollowUp?.amountFrom === 'damageEvent',
+      )
       .sort(byTimestamp);
     if (candidates.length === 0) break;
 
@@ -235,8 +294,16 @@ export function applyReplacements(
       throw new Error(`applyReplacements: chooser returned ${chosen.id}, which is not applicable`);
     }
 
-    const result = applyModification(live, chosen.modification);
-    const consumed = consume(chosen, result.spent);
+    const result = applyModification(state, live, chosen.modification);
+    if (live.kind === 'damage' && result.spent > 0) {
+      preventions.push({ effect: chosen, recipient: live.recipient, amount: result.spent });
+    }
+    if (live.kind === 'damage' && chosen.modification.kind === 'preventDamage') {
+      const followUp = chosen.damageReplacementFollowUp;
+      const amount = followUp?.amountFrom === 'damageEvent' ? live.amount : result.spent;
+      if (followUp !== undefined && amount > 0) damageFollowUps.push({ effect: chosen, amount });
+    }
+    const consumed = consumeReplacementEffect(chosen, result.spent);
     effects =
       consumed === null
         ? effects.filter((effect) => effect.id !== chosen.id)
@@ -249,6 +316,8 @@ export function applyReplacements(
     event: current,
     replacements: effects.filter((effect) => persistentIds.has(effect.id)),
     appliedIds: applied,
+    preventions,
+    damageFollowUps,
   };
 }
 

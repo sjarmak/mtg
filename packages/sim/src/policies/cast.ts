@@ -11,16 +11,22 @@
  *    spells that fits under this turn's available mana, so the bot casts two
  *    two-drops rather than one four-drop when that is worth more. Exhaustive
  *    while the candidate set is small, value-per-mana greedy above that.
+ *
+ * Plus one subtraction the three of them share: a permanent that a state
+ * trigger removes the instant it arrives is worth its body to nobody, so
+ * `diesOnArrival` takes the body back out of the score
+ * (`policies/entry-survival.ts`).
  */
 import type { Card } from '@mtg/dsl';
-import { cardManaValue, effectsFor } from '@mtg/dsl';
+import { manaValue, spellEffectsFor } from '@mtg/dsl';
 import type { Action, AgentView, GameState, ObjectId, PlayerId } from '@mtg/kernel';
-import { availableMana, getObject } from '@mtg/kernel';
+import { availableMana, countTargetInstances, getObject, selectedCastingManaCost } from '@mtg/kernel';
 import type { CastPolicyConfig, GreedyBotConfig } from '../config';
-import { printedCardValue } from '../evaluate';
+import { boardCreatureValue, printedCardValue } from '../evaluate';
+import { diesOnArrival } from './entry-survival';
 import { scoreTargets } from './target';
 
-type CastAction = Extract<Action, { type: 'castSpell' }>;
+type CastAction = Extract<Action, { type: 'castSpell' | 'beginCastSpell' }>;
 
 export interface CastCandidate {
   readonly action: CastAction;
@@ -50,13 +56,69 @@ export function castTimingAllows(
   card: Card,
   mode: number | null,
   config: CastPolicyConfig,
+  castingCost?: CastAction['castingCost'],
 ): boolean {
-  const isTrick = effectsFor(card, mode).some((effect) => effect.kind === 'pumpUntilEndOfTurn');
+  const effects =
+    castingCost === 'overload'
+      ? spellEffectsFor(card, null, 'overload')
+      : spellEffectsFor(card, mode, 'ordinary');
+  const isTrick = effects.some((effect) => effect.kind === 'pumpUntilEndOfTurn');
   if (isTrick && state.combat.attacks.length === 0) return false;
   if (card.kind !== 'instant' || !config.holdInstants) return true;
   if (state.stack.length > 0) return true;
   if (state.turn.active !== me) return true;
   return COMBAT_RESPONSE_STEPS.has(state.turn.step);
+}
+
+/**
+ * What this cast option gives up to pay its additional sacrifice.
+ *
+ * The kernel enumerates one option per legal sacrifice set, and nothing else
+ * about the option changes with it, so an unpriced payment left the policy
+ * choosing between them by enumeration order — `mtg-sejo`: a bot at 21 life
+ * against a 4/2 sacrificed a 2/3 flying first striker to Fling for two, with a
+ * worse creature standing beside it. Priced, the same scan takes the cheapest
+ * body that pays, and a Fling that costs more than it deals scores at or below
+ * zero, which is where `chooseCast` already holds the card.
+ *
+ * `boardCreatureValue` is the one function this package prices a creature with,
+ * the same one `choosePermanentToSacrifice` reads; a noncreature permanent ties
+ * at zero there and does here for the same reason.
+ */
+function sacrificedValue(
+  state: GameState,
+  sacrifices: readonly ObjectId[] | undefined,
+  config: GreedyBotConfig,
+): number {
+  if (sacrifices === undefined) return 0;
+  return sacrifices.reduce((sum, oid) => sum + boardCreatureValue(config.cast, state, oid), 0);
+}
+
+/**
+ * The body this cast does not actually get to keep.
+ *
+ * A permanent whose own state trigger sacrifices it on arrival is on the
+ * battlefield for no priority at all, so what the caster buys is the spell's
+ * effects and none of the permanent — which on Phylactery Lich, the card that
+ * reported this, is nothing whatsoever. Subtracting the printed value rather
+ * than filtering the option keeps the two halves separable: a permanent that
+ * dies on arrival but resolves a worthwhile effect on the way still scores that
+ * effect, and `chooseCast` holds anything that lands at or below zero, which is
+ * where a bare doomed body lands.
+ */
+function doomedBodyValue(state: GameState, player: PlayerId, card: Card, config: GreedyBotConfig): number {
+  if (card.kind === 'instant' || card.kind === 'sorcery') return 0;
+  return diesOnArrival(state, player, card) ? printedCardValue(config.cast, card) : 0;
+}
+
+/** What this cast option gives up from hand as its additional discard. */
+function discardedValue(
+  state: GameState,
+  discards: readonly ObjectId[] | undefined,
+  config: GreedyBotConfig,
+): number {
+  if (discards === undefined) return 0;
+  return discards.reduce((sum, oid) => sum + printedCardValue(config.cast, getObject(state, oid).card), 0);
 }
 
 /**
@@ -75,13 +137,20 @@ export function bestTargetingPerCard(view: AgentView, config: GreedyBotConfig): 
   // must not be reused for its siblings.
   const timingOk = new Map<string, boolean>();
   for (const option of view.decision.options) {
-    if (option.type !== 'castSpell') continue;
-    const card = getObject(state, option.oid).card;
+    if (option.type !== 'castSpell' && option.type !== 'beginCastSpell') continue;
+    const physical = getObject(state, option.oid);
+    const card =
+      view.decision.kind === 'freeCast' && state.pendingFreeCast?.oid === option.oid
+        ? (state.pendingFreeCast.card ?? physical.card)
+        : physical.card;
+    if (card.kind === 'land') continue;
     const mode = option.mode ?? null;
-    const timingKey = `${String(option.oid)}:${String(mode)}`;
+    const timingKey = `${String(option.oid)}:${String(mode)}:${String(option.castingCost)}`;
     let allowed = timingOk.get(timingKey);
     if (allowed === undefined) {
-      allowed = castTimingAllows(state, view.player, card, mode, config.cast);
+      allowed =
+        view.decision.kind === 'freeCast' ||
+        castTimingAllows(state, view.player, card, mode, config.cast, option.castingCost);
       timingOk.set(timingKey, allowed);
     }
     const value =
@@ -96,15 +165,41 @@ export function bestTargetingPerCard(view: AgentView, config: GreedyBotConfig): 
         config.race,
         option.x ?? 0,
         mode,
-      );
+        option.type === 'castSpell' ? option.multiTargets : undefined,
+        option.type === 'castSpell' ? option.damageAllocations : undefined,
+        option.sacrifices,
+        option.castingCost,
+      ) -
+      sacrificedValue(state, option.sacrifices, config) -
+      discardedValue(state, option.discards, config) -
+      doomedBodyValue(state, view.player, card, config);
     if (!allowed && value < config.target.lethalBonus) continue;
     const existing = best.get(option.oid);
-    if (existing === undefined || value > existing.value) {
+    const cost = manaValue(
+      selectedCastingManaCost(
+        state,
+        view.player,
+        card,
+        option.x,
+        option.castingCost ?? 'mana',
+        countTargetInstances(option.targets, option.type === 'castSpell' ? option.multiTargets : undefined),
+      ),
+    );
+    // Identical declarations keep the live no-mana price. A printed
+    // alternative still loses its old tie against the ordinary price because
+    // its life or permanent payment is not represented by `cost`.
+    if (
+      existing === undefined ||
+      value > existing.value ||
+      (value === existing.value &&
+        ((option.castingCost === 'withoutMana' && existing.action.castingCost !== 'withoutMana') ||
+          (existing.action.castingCost === 'alternative' && option.castingCost !== 'alternative')))
+    ) {
       best.set(option.oid, {
         action: option,
         card,
         value,
-        cost: cardManaValue(card) + (option.x ?? 0),
+        cost,
       });
     }
   }

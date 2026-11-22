@@ -1,7 +1,7 @@
 /**
  * The color layer — which is to say, the layer that names no colors.
  *
- * `@mtg/ui`'s `tokens.ts` is the single place in the lab where a color is
+ * `@mtg/render-spec`'s `tokens.ts` is the single place in the lab where a color is
  * chosen, and this package does not get a second one. The SVG carries
  * `TOKEN_CSS` verbatim and every painted thing below resolves through
  * `var(--mtg-*)`, so a card rendered to a file and a card rendered in the web
@@ -21,8 +21,8 @@
  * second palette, and it is the right price — a duplicated color drifts, a
  * missing rasterizer feature is a one-line note.
  */
-import { COLOR_IDENTITIES, RARITY_SEAL_INK, TOKEN_CSS } from '@mtg/ui';
-import type { ColorIdentity } from '@mtg/ui';
+import { COLOR_IDENTITIES, RARITY_SEAL_INK, TOKEN_CSS } from '@mtg/render-spec';
+import type { ColorIdentity } from '@mtg/render-spec';
 
 export { COLOR_IDENTITIES, TOKEN_CSS };
 export type { ColorIdentity };
@@ -91,7 +91,11 @@ export const CARD_CSS = [
   `.${CARD_CLASS} .pip[data-pip='generic'] { --pip: var(--mtg-surface-inset); --pip-on: var(--mtg-ink-muted); }`,
   ...COLOR_IDENTITIES.map(symbolRule),
   `.${CARD_CLASS} .sym[data-glyph='generic'] { --pip: var(--mtg-surface-inset); --pip-on: var(--mtg-ink-muted); }`,
-  `.${CARD_CLASS} .frame { fill: var(--frame); stroke: var(--edge); }`,
+  // The two rects the ground is now made of (`mtg-d4g`). Neither is stroked: the
+  // edge *is* the outer rect, and a keyline between it and the identity ground
+  // would be a third band on a 2.6 mm frame.
+  `.${CARD_CLASS} .frame-edge { fill: var(--mtg-card-edge); stroke: none; }`,
+  `.${CARD_CLASS} .frame { fill: var(--frame); stroke: none; }`,
   `.${CARD_CLASS} .panel { fill: var(--panel); stroke: var(--edge); }`,
   `.${CARD_CLASS} .well { fill: var(--well); stroke: var(--edge); }`,
   `.${CARD_CLASS} .art[data-art-state='pending'] .well { fill: var(--mtg-surface-sunken); }`,

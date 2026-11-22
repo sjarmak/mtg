@@ -167,7 +167,7 @@ describe('chooseFromGraveyard', () => {
 
   it('resumes the effects printed after the choice', () => {
     const spell = sorcery(
-      'Gravedigger Errand',
+      'Grave Errand',
       [
         {
           kind: 'chooseFromGraveyard',

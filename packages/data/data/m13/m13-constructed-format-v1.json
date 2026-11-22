@@ -1,0 +1,365 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "m13",
+  "name": "Magic 2013",
+  "sources": [
+    {
+      "code": "M13",
+      "catalogFormat": "m13-printed-v1",
+      "catalogSha256": "8c1e9e7ca45e1ac3ef449efcf30bcefc84ee8f9d648b635b571bc07a2a980f4e",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/M13.json",
+        "sha256": "2a6bd5e46d834a1c97578efcdf914734c99bf227a5fe3089637bdb160d1d6389",
+        "version": "5.3.0+20260927"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-flyers",
+      "name": "White-Blue Flyers",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m13-printed-v1:0043:2e6ec8a6-ad88-45c9-ab4b-dd7de2418bb7",
+          "name": "Augur of Bolas",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0052:8a5a69dc-c6f3-459b-9dcd-b3363c26ca34",
+          "name": "Fog Bank",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0079:9a3c6dc6-4a16-4a01-822e-353ff84b363c",
+          "name": "Welkin Tern",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0042:06f6aab1-c400-4d87-b68e-f36552e7417f",
+          "name": "Arctic Aven",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0033:aef0e34f-5065-46af-bea3-d748ca25707c",
+          "name": "Serra Avenger",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0031:fe1e5de6-3f95-4e1c-99ae-574074998d5e",
+          "name": "Serra Angel",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0072:bc1a6867-921d-4912-afae-c3c445ad81e7",
+          "name": "Talrand, Sky Summoner",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0069:4462978c-0076-466b-a64b-0f54d09d4f27",
+          "name": "Sphinx of Uthuun",
+          "count": 1
+        },
+        {
+          "physicalId": "m13-printed-v1:0024:f442e3b2-9d65-40c4-a3b9-8cb821980d80",
+          "name": "Pacifism",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0050:fcd965f9-bdaa-4434-a9c8-53fc57e997db",
+          "name": "Essence Scatter",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0225:bc9d29ee-1a21-4c3e-99c1-f815d40e8f19",
+          "name": "Glacial Fortress",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0230:080a001b-7815-469b-bd0c-c92453d80e9a",
+          "name": "Plains",
+          "count": 16
+        },
+        {
+          "physicalId": "m13-printed-v1:0234:cd86b167-3fc8-4e5a-9e21-b4ce5a7a05cd",
+          "name": "Island",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "white-black-exalted",
+      "name": "White-Black Exalted",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m13-printed-v1:0021:1646cb67-e0ac-4f2d-af21-618ff3613d69",
+          "name": "Knight of Glory",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0096:9e339853-5b6b-47b7-8d88-e9d3befb803f",
+          "name": "Knight of Infamy",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0006:e60a0c43-9f47-404a-8acf-508173e7062f",
+          "name": "Aven Squire",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0108:e00a2b22-a473-44ae-919f-29bc8be05543",
+          "name": "Servant of Nefarox",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0036:f5cc38bc-55a4-446a-b054-48fb90216946",
+          "name": "Sublime Archangel",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0103:abc382f3-fdb9-4987-acf4-bf1ac4fd2ef7",
+          "name": "Nefarox, Overlord of Grixis",
+          "count": 1
+        },
+        {
+          "physicalId": "m13-printed-v1:0101:c8676f02-cf1e-4d40-a0c5-6e5a97417898",
+          "name": "Murder",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0022:1e2a73ec-39be-4d23-8c25-17d7c174dcee",
+          "name": "Oblivion Ring",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0230:080a001b-7815-469b-bd0c-c92453d80e9a",
+          "name": "Plains",
+          "count": 18
+        },
+        {
+          "physicalId": "m13-printed-v1:0238:83b16e93-ee53-4c1b-9dea-6db7977e9c2f",
+          "name": "Swamp",
+          "count": 20
+        }
+      ]
+    },
+    {
+      "id": "red-green-aggro",
+      "name": "Red-Green Aggro",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m13-printed-v1:0160:b7d6b117-0c14-4455-92fc-29555ee75d97",
+          "name": "Arbor Elf",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0185:b982558f-5b82-4918-9b54-c7ac1e6f8da5",
+          "name": "Rancor",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0171:7e380b99-0173-4083-a4a2-222ad98b904a",
+          "name": "Flinthoof Boar",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0194:d16928c9-0470-46ec-b92d-0d6ff9f23ef7",
+          "name": "Timberpack Wolf",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0143:ed2f1b5d-1b16-4f35-9cce-2f089905fddd",
+          "name": "Mogg Flunkies",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0147:11a94b7c-0216-473c-87a6-71e5a64d7799",
+          "name": "Searing Spear",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0132:aca215b1-7b98-49ce-afae-eeb61058125a",
+          "name": "Flames of the Firebrand",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0174:9945307b-d49d-4d21-bba0-2aebba68d57a",
+          "name": "Garruk, Primal Hunter",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0193:28667c8b-d02c-4e57-a050-1549207b65d1",
+          "name": "Thragtusk",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0150:d0476e0f-61df-46a6-aaf1-8ee79c701160",
+          "name": "Thundermaw Hellkite",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0228:76364643-bfcb-4c50-9224-bf9e35648ddf",
+          "name": "Rootbound Crag",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0224:d9d107e1-8293-4486-9b68-4897b8b7043c",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0242:d67cf0c1-5658-4f88-9fbd-63c1dbf77ee0",
+          "name": "Mountain",
+          "count": 7
+        },
+        {
+          "physicalId": "m13-printed-v1:0246:51a55233-2e1a-4515-8fd1-354605c0c36b",
+          "name": "Forest",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m13-printed-v1:0101:c8676f02-cf1e-4d40-a0c5-6e5a97417898",
+          "name": "Murder",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0102:c48bc86b-df0a-4a9c-8aad-c3ffb742a5ff",
+          "name": "Mutilate",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0050:fcd965f9-bdaa-4434-a9c8-53fc57e997db",
+          "name": "Essence Scatter",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0062:8da17a86-3666-46b8-932e-daafd6a0cd69",
+          "name": "Negate",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0052:8a5a69dc-c6f3-459b-9dcd-b3363c26ca34",
+          "name": "Fog Bank",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0043:2e6ec8a6-ad88-45c9-ab4b-dd7de2418bb7",
+          "name": "Augur of Bolas",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0112:9ba96d96-8d9e-47c8-ab39-17479564aadf",
+          "name": "Vampire Nighthawk",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0069:4462978c-0076-466b-a64b-0f54d09d4f27",
+          "name": "Sphinx of Uthuun",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0047:a3c573ab-9013-4c2b-a039-ce5b20dba264",
+          "name": "Divination",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0110:64f6600b-36c4-43bd-8c01-cfbca402ecd6",
+          "name": "Sign in Blood",
+          "count": 1
+        },
+        {
+          "physicalId": "m13-printed-v1:0223:8b41b86b-58e1-4601-b8ed-0ad31f03a78d",
+          "name": "Drowned Catacomb",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0234:cd86b167-3fc8-4e5a-9e21-b4ce5a7a05cd",
+          "name": "Island",
+          "count": 11
+        },
+        {
+          "physicalId": "m13-printed-v1:0238:83b16e93-ee53-4c1b-9dea-6db7977e9c2f",
+          "name": "Swamp",
+          "count": 17
+        }
+      ]
+    },
+    {
+      "id": "red-white-tokens",
+      "name": "Red-White Tokens",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m13-printed-v1:0139:84df41e9-e973-4441-b17f-434517134d46",
+          "name": "Krenko's Command",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0005:c0f5cb3f-c27d-4b35-930f-00d806393796",
+          "name": "Attended Knight",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0009:79258432-ea35-4f2a-9e4a-4abb53f335c6",
+          "name": "Captain's Call",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0138:aa078518-0ce2-4c6f-9061-aa7e22ed7493",
+          "name": "Krenko, Mob Boss",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0008:8e3c18f5-89cd-4d33-8d5b-12dacad9f9b3",
+          "name": "Captain of the Watch",
+          "count": 3
+        },
+        {
+          "physicalId": "m13-printed-v1:0023:bb1552a8-27b4-4a95-9022-6fdd59aca28f",
+          "name": "Odric, Master Tactician",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0010:295096bb-1857-4224-bc7b-307b38cfd338",
+          "name": "Crusader of Odric",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0147:11a94b7c-0216-473c-87a6-71e5a64d7799",
+          "name": "Searing Spear",
+          "count": 4
+        },
+        {
+          "physicalId": "m13-printed-v1:0015:f8672cfd-e34b-4587-9e24-015e03c7574d",
+          "name": "Glorious Charge",
+          "count": 2
+        },
+        {
+          "physicalId": "m13-printed-v1:0230:080a001b-7815-469b-bd0c-c92453d80e9a",
+          "name": "Plains",
+          "count": 17
+        },
+        {
+          "physicalId": "m13-printed-v1:0242:d67cf0c1-5658-4f88-9fbd-63c1dbf77ee0",
+          "name": "Mountain",
+          "count": 17
+        }
+      ]
+    }
+  ],
+  "contentSha256": "93a53d5c5f147079a3f2fcb79cbe129b45614c5d3b302a1faf1efead2cd4f8ed"
+}

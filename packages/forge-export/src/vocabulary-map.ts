@@ -33,7 +33,7 @@ import type {
   TargetRestriction,
   TriggerCondition,
 } from '@mtg/dsl';
-import { assertNever } from '@mtg/dsl';
+import { PERMANENT_CARD_KINDS, assertNever } from '@mtg/dsl';
 import type { ForgeParam } from './script-text';
 
 /** Forge `K:` keyword names (`res/cardsfolder`, e.g. Serra Angel's `K:Flying`). */
@@ -66,6 +66,9 @@ export const FORGE_GRANTABLE_KEYWORDS: Readonly<Record<GrantableKeyword, string>
   ...FORGE_KEYWORDS,
   indestructible: 'Indestructible',
   doubleStrike: 'Double Strike',
+  shroud: 'Shroud',
+  hexproof: 'Hexproof',
+  intimidate: 'Intimidate',
 };
 
 /**
@@ -113,6 +116,8 @@ export function forgeTargetRestriction(restriction: TargetRestriction): string |
   switch (restriction.kind) {
     case 'maxPower':
       return `powerLE${String(restriction.power)}`;
+    case 'maxToughness':
+      return `toughnessLE${String(restriction.toughness)}`;
     case 'minPower':
       return `powerGE${String(restriction.power)}`;
     case 'tapped':
@@ -128,39 +133,52 @@ export function forgeTargetRestriction(restriction: TargetRestriction): string |
       if (decomposition === null || decomposition.length !== 1) return null;
       return `counters_GE1_${decomposition[0]}`;
     }
+    case 'playerLostLifeThisTurn':
+      return 'LostLifeThisTurn';
     default:
       return assertNever(restriction, 'forgeTargetRestriction');
   }
 }
 
 /**
- * A `ValidTgts$` selector with a restriction qualifier attached.
+ * A `ValidTgts$` selector with a restriction qualifier attached to every member.
  *
  * Forge separates the first qualifier from the card type with a dot and every
  * one after it with a plus (`Creature.YouCtrl+counters_GE1_P1P1`, five shipped
  * cards), so which separator to write is a question about the base and not about
- * the qualifier. A base that is a comma-separated union of card types
- * (`Artifact,Enchantment`) can carry neither: the qualifier would bind to the
- * last member only. That combination cannot arise — `restrictionFitsTargetKind`
- * admits a restriction on the three kinds whose space is exactly `creature` —
- * but it returns `null` rather than trusting an upstream validator to have run,
- * because a transpiler that emits a selector it cannot justify is the failure
- * this table exists to fix.
+ * the qualifier. A base that is a comma-separated union
+ * (`Creature.attacking,Creature.blocking`) can carry neither at the end, because
+ * a qualifier appended to the whole string binds to the last member only. Forge
+ * writes it on each member instead: `res/cardsfolder/s/searing_light.txt` is
+ * `ValidTgts$ Creature.attacking+powerLE2,Creature.blocking+powerLE2`, and the
+ * same distribution ships as `+withFlying` (3 cards), `+OppCtrl` (3),
+ * `+YouCtrl` (1), `+withoutFlying` (1) and
+ * `Instant.YouCtrl+cmcEQX,Sorcery.YouCtrl+cmcEQX` (3). It is the distributive
+ * law and nothing subtler — the qualifier is a conjunct over a disjunction of
+ * members, so it belongs on each of them — which is why this is total and no
+ * caller has a refusal to handle.
+ *
+ * Refusing the union instead is what this function did until `mtg-ds02`, and it
+ * cost the flagship two commons: Light Arrow and Bomb Flower target an attacking
+ * or blocking creature with a power bound, which is Searing Light's shape with a
+ * different number on it.
  */
-export function forgeRestrictedTarget(base: string, qualifier: string): string | null {
-  if (base.includes(',')) return null;
-  return appendQualifier(base, qualifier);
+export function forgeRestrictedTarget(base: string, qualifier: string): string {
+  return base
+    .split(',')
+    .map((member) => appendQualifier(member, qualifier))
+    .join(',');
 }
 
 /**
- * Forge's two separators, applied to a base already known to carry no comma.
+ * Forge's two separators, applied to one union member.
  *
  * Split out of `forgeRestrictedTarget` rather than written twice because
  * `forgeFilteredTargets` builds its members by splitting a union on the comma
- * first, so it has answered that function's one refusal before it starts and
- * would otherwise have to re-decide the dot-or-plus rule. One implementation
- * means the restriction path and the filter path cannot come to different
- * conclusions about a base that already carries a qualifier.
+ * first, so it is already holding a single member when it needs the dot-or-plus
+ * rule and would otherwise have to re-decide it. One implementation means the
+ * restriction path and the filter path cannot come to different conclusions
+ * about a base that already carries a qualifier.
  */
 function appendQualifier(base: string, qualifier: string): string {
   return base.includes('.') ? `${base}+${qualifier}` : `${base}.${qualifier}`;
@@ -240,24 +258,13 @@ export const FORGE_COMBAT_ROLES: Readonly<Record<TargetCombatRole, readonly stri
  * The field that stops this filter from having a Forge selector, or `null` when
  * every field it states maps.
  *
- * Two fields are refused rather than guessed, and the argument is the same one
- * twice. Forge's grammar plausibly spells a conjunction `Creature.Artifact` and
- * plausibly spells a keyword `Creature.withFlying`, and plausibly is the whole
- * problem: every row in this file is read off `res/cardsfolder`, that corpus is
- * not in this checkout, and a parity oracle that invents a selector reports a
- * mismatch as agreement. So the refusal is the mapping until somebody reads the
- * corpus, and both belong to `mtg-17a` with every other unverified row here.
- *
- * A field rather than a boolean, because the caller prints the cause and the
- * two causes have different fixes: a conjunction is a card the author can
- * rewrite, and a keyword sweep is a selector nobody has attested yet
- * (`mtg-nhyv.2`, `mtg-nhyv.62`). One function rather than a condition repeated
- * inside `forgeFilteredTargets` and again at each rejection site, so the list
- * of refused fields cannot drift from the list of reasons given for refusing.
+ * Conjunctive card types remain refused rather than guessed. Keyword selectors
+ * are mapped only because the pinned Forge corpus attests `withFlying` and
+ * `withoutFlying`; selectors without that evidence still do not belong here.
+ * A field rather than a boolean keeps the refusal reason available to callers.
  */
-export function unmappedFilterField(filter: TargetFilter): 'allCardTypes' | 'keywords' | null {
+export function unmappedFilterField(filter: TargetFilter): 'allCardTypes' | null {
   if (filter.allCardTypes !== undefined) return 'allCardTypes';
-  if (filter.keywords !== undefined) return 'keywords';
   return null;
 }
 
@@ -267,18 +274,31 @@ export function forgeFilteredTargets(
   cardTypes: 'base' | 'qualifier',
 ): readonly string[] | null {
   if (unmappedFilterField(filter) !== null) return null;
-  const named = filter.cardTypes?.map((kind) => FORGE_CARD_TYPES[kind]);
+  const namesEveryPermanent =
+    filter.cardTypes !== undefined &&
+    filter.cardTypes.length === PERMANENT_CARD_KINDS.length &&
+    PERMANENT_CARD_KINDS.every((kind) => filter.cardTypes?.includes(kind));
+  const effectiveBase = namesEveryPermanent ? 'Permanent' : base;
+  const named = namesEveryPermanent ? undefined : filter.cardTypes?.map((kind) => FORGE_CARD_TYPES[kind]);
   // A subtype with no card type beside it and nothing but `Permanent` to narrow
   // takes the base, the way a card type does; anywhere else it is a qualifier.
   // `checkFilterLists` refuses the two together (CR 205.3), so the first branch
   // is what a valid card reaches and the second is what a hand-written filter
   // and every narrower base reach.
-  const subtypeBases = named === undefined && base === 'Permanent' ? filter.subtypes : undefined;
-  const bases = subtypeBases ?? (named !== undefined && cardTypes === 'base' ? named : base.split(','));
+  const subtypeBases = named === undefined && effectiveBase === 'Permanent' ? filter.subtypes : undefined;
+  const bases =
+    subtypeBases ?? (named !== undefined && cardTypes === 'base' ? named : effectiveBase.split(','));
   const typeQualifiers = named !== undefined && cardTypes === 'qualifier' ? named : [null];
   const subtypes = subtypeBases !== undefined ? [null] : (filter.subtypes ?? [null]);
   const colors = filter.colors?.map((color) => FORGE_COLOR_PROPERTIES[color]) ?? [null];
   const roles = filter.combat === undefined ? [null] : FORGE_COMBAT_ROLES[filter.combat];
+  const keywordQualifiers = [
+    ...(filter.monocolored === true ? ['MonoColor'] : []),
+    ...(filter.maxManaValue === undefined ? [] : [`cmcLE${filter.maxManaValue}`]),
+    ...(filter.dealtDamageThisTurn === true ? ['dealtDamageThisTurn'] : []),
+    ...(filter.keywords ?? []).map((keyword) => `with${FORGE_KEYWORDS[keyword]}`),
+    ...(filter.excludeKeywords ?? []).map((keyword) => `without${FORGE_KEYWORDS[keyword]}`),
+  ];
   // The conjunctive half, in one order for every member: exclusions never
   // multiply the union, so they are appended rather than crossed.
   const refused = [
@@ -292,7 +312,7 @@ export function forgeFilteredTargets(
       for (const subtype of subtypes) {
         for (const color of colors) {
           for (const role of roles) {
-            const qualifiers = [type, subtype, color, role, ...refused].filter(
+            const qualifiers = [type, subtype, color, role, ...keywordQualifiers, ...refused].filter(
               (word): word is string => word !== null,
             );
             members.push(qualifiers.length === 0 ? member : appendQualifier(member, qualifiers.join('+')));
@@ -328,6 +348,11 @@ export const FORGE_VALID_TARGETS: Readonly<Record<TargetKind, string | null>> = 
   // `ValidTgts$` clause at all. The row exists so the record stays total over
   // `TargetKind`, which is what makes a new kind a compile error.
   triggeringCreature: null,
+  // Never read: the retained player compiles as `Defined$
+  // TriggeredCardController`, not as a `ValidTgts$` choice.
+  triggeringPlayer: null,
+  // Fixed by `ChooseP` on this permanent's entry replacement.
+  chosenPlayer: null,
   // Never read, for the same reason and by the same mechanism as the row
   // above: `targetParams` answers `selfCreature` before it reaches this table,
   // because the referent is `Defined$ Self` — Forge's generic "the source of
@@ -340,7 +365,7 @@ export const FORGE_VALID_TARGETS: Readonly<Record<TargetKind, string | null>> = 
   // without a second branch. The row exists to keep the record total.
   selfPermanent: null,
   // Never read, by the same mechanism as the two rows above: `targetParams`
-  // answers the three back-references (`mtg-nhyv.75`) before it consults this
+  // answers the back-references (`mtg-nhyv.75`) before it consults this
   // table, because Forge spells them `Defined$` too. `Targeted` for this kind
   // and for `thatPlayer` — one word there for both, since Forge's referent
   // carries no type — and `TargetedController` for the third. The rows exist to
@@ -349,6 +374,11 @@ export const FORGE_VALID_TARGETS: Readonly<Record<TargetKind, string | null>> = 
   thatCreature: null,
   thatPlayer: null,
   thatCreaturesController: null,
+  thatPlayerOrPlaneswalkerController: null,
+  // Never read: an Aura's live attachment is a retained referent, which
+  // `targetParams` writes as `Defined$ Enchanted` before consulting this map.
+  enchantedCreature: null,
+  equippedCreature: null,
   // Forge's dotted qualifier for "controlled by the defending player" on an
   // attack trigger, written `DefenderCtrl` in `res/cardsfolder`. Unverified
   // against a booted Forge for the reason the two rows above are: `mtg-17a` is
@@ -369,6 +399,9 @@ export const FORGE_VALID_TARGETS: Readonly<Record<TargetKind, string | null>> = 
   // `Enchantment,Artifact`; the order is Forge's own preference and not a
   // difference in meaning.
   targetArtifactOrEnchantment: 'Artifact,Enchantment',
+  // Vandalblast's shipped Forge script uses this exact selector for its
+  // ordinary mode: `ValidTgts$ Artifact.YouDontCtrl`.
+  targetArtifactYouDontControl: 'Artifact.YouDontCtrl',
   // The complement of `targetCreatureYouControl`, and Forge spells it as the
   // negation of the same qualifier: 158 cards write
   // `ValidTgts$ Creature.YouDontCtrl`, among them Affectionate Indrik, whose
@@ -376,6 +409,16 @@ export const FORGE_VALID_TARGETS: Readonly<Record<TargetKind, string | null>> = 
   // trigger. Unverified against a booted Forge for the reason the rows above
   // are: `mtg-17a` is that check.
   targetCreatureYouDontControl: 'Creature.YouDontCtrl',
+  // Mystifying Maze's upstream script uses this exact selector:
+  // `ValidTgts$ Creature.attacking+OppCtrl` after the combat filter composes.
+  targetCreatureOpponentControls: 'Creature.OppCtrl',
+  targetNonlandPermanentOpponentControls: 'Permanent.nonLand+OppCtrl',
+  // Rite of Undoing attests the wider multiplayer-safe controller qualifier:
+  // `ValidTgts$ Permanent.YouDontCtrl+nonLand`.
+  targetNonlandPermanentYouDontControl: 'Permanent.nonLand+YouDontCtrl',
+  // Conjured Currency's shipped selector, including both independent
+  // controller- and owner-relative restrictions.
+  targetPermanentYouNeitherOwnNorControl: 'Permanent.YouDontCtrl+YouDontOwn',
   // The widest object base Forge has, and the one the DSL's `targetPermanent`
   // means: `ValidTgts$ Permanent` is what Vindicate and every other
   // destroy-anything spell writes, and a filter narrows it from there
@@ -390,6 +433,14 @@ export const FORGE_VALID_TARGETS: Readonly<Record<TargetKind, string | null>> = 
   // strictly wider card than the one we print. Unverified against a booted
   // Forge: `mtg-17a` is that check.
   targetPlayerOrPlaneswalker: 'Player,Planeswalker',
+  // Trading Post's shipped selector. `targetParams` composes any printed
+  // filter before reattaching `YouCtrl`, so an artifact filter becomes
+  // `Artifact.YouCtrl` rather than dropping the graveyard-owner qualifier.
+  targetCardInYourGraveyard: 'Card.YouCtrl',
+  // Rise from the Grave and Vile Rebirth use the unqualified selector because
+  // either public graveyard may supply the targeted card.
+  targetCardInAGraveyard: 'Card',
+  targetCardInOpponentsGraveyard: 'Card.OppOwn',
 };
 
 /**
@@ -462,15 +513,16 @@ export const FORGE_SCOPE_ORIGINS: Readonly<Record<TargetedPlayerScope, string>> 
  * Forge's `Defined$` is a definition selector rather than a parameter of one
  * API, so the same two words work on `Draw`, `LoseLife` and `Discard` alike:
  * `Defined$ Player` is every player at the table (how the corpus scripts Temple
- * Bell and Howling Banshee) and `Defined$ Opponent` is everyone but the
- * resolving controller (how it scripts Liliana's Specter). Neither is a target,
+ * Bell and Howling Banshee) and `Defined$ Player.Opponent` is everyone but the
+ * resolving controller (how current Blood Tithe and Sizzle are scripted).
+ * Neither is a target,
  * which is the whole reason the sweep replaces the target clause instead of
  * qualifying it — the `noTarget` slot beside it would otherwise write
  * `Defined$ You` and reach one seat, the wrong one.
  */
 export const FORGE_PLAYER_SCOPE_DEFINED: Readonly<Record<PlayerScope, string>> = {
   eachPlayer: 'Player',
-  eachOpponent: 'Opponent',
+  eachOpponent: 'Player.Opponent',
 };
 
 /**
@@ -534,7 +586,7 @@ export function forgeSweepSelector(scope: SpaceScope, filter: TargetFilter): str
  * Forge writes a triggered ability as one `T:Mode$ … | Execute$ SVarName` line
  * plus an `SVar:` holding the sub-ability, which is the shape every
  * enters-the-battlefield and attack trigger in `res/cardsfolder` uses. The
- * three DSL conditions were chosen to compile onto exactly that grammar:
+ * The self-zone DSL conditions compile onto exactly that grammar:
  * "enters" and "dies" are both `ChangesZone` with different endpoints, and
  * "attacks" is `Attacks`; `Card.Self` is Forge's word for the source.
  *
@@ -560,10 +612,103 @@ export const FORGE_TRIGGER_MODES: Readonly<Record<TriggerCondition, readonly For
     ['Destination', 'Graveyard'],
     ['ValidCard', 'Card.Self'],
   ],
+  selfIsDealtDamage: [
+    ['Mode', 'DamageDoneOnce'],
+    ['ValidTarget', 'Card.Self'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  selfLeavesBattlefield: [
+    ['Mode', 'ChangesZone'],
+    ['Origin', 'Battlefield'],
+    ['Destination', 'Any'],
+    ['ValidCard', 'Card.Self'],
+  ],
+  selfPutIntoGraveyardFromBattlefield: [
+    ['Mode', 'ChangesZone'],
+    ['Origin', 'Battlefield'],
+    ['Destination', 'Graveyard'],
+    ['ValidCard', 'Card.Self'],
+  ],
+  selfPutIntoGraveyardFromAnywhere: [
+    ['Mode', 'ChangesZone'],
+    ['Origin', 'Any'],
+    ['Destination', 'Graveyard'],
+    ['ValidCard', 'Card.Self'],
+  ],
+  anotherCreatureEnters: [
+    ['Mode', 'ChangesZone'],
+    ['Origin', 'Any'],
+    ['Destination', 'Battlefield'],
+    ['ValidCard', 'Creature.Other'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  controlledCreatureDies: [
+    ['Mode', 'ChangesZone'],
+    ['Origin', 'Battlefield'],
+    ['Destination', 'Graveyard'],
+    ['ValidCard', 'Creature.YouCtrl'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  // Veilborn Ghoul's shipped Forge row uses `Swamp.YouCtrl`; the ability
+  // writer replaces the generic land selector below with the authored basic
+  // land subtype and places a graveyard source in `TriggerZones$ Graveyard`.
+  controlledLandSubtypeEnters: [
+    ['Mode', 'ChangesZone'],
+    ['Origin', 'Any'],
+    ['Destination', 'Battlefield'],
+    ['ValidCard', 'Land.YouCtrl'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  enchantedCreatureDies: [
+    ['Mode', 'ChangesZone'],
+    ['Origin', 'Battlefield'],
+    ['Destination', 'Graveyard'],
+    ['ValidCard', 'Card.EnchantedBy'],
+  ],
+  enchantedLandBecomesTapped: [
+    ['Mode', 'Taps'],
+    ['ValidCard', 'Card.AttachedBy'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  // Phantom Beast's current source line in Card-Forge/forge. `ValidTarget`
+  // names the object that was aimed at (not the spell doing the aiming), and
+  // the explicit zone keeps the source-bound trigger on the battlefield just
+  // as the kernel does.
+  selfBecomesTarget: [
+    ['Mode', 'BecomesTarget'],
+    ['ValidTarget', 'Card.Self'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  selfBecomesTargetByOpponent: [
+    ['Mode', 'BecomesTarget'],
+    ['ValidSource', 'SpellAbility.OppCtrl'],
+    ['ValidTarget', 'Card.Self'],
+    ['TriggerZones', 'Battlefield'],
+  ],
   controlledCreatureAttacksAlone: [
     ['Mode', 'Attacks'],
     ['ValidCard', 'Creature.YouCtrl'],
     ['Alone', 'True'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  selfAttacksAlone: [
+    ['Mode', 'Attacks'],
+    ['ValidCard', 'Card.Self'],
+    ['Alone', 'True'],
+  ],
+  selfAndThreeOthersAttack: [
+    ['Mode', 'Attacks'],
+    ['ValidCard', 'Card.Self'],
+    ['TriggerZones', 'Battlefield'],
+    ['IsPresent', 'Creature.attacking+Other'],
+    ['PresentCompare', 'GE3'],
+    ['NoResolvingCheck', 'True'],
+  ],
+  creatureAttacksYouOrPlaneswalkerYouControl: [
+    ['Mode', 'Attacks'],
+    ['ValidCard', 'Creature.YouDontCtrl'],
+    ['Attacked', 'You,Planeswalker.YouCtrl'],
+    ['TriggerZones', 'Battlefield'],
   ],
   // `selfDies` plus Forge's own negative sacrifice property. Forge writes the
   // restriction as a `+`-joined qualifier on `ValidCard$`, the same grammar the
@@ -605,6 +750,15 @@ export const FORGE_TRIGGER_MODES: Readonly<Record<TriggerCondition, readonly For
     ['Mode', 'Phase'],
     ['Phase', 'Upkeep'],
     ['ValidPlayer', 'You'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  // Wild Evocation's current Forge source. `Player` is the unfiltered seat
+  // selector and supplies `TriggeredPlayer` to the payload.
+  beginningOfEachPlayersUpkeep: [
+    ['Mode', 'Phase'],
+    ['Phase', 'Upkeep'],
+    ['ValidPlayer', 'Player'],
+    ['TriggerZones', 'Battlefield'],
   ],
   beginningOfYourEndStep: [
     ['Mode', 'Phase'],
@@ -630,74 +784,135 @@ export const FORGE_TRIGGER_MODES: Readonly<Record<TriggerCondition, readonly For
     ['Destination', 'Battlefield'],
     ['ValidCard', 'Card.YouCtrl+Other'],
   ],
+  // Leyline of Vitality's current Forge source, including the explicit
+  // battlefield trigger zone. Unlike the sibling below, this has no `+Other`:
+  // a creature source with this wording also sees its own arrival.
+  controlledCreatureEnters: [
+    ['Mode', 'ChangesZone'],
+    ['Origin', 'Any'],
+    ['Destination', 'Battlefield'],
+    ['ValidCard', 'Creature.YouCtrl'],
+    ['TriggerZones', 'Battlefield'],
+  ],
   anotherControlledCreatureEnters: [
     ['Mode', 'ChangesZone'],
     ['Origin', 'Any'],
     ['Destination', 'Battlefield'],
     ['ValidCard', 'Creature.YouCtrl+Other'],
+    ['TriggerZones', 'Battlefield'],
   ],
   youCastSpell: [
     ['Mode', 'SpellCast'],
     ['ValidCard', 'Card.YouCtrl'],
   ],
-  // The comma is Forge's OR across two card-type restrictions on one
-  // `ValidCard$`, the same device `res/cardsfolder` uses for cards like
-  // Guttersnipe.
+  // Guttersnipe's installed 2.0.14 line: one OR-separated card-type filter,
+  // with the casting player and battlefield trigger zone stated separately.
   youCastInstantOrSorcery: [
     ['Mode', 'SpellCast'],
-    ['ValidCard', 'Instant.YouCtrl,Sorcery.YouCtrl'],
+    ['ValidCard', 'Instant,Sorcery'],
+    ['ValidActivatingPlayer', 'You'],
+    ['TriggerZones', 'Battlefield'],
   ],
   selfDealsCombatDamageToPlayer: [
     ['Mode', 'DamageDone'],
     ['ValidSource', 'Card.Self'],
     ['ValidTarget', 'Player'],
     ['CombatDamage', 'True'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  controlledCreatureDealsCombatDamageToPlayer: [
+    ['Mode', 'DamageDone'],
+    ['ValidSource', 'Creature.YouCtrl'],
+    ['ValidTarget', 'Player'],
+    ['TriggerZones', 'Battlefield'],
+    ['CombatDamage', 'True'],
   ],
   selfBlocks: [
     ['Mode', 'Blocks'],
     ['ValidCard', 'Card.Self'],
   ],
+  enchantedCreatureAttacksOrBlocks: [
+    ['Mode', 'Attacks'],
+    ['ValidCard', 'Card.AttachedBy'],
+  ],
+  enchantedCreatureBecomesTarget: [
+    ['Mode', 'BecomesTarget'],
+    ['ValidTarget', 'Card.AttachedBy'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  // Wall of Frost's current Forge source, verbatim. `AttackerBlocked` is the
+  // pair-shaped event and names the attacker as `TriggeredAttackerLKICopy` for
+  // the effect body; `ValidBlocker` confines the source side of that pairing.
+  selfBlocksCreature: [
+    ['Mode', 'AttackerBlocked'],
+    ['ValidBlocker', 'Card.Self'],
+  ],
   youGainLife: [
     ['Mode', 'LifeGained'],
     ['ValidPlayer', 'You'],
   ],
-  // Flurry rush's condition, and the row this file cannot honestly claim to
-  // have compiled. Forge's `Blocks` mode carries `ValidCard$` for the blocker
-  // and `ValidBlocked$` for what it blocked, which covers only the half where
-  // the source is the blocker; the other half — the source is the attacker and
-  // something bigger blocked it — is `BlockedBy` in `res/cardsfolder`, a second
-  // mode rather than a parameter on this one. `ForgeParam` rows are one mode
-  // each, so the union this condition names does not fit the grammar, and the
-  // power comparison has no `ValidCard$` restriction at all: Forge's card
-  // properties compare power to a constant (`Creature.powerGE3`), never to the
-  // source's own power at declaration.
-  //
-  // So this row compiles the half a single mode can state, and it is *narrower*
-  // than the DSL condition rather than wider, which is the direction a wrong
-  // guess should fail in — a Forge card that fires on too few blocks is a
-  // visible parity mismatch, one that fires on too many is a silently different
-  // card. `mtg-17a` is the bead that checks every guess in this file against a
-  // booted Forge; this row is the one that should be *replaced* by that check
-  // rather than merely confirmed, because what it needs is a second `T:` line
-  // and this table has no way to emit one.
-  selfBlocksOrIsBlockedByGreaterPower: [
-    ['Mode', 'Blocks'],
-    ['ValidCard', 'Card.Self'],
+  // Jace's Erasure's current Card-Forge/forge source. `ValidCard` is Forge's
+  // field name for the drawn object here; `Card.YouCtrl` is its source-relative
+  // spelling, and the explicit zone confines the watcher to the battlefield.
+  youDrawCard: [
+    ['Mode', 'Drawn'],
+    ['ValidCard', 'Card.YouCtrl'],
+    ['TriggerZones', 'Battlefield'],
   ],
-  // `selfBlocksOrIsBlockedByGreaterPower`'s problem exactly, and the same
-  // answer. Forge states one `Mode$` per `T:` line, and the two halves of this
-  // condition are two modes — `ChangesZone` for the arrival and `Attacks` for
-  // the declaration — so the union does not fit a single row and this table has
-  // no way to emit a second line.
+  // Flurry rush's condition, and the blocking half of it. Arrogant Bloodlord is
+  // the template and it is the same printed sentence with a different
+  // comparator — "Whenever CARDNAME blocks or becomes blocked by a creature
+  // with power 1 or less" — spelled as two `AttackerBlockedByCreature` lines
+  // that differ only in which side of the pairing `Card.Self` sits on:
   //
-  // The arrival half is the one written, and the choice is not arbitrary: an
-  // entry that fires only on arrival is the card missing its combat payoff,
-  // which a parity run reports as a mismatch the first time a Titan attacks,
-  // while an entry that fired only on the attack would silently drop the half
-  // the printed card guarantees on turn six. Narrower than the DSL condition
-  // either way, which is the direction a guess should fail in. `mtg-17a` is the
-  // bead that checks it against a booted Forge, and like the row above this one
-  // should be *replaced* by that check rather than confirmed.
+  //   T:Mode$ AttackerBlockedByCreature | ValidCard$ Creature.powerLE1 | ValidBlocker$ Card.Self | …
+  //   T:Mode$ AttackerBlockedByCreature | ValidCard$ Card.Self | ValidBlocker$ Creature.powerLE1 | … | Secondary$ True | …
+  //
+  // This row is the first of those and `FORGE_ADDITIONAL_TRIGGER_MODES` carries
+  // the second. `AttackerBlockedByCreature` fires once per blocking creature,
+  // which is the condition's own "one trigger per qualifying creature, not per
+  // block"; `AttackerBlocked` beside it in the corpus fires once per block with
+  // every blocker at hand, and would give a double block by two larger
+  // creatures one trigger instead of two.
+  //
+  // `powerGTZ` is the comparison, over `SVar:Z:Count$CardPower` in
+  // `FORGE_TRIGGER_SUPPORTING_LINES`: `Count$CardPower` is the source's own
+  // power, so `Creature.powerGTZ` on the *other* slot is "a creature whose
+  // power is greater than this card's". Rangers of Ithilien writes that pair
+  // verbatim at the other comparator (`Creature.powerLTZ` over
+  // `SVar:Z:Count$CardPower`), Drizzt Do'Urden and Éowyn write `powerGTX` in a
+  // trigger's and a spell's `Valid` clause over `SVar:X:Count$CardPower`, and
+  // Ant-Man writes `Creature.powerGTX` in a blocker slot. `Z` rather than `X`
+  // or `Y` because those two are already this transpiler's resolution count and
+  // board count (`remember.ts`, `board-count.ts`), and Gyrus reaches for `Z`
+  // on exactly that ground — its own `X` and `Y` are taken.
+  //
+  // What this row said before `mtg-uisd` was that Forge's grammar could not
+  // state the union at all: `Blocks` covers only the half where the source
+  // blocks, the other half is a mode called `BlockedBy`, one `ForgeParam` row
+  // is one mode, and a power comparison against the source has no spelling.
+  // Every clause of that is wrong. There is no `BlockedBy` mode in the corpus;
+  // `FORGE_ADDITIONAL_TRIGGER_MODES` had been emitting second `T:` lines since
+  // `selfEntersOrAttacks`; and the comparison is 176 files deep. What the row
+  // actually exported was `Mode$ Blocks | ValidCard$ Card.Self` with the body
+  // aimed at `TriggeredTarget` — a card that fires on *every* block rather than
+  // only on blocks against something bigger, that never fires on the attacking
+  // half, and that names a referent `Blocks` does not supply. Wider, narrower
+  // and misaimed at once, with nothing on stdout to say so.
+  //
+  // Unverified against a booted Forge, like every row in this file, and
+  // `mtg-17a` is that check. What is different here is the evidence class: the
+  // shape is not reasoned from Forge's API list but read off four shipped cards
+  // (Arrogant Bloodlord, Ashmouth Hound, Shape Stealer, No Quarter) that print
+  // this pairing, and the two referent names below are read off the same ones.
+  selfBlocksOrIsBlockedByGreaterPower: [
+    ['Mode', 'AttackerBlockedByCreature'],
+    ['ValidCard', 'Creature.powerGTZ'],
+    ['ValidBlocker', 'Card.Self'],
+  ],
+  // The primary half of the two-event condition. The attack half lives in
+  // `FORGE_ADDITIONAL_TRIGGER_MODES`, because Forge represents the union as two
+  // `T:` lines that execute the same body.
   selfEntersOrAttacks: [
     ['Mode', 'ChangesZone'],
     ['Origin', 'Any'],
@@ -751,7 +966,97 @@ export const FORGE_TRIGGER_MODES: Readonly<Record<TriggerCondition, readonly For
     ['Destination', 'Battlefield'],
     ['ValidCard', 'Creature.YouCtrl+Other+powerGE3'],
   ],
+  opponentDiscardsCard: [
+    ['Mode', 'Discarded'],
+    ['ValidCard', 'Card.OppOwn'],
+    ['TriggerZones', 'Battlefield'],
+  ],
+  selfPlusOnePlusOneCounterRemoved: [
+    ['Mode', 'CounterRemoved'],
+    ['ValidCard', 'Card.Self'],
+    ['TriggerZones', 'Battlefield'],
+    ['CounterType', 'P1P1'],
+  ],
 };
+
+/** Extra `T:` modes for a DSL condition that is a union of Forge events. */
+export const FORGE_ADDITIONAL_TRIGGER_MODES: Readonly<
+  Partial<Record<TriggerCondition, readonly (readonly ForgeParam[])[]>>
+> = {
+  selfEntersOrAttacks: [
+    [
+      ['Mode', 'Attacks'],
+      ['ValidCard', 'Card.Self'],
+      ['Secondary', 'True'],
+    ],
+  ],
+  enchantedCreatureAttacksOrBlocks: [
+    [
+      ['Mode', 'Blocks'],
+      ['ValidCard', 'Card.AttachedBy'],
+      ['Secondary', 'True'],
+    ],
+  ],
+  // The half where the source is the attacker and something bigger blocked it.
+  // Arrogant Bloodlord's second line with the comparator swapped: same mode,
+  // the two slots exchanged, `Secondary$ True` because both lines carry the one
+  // printed description. Unlike the two entries above it this half retains a
+  // *different* referent from the first — the blocker rather than the attacker
+  // — which is what `FORGE_TRIGGERING_CREATURE_REFERENTS` exists to say.
+  selfBlocksOrIsBlockedByGreaterPower: [
+    [
+      ['Mode', 'AttackerBlockedByCreature'],
+      ['ValidCard', 'Card.Self'],
+      ['ValidBlocker', 'Creature.powerGTZ'],
+      ['Secondary', 'True'],
+    ],
+  ],
+};
+
+/**
+ * What a trigger's `triggeringCreature` target compiles to, per emitted `T:`
+ * line, for the conditions where Forge's name for the referent is not its
+ * default `TriggeredTarget`.
+ *
+ * Entry `n` names the referent for the `n`th `T:` line the condition emits, so
+ * a condition whose two lines retain two different creatures says so here
+ * rather than in the effect compiler. `selfBlocksOrIsBlockedByGreaterPower` is
+ * the only such condition and it is the reason this table is a list: its first
+ * line puts the source in the blocker slot and retains the attacker, its second
+ * puts the source in the attacker slot and retains the blocker, and one shared
+ * body would aim both at whichever creature the first line names. Ashmouth
+ * Hound is the shipped card that shows the two names on this exact pair of
+ * lines, and No Quarter shows them on a pair whose two halves genuinely differ.
+ *
+ * A condition absent from this table compiles `triggeringCreature` to
+ * `TriggeredTarget`, which is what `DamageDone` and the other supported modes
+ * supply.
+ */
+export const FORGE_TRIGGERING_CREATURE_REFERENTS: Readonly<
+  Partial<Record<TriggerCondition, readonly string[]>>
+> = {
+  // Wall of Frost's shipped script: `AttackerBlocked` names its paired attacker
+  // `TriggeredAttackerLKICopy`. One line, one referent.
+  selfBlocksCreature: ['TriggeredAttackerLKICopy'],
+  controlledCreatureDealsCombatDamageToPlayer: ['TriggeredSourceLKICopy'],
+  selfBlocksOrIsBlockedByGreaterPower: ['TriggeredAttackerLKICopy', 'TriggeredBlockerLKICopy'],
+};
+
+/** Source-level declarations required by a trigger mode beyond its `T:` line. */
+export const FORGE_TRIGGER_SUPPORTING_LINES: Readonly<Partial<Record<TriggerCondition, readonly string[]>>> =
+  {
+    // Present on Wall of Frost's shipped script and used by Forge's combat AI to
+    // recognize that declaring this blocker has an immediate triggered effect.
+    selfBlocksCreature: ['SVar:HasBlockEffect:TRUE'],
+    // The source's own power, which both of this condition's `T:` lines compare
+    // the other creature against. `Z` and not `X` or `Y` for `board-count.ts`'s
+    // stated reason — those two are taken by the resolution count and the board
+    // count, and a card may print any pair of the three — and Gyrus, Waker of
+    // Corpses picks `Z` on that same ground. No `SVar:HasBlockEffect:TRUE`
+    // here: one of the 67 `AttackerBlockedByCreature` scripts in the corpus
+    // carries it and none of the four this row is modeled on do.
+    selfBlocksOrIsBlockedByGreaterPower: ['SVar:Z:Count$CardPower'],
+  };
 
 /**
  * Forge `Affected$` restriction per DSL static scope, before a subtype narrows
@@ -932,6 +1237,22 @@ export const FORGE_COUNTER_TYPES: Readonly<Record<CounterKind, readonly [string,
   // counter whose whole function is a count some other card reads: exporting
   // it as `P1P1` would hand Forge a board the kernel never had.
   trisigil: null,
+  phylactery: ['PHYLACTERY'],
+  defense: null,
+  // Forge 2.0.14 ships this exact named marker and uses it on Hellion
+  // Crucible's PutCounter and SubCounter costs. Unlike the semantic
+  // decompositions above, this row preserves a zero-modification counter's
+  // identity because Forge and the DSL name the same marker.
+  pressure: ['PRESSURE'],
+  petrification: ['PETRIFICATION'],
+  charge: ['CHARGE'],
+  filibuster: ['FILIBUSTER'],
+};
+
+/** Optional Forge AI hint for a chosen counter bearer, indexed by counter semantics. */
+export const FORGE_ENTRY_COUNTER_AI_LOGIC: Readonly<Partial<Record<CounterKind, string>>> = {
+  // Forge 2.0.14's own Phylactery Lich script uses this exact decision hint.
+  phylactery: 'Phylactery',
 };
 
 /**
@@ -955,10 +1276,9 @@ export const FORGE_LIBRARY_POSITIONS: Readonly<Record<LibraryPosition, string>> 
 /**
  * The `ChangeType$` selector naming whose graveyard a mass exile empties.
  *
- * A graveyard exile has no target in the DSL — it names an owner by word
- * (`exileGraveyardEffect`, `@mtg/dsl`) — so the owner cannot ride in a
- * `ValidTgts$` clause the way `FORGE_SCOPE_CHANGE_TYPES`' sweepers put it
- * there. Forge's `Valid` grammar spells ownership as a dotted qualifier, and
+ * The legacy graveyard-exile form names an owner by word, so its owner cannot
+ * ride in a `ValidTgts$` clause the way the hand-authored target-player form
+ * does. Forge's `Valid` grammar spells ownership as a dotted qualifier, and
  * `YouOwn`/`OppOwn` are the two it ships; "each" is the bare `Card`, because a
  * qualifier that admitted both would be a longer spelling of no qualifier.
  *
@@ -1013,12 +1333,10 @@ export const FORGE_GRAVEYARD_OWNER_QUALIFIERS: Readonly<Record<GraveyardOwner, s
  * rather than by how the card got there. Keyed over the union so a member
  * added to any one of them fails to compile here.
  *
- * `exile` reaches the union from the third vocabulary alone, and that is the
- * rules rather than an oversight: CR 701.19b makes a library search a move to
- * a zone the card can be *put into*, and exile is not one the printed tutors
- * use, while a graveyard fetch exiles constantly (Vile Rebirth, Tormod's
- * Crypt). Widening the search vocabulary to match would let the generator ask
- * for a search that ends in exile, which no card in the backlog asks for.
+ * `exile` now reaches the union from searches as well as graveyard choices.
+ * Haunting Echoes is the card that asks: its dynamically filtered search puts
+ * the cards it finds into exile. `searchLibrary` remains hand-authored, so the
+ * widening changes no generator slot or model-facing schema.
  */
 export const FORGE_CARD_DESTINATIONS: Readonly<
   Record<SearchDestination | ReturnDestination | GraveyardChoiceDestination, string>
@@ -1027,6 +1345,7 @@ export const FORGE_CARD_DESTINATIONS: Readonly<
   battlefield: 'Battlefield',
   battlefieldTapped: 'Battlefield',
   exile: 'Exile',
+  libraryTop: 'Library',
 };
 
 /**
@@ -1051,6 +1370,7 @@ export const FORGE_CARD_TYPES: Readonly<Record<CardKind, string>> = {
   land: 'Land',
   enchantment: 'Enchantment',
   planeswalker: 'Planeswalker',
+  battle: 'Battle',
 };
 
 /** Forge's dotted qualifier for each DSL supertype (`Land.Basic`). */
@@ -1060,16 +1380,23 @@ export const FORGE_SUPERTYPES: Readonly<Record<Supertype, string>> = {
 };
 
 /**
- * The `ChangeType$` selector for one search filter, or `null` when this
- * transpiler will not write it.
+ * The members a search filter spells, one per combination its lists admit, or
+ * `null` when this transpiler will not write it.
  *
- * `boardCountValid`'s rule, applied to the zone one over and for its reason:
- * a `CardFilter` ORs within each list and ANDs across them, Forge spells an OR
- * as a comma-separated list of whole specs, and that is a shape nothing here
- * writes. So at most one entry per list is spelled and anything wider is
- * refused by name. A refusal costs a card; a guess costs a card that
- * transpiles clean and searches a different library in Forge than it searches
- * in the kernel.
+ * `boardCountValid`'s rule, applied to the zone one over and for its reason: a
+ * `CardFilter` ORs within each list and ANDs across them, Forge spells the OR
+ * as a comma-separated list of whole specs and the AND as a `+` between
+ * qualifiers, so a filter with several members on several lists is the cross
+ * product. `ChangeType$ Instant.YouOwn,Sorcery.YouOwn` is shipped twelve times
+ * and 285 of the 2,616 `ChangeType$` lines in 2.0.15's `res/cardsfolder` write
+ * a comma; `ValidCard$ Instant,Sorcery` is shipped 264 times.
+ *
+ * The comma means any-of and not a repeat, which the Java settles rather than
+ * the corpus implying: `AbilityUtils.filterListByType` hands the whole string
+ * to `CardLists.getValidCards`, which splits it on commas and filters by
+ * `isValid(String[])`, and that returns on the first member a card matches. So
+ * a card satisfying two members is offered once, which is what `matchesFilter`
+ * means by `anyOf`.
  *
  * The base token is the card type when the filter names one and the subtype
  * when it does not, which is the same position swap `boardCountValid` makes,
@@ -1091,19 +1418,21 @@ export const FORGE_SUPERTYPES: Readonly<Record<Supertype, string>> = {
  * than a list, so the OR shape this file refuses everywhere else cannot arise
  * from it.
  *
- * `names` is refused outright rather than spelled. Forge writes a name
- * restriction as a `named<Name>` qualifier, and a card name is an arbitrary
- * string with spaces, commas and apostrophes in it — the comma is the same
- * character this grammar reads as the OR separator, so a name spliced into a
- * qualifier list is a selector that parses as something else. Guessing an
- * escaping convention against a grammar nothing in this checkout can boot is
- * the guess this file exists to refuse.
+ * `names` is refused outright rather than spelled, and the widening above is
+ * why it stays refused. Forge writes a name restriction as a `named<Name>`
+ * qualifier, and a card name is an arbitrary string with spaces, commas and
+ * apostrophes in it — the comma is the same character this grammar reads as
+ * the OR separator, so a name spliced into a member list is a selector that
+ * parses as something else. Forge's own corpus shows the hazard rather than a
+ * fix: `Discard<1/Card.namedBaru, Fist of Krosa>` is a shipped line whose
+ * qualifier contains the separator. Guessing an escaping convention against a
+ * grammar nothing in this checkout can boot is the guess this file exists to
+ * refuse.
  *
- * `excludeCardTypes` is spelled rather than refused, and it is the one list
- * here with no one-entry ceiling. The ceiling exists because Forge writes a
- * union as a comma-separated list of whole specs, and exclusions are not a
- * union: "noncreature, nonland" refuses both, so the two words conjoin with
- * `+` the way `cmcLE2` does. `forgeFilteredTargets` already writes exactly
+ * `excludeCardTypes` conjoins rather than distributing, and that is the one
+ * list here that never becomes a member of its own: exclusions are not a
+ * union. "noncreature, nonland" refuses both, so the two words conjoin with
+ * `+` the way `cmcLE2` does, and they ride on every member. `forgeFilteredTargets` already writes exactly
  * these words for exactly this field on the target side ("the conjunctive half,
  * in one order for every member"), so the spelling is attested in this file
  * rather than guessed at, which is the standard everything else here is held
@@ -1113,26 +1442,87 @@ export const FORGE_SUPERTYPES: Readonly<Record<Supertype, string>> = {
  * field for — ownership, in the one caller that has to say whose graveyard —
  * without that caller reaching into the returned string to splice a `+` in.
  */
-export function forgeSearchType(filter: CardFilter, optionalQualifier: string | null = null): string | null {
-  const cardTypes = filter.cardTypes ?? [];
-  const subtypes = filter.subtypes ?? [];
-  const supertypes = filter.supertypes ?? [];
-  const colors = filter.colors ?? [];
-  if (cardTypes.length > 1 || subtypes.length > 1 || supertypes.length > 1 || colors.length > 1) return null;
+export function forgeSearchTypeMembers(
+  filter: CardFilter,
+  optionalQualifier: string | null = null,
+): readonly string[] | null {
+  if (filter.anyOf !== undefined) {
+    const members = filter.anyOf.flatMap((alternative) => {
+      const rendered = forgeSearchTypeMembers(alternative, optionalQualifier);
+      if (rendered === null) return [];
+      return rendered.map((member) =>
+        alternative.cardTypes === undefined && alternative.subtypes?.length === 1 ? `Card.${member}` : member,
+      );
+    });
+    return members.length === 0 ? null : [...new Set(members)];
+  }
   if (filter.names !== undefined) return null;
-
-  const [cardType] = cardTypes;
-  const [subtype] = subtypes;
-  const [supertype] = supertypes;
-  const [color] = colors;
-  const base = cardType !== undefined ? FORGE_CARD_TYPES[cardType] : (subtype ?? 'Card');
-  const qualifiers = [
-    ...(supertype === undefined ? [] : [FORGE_SUPERTYPES[supertype]]),
-    ...(cardType === undefined || subtype === undefined ? [] : [subtype]),
-    ...(color === undefined ? [] : [FORGE_COLOR_PROPERTIES[color]]),
+  const cardTypes = orNothing(filter.cardTypes);
+  const subtypes = orNothing(filter.subtypes);
+  const supertypes = orNothing(filter.supertypes);
+  const colors = orNothing(filter.colors);
+  const keywords = orNothing(filter.keywords);
+  const conjoined = [
     ...(filter.maxManaValue === undefined ? [] : [`cmcLE${filter.maxManaValue}`]),
     ...(filter.excludeCardTypes ?? []).map((kind) => `non${FORGE_CARD_TYPES[kind]}`),
     ...(optionalQualifier === null ? [] : [optionalQualifier]),
   ];
-  return qualifiers.length === 0 ? base : `${base}.${qualifiers.join('+')}`;
+
+  const members: string[] = [];
+  for (const cardType of cardTypes) {
+    for (const subtype of subtypes) {
+      for (const supertype of supertypes) {
+        for (const color of colors) {
+          for (const keyword of keywords) {
+            const base = cardType !== undefined ? FORGE_CARD_TYPES[cardType] : (subtype ?? 'Card');
+            const qualifiers = [
+              ...(supertype === undefined ? [] : [FORGE_SUPERTYPES[supertype]]),
+              ...(cardType === undefined || subtype === undefined ? [] : [subtype]),
+              ...(color === undefined ? [] : [FORGE_COLOR_PROPERTIES[color]]),
+              ...conjoined,
+              ...(keyword === undefined ? [] : [`with${FORGE_GRANTABLE_KEYWORDS[keyword]}`]),
+            ];
+            const member = qualifiers.length === 0 ? base : `${base}.${qualifiers.join('+')}`;
+            if (!members.includes(member)) members.push(member);
+          }
+        }
+      }
+    }
+  }
+  return members;
+}
+
+/** The list, or one absent member, so an empty list still runs the loop once. */
+function orNothing<T>(list: readonly T[] | undefined): readonly (T | undefined)[] {
+  return list === undefined || list.length === 0 ? [undefined] : list;
+}
+
+/**
+ * The whole selector for a grammar position that reads a comma as the OR:
+ * `ChangeType$` and `ValidCard$`, both of which the corpus writes with commas
+ * in the hundreds.
+ */
+export function forgeSearchTypeUnion(
+  filter: CardFilter,
+  optionalQualifier: string | null = null,
+): string | null {
+  const members = forgeSearchTypeMembers(filter, optionalQualifier);
+  return members === null ? null : members.join(',');
+}
+
+/**
+ * The selector for a position that cannot read a comma, which refuses any
+ * filter needing more than one member.
+ *
+ * Two positions need this and neither is a stylistic preference. An activation
+ * cost spells its own OR with a semicolon and not a comma —
+ * `Discard<1/Enchantment;Instant;Sorcery/...>` and `Sac<1/Artifact;Creature;Land/...>`
+ * are the shipped lines — and both of those also carry a third human-readable field
+ * this transpiler does not write, so the union form there is a guess rather
+ * than a spelling. A search quota writes `ChangeType$ EACH A & B`, where a
+ * member list inside a term has no reading at all.
+ */
+export function forgeSearchType(filter: CardFilter, optionalQualifier: string | null = null): string | null {
+  const members = forgeSearchTypeMembers(filter, optionalQualifier);
+  return members === null || members.length !== 1 ? null : (members[0] ?? null);
 }

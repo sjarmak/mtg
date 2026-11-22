@@ -154,20 +154,30 @@ function asElement(value: unknown): ElementLike {
   return candidate as ElementLike;
 }
 
-function names(list: ArrayLike<ElementLike>): readonly string[] {
+function names(list: ArrayLike<ElementLike>, attribute?: string): readonly string[] {
   const out: string[] = [];
   for (let at = 0; at < list.length; at += 1) {
     const item = list[at];
-    if (item !== undefined) out.push((item.textContent ?? '').trim());
+    if (item === undefined) continue;
+    out.push(((attribute === undefined ? item.textContent : item.getAttribute(attribute)) ?? '').trim());
   }
   return out;
 }
 
 describe('the exile zone', () => {
-  it('says it is empty in its own words rather than the graveyard one', () => {
-    render(h(Exile, { label: 'Your exile', cards: [] }));
-    expect(screen.getByText('exile is empty')).toBeDefined();
-    expect(screen.queryByText('graveyard is empty')).toBeNull();
+  it('says it is empty without naming the zone its label has already named', () => {
+    // It used to say "exile is empty" against the graveyard's "graveyard is
+    // empty", and the difference was the whole assertion. `mtg-dcxg.10` removed
+    // the noun from both: the label says which zone, the sentence says the
+    // state, and neither can borrow the other's word because neither has one.
+    const { container } = render(h(Exile, { label: 'Your exile', cards: [] }));
+    expect(screen.getByText('empty')).toBeDefined();
+    expect(screen.getByLabelText('Your exile')).toBeDefined();
+    // Through a cast for the reason `../test/board-marks.test.ts` casts: this
+    // suite typechecks under the workspace's single Node tsconfig, which
+    // carries no `dom` lib.
+    const root = container as unknown as { readonly querySelector: (selector: string) => unknown };
+    expect(root.querySelector('.mtg-zone__count')).toBeNull();
   });
 
   it('lists newest first, which is the order the graveyard already promises', () => {
@@ -244,7 +254,9 @@ describe('the board hangs exile off the seat that owns it', () => {
     // Order within the pod: the pile the seat owns comes after the pile it
     // buried, which is the arrangement `Board.ts` argues rather than an accident
     // of the spread.
-    const zones = names(asElement(view.container).querySelectorAll('.mtg-zone__label'));
+    // Read off the spoken names, because the strips print the zone alone now
+    // (`mtg-dcxg.10`) and both seats draw the same two words.
+    const zones = names(asElement(view.container).querySelectorAll('.mtg-browser[aria-label]'), 'aria-label');
     expect(zones.indexOf('Your exile')).toBeGreaterThan(zones.indexOf('Your graveyard'));
   });
 });
@@ -286,7 +298,7 @@ describe('the live position splits one game-wide exile by owner', () => {
     const position = boardPosition(EXILED, 0, NAMES);
     const view = render(h(Board, position));
     const zone = asElement(view.container).querySelectorAll('.mtg-browser[data-seat="opponent"]');
-    const labels = names(zone).filter((said) => said.includes('exile'));
+    const labels = names(zone, 'aria-label').filter((said) => said.includes('exile'));
     expect(labels.length).toBeGreaterThan(0);
     const head = screen.getByRole('button', { name: "Bot's exile, 1 card" });
     fireEvent.click(head);

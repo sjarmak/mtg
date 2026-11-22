@@ -52,6 +52,10 @@ The lab's bundle reduces to three packages, all MIT:
 ## Not dependencies
 
 Forge, XMage, Argentum and Draftmancer are named in `NOTICE`. None of them is
-an npm dependency and none of their source is present in this tree. Forge in
-particular is GPL-3.0 and is only ever downloaded at run time and driven as a
-subprocess.
+an npm dependency and none of their source is present in this tree. Forge is
+GPL-3.0; it is downloaded separately and run as its own process. The
+Forge-derived files this tree does carry, the GPL-3.0 bridge and quoted card
+script lines, are listed in `LICENSE`.
+
+Every npm dependency is permissively licensed, so nothing here constrains how
+the project's own AGPL-3.0-or-later code may be combined with them.

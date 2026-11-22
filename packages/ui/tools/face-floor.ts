@@ -53,16 +53,18 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { isLand, parseCards, setBasics } from '@mtg/dsl';
+import { isLand, setBasics } from '@mtg/dsl';
 import type { Card as DslCard } from '@mtg/dsl';
 import type { GameSession, GameState, PlayerId } from '@mtg/kernel';
 import { DEFAULT_AUTO_PASS, humanSeat, pendingDecision, scenario } from '@mtg/kernel';
 import { Shell } from '../src/app/Shell';
+import type { ShellAt } from '../src/app/Shell';
 import { artResolver, readArtManifest } from '../src/lab/art-manifest';
 import type { ArtResolver } from '../src/lab/art-manifest';
 import { PlayView } from '../src/routes/play/PlayView';
 import { EVENT_LOG_SCHEMA_VERSION, ReplayViewer, readEventLog } from '../src/routes/replay';
 import { uiStyleSheet } from '../src/styles/index';
+import { readSetCards } from './set-file';
 
 const UI_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REPO_ROOT = resolve(UI_ROOT, '..', '..');
@@ -86,15 +88,7 @@ const setPath: string = named;
 const artPath = process.argv[4];
 
 const CARDS = ((): readonly DslCard[] => {
-  const document: unknown = JSON.parse(readFileSync(setPath, 'utf8'));
-  const listed =
-    typeof document === 'object' && document !== null && 'cards' in document
-      ? (document as { readonly cards: unknown }).cards
-      : null;
-  if (!Array.isArray(listed)) {
-    throw new Error(`${setPath} has no "cards" array, so it is not a set document`);
-  }
-  return parseCards(listed);
+  return readSetCards(setPath);
 })();
 
 /** The manifest's resolver, rebased on the page's own directory, or null. */
@@ -528,13 +522,13 @@ window.mtgFaceFloor = function () {
 };
 `;
 
-function shell(mode: 'play' | 'replay', body: ReturnType<typeof h>): string {
-  return renderToStaticMarkup(h(Shell, { mode, onSelectMode: () => undefined, children: body }));
+function shell(at: ShellAt, body: ReturnType<typeof h>): string {
+  return renderToStaticMarkup(h(Shell, { ...at, onSelectMode: () => undefined, children: body }));
 }
 
 function playMarkup(count: number, blocking: boolean, pool?: readonly DslCard[]): string {
   return shell(
-    'play',
+    { mode: 'play' },
     h(PlayView, {
       session: dealtSession(count, blocking, pool),
       viewer: 0,
@@ -551,10 +545,10 @@ function playMarkup(count: number, blocking: boolean, pool?: readonly DslCard[])
 function replayMarkup(count: number, pool?: readonly DslCard[]): string {
   const log = readEventLog(replayLogText(count, pool));
   return shell(
-    'replay',
+    { mode: 'analysis', sub: 'replay' },
     h(ReplayViewer, {
       state: { status: 'ready', log },
-      route: { mode: 'replay', params: { game: '0', seq: '0' } },
+      route: { mode: 'analysis', sub: 'replay', params: { game: '0', seq: '0' } },
       onSetParams: () => undefined,
       ...(ART === null ? {} : { artFor: ART }),
       // ReplayViewer took this prop for the first time in mtg-6hrz. It was

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-controller-contract-receipt",
+  "id": "zone-card-selection-v1",
+  "engineRuntime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "protocolVersion": 2
+  },
+  "decisionFamilies": [
+    "zone-card-selection"
+  ],
+  "sourceRegions": [
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        public Card chooseSingleCardForZoneChange(",
+      "endMarker": "        public CardCollection chooseCardsToDiscardFrom(",
+      "sha256": "5804bc9cd920c1af4602695b8876fb518c0325eacb1348a8b936e48ccf081bc4"
+    },
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        public List<Card> chooseCardsForZoneChange(",
+      "endMarker": "        /** Exact Convoke distributions; Improvise, Waterbend, and all drift remain refused. */",
+      "sha256": "2736efd73c3ea92fa6658200725abb82baac1e1b8f2718f52149456a7b5753cd"
+    }
+  ],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "scenarioReceiptIds": [
+        "shefet-monitor-local-zone-selection-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "scenarioReceiptIds": [
+        "shefet-monitor-engine-zone-selection-v1"
+      ]
+    }
+  ],
+  "evidence": {
+    "scenarioReceipts": [
+      {
+        "receiptId": "shefet-monitor-engine-zone-selection-v1",
+        "file": {
+          "path": "scenarios/shefet-monitor-engine-zone-selection-v1.json",
+          "sha256": "41865927ee9c7a96b5cc3b7baf3c32cf672be2f94dea9065352da3477fe50d4c"
+        }
+      },
+      {
+        "receiptId": "shefet-monitor-local-zone-selection-v1",
+        "file": {
+          "path": "scenarios/shefet-monitor-local-zone-selection-v1.json",
+          "sha256": "d245ac017e2cc6b704b7142ff12f9f51689e5555a061453b598e47b9d9015355"
+        }
+      }
+    ]
+  }
+}

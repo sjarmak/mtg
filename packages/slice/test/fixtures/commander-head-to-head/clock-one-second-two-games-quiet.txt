@@ -1,0 +1,14 @@
+Simulation mode
+Ai(1)-Draconic Domination [C17] [2017] vs Ai(2)-Heavenly Inferno [CMA] [2017] - two games of Commander
+Stopping slow match as draw
+Game Outcome: Turn 5
+Game Outcome: Ai(1)-Draconic Domination [C17] [2017] has won because all opponents have lost
+Game Outcome: Ai(2)-Heavenly Inferno [CMA] [2017] has won because all opponents have lost
+Match Result: Ai(1)-Draconic Domination [C17] [2017]: 1 Ai(2)-Heavenly Inferno [CMA] [2017]: 0 
+Game Result: Game 1 ended in 1040 ms. Ai(1)-Draconic Domination [C17] [2017] has won!
+Stopping slow match as draw
+Game Outcome: Turn 7
+Game Outcome: Ai(1)-Draconic Domination [C17] [2017] has won because all opponents have lost
+Game Outcome: Ai(2)-Heavenly Inferno [CMA] [2017] has won because all opponents have lost
+Match Result: Ai(1)-Draconic Domination [C17] [2017]: 2 Ai(2)-Heavenly Inferno [CMA] [2017]: 0 
+Game Result: Game 2 ended in 1000 ms. Ai(1)-Draconic Domination [C17] [2017] has won!

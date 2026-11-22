@@ -33,9 +33,25 @@
  * they were played.
  */
 import type { ActivatedAbility, Card, Color, ManaCost } from '@mtg/dsl';
-import { COLORS, manaAbilityOf, manaValue } from '@mtg/dsl';
+import {
+  BASIC_LAND_COLOR,
+  BASIC_LAND_TYPES,
+  COLORS,
+  concreteManaCosts,
+  isManaAbility,
+  manaSourceColors,
+  manaValue,
+} from '@mtg/dsl';
 import type { ObjectId, PlayerId } from './ids';
-import { controllerOf, hasCardType, hasKeyword, isCreatureObject } from './layers';
+import {
+  abilitiesOf,
+  controllerOf,
+  copiableValuesOf,
+  hasCardType,
+  hasKeyword,
+  hasSubtype,
+  isCreatureObject,
+} from './layers';
 import type { GameObject, GameState, ManaColor, ManaPool } from './state';
 import { EMPTY_MANA_POOL } from './state';
 import type { Trace } from './trace';
@@ -57,11 +73,34 @@ export function landProduces(card: Card): readonly ManaColor[] {
 }
 
 /**
+ * Colors supplied by a land's current basic land types, beside every printed
+ * land-mana choice it retains. CR 305.6 grants the intrinsic ability from the
+ * current subtype, so this query deliberately goes through the layer walk.
+ */
+export function landProducesOnBattlefield(state: GameState, oid: ObjectId): readonly ManaColor[] {
+  const object = state.objects[oid];
+  if (object === undefined || !hasCardType(state, oid, 'land')) return [];
+  const colors = new Set<ManaColor>(landProduces(copiableValuesOf(state, oid)));
+  for (const landType of BASIC_LAND_TYPES) {
+    if (hasSubtype(state, oid, landType)) colors.add(BASIC_LAND_COLOR[landType]);
+  }
+  return [...colors];
+}
+
+/** Every color a current permanent can produce through the existing action seam. */
+export function manaSourceColorsOf(state: GameState, oid: ObjectId): readonly ManaColor[] {
+  const intrinsic = landProducesOnBattlefield(state, oid);
+  if (intrinsic.length > 0) return intrinsic;
+  const object = state.objects[oid];
+  return object === undefined ? [] : manaSourceColors(copiableValuesOf(state, oid));
+}
+
+/**
  * Spends a cost out of a pool, or returns `null` when the pool cannot cover it.
  * Colored pips come from their own color; generic is paid colorless-first,
  * then WUBRG, which cannot strand a needed pip because pips are taken first.
  */
-export function payFromPool(pool: ManaPool, cost: ManaCost): ManaPool | null {
+function payFixedFromPool(pool: ManaPool, cost: ManaCost): ManaPool | null {
   let remaining: ManaPool = pool;
   for (const color of COLORS) {
     const need = cost[color];
@@ -76,6 +115,18 @@ export function payFromPool(pool: ManaPool, cost: ManaCost): ManaPool | null {
     generic -= spend;
   }
   return generic > 0 ? null : remaining;
+}
+
+/**
+ * Spends either a fixed cost or the first payable fixed expansion of a hybrid
+ * cost. The same expansion order drives source planning below.
+ */
+export function payFromPool(pool: ManaPool, cost: ManaCost): ManaPool | null {
+  for (const fixed of concreteManaCosts(cost)) {
+    const paid = payFixedFromPool(pool, fixed);
+    if (paid !== null) return paid;
+  }
+  return null;
 }
 
 export interface PaymentPlan {
@@ -115,9 +166,16 @@ function costIsOnlyTheTap(ability: ActivatedAbility): boolean {
   // zero and is not free; nothing prints one on a mana ability today, and a
   // guard that reads the flag cannot be surprised by the first card that does.
   if (ability.cost.mana.hasX || manaValue(ability.cost.mana) > 0) return false;
+  if (ability.cost.payLife !== undefined) return false;
   if (ability.cost.sacrificeSelf) return false;
+  if (ability.cost.exileSelf) return false;
   if (ability.cost.sacrificeOther !== undefined) return false;
+  if (ability.cost.sacrificeMatching !== undefined) return false;
+  if (ability.cost.sacrificeLandSubtypePair !== undefined) return false;
+  if (ability.cost.tapMatching !== undefined) return false;
   if (ability.cost.discard !== undefined) return false;
+  if (ability.cost.discardMatching !== undefined) return false;
+  if (ability.cost.removeCounter !== undefined) return false;
   return ability.loyaltyCost === undefined;
 }
 
@@ -137,8 +195,9 @@ function costIsOnlyTheTap(ability: ActivatedAbility): boolean {
  *    throws on. So a computed amount is not a candidate.
  *  - **A cost that is more than the tap.** Paying for the payment is a
  *    recursion this planner does not do, so a mana ability that also charges
- *    mana, a sacrifice or a discard is left to the player to activate by hand
- *    through `activateManaSource`, which does pay it.
+ *    mana is left to the player to activate by hand through
+ *    `activateManaSource`. Chosen or stateful non-mana costs are rejected by
+ *    the DSL because that action carries no payment payload for them.
  *  - **A tap that is not legal now.** CR 302.6: a summoning-sick creature
  *    cannot pay `{T}` unless it has haste (CR 702.10c). `activationBlocker` says
  *    the same thing for the action; a plan that tapped one anyway would be a
@@ -148,12 +207,6 @@ function costIsOnlyTheTap(ability: ActivatedAbility): boolean {
  *    never taps is not spent by being used.
  */
 function tapPromise(state: GameState, object: GameObject): Candidate | null {
-  const colors = landProduces(object.card);
-  if (colors.length > 0 && hasCardType(state, object.oid, 'land')) {
-    return { oid: object.oid, colors, amount: 1 };
-  }
-  const ability = manaAbilityOf(object.card);
-  if (ability === null || !costIsOnlyTheTap(ability)) return null;
   if (
     isCreatureObject(state, object.oid) &&
     object.summoningSick &&
@@ -161,14 +214,25 @@ function tapPromise(state: GameState, object: GameObject): Candidate | null {
   ) {
     return null;
   }
-  for (const effect of ability.effects) {
-    if (effect.kind !== 'addMana') continue;
-    if (typeof effect.amount !== 'number' || effect.amount <= 0) return null;
-    return effect.produces.length === 0
-      ? null
-      : { oid: object.oid, colors: effect.produces, amount: effect.amount };
+
+  const candidates: Candidate[] = [];
+  const intrinsic = landProducesOnBattlefield(state, object.oid);
+  if (intrinsic.length > 0 && hasCardType(state, object.oid, 'land')) {
+    candidates.push({ oid: object.oid, colors: intrinsic, amount: 1 });
   }
-  return null;
+  for (const ability of abilitiesOf(state, object.oid)) {
+    if (ability.kind !== 'activated' || !isManaAbility(ability) || !costIsOnlyTheTap(ability)) continue;
+    const effect = ability.effects.find((candidate) => candidate.kind === 'addMana');
+    if (effect === undefined || typeof effect.amount !== 'number' || effect.amount <= 0) continue;
+    if (effect.produces.length > 0) {
+      candidates.push({ oid: object.oid, colors: effect.produces, amount: effect.amount });
+    }
+  }
+  return (
+    candidates.sort((left, right) =>
+      left.amount !== right.amount ? right.amount - left.amount : right.colors.length - left.colors.length,
+    )[0] ?? null
+  );
 }
 
 function untappedManaSources(
@@ -327,7 +391,7 @@ function buildPlan(
     }
   }
 
-  const afterPips = payFromPool(pool, { ...cost, generic: 0 });
+  const afterPips = payFixedFromPool(pool, { ...cost, generic: 0 });
   if (afterPips === null) return null;
   let genericShort = cost.generic - poolTotal(afterPips);
   while (genericShort > 0) {
@@ -342,7 +406,45 @@ function buildPlan(
     genericShort -= candidate.amount;
   }
 
-  return payFromPool(pool, cost) === null ? null : { taps, produces, amounts };
+  return payFixedFromPool(pool, cost) === null ? null : { taps, produces, amounts };
+}
+
+interface ConcretePaymentPlan {
+  readonly cost: ManaCost;
+  readonly plan: PaymentPlan;
+}
+
+/** How much of the hand's color reserve a completed plan consumes. */
+function planReserveShortfall(
+  plan: PaymentPlan,
+  sources: readonly Candidate[],
+  reserve: ColorReserve,
+): number {
+  const tapped = new Set(plan.taps);
+  const remaining = sourcesPerColor(sources.filter((source) => !tapped.has(source.oid)));
+  return COLORS.reduce((sum, color) => sum + Math.max(0, reserve[color] - remaining[color]), 0);
+}
+
+/** Best payable fixed expansion; canonical expansion order breaks exact ties. */
+function buildPlanForCost(
+  startingPool: ManaPool,
+  sources: readonly Candidate[],
+  cost: ManaCost,
+  reserve: ColorReserve,
+  tiebreak: (count: number) => number,
+): ConcretePaymentPlan | null {
+  let best: ConcretePaymentPlan | null = null;
+  let bestShortfall = Number.POSITIVE_INFINITY;
+  for (const fixed of concreteManaCosts(cost)) {
+    const plan = buildPlan(startingPool, sources, fixed, reserve, tiebreak);
+    if (plan === null) continue;
+    const shortfall = planReserveShortfall(plan, sources, reserve);
+    if (shortfall < bestShortfall) {
+      best = { cost: fixed, plan };
+      bestShortfall = shortfall;
+    }
+  }
+  return best;
 }
 
 /**
@@ -364,9 +466,10 @@ function handReserve(hand: readonly Card[], pool: ManaPool, sources: readonly Ca
   const reserve: Record<Color, number> = { ...NO_RESERVE };
   for (const card of hand) {
     if (card.kind === 'land') continue;
-    if (buildPlan(pool, sources, card.manaCost, NO_RESERVE, firstOfEquals) === null) continue;
+    const payable = buildPlanForCost(pool, sources, card.manaCost, NO_RESERVE, firstOfEquals);
+    if (payable === null) continue;
     for (const color of COLORS) {
-      if (card.manaCost[color] > reserve[color]) reserve[color] = card.manaCost[color];
+      if (payable.cost[color] > reserve[color]) reserve[color] = payable.cost[color];
     }
   }
   return reserve;
@@ -412,8 +515,10 @@ export function planPayment(
     .filter((card): card is Card => card !== undefined);
 
   const reserve = handReserve(hand, seat.pool, sources);
-  const preferred = buildPlan(seat.pool, sources, cost, reserve, firstOfEquals);
-  return preferred ?? buildPlan(seat.pool, sources, cost, NO_RESERVE, firstOfEquals);
+  const preferred = buildPlanForCost(seat.pool, sources, cost, reserve, firstOfEquals);
+  return (
+    preferred?.plan ?? buildPlanForCost(seat.pool, sources, cost, NO_RESERVE, firstOfEquals)?.plan ?? null
+  );
 }
 
 /**
@@ -431,7 +536,7 @@ export function canPay(
 ): boolean {
   const seat = playerOf(state, player);
   return (
-    buildPlan(
+    buildPlanForCost(
       seat.pool,
       untappedManaSources(state, player, excludedSources),
       cost,

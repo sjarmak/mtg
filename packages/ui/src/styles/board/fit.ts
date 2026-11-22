@@ -40,7 +40,7 @@
  * the hand, which is where Magic Online draws it. It is the one block on this
  * column whose height is fixed by its own content rather than by what is left —
  * 33.9px, plus the gap this file takes back below — so it comes off the two
- * battlefield rows and off nothing else. Measured over `../../tools/hand-scale.ts`
+ * battlefield rows and off nothing else. Measured over `../../../tools/hand-scale.ts`
  * at three viewports and 4, 8 and 12 permanents a side: a near face loses 8.1px
  * at 1440x900 and 8.0px at 1280x800 on an uncrowded board, nothing at all at
  * 1024x768, and nothing anywhere at twelve a side — which is where `mtg-0sq`
@@ -135,8 +135,12 @@ import { POD_WIDTH_REM } from './status';
  * than any driven game does: at 1280x800 six permanents a side measures 164px,
  * eight measures 120px, and this floor does not bind until fourteen a side,
  * where the row is already at `MIN_SLOT_WIDTH_REM` and the face is 48px wide.
+ *
+ * Exported for `./band.ts`, which spends it on a box a card may not overflow
+ * rather than on a well that scrolls past it: see `MIN_SLOT_REM`'s use on the
+ * staged combat entry for why the same number answers both questions.
  */
-const MIN_SLOT_REM = 5;
+export const MIN_SLOT_REM = 5;
 
 /**
  * And the narrowest, which is what a crowded row shrinks a card down to before
@@ -157,7 +161,7 @@ const MIN_SLOT_REM = 5;
  * 1024x768 came out 48 x 67 upright against 40.2 x 56.1 tapped. So the tapped
  * floor is this one turned by the trim, and the two states hit bottom together.
  */
-const MIN_SLOT_WIDTH_REM = 3;
+export const MIN_SLOT_WIDTH_REM = 3;
 
 /**
  * And the opponent's face-down cards, drawn at a chip's size because they are
@@ -263,6 +267,13 @@ ${TABLE} .mtg-board__lanes { min-height: 0; gap: var(--mtg-space-1); }
 ${TABLE} .mtg-board__divider { margin: 0; }
 ${TABLE} .mtg-board__side { flex: 1 1 auto; min-height: 0; gap: var(--mtg-space-1); }
 ${TABLE} .mtg-board__side > .mtg-zone { flex: 1 1 auto; }
+/* A zone holding nothing does not take a seat's share of the mat. The rule above
+   splits the leftover height evenly between the two sides whether or not either
+   has a permanent on it, and the opening position of a game is the case where
+   neither does: a replay opened on turn 0 drew two ~230px boxes, 55% of a 900px
+   viewport, to say "no permanents" twice. An empty side is worth its sentence
+   and the other side is worth the rest. */
+${TABLE} .mtg-board__side > .mtg-zone[data-empty='true'] { flex: 0 0 auto; }
 /* The step bar sits flush under the battlefield rather than a gap below it
    (mtg-rgc.6). The band is a flex column with one gap between every pair of
    children, so a third child costs the cards a second gap for no reading, and
@@ -275,6 +286,21 @@ ${TABLE} .mtg-board__side > .mtg-zone { flex: 1 1 auto; }
    it is kept because the reading is right and the pixels are free. */
 ${TABLE} .mtg-board__side > .mtg-phasebar { margin-block-start: calc(-1 * var(--mtg-space-1)); }
 ${TABLE} .mtg-board__side .mtg-zone__head { display: none; }
+/* Except when the zone is empty, where it is the whole of what is left to read.
+   Hiding the head is right for a row of cards — the cards are the zone, and the
+   name over them is a caption on a picture that needs none — and wrong for a row
+   with none: the 2026-08-23 sweep photographed a bare "no permanents" sitting
+   directly above a hand holding seven cards, with nothing on the strip to say
+   which zone the sentence was about (\`mtg-dcxg.10\`). It costs the collapsed
+   strip no height, because the head and the sentence lay out on one line and
+   the strip was already as tall as the sentence; \`../../board/Zone.ts\` drops the
+   \`0\` chip on the same reading, so what comes back is the name and nothing
+   else. */
+${TABLE} .mtg-board__side .mtg-zone[data-empty='true'] .mtg-zone__head { display: flex; }
+/* One line, not two. The name and the sentence are two short phrases about the
+   same nothing, and stacked they double the height of the strip the rule above
+   collapsed. */
+${TABLE} .mtg-board__side .mtg-zone[data-empty='true'] { flex-direction: row; align-items: baseline; }
 ${TABLE} .mtg-zone { min-height: 0; padding: var(--mtg-space-1) var(--mtg-space-2); gap: var(--mtg-space-1); }
 ${TABLE} .mtg-zone__body {
   flex: 1; min-height: 0;
@@ -300,9 +326,8 @@ ${TABLE} .mtg-zone__body {
    The track is transparent so the band's own ground shows through it. */
 ${TABLE} .mtg-board__spells {
   flex: 1 1 auto; min-height: ${cssNumber(SPELLS_ROW_MIN_REM)}rem;
-  flex-wrap: nowrap; align-items: stretch;
-  overflow: auto; padding-block: var(--mtg-space-1);
-  scrollbar-width: thin; scrollbar-color: var(--mtg-line-strong) transparent;
+  flex-wrap: wrap; align-content: center; align-items: center;
+  overflow: visible; padding-block: var(--mtg-space-1);
 }
 /* And the mana band takes no more of the lane than the row's floor leaves it,
    which is the half of that floor mtg-z1h8 did not write down (mtg-bduq).

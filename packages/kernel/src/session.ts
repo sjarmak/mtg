@@ -90,6 +90,8 @@
  * where the answer is kept, so the refusal is a check rather than a recount.
  */
 import type { Action } from './actions';
+import { settleAgentAction } from './agent-preview';
+import { agentView } from './agent-view';
 import { IllegalActionError } from './actions';
 import { canonicalAction, indexOfAction } from './action-identity';
 import type { PlayerAgent } from './agent';
@@ -109,7 +111,7 @@ import { settledAction } from './damage-order';
 import type { GameEvent } from './events';
 import type { PlayerId } from './ids';
 import type { Decision } from './legal';
-import { asksInSteps, pendingDecision, validateAction } from './legal';
+import { asksInSteps, ownedDecision, validateAction } from './legal';
 import { reduce } from './reduce';
 import { createGame } from './setup';
 import type { GameSetup } from './setup';
@@ -349,7 +351,7 @@ export function advance(session: GameSession, options: SessionOptions = {}): Gam
   let committed = session.committed;
 
   for (;;) {
-    const decision = pendingDecision(state);
+    const decision = ownedDecision(state);
     if (decision === null) {
       return {
         ...session,
@@ -366,7 +368,7 @@ export function advance(session: GameSession, options: SessionOptions = {}): Gam
     const seat = session.seats[decision.player];
     let action: Action;
     if (seat.kind === 'human') {
-      if (decision.options.length === 0) {
+      if (decision.options.length === 0 && decision.kind !== 'cardName') {
         throw new Error(
           `session: the kernel asked player ${decision.player} for a "${decision.kind}" decision with no legal options`,
         );
@@ -396,7 +398,11 @@ export function advance(session: GameSession, options: SessionOptions = {}): Gam
       action = decision.options[taken] as Action;
       choices = [...choices, taken];
     } else {
-      action = seat.agent.decide({ state, player: decision.player, decision });
+      action = seat.agent.decide(
+        agentView(state, decision.player, decision, `session:${String(decisions)}`, (candidate) =>
+          settleAgentAction(state, candidate),
+        ),
+      );
       if (action.player !== decision.player) {
         throw new Error(
           `agent ${seat.agent.name} answered for player ${action.player} but player ${decision.player} was asked`,
@@ -597,7 +603,7 @@ export function chooseAction(
   const settled = settledAction(session.state, action);
   const index = indexOfAction(decision.options, settled);
   if (index !== null) return choose(session, index, options);
-  if (decision.complete && !asksInSteps(decision)) {
+  if (decision.complete && !asksInSteps(decision) && decision.kind !== 'cardName') {
     throw new ActionNotEnumeratedError(action, decision);
   }
   return choose(session, canonicalAction(settled), options);
@@ -820,6 +826,8 @@ function midDeclaration(session: GameSession): boolean {
   return (
     combat.attacksSettled !== undefined ||
     combat.blocksSettled !== undefined ||
+    combat.ordered !== undefined ||
+    combat.attackersOrdered !== undefined ||
     pendingSelection !== undefined
   );
 }

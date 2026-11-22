@@ -46,11 +46,24 @@
  * an activation is a bot decision and a trigger is not, so a pool whose
  * activations are dead and whose triggers fire constantly reads as two
  * different numbers instead of one healthy-looking sum.
+ *
+ * `cards` carries 17lands' GAME-dataset per-card columns — `deck_`, `drawn_`,
+ * `opening_hand_` and `sideboard_`, one entry per card name in the `user`
+ * seat's own deck, exactly as every other GAME-only column above (`main_colors`,
+ * `won`, `on_play`, …) already reads from that seat and not `oppo`'s. They are
+ * a different dataset from the replay columns above them — 17lands publishes
+ * GAME and REPLAY as separate files that share only the 18 game-metadata
+ * columns — so this schema is REPLAY-plus-GAME-per-card, not a pure superset of
+ * either alone. `sideboard` is always zero: no sideboard is modeled, so it is a
+ * verbatim 17lands name this pipeline cannot produce, filled per the header's
+ * own zero-fill policy rather than omitted. `drawn` excludes the opening hand,
+ * matching `{side}_total_cards_drawn` above it: a card seen only in the opening
+ * seven counts in `opening_hand`, not `drawn`.
  */
 import { z } from 'zod';
 
 /** Bump on any change to column names or semantics. */
-export const SIM_LOG_SCHEMA_VERSION = 'mtg-sim/replay-superset/2';
+export const SIM_LOG_SCHEMA_VERSION = 'mtg-sim/replay-superset/3';
 
 /** Seat labels, matching 17lands' perspective columns. Seat 0 is always `user`. */
 export const SIDES = ['user', 'oppo'] as const;
@@ -147,6 +160,18 @@ export function totalColumn(side: Side, field: (typeof REPLAY_TOTAL_FIELDS)[numb
   return `${side}_total_${field}`;
 }
 
+/**
+ * 17lands' GAME-dataset per-card column families, verbatim. Unlike the replay
+ * families above, these carry no `{side}` coordinate — GAME rows are already
+ * one seat's own perspective, and here that seat is always `user`.
+ */
+export const CARD_STAT_PREFIXES = ['deck', 'sideboard', 'opening_hand', 'drawn'] as const;
+export type CardStatPrefix = (typeof CARD_STAT_PREFIXES)[number];
+
+export function cardColumn(prefix: CardStatPrefix, cardName: string): string {
+  return `${prefix}_${cardName}`;
+}
+
 const counter = z.number().int().min(0);
 
 export const SideTurnStatsSchema = z.object({
@@ -232,17 +257,33 @@ export const SimExtrasSchema = z.object({
   sim_user_bot: z.string(),
   sim_oppo_bot: z.string(),
   sim_winner: z.union([z.literal(0), z.literal(1), z.null()]),
-  sim_end_reason: z.enum(['lifeZero', 'emptyLibrary', 'concede', 'turnLimit']),
+  sim_end_reason: z.enum(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']),
   sim_decisions: z.number().int().min(0),
 });
 
 export type SimExtras = z.infer<typeof SimExtrasSchema>;
+
+/** One card's GAME-dataset counts, `user`-seat-only. See `cards` on `SimGameLogSchema`. */
+export const CardGameStatsSchema = z.object({
+  deck: counter,
+  sideboard: counter,
+  opening_hand: counter,
+  drawn: counter,
+});
+
+export type CardGameStats = z.infer<typeof CardGameStatsSchema>;
+
+export function emptyCardGameStats(): CardGameStats {
+  return { deck: 0, sideboard: 0, opening_hand: 0, drawn: 0 };
+}
 
 export const SimGameLogSchema = z.object({
   metadata: GameMetadataSchema,
   extras: SimExtrasSchema,
   totals: z.object({ user: SideTotalsSchema, oppo: SideTotalsSchema }),
   turns: z.array(TurnRecordSchema),
+  /** GAME-dataset per-card columns, keyed by card name; see the header. */
+  cards: z.record(z.string(), CardGameStatsSchema),
 });
 
 export type SimGameLog = z.infer<typeof SimGameLogSchema>;

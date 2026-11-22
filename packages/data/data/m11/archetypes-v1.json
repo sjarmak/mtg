@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "m11",
+  "archetypes": [
+    {
+      "id": "white-blue-flyers",
+      "name": "White-Blue Flyers",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Serra Angel",
+        "physicalId": "m11-printed-v1:0027:3c53890f-8cf2-42ad-8b5f-66badc99630c"
+      },
+      "plan": "Defend the ground and win in the air with efficient flyers and tempo interaction."
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Jace's Ingenuity",
+        "physicalId": "m11-printed-v1:0060:b79bea30-3210-4944-b146-3624c9869f45"
+      },
+      "plan": "Trade resources, draw extra cards, and finish after the opponent has exhausted their threats."
+    },
+    {
+      "id": "black-red-sacrifice",
+      "name": "Black-Red Sacrifice",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Act of Treason",
+        "physicalId": "m11-printed-v1:0121:6a64b7c8-d417-4162-8c27-5d3b16f2f381"
+      },
+      "plan": "Pressure life totals, borrow opposing creatures, and convert temporary control into permanent value."
+    },
+    {
+      "id": "red-green-ramp",
+      "name": "Red-Green Ramp",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Cultivate",
+        "physicalId": "m11-printed-v1:0168:2ef3dbe4-5c03-4be4-ab48-45b6689b6712"
+      },
+      "plan": "Accelerate and fix mana with Cultivate before deploying creatures larger than the opposing curve."
+    },
+    {
+      "id": "green-white-creatures",
+      "name": "Green-White Creatures",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Ajani's Pridemate",
+        "physicalId": "m11-printed-v1:0003:f70d1452-6b61-4c63-841f-4256ac498e9f"
+      },
+      "plan": "Curve efficient creatures into larger bodies and use life gain to grow a decisive threat."
+    }
+  ]
+}

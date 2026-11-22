@@ -1,0 +1,130 @@
+import { lane, members } from './groups';
+
+/** Curve pressure, answers, and value. Generic answers remain deliberately flexible. */
+export const FAIR_GROUPS = [
+  members(
+    `Wretched Confluence`,
+    ['card-advantage'],
+    ['card advantage'],
+    [lane('control', 2, ['card advantage'], 0.3)],
+  ),
+  members(`Batterskull`, ['threat'], ['threat'], [lane('midrange', 2, ['threat'], 0.25)]),
+  members(
+    `Giver of Runes | Usher of the Fallen | Kytheon, Hero of Akros | Mother of Runes | Student of Warfare | Thraben Inspector | Charming Prince | Containment Priest | Remorseful Cleric | Esper Sentinel | Selfless Spirit | Stoneforge Mystic | Thalia, Guardian of Thraben | Luminarch Aspirant | Porcelain Legionnaire | Figure of Destiny`,
+    ['cheap-threat', 'threat'],
+    ['threat'],
+    [lane('aggro', 2, ['core'], 0.5), lane('equipment', 1, ['support/glue'], 0.15)],
+  ),
+  members(
+    `Cryptbreaker | Dread Wanderer | Gravecrawler | Gutterbones | Dark Confidant | Kitesail Freebooter | Oona's Prowler | Pack Rat | Bloodghast | Dauthi Voidwalker | Skyclave Shade`,
+    ['cheap-threat', 'threat'],
+    ['threat'],
+    [lane('aggro', 2, ['threat'], 0.5)],
+  ),
+  members(
+    `Dragon's Rage Channeler | Firedrinker Satyr | Goblin Guide | Grim Lavamancer | Monastery Swiftspear | Zurgo Bellstriker | Abbot of Keral Keep | Embereth Shieldbreaker | Goblin Cratermaker | Ragavan, Nimble Pilferer | Dragonkin Berserker | Runaway Steam-Kin | Young Pyromancer | Flametongue Yearling | Magda, Brazen Outlaw | Magmatic Channeler | Bomat Courier | Hexdrinker | Allosaurus Shepherd`,
+    ['cheap-threat', 'threat'],
+    ['threat'],
+    [lane('aggro', 2, ['threat'], 0.5)],
+  ),
+  members(
+    `Blade Splicer | Skyclave Apparition | Elite Spellbinder | Brightling | Hallowed Spiritkeeper | Gideon Blackblade | Ranger-Captain of Eos | Restoration Angel | Hero of Bladehold | Sublime Archangel | Venerated Loxodon | Elspeth, Knight-Errant | Gideon, Ally of Zendikar | Bonecrusher Giant | Legion Warboss | Goblin Rabblemaster | Rampaging Ferocidon | Anax, Hardened in the Forge | Hazoret the Fervent | Hellrider | Rekindling Phoenix | Glorybringer | Lightning Phoenix | Thundermaw Hellkite | Goldspan Dragon | Rotting Regisaur | Rankle, Master of Pranks | Geralf's Messenger | Falkenrath Aristocrat`,
+    ['threat'],
+    ['threat'],
+    [lane('aggro', 2, ['threat'], 0.4), lane('midrange', 1, ['threat'], 0.1)],
+  ),
+  members(
+    `Armageddon | Ravages of War | Sulfuric Vortex | Tangle Wire | Rishadan Port | Wasteland`,
+    ['interaction', 'tempo-denial'],
+    ['interaction'],
+    [lane('aggro', 3, ['payoff'], 0.7)],
+    { flexibility: 0.35 },
+  ),
+  members(
+    `Condemn | Oust | Path to Exile | Swords to Plowshares | Journey to Nowhere | Banishing Light | Oblivion Ring | Council's Judgment | Cast Out | Conclave Tribunal | Faith's Fetters | Unexpectedly Absent | Prismatic Ending | Blessed Alliance | Solitude | Skyclave Apparition | Elspeth Conquers Death | Parallax Wave | Gideon Jura`,
+    ['interaction'],
+    ['interaction'],
+    [lane('control', 1, ['interaction'], 0.12), lane('midrange', 1, ['interaction'], 0.1)],
+  ),
+  members(
+    `Day of Judgment | Wrath of God | Terminus | Slash the Ranks | Toxic Deluge | Damnation | Extinction Event | Languish | Damn | Supreme Verdict | All Is Dust | Oblivion Stone | Sweltering Suns | Anger of the Gods | Pyroclasm`,
+    ['interaction', 'sweeper'],
+    ['interaction'],
+    [lane('control', 3, ['core'], 0.65)],
+  ),
+  members(
+    `Mana Tithe | Pact of Negation | Mana Leak | Miscalculation | Negate | Remand | Remove Soul | Counterspell | Supreme Will | Forbid | Force of Negation | Cryptic Command | Force of Will | Mystic Confluence | Daze | Stratus Dancer | Glen Elendra Archmage`,
+    ['interaction', 'counterspell'],
+    ['interaction'],
+    [lane('control', 2, ['interaction'], 0.25), lane('spells-tempo', 1, ['interaction'], 0.15)],
+  ),
+  members(
+    `Cyclonic Rift | Repeal | Into the Roil | Brazen Borrower | Venser, Shaper Savant | Man-o'-War | Riftwing Cloudskate | Control Magic | Sower of Temptation | Treachery | Fall from Favor`,
+    ['interaction'],
+    ['interaction'],
+    [lane('control', 2, ['interaction'], 0.25), lane('spells-tempo', 1, ['interaction'], 0.15)],
+  ),
+  members(
+    `Power Word Kill | Feed the Swarm | Duress | Fatal Push | Inquisition of Kozilek | Thoughtseize | Doom Blade | Go for the Throat | Heartless Act | Hymn to Tourach | Hero's Downfall | Murderous Rider | Bloodchief's Thirst | Wretched Confluence | Malicious Affliction | Sudden Edict | Collective Brutality | Dismember | Bone Shredder | Gatekeeper of Malakir | Nekrataal | Ravenous Chupacabra | Shriekmaw | Cavalier of Night | Liliana of the Veil | Ob Nixilis Reignited`,
+    ['interaction'],
+    ['interaction'],
+    [lane('control', 2, ['interaction'], 0.2), lane('midrange', 2, ['interaction'], 0.2)],
+  ),
+  members(
+    `Burst Lightning | Chain Lightning | Firebolt | Flame Slash | Lightning Bolt | Shivan Fire | Abrade | Ancient Grudge | Incinerate | Lava Coil | Lightning Strike | Unholy Heat | Searing Spear | Char | Collective Defiance | Exquisite Firecraft | Fiery Confluence | Stoke the Flames | Roil Eruption | Banefire | Devil's Play | Bonfire of the Damned | Fire Prophecy | Rift Bolt | Lightning Helix | Electrolyze | Prismari Command | Kolaghan's Command`,
+    ['interaction', 'burn'],
+    ['interaction'],
+    [lane('aggro', 1, ['interaction'], 0.15), lane('spells-tempo', 1, ['interaction'], 0.15)],
+  ),
+  members(
+    `Primal Might | Beast Within | Reclamation Sage | Thrashing Brontodon | Acidic Slime | Sawtusk Demolisher | Polukranos, World Eater | Vanishing Verse | Vindicate | Tidehollow Sculler | Knight of Autumn | Fractured Identity | Bedevil | Abrupt Decay | Casualties of War | Grist, the Hunger Tide | Vraska, Relic Seeker | Ajani Vengeant | Dakkon, Shadow Slayer | Daretti, Ingenious Iconoclast | Duplicant | Engineered Explosives | Phyrexian Revoker | Karn Liberated | Ugin, the Spirit Dragon`,
+    ['interaction'],
+    ['interaction'],
+    [lane('midrange', 2, ['interaction'], 0.2), lane('control', 1, ['interaction'], 0.1)],
+  ),
+  members(
+    `Brainstorm | Opt | Ponder | Preordain | Serum Visions | Portent`,
+    ['selection'],
+    ['support/glue'],
+    [lane('spells-tempo', 2, ['enabler'], 0.3), lane('control', 1, ['support/glue'], 0.1)],
+  ),
+  members(
+    `Wall of Omens | Mulldrifter | Consecrated Sphinx | Ancestral Vision | Chart a Course | Compulsive Research | Thirst for Knowledge | Fact or Fiction | Careful Consideration | Narset, Parter of Veils | Jace, the Mind Sculptor | Mystic Confluence | Night's Whisper | Read the Bones | Phyrexian Arena | Ob Nixilis Reignited | Coercive Portal | The Immortal Sun | Teferi, Hero of Dominaria | Sphinx's Revelation | Expressive Iteration | Search for Azcanta`,
+    ['card-advantage'],
+    ['card advantage'],
+    [lane('control', 2, ['card advantage'], 0.3)],
+  ),
+  members(
+    `Dark Confidant | Midnight Reaper | Gonti, Lord of Luxury | Liliana, the Last Hope | Outpost Siege | Chandra, Torch of Defiance | Showdown of the Skalds | Escape to the Wilds | Wall of Blossoms | Tireless Tracker | Courser of Kruphix | Jadelight Ranger | Toski, Bearer of Secrets | Sylvan Library | Eternal Witness | Den Protector | Garruk, Primal Hunter | The Great Henge | Ranger Class | Baleful Strix | Shardless Agent | Uro, Titan of Nature's Wrath | Edric, Spymaster of Trest | Hydroid Krasis | The Scarab God`,
+    ['card-advantage'],
+    ['card advantage'],
+    [lane('midrange', 2, ['card advantage'], 0.3)],
+  ),
+  members(
+    `Timeless Dragon | Lyra Dawnbringer | Baneslayer Angel | Archangel Avacyn | Sun Titan | Frost Titan | Torrential Gearhulk | Shark Typhoon | Alrund's Epiphany | Grave Titan | Massacre Wurm | Kalitas, Traitor of Ghet | Nighthawk Scavenger | Vampire Nighthawk | Phyrexian Obliterator | Gray Merchant of Asphodel | Bloodline Keeper | Lolth, Spider Queen | Koth of the Hammer | Chandra, Awakened Inferno | Questing Beast | Thrun, the Last Troll | Thragtusk | Elder Gargaroth | Whisperwood Elemental | Nissa, Who Shakes the World | Vivien, Monsters' Advocate | Garruk Relentless | Bloodbraid Elf | Huntmaster of the Fells | Klothys, God of Destiny | Kitchen Finks | Voice of Resurgence | Oko, Thief of Crowns | Koma, Cosmos Serpent | Fallen Shinobi | Zareth San, the Trickster | Kroxa, Titan of Death's Hunger | Omnath, Locus of Creation | Niv-Mizzet Reborn | Dragonlord Silumgar | Dragonlord Atarka | Niv-Mizzet, Parun | Velomachus Lorehold | Nicol Bolas, Planeswalker | Wurmcoil Engine | Walking Ballista | Stonecoil Serpent`,
+    ['threat'],
+    ['threat'],
+    [lane('midrange', 2, ['threat'], 0.25)],
+  ),
+  members(
+    `Oko, Thief of Crowns | Jace, the Mind Sculptor | Teferi, Hero of Dominaria | Teferi, Time Raveler | Fractured Identity | Uro, Titan of Nature's Wrath | Omnath, Locus of Creation | Niv-Mizzet Reborn | Nicol Bolas, Planeswalker | Golos, Tireless Pilgrim | Hydroid Krasis | Koma, Cosmos Serpent | Valki, God of Lies`,
+    ['card-advantage'],
+    ['card advantage'],
+    [lane('multicolor-control', 2, ['payoff'], 0.15)],
+    { quality: 5 },
+  ),
+  members(
+    `Swords to Plowshares | Umezawa's Jitte | Treachery | Solitude | Ragavan, Nimble Pilferer`,
+    [],
+    [],
+    [],
+    { quality: 5 },
+  ),
+  members(
+    `Lightning Bolt | Thoughtseize | Counterspell | Force of Will | Force of Negation | Fatal Push | Dismember | Toxic Deluge | Damnation | Wrath of God | Skyclave Apparition | Snapcaster Mage | Stoneforge Mystic | Eternal Witness | Sylvan Library | Chandra, Torch of Defiance | Liliana of the Veil | Bonecrusher Giant | Seasoned Pyromancer | Wurmcoil Engine | Batterskull | Grave Titan | Inferno Titan | Primeval Titan | Glorybringer | Thundermaw Hellkite | Consecrated Sphinx | Spellseeker | Expressive Iteration | Birds of Paradise | Noble Hierarch | Ignoble Hierarch`,
+    [],
+    [],
+    [],
+    { quality: 4 },
+  ),
+] as const;

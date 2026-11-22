@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-10-01T08:27:39.932Z",
+  "sources": [
+    {
+      "code": "GPT",
+      "mtgjson": {
+        "file": "GPT-8c872c726a55ab41f195b8cb04733cd225f1a3e7bcd7e48fce98fdae274387fc.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/GPT.json",
+        "sha256": "8c872c726a55ab41f195b8cb04733cd225f1a3e7bcd7e48fce98fdae274387fc",
+        "meta": {
+          "date": "2026-09-30",
+          "version": "5.3.0+20260930"
+        }
+      },
+      "scryfall": {
+        "file": "GPT-3505995bdac0338bdc996f29240adcac5d5b22d209d2d756c7b700bdf65cd8cc.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Agpt+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "3505995bdac0338bdc996f29240adcac5d5b22d209d2d756c7b700bdf65cd8cc",
+        "cards": 167
+      }
+    },
+    {
+      "code": "RAV",
+      "mtgjson": {
+        "file": "RAV-91cccb1d3c661e9f173cdd0c4a86c7d902fc9b804ec52c87663a27633fed1a61.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/RAV.json",
+        "sha256": "91cccb1d3c661e9f173cdd0c4a86c7d902fc9b804ec52c87663a27633fed1a61",
+        "meta": {
+          "date": "2026-09-30",
+          "version": "5.3.0+20260930"
+        }
+      },
+      "scryfall": {
+        "file": "RAV-575ea168a981950da390fbfa4a27910b4c63faaaa49df28a6c38a5464d435498.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Arav+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "575ea168a981950da390fbfa4a27910b4c63faaaa49df28a6c38a5464d435498",
+        "cards": 306
+      }
+    }
+  ]
+}

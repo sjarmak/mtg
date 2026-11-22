@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "rtr",
+  "archetypes": [
+    {
+      "id": "white-blue-detain",
+      "name": "White-Blue Detain",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Azorius Arrester",
+        "physicalId": "rtr-printed-v1:0005:199f7563-563e-483c-8317-5380a83db955"
+      },
+      "plan": "Use detain to remove blockers for a turn while an efficient creature curve keeps attacking."
+    },
+    {
+      "id": "blue-red-overload",
+      "name": "Blue-Red Overload",
+      "colors": ["U", "R"],
+      "signpost": {
+        "name": "Frostburn Weird",
+        "physicalId": "rtr-printed-v1:0215:ba5a68d3-6bc9-4de8-bc06-e1106cf9b3d4"
+      },
+      "plan": "Trade tempo early, then turn flexible overload spells into late-game card advantage."
+    },
+    {
+      "id": "black-red-unleash",
+      "name": "Black-Red Unleash",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Rakdos Cackler",
+        "physicalId": "rtr-printed-v1:0220:5f873c0b-e779-4f09-8e9c-94a1765eb5da"
+      },
+      "plan": "Deploy unleashed creatures on curve and use removal to keep the opponent from stabilizing."
+    },
+    {
+      "id": "black-green-scavenge",
+      "name": "Black-Green Scavenge",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Dreg Mangler",
+        "physicalId": "rtr-printed-v1:0158:28d42d6a-e9a0-449e-9b31-436c09b7c1ba"
+      },
+      "plan": "Trade creatures early and reuse them through scavenge to make every later threat larger."
+    },
+    {
+      "id": "green-white-populate",
+      "name": "Green-White Populate",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Vitu-Ghazi Guildmage",
+        "physicalId": "rtr-printed-v1:0207:e54f8e61-550f-4493-b8ba-65f81b2457d3"
+      },
+      "plan": "Create a large creature token, copy it with populate, and win through a widening board."
+    }
+  ]
+}

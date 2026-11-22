@@ -122,7 +122,8 @@ type OrderDecision = Extract<Decision, { kind: 'orderBlockers' }>;
  */
 export function orderPlan(state: GameState, names: SeatNames, decision: Decision): OrderPlan | null {
   if (decision.kind !== 'orderBlockers') return null;
-  if (decision.options.length < 2 && decision.complete) return null;
+  if (decision.options.filter((option) => option.type !== 'concede').length < 2 && decision.complete)
+    return null;
   const groups = groupsOf(state, names, decision);
   if (groups.length === 0) return null;
   return { player: decision.player, groups, options: decision.options };

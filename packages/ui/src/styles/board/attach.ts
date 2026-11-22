@@ -58,6 +58,21 @@ import { RATIO } from './geometry';
  */
 const TUCKED_HEIGHT = 0.7;
 
+/** The keyline itself, and the breathing room inside it. */
+const TRAY_PADDING_PX = 2;
+const TRAY_BORDER_PX = 1;
+
+/**
+ * What the tray costs on the block axis before either card is drawn.
+ *
+ * Exported because `./hand.ts` bounds the tray's height so the host card inside
+ * it comes out the width of the bare permanent beside it, and that arithmetic
+ * needs the chrome this file draws around it. Two declarations of six pixels
+ * would agree until the day one of them is edited, which is the argument
+ * `./geometry.ts` opens with.
+ */
+export const TRAY_BLOCK_CHROME_PX = (TRAY_PADDING_PX + TRAY_BORDER_PX) * 2;
+
 export const ATTACH_CSS = `
 .mtg-mark__glyph { display: block; width: 0.85em; height: 0.85em; fill: currentColor; }
 /* Asked of the slot rather than followed from the marks row, and mtg-9edk is
@@ -72,9 +87,11 @@ export const ATTACH_CSS = `
 }
 .mtg-attach {
   display: flex; flex: 0 1 auto; min-width: 0; align-items: stretch;
-  padding: 2px; border: 1px solid var(--mtg-line-strong); border-radius: var(--mtg-radius-md);
+  padding: ${cssNumber(TRAY_PADDING_PX)}px;
+  border: ${cssNumber(TRAY_BORDER_PX)}px solid var(--mtg-line-strong); border-radius: var(--mtg-radius-md);
   background: var(--mtg-surface-inset);
 }
+.mtg-attach[data-holds='false'] { display: contents; }
 .mtg-attach__held { display: flex; flex: 0 1 auto; min-width: 0; align-items: flex-end; gap: 2px; }
 .mtg-attach__held > .mtg-slot[data-slot] {
   width: auto; height: ${cssNumber(TUCKED_HEIGHT * 100)}%; min-height: 0;

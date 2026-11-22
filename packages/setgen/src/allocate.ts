@@ -12,7 +12,7 @@
  *    is actually printed in the colors that asked for it.
  * Both are recorded as notes so the report can explain the set to a designer.
  */
-import type { AbilityKind, Color, EffectKind, Keyword } from '@mtg/dsl';
+import type { Color, EffectKind, Keyword, ModelAbilityKind } from '@mtg/dsl';
 import { COLORS } from '@mtg/dsl';
 import type {
   PieLevel,
@@ -39,6 +39,7 @@ import {
 import type { ManaValueRange } from './roles';
 import type { Slot } from './slot';
 import { carriesAbilities, printsNoText, slotId } from './slot';
+import { capabilitiesForMechanic } from './capabilities';
 import { applyStatedSpellRoles } from './stated-roles';
 import { createRng, shuffle } from './rng';
 import type { Rng } from './rng';
@@ -51,6 +52,25 @@ const PIE_PREFERENCE: Readonly<Record<PieLevel, number>> = {
   offPie: 3,
 };
 
+/**
+ * A mechanic one group's ability pass could not seat, and the reason.
+ *
+ * `mtg-xjfa`. The pass declines exactly one way — every slot in the group that
+ * can carry an ability is already carrying another mechanic — and until now it
+ * said so only in a note. A note is prose, and the reader who most needs this
+ * fact is `checkMechanicCoverage`, which was left guessing and guessed wrong:
+ * it told a brief author their mechanic's vocabulary never reached a common
+ * role when the vocabulary was identical to one that did and the group had
+ * simply run out of permanents. So the decline is recorded as a value beside
+ * the note, and the finding reads the value rather than grepping the sentence.
+ */
+export interface MechanicDecline {
+  readonly mechanic: string;
+  readonly rarity: SliceRarity;
+  readonly color: Color | null;
+  readonly reason: 'noPermanentSlotLeft';
+}
+
 export interface Allocation {
   readonly brief: SetBrief;
   /** The profile actually allocated against: the brief's profile after archetype reservation. */
@@ -60,6 +80,8 @@ export interface Allocation {
   readonly archetypes: readonly ArchetypePlan[];
   /** Every judgment the allocator made, in the order it made it. */
   readonly notes: readonly string[];
+  /** The ability pass's refusals, as values. See `MechanicDecline`. */
+  readonly abilityDeclines: readonly MechanicDecline[];
 }
 
 const POOLS: readonly (Color | null)[] = [...COLORS, null];
@@ -75,6 +97,7 @@ export function allocateSlots(
   }
   const rng = createRng(`${brief.seed}|${brief.setCode}|${brief.targetSize}`);
   const notes: string[] = [];
+  const declines: MechanicDecline[] = [];
   const slots: Slot[] = [];
 
   // Four passes bend the profile before anything is allocated, and the brief's
@@ -124,6 +147,7 @@ export function allocateSlots(
           brief,
           rng,
           notes,
+          declines,
           bomb: rarityPolicy(rarity, derived.profile.rarityRules).bomb,
         }),
       );
@@ -158,7 +182,14 @@ export function allocateSlots(
   );
   notes.push(...required.notes);
 
-  return { brief, profile: derived.profile, slots: required.slots, archetypes, notes };
+  return {
+    brief,
+    profile: derived.profile,
+    slots: required.slots,
+    archetypes,
+    notes,
+    abilityDeclines: declines,
+  };
 }
 
 /**
@@ -223,12 +254,13 @@ interface GroupInput {
   readonly brief: SetBrief;
   readonly rng: Rng;
   readonly notes: string[];
+  readonly declines: MechanicDecline[];
   /** This group is at or above the profile's `bombsMinRarity`. */
   readonly bomb: boolean;
 }
 
 function allocateGroup(input: GroupInput): Slot[] {
-  const { plan, rarity, color, brief, rng, notes, bomb } = input;
+  const { plan, rarity, color, brief, rng, notes, declines, bomb } = input;
   const curve = expandCurve(plan.creatureCurve);
   if (curve.length !== plan.creatures) {
     throw new Error(
@@ -267,7 +299,7 @@ function allocateGroup(input: GroupInput): Slot[] {
       ? colorlessPermanentSlots(plan, rarity, creatureSlots.length, bomb)
       : coloredSpellSlots(plan, rarity, color, brief, creatureSlots.length, bomb, notes);
 
-  return reserveAbilitySlots([...creatureSlots, ...spellSlots], brief, color, rarity, notes, bomb);
+  return reserveAbilitySlots([...creatureSlots, ...spellSlots], brief, color, rarity, notes, declines, bomb);
 }
 
 /**
@@ -349,6 +381,7 @@ function reserveAbilitySlots(
   color: Color | null,
   rarity: SliceRarity,
   notes: string[],
+  declines: MechanicDecline[],
   bomb: boolean,
 ): Slot[] {
   const applicable = brief.mechanics.filter(
@@ -359,6 +392,7 @@ function reserveAbilitySlots(
     const free = slots.filter((slot) => carriesAbilities(slot) && !chosen.has(slot.id));
     const slot = free.find((candidate) => candidate.keywords.length === 0) ?? free[0];
     if (slot === undefined) {
+      declines.push({ mechanic: mechanic.name, rarity, color, reason: 'noPermanentSlotLeft' });
       notes.push(
         `${rarity} ${color ?? 'colorless'}: mechanic "${mechanic.name}" asked for ${mechanic.abilityKinds.join('/')}, ` +
           'and the group had no permanent slot left to carry it.',
@@ -394,6 +428,9 @@ function reserveAbilitySlots(
             abilityKinds: mechanic.abilityKinds,
             triggerConditions: mechanic.triggerConditions,
             mechanics,
+            ...(capabilitiesForMechanic(mechanic).length === 0
+              ? {}
+              : { capabilities: capabilitiesForMechanic(mechanic) }),
           };
         });
 
@@ -506,8 +543,8 @@ function fillTextlessPermanents(
   return slots.map((slot) => (ids.has(slot.id) ? { ...slot, abilityKinds: STATIC_ABILITY_KIND } : slot));
 }
 
-/** The one `AbilityKind` `fillTextlessPermanents` ever hands out. */
-const STATIC_ABILITY_KIND: readonly AbilityKind[] = ['static'];
+/** The one model ability kind `fillTextlessPermanents` ever hands out. */
+const STATIC_ABILITY_KIND: readonly ModelAbilityKind[] = ['static'];
 
 /** A permanent slot that, as allocated, would print a card with no rules text. */
 function isTextlessPermanent(slot: Slot): boolean {
@@ -517,7 +554,7 @@ function isTextlessPermanent(slot: Slot): boolean {
 interface UnnamedAbilities {
   /** The slots that get one, so the caller applies no predicate of its own. */
   readonly ids: ReadonlySet<string>;
-  readonly kinds: readonly AbilityKind[];
+  readonly kinds: readonly ModelAbilityKind[];
 }
 
 /**
@@ -626,6 +663,7 @@ function coloredSpellSlots(
       mechanics: chosen.mechanics,
       archetypes: [],
       signpost: false,
+      ...(profile.capabilities === undefined ? {} : { capabilities: profile.capabilities }),
     };
   });
 }

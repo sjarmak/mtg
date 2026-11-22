@@ -43,11 +43,14 @@ export type { JsonExtraction } from './json';
 export { buildAttemptPrompt } from './prompt';
 export type { AttemptPromptInput } from './prompt';
 
+export { inlineRefs } from './deref';
+
 export {
   asObjectSchema,
   FIXTURE_KEY_VERSION,
   fixtureKey,
   formatIssues,
+  isStrictlyAdditiveSchemaWidening,
   toJsonSchema,
   WRAPPER_PROPERTY,
 } from './schema';
@@ -92,6 +95,7 @@ export {
   DEFAULT_CLAUDE_CLI_MODEL,
   DEFAULT_CLI_TIMEOUT_MS,
   envelopeToRawResponse,
+  MAX_ARG_BYTES,
   parseClaudeCliEnvelope,
   resolveEffort,
 } from './providers/claude-cli';
@@ -151,7 +155,9 @@ export {
   completionSpend,
   costAgreementOf,
   costCheckOf,
+  DEFAULT_SCHEMA_ENCODING,
   isProviderName,
+  SCHEMA_ENCODINGS,
   PROVIDER_NAMES,
   totalTokens,
   UNCHECKED_COST,
@@ -175,5 +181,6 @@ export type {
   ProviderName,
   RawRequest,
   RawResponse,
+  SchemaEncoding,
   TokenUsage,
 } from './types';

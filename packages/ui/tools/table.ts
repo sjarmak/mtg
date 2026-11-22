@@ -24,13 +24,13 @@ import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseCard } from '@mtg/dsl';
 import type { Card } from '@mtg/dsl';
 import { resolveSet } from './resolve-set';
 import type { ResolvedSet } from './resolve-set';
 import { flagshipOnly, SET_CANDIDATES } from './set-candidates';
 import { choosePreconFile, preconCandidatesFor } from './stage-precons';
 import { chooseDeck, chooseName, chooseSeed, deckMenu, netplayFlags } from './table/menu';
+import { cardsInDocument } from './set-file';
 
 const UI_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REPO_ROOT = resolve(UI_ROOT, '..', '..');
@@ -41,13 +41,11 @@ function fail(message: string): never {
 }
 
 function cardsOf(document: ResolvedSet): readonly Card[] {
-  const parsed: unknown = JSON.parse(document.json);
-  if (typeof parsed !== 'object' || parsed === null || !('cards' in parsed)) {
-    fail(`${document.path} has no "cards" array`);
+  try {
+    return cardsInDocument(document.json, document.path);
+  } catch (cause: unknown) {
+    fail(cause instanceof Error ? cause.message : String(cause));
   }
-  const { cards } = parsed as { cards: unknown };
-  if (!Array.isArray(cards)) fail(`${document.path} has no "cards" array`);
-  return cards.map((card: unknown) => parseCard(card));
 }
 
 /**

@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "coveragePlan": "out/validation-pilot/akh-hou-complete-coverage-plan-v6/coverage-plan.json",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "abandoned-sarcophagus-local-controller-profile-v1",
+      "scope": "scenario",
+      "controller": "local",
+      "sourceName": "Abandoned Sarcophagus",
+      "sourceSeat": 0,
+      "decisionFamilies": ["priority"],
+      "assertions": ["Abandoned Sarcophagus local controller profile"],
+      "testFile": "packages/forge-export/test/bridge-priority-controller-profile.integration.test.ts"
+    },
+    {
+      "id": "abandoned-sarcophagus-engine-controller-profile-v1",
+      "scope": "scenario",
+      "controller": "engine",
+      "sourceName": "Abandoned Sarcophagus",
+      "sourceSeat": 1,
+      "decisionFamilies": ["priority"],
+      "assertions": ["Abandoned Sarcophagus engine controller profile"],
+      "testFile": "packages/forge-export/test/bridge-priority-controller-profile.integration.test.ts"
+    },
+    {
+      "id": "ancient-crab-local-controller-profile-v1",
+      "scope": "scenario",
+      "controller": "local",
+      "sourceName": "Ancient Crab",
+      "sourceSeat": 0,
+      "decisionFamilies": ["priority", "combat"],
+      "assertions": ["Ancient Crab local controller profile"],
+      "testFile": "packages/forge-export/test/bridge-textless-controller-profile.integration.test.ts"
+    },
+    {
+      "id": "ancient-crab-engine-controller-profile-v1",
+      "scope": "scenario",
+      "controller": "engine",
+      "sourceName": "Ancient Crab",
+      "sourceSeat": 1,
+      "decisionFamilies": ["priority", "combat"],
+      "assertions": ["Ancient Crab engine controller profile"],
+      "testFile": "packages/forge-export/test/bridge-textless-controller-profile.integration.test.ts"
+    },
+    {
+      "id": "ahn-crop-crasher-local-exert-scenario-v1",
+      "scope": "scenario",
+      "controller": "local",
+      "sourceName": "Ahn-Crop Crasher",
+      "sourceSeat": 0,
+      "decisionFamilies": [
+        "priority",
+        "targets",
+        "optional-costs",
+        "combat",
+        "combat-exert",
+        "exert-payoff",
+        "exert-skip-untap",
+        "exert-recover-untap"
+      ],
+      "assertions": [
+        "single-source attack exert contract Ahn-Crop Crasher: exert=false",
+        "single-source attack exert contract Ahn-Crop Crasher: exert=true"
+      ],
+      "testFile": "packages/forge-export/test/bridge-exert-contract.integration.test.ts"
+    },
+    {
+      "id": "ahn-crop-crasher-engine-exert-scenario-v1",
+      "scope": "scenario",
+      "controller": "engine",
+      "sourceName": "Ahn-Crop Crasher",
+      "sourceSeat": 1,
+      "decisionFamilies": [
+        "priority",
+        "targets",
+        "optional-costs",
+        "combat",
+        "combat-exert",
+        "exert-payoff",
+        "exert-skip-untap",
+        "exert-recover-untap"
+      ],
+      "assertions": [
+        "native bot exert opportunities 'Ahn-Crop Crasher': native choice, payoff and skipped untap"
+      ],
+      "testFile": "packages/forge-export/test/bridge-exert-bot-scenario.integration.test.ts"
+    },
+    {
+      "id": "glorybringer-local-exert-scenario-v1",
+      "scope": "scenario",
+      "controller": "local",
+      "sourceName": "Glorybringer",
+      "sourceSeat": 0,
+      "decisionFamilies": [
+        "priority",
+        "targets",
+        "optional-costs",
+        "combat",
+        "combat-exert",
+        "exert-payoff",
+        "exert-skip-untap",
+        "exert-recover-untap"
+      ],
+      "assertions": [
+        "single-source attack exert contract Glorybringer: exert=false",
+        "single-source attack exert contract Glorybringer: exert=true"
+      ],
+      "testFile": "packages/forge-export/test/bridge-exert-contract.integration.test.ts"
+    },
+    {
+      "id": "glorybringer-engine-exert-scenario-v1",
+      "scope": "scenario",
+      "controller": "engine",
+      "sourceName": "Glorybringer",
+      "sourceSeat": 1,
+      "decisionFamilies": [
+        "priority",
+        "targets",
+        "optional-costs",
+        "combat",
+        "combat-exert",
+        "exert-payoff",
+        "exert-skip-untap",
+        "exert-recover-untap"
+      ],
+      "assertions": [
+        "native bot exert opportunities 'Glorybringer': native choice, payoff and skipped untap"
+      ],
+      "testFile": "packages/forge-export/test/bridge-exert-bot-scenario.integration.test.ts"
+    },
+    {
+      "id": "gust-walker-local-exert-scenario-v1",
+      "scope": "scenario",
+      "controller": "local",
+      "sourceName": "Gust Walker",
+      "sourceSeat": 0,
+      "decisionFamilies": [
+        "priority",
+        "optional-costs",
+        "combat",
+        "combat-exert",
+        "exert-payoff",
+        "exert-skip-untap",
+        "exert-recover-untap"
+      ],
+      "assertions": [
+        "single-source attack exert contract Gust Walker: exert=false",
+        "single-source attack exert contract Gust Walker: exert=true"
+      ],
+      "testFile": "packages/forge-export/test/bridge-exert-contract.integration.test.ts"
+    },
+    {
+      "id": "gust-walker-engine-exert-scenario-v1",
+      "scope": "scenario",
+      "controller": "engine",
+      "sourceName": "Gust Walker",
+      "sourceSeat": 1,
+      "decisionFamilies": [
+        "priority",
+        "optional-costs",
+        "combat",
+        "combat-exert",
+        "exert-payoff",
+        "exert-skip-untap",
+        "exert-recover-untap"
+      ],
+      "assertions": ["native bot exert opportunities 'Gust Walker': native choice, payoff and skipped untap"],
+      "testFile": "packages/forge-export/test/bridge-exert-bot-scenario.integration.test.ts"
+    }
+  ]
+}

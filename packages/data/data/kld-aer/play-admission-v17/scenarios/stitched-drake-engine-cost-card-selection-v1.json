@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-scenario-probe-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "266c365eebfa3023207d91f00e942926483cfe74f4c7f6382527816bef0855fb",
+    "adapterSha256": "c35761829bb2a2273aeebc963d5bc3a54ebca474c3dd2dec0902d3436d483083",
+    "protocolVersion": 2
+  },
+  "result": {
+    "id": "stitched-drake-engine-cost-card-selection-v1",
+    "scope": "scenario",
+    "controller": "engine",
+    "sourceName": "Stitched Drake",
+    "sourceSeat": 1,
+    "decisionFamilies": [
+      "priority",
+      "cost-card-selection"
+    ],
+    "assertions": [
+      "ISD controller contract witnesses lets Forge choose Stitched Drake graveyard-exile payment"
+    ],
+    "status": "passed"
+  },
+  "sourceScript": {
+    "path": "s/stitched_drake.txt",
+    "sha256": "6327f7b7f6aceeebec21ad4cc3da04863c2e070d88d40dce436d65ffda8564d8"
+  },
+  "sources": [
+    {
+      "path": "packages/forge-export/test/observed-isd-contract-witness.integration.test.ts",
+      "sha256": "82df804531f495fc0ffeb565f3d558444cd6e8fd1b798f1f233cf796ae6cdafe"
+    },
+    {
+      "path": "packages/forge-export/test/support/exert-scenarios.ts",
+      "sha256": "91502d7d0dd90d99bcbd67535d561d153cd71558aac8657c0f659629b749935b"
+    },
+    {
+      "path": "packages/forge-export/test/support/isd-match-fixture.ts",
+      "sha256": "e5c0767437e824d6f40669c75a2e9ac0438b2173d4676f4902923b669ac8e66e"
+    },
+    {
+      "path": "packages/forge-export/test/support/printed-match-probes.ts",
+      "sha256": "246653ef7d2bb516e89b58429f2bbdc2cf490242d7aa452ed504894bb6b8d5e0"
+    },
+    {
+      "path": "packages/forge-export/test/support/scd-match-fixture.ts",
+      "sha256": "954cbe53d0f5cdffb47f46cf9be64507d3559b8387490d1e61576b14d88136af"
+    },
+    {
+      "path": "packages/forge-export/test/support/snapshot-backend.ts",
+      "sha256": "56c29208bc9980e74efec42b19447162f49b2568041e07184fe311607d8aa353"
+    },
+    {
+      "path": "packages/forge-export/test/support/textless-blocking.ts",
+      "sha256": "1ea2cba3671c2304881f1c36fb02df22a5f388747a20806fc4323fc7f5cb3a93"
+    }
+  ],
+  "cases": [
+    {
+      "testFile": "packages/forge-export/test/observed-isd-contract-witness.integration.test.ts",
+      "testIdentity": {
+        "id": "810465827_0_3",
+        "ancestorTitles": [
+          "ISD controller contract witnesses"
+        ],
+        "title": "lets Forge choose Stitched Drake graveyard-exile payment"
+      },
+      "formatId": "isd",
+      "stateSha256": "7626f54b025bf1bd87c744cf091d534117af35a01fd33f97455157a775c88143",
+      "seed": "isd-stitched-drake-engine-cost-v1",
+      "maximumTurns": 3
+    }
+  ],
+  "evidence": {
+    "report": {
+      "path": "vitest.json",
+      "sha256": "cf1c1912233ee40b09194f0f55587968b2c13935fe42ea651a89d990ed4a0699"
+    },
+    "usage": {
+      "path": "snapshot-usage.jsonl",
+      "sha256": "f715ee2df0af7e6379aa72f86f6d8a420cc7b286f005169dedca38045ca04bde"
+    }
+  }
+}

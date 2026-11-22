@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-reviewed-profiles",
+  "completeBehaviorReviews": [
+    "a/ahn_crop_crasher.txt",
+    "a/ancient_crab.txt",
+    "g/glorybringer.txt",
+    "g/gust_walker.txt"
+  ],
+  "profileRepresentatives": {
+    "a/abandoned_sarcophagus.txt": {
+      "local": {
+        "receiptId": "abandoned-sarcophagus-local-controller-profile-v1",
+        "assertions": ["Abandoned Sarcophagus local controller profile"]
+      },
+      "engine": {
+        "receiptId": "abandoned-sarcophagus-engine-controller-profile-v1",
+        "assertions": ["Abandoned Sarcophagus engine controller profile"]
+      }
+    },
+    "a/ancient_crab.txt": {
+      "local": {
+        "receiptId": "ancient-crab-local-controller-profile-v1",
+        "assertions": ["Ancient Crab local controller profile"]
+      },
+      "engine": {
+        "receiptId": "ancient-crab-engine-controller-profile-v1",
+        "assertions": ["Ancient Crab engine controller profile"]
+      }
+    }
+  }
+}

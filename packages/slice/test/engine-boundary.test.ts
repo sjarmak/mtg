@@ -40,7 +40,7 @@
  * `@mtg/slice` is the package that composes the workspace.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { lstatSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
@@ -98,6 +98,22 @@ const QUOTED: readonly { readonly path: string; readonly why: string }[] = [
     path: 'packages/slice/test/engine-boundary.test.ts',
     why: 'the ledger itself, which has to spell what it looks for',
   },
+  {
+    path: 'LICENSE-AGPL-3.0',
+    why: 'the unmodified license text this project is released under; the export writes it to the public root as LICENSE-AGPL-3.0',
+  },
+  {
+    path: 'LICENSE-GPL-3.0',
+    why: 'the unmodified license text the Forge bridge and the quoted Forge script lines remain under; the export writes it to the public root as LICENSE-GPL-3.0',
+  },
+];
+
+/** Explicit subprocess companions only; never TypeScript linkage or vendored engine sources. */
+const FORGE_COMPANIONS = [
+  'packages/forge-export/bridge/ForgeBridge.java',
+  'packages/forge-export/bridge/ForgeBotBenchmark.java',
+  'packages/forge-export/bridge/ForgeDraftRankings.java',
+  'packages/forge-export/bridge/LegacyCubeBotProbes.java',
 ];
 
 function trackedFiles(): readonly string[] {
@@ -120,6 +136,17 @@ function trackedFiles(): readonly string[] {
   return paths;
 }
 
+/** Tracked plus untracked authored files, with ignored downloaded artifacts still excluded. */
+function workingTreeFiles(): readonly string[] {
+  return execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {
+    cwd: fileURLToPath(ROOT),
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  })
+    .split('\0')
+    .filter((path) => path.length > 0);
+}
+
 /** Whether git would ignore a path, asked of git rather than parsed out of the file. */
 function isIgnored(path: string): boolean {
   try {
@@ -131,6 +158,29 @@ function isIgnored(path: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * `tools/forge/dist` asked the right way to be ignored, whether it is a real
+ * download or the symlink a worker slot plants there (the mayor's `pre_start`
+ * step, `gc-966622`).
+ *
+ * `git check-ignore` cannot take a path *through* a symlink — `tools/forge/
+ * dist/forge.jar` exits 128, "pathspec ... is beyond a symbolic link", which
+ * `isIgnored` above cannot tell apart from "not ignored". So when the
+ * distribution is a symlink, this asks about the directory entry itself
+ * rather than a path through it; a real download still gets the stronger
+ * question of whether a file inside it is ignored too. Not a check for the
+ * slot specifically: any symlink at this path gets the same treatment.
+ */
+function forgeDistIgnoreTarget(): string {
+  let isSymlink: boolean;
+  try {
+    isSymlink = lstatSync(new URL('tools/forge/dist', ROOT)).isSymbolicLink();
+  } catch {
+    isSymlink = false; // absent; either question resolves the same ignore rule
+  }
+  return isSymlink ? 'tools/forge/dist' : 'tools/forge/dist/forge.jar';
 }
 
 describe('the third-party engine boundary', () => {
@@ -171,10 +221,22 @@ describe('the third-party engine boundary', () => {
 
   it('keeps the Forge distribution untracked', () => {
     const inside = tracked.filter(
-      (path) => path.startsWith('tools/forge/') && path !== 'tools/forge/README.md',
+      (path) =>
+        path.startsWith('tools/forge/') &&
+        path !== 'tools/forge/README.md' &&
+        path !== 'tools/forge/install.sh',
     );
     expect(inside, 'ADR-0001 §5.1: Forge lives under tools/forge/ as a gitignored artifact').toEqual([]);
-    expect(isIgnored('tools/forge/dist/forge.jar'), 'tools/forge/dist/ must be gitignored').toBe(true);
+    expect(isIgnored(forgeDistIgnoreTarget()), 'tools/forge/dist must be gitignored').toBe(true);
+  });
+
+  it('keeps Forge-linked Java in its declared subprocess companions', () => {
+    const linkedJava = workingTreeFiles().filter(
+      (path) => path.startsWith('packages/forge-export/') && path.endsWith('.java'),
+    );
+    expect(linkedJava.sort(), 'Forge-linked Java must stay in the separately executed bridge paths').toEqual(
+      [...FORGE_COMPANIONS].sort(),
+    );
   });
 
   it('names fragments that could still match something', () => {

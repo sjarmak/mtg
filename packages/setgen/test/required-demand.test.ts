@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import type { CardKind, Color } from '@mtg/dsl';
 import { createFixtureProvider } from '@mtg/llm';
 import type { Allocation, GenerationResult, RequiredCardInput, SetBriefInput } from '@mtg/setgen';
-import { allocateSlots, generateSet, parseBrief } from '@mtg/setgen';
+import { allocateSlots, COLORLESS_PERMANENT_MV, generateSet, parseBrief } from '@mtg/setgen';
 import { COLORLESS_MECHANIC, scriptedTransport, TEST_BRIEF } from './helpers';
 
 /**
@@ -118,6 +118,72 @@ describe('a color asked for more creatures than it derived', () => {
     expect(creatures.every((slot) => slot.manaValueMin >= 1 && slot.manaValueMax >= slot.manaValueMin)).toBe(
       true,
     );
+  });
+});
+
+/**
+ * What a colorless artifact slot costs, asked once.
+ *
+ * `mtg-na5y`. Two passes price a slot and they read different tables.
+ * `allocate.ts`'s `colorlessPermanentSlots` gives a colorless slot whose role
+ * prints no effects a window off `colorlessPermanentWindow`, a rotation over
+ * `COLORLESS_PERMANENT_MV`; `required-demand.ts` fell through to `spellCurve`,
+ * which is the *colored* table and the one `curve.ts` opens by saying a
+ * colorless permanent does not read. The two agreed by accident where the
+ * rotation and the curve happened to land together, and diverged everywhere
+ * else.
+ *
+ * Measured on this brief before the fix: the pass sold the `manaArtifact` slot
+ * calling it MV 4, and the allocator had stamped that same slot MV 3. So the
+ * body bought with it entered the creature curve one bucket dearer than the
+ * slot that paid for it, and the note printed for a human read 4 about a
+ * three-mana slot. One bucket, silently, on every sale of a colorless artifact.
+ *
+ * Both halves are pinned. The exact notes are the regression — the numbers move
+ * the moment the wrong table is read again, and the diff says which way — and
+ * the membership check is the rule, so a brief that reshapes this pool still
+ * says a colorless artifact costs what the window list says it costs.
+ */
+describe('the demand pass and the allocator price a colorless artifact the same way', () => {
+  const wanted = supplyIn(baseline, null, 'creature') + 4;
+  const allocation = allocate(named(wanted, { color: 'colorless', cardKind: 'creature' }));
+  const SALE = /the "(\w+)" artifact slot at MV (\d+)/g;
+
+  function sales(): readonly { readonly role: string; readonly manaValue: number }[] {
+    return allocation.notes.flatMap((note) =>
+      [...note.matchAll(SALE)].map((match) => ({
+        role: match[1] ?? '',
+        manaValue: Number(match[2]),
+      })),
+    );
+  }
+
+  it('sells the colorless artifact slots at the window the allocator printed them at', () => {
+    expect(allocation.notes.filter((note) => note.includes('artifact slot at MV'))).toStrictEqual([
+      'common colorless: the "landFixing" artifact slot at MV 4 became a creature at MV 4-4; the brief names 15 creature card(s) in this pool and the skeleton derived 11.',
+      'common colorless: the "manaArtifact" artifact slot at MV 3 became a creature at MV 3-3; the brief names 15 creature card(s) in this pool and the skeleton derived 12.',
+      'common colorless: the "landFixing" artifact slot at MV 4 became a creature at MV 4-4; the brief names 15 creature card(s) in this pool and the skeleton derived 14.',
+    ]);
+  });
+
+  it('never names a mana value the colorless window list does not hold', () => {
+    const windows = new Set(COLORLESS_PERMANENT_MV.map((range) => range.min));
+    const sold = sales();
+
+    // Every sale here is at common, which is below this profile's bomb line, so
+    // one list covers them. A brief that sold a rare one would need the bomb
+    // list too, and that is `rare-tier.test.ts`'s subject rather than this
+    // file's.
+    expect(sold.length).toBeGreaterThan(0);
+    expect(sold.every((sale) => windows.has(sale.manaValue))).toBe(true);
+  });
+
+  it('buys the body at the mana value the slot it sold was printed at', () => {
+    for (const note of allocation.notes) {
+      const match = /artifact slot at MV (\d+) became a creature at MV (\d+)/.exec(note);
+      if (match === null) continue;
+      expect(match[2], note).toBe(match[1]);
+    }
   });
 });
 

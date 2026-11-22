@@ -1,5 +1,5 @@
 /**
- * `SimpleBot`: the whole of a custom set's draft intelligence, in one line.
+ * Draftmancer `SimpleBot`: the static export policy, in one line.
  *
  * ADR-0003 §1 records the algorithm, read from Draftmancer's `src/Bot.ts` via
  * `docs/research/prior-art-tooling.md` §1.1:
@@ -27,7 +27,7 @@
  */
 import type { Card, Color } from '@mtg/dsl';
 import { DraftError } from './errors';
-import type { CardRating } from './rating';
+import type { RatedCard } from './rating';
 import { SIMPLE_BOT_COLOR_BONUS } from './rating';
 import type { Rng } from './rng';
 import { nextBelow } from './rng';
@@ -37,7 +37,7 @@ export type ColorCounts = Readonly<Record<Color, number>>;
 const NO_COLORS: ColorCounts = { W: 0, U: 0, B: 0, R: 0, G: 0 };
 
 /** Cards already picked, counted per color. A gold card counts in both. */
-export function countPickedColors(picked: readonly Card[]): ColorCounts {
+export function countPickedColors(picked: readonly Pick<Card, 'colors'>[]): ColorCounts {
   const counts: Record<Color, number> = { ...NO_COLORS };
   for (const card of picked) {
     for (const color of card.colors) counts[color] += 1;
@@ -46,7 +46,10 @@ export function countPickedColors(picked: readonly Card[]): ColorCounts {
 }
 
 /** One card's score to a bot holding `picked`: its rating plus color affinity. */
-export function simpleBotScore(rated: CardRating, picked: ColorCounts): number {
+export function simpleBotScore(
+  rated: { readonly card: Pick<Card, 'colors'>; readonly rating: number },
+  picked: ColorCounts,
+): number {
   return rated.card.colors.reduce(
     (score, color) => score + SIMPLE_BOT_COLOR_BONUS * picked[color],
     rated.rating,
@@ -54,7 +57,7 @@ export function simpleBotScore(rated: CardRating, picked: ColorCounts): number {
 }
 
 /** Every card in the pack, scored in pack order. */
-export function simpleBotScores(pack: readonly CardRating[], picked: readonly Card[]): readonly number[] {
+export function simpleBotScores(pack: readonly RatedCard[], picked: readonly Card[]): readonly number[] {
   const counts = countPickedColors(picked);
   return pack.map((rated) => simpleBotScore(rated, counts));
 }
@@ -66,7 +69,7 @@ export function simpleBotScores(pack: readonly CardRating[], picked: readonly Ca
  * tie there is not; nothing else about the choice differs.
  */
 export function simpleBotPick(
-  pack: readonly CardRating[],
+  pack: readonly RatedCard[],
   picked: readonly Card[],
   rng: Rng,
 ): readonly [number, Rng] {

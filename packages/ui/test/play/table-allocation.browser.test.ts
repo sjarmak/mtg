@@ -36,6 +36,22 @@
  *     1280x800 and 1024x768 it is genuinely short and buys the words with a
  *     second line rather than an ellipsis on every one.
  *
+ *     The sideways-scroll half of that claim is now stated against the steps
+ *     rather than against the row, and `mtg-t9n7` is why. The bar's own two
+ *     controls moved *inside* `.mtg-phasebar__steps` (`styles/views.ts` argues
+ *     it), pinned to the scrollport with `position: sticky; right: 0`, because
+ *     beside the row they took their width off every wrapped line and cost the
+ *     table 32px at 1024x768. A pinned item still contributes its width to the
+ *     row's scroll width, so `scrollWidth === clientWidth` stopped being a
+ *     statement about the thirteen names: at 1440x560 the row reads 876 against
+ *     866, and 67.1 of that is the control. What is asserted is the part that is
+ *     about the steps -- the overflow is no wider than the pinned control, so
+ *     the names themselves fit the row they are given -- and the residue is
+ *     visible rather than lost, because the pin is drawn at every scroll
+ *     position. What it costs is the tail of the last name at that one
+ *     viewport: CLEANUP's right-hand 8.4px pass under the pin until the row is
+ *     scrolled its 10.
+ *
  * The harness is `../support/chrome.ts`. jsdom answers none of this: it performs
  * no layout, so `getBoundingClientRect` is zeros and `scrollWidth` is
  * `clientWidth` on everything.
@@ -151,9 +167,10 @@ function page(game: GameSession): string {
 const MEASURE = `(() => {
   const round = (value) => Math.round(value * 10) / 10;
   const drawn = (node) => node !== null && node.getBoundingClientRect().height > 0;
-  const faces = [...document.querySelectorAll(".mtg-board__spells > .mtg-slot[data-slot='play'] > .mtg-card")].map((face) => {
+  const faces = [...document.querySelectorAll(".mtg-board__spells > .mtg-attach > .mtg-slot[data-slot='play'] > .mtg-card")].map((face) => {
     const slot = face.parentElement;
-    const row = slot.parentElement;
+    const place = slot.parentElement;
+    const row = place.getAttribute('data-holds') === 'false' ? place.parentElement : place;
     const faceBox = face.getBoundingClientRect();
     const slotBox = slot.getBoundingClientRect();
     const rowBox = row.getBoundingClientRect();
@@ -167,8 +184,10 @@ const MEASURE = `(() => {
       seat: slot.closest('.mtg-board__side').getAttribute('data-seat'),
       tapped: slot.getAttribute('data-tapped') === 'true',
       face: [round(faceBox.width), round(faceBox.height)],
+      faceBlock: [round(faceBox.top), round(faceBox.bottom)],
       chrome: round(chrome),
       slot: [round(slotBox.width), round(slotBox.height)],
+      rowBlock: [round(rowBox.top), round(rowBox.bottom), round(rowBox.height)],
       overhangY: round(Math.max(0, slotBox.top - faceBox.top, faceBox.bottom - slotBox.bottom)),
       overhangX: round(Math.max(0, slotBox.left - faceBox.left, faceBox.right - slotBox.right)),
       clipY: round(Math.max(0, rowBox.top - faceBox.top, faceBox.bottom - rowBox.bottom)),
@@ -189,17 +208,28 @@ const MEASURE = `(() => {
   const tops = {};
   for (const node of stepNodes) tops[Math.round(node.getBoundingClientRect().top)] = 1;
   const steps = document.querySelector('.mtg-phasebar__steps');
+  const pinned = steps === null ? null : steps.querySelector('.mtg-phasebar__controls');
   return {
     viewport: [window.innerWidth, window.innerHeight],
     faces,
+    represented: [...document.querySelectorAll('.mtg-board__spells')].reduce(
+      (total, row) => total + [...row.children].reduce(
+        (rowTotal, place) => rowTotal + Number(
+          place.querySelector('.mtg-permanent-pile__toggle')?.getAttribute('data-pile-count') ?? 1
+        ),
+        0,
+      ),
+      0,
+    ),
     zoom: {
-      tapped: zoomBox(document.querySelector(".mtg-board__spells > .mtg-slot[data-tapped='true']")),
+      tapped: zoomBox(document.querySelector(".mtg-board__spells > .mtg-attach > .mtg-slot[data-tapped='true']")),
       hand: zoomBox(document.querySelector(".mtg-zone[data-tone='rail'] .mtg-slot")),
     },
     steps: {
       count: stepNodes.length,
       lines: Object.keys(tops).length,
       sidewaysScroll: steps === null ? -1 : steps.scrollWidth - steps.clientWidth,
+      pinnedWidth: pinned === null ? 0 : Math.round(pinned.getBoundingClientRect().width * 10) / 10,
       clipped: stepNodes
         .map((node) => node.querySelector('.mtg-phasebar__text'))
         .filter((text) => text !== null && text.scrollWidth > text.clientWidth + 1)
@@ -213,9 +243,11 @@ interface FaceReading {
   readonly seat: string;
   readonly tapped: boolean;
   readonly face: readonly [number, number];
+  readonly faceBlock: readonly [number, number];
   /** Border plus padding across the face, read off the element rather than stated. */
   readonly chrome: number;
   readonly slot: readonly [number, number];
+  readonly rowBlock: readonly [number, number, number];
   readonly overhangY: number;
   readonly overhangX: number;
   readonly clipY: number;
@@ -232,6 +264,8 @@ interface StepReading {
   readonly count: number;
   readonly lines: number;
   readonly sidewaysScroll: number;
+  /** The bar's own pinned control, which is the one thing in that row that is not a step. */
+  readonly pinnedWidth: number;
   readonly clipped: readonly string[];
 }
 
@@ -249,6 +283,18 @@ const VIEWPORTS = [
   [1392, 766],
   [1440, 560],
   [1440, 480],
+  // The band of heights just above the short-table bound, which is where a
+  // crowded row used to draw its tapped and upright permanents at two sizes
+  // (`mtg-qpf6`, measured 103.3 against 96.9 at eight a side). `08dc7ae8` made
+  // the rotated face's height guard carry the printed share on both terms and
+  // closed it; these four cells are here so it cannot come back unmeasured.
+  // Every one of them overflows its row - 126 to 786px of sideways scroll at
+  // eight and twelve a side - so they are asking the parity question of a row
+  // that genuinely has less width than it wants.
+  [1280, 801],
+  [1360, 801],
+  [1400, 801],
+  [1440, 801],
 ] as const;
 
 /** Where the step bar has the whole thirteen-name row to answer for. */
@@ -280,14 +326,18 @@ describe('the table spends its shortfall where the shortfall is', () => {
             const result = await measurePage(chrome.client, file, width, height, MEASURE, 'table allocation');
             expect(result['viewport']).toEqual([width, height]);
             const faces = result['faces'] as readonly FaceReading[];
-            expect(faces, `${where} face count`).toHaveLength(perSide * 2);
+            expect(result['represented'], `${where} represented face count`).toBe(perSide * 2);
+            expect(faces.length, `${where} rendered face count`).toBeGreaterThan(0);
 
             for (const face of faces) {
               expect(
                 face.overhangX,
                 `${where}: ${face.name} outside its slot horizontally`,
               ).toBeLessThanOrEqual(1);
-              expect(face.clipY, `${where}: ${face.name} cut by its row`).toBeLessThanOrEqual(1);
+              expect(
+                face.clipY,
+                `${where}: ${face.name} cut by its row ${JSON.stringify({ face: face.faceBlock, row: face.rowBlock })}`,
+              ).toBeLessThanOrEqual(1);
 
               // The block axis is asked only of a slot that can hold a face at
               // all: a slot shorter than the card's own two bands is a table
@@ -324,11 +374,13 @@ describe('the table spends its shortfall where the shortfall is', () => {
             // Every permanent on the table keeps its rules box. That is the
             // whole of mtg-5f9's first finding, which was measured on the face
             // that carried 16px of chrome: a seventh of a 1024x768 row was a
-            // 72px face with a 56px content box, under BOARD_RULES_MIN_REM's
-            // 64, so no card on that table drew rules text at any board size
-            // while the row was 170.4px tall with a 100.6px slot in it. On the
-            // proportional band the same 72px face has a 68px content box, and
-            // the rules text first draws at a 69px face.
+            // 72px face with a 56px content box, under
+            // BOARD_RULES_PANEL_MAX_REM's 64, which hid the box outright until
+            // mtg-8kc, so no card on that table drew rules text at any board
+            // size while the row was 170.4px tall with a 100.6px slot in it. On
+            // the proportional band the same 72px face has a 68px content box,
+            // and the box first draws in the column, rather than as a panel over
+            // the picture, at a 69px face.
             //
             // The type line is not asserted with it, and the reason is a number
             // rather than an oversight: the type line first draws at an 87px
@@ -384,7 +436,10 @@ describe('the table spends its shortfall where the shortfall is', () => {
 
             const steps = result['steps'] as StepReading;
             expect(steps.count, `${where} step count`).toBe(STEPS);
-            expect(steps.sidewaysScroll, `${where} step bar sideways scroll`).toBe(0);
+            expect(
+              Math.round((steps.sidewaysScroll - steps.pinnedWidth) * 10) / 10,
+              `${where} steps past their row: ${String(steps.sidewaysScroll)} of overflow against a ${String(steps.pinnedWidth)}px pinned control`,
+            ).toBeLessThanOrEqual(0);
             if (STEP_VIEWPORTS.has(`${String(width)}x${String(height)}`)) {
               expect(steps.clipped, `${where} step names cut`).toEqual([]);
               expect(steps.lines, `${where} step bar lines`).toBeLessThanOrEqual(MAX_STEP_LINES);

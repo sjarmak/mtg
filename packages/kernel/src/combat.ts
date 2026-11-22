@@ -21,127 +21,34 @@
  *                   (CR 702.4b). `vocabulary.ts` says why it is a keyword
  *                   ability rather than a tenth entry in `KEYWORDS`.
  */
-import type { CombatModification, Condition, Keyword, StaticAbility } from '@mtg/dsl';
+import type { AttackAdmission, CombatModification, Keyword } from '@mtg/dsl';
 import { assertNever, isCombatStaticModification } from '@mtg/dsl';
-import { counterCount } from './continuous';
 import type { ObjectId, PlayerId } from './ids';
 import { opponentOf } from './ids';
 import {
+  abilitiesOf,
+  characteristicsOf,
   controllerOf,
   hasCardType,
   hasKeyword,
   hasKeywordAbility,
   hasSubtype,
-  isCreatureObject,
   keywordAbilitiesOf,
   powerOf,
   toughnessOf,
 } from './layers';
-import type { Attack, Block, CombatDefender, GameState, TurnCombatRule } from './state';
+import type { Attack, AttackerOrder, Block, CombatDefender, GameState, TurnCombatRule } from './state';
 import type { Trace } from './trace';
 import { emit, withState } from './trace';
 import type { DamageInstance } from './damage';
 import { applyDamage } from './damage';
 import { creaturesControlledBy, getObject, isOnBattlefield, landsControlledBy, tapObject } from './zones';
-import { hasAuraModification } from './attach';
+import { hasAttachmentModification } from './attach';
 import { isProtectedFrom } from './keyword-abilities';
-
-/**
- * Whether one static ability's `enabledWhile` (CR 611.2c) currently holds.
- *
- * Reimplements `characteristics.ts`'s `conditionHolds` over `layers.ts`'s live
- * accessors instead of a `LayerContext`: that context is a full computed
- * characteristic map built once per layer walk, and a combat-legality query
- * runs far more often than a layer-walk recompute — once per candidate
- * attacker or blocker the declaration enumerator considers — and needs
- * nothing from the map beyond `controllerOf`, `hasSubtype`, `isCreatureObject`
- * and a raw counter read, all of which are already live lookups over `state`.
- *
- * Real `switch`/`assertNever` dispatch, mirroring `conditionHolds`
- * (`characteristics.ts`) for the identical reason argued there and in
- * `condition.ts`: `Condition` is a genuine two-member union as of `mtg-jp23`,
- * so a `switch` that omits a case fails to compile rather than silently
- * misreading the new member's fields.
- */
-function combatConditionHolds(state: GameState, condition: Condition, source: ObjectId): boolean {
-  switch (condition.kind) {
-    case 'controlsSubtype': {
-      const controller = controllerOf(state, source);
-      let count = 0;
-      for (const oid of state.battlefield) {
-        if (controllerOf(state, oid) !== controller) continue;
-        if (!hasSubtype(state, oid, condition.subtype)) continue;
-        count += 1;
-      }
-      return count >= condition.atLeast;
-    }
-    case 'anyCreatureHasCounter':
-      return state.battlefield.some(
-        (oid) =>
-          isCreatureObject(state, oid) && counterCount(getObject(state, oid).counters, condition.counter) > 0,
-      );
-    case 'opponentGraveyardAtLeast':
-      return state.players[opponentOf(controllerOf(state, source))].graveyard.length >= condition.atLeast;
-    case 'lifeAtLeast':
-      return state.players[controllerOf(state, source)].life >= condition.atLeast;
-    // Bloodcrazed Goblin's clause, and the one arm in this switch that is
-    // load-bearing here rather than in `conditionHolds`: a `cantAttack`
-    // restriction is answered by this file and never reaches the layer walk.
-    case 'noOpponentDealtDamageThisTurn':
-      return !state.turn.damagedPlayers.includes(opponentOf(controllerOf(state, source)));
-    default:
-      return assertNever(condition, 'combatConditionHolds');
-  }
-}
-
-/**
- * Whether a static ability's `enabledWhile`, if it has one, currently holds.
- * `true` for an unconditional static, matching `affectedByEffect`'s
- * (`characteristics.ts`) treatment of an absent condition.
- */
-function staticIsEnabled(state: GameState, ability: StaticAbility, source: ObjectId): boolean {
-  const condition = ability.enabledWhile ?? null;
-  return condition === null || combatConditionHolds(state, condition, source);
-}
-
-/**
- * Whether `target` falls within a static ability's scope, mirroring
- * `abilities.ts`'s `staticFilterFor` as a direct predicate rather than an
- * `ObjectFilter` the layer walk evaluates.
- *
- * A second spelling rather than a call into `staticFilterFor` (unexported,
- * and returns data for the layer walk to evaluate rather than an answer) or
- * the `ObjectFilter`/layer-walk machinery generally: this query runs once per
- * candidate creature per combat-legality question, a hot path `staticFilterFor`
- * was never asked to serve, and it only ever needs `cardTypes`,
- * `controllerIsSource`, `subtypes` and `excludeOids` for these three scopes —
- * little enough to restate as a switch without pulling `continuous.ts`'s
- * evaluator in for it.
- */
-function matchesStaticScope(
-  state: GameState,
-  ability: StaticAbility,
-  source: ObjectId,
-  target: ObjectId,
-): boolean {
-  if (ability.subtype !== null && !hasSubtype(state, target, ability.subtype)) return false;
-  switch (ability.scope) {
-    case 'self':
-      return target === source;
-    case 'creaturesYouControl':
-      return (
-        hasCardType(state, target, 'creature') && controllerOf(state, target) === controllerOf(state, source)
-      );
-    case 'otherCreaturesYouControl':
-      return (
-        target !== source &&
-        hasCardType(state, target, 'creature') &&
-        controllerOf(state, target) === controllerOf(state, source)
-      );
-    default:
-      return assertNever(ability.scope, 'matchesStaticScope');
-  }
-}
+import { staticPlayerRuleApplies } from './player-rules';
+import { liveStaticAbilityAffects } from './live-static';
+import { counterCount } from './continuous';
+import { isDetained } from './detention';
 
 /**
  * Whether some static ability printed on any battlefield permanent currently
@@ -156,7 +63,7 @@ function matchesStaticScope(
  * different fields off a different kind of source. Both stay live rather than
  * registered, for `hasAuraModification`'s reason: `attachAuraTo` (`attach.ts`)
  * and `registerStatics` (`abilities.ts`) already fall through with no
- * `ContinuousEffect` for these six kinds, because none of them changes a
+ * `ContinuousEffect` for these combat kinds, because none of them changes a
  * printed characteristic — there is nothing for a layer to hold.
  */
 export function hasCombatModification(
@@ -167,14 +74,55 @@ export function hasCombatModification(
   return state.battlefield.some((source) => {
     const object = state.objects[source];
     if (object === undefined) return false;
-    return object.card.abilities.some((ability) => {
+    return abilitiesOf(state, source).some((ability) => {
       if (ability.kind !== 'static') return false;
       if (!isCombatStaticModification(ability.modification)) return false;
       if (ability.modification.kind !== kind) return false;
-      if (!staticIsEnabled(state, ability, source)) return false;
-      return matchesStaticScope(state, ability, source, target);
+      return liveStaticAbilityAffects(state, ability, source, target);
     });
   });
+}
+
+/** Whether a creature is prohibited from attacking by any live restriction. */
+function cannotAttack(state: GameState, target: ObjectId): boolean {
+  return (
+    isDetained(state, target) ||
+    hasAttachmentModification(state, target, 'cantAttack') ||
+    hasCombatModification(state, target, 'cantAttack') ||
+    hasCombatModification(state, target, 'cantAttackOrBlock')
+  );
+}
+
+/** Whether a creature is prohibited from blocking by any live restriction. */
+function cannotBlock(state: GameState, target: ObjectId): boolean {
+  return (
+    isDetained(state, target) ||
+    (hasKeywordAbility(state, target, 'unleash') &&
+      counterCount(getObject(state, target).counters, 'plusOnePlusOne') > 0) ||
+    hasAttachmentModification(state, target, 'cantBlock') ||
+    hasCombatModification(state, target, 'cantBlock') ||
+    hasCombatModification(state, target, 'cantAttackOrBlock')
+  );
+}
+
+/** A whole attack declaration's cross-creature restriction, if it violates one. */
+export function attackCohortRestriction(state: GameState, attackers: readonly ObjectId[]): string | null {
+  const only = attackers.length === 1 ? attackers[0] : undefined;
+  return only !== undefined && hasCombatModification(state, only, 'cantAttackOrBlockAlone')
+    ? `${only} can't attack alone`
+    : null;
+}
+
+/** A whole block declaration's cross-creature restriction, if it violates one. */
+export function blockCohortRestriction(
+  state: GameState,
+  assignments: readonly { readonly blocker: ObjectId }[],
+): string | null {
+  const blockers = [...new Set(assignments.map((assignment) => assignment.blocker))];
+  const only = blockers.length === 1 ? blockers[0] : undefined;
+  return only !== undefined && hasCombatModification(state, only, 'cantAttackOrBlockAlone')
+    ? `${only} can't block alone`
+    : null;
 }
 
 /**
@@ -237,11 +185,10 @@ function requiredBlockKeywords(state: GameState, blocker: ObjectId): readonly Ke
   for (const source of state.battlefield) {
     const object = state.objects[source];
     if (object === undefined) continue;
-    for (const ability of object.card.abilities) {
+    for (const ability of abilitiesOf(state, source)) {
       if (ability.kind !== 'static') continue;
       if (ability.modification.kind !== 'blockOnlyCreaturesWithKeyword') continue;
-      if (!staticIsEnabled(state, ability, source)) continue;
-      if (!matchesStaticScope(state, ability, source, blocker)) continue;
+      if (!liveStaticAbilityAffects(state, ability, source, blocker)) continue;
       keywords.push(ability.modification.keyword);
     }
   }
@@ -270,15 +217,44 @@ function blockedBySubtypes(state: GameState, attacker: ObjectId): readonly strin
   for (const source of state.battlefield) {
     const object = state.objects[source];
     if (object === undefined) continue;
-    for (const ability of object.card.abilities) {
+    for (const ability of abilitiesOf(state, source)) {
       if (ability.kind !== 'static') continue;
       if (ability.modification.kind !== 'cantBeBlockedBySubtype') continue;
-      if (!staticIsEnabled(state, ability, source)) continue;
-      if (!matchesStaticScope(state, ability, source, attacker)) continue;
+      if (!liveStaticAbilityAffects(state, ability, source, attacker)) continue;
       subtypes.push(ability.modification.subtype);
     }
   }
   return subtypes;
+}
+
+/** Whether one current creature ability admits it through a global restriction. */
+function attackAdmissionHolds(state: GameState, creature: ObjectId, admission: AttackAdmission): boolean {
+  switch (admission.kind) {
+    case 'keyword':
+      return hasKeyword(state, creature, admission.keyword);
+    case 'landwalk':
+      return keywordAbilitiesOf(state, creature).some(
+        (ability) => ability.kind === 'landwalk' && ability.landType === admission.landType,
+      );
+    default:
+      return assertNever(admission, 'attackAdmissionHolds');
+  }
+}
+
+/** CR 508.1c: every live global restriction must independently admit the creature. */
+function satisfiesGlobalAttackRestrictions(state: GameState, creature: ObjectId): boolean {
+  for (const source of state.battlefield) {
+    if (state.objects[source] === undefined) continue;
+    for (const ability of abilitiesOf(state, source)) {
+      if (ability.kind !== 'static') continue;
+      if (ability.modification.kind !== 'cantAttackWithoutAnyOf') continue;
+      if (!liveStaticAbilityAffects(state, ability, source, creature)) continue;
+      if (!ability.modification.anyOf.some((admission) => attackAdmissionHolds(state, creature, admission))) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 /** The opposing player and each planeswalker they currently control. */
@@ -288,7 +264,11 @@ export function combatDefenders(state: GameState, attacker: PlayerId): readonly 
     .filter((oid) => controllerOf(state, oid) === opponent)
     .filter((oid) => hasCardType(state, oid, 'planeswalker'))
     .map((oid): CombatDefender => ({ kind: 'planeswalker', oid }));
-  return [opponent, ...walkers];
+  const battles = state.battlefield
+    .filter((oid) => state.objects[oid]?.protector === opponent)
+    .filter((oid) => hasCardType(state, oid, 'battle'))
+    .map((oid): CombatDefender => ({ kind: 'battle', oid }));
+  return [opponent, ...walkers, ...battles];
 }
 
 export function isLegalCombatDefender(
@@ -297,22 +277,35 @@ export function isLegalCombatDefender(
   defender: CombatDefender,
 ): boolean {
   if (typeof defender === 'number') return defender === opponentOf(attacker);
+  if (!isOnBattlefield(state, defender.oid)) return false;
+  if (defender.kind === 'planeswalker') {
+    return (
+      controllerOf(state, defender.oid) === opponentOf(attacker) &&
+      hasCardType(state, defender.oid, 'planeswalker')
+    );
+  }
   return (
-    isOnBattlefield(state, defender.oid) &&
-    controllerOf(state, defender.oid) === opponentOf(attacker) &&
-    hasCardType(state, defender.oid, 'planeswalker')
+    state.objects[defender.oid]?.protector === opponentOf(attacker) &&
+    hasCardType(state, defender.oid, 'battle')
   );
 }
 
 /** Creatures the active player could legally declare as attackers. */
 export function eligibleAttackers(state: GameState): readonly ObjectId[] {
   const active = state.turn.active;
+  if (staticPlayerRuleApplies(state, active, 'cantAttackWithCreaturesIfCastSpellThisTurn')) {
+    return [];
+  }
   return creaturesControlledBy(state, active)
     .filter((object) => !object.tapped)
     .filter((object) => !object.summoningSick || hasKeyword(state, object.oid, 'haste'))
-    .filter((object) => !hasKeywordAbility(state, object.oid, 'defender'))
-    .filter((object) => !hasAuraModification(state, object.oid, 'cantAttack'))
-    .filter((object) => !hasCombatModification(state, object.oid, 'cantAttack'))
+    .filter(
+      (object) =>
+        !hasKeywordAbility(state, object.oid, 'defender') ||
+        hasCombatModification(state, object.oid, 'canAttackAsThoughNoDefender'),
+    )
+    .filter((object) => !cannotAttack(state, object.oid))
+    .filter((object) => satisfiesGlobalAttackRestrictions(state, object.oid))
     .map((object) => object.oid);
 }
 
@@ -321,18 +314,19 @@ export function eligibleBlockers(state: GameState): readonly ObjectId[] {
   const defender = opponentOf(state.turn.active);
   return creaturesControlledBy(state, defender)
     .filter((object) => !object.tapped)
-    .filter((object) => !hasAuraModification(state, object.oid, 'cantBlock'))
-    .filter((object) => !hasCombatModification(state, object.oid, 'cantBlock'))
+    .filter((object) => !cannotBlock(state, object.oid))
+    .filter((object) => !hasTurnCombatRule(state, object.oid, 'cantBlockThisTurn'))
     .map((object) => object.oid);
 }
 
 /** Can `blocker` legally be assigned to `attacker`, ignoring count rules? */
 export function canBlock(state: GameState, blocker: ObjectId, attacker: ObjectId): boolean {
   if (!isOnBattlefield(state, blocker) || !isOnBattlefield(state, attacker)) return false;
+  if (!hasCardType(state, blocker, 'creature') || !hasCardType(state, attacker, 'creature')) return false;
   if (getObject(state, blocker).tapped) return false;
-  if (hasAuraModification(state, blocker, 'cantBlock')) return false;
-  if (hasAuraModification(state, attacker, 'cantBeBlocked')) return false;
-  if (hasCombatModification(state, blocker, 'cantBlock')) return false;
+  if (cannotBlock(state, blocker)) return false;
+  if (hasTurnCombatRule(state, blocker, 'cantBlockThisTurn')) return false;
+  if (hasAttachmentModification(state, attacker, 'cantBeBlocked')) return false;
   if (hasCombatModification(state, attacker, 'cantBeBlocked')) return false;
   if (hasTurnCombatRule(state, attacker, 'cantBeBlockedThisTurn')) return false;
   if (isProtectedFrom(state, attacker, blocker)) return false;
@@ -348,6 +342,12 @@ export function canBlock(state: GameState, blocker: ObjectId, attacker: ObjectId
   if (hasKeyword(state, attacker, 'flying')) {
     if (!hasKeyword(state, blocker, 'flying') && !hasKeyword(state, blocker, 'reach')) return false;
   }
+  if (hasKeywordAbility(state, attacker, 'intimidate')) {
+    const artifactCreature = hasCardType(state, blocker, 'artifact');
+    const attackerColors = characteristicsOf(state, attacker).colors;
+    const blockerColors = characteristicsOf(state, blocker).colors;
+    if (!artifactCreature && !attackerColors.some((color) => blockerColors.includes(color))) return false;
+  }
   const required = requiredBlockKeywords(state, blocker);
   if (required.length > 0 && !required.every((keyword) => hasKeyword(state, attacker, keyword))) return false;
   // CR 509.1b from the attacker's side. `hasSubtype` rather than a read of
@@ -358,6 +358,11 @@ export function canBlock(state: GameState, blocker: ObjectId, attacker: ObjectId
   const forbidden = blockedBySubtypes(state, attacker);
   if (forbidden.some((subtype) => hasSubtype(state, blocker, subtype))) return false;
   return true;
+}
+
+/** Whether CR 509.1a lets this creature appear in more than one block pair. */
+export function canBlockAnyNumber(state: GameState, blocker: ObjectId): boolean {
+  return hasCombatModification(state, blocker, 'canBlockAnyNumber');
 }
 
 export interface BlockAssignment {
@@ -385,13 +390,20 @@ export function validateBlocks(
   whole = true,
 ): string | null {
   const attacking = new Set(state.combat.attacks.map((attack) => attack.oid));
-  const seen = new Set<ObjectId>();
+  const seenPairs = new Set<string>();
+  const blocksBy = new Map<ObjectId, number>();
   const perAttacker = new Map<ObjectId, number>();
 
   for (const assignment of assignments) {
     if (!attacking.has(assignment.attacker)) return `${assignment.attacker} is not attacking`;
-    if (seen.has(assignment.blocker)) return `${assignment.blocker} cannot block twice`;
-    seen.add(assignment.blocker);
+    const pair = `${assignment.blocker}>${assignment.attacker}`;
+    if (seenPairs.has(pair)) return `${assignment.blocker} already blocks ${assignment.attacker}`;
+    seenPairs.add(pair);
+    const priorBlocks = blocksBy.get(assignment.blocker) ?? 0;
+    if (priorBlocks > 0 && !canBlockAnyNumber(state, assignment.blocker)) {
+      return `${assignment.blocker} cannot block twice`;
+    }
+    blocksBy.set(assignment.blocker, priorBlocks + 1);
     const blocker = state.objects[assignment.blocker];
     if (blocker === undefined || blocker.zone !== 'battlefield') {
       return `${assignment.blocker} is not on the battlefield`;
@@ -399,7 +411,7 @@ export function validateBlocks(
     if (controllerOf(state, assignment.blocker) !== defender) {
       return `${assignment.blocker} is not controlled by the defender`;
     }
-    if (blocker.card.kind !== 'creature') return `${assignment.blocker} is not a creature`;
+    if (!hasCardType(state, assignment.blocker, 'creature')) return `${assignment.blocker} is not a creature`;
     if (blocker.tapped) return `${assignment.blocker} is tapped`;
     if (!canBlock(state, assignment.blocker, assignment.attacker)) {
       return `${assignment.blocker} cannot block ${assignment.attacker} (evasion)`;
@@ -408,6 +420,8 @@ export function validateBlocks(
   }
 
   if (!whole) return null;
+  const cohort = blockCohortRestriction(state, assignments);
+  if (cohort !== null) return cohort;
   for (const [attacker, count] of perAttacker) {
     if (hasKeyword(state, attacker, 'menace') && count === 1) {
       return `${attacker} has menace and must be blocked by two or more creatures`;
@@ -432,8 +446,34 @@ export function groupBlocks(assignments: readonly BlockAssignment[]): readonly B
   return order.map((attacker) => ({ attacker, blockers: grouped.get(attacker) ?? [] }));
 }
 
+/** The reverse combat relation, retained only for blockers facing several attackers. */
+export function groupAttackerOrders(blocks: readonly Block[]): readonly AttackerOrder[] {
+  const order: ObjectId[] = [];
+  const grouped = new Map<ObjectId, ObjectId[]>();
+  for (const block of blocks) {
+    for (const blocker of block.blockers) {
+      const existing = grouped.get(blocker);
+      if (existing === undefined) {
+        order.push(blocker);
+        grouped.set(blocker, [block.attacker]);
+      } else {
+        existing.push(block.attacker);
+      }
+    }
+  }
+  return order.flatMap((blocker) => {
+    const attackers = grouped.get(blocker) ?? [];
+    return attackers.length > 1 ? [{ blocker, attackers }] : [];
+  });
+}
+
 export function attackersNeedingOrder(state: GameState): readonly Block[] {
   return state.combat.blocks.filter((block) => block.blockers.length > 1);
+}
+
+/** CR 509.3: blockers assigned to several attackers need the reverse order. */
+export function blockersNeedingAttackerOrder(state: GameState): readonly AttackerOrder[] {
+  return state.combat.attackerOrders?.filter((order) => order.attackers.length > 1) ?? [];
 }
 
 /** Taps the declared attackers that lack vigilance. */
@@ -456,6 +496,14 @@ function livingBlockers(state: GameState, attacker: ObjectId): readonly ObjectId
   return block.blockers.filter((oid) => isOnBattlefield(state, oid));
 }
 
+function livingAttackers(state: GameState, blocker: ObjectId): readonly ObjectId[] {
+  const ordered = state.combat.attackerOrders?.find((entry) => entry.blocker === blocker)?.attackers;
+  const attackers =
+    ordered ??
+    state.combat.blocks.flatMap((block) => (block.blockers.includes(blocker) ? [block.attacker] : []));
+  return attackers.filter((oid) => isOnBattlefield(state, oid));
+}
+
 /** Damage needed to finish a creature off, respecting deathtouch (CR 702.2b). */
 export function lethalDamageFor(state: GameState, oid: ObjectId, deathtouch: boolean): number {
   const remaining = toughnessOf(state, oid) - getObject(state, oid).damage;
@@ -466,6 +514,32 @@ export function lethalDamageFor(state: GameState, oid: ObjectId, deathtouch: boo
 interface Assignment {
   readonly recipient: ObjectId | 'defender';
   readonly amount: number;
+}
+
+interface AssignedCombatDamage {
+  readonly amount: number;
+  readonly deathtouch: boolean;
+}
+
+/**
+ * Lethal still owed after damage assigned by earlier creatures in this step.
+ *
+ * CR 510.1c-d counts marked damage and simultaneous assignments. Deathtouch is
+ * retained on the assignment that supplied it: one ordinary point assigned by
+ * an earlier creature does not become lethal merely because the next creature
+ * assigning damage has deathtouch.
+ */
+function lethalDamageStillOwed(
+  state: GameState,
+  oid: ObjectId,
+  deathtouch: boolean,
+  assigned: AssignedCombatDamage | undefined,
+): number {
+  const marked = getObject(state, oid).damage;
+  const alreadyAssigned = assigned?.amount ?? 0;
+  if (marked + alreadyAssigned >= toughnessOf(state, oid)) return 0;
+  if (assigned?.deathtouch === true && alreadyAssigned > 0) return 0;
+  return deathtouch ? 1 : toughnessOf(state, oid) - marked - alreadyAssigned;
 }
 
 /**
@@ -487,6 +561,15 @@ export function assignAttackerDamage(
   attacker: ObjectId,
   power: number,
 ): readonly Assignment[] {
+  return assignAttackerDamageWithLedger(state, attacker, power, new Map());
+}
+
+function assignAttackerDamageWithLedger(
+  state: GameState,
+  attacker: ObjectId,
+  power: number,
+  assignedDamage: ReadonlyMap<ObjectId, AssignedCombatDamage>,
+): readonly Assignment[] {
   if (power <= 0) return [];
   const trample = hasKeyword(state, attacker, 'trample');
   const deathtouch = hasKeyword(state, attacker, 'deathtouch');
@@ -504,7 +587,7 @@ export function assignAttackerDamage(
   let remaining = power;
   for (const blocker of blockers) {
     if (remaining <= 0) break;
-    const lethal = lethalDamageFor(state, blocker, deathtouch);
+    const lethal = lethalDamageStillOwed(state, blocker, deathtouch, assignedDamage.get(blocker));
     const amount = Math.min(remaining, lethal);
     if (amount > 0) assignments.push({ recipient: blocker, amount });
     remaining -= amount;
@@ -523,6 +606,47 @@ export function assignAttackerDamage(
   }
   if (fallback === undefined) return assignments;
   return [{ recipient: fallback, amount: remaining }];
+}
+
+/**
+ * Splits one blocker's single power budget across every attacker it blocks.
+ * CR 510.1d uses the reverse order announced under CR 509.3 and the same
+ * lethal-before-later rule as an attacker assigning among several blockers.
+ */
+export function assignBlockerDamage(
+  state: GameState,
+  blocker: ObjectId,
+  power: number,
+): readonly Assignment[] {
+  return assignBlockerDamageWithLedger(state, blocker, power, new Map());
+}
+
+function assignBlockerDamageWithLedger(
+  state: GameState,
+  blocker: ObjectId,
+  power: number,
+  assignedDamage: ReadonlyMap<ObjectId, AssignedCombatDamage>,
+): readonly Assignment[] {
+  if (power <= 0) return [];
+  const deathtouch = hasKeyword(state, blocker, 'deathtouch');
+  const attackers = livingAttackers(state, blocker);
+  if (attackers.length === 0) return [];
+  const assignments: Assignment[] = [];
+  let remaining = power;
+  for (const attacker of attackers) {
+    if (remaining <= 0) break;
+    const lethal = lethalDamageStillOwed(state, attacker, deathtouch, assignedDamage.get(attacker));
+    const amount = Math.min(remaining, lethal);
+    if (amount > 0) assignments.push({ recipient: attacker, amount });
+    remaining -= amount;
+  }
+  if (remaining <= 0) return assignments;
+  const last = assignments[assignments.length - 1];
+  const fallback = attackers[attackers.length - 1];
+  if (last !== undefined) {
+    return [...assignments.slice(0, -1), { recipient: last.recipient, amount: last.amount + remaining }];
+  }
+  return fallback === undefined ? [] : [{ recipient: fallback, amount: remaining }];
 }
 
 /**
@@ -576,15 +700,25 @@ export function combatNeedsFirstStrikeStep(state: GameState): boolean {
 export function dealCombatDamage(trace: Trace, firstStrike: boolean): Trace {
   const state = trace.state;
   const instances: DamageInstance[] = [];
+  let assignedDamage: ReadonlyMap<ObjectId, AssignedCombatDamage> = new Map();
+
+  const retainAssignment = (recipient: ObjectId, amount: number, deathtouch: boolean): void => {
+    const existing = assignedDamage.get(recipient);
+    assignedDamage = new Map(assignedDamage).set(recipient, {
+      amount: (existing?.amount ?? 0) + amount,
+      deathtouch: existing?.deathtouch === true || deathtouch,
+    });
+  };
 
   for (const attack of state.combat.attacks) {
     if (!participatesInStep(state, attack.oid, firstStrike)) continue;
     const power = powerOf(state, attack.oid);
     const deathtouch = hasKeyword(state, attack.oid, 'deathtouch');
     const lifelink = hasKeyword(state, attack.oid, 'lifelink');
-    for (const assignment of assignAttackerDamage(state, attack.oid, power)) {
+    for (const assignment of assignAttackerDamageWithLedger(state, attack.oid, power, assignedDamage)) {
       instances.push({
         sourceOid: attack.oid,
+        sourceIncarnation: state.objects[attack.oid]?.incarnation ?? 0,
         controller: controllerOf(state, attack.oid),
         recipient:
           assignment.recipient === 'defender'
@@ -596,25 +730,35 @@ export function dealCombatDamage(trace: Trace, firstStrike: boolean): Trace {
         deathtouch,
         lifelink,
         combat: true,
+        preventable: true,
       });
+      if (assignment.recipient !== 'defender') {
+        retainAssignment(assignment.recipient, assignment.amount, deathtouch);
+      }
     }
   }
 
-  for (const block of state.combat.blocks) {
-    for (const blockerOid of block.blockers) {
-      if (!participatesInStep(state, blockerOid, firstStrike)) continue;
-      if (!isOnBattlefield(state, block.attacker)) continue;
-      const power = powerOf(state, blockerOid);
-      if (power <= 0) continue;
+  const blockers = new Set(state.combat.blocks.flatMap((block) => block.blockers));
+  for (const blockerOid of blockers) {
+    if (!participatesInStep(state, blockerOid, firstStrike)) continue;
+    const power = powerOf(state, blockerOid);
+    if (power <= 0) continue;
+    const deathtouch = hasKeyword(state, blockerOid, 'deathtouch');
+    for (const assignment of assignBlockerDamageWithLedger(state, blockerOid, power, assignedDamage)) {
       instances.push({
         sourceOid: blockerOid,
+        sourceIncarnation: state.objects[blockerOid]?.incarnation ?? 0,
         controller: controllerOf(state, blockerOid),
-        recipient: { kind: 'permanent', oid: block.attacker },
-        amount: power,
-        deathtouch: hasKeyword(state, blockerOid, 'deathtouch'),
+        recipient: { kind: 'permanent', oid: assignment.recipient as ObjectId },
+        amount: assignment.amount,
+        deathtouch,
         lifelink: hasKeyword(state, blockerOid, 'lifelink'),
         combat: true,
+        preventable: true,
       });
+      if (assignment.recipient !== 'defender') {
+        retainAssignment(assignment.recipient, assignment.amount, deathtouch);
+      }
     }
   }
 

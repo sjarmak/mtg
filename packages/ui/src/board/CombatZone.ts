@@ -43,17 +43,32 @@
  * a block an assignment to one specific attacker, so a blocker that entered a
  * shared band without landing beside its attacker would make the band mean less
  * than it does now. That is why the strip is a list of entries rather than a flat
- * row of cards: `orderEntries` puts each staged blocker immediately after the
- * attacker it answers, so the pairing is adjacency in a row that has nothing
- * else in it, and the pair reads left to right the way the sentence does.
+ * row of cards: `pairEntries` puts each staged blocker immediately after the
+ * attacker it answers, and the pair reads left to right the way the sentence
+ * does.
  *
- * It is the *staged* half that moves — a declaration the player is assembling,
- * drawn in exactly the three channels a staged attacker gets (short of the band,
- * hanging off its own seat's edge, ringed in `--mtg-ready`). A block the kernel
- * has taken leaves the blocker in its row wearing the badge it always wore,
- * because by then the position is the kernel's to describe and `blockedBy` on the
- * attacker already says it. Adjacency is invisible to a screen reader, so the
- * blocker also carries the sentence (`./Battlefield.ts`, `stagedBlockMark`).
+ * **Adjacency alone was not enough, and `mtg-7all` is where it stopped being
+ * enough.** With one attacker it is unambiguous. With three attackers and one
+ * blocker each the row reads attacker, blocker, attacker, blocker, and the only
+ * channels saying which pairs with which are the height, the seat strip and the
+ * amber ring - three channels that all say "this is a staged blocker" and none
+ * that says "of that one". So the pair is drawn inside a keylined tray with a
+ * connector between the two cards, which is the drawing
+ * `../styles/board/attach.ts` already uses for an Equipment and its creature:
+ * same vocabulary, same reason, one relation a player reads instead of infers.
+ * An attacker nobody has answered is the bare entry it always was, so
+ * declare-attackers draws exactly what it drew before.
+ *
+ * Both halves move. A *staged* block — a declaration the player is assembling —
+ * is drawn in exactly the three channels a staged attacker gets (short of the
+ * band, hanging off its own seat's edge, ringed in `--mtg-ready`). A block the
+ * engine has taken (`blockingKeys`, filled from the projection for both seats)
+ * fills the band beside its attacker in the same tray, because a declared block
+ * that left the blocker in its row was the one pairing on the table that had to
+ * be worked out by reading two rows and a badge (`mtg-31b0r`): the other seat
+ * never staged anything, so for them the declared drawing is the only one.
+ * Adjacency is invisible to a screen reader, so the blocker also carries the
+ * sentence (`./Battlefield.ts`, `stagedBlockMark` and `blockingMark`).
  *
  * **The band owns no game state.** Everything it draws is read off props the
  * projection already fills from `GameState.combat`, and the one thing that is
@@ -64,7 +79,7 @@ import { createElement } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { isLand } from '@mtg/dsl';
 import type { BattlefieldProps, BoardPermanent, PermanentGroup } from './Battlefield';
-import { groupAttachments, groupNode } from './Battlefield';
+import { groupAttachments, groupNode, groupPermanentPiles, permanentPileNode } from './Battlefield';
 import type { BoardSeat, BoardSide } from './Board';
 
 /** What the seam says it is, for a reader who cannot see where a card sits. */
@@ -83,9 +98,18 @@ export interface CombatTable {
   readonly band: ReactElement;
 }
 
+/**
+ * The attackers a blocker is answering, by key: the block it is assembling, or
+ * failing that the one the engine has taken. Never both, since a declared block
+ * is not a decision the board is still asking for.
+ */
+function blockKeys(permanent: BoardPermanent): readonly string[] | undefined {
+  return permanent.stagedBlockKeys ?? permanent.blockingKeys;
+}
+
 /** A permanent the seam draws rather than the row: declared, or proposed. */
 function inCombat(permanent: BoardPermanent): boolean {
-  return permanent.attacking === true || permanent.staged === true || permanent.stagedBlockKey !== undefined;
+  return permanent.attacking === true || permanent.staged === true || blockKeys(permanent) !== undefined;
 }
 
 /**
@@ -98,7 +122,7 @@ function inCombat(permanent: BoardPermanent): boolean {
  */
 function isProposal(permanent: BoardPermanent): boolean {
   return (
-    permanent.attacking !== true && (permanent.staged === true || permanent.stagedBlockKey !== undefined)
+    permanent.attacking !== true && (permanent.staged === true || permanent.stagedBlockKeys !== undefined)
   );
 }
 
@@ -139,9 +163,9 @@ function splitSeat(side: BoardSide): {
  * is what makes a click on an attacker in the band mean the same thing as a
  * click on it in the row.
  */
-function entryNode(props: BattlefieldProps, entry: CombatEntry): ReactElement {
+function entryNode(props: BattlefieldProps, entry: CombatEntry, cover?: ReactNode): ReactElement {
   const host = entry.group.host;
-  const blocks = host.stagedBlockKey;
+  const blocks = blockKeys(host);
   return createElement(
     'div',
     {
@@ -152,40 +176,141 @@ function entryNode(props: BattlefieldProps, entry: CombatEntry): ReactElement {
       // What this entry is answering, when it is answering one. Written for the
       // same reason `data-seat` is: the relation is drawn as a position, and a
       // position is the one thing a test cannot read back off the picture.
-      ...(blocks === undefined ? {} : { 'data-blocks': blocks }),
+      ...(blocks === undefined ? {} : { 'data-blocks': blocks.join(',') }),
     },
-    groupNode(props, entry.group),
+    groupNode(props, entry.group, cover),
+  );
+}
+
+/** One item in the strip: a card, and the blockers staged or declared against it. */
+interface CombatPair {
+  readonly attacker: CombatEntry;
+  readonly blockers: readonly CombatEntry[];
+}
+
+/**
+ * The strip's order and its grouping in one pass: every attacker, carrying each
+ * not-yet-placed blocker staged against it.
+ *
+ * Attackers keep the order the two rows gave them, which is the order the board
+ * is in, so nothing moves under the player as they assign. A staged blocker
+ * whose attacker is not in the strip becomes a pair of its own at the end rather
+ * than being dropped — that is a staged *attacker* of the viewer's own, which is
+ * what this list holds one turn step earlier and the only other thing in it.
+ *
+ * Grouping here rather than in the layout is `mtg-7all`: the drawing has to be
+ * one bounded element per pair, and the order alone cannot produce one.
+ */
+function pairEntries(entries: readonly CombatEntry[]): readonly CombatPair[] {
+  const answered = new Set<string>();
+  const pairs: CombatPair[] = [];
+  for (const entry of entries) {
+    if (blockKeys(entry.group.host) !== undefined) continue;
+    const blockers: CombatEntry[] = [];
+    for (const other of entries) {
+      if (answered.has(other.group.host.key)) continue;
+      if (blockKeys(other.group.host)?.includes(entry.group.host.key) !== true) continue;
+      blockers.push(other);
+      answered.add(other.group.host.key);
+    }
+    pairs.push({ attacker: entry, blockers });
+  }
+  for (const entry of entries) {
+    if (blockKeys(entry.group.host) === undefined) continue;
+    if (answered.has(entry.group.host.key)) continue;
+    pairs.push({ attacker: entry, blockers: [] });
+  }
+  return pairs;
+}
+
+/**
+ * An attacker and the blockers staged against it, in one keylined tray.
+ *
+ * The tray is `../styles/board/attach.ts`'s, and deliberately: an Equipment and
+ * its creature are already drawn as a bordered box with a short connector
+ * between them, and a table that says "these two are one thing" two different
+ * ways is a table a player has to learn twice.
+ *
+ * It is a named `group`, for the reason `./Battlefield.ts`'s `attachedGroup` is:
+ * the relation is drawn, and a drawn relation reaches nobody using a screen
+ * reader. The blocker still carries its own sentence (`stagedBlockMark`), so the
+ * name here is the pairing read from the attacker's side and not a second copy
+ * of it.
+ */
+function pairNode(
+  props: {
+    readonly you: BattlefieldProps;
+    readonly opponent: BattlefieldProps;
+  },
+  pair: CombatPair,
+): ReactElement {
+  const host = pair.attacker.group.host;
+  const field = (entry: CombatEntry): BattlefieldProps => (entry.seat === 'you' ? props.you : props.opponent);
+  const names = pair.blockers.map((entry) => entry.group.host.card.name);
+  return createElement(
+    'div',
+    {
+      key: `pair-${host.key}`,
+      className: 'mtg-combat__pair',
+      // Which attacker this tray is about, written rather than left to the
+      // layout, for the same reason `entryNode` writes `data-blocks`: a position
+      // is the one thing a test cannot read back off the picture.
+      'data-attacker': host.key,
+      role: 'group',
+      'aria-label': `${host.card.name}, blocked by ${names.join(', ')}`,
+    },
+    entryNode(field(pair.attacker), pair.attacker),
+    createElement('span', { key: 'link', className: 'mtg-combat__pair-link', 'aria-hidden': true }),
+    ...pair.blockers.map((entry) => entryNode(field(entry), entry)),
   );
 }
 
 /**
- * The strip's order: every attacker, each followed by the blockers staged
- * against it.
- *
- * Attackers keep the order the two rows gave them, which is the order the board
- * is in, so nothing moves under the player as they assign. A staged blocker
- * whose attacker is not in the strip keeps its place at the end rather than
- * being dropped — that is a staged *attacker* of the viewer's own, which is what
- * this list holds one turn step earlier and the only other thing in it.
+ * Unanswered combatants retain the battlefield's pile contract in the seam.
+ * A blocker pair is deliberately a boundary: two creatures assigned to two
+ * different attackers are different actionable objects even when their card
+ * and visible state happen to match.
  */
-function orderEntries(entries: readonly CombatEntry[]): readonly CombatEntry[] {
-  const answered = new Set<string>();
-  const ordered: CombatEntry[] = [];
-  for (const entry of entries) {
-    if (entry.group.host.stagedBlockKey !== undefined) continue;
-    ordered.push(entry);
-    for (const other of entries) {
-      if (other.group.host.stagedBlockKey !== entry.group.host.key) continue;
-      ordered.push(other);
-      answered.add(other.group.host.key);
+function combatPairNodes(
+  props: {
+    readonly you: BattlefieldProps;
+    readonly opponent: BattlefieldProps;
+  },
+  pairs: readonly CombatPair[],
+): readonly ReactElement[] {
+  const nodes: ReactElement[] = [];
+  let loose: CombatEntry[] = [];
+
+  const flush = (): void => {
+    if (loose.length === 0) return;
+    const seat = loose[0]?.seat;
+    if (seat === undefined) return;
+    const battlefield = seat === 'you' ? props.you : props.opponent;
+    const piles = groupPermanentPiles(
+      loose.map((entry) => entry.group),
+      battlefield,
+    );
+    for (const pile of piles) {
+      nodes.push(
+        permanentPileNode(battlefield, pile, (field, group, cover) =>
+          entryNode(field, { seat, group }, cover),
+        ),
+      );
     }
+    loose = [];
+  };
+
+  for (const pair of pairs) {
+    if (pair.blockers.length === 0 && (loose.length === 0 || loose[0]?.seat === pair.attacker.seat)) {
+      loose.push(pair.attacker);
+      continue;
+    }
+    flush();
+    if (pair.blockers.length === 0) loose.push(pair.attacker);
+    else nodes.push(pairNode(props, pair));
   }
-  for (const entry of entries) {
-    if (entry.group.host.stagedBlockKey === undefined) continue;
-    if (answered.has(entry.group.host.key)) continue;
-    ordered.push(entry);
-  }
-  return ordered;
+  flush();
+  return nodes;
 }
 
 /**
@@ -274,10 +399,11 @@ export function combatTable(props: {
 }): CombatTable {
   const far = splitSeat(props.opponent);
   const near = splitSeat(props.you);
-  const entries: readonly CombatEntry[] = orderEntries([
+  const entries: readonly CombatEntry[] = [
     ...far.groups.map((group): CombatEntry => ({ seat: 'opponent', group })),
     ...near.groups.map((group): CombatEntry => ({ seat: 'you', group })),
-  ]);
+  ];
+  const pairs = pairEntries(entries);
   const controls = props.combat ?? null;
   const open = entries.length > 0 || controls !== null;
   // The attackers scroll and the controls do not, which is why they are two
@@ -288,9 +414,9 @@ export function combatTable(props: {
   const strip = createElement(
     'div',
     { key: 'strip', className: 'mtg-combat__strip', 'data-seats': seatsHeld(entries) },
-    ...entries.map((entry) =>
-      entryNode(entry.seat === 'you' ? props.you.battlefield : props.opponent.battlefield, entry),
-    ),
+    // A tray only where there is a pair to bound. An unanswered attacker is the
+    // bare entry it has always been, so nothing about declare-attackers moved.
+    ...combatPairNodes({ you: props.you.battlefield, opponent: props.opponent.battlefield }, pairs),
   );
   const stack = props.stack ?? null;
   const beat = props.beat ?? null;

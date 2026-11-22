@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "dka",
+  "archetypes": [
+    {
+      "id": "white-blue-spirits",
+      "name": "White-Blue Spirits",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Drogskol Captain",
+        "physicalId": "dka-printed-v1:0136:b8238e36-625f-460d-9e39-fd501e65490c"
+      },
+      "plan": "Build around Drogskol Captain: Build an evasive Spirit force, use flashback and tap effects to control races, and attack through the air."
+    },
+    {
+      "id": "blue-black-zombies",
+      "name": "Blue-Black Zombies",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Diregraf Captain",
+        "physicalId": "dka-printed-v1:0135:0e5f41eb-609b-4882-af9e-904daa717484"
+      },
+      "plan": "Build around Diregraf Captain: Fill the graveyard and recur Zombies so removal trades become temporary setbacks rather than lost resources."
+    },
+    {
+      "id": "black-red-vampires",
+      "name": "Black-Red Vampires",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Stromkirk Captain",
+        "physicalId": "dka-printed-v1:0143:5bfcca87-04f8-480a-bae6-ae87f7afb7e1"
+      },
+      "plan": "Build around Stromkirk Captain: Pressure with Vampires, preserve attack triggers with removal, and snowball tribal bonuses across combat steps."
+    },
+    {
+      "id": "red-green-werewolves",
+      "name": "Red-Green Werewolves",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Immerwolf",
+        "physicalId": "dka-printed-v1:0141:9326061f-ea76-4be7-a06f-aefb63454777"
+      },
+      "plan": "Build around Immerwolf: Develop Werewolves, pass selectively to transform them, and use instant-speed plays to keep the larger faces active."
+    },
+    {
+      "id": "green-white-humans",
+      "name": "Green-White Humans",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Travel Preparations",
+        "physicalId": "isd-printed-v1:0206:e9654ae7-af2c-4956-be3a-68befa33f523"
+      },
+      "plan": "Build around Travel Preparations: Curve Humans into tribal or enter-the-battlefield bonuses, go wide, and attack with a strengthened team."
+    }
+  ]
+}

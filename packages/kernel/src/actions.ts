@@ -7,8 +7,13 @@
  * actually leave open. That is the seam the bots and the future LLM referee
  * plug into: the kernel enumerates, the agent picks, the kernel mutates.
  */
+import type { Color } from '@mtg/dsl';
 import type { ObjectId, PlayerId } from './ids';
-import type { CombatDefender, ManaColor, Target } from './state';
+import type { CastingCostChoice, CombatDefender, DamageAllocations, ManaColor, Target } from './state';
+export type { CastingCostChoice } from './state';
+
+/** Hostile-input ceiling; current Oracle names fit comfortably inside it. */
+export const MAX_CARD_NAME_LENGTH = 256;
 
 export interface AttackDeclaration {
   readonly oid: ObjectId;
@@ -23,6 +28,11 @@ export interface BlockDeclaration {
 export interface BlockerOrdering {
   readonly attacker: ObjectId;
   readonly blockers: readonly ObjectId[];
+}
+
+export interface AttackerOrdering {
+  readonly blocker: ObjectId;
+  readonly attackers: readonly ObjectId[];
 }
 
 export type Action =
@@ -54,28 +64,76 @@ export type Action =
        */
       readonly mode?: number;
       /**
-       * Chosen members for a `TargetSpec.count` slot ("up to two target
-       * creatures", `mtg-kg44`), keyed by index into `card.effects` the same
-       * way `targets` is. Absent for the same reason `x` and `mode` are: a
-       * card with no counted slot casts with no key here to omit, and
-       * `validateCast` rejects a submission that names an index the card
-       * does not have a counted slot at, or more members than `count` allows.
+       * Chosen members for a plural target slot, whether a bounded `count`
+       * ("up to three target creatures") or `anyNumber` ("any number of target
+       * players"). Keyed by index into `card.effects` the same way `targets`
+       * is. `validateCast` rejects a submission on an ordinary slot, duplicate
+       * members, illegal members, and a bounded choice over its maximum.
        *
        * Sibling of `targets` rather than a member of it, because `targets` is
        * `Target | null` per slot and "chose two creatures" is not a single
        * `Target` — see `StackEntry.multiTargets`' docblock for why that stayed
-       * a side channel instead of a fourth `Target` variant. Scoped to
-       * `castSpell` only: `checkAbilityEffectTarget` (`@mtg/dsl`) never calls
-       * `checkTargetCount`, so a `count` slot cannot appear on a printed
-       * ability's effect list, and `activateAbility` and
-       * `chooseTriggerTargets` carry no matching field.
+       * a side channel instead of a fourth `Target` variant. Activated and
+       * triggered abilities use the same representation at their own action
+       * boundaries, so resolution consumes one target-group shape everywhere.
        */
-      readonly multiTargets?: Readonly<Record<number, readonly ObjectId[]>>;
+      readonly multiTargets?: Readonly<Record<number, readonly Target[]>>;
+      /**
+       * CR 601.2f: the printed mana cost, a typed alternative, or a live
+       * permission/effect instruction to cast without paying the mana cost.
+       * Present on both alternatives when the card offers a choice, absent on
+       * cards that have only their printed cost so historical actions retain
+       * their canonical bytes. Validation rejects an omitted choice on a card
+       * that needs one and a choice on a card that has none.
+       */
+      readonly castingCost?: CastingCostChoice;
+      /** Chosen positive damage shares, parallel to each plural target list. */
+      readonly damageAllocations?: DamageAllocations;
+      /** Permanents chosen and paid as this spell's additional sacrifice cost. */
+      readonly sacrifices?: readonly ObjectId[];
+      /** Cards chosen and paid as this spell's additional discard cost. */
+      readonly discards?: readonly ObjectId[];
+    }
+  | {
+      /** Begins a cast whose plural targets are collected in linear stages. */
+      readonly type: 'beginCastSpell';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly targets: readonly (Target | null)[];
+      readonly x?: number;
+      readonly mode?: number;
+      readonly castingCost?: CastingCostChoice;
+      readonly sacrifices?: readonly ObjectId[];
+      readonly discards?: readonly ObjectId[];
+    }
+  | {
+      /** Adds one member to the current plural slot, or finishes it with null. */
+      readonly type: 'choosePluralTarget';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly target: Target | null;
+    }
+  | {
+      /** Assigns the next positive share in a divided-as-chosen damage slot. */
+      readonly type: 'allocateDividedDamage';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly amount: number;
     }
   | {
       readonly type: 'activateManaAbility';
       readonly player: PlayerId;
       readonly oid: ObjectId;
+      readonly color: ManaColor;
+      /** Current ability slot; absent for intrinsic land mana and legacy single-source actions. */
+      readonly abilityIndex?: number;
+      /** Fixed quantity produced; omitted for the ordinary one-mana spelling and legacy actions. */
+      readonly amount?: number;
+    }
+  | {
+      /** Chooses the color produced by an ordinary stack-using mana effect as it resolves. */
+      readonly type: 'chooseManaColor';
+      readonly player: PlayerId;
       readonly color: ManaColor;
     }
   | {
@@ -93,8 +151,14 @@ export type Action =
       readonly oid: ObjectId;
       /** Index into the permanent's `card.abilities`. */
       readonly abilityIndex: number;
+      /** CR 700.2 mode announced for a modal activated ability. */
+      readonly mode?: number;
       /** Parallel to the ability's effect list; `null` where an effect needs no target. */
       readonly targets: readonly (Target | null)[];
+      /** Chosen members for plural activated-ability target slots. */
+      readonly multiTargets?: Readonly<Record<number, readonly Target[]>>;
+      /** Positive damage shares paired with `multiTargets`. */
+      readonly damageAllocations?: DamageAllocations;
       /**
        * CR 601.2b, reached through CR 602.2b: the value announced for this
        * ability's `{X}`, chosen as the ability is activated and therefore known
@@ -109,16 +173,25 @@ export type Action =
        */
       readonly x?: number;
       /**
-       * The permanents `cost.sacrificeOther` eats, chosen by the activating
+       * The permanents `cost.sacrificeOther` or `cost.sacrificeMatching` eats, chosen by the activating
        * player (CR 601.2g). Empty when the cost names none, which is every
        * ability written before Chests: an always-present list rather than an
        * optional field, so "this activation sacrifices nothing" has one
        * spelling and `validateAction` can check the length unconditionally.
        *
-       * The source itself is never in here even when `cost.sacrificeSelf` is
-       * set. That payment is not a choice, so it is not agent input.
+       * The source itself is absent when `cost.sacrificeSelf` or
+       * `cost.exileSelf` is set because either payment is fixed rather than
+       * chosen. It may appear for `sacrificeMatching`, whose printed filter
+       * permits the source when it matches.
        */
       readonly sacrifices: readonly ObjectId[];
+      /**
+       * The distinct permanents `cost.tapMatching` taps as the activation is
+       * paid. Present exactly when that cost exists and omitted otherwise, so
+       * old recordings remain valid while a cost-bearing action cannot hide
+       * which cohort it chose.
+       */
+      readonly taps?: readonly ObjectId[];
       /**
        * The cards `cost.discard` pays with, chosen by the activating player
        * (CR 601.2h).
@@ -156,6 +229,10 @@ export type Action =
       readonly oid: ObjectId;
       /** Parallel to the trigger's effect list; `null` where an effect needs none. */
       readonly targets: readonly (Target | null)[];
+      /** Chosen members for plural trigger target slots. */
+      readonly multiTargets?: Readonly<Record<number, readonly Target[]>>;
+      /** Positive damage shares paired with `multiTargets`. */
+      readonly damageAllocations?: DamageAllocations;
     }
   | {
       /**
@@ -210,6 +287,12 @@ export type Action =
       readonly pay: boolean;
     }
   | {
+      /** Declines an optional permission to cast a card without paying its mana cost. */
+      readonly type: 'declineFreeCast';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+    }
+  | {
       readonly type: 'declareAttackers';
       readonly player: PlayerId;
       readonly attackers: readonly AttackDeclaration[];
@@ -244,11 +327,22 @@ export type Action =
        * offer rather than at the commit, so no listed option is a trap.
        */
       readonly settled?: number;
+      /**
+       * How many attackers the current unlimited-capacity blocker has answered
+       * for when its subset is too wide to enumerate at once. Absent outside
+       * that within-one-blocker sequence.
+       */
+      readonly attackerChoicesSettled?: number;
     }
   | {
       readonly type: 'orderBlockers';
       readonly player: PlayerId;
       readonly orders: readonly BlockerOrdering[];
+    }
+  | {
+      readonly type: 'orderAttackers';
+      readonly player: PlayerId;
+      readonly orders: readonly AttackerOrdering[];
     }
   | { readonly type: 'discard'; readonly player: PlayerId; readonly oids: readonly ObjectId[] }
   | {
@@ -274,31 +368,54 @@ export type Action =
       readonly oids: readonly ObjectId[];
     }
   | {
+      /** Choose one eligible card from the hand this resolution revealed, or decline when offered. */
+      readonly type: 'chooseFromRevealedHand';
+      readonly player: PlayerId;
+      readonly chosen: ObjectId | null;
+    }
+  | {
       /** CR 701.18: both groups are ordered from the top of the library downward. */
       readonly type: 'scry';
       readonly player: PlayerId;
       readonly top: readonly ObjectId[];
       readonly bottom: readonly ObjectId[];
     }
+  | { readonly type: 'orderTopLibrary'; readonly player: PlayerId; readonly cards: readonly ObjectId[] }
+  | {
+      readonly type: 'selectFromTopLibrary';
+      readonly player: PlayerId;
+      readonly chosen: ObjectId | null;
+      readonly rest: readonly ObjectId[];
+    }
+  | {
+      readonly type: 'separateTopLibraryPiles';
+      readonly player: PlayerId;
+      readonly first: readonly ObjectId[];
+      readonly second: readonly ObjectId[];
+    }
+  | { readonly type: 'chooseTopLibraryPile'; readonly player: PlayerId; readonly pile: 0 | 1 }
   | {
       /**
        * CR 701.19a: which card the search takes, or nothing.
        *
-       * `found: null` is always offered, and it is not a courtesy. CR 701.19c
-       * lets a player fail to find even when the library holds a match, which
-       * is the rule that makes a search safe to log: a seat that had to take a
-       * card whenever one existed would have `librarySearched.found` read off
-       * the library rather than off the choice, and the boolean would tell the
-       * opponent the contents of a hidden zone.
+       * `found: null` is offered when CR 701.19b permits failing to find a card
+       * with a stated quality, or when the effect says "up to" through a count
+       * above one. An unrestricted one-card search omits it because a nonempty
+       * library must yield a card; its empty case completes without an action.
        *
-       * One card and not a list, because every search in the vocabulary takes
-       * one — `searchLibraryEffect` (`@mtg/dsl`) prints no count, and a count
-       * would need the whole ordered-subset enumeration `scry` pays for
-       * without a card asking for it.
+       * One card and not a list because a multi-card search is a sequence of
+       * these bounded questions. `PendingSearch.taken` retains the answers and
+       * the resolution moves them together after the final question.
        */
       readonly type: 'searchLibrary';
       readonly player: PlayerId;
       readonly found: ObjectId | null;
+    }
+  | {
+      /** Assigns one found card to the `one` arm of a split search destination. */
+      readonly type: 'chooseSearchDestination';
+      readonly player: PlayerId;
+      readonly one: ObjectId;
     }
   | {
       /**
@@ -307,10 +424,9 @@ export type Action =
        * `searchLibrary`'s shape one zone over, and `chosen: null` is offered
        * for a different reason than `found: null` is. There it is CR 701.19c,
        * which exists so a public failure cannot leak the contents of a hidden
-       * zone; here the zone is public and nothing leaks either way, so the null
-       * arm is what makes "you may return target creature card" (Gravedigger)
-       * and "return target creature card" (Disentomb) one effect instead of
-       * two, with no `optional` flag for a card to set wrong.
+       * zone; here the zone is public and nothing leaks either way. The null
+       * arm is the explicit decline for a genuinely optional, nontargeted
+       * resolution-time choice, with no second `optional` flag to disagree.
        *
        * One card and not a list, because every printed clause this vocabulary
        * covers takes one: `chooseFromGraveyardEffect` (`@mtg/dsl`) prints no
@@ -321,6 +437,31 @@ export type Action =
       readonly type: 'chooseFromGraveyard';
       readonly player: PlayerId;
       readonly chosen: ObjectId | null;
+    }
+  | {
+      /** One mandatory permanent selected from the resolving controller's battlefield. */
+      readonly type: 'chooseFromBattlefield';
+      readonly player: PlayerId;
+      readonly chosen: ObjectId;
+    }
+  | {
+      /** CR 701.30: one controlled creature token copied by a resolving Populate instruction. */
+      readonly type: 'choosePopulateToken';
+      readonly player: PlayerId;
+      readonly token: ObjectId;
+    }
+  | {
+      /**
+       * Takes one card-authored action from this opening hand, or finishes the
+       * player's pregame action round with `oid: null`.
+       *
+       * A nullable object is semantically meaningful here: it distinguishes a
+       * player declining the remaining optional actions from a player who was
+       * never asked because their hand contained none.
+       */
+      readonly type: 'chooseOpeningHandAction';
+      readonly player: PlayerId;
+      readonly oid: ObjectId | null;
     }
   | {
       /**
@@ -389,6 +530,104 @@ export type Action =
       readonly type: 'sacrificePermanent';
       readonly player: PlayerId;
       readonly oid: ObjectId;
+    }
+  | {
+      /** Select the next canonical member of a resolving group untap, or stop. */
+      readonly type: 'choosePermanentToUntap';
+      readonly player: PlayerId;
+      readonly oid: ObjectId | null;
+    }
+  | {
+      /** CR 201.4: one arbitrary non-empty card name chosen during resolution. */
+      readonly type: 'chooseCardName';
+      readonly player: PlayerId;
+      readonly name: string;
+    }
+  | {
+      /** Select the next canonical match from a named three-zone search, or stop. */
+      readonly type: 'chooseNamedZoneExile';
+      readonly player: PlayerId;
+      readonly oid: ObjectId | null;
+    }
+  | {
+      /** The complete replacement target tuple chosen during spell resolution. */
+      readonly type: 'chooseSpellTargets';
+      readonly player: PlayerId;
+      /** The spell being changed, or the original from which a copy will be made. */
+      readonly oid: ObjectId;
+      readonly targets: readonly (Target | null)[];
+      readonly multiTargets?: Readonly<Record<number, readonly Target[]>>;
+      readonly damageAllocations?: DamageAllocations;
+    }
+  | {
+      /** CR 707.9: copied values chosen while a permanent enters, or declined. */
+      readonly type: 'chooseEntryCopy';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly copyOf: ObjectId | null;
+    }
+  | {
+      /** A mandatory controlled permanent chosen by an as-entry replacement. */
+      readonly type: 'chooseEntryCounterPermanent';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly permanent: ObjectId;
+    }
+  | {
+      /** CR 303.4f: the legal object a non-spell Aura enters attached to. */
+      readonly type: 'chooseEntryAuraHost';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly host: ObjectId;
+    }
+  | {
+      /** Choose the next earliest object in this controller's CR 613.7m order. */
+      readonly type: 'chooseEntryTimestampNext';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+    }
+  | {
+      /** One complete copiable form chosen before this creature enters. */
+      readonly type: 'chooseEntryCharacteristics';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly mode: number;
+    }
+  | {
+      /** Accepts or declines an optional counter replacement before entry. */
+      readonly type: 'chooseEntryOptionalCounter';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly accept: boolean;
+    }
+  | {
+      /** Pays life so a permanent does not enter tapped, or declines. */
+      readonly type: 'chooseEntryPayLife';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly life: number;
+      readonly pay: boolean;
+    }
+  | {
+      /** The player fixed by this permanent's as-enters choice. */
+      readonly type: 'chooseEntryPlayer';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly chosen: PlayerId;
+    }
+  | {
+      /** The two distinct colors fixed by this permanent's as-enters choice. */
+      readonly type: 'chooseEntryColors';
+      readonly player: PlayerId;
+      readonly oid: ObjectId;
+      readonly colors: readonly [Color, Color];
+    }
+  | {
+      /** CR 615.7: how much of the pending finite shield this source receives. */
+      readonly type: 'allocateDamagePrevention';
+      readonly player: PlayerId;
+      readonly sourceOid: ObjectId;
+      readonly amount: number;
     }
   | { readonly type: 'concede'; readonly player: PlayerId };
 

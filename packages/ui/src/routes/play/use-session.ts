@@ -23,8 +23,27 @@
  * Which seat the board is drawn from is decided here too, by `seatOnDeck`. It
  * belongs with the session rather than with the configuration because it is a
  * fact about the game's current position, not about how the game was set up.
+ *
+ * **The config is a mount-time value** (`mtg-zwbq`), and that is a decision
+ * rather than an oversight. A game is dealt from it once; a later render handing
+ * a different one changes nothing, and the way to play a different game is to
+ * mount a new hook — a `key` on the component, which is React's own spelling of
+ * "this is a different thing now". Re-dealing under a player mid-game is worse
+ * than ignoring the caller: the choices they have made are gone and nothing on
+ * screen says so. `PlayRoute` takes a union for its *set* for the opposite
+ * reason, and the two are not the same case — a set arrives asynchronously and
+ * belongs to nobody until it does, while a config is something the caller built
+ * and is holding.
+ *
+ * So it is pinned at mount rather than merely documented as such. Every path
+ * that re-reads it reads the pinned one: `restart` deals the game that was
+ * opened, not whatever the last render passed, and `undo` rewinds through the
+ * setup that game was dealt from. Until this bead `restart` and `undo` read the
+ * live prop while the session ignored it, so a caller who changed the config had
+ * an interface where twelve controls played one game and the thirteenth quietly
+ * started another.
  */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type {
   AutoPassSettings,
   BeatSet,
@@ -47,7 +66,16 @@ import {
   undo as undoToBoundary,
   yieldPriority,
 } from '@mtg/kernel';
+import type { OpeningRoll } from './opening-roll';
 import type { SeatNames } from './position';
+import type { TriggerYield, TriggerYields } from './trigger-yields';
+import {
+  NO_TRIGGER_YIELDS,
+  settleTriggerYields,
+  withoutTriggerYield,
+  withTriggerYield,
+  yieldedAnswer,
+} from './trigger-yields';
 
 export interface PlayConfig {
   readonly setup: GameSetup;
@@ -78,6 +106,7 @@ export interface PlayConfig {
    * `autoPass` does.
    */
   readonly watchBeats?: BeatSet | undefined;
+  readonly openingRoll?: OpeningRoll | undefined;
 }
 
 export interface PlaySessionHandle {
@@ -116,6 +145,26 @@ export interface PlaySessionHandle {
   /** Passes to a boundary; see `yieldPriority`. A no-op with nothing pending. */
   readonly yieldTo: (boundary: YieldBoundary) => void;
   /**
+   * The optional triggers whose answer the player has settled, oldest first.
+   *
+   * A list rather than the map, because every reader of this is drawing them:
+   * `./trigger-yields.ts` owns the keying and nothing outside it should be
+   * looking anything up by a card id.
+   */
+  readonly triggerYields: readonly TriggerYield[];
+  /**
+   * Settles an optional trigger's answer and takes it, in one move.
+   *
+   * One call rather than a setter beside `choose`, because the two halves have
+   * to happen against the same map: a player who presses "always decline" while
+   * two copies of that trigger are on the stack means both of them, and a
+   * `setState` followed by a `choose` would answer the first under the old map
+   * and ask about the second.
+   */
+  readonly yieldToTrigger: (yielded: TriggerYield) => void;
+  /** Unsettles one answer, so that ability is asked about again. */
+  readonly clearTriggerYield: (key: string) => void;
+  /**
    * Takes every decision back to the last commit boundary, or puts the reason it
    * cannot on `error`. Never a no-op: see the comment on the callback.
    */
@@ -138,10 +187,10 @@ export interface PlaySessionHandle {
  * "whoever we were already showing".
  *
  * With one person at the screen the distinction is invisible: the only seat the
- * session ever stops on is theirs. With two people at one screen it is the whole
- * ball game — the revealed hand belongs to whoever is being asked, so a viewer
- * that fell back to a configured seat would put player 0's hand on a screen
- * player 1 is holding, every time a beat paused a combat player 1 was in.
+ * session ever stops on is theirs. On a two-human table (the test fixture) it is
+ * the whole ball game — the revealed hand belongs to whoever is being asked, so
+ * a viewer that fell back to a configured seat would reveal player 0's hand at
+ * player 1's decision, every time a beat paused a combat player 1 was in.
  * Hidden information is this surface's whole job and it fails silently: nothing
  * on screen says the hand you are looking at is not yours to see.
  *
@@ -185,10 +234,20 @@ function start(config: PlayConfig, options: SessionOptions): GameSession {
 }
 
 export function usePlaySession(config: PlayConfig): PlaySessionHandle {
-  const [autoPass, setSettings] = useState<AutoPassSettings>(config.autoPass ?? DEFAULT_AUTO_PASS);
-  const [watchBeats, setBeats] = useState<BeatSet>(config.watchBeats ?? DEFAULT_BEATS);
+  /*
+   * The config this session was opened on, held for the life of the hook.
+   *
+   * `useRef` and not `useMemo`: a memo is a cache the runtime is allowed to
+   * drop and recompute, which would silently re-deal on the render it happened
+   * to drop. This has to be the same object every time or it is nothing.
+   */
+  const opened = useRef(config);
+  const dealt = opened.current;
+  const [autoPass, setSettings] = useState<AutoPassSettings>(dealt.autoPass ?? DEFAULT_AUTO_PASS);
+  const [watchBeats, setBeats] = useState<BeatSet>(dealt.watchBeats ?? DEFAULT_BEATS);
+  const [triggerYields, setTriggerYields] = useState<TriggerYields>(NO_TRIGGER_YIELDS);
   const [game, setGame] = useState<HeldGame>(() =>
-    held(start(config, { autoPass: config.autoPass ?? DEFAULT_AUTO_PASS, watchBeats }), config.viewer),
+    held(start(dealt, { autoPass: dealt.autoPass ?? DEFAULT_AUTO_PASS, watchBeats }), dealt.viewer),
   );
   const session = game.session;
   const [error, setError] = useState<string | null>(null);
@@ -201,29 +260,79 @@ export function usePlaySession(config: PlayConfig): PlaySessionHandle {
    * settings change cannot make an action illegal — so it is surfaced instead of
    * losing the game in progress.
    */
-  const moveSession = useCallback((move: (current: GameSession) => GameSession): void => {
-    setError(null);
-    setGame((current) => {
-      try {
-        return held(move(current.session), current.viewer);
-      } catch (cause: unknown) {
-        setError(cause instanceof Error ? cause.message : String(cause));
-        return current;
-      }
-    });
-  }, []);
-
   const options: SessionOptions = useMemo(
     (): SessionOptions => ({ autoPass, watchBeats }),
     [autoPass, watchBeats],
   );
 
+  /**
+   * Every path that moves the session, wrapped once.
+   *
+   * `settleWith` is the trigger yields to apply to wherever the move lands, or
+   * null for the one path that must not apply them. It is an argument rather
+   * than a lookup so every call site says out loud which it is: a yield that
+   * silently reached one more path would be a decision answering itself where
+   * somebody expected to be asked.
+   */
+  const moveSession = useCallback(
+    (move: (current: GameSession) => GameSession, settleWith: TriggerYields | null): void => {
+      setError(null);
+      setGame((current) => {
+        try {
+          const moved = move(current.session);
+          return held(
+            settleWith === null ? moved : settleTriggerYields(moved, options, settleWith),
+            current.viewer,
+          );
+        } catch (cause: unknown) {
+          setError(cause instanceof Error ? cause.message : String(cause));
+          return current;
+        }
+      });
+    },
+    [options],
+  );
+
   const choose = useCallback(
     (choice: Choice): void => {
-      moveSession((current) => applyChoice(current, choice, options));
+      moveSession((current) => applyChoice(current, choice, options), triggerYields);
     },
-    [moveSession, options],
+    [moveSession, options, triggerYields],
   );
+
+  /**
+   * Settles an optional trigger's answer, and takes it now.
+   *
+   * The answer to the pending decision is built by `yieldedAnswer` off the map
+   * this press produces, so the decision on screen is answered by the rule that
+   * will answer the next one rather than by a second copy of it. Nothing
+   * special happens when the pending decision is not the trigger the press came
+   * from — the yield is recorded and the session settles under it, which is the
+   * same thing that would have happened had the press landed a moment later.
+   */
+  const yieldToTrigger = useCallback(
+    (yielded: TriggerYield): void => {
+      const next = withTriggerYield(triggerYields, yielded);
+      setTriggerYields(next);
+      moveSession((current) => {
+        const answer = yieldedAnswer(current, next);
+        return answer === null ? current : applyChoice(current, answer, options);
+      }, next);
+    },
+    [moveSession, options, triggerYields],
+  );
+
+  /**
+   * Unsettles one answer.
+   *
+   * It does not re-settle the session, and that is the whole of the difference
+   * from `setAutoPass`: turning a stop on can only add a question, and the
+   * question this adds is about an ability that is not on the stack right now.
+   * There is nothing to ask.
+   */
+  const clearTriggerYield = useCallback((key: string): void => {
+    setTriggerYields((current) => withoutTriggerYield(current, key));
+  }, []);
 
   /**
    * Changing the settings re-settles the session rather than waiting for the
@@ -235,9 +344,9 @@ export function usePlaySession(config: PlayConfig): PlaySessionHandle {
   const setAutoPass = useCallback(
     (next: AutoPassSettings): void => {
       setSettings(next);
-      moveSession((current) => advance(current, { autoPass: next, watchBeats }));
+      moveSession((current) => advance(current, { autoPass: next, watchBeats }), triggerYields);
     },
-    [moveSession, watchBeats],
+    [moveSession, watchBeats, triggerYields],
   );
 
   /**
@@ -257,9 +366,9 @@ export function usePlaySession(config: PlayConfig): PlaySessionHandle {
   const setWatchBeats = useCallback(
     (next: BeatSet): void => {
       setBeats(next);
-      moveSession((current) => advance(current, { autoPass, watchBeats: next }));
+      moveSession((current) => advance(current, { autoPass, watchBeats: next }), triggerYields);
     },
-    [moveSession, autoPass],
+    [moveSession, autoPass, triggerYields],
   );
 
   /**
@@ -270,14 +379,14 @@ export function usePlaySession(config: PlayConfig): PlaySessionHandle {
    * that is already settled, which is why this needs no guard of its own.
    */
   const resume = useCallback((): void => {
-    moveSession((current) => advance(current, options));
-  }, [moveSession, options]);
+    moveSession((current) => advance(current, options), triggerYields);
+  }, [moveSession, options, triggerYields]);
 
   const yieldTo = useCallback(
     (boundary: YieldBoundary): void => {
-      moveSession((current) => yieldPriority(current, boundary, options));
+      moveSession((current) => yieldPriority(current, boundary, options), triggerYields);
     },
-    [moveSession, options],
+    [moveSession, options, triggerYields],
   );
 
   /**
@@ -289,18 +398,20 @@ export function usePlaySession(config: PlayConfig): PlaySessionHandle {
    * told which event closed the game behind them rather than watching a button
    * do nothing. The kernel decides; `@mtg/kernel`'s `undo.ts` argues the set.
    *
-   * It rewinds through `config.setup`, the same seed `start` deals from, so the
-   * landed position is the one the game actually stood in rather than a
-   * reconstruction of it.
+   * It rewinds through the setup the game was dealt from, which is the pinned
+   * one and not the last render's, so the landed position is the one the game
+   * actually stood in rather than a reconstruction of it.
    */
   const undo = useCallback((): void => {
-    moveSession((current) => undoToBoundary(config.setup, current, options));
-  }, [moveSession, config.setup, options]);
+    moveSession((current) => undoToBoundary(dealt.setup, current, options), null);
+  }, [moveSession, dealt.setup, options]);
 
   const restart = useCallback((): void => {
     setError(null);
-    setGame(held(start(config, { autoPass, watchBeats }), config.viewer));
-  }, [config, autoPass, watchBeats]);
+    setGame(
+      held(settleTriggerYields(start(dealt, { autoPass, watchBeats }), options, triggerYields), dealt.viewer),
+    );
+  }, [dealt, autoPass, watchBeats, options, triggerYields]);
 
   const viewer = game.viewer;
 
@@ -318,6 +429,9 @@ export function usePlaySession(config: PlayConfig): PlaySessionHandle {
       watchBeats,
       setWatchBeats,
       yieldTo,
+      triggerYields: [...triggerYields.values()],
+      yieldToTrigger,
+      clearTriggerYield,
       undo,
       canUndo: anyUncommitted(session),
     }),
@@ -333,6 +447,9 @@ export function usePlaySession(config: PlayConfig): PlaySessionHandle {
       watchBeats,
       setWatchBeats,
       yieldTo,
+      triggerYields,
+      yieldToTrigger,
+      clearTriggerYield,
       undo,
     ],
   );

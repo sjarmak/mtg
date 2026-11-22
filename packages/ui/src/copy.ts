@@ -29,3 +29,16 @@ export function renderCopy(text: string): ReactNode {
     index % 2 === 0 ? span : createElement('code', { key: `c${String(index)}`, className: 'mtg-code' }, span),
   );
 }
+
+/**
+ * `1 card`, `3 cards`: a count and the noun it counts, agreeing.
+ *
+ * Here rather than in each route because four files had written the same three
+ * lines (`deck-counts.ts`, `shortfall-note.ts`, `routes/play/SealedBuilder.ts`,
+ * and this module's own caller), which is one past the rule of three. English
+ * plurals that are not an `s` are not handled and are not wanted: every noun
+ * this app counts is a card, a deck, a sheet, a configuration or a pack.
+ */
+export function plural(count: number, noun: string): string {
+  return `${String(count)} ${noun}${count === 1 ? '' : 's'}`;
+}

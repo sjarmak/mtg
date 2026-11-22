@@ -32,11 +32,11 @@
 import { describe, expect, it } from 'vitest';
 import type { SessionSpec } from '@mtg/engine';
 import { labelDecision } from '@mtg/engine';
-import { exampleCard } from '@mtg/dsl';
+import { exampleCard, parseCard } from '@mtg/dsl';
 import type { Action } from '@mtg/kernel';
-import { pendingDecision, reduceAll, scenario } from '@mtg/kernel';
+import { beginTrace, moveObject, pendingDecision, reduce, reduceAll, scenario } from '@mtg/kernel';
 import { projectDecision, projectState } from '../src/backend-projection';
-import { MOUNTAIN } from './cards';
+import { creature, FOREST, instant, MOUNTAIN } from './cards';
 
 const TABLE: SessionSpec = {
   content: { kind: 'dsl-set', setCode: 'SLC' },
@@ -47,6 +47,33 @@ const TABLE: SessionSpec = {
   seed: 'backend-projection/mtg-cee',
   maximumTurns: 40,
 };
+
+describe('backend-projection exposes public exile', () => {
+  it('projects an exiled card under its owning seat', () => {
+    const opened = scenario({ hands: [[FOREST], []] });
+    const oid = opened.state.players[0].hand[0];
+    if (oid === undefined) throw new Error('expected a card in hand');
+    const exiled = moveObject(beginTrace(opened.state), oid, 'exile').state;
+
+    const view = projectState(exiled, TABLE, [0, 1]);
+
+    expect(view.seats[0].exile.map((card) => card.oid)).toEqual([String(oid)]);
+    expect(view.seats[1].exile).toEqual([]);
+  });
+
+  it('projects the combat relation that moves a declared attacker into the shared band', () => {
+    const opened = scenario({ battlefield: [{ card: creature('Attacker', 2, 2), controller: 0 }] });
+    const attacker = opened.state.battlefield[0];
+    if (attacker === undefined) throw new Error('expected an attacker');
+    const attacking = {
+      ...opened.state,
+      combat: { ...opened.state.combat, attacks: [{ oid: attacker, defender: 1 as const }] },
+    };
+
+    expect(projectState(attacking, TABLE, [0, 1]).seats[0].battlefield[0]?.attacking).toBe(true);
+    expect(projectState(opened.state, TABLE, [0, 1]).seats[0].battlefield[0]?.attacking).toBe(false);
+  });
+});
 
 describe('backend-projection points a castSpell at what it targets', () => {
   it('separates two Lightning Lash casts aimed at the two players’ Emberflow Raiders', () => {
@@ -150,5 +177,249 @@ describe('backend-projection points a castSpell at what it targets', () => {
     expect(player0Label.text).not.toBe(player1Label.text);
     expect(player0Label.sharedWith).toEqual([]);
     expect(player1Label.sharedWith).toEqual([]);
+  });
+});
+
+describe('backend-projection exposes spell discard payments', () => {
+  it('points each Wild Guess option at the hand card it will discard', () => {
+    const wildGuess = parseCard({
+      kind: 'sorcery',
+      id: 'projection-wild-guess',
+      name: 'Wild Guess',
+      rarity: 'common',
+      set: { code: 'M13', collectorNumber: 157 },
+      colors: ['R'],
+      manaCost: { R: 2 },
+      additionalCost: { discard: 1 },
+      effects: [{ kind: 'drawCards', count: 2, target: { kind: 'noTarget' } }],
+    });
+    const opened = scenario({
+      battlefield: [
+        { card: MOUNTAIN, controller: 0 },
+        { card: MOUNTAIN, controller: 0 },
+      ],
+      hands: [
+        [
+          wildGuess,
+          FOREST,
+          instant('Valuable Spell', [{ kind: 'drawCards', count: 3, target: { kind: 'noTarget' } }]),
+        ],
+        [],
+      ],
+    });
+    const floated = reduceAll(
+      opened.state,
+      opened.state.battlefield.map((oid): Action => ({
+        type: 'activateManaAbility',
+        player: 0,
+        oid,
+        color: 'R',
+      })),
+    );
+    const decision = pendingDecision(floated.state);
+    if (decision?.kind !== 'priority') throw new Error('expected priority');
+    const projected = projectDecision(floated.state, decision);
+    const wildGuessOid = floated.state.players[0].hand.find(
+      (oid) => floated.state.objects[oid]?.card.name === 'Wild Guess',
+    );
+    if (wildGuessOid === undefined) throw new Error('Wild Guess left the hand');
+    const casts = decision.options.flatMap((action, index) =>
+      action.type === 'castSpell' && action.oid === wildGuessOid
+        ? [{ action, option: projected.options[index] }]
+        : [],
+    );
+
+    expect(
+      casts.map(({ action, option }) => ({
+        discarded: action.discards?.map((oid) => floated.state.objects[oid]?.card.name),
+        projected: option?.targets.map((target) => target.name),
+        text: option?.text,
+      })),
+    ).toEqual([
+      {
+        discarded: ['Forest'],
+        projected: ['Wild Guess', 'Forest'],
+        text: 'Cast Wild Guess discarding Forest',
+      },
+      {
+        discarded: ['Valuable Spell'],
+        projected: ['Wild Guess', 'Valuable Spell'],
+        text: 'Cast Wild Guess discarding Valuable Spell',
+      },
+    ]);
+  });
+});
+
+describe('backend-projection exposes a chosen cohort payment', () => {
+  it('points each activation option at the permanent it will tap', () => {
+    const source = parseCard({
+      kind: 'artifact',
+      id: 'projection-cohort-source',
+      name: 'Cohort Source',
+      rarity: 'common',
+      set: { code: 'TST', collectorNumber: 3 },
+      manaCost: { generic: 1 },
+      abilities: [
+        {
+          kind: 'activated',
+          cost: { mana: {}, tapMatching: { count: 1, filter: { cardTypes: ['creature'] } } },
+          effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }],
+        },
+      ],
+    });
+    const opened = scenario({
+      battlefield: [
+        { card: source, controller: 0 },
+        { card: creature('First Payer', 1, 1), controller: 0, summoningSick: true },
+        { card: creature('Second Payer', 1, 1), controller: 0, summoningSick: true },
+      ],
+    });
+    const decision = pendingDecision(opened.state);
+    if (decision?.kind !== 'priority') throw new Error('expected a priority decision');
+    const projected = projectDecision(opened.state, decision);
+    const activations = decision.options.flatMap((action, index) =>
+      action.type === 'activateAbility' ? [{ action, option: projected.options[index] }] : [],
+    );
+
+    expect(activations).toHaveLength(2);
+    expect(
+      activations.map(({ action, option }) => ({
+        tapped: action.taps?.map((oid) => opened.state.objects[oid]?.card.name),
+        projected: option?.targets.map((target) => target.name),
+      })),
+    ).toEqual([
+      { tapped: ['First Payer'], projected: ['Cohort Source', 'First Payer'] },
+      { tapped: ['Second Payer'], projected: ['Cohort Source', 'Second Payer'] },
+    ]);
+  });
+});
+
+describe('backend-projection names plural player-target choices', () => {
+  it('gives each staged Hunters Feast member and completion distinct move text', () => {
+    const feast = parseCard({
+      kind: 'sorcery',
+      id: 'projection-hunters-feast',
+      name: "Hunters' Feast",
+      rarity: 'common',
+      set: { code: 'TST', collectorNumber: 182 },
+      manaCost: { generic: 3, G: 1 },
+      colors: ['G'],
+      effects: [
+        {
+          kind: 'gainLife',
+          amount: 6,
+          target: { kind: 'targetPlayer', anyNumber: true },
+        },
+      ],
+    });
+    const opened = scenario({
+      battlefield: Array.from({ length: 4 }, () => ({ card: FOREST, controller: 0 as const })),
+      hands: [[feast], []],
+    });
+    const floated = reduceAll(
+      opened.state,
+      opened.state.battlefield.map((oid): Action => ({
+        type: 'activateManaAbility',
+        player: 0,
+        oid,
+        color: 'G',
+      })),
+    );
+    const decision = pendingDecision(floated.state);
+    if (decision === null) throw new Error('expected a pending decision');
+    const start = decision.options.find((action) => action.type === 'beginCastSpell');
+    if (start === undefined) throw new Error('expected staged cast start');
+    const staged = reduce(floated.state, start);
+    const memberDecision = pendingDecision(staged.state);
+    if (memberDecision === null) throw new Error('expected staged member decision');
+    const projected = projectDecision(staged.state, memberDecision);
+
+    expect(new Set(projected.options.map((option) => option.text)).size).toBe(3);
+    expect(projected.options.map((option) => option.text).sort()).toEqual([
+      'Add player 0 as a target',
+      'Add player 1 as a target',
+      "Finish choosing targets for Hunters' Feast",
+    ]);
+  });
+});
+
+describe('backend-projection names resolution-time spell target choices', () => {
+  it('points each Redirect option at both the spell and its proposed target', () => {
+    const spark = instant(
+      'Forked Spark',
+      [{ kind: 'dealDamage', amount: 2, target: { kind: 'anyTarget' } }],
+      {},
+    );
+    const redirect = instant('Redirect', [{ kind: 'changeSpellTargets' }], {});
+    const first = creature('First Host', 2, 2);
+    const second = creature('Second Host', 2, 2);
+    let state = scenario({
+      battlefield: [
+        { card: first, controller: 0 },
+        { card: second, controller: 1 },
+      ],
+      hands: [[spark, redirect], []],
+    }).state;
+    const firstOid = state.battlefield[0];
+    const secondOid = state.battlefield[1];
+    const sparkOid = state.players[0].hand.find((oid) => state.objects[oid]?.card.name === spark.name);
+    if (firstOid === undefined || secondOid === undefined || sparkOid === undefined) {
+      throw new Error('the Redirect projection fixture is incomplete');
+    }
+    state = reduce(state, {
+      type: 'castSpell',
+      player: 0,
+      oid: sparkOid,
+      targets: [{ kind: 'permanent', oid: firstOid }],
+    }).state;
+    const priority = pendingDecision(state);
+    if (priority?.kind !== 'priority') throw new Error('Redirect has no priority window');
+    const redirectCast = priority.options.find(
+      (action) =>
+        action.type === 'castSpell' &&
+        action.targets[0]?.kind === 'spell' &&
+        action.targets[0].oid === sparkOid,
+    );
+    if (redirectCast === undefined) throw new Error('Redirect was not offered');
+    state = reduce(state, redirectCast).state;
+    for (let count = 0; count < 2; count += 1) {
+      const pass = pendingDecision(state);
+      if (pass?.kind !== 'priority') throw new Error('Redirect did not reach resolution');
+      state = reduce(state, { type: 'passPriority', player: pass.player }).state;
+    }
+    const targets = pendingDecision(state);
+    if (targets?.kind !== 'spellTargets') throw new Error('Redirect did not ask for new targets');
+    const firstIndex = targets.options.findIndex(
+      (action) =>
+        action.type === 'chooseSpellTargets' &&
+        action.targets[0]?.kind === 'permanent' &&
+        action.targets[0].oid === firstOid,
+    );
+    const secondIndex = targets.options.findIndex(
+      (action) =>
+        action.type === 'chooseSpellTargets' &&
+        action.targets[0]?.kind === 'permanent' &&
+        action.targets[0].oid === secondOid,
+    );
+    expect(firstIndex).toBeGreaterThanOrEqual(0);
+    expect(secondIndex).toBeGreaterThanOrEqual(0);
+
+    const projected = projectDecision(state, targets);
+    expect(projected.options[firstIndex]).toEqual({
+      id: String(firstIndex),
+      text: 'Aim Forked Spark at First Host',
+      targets: [
+        { oid: sparkOid, name: 'Forked Spark' },
+        { oid: firstOid, name: 'First Host' },
+      ],
+    });
+    expect(projected.options[secondIndex]).toEqual({
+      id: String(secondIndex),
+      text: 'Aim Forked Spark at Second Host',
+      targets: [
+        { oid: sparkOid, name: 'Forked Spark' },
+        { oid: secondOid, name: 'Second Host' },
+      ],
+    });
   });
 });

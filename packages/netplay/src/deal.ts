@@ -7,9 +7,13 @@
  * deck over the wire.** A networked deckbuilder is a second screen, a second
  * ready state and a second protocol, and none of it is what "two people on two
  * machines play a game" needed. `@mtg/ui`'s `deal.ts` says the same thing about
- * the hot-seat path and for the same reason. When somebody wants it, it is a
- * phase before this one rather than a change to it: the output is still a
- * `GameSetup` with two decks in it.
+ * the hot-seat path and for the same reason.
+ *
+ * Somebody wanted it, and `room.ts` is it — built the way this paragraph said it
+ * would be, as a phase before this one rather than a change to it. A room opens
+ * the same two pools from the same seeds, takes a deck from each person, and
+ * ends at `tableSpecFor` holding two decks, which is where this file ends too.
+ * That is why both helpers below are exported rather than private.
  *
  * Both pool seeds derive from the table seed, so a whole match — the two pools,
  * the two builds, the two shuffles — reproduces from one string.
@@ -19,6 +23,7 @@ import { buildDeck, buildPrecon, openSealedPool } from '@mtg/deckbuild';
 import type { PreconDeck } from '@mtg/deckbuild';
 import type { DeckList, GameSetup, PlayerId, Seat } from '@mtg/kernel';
 import { botSeat, humanSeat, simpleAgent } from '@mtg/kernel';
+import type { GameplayFormat } from './gameplay';
 import type { TableSeating, TableSpec } from './table';
 
 /** Who is sitting in a seat, and what to call them. */
@@ -76,7 +81,28 @@ function sealedDeck(set: readonly Card[], seed: string, name: string, boosters?:
   return { name: `${name} sealed`, cards: buildDeck(pool.cards).deck };
 }
 
-function tableSpec(options: TableDealOptions, decks: readonly [DeckList, DeckList]): TableSpec {
+/**
+ * The seed one seat's pool is opened from.
+ *
+ * Exported because `room.ts` opens the same two pools a phase earlier, and a
+ * second spelling of `${seed}/seat0` is a second chance for the room and the
+ * deal to hand out different cards from the same table seed.
+ */
+export function poolSeedFor(seed: string, seat: number): string {
+  return `${seed}/seat${String(seat)}`;
+}
+
+/**
+ * Two decks and a plan to the table they make.
+ *
+ * Exported for `room.ts`, which arrives at its two decks by asking two people
+ * rather than by building them, and then wants exactly this table.
+ */
+export function tableSpecFor(
+  options: TableDealOptions,
+  decks: readonly [DeckList, DeckList],
+  format?: GameplayFormat,
+): TableSpec {
   const [first, second] = options.plan;
   const setup: GameSetup = {
     seed: options.seed,
@@ -88,16 +114,17 @@ function tableSpec(options: TableDealOptions, decks: readonly [DeckList, DeckLis
     setup,
     seats: [seatFor(first), seatFor(second)],
     seating: [seatingFor(first), seatingFor(second)],
+    ...(format === undefined ? {} : { format }),
   };
 }
 
 export function dealSealedTable(options: TableDealOptions): DealtTable {
   const [first, second] = options.plan;
   const decks: readonly [DeckList, DeckList] = [
-    sealedDeck(options.set, `${options.seed}/seat0`, first.name, options.boosters),
-    sealedDeck(options.set, `${options.seed}/seat1`, second.name, options.boosters),
+    sealedDeck(options.set, poolSeedFor(options.seed, 0), first.name, options.boosters),
+    sealedDeck(options.set, poolSeedFor(options.seed, 1), second.name, options.boosters),
   ];
-  return { decks, spec: tableSpec(options, decks) };
+  return { decks, spec: tableSpecFor(options, decks, 'sealed') };
 }
 
 /** Turns two authored deck lists into the same concealed table as sealed play. */
@@ -106,7 +133,7 @@ export function dealPreconTable(options: PreconTableDealOptions): DealtTable {
     { name: options.decks[0].name, cards: buildPrecon(options.decks[0], options.set).deck },
     { name: options.decks[1].name, cards: buildPrecon(options.decks[1], options.set).deck },
   ];
-  return { decks, spec: tableSpec(options, decks) };
+  return { decks, spec: tableSpecFor(options, decks, 'constructed') };
 }
 
 /** The seats a person is sitting in, which is what the launcher prints links for. */

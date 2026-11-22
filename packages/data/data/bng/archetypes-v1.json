@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "bng",
+  "archetypes": [
+    {
+      "id": "white-blue-heroic",
+      "name": "White-Blue Heroic",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Ephara's Enlightenment",
+        "physicalId": "bng-printed-v1:0146:6e480d04-9a35-463e-928e-8da3556629e6"
+      },
+      "plan": "Build around Ephara's Enlightenment: Target heroic creatures with Auras and tricks, protect the invested threat, and use evasion to close quickly."
+    },
+    {
+      "id": "blue-black-inspired",
+      "name": "Blue-Black Inspired",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Siren of the Silent Song",
+        "physicalId": "bng-printed-v1:0155:990f4438-aa74-4460-8bac-93480d0bb0dc"
+      },
+      "plan": "Build around Siren of the Silent Song: Tap inspired creatures safely in combat or with enablers, then profit when they untap while controlling the pace."
+    },
+    {
+      "id": "black-red-minotaurs",
+      "name": "Black-Red Minotaurs",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Ragemonger",
+        "physicalId": "bng-printed-v1:0153:1eb6eda2-e3df-440a-8900-8310f11db6e9"
+      },
+      "plan": "Build around Ragemonger: Reduce Minotaur costs, curve tribal creatures into one another, and attack before slower decks stabilize."
+    },
+    {
+      "id": "red-green-tribute",
+      "name": "Red-Green Tribute",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Fanatic of Xenagos",
+        "physicalId": "bng-printed-v1:0147:3687799c-81bd-4c49-902a-2a96863629c3"
+      },
+      "plan": "Build around Fanatic of Xenagos: Present difficult tribute choices with efficient creatures and maintain pressure whichever mode the opponent grants."
+    },
+    {
+      "id": "green-white-heroic",
+      "name": "Green-White Heroic",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Reap What Is Sown",
+        "physicalId": "bng-printed-v1:0154:120babed-841f-4bf1-ac2d-3ab097c0760b"
+      },
+      "plan": "Build around Reap What Is Sown: Target heroic creatures with efficient tricks, spread counters across the team, and win creature combat through growth."
+    }
+  ]
+}

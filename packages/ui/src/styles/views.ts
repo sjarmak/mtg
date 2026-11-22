@@ -8,8 +8,10 @@
  * is a vibe.
  */
 import { ASK_BAND_ALWAYS, ASK_BANDS, ASK_FIT_STEPS, askFitAttribute, askFitScale } from './ask-fit';
-import { cssNumber } from './number';
-import { TABLE } from './board/geometry';
+import { FULL_FACE_WIDTH_REM } from '@mtg/card-geometry';
+import { cssNumber, MICRO_LABEL } from './number';
+import { SPOKEN_NOT_DRAWN } from './base';
+import { SHORT_VIEWPORT_QUERY, TABLE } from './board/geometry';
 
 const GALLERY = `
 .mtg-gallery { display: flex; flex-wrap: wrap; gap: var(--mtg-space-4); }
@@ -20,15 +22,58 @@ const GALLERY = `
    what the index is for either way: no art window, no rules box, three times the
    cards down the page. */
 .mtg-gallery .mtg-card[data-size='compact'] { --card-w: 13rem; }
-/* Limited deck/pool compact mode is the MTGO curve: one ascending column per
+/* The pool pane is the MTGO curve at both densities: one ascending column per
    mana value. It scrolls locally on a narrow viewport instead of shrinking
-   card names into unreadable slivers. */
+   card names into unreadable slivers.
+
+   Both, since mtg-rgc.21. Full used to be a wrapping gallery, which emitted the
+   cards in the same order and could not say so. What the density changes here is
+   the face inside the column and how wide the column is drawn: a full face was
+   measured at 15.25rem and there is no reason to hold it to the width a name and
+   a type line need. */
 .mtg-builder-curve {
   display: grid; grid-auto-flow: column; grid-auto-columns: minmax(11rem, 13rem);
   gap: var(--mtg-space-3); align-items: start; justify-content: start;
   overflow-x: auto; padding-block-end: var(--mtg-space-2);
 }
-.mtg-builder-curve .mtg-card[data-size='compact'] { --card-w: 100%; width: 100%; }
+.mtg-builder-curve[data-view='full'] { grid-auto-columns: ${cssNumber(FULL_FACE_WIDTH_REM)}rem; }
+/* The token rather than a share of --card-w, for the reason ./panel.ts states
+   where it does the same: this width is a percentage, and a percentage in a
+   font-size is a percentage of the parent's type. */
+.mtg-builder-curve .mtg-card { --card-w: 100%; width: 100%; --rules-type: var(--mtg-text-sm); }
+/* The same groups stacked, with their faces wrapping under each head, for a
+   collection that is a column of a workbench rather than a band across a page
+   (routes/deck/CurveColumns.ts's CurveFlow, mtg-xiso). One direction of scroll:
+   the sideways one is what put the ninth mana value behind a scrollbar at the
+   bottom of 26,769px of cards.
+
+   auto-fill with a 1fr ceiling, so the faces grow into whatever the pane is
+   given rather than leaving a ragged gutter down its right edge. The floor is
+   the same width the columns use, which is what a name and a type line need,
+   inside a min() against the pane: a bare rem floor does not shrink below itself,
+   so a pane dragged narrower than one face would paint the faces cut off at its
+   clip rather than at one per row. The move list learned that first and
+   ../test/touch-sheet.ts holds both rules to it. */
+.mtg-builder-curve[data-flow='rows'] {
+  grid-auto-flow: row; grid-auto-columns: auto;
+  grid-template-columns: minmax(0, 1fr);
+  overflow-x: visible;
+}
+.mtg-builder-curve[data-flow='rows'] .mtg-deck__column {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr));
+  gap: var(--mtg-space-2); align-items: start;
+}
+.mtg-builder-curve[data-flow='rows'][data-view='full'] .mtg-deck__column {
+  grid-template-columns: repeat(auto-fill, minmax(min(${cssNumber(FULL_FACE_WIDTH_REM)}rem, 100%), 1fr));
+}
+/* The head names the whole row rather than sitting in the first cell of it, and
+   stays put while the faces under it scroll past. */
+.mtg-builder-curve[data-flow='rows'] .mtg-deck__column-head {
+  grid-column: 1 / -1;
+  position: sticky; inset-block-start: 0; z-index: 1;
+  justify-content: flex-start;
+  background: var(--mtg-surface-page);
+}
 /* The Constructed builder's curve readout: one rung per mana value between the
    deck's cheapest card and its dearest, drawn above the deck pane at both
    densities. Its numbers are cards rather than tiles, which is the rule
@@ -83,8 +128,80 @@ const GALLERY = `
 .mtg-decklist:focus-visible { outline: 2px solid var(--mtg-accent); outline-offset: 1px; }
 .mtg-filters { display: flex; flex-wrap: wrap; gap: var(--mtg-space-2); align-items: center; }
 .mtg-filters__label {
-  font-size: var(--mtg-text-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--mtg-ink-faint);
-  font-weight: 600; margin-right: var(--mtg-space-1);
+  ${MICRO_LABEL}
+  color: var(--mtg-ink-faint); margin-right: var(--mtg-space-1);
+}
+/* The Cards page's one control bar: search, identity, type, rarity, mana value,
+   size. It sticks under the shell bar so a filter keeps changing what is on
+   screen after the gallery has been scrolled -- the same offset
+   \`.mtg-deck__pane-head\` uses, and static under 450px for the same reason it
+   is: the shell bar's height stops being one number once its pills wrap, and a
+   bar guessing wrong covers the heading rather than sitting below it. */
+.mtg-cardbar {
+  display: flex; flex-wrap: wrap; gap: var(--mtg-space-3); align-items: center;
+  position: sticky; top: calc(3.5rem - var(--mtg-space-3)); z-index: 1;
+  background: var(--mtg-surface-page);
+  border-bottom: 1px solid var(--mtg-line);
+  padding-block: var(--mtg-space-3);
+  margin-block-start: calc(var(--mtg-space-3) * -1);
+}
+@media (max-width: 450px) {
+  .mtg-cardbar { position: static; }
+}
+/* On a screen with no height the bar's own air is the cards it costs.
+
+   Measured at 844x390 with the browser in compact: the bar is 96.1px and the
+   first card starts 219.6px down a 390px screen, so a phone in landscape sees
+   one row of an index of 371 cards. The bar wraps to two rows there and nothing
+   here changes that -- eight identity pills, three selects and a density switch
+   do not fit on one 844px line and the controls are the point of the route. What
+   comes off is the padding above and below them and the gap between the two
+   rows: 24px of the 96, and 24px is a fifth of a compact card. */
+@media ${SHORT_VIEWPORT_QUERY} {
+  .mtg-cardbar { gap: var(--mtg-space-2); padding-block: var(--mtg-space-1); }
+}
+/* The bar's micro-labels are spoken and not drawn, because every control on it
+   already says what it narrows: each select's unset entry reads "Any type"
+   rather than "Any", the search box carries its placeholder, and the identity
+   row is pips with their letters on them. Drawn, they were six small-caps words
+   that pushed Size onto a second line at 1440px and filled a 844x390 phone with
+   three rows of controls and no cards. */
+.mtg-cardbar .mtg-filters__label { ${SPOKEN_NOT_DRAWN} }
+/* The one control on the bar that wants the room left over, so a long card name
+   is readable while typing. It has a floor as well, because a wrapped bar hands
+   the search whatever is left of the last line, which can be nothing. */
+.mtg-cardbar__search { flex: 1 1 14rem; min-inline-size: 12rem; }
+.mtg-cardbar__search .mtg-input { flex: 1; min-inline-size: 0; }
+/* What a reduced build left out (\`../routes/cards/MissingCards.ts\`). It sits
+   between the bar and the gallery because that is where its subject is: the
+   holes are in the list below it. Shut, it is one line; open, it is a reason per
+   refused position, so the list gets its own scroll rather than pushing the
+   gallery off the screen. */
+.mtg-missing {
+  border: 1px solid var(--mtg-line); border-radius: var(--mtg-radius-md);
+  background: var(--mtg-surface-sunken);
+  padding: var(--mtg-space-2) var(--mtg-space-3);
+  margin-block: var(--mtg-space-3);
+}
+.mtg-missing__summary { cursor: pointer; font-size: var(--mtg-text-sm); font-weight: 600; }
+.mtg-missing__summary:focus-visible { outline: 2px solid var(--mtg-accent); outline-offset: 2px; }
+.mtg-missing__list {
+  list-style: none; margin: 0; padding: 0;
+  max-block-size: 22rem; overflow-y: auto;
+  font-size: var(--mtg-text-xs);
+}
+.mtg-missing__row {
+  display: grid; grid-template-columns: minmax(10rem, 1fr) minmax(8rem, auto);
+  gap: 0 var(--mtg-space-2); align-items: baseline;
+  padding-block: var(--mtg-space-1);
+  border-block-start: 1px solid var(--mtg-line);
+}
+.mtg-missing__name { font-weight: 600; }
+.mtg-missing__meta { color: var(--mtg-ink-muted); text-align: end; }
+.mtg-missing__why { grid-column: 1 / -1; color: var(--mtg-ink-faint); }
+@media (max-width: 450px) {
+  .mtg-missing__row { grid-template-columns: 1fr; }
+  .mtg-missing__meta { text-align: start; }
 }
 .mtg-toolbar { display: flex; flex-wrap: wrap; gap: var(--mtg-space-3); align-items: center; }
 .mtg-toolbar__spacer { flex: 1; }
@@ -112,14 +229,22 @@ const TIMELINE = `
 .mtg-turn:hover { background: var(--mtg-surface-sunken); }
 .mtg-turn:first-child { border-top: 0; }
 .mtg-turn[data-selected='true'] { background: var(--mtg-accent-soft); }
+/* \`min-width: 0\` because the name in this column is a deck's, and a deck's name
+   is as long as its author made it. The track is 4.5rem; a grid item's automatic
+   minimum size is its content, so \`WIELD THE OBLITERATOR\` widened the column
+   past the track and painted itself under the counts beside it — measured at
+   1440x900 on the 2026-08-23 sweep, and again at 390x844 (\`mtg-dcxg.1\`). Wrapped
+   rather than ellipsized: this is the only place either seat is named on the
+   route, and half a deck name is not a seat. */
 .mtg-turn__no {
   display: flex; flex-direction: column; gap: 1px;
+  min-width: 0; overflow-wrap: anywhere;
   font-family: var(--mtg-font-mono); font-variant-numeric: tabular-nums;
 }
 .mtg-turn__no-value { font-weight: 700; }
 .mtg-turn__owner {
-  font-size: var(--mtg-text-xs); font-weight: 600; color: var(--mtg-ink-faint);
-  text-transform: uppercase; letter-spacing: 0.06em;
+  ${MICRO_LABEL}
+  color: var(--mtg-ink-faint);
 }
 .mtg-turn__facts { display: flex; flex-wrap: wrap; gap: var(--mtg-space-1) var(--mtg-space-3); }
 .mtg-fact { display: inline-flex; align-items: baseline; gap: var(--mtg-space-1); font-size: var(--mtg-text-sm); }
@@ -242,11 +367,48 @@ const PLAY = `
   overflow-wrap: break-word;
 }
 .mtg-choices__group-title {
-  font-size: var(--mtg-text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  ${MICRO_LABEL}
   color: var(--mtg-ink-faint);
   padding-bottom: var(--mtg-space-1); border-bottom: 1px solid var(--mtg-line);
 }
 .mtg-choices__list { display: flex; flex-direction: column; gap: var(--mtg-space-1); }
+/* The one choice answered by typing rather than by pressing (routes/play/rail.ts).
+   A bare <form> is a block, so its label, field and button stacked flush with
+   no gap while every other group in this rail was a spaced column. mtg-21s0. */
+.mtg-choices__text { display: flex; flex-direction: column; gap: var(--mtg-space-2); }
+.mtg-damage-assignment { display: grid; gap: var(--mtg-space-2); }
+.mtg-prompt--damage {
+  position: fixed; z-index: 40;
+  inset-inline-end: max(var(--mtg-space-4), env(safe-area-inset-right));
+  inset-block-end: max(var(--mtg-space-4), env(safe-area-inset-bottom));
+  inline-size: min(28rem, calc(100vw - 2 * var(--mtg-space-4) - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  max-block-size: calc(100dvh - 2 * var(--mtg-space-4) - env(safe-area-inset-bottom));
+  box-shadow: var(--mtg-shadow-table);
+}
+.mtg-prompt--damage .mtg-panel__body { overflow-y: auto; }
+.mtg-damage-assignment__summary { display: flex; justify-content: space-between; gap: var(--mtg-space-3); font-variant-numeric: tabular-nums; }
+.mtg-damage-assignment__summary span { color: var(--mtg-ink-muted); }
+.mtg-damage-assignment__row { display: grid; grid-template-columns: minmax(0, 1fr) 5rem; align-items: center; gap: var(--mtg-space-3); padding-block: var(--mtg-space-2); border-block-start: 1px solid var(--mtg-line); }
+.mtg-damage-assignment__recipient { display: grid; gap: var(--mtg-space-1); min-inline-size: 0; }
+.mtg-damage-assignment__recipient span { color: var(--mtg-ink-muted); font-size: var(--mtg-text-sm); font-variant-numeric: tabular-nums; }
+.mtg-damage-assignment__amount { inline-size: 5rem; min-inline-size: 0; min-block-size: 44px; text-align: end; font-variant-numeric: tabular-nums; }
+.mtg-damage-assignment__actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--mtg-space-2); }
+/* The pair that settles an optional trigger's answer (../routes/play/rail.ts).
+   Ruled off above rather than boxed: it sits under the moves in the same
+   scrolling body, and a box there would read as a third answer to the question.
+   The two buttons share the row evenly, which is what says they are a pair and
+   not a primary with an alternative - neither "always take" nor "always
+   decline" is the one a player is being steered toward. */
+.mtg-choices__yield {
+  display: flex; flex-wrap: wrap; gap: var(--mtg-space-1);
+  margin-top: var(--mtg-space-2); padding-top: var(--mtg-space-2);
+  border-top: 1px solid var(--mtg-line);
+}
+.mtg-choices__yield > .mtg-btn { flex: 1 1 0; font-size: var(--mtg-text-xs); }
+.mtg-choices__yield-note {
+  flex: 1 0 100%; margin: 0;
+  font-size: var(--mtg-text-xs); color: var(--mtg-ink-faint);
+}
 /* The note that stands in for an empty list.
    \`passPriority\` left the enumeration on 2026-08-20 for a fixed home in the
    priority foot (../routes/play/rail.ts), so a window where passing is the only
@@ -422,7 +584,40 @@ ${TABLE} .mtg-shell__main {
  */
 const COMMAND_RAIL = `
 .mtg-prompt { display: flex; flex-direction: column; min-height: 0; }
-.mtg-prompt .mtg-panel__head { flex: none; padding: var(--mtg-space-1) var(--mtg-space-3); }
+.mtg-prompt .mtg-panel__head {
+  flex: none; padding: var(--mtg-space-1) var(--mtg-space-3); flex-wrap: wrap;
+}
+/* The shape of the list, above the fold (routes/play/rail.ts's askIndex).
+
+   It is the head's note rather than a line under it, and it wraps inside the
+   head when it has to: ../../test/play/ask-fold.browser.test.ts measured the
+   body at 1024x768 showing 4 move buttons whole, and a row of its own took that
+   to 3. A quarter of the enumeration is too much to pay for a sentence about the
+   rest of it. flex-wrap on the head above is what lets the words wrap rather
+   than push the title off the row at 157.1px, which is the ask column there. */
+.mtg-prompt__index { overflow-wrap: break-word; text-align: right; }
+/* And it goes away where the scroller is at its shortest. On a phone held
+   sideways the ask panel has 38.78px of body once the head takes two lines, and
+   styles/touch.ts floors a move button at 44px under a coarse pointer, so the
+   index turns a column showing one move into a column showing none —
+   ../../test/play/ask-column-phone.browser.test.ts measures exactly that and is
+   what caught it. The count comes back in its place: it is one line whatever the
+   width, and where nothing fits, how many there are is the more useful of the
+   two things to say. */
+@media ${SHORT_VIEWPORT_QUERY} {
+  .mtg-prompt__index { display: none; }
+  /* Every property SPOKEN_NOT_DRAWN sets, put back: the count is drawn here. */
+  .mtg-prompt__count {
+    position: static; width: auto; height: auto; padding: 0; margin: 0;
+    overflow: visible; clip-path: none; white-space: normal;
+  }
+}
+/* The count the index displaces. It is in the head at every width and spoken at
+   every width — the index above it is aria-hidden, so this is the only thing on
+   the panel that says how many moves there are — and drawn only where the index
+   is not. Which one is drawn is a media query rather than a render, because a
+   component cannot ask how tall the panel came out. */
+.mtg-prompt__count { ${SPOKEN_NOT_DRAWN} }
 .mtg-prompt .mtg-panel__body {
   flex: 1; min-height: ${String(COMMAND_ROW_FLOOR_REM)}rem; overflow-y: auto;
   padding: var(--mtg-space-1) var(--mtg-space-2);
@@ -433,10 +628,33 @@ const COMMAND_RAIL = `
     radial-gradient(farthest-side at 50% 0, var(--mtg-scroll-edge), transparent) center top / 100% 0.5rem no-repeat scroll,
     radial-gradient(farthest-side at 50% 100%, var(--mtg-scroll-edge), transparent) center bottom / 100% 0.5rem no-repeat scroll;
 }
+/* The anchored foot: the two answers to a decision, outside the scroller.
+   routes/play/rail.ts's anchoredChoices argues which prompts get one; this is
+   what it costs the layout. flex: none against the body's flex: 1, so the
+   scroller yields every pixel the buttons need and the panel's height is
+   unchanged — which is the whole of why the foot cannot be pushed off a box
+   capped at 46% of the lanes (board/ask-flyout.ts), 171.11px of them at 844x390.
+
+   The buttons go side by side rather than stacked. A decision is two answers of
+   equal standing, and an equal share of 26rem of flyout gives Keep this hand
+   and Mulligan a line apiece; stacked, the second sat 9.52px below the box that
+   started this. flex-basis 0 so a long label does not take
+   the width off a short one. They keep .mtg-choice's own type and padding, and
+   with it styles/touch.ts's 44px coarse floor, because they are the same
+   control the list draws — a second button vocabulary here would be a second
+   opinion about what pressing it does (routes/play/choice-button.ts). */
+.mtg-prompt__foot {
+  flex: none; padding: var(--mtg-space-2); border-top: 1px solid var(--mtg-line);
+}
+.mtg-prompt__foot .mtg-choices { display: block; }
+.mtg-prompt__foot .mtg-choices__list { flex-direction: row; gap: var(--mtg-space-2); }
+.mtg-prompt__foot .mtg-choice { flex: 1 1 0; min-inline-size: 0; align-items: center; text-align: center; }
 .mtg-prompt .mtg-prompt__explain { margin-bottom: var(--mtg-space-1); }
 .mtg-prompt .mtg-choices { gap: var(--mtg-space-2); }
 /* The one step narrower on both insets, and it is bought rather than spent: at
-   1024x768 the ask column is 127.7px, and the panel's border, the body's inset,
+   1024x768 the ask column was 127.7px when this was read (ASK_PERCENT was 13;
+   it is 157.1px now, and both labels below gain that 29.4px), and the panel's
+   border, the body's inset,
    the button's own inset and the scrollbar leave a 65.7px label for a card name.
    Taking the small step here instead of the medium one on the two insets that
    nest gives that label 81.7px — a quarter more room for words — and costs the
@@ -516,9 +734,54 @@ const PHASE_NODE_MIN_WIDTH_REM = 1.75;
  *
  * A phone re-values this, and `./mobile.ts` holds the number and the reason: at
  * 390px the bar's row is short enough that 5rem buys a whole extra line of steps
- * out of a lane budget that is fixed there.
+ * out of a lane budget that is fixed there. **A desktop re-values it in the
+ * other direction, and the block directly below holds that number**: this one is
+ * the narrow window's answer, not every window's.
  */
 const PHASE_HEAD_MAX_REM = 5;
+
+/*
+ * And the desktop re-values all three of those numbers, because the ledge above
+ * belongs to 1024x768 and not to the window this lab is used in.
+ *
+ * The playtester's interface pass asks the bar to be readable — "no tiny labels",
+ * "stronger current-phase state" — and asks the whole surface to be optimized
+ * for 1440 to 1600. Every number above was fitted against 1024x768, which is
+ * the viewport with the least to give and the one where half a rem more of turn
+ * is a third line of steps. Holding a 1600px window to 1024's budget is paying
+ * that viewport's bill twice.
+ *
+ * Measured in chrome-headless-shell 151 over `tools/step-bar.ts`, 2026-08-22,
+ * with the same long seat name the tool deals on purpose. Steps-row height and
+ * the near battlefield's height, shipped against the two candidates:
+ *
+ *   viewport   shipped 11px/5rem   12px/9rem     13px/9rem
+ *   1600x900   33.9, 316.9         35.4, 316.2   62.8, 302.4
+ *   1440x900   59.9, 303.9         72.8, 297.5   75.7, 296.0
+ *   1280x800   69.9, 271.3         72.8, 269.8   75.7, 268.4
+ *
+ * 12px rather than `--mtg-text-sm`, and the 1600 row is the whole reason: at
+ * 13px the thirteen names plus a 9rem turn no longer fit one line, and a bar
+ * that wraps stops reading as a timeline — which is the thing this bar is. A
+ * type token would be the tidier write and the worse drawing, which is the same
+ * trade `PHASE_PIP_REM` above makes for the same bar.
+ *
+ * The turn is what the width buys. At 5rem the label has 51.8px and the app's
+ * own `Turn 7: Opponent` wants 99, so every desktop capture since `mtg-rgc.13`
+ * has read `Turn 7: …` — a fact drawn as an ellipsis. 9rem clears
+ * `Turn 12: Opponent` at 106px with the seat name still the part an unusually
+ * long one loses.
+ *
+ * Both conditions are load-bearing. Width, because the ledge below 1200 is real
+ * and measured. Height, because a wide short window — a landscape phone is
+ * 844px, but a 1440x500 one is not — is `./mobile.ts`'s short tier, where the
+ * steps row stops wrapping and scrolls sideways instead, and a larger word in a
+ * scroller is more scrolling rather than more reading.
+ */
+const PHASE_WIDE_MIN_WIDTH_PX = 1200;
+const PHASE_WIDE_MIN_HEIGHT_REM = 40;
+const PHASE_WIDE_TEXT_REM = 0.75;
+const PHASE_HEAD_WIDE_MAX_REM = 9;
 
 /*
  * The step bar: the whole turn structure under the viewer's battlefield, with a
@@ -664,9 +927,13 @@ const PHASE_BAR = `
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   min-height: ${cssNumber(PHASE_NODE_MIN_REM)}rem;
   padding: 0 0.125rem;
-  font: inherit; font-size: var(--mtg-text-xs); font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
-  color: var(--mtg-ink-faint);
+  font: inherit; ${MICRO_LABEL} white-space: nowrap;
+  /* Muted rather than faint. Faint is the ink for a thing beside the point --
+     a caption, a count -- and every step on this bar is a place the game
+     stops; the hierarchy that matters is where the game *is*, and that is
+     carried below by an accent field and a border rather than by making the
+     other twelve labels hard to read. */
+  color: var(--mtg-ink-muted);
   background: none; border: 1px solid transparent; border-radius: var(--mtg-radius-sm);
 }
 /* The name line, and the one thing on the bar that is allowed to be cut short.
@@ -708,34 +975,103 @@ button.mtg-phasebar__node:focus-visible { outline: 2px solid var(--mtg-accent); 
    player looking for the game's position must not have to read two signals. */
 .mtg-phasebar__node[aria-current='step'] {
   background: var(--mtg-accent-soft); border-color: var(--mtg-accent); color: var(--mtg-ink);
+  /* Where the game is, said a third way. A field and a border are two, and a
+     player scanning thirteen uppercase words at a glance reads weight before
+     either of them. */
+  font-weight: 700;
 }
-/* The bar's own control, at the end of the strip, where Magic Online puts the
-   one control that is about the bar rather than about a step. \`flex: none\` is
-   load-bearing: the steps give under width pressure and this does not, because a
-   toggle that shrank to an ellipsis would be a control nobody can identify. */
-.mtg-phasebar__beats {
+/* The bar's own controls, at the end of the strip, where Magic Online puts the
+   ones that are about the bar rather than about a step. \`flex: none\` is
+   load-bearing: the steps give under width pressure and these do not, because a
+   toggle that shrank to an ellipsis would be a control nobody can identify.
+
+   They sit INSIDE \`.mtg-phasebar__steps\` rather than beside it (\`mtg-t9n7\`).
+   Beside it, \`flex: none\` on a sibling of a \`flex: 1 1 0\` row took their
+   width off the steps before the steps wrapped, so the shortfall landed on every
+   wrapped line: 105.8px of bar at 1024x768 against the 69.9 before the pace
+   control existed, and the 32px of table that went with it is what four browser
+   gates measure. Inside the row they wrap with the steps and cost one short
+   line instead of a slice of every line.
+
+   \`position: sticky; right: 0\` is the other half, and it is for the tier that
+   does not wrap. \`./mobile.ts\` makes this row a sideways scroller on a short
+   table on purpose, and a control that scrolls with the steps is off the
+   right-hand end until the player scrolls for it, which is worse than the width
+   it was costing. Pinned against the scrollport it stays where it was on every
+   table. The pin needs an opaque field under it, because the steps pass beneath
+   it rather than around it, and the field is the bar's own \`--mtg-mat\` so the
+   pinned control reads as part of the bar rather than as a card over it. */
+.mtg-phasebar__controls {
+  position: sticky; right: 0; z-index: 1;
+  flex: none; align-self: stretch;
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding-left: 0.25rem;
+  background: var(--mtg-mat);
+}
+/*
+
+   The pace (\`mtg-kwu\`) takes the beats' appearance outright rather than a
+   second one of its own. They sit adjacent, they are the same size, and they are
+   the two settings on this bar that are about watching rather than about
+   playing; drawing them differently would say they are different kinds of thing.
+   It carries no \`aria-pressed\` and no mark, because it cycles four values
+   rather than toggling one, so the pressed-state rules below name only the
+   toggle. */
+.mtg-phasebar__beats,
+.mtg-phasebar__pace {
   flex: none; align-self: center;
   display: inline-flex; align-items: center; gap: 0.125rem;
   min-height: ${cssNumber(PHASE_NODE_MIN_REM)}rem;
   padding: 0 0.25rem;
   appearance: none; cursor: pointer;
-  font: inherit; font-size: var(--mtg-text-xs); font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+  font: inherit; ${MICRO_LABEL} white-space: nowrap;
   color: var(--mtg-ink-faint);
   background: none; border: 1px solid var(--mtg-line); border-radius: var(--mtg-radius-sm);
   transition: border-color var(--mtg-duration-fast) var(--mtg-ease), color var(--mtg-duration-fast) var(--mtg-ease);
 }
-.mtg-phasebar__beats:hover { border-color: var(--mtg-accent); color: var(--mtg-ink); }
-.mtg-phasebar__beats:focus-visible { outline: 2px solid var(--mtg-accent); outline-offset: 1px; }
+.mtg-phasebar__beats:hover,
+.mtg-phasebar__pace:hover { border-color: var(--mtg-accent); color: var(--mtg-ink); }
+.mtg-phasebar__beats:focus-visible,
+.mtg-phasebar__pace:focus-visible { outline: 2px solid var(--mtg-accent); outline-offset: 1px; }
 .mtg-phasebar__beats[aria-pressed='true'] { color: var(--mtg-ink); border-color: var(--mtg-accent); }
 .mtg-phasebar__beats[aria-pressed='true'] .mtg-phasebar__beats-mark { color: var(--mtg-pending); }
-.mtg-phasebar__beats-mark { font-size: ${cssNumber(PHASE_PIP_REM)}rem; line-height: 1; }
+.mtg-phasebar__beats-mark,
+.mtg-phasebar__pace-mark { font-size: ${cssNumber(PHASE_PIP_REM)}rem; line-height: 1; }
+/* Constrained tables spend the control width on familiar playback marks. The
+   full words remain in the DOM and return in the wide tier below; title and the
+   described hint keep the compact controls named for pointer and assistive
+   input. */
+.mtg-phasebar__beats-text,
+.mtg-phasebar__pace-text { display: none; }
 /* What the last press did, for a screen reader and for nobody else. Clipped
    rather than \`display: none\`, which would take it out of the accessibility
    tree and announce nothing at all. */
 .mtg-phasebar__status {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
   overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+/* The desktop tier, whose numbers and whose measurements are above the sheet.
+   A bigger word and a turn that is not an ellipsis, bought with pixels off a
+   battlefield the same interface pass calls too empty. */
+@media (min-width: ${String(PHASE_WIDE_MIN_WIDTH_PX)}px) and (min-height: ${cssNumber(PHASE_WIDE_MIN_HEIGHT_REM)}rem) {
+  .mtg-phasebar__node,
+  .mtg-phasebar__pace,
+  .mtg-phasebar__beats { font-size: ${cssNumber(PHASE_WIDE_TEXT_REM)}rem; }
+  .mtg-phasebar__beats-text,
+  .mtg-phasebar__pace-text { display: inline; }
+  .mtg-phasebar__pace-mark { display: none; }
+  /* And the surplus stops being shared once the row wraps.
+
+     A content basis with \`flex-grow: 1\` shares the leftover equally, which is
+     right on a full line and grotesque on a short one: at 1440x900 the row wraps
+     after MAIN 2 and the two words left over were drawn as two 500px columns
+     with END and CLEANUP marooned at either end of them. Packed and centered,
+     the thirteen names read as one sentence that happens to wrap, which is what
+     they are. */
+  .mtg-phasebar__steps { justify-content: center; }
+  .mtg-phasebar__node { flex-grow: 0; }
+  .mtg-phasebar > .mtg-turnstops .mtg-turnstops__head,
+  .mtg-phasebar > .mtg-badge { max-width: ${cssNumber(PHASE_HEAD_WIDE_MAX_REM)}rem; }
 }
 `;
 
@@ -869,6 +1205,54 @@ const TURN_STOPS = `
    legend is a picture of the bar rather than a second palette. */
 .mtg-turnstops__legend-row[data-mark='none'] .mtg-turnstops__legend-mark { color: var(--mtg-ink-faint); }
 .mtg-turnstops__legend-row[data-mark='beat'] .mtg-turnstops__legend-mark { color: var(--mtg-pending); }
+/* The settled optional-trigger answers (../routes/play/trigger-yields.ts).
+   A row is a sentence and the control that undoes it, so the two are pushed to
+   opposite ends and the sentence takes what is left: the ability's name is the
+   half that varies in length, and a button whose width followed it would put
+   the way out of this setting somewhere different on every row. Unstyled list,
+   like the legend above it, for the same reason - it is structure for a reader
+   rather than a bulleted list for the eye. */
+.mtg-turnstops__yields {
+  display: flex; flex-direction: column; gap: var(--mtg-space-1);
+  margin: 0; padding: 0; list-style: none;
+}
+.mtg-turnstops__yield-row {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--mtg-space-2);
+}
+.mtg-turnstops__yield-name {
+  font-size: var(--mtg-text-xs); color: var(--mtg-ink-muted);
+  overflow-wrap: break-word; min-inline-size: 0;
+}
+.mtg-turnstops__yield-row .mtg-btn { flex: 0 0 auto; font-size: var(--mtg-text-xs); }
+/* The game menu: one word on the strip and a sheet under it. Opens downward,
+   aligned to its own start, because that is where the control is: .mtg-toolbar
+   is a flex row and the strip is its only child, so the button sits at the start
+   of the band above the table, not the end. It was written end-aligned on the
+   opposite belief, and a 256px sheet hung off the start-most control starts at
+   -182.75 CSS px — the whole Game ID line off the left of the window at every
+   viewport width, which is what a person sees as a cut-off text box
+   (../../test/play/game-menu.browser.test.ts measures both edges).
+   Same surface, border and shadow as the stops panel: they are the same object —
+   a small panel over the board, opened from a control in the chrome — and two
+   treatments would read as two kinds of thing. */
+.mtg-gamemenu { position: relative; display: inline-flex; }
+.mtg-gamemenu__caret { margin-inline-start: var(--mtg-space-1); color: var(--mtg-ink-faint); }
+.mtg-gamemenu__sheet {
+  position: absolute; z-index: 30;
+  inset-block-start: calc(100% + var(--mtg-space-1)); inset-inline-start: 0;
+  min-inline-size: 16rem; max-inline-size: calc(100vw - var(--mtg-space-6));
+  display: flex; flex-direction: column; gap: var(--mtg-space-2);
+  padding: var(--mtg-space-3);
+  background: var(--mtg-surface-raised);
+  border: 1px solid var(--mtg-line); border-radius: var(--mtg-radius-lg);
+  box-shadow: var(--mtg-shadow-raised);
+}
+/* A seed is one token with no space in it, so the line it sits on cannot wrap on
+   its own. Where the sheet is clamped narrower than the seed — a phone, where
+   max-inline-size bites — the row has to be allowed to shrink and the token to
+   break, or the id runs out through the panel's own padding. */
+.mtg-gamemenu__sheet .mtg-fact { min-inline-size: 0; flex-wrap: wrap; }
+.mtg-gamemenu__sheet .mtg-fact__value { min-inline-size: 0; overflow-wrap: anywhere; }
 `;
 
 /*
@@ -906,7 +1290,60 @@ const PRIORITY_FOOT = `
 .mtg-priority__own {
   margin: 0; font-size: var(--mtg-text-xs); font-weight: 600; color: var(--mtg-accent);
 }
+/* The unspent land drop, in the same place and at the same weight as the clause
+   above it, because it is the same kind of statement: a fact about this window
+   that the move list cannot give, drawn only while it is true (mtg-re3).
+
+   Full-strength ink, not the amber the button below wears. --mtg-pending is
+   already under AA as text (board/band.ts measured it), and this is a sentence
+   whose whole job is to be read; the hue channel belongs on the control, where
+   it is a keyline rather than letterforms. Not the accent either - that color
+   is spent on the clause above, and two demands for attention in a block one
+   button tall is neither of them being read. */
+.mtg-priority__land {
+  margin: 0; font-size: var(--mtg-text-xs); font-weight: 600; color: var(--mtg-ink);
+}
 .mtg-play__pass { flex: none; }
+/* And the button itself says it, because a player who has learned where the pass
+   is stops reading the column above it. A keyline rather than a fill: the pass is
+   the primary control of this surface and recoloring it would either shout or
+   make it look unavailable, and it is neither. It never disables anything -
+   ../routes/play/pass.ts keeps the click on the enumerated index. */
+.mtg-play__pass[data-land-drop] {
+  box-shadow: inset 0 0 0 2px var(--mtg-pending);
+}
+/* The pass and its yield panel share one box, and that box is the button's own
+   until the panel opens (mtg-nxh). Relative rather than in flow, because the
+   promise routes/play/pass.ts calls absolute is that nothing makes the button
+   move: a panel that took height would push the pass down the column at the
+   moment the player is holding it. */
+.mtg-pass { flex: none; position: relative; display: flex; flex-direction: column; }
+/* Above the button rather than below it. The pass sits at the foot of the ask
+   column with the near seat's own pod directly under it, so a panel drawn
+   downward opens over the player's own vitals; upward it opens over the move
+   list, which is the thing the player has just decided against. */
+.mtg-pass__yields {
+  position: absolute; inset-inline: 0; inset-block-end: calc(100% + var(--mtg-space-1));
+  z-index: 3;
+  display: flex; flex-direction: column; gap: var(--mtg-space-1);
+  padding: var(--mtg-space-1);
+  border: 1px solid var(--mtg-line-strong); border-radius: var(--mtg-radius-md);
+  background: var(--mtg-surface-raised); box-shadow: var(--mtg-shadow-card);
+}
+.mtg-pass__yields .mtg-btn { inline-size: 100%; }
+/* The take-back, under the pass and quieter than it.
+
+   Unavailable is drawn and never enforced (../routes/play/undo.ts), so the
+   drawing is the whole of the signal: muted ink and a thinner keyline, with the
+   pointer left alone. \`cursor: not-allowed\` was the obvious choice and is the
+   wrong one here - it says the press will be swallowed, and the press is what
+   makes the kernel state its reason. Opacity is left alone for the same reason
+   ../styles/tokens.ts keeps text at full strength: a control that is still worth
+   pressing should still be worth reading. */
+.mtg-undo { flex: none; inline-size: 100%; }
+.mtg-undo[data-available='false'] {
+  color: var(--mtg-ink-muted); border-color: var(--mtg-line);
+}
 /* The pass key's answer, under the button rather than beside it: this is the one
    thing here that exists to be read in full, and the column is narrow. It takes
    no height while it has nothing to say, and it is never hidden with
@@ -954,4 +1391,261 @@ ${[...ASK_BANDS]
   .join('\n')}
 `;
 
-export const VIEWS_CSS = `${GALLERY}${TIMELINE}${ANALYSIS}${PLAY}${FIT}${COMMAND_RAIL}${PHASE_BAR}${TURN_STOPS}${PRIORITY_FOOT}${ASK_FIT_RULES}`;
+/* The shape every route that is a page rather than a table sits in.
+ *
+ * It used to hold the set list and More's destination rows as well. Both are
+ * gone: the set list was a page whose whole content the picker in the bar
+ * already carries on every route, and More was a page whose whole content was
+ * two links to tabs that are tabs again. `.mtg-group__title` outlived both,
+ * because the deck panes and the precon picker name their groups the same way. */
+const PAGE = `
+.mtg-page {
+  display: flex; flex-direction: column; gap: var(--mtg-space-4);
+  padding-block-end: var(--mtg-space-4);
+}
+.mtg-group + .mtg-group { margin-block-start: var(--mtg-space-3); }
+/* Small caps rather than a heading-sized heading: a label over three rows
+   should name them, not outweigh them. */
+.mtg-group__title {
+  margin: 0 0 var(--mtg-space-2);
+  ${MICRO_LABEL}
+  color: var(--mtg-ink-faint);
+}
+.mtg-source-choice { display: flex; flex-direction: column; gap: var(--mtg-space-3); }
+.mtg-source-choice__title {
+  margin: 0 0 var(--mtg-space-2);
+  font-size: var(--mtg-text-sm); font-weight: 600; color: var(--mtg-ink-muted);
+}
+.mtg-source-choice__group { min-inline-size: 0; }
+.mtg-source-choice__select { inline-size: min(100%, 28rem); }
+.mtg-printed-precon-deck {
+  display: flex; flex: 1 1 auto; flex-direction: column; gap: var(--mtg-space-3);
+  min-block-size: 0;
+}
+.mtg-printed-precon-deck > [data-pane='deck'] { flex: 1 1 auto; min-block-size: 0; }
+.mtg-printed-precon-commanders-head {
+  display: flex; align-items: center; gap: var(--mtg-space-2);
+}
+.mtg-printed-precon-commanders {
+  display: flex; flex: 0 1 auto; flex-wrap: wrap; gap: var(--mtg-space-2);
+  min-block-size: 0; overflow: auto;
+}
+/* The word the full face has nowhere to put: mtg-dna4y moved the commander
+   from the board face to the full one, and the full face has no footer region
+   for a caller's footnote. It goes above the card instead. */
+.mtg-printed-precon-commander {
+  display: flex; flex-direction: column; gap: var(--mtg-space-1);
+}
+.mtg-printed-precon-commander__label {
+  ${MICRO_LABEL}
+  color: var(--mtg-ink-faint);
+}
+.mtg-precon-matchup {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--mtg-space-5);
+  margin-block: var(--mtg-space-2) var(--mtg-space-4);
+}
+.mtg-precon-matchup[data-seats='one'] { grid-template-columns: minmax(0, 1fr); }
+.mtg-precon-matchup__deck {
+  display: grid;
+  grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr);
+  grid-template-areas: 'seat seat' 'faces details';
+  gap: var(--mtg-space-2) var(--mtg-space-4);
+  align-items: start;
+  padding-block: var(--mtg-space-3);
+  border-block: 1px solid var(--mtg-line);
+}
+.mtg-precon-matchup__seat {
+  grid-area: seat;
+  ${MICRO_LABEL}
+  color: var(--mtg-ink-faint);
+}
+.mtg-precon-matchup__faces {
+  grid-area: faces;
+  display: flex; flex-direction: column; gap: var(--mtg-space-2);
+  width: min(100%, 12rem);
+}
+.mtg-precon-matchup__faces > .mtg-card { --card-w: 100%; --rules-type: var(--mtg-text-sm); }
+.mtg-precon-matchup__details {
+  grid-area: details;
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--mtg-space-2);
+}
+.mtg-precon-matchup__name { margin: 0; font-size: var(--mtg-text-lg); }
+.mtg-precon-matchup__summary,
+.mtg-precon-matchup__plan { margin: 0; color: var(--mtg-ink-muted); }
+.mtg-precon-matchup__summary { font-weight: 650; color: var(--mtg-ink); }
+@media (max-width: 70rem) {
+  .mtg-precon-matchup__deck {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'seat' 'faces' 'details';
+  }
+}
+@media (max-width: 42rem) {
+  .mtg-precon-matchup { grid-template-columns: minmax(0, 1fr); gap: var(--mtg-space-3); }
+}
+.mtg-pairing {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--mtg-space-2);
+  margin-block: var(--mtg-space-3);
+}
+.mtg-pairing__title { margin: 0; font-size: var(--mtg-text-base); }
+.mtg-pairing__line { margin: 0; }
+.mtg-pairing__label {
+  margin: 0;
+  ${MICRO_LABEL}
+  color: var(--mtg-ink-faint);
+}
+.mtg-pairing__opponents { display: flex; flex-wrap: wrap; gap: var(--mtg-space-2); }
+.mtg-pairing__opponents > .mtg-chip {
+  block-size: auto; padding-block: var(--mtg-space-1);
+  border-radius: var(--mtg-radius-md); text-align: start;
+}
+.mtg-pairing__head-to-head {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--mtg-space-2);
+  padding-block-start: var(--mtg-space-3); border-top: 1px solid var(--mtg-line);
+}
+`;
+
+/* Play's chooser (`mtg-tewc.5`): the set it is showing, and the two ways in.
+ *
+ * The header is the set's name with its category beside it, and it is drawn at
+ * the scale of a page title rather than a route title because on this page it
+ * *is* the subject — the question the page asks is "what do I want to play",
+ * and the answer starts with which set. It is removed from the markup entirely
+ * once a game is on, so nothing here has to hide it.
+ *
+ * `data-playing` is the height budget. `.mtg-play-route` is a flex column whose
+ * leftover goes to the one child that asks for it, and once the decks section
+ * holds a live table it is that child; `min-height: 0` is what lets the table
+ * inside it scroll rather than push the column taller than the viewport.
+ */
+const CHOOSER = `
+.mtg-playhead {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--mtg-space-2);
+}
+.mtg-playhead__name {
+  margin: 0; font-size: var(--mtg-text-lg); font-weight: 600; letter-spacing: -0.01em;
+}
+.mtg-playhead__kind {
+  padding: 1px var(--mtg-space-2); border-radius: var(--mtg-radius-pill);
+  font-size: var(--mtg-text-xs); font-weight: 600;
+  background: var(--mtg-surface-sunken); color: var(--mtg-pending);
+}
+/* \`flex: none\`, and the reason is the landscape phone. The route is a flex
+   column with the viewport's height to spend, so every section is shrinkable by
+   default, and \`min-height: 0\` used to sit here and let one shrink past its own
+   content. At 844x390 it did: the decks section was given less height than the
+   five cards in it needed, the cards overflowed it rather than resizing, and
+   "SEALED / Open six boosters" was drawn straight through the middle of two of
+   them. The budget is for the section holding a live table and nothing else, so
+   it lives on that section alone (below) and the chooser scrolls, which is what
+   \`.mtg-shell__main\` is \`overflow: auto\` for. */
+.mtg-playsection {
+  display: flex; flex-direction: column; gap: var(--mtg-space-3); flex: none;
+}
+.mtg-playsection__title {
+  margin: 0; font-size: var(--mtg-text-base); font-weight: 600;
+  color: var(--mtg-ink-faint);
+}
+.mtg-playsection__blurb {
+  margin: 0; font-size: var(--mtg-text-base); color: var(--mtg-ink-muted);
+  max-inline-size: var(--mtg-measure);
+}
+.mtg-playsection[data-playing='true'] { flex: 1; min-height: 0; gap: var(--mtg-space-2); }
+.mtg-playsection[data-boxed='true'] {
+  max-inline-size: 40rem; gap: var(--mtg-space-2);
+  padding: var(--mtg-space-3);
+  border: 1px solid var(--mtg-line-strong); border-radius: var(--mtg-radius-md);
+  background: var(--mtg-surface-raised);
+}
+/* The LAN button and the reason it did nothing, stacked. The refusal is drawn
+   under the control rather than in place of it (\`LanSection.ts\` says why), so
+   the two need a gap tighter than the section's own or the sentence reads as a
+   third thing in the section instead of an answer to the press. */
+.mtg-lanstart {
+  display: flex; flex-direction: column; gap: var(--mtg-space-1);
+}
+/* The opponent choice above every Play section: two cells side by side at
+   reading width, one under the other on a phone. Each cell is its button and,
+   when the cell is dark, the sentence saying why, which is the printed pool
+   editor's status row so the two refusals read the same way. */
+.mtg-opponents {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--mtg-space-3);
+  max-inline-size: 40rem;
+}
+.mtg-opponents__cell {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--mtg-space-1);
+}
+@media (max-width: 40rem) {
+  .mtg-opponents { grid-template-columns: minmax(0, 1fr); }
+}
+`;
+
+/**
+ * The invite panel, and the one thing it is not allowed to be: furniture.
+ *
+ * It sits above a board on the host's screen while the other player is still
+ * finding their phone, and it leaves the moment they arrive (`LanInvite.ts`
+ * decides that; this only has to not fight it). So it is boxed at reading width
+ * the way the sealed section is, rather than a band across a 1440px window.
+ *
+ * The link is drawn as monospace with `word-break: anywhere`, because it is a
+ * UUID and the alternative on a 390px phone is a line that reaches the edge of
+ * the screen and stops. It is selectable text as well as a copy button: the
+ * button is absent on an insecure origin, which is exactly what a LAN address
+ * is, and the link still has to be gettable there.
+ *
+ * The code is 9rem and has a white ground of its own. A scanner wants dark
+ * modules on a light field, and the field this page provides in dark mode is
+ * neither.
+ */
+const LAN = `
+.mtg-lan {
+  display: flex; flex-direction: column; gap: var(--mtg-space-3); flex: none;
+  max-inline-size: 38rem;
+  padding: var(--mtg-space-3);
+  border: 1px solid var(--mtg-line-strong); border-radius: var(--mtg-radius-md);
+  background: var(--mtg-surface-raised);
+}
+.mtg-lan__title {
+  margin: 0;
+  ${MICRO_LABEL}
+  color: var(--mtg-ink-faint);
+}
+.mtg-lan__seat { display: flex; flex-direction: column; gap: var(--mtg-space-2); }
+.mtg-lan__body {
+  display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--mtg-space-3);
+}
+.mtg-lan__lines {
+  display: flex; flex-direction: column; gap: var(--mtg-space-2);
+  flex: 1 1 16rem; min-inline-size: 0;
+}
+.mtg-lan__who { margin: 0; font-size: var(--mtg-text-sm); color: var(--mtg-ink-muted); }
+.mtg-lan__url {
+  display: block;
+  padding: var(--mtg-space-2);
+  border-radius: var(--mtg-radius-sm);
+  background: var(--mtg-surface-sunken);
+  font-family: var(--mtg-font-mono); font-size: var(--mtg-text-xs);
+  overflow-wrap: anywhere; word-break: break-all;
+}
+.mtg-lan__qr {
+  flex: none; inline-size: 9rem; block-size: 9rem;
+  border-radius: var(--mtg-radius-sm);
+  background: var(--mtg-qr-field);
+}
+/* The code's own two colors, which live here rather than on the elements: a
+   scanner needs dark modules on a light field in both themes, and a fill
+   written into the component is a color literal the token gate is right to
+   refuse. The quiet zone is the rect; the modules are the one path. */
+.mtg-lan__qr > rect { fill: var(--mtg-qr-field); }
+.mtg-lan__qr > path { fill: var(--mtg-qr-module); }
+.mtg-lan__note { margin: 0; font-size: var(--mtg-text-xs); color: var(--mtg-ink-faint); }
+.mtg-lan__more { font-size: var(--mtg-text-xs); color: var(--mtg-ink-muted); }
+.mtg-lan__more > summary { cursor: pointer; }
+.mtg-lan__addresses {
+  list-style: none; margin: var(--mtg-space-2) 0 0; padding: 0;
+  display: flex; flex-direction: column; gap: var(--mtg-space-2);
+}
+.mtg-lan__addresslabel { display: block; color: var(--mtg-ink-faint); }
+`;
+
+export const VIEWS_CSS = `${GALLERY}${TIMELINE}${ANALYSIS}${PLAY}${FIT}${COMMAND_RAIL}${PHASE_BAR}${TURN_STOPS}${PRIORITY_FOOT}${ASK_FIT_RULES}${PAGE}${CHOOSER}${LAN}`;

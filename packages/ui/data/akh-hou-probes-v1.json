@@ -1,0 +1,559 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "match-engine-starting-player-v1",
+      "scope": "match",
+      "controller": "engine",
+      "cardIds": [],
+      "decisionFamilies": ["starting-player"],
+      "assertions": [
+        "AKH/HOU engine-controlled starting choice reaches its first turn without a local starting move"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-start-engine.integration.test.ts"
+    },
+    {
+      "id": "match-engine-mulligan-v1",
+      "scope": "match",
+      "controller": "engine",
+      "cardIds": [],
+      "decisionFamilies": ["mulligan"],
+      "assertions": ["AKH/HOU native mulligans emit public evidence and conserve the hidden opening deck"],
+      "testFile": "packages/forge-export/test/observed-akh-mulligan-engine.integration.test.ts"
+    },
+    {
+      "id": "binding-mummy-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0006:fae54072-ae27-4aae-a2b7-71f4551934f6"],
+      "decisionFamilies": ["zombie-entry-optional-tap"],
+      "assertions": [
+        "Binding Mummy optional tap (accept: true)",
+        "Binding Mummy optional tap (accept: false)"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-binding-mummy.integration.test.ts"
+    },
+    {
+      "id": "binding-mummy-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0006:fae54072-ae27-4aae-a2b7-71f4551934f6"],
+      "decisionFamilies": ["zombie-entry-optional-tap"],
+      "assertions": ["Forge uses Binding Mummy to tap the opposing creature when another Zombie enters"],
+      "testFile": "packages/forge-export/test/observed-akh-binding-mummy-bot.integration.test.ts"
+    },
+    {
+      "id": "cartouche-trial-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": [
+        "akh-printed-v1:0007:90eaf94e-85a7-4958-aa58-8e2fe44db58d",
+        "akh-printed-v1:0034:a2604d43-a105-440b-86b1-60d1d0c04339"
+      ],
+      "decisionFamilies": ["owned-aura-target-and-ordered-etb"],
+      "assertions": [
+        "Cartouche enchants only an owned creature and resolves Trial of Solidarity first",
+        "Cartouche enchants only an owned creature and resolves Cartouche of Solidarity first"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-cartouche.integration.test.ts"
+    },
+    {
+      "id": "cartouche-trial-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": [
+        "akh-printed-v1:0007:90eaf94e-85a7-4958-aa58-8e2fe44db58d",
+        "akh-printed-v1:0034:a2604d43-a105-440b-86b1-60d1d0c04339"
+      ],
+      "decisionFamilies": ["cartouche-trial-return-and-recast"],
+      "assertions": ["Forge casts a Cartouche beside a Trial and recasts that same returned Trial"],
+      "testFile": "packages/forge-export/test/observed-akh-cartouche-bot.integration.test.ts"
+    },
+    {
+      "id": "decimator-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0197:6b75e834-fa46-4833-ae9f-1bc2809ece2f"],
+      "decisionFamilies": ["linked-counter-targets"],
+      "assertions": [
+        "Decimator Beetle resolves linked counters (opposing target: true)",
+        "Decimator Beetle resolves linked counters (opposing target: false)"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-decimator.integration.test.ts"
+    },
+    {
+      "id": "decimator-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0197:6b75e834-fa46-4833-ae9f-1bc2809ece2f"],
+      "decisionFamilies": ["linked-counter-targets"],
+      "assertions": [
+        "Forge removes its own counter and puts a counter on a defending creature with Decimator Beetle"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-decimator-bot.integration.test.ts"
+    },
+    {
+      "id": "market-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0148:d998db65-8785-4ee9-940e-fa9ab62e180f"],
+      "decisionFamilies": ["aftermath-draw-two-discard-two"],
+      "assertions": ["Market draws two, discards the selected two physical cards, and exiles itself"],
+      "testFile": "packages/forge-export/test/observed-akh-market.integration.test.ts"
+    },
+    {
+      "id": "market-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0148:d998db65-8785-4ee9-940e-fa9ab62e180f"],
+      "decisionFamilies": ["aftermath-draw-two-discard-two"],
+      "assertions": ["Forge casts Market from its graveyard, draws and discards two, then exiles it"],
+      "testFile": "packages/forge-export/test/observed-akh-market-bot.integration.test.ts"
+    },
+    {
+      "id": "dawn-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0210:937dbc51-b589-4237-9fce-ea5c757f7c48"],
+      "decisionFamilies": ["aftermath-creature-recovery"],
+      "assertions": ["casts Dawn from the graveyard, returns the exact creature, and exiles the split card"],
+      "testFile": "packages/forge-export/test/observed-akh-aftermath.integration.test.ts"
+    },
+    {
+      "id": "dawn-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0210:937dbc51-b589-4237-9fce-ea5c757f7c48"],
+      "decisionFamilies": ["aftermath-creature-recovery"],
+      "assertions": ["Forge AI casts aftermath from the graveyard and recovers creatures"],
+      "testFile": "packages/forge-export/test/observed-akh-aftermath-bot.integration.test.ts"
+    },
+    {
+      "id": "crasher-exert-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0117:dd5db68c-24d5-44ce-9809-e446f26fac5d"],
+      "decisionFamilies": ["optional-exert-blocking-prevention-and-skipped-untap"],
+      "assertions": ["Ahn-Crop Crasher can decline exert, then stop one exact blocker and skip one untap"],
+      "testFile": "packages/forge-export/test/observed-akh-exert.integration.test.ts"
+    },
+    {
+      "id": "crasher-exert-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0117:dd5db68c-24d5-44ce-9809-e446f26fac5d"],
+      "decisionFamilies": ["exert-trigger-and-skipped-untap"],
+      "assertions": ["Forge AI exerts an attacking Crasher against a blocker and skips its next untap"],
+      "testFile": "packages/forge-export/test/observed-akh-exert-bot.integration.test.ts"
+    },
+    {
+      "id": "khenra-afflict-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0066:abbdc277-4a76-44a9-aeda-edabab1f579e"],
+      "decisionFamilies": ["afflict-one-life-before-combat-damage"],
+      "assertions": [
+        "Khenra Eternal afflicts once with 0 blockers, only when blocked",
+        "Khenra Eternal afflicts once with 1 blockers, only when blocked",
+        "Khenra Eternal afflicts once with 2 blockers, only when blocked"
+      ],
+      "testFile": "packages/forge-export/test/observed-hou-afflict.integration.test.ts"
+    },
+    {
+      "id": "khenra-afflict-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0066:abbdc277-4a76-44a9-aeda-edabab1f579e"],
+      "decisionFamilies": ["afflict-one-life-before-combat-damage"],
+      "assertions": ["Forge attacks with Khenra Eternal and resolves Afflict before combat damage"],
+      "testFile": "packages/forge-export/test/observed-hou-afflict-bot.integration.test.ts"
+    },
+    {
+      "id": "cycling-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": [
+        "akh-printed-v1:0046:4cb4e315-1a77-479a-9f15-fb23575de805",
+        "akh-printed-v1:0149:f11cd406-c6ae-4018-ae45-4e5577aa82ae",
+        "hou-printed-v1:0172:7d42aa0c-0408-4b0d-bec5-9861dbcf9ee1"
+      ],
+      "decisionFamilies": ["cycling-source-discard-and-single-draw"],
+      "assertions": [
+        "'Censor' cycles one exact hand card for 1 mana and draws exactly one",
+        "'Sweltering Suns' cycles one exact hand card for 3 mana and draws exactly one",
+        "'Desert of the Indomitable' cycles one exact hand card for 2 mana and draws exactly one"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-cycling.integration.test.ts"
+    },
+    {
+      "id": "cycling-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": [
+        "akh-printed-v1:0046:4cb4e315-1a77-479a-9f15-fb23575de805",
+        "akh-printed-v1:0149:f11cd406-c6ae-4018-ae45-4e5577aa82ae",
+        "hou-printed-v1:0172:7d42aa0c-0408-4b0d-bec5-9861dbcf9ee1"
+      ],
+      "decisionFamilies": ["cycling-source-discard-and-single-draw"],
+      "assertions": [
+        "Forge AI cycles 'Censor' with exact public card conservation",
+        "Forge AI cycles 'Sweltering Suns' with exact public card conservation",
+        "Forge AI cycles 'Desert of the Indomitable' with exact public card conservation"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-censor-bot.integration.test.ts"
+    },
+    {
+      "id": "shefet-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0186:2688ef62-875a-4735-9a63-6f3152d10d61"],
+      "decisionFamilies": ["shefet-monitor-cycle-search-land-selection"],
+      "assertions": [
+        "Shefet Monitor cycles for four mana and searches before drawing: Forest",
+        "Shefet Monitor cycles for four mana and searches before drawing: Desert of the Indomitable",
+        "Shefet Monitor cycles for four mana and searches before drawing: decline"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-shefet.integration.test.ts"
+    },
+    {
+      "id": "shefet-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0186:2688ef62-875a-4735-9a63-6f3152d10d61"],
+      "decisionFamilies": ["shefet-monitor-bot-cycle-search-public-zones"],
+      "assertions": ["Forge AI cycles Shefet Monitor, searches for a land, then draws"],
+      "testFile": "packages/forge-export/test/observed-akh-shefet-bot.integration.test.ts"
+    },
+    {
+      "id": "embalm-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0027:08891c78-13c1-4d84-aa9c-78346b3b7d18"],
+      "decisionFamilies": ["embalm-source-exile-and-lifelink-token"],
+      "assertions": ["embalms an exact Sacred Cat and preserves lifelink on its token"],
+      "testFile": "packages/forge-export/test/observed-akh-embalm.integration.test.ts"
+    },
+    {
+      "id": "eternalize-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0002:865e267d-450c-4eeb-b61d-bd0ec5d8534a"],
+      "decisionFamilies": ["eternalize-source-exile-and-double-strike-token"],
+      "assertions": ["eternalizes an exact discarded Pouncer through local choices"],
+      "testFile": "packages/forge-export/test/observed-akh-eternalize.integration.test.ts"
+    },
+    {
+      "id": "graveyard-token-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": [
+        "akh-printed-v1:0027:08891c78-13c1-4d84-aa9c-78346b3b7d18",
+        "hou-printed-v1:0002:865e267d-450c-4eeb-b61d-bd0ec5d8534a"
+      ],
+      "decisionFamilies": ["bot-graveyard-token-mirror-for-embalm-or-eternalize"],
+      "assertions": [
+        "Forge AI casts and loses 'Adorned Pouncer', then uses 'Eternalize' in a real match",
+        "Forge AI casts and loses 'Sacred Cat', then uses 'Embalm' in a real match"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-bot.integration.test.ts"
+    },
+    {
+      "id": "never-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0212:a4b32135-7061-4278-a01a-4fcbaadc9706"],
+      "decisionFamilies": ["never-creature-or-planeswalker-target-selection"],
+      "assertions": [
+        "Never destroys the selected Defiant Khenra and excludes lands",
+        "Never destroys the selected Liliana, Death's Majesty and excludes lands"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-never.integration.test.ts"
+    },
+    {
+      "id": "never-return-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0212:a4b32135-7061-4278-a01a-4fcbaadc9706"],
+      "decisionFamilies": ["bot-never-removal-and-return-exile-token"],
+      "assertions": [
+        "Forge destroys a threat with Never and uses Return to exile a graveyard card and make a Zombie"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-never-return-bot.integration.test.ts"
+    },
+    {
+      "id": "basic-lands-local-v2",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": [
+        "akh-printed-v1:0250:c7191d23-b68f-406b-8c28-8dadbaef6562",
+        "akh-printed-v1:0255:0422da01-0252-4f3b-b2e5-9f5b2c0b94ae",
+        "akh-printed-v1:0256:ba708fff-a428-4783-b405-4c7e6ea72fd3",
+        "akh-printed-v1:0257:e4734a7c-67d0-4124-b76e-d53634557c7d",
+        "hou-printed-v1:0185:c20ec10e-78fc-49dc-a112-7863a34056b1",
+        "hou-printed-v1:0190:ce617aad-2c72-4b47-a9ae-51792459cffd",
+        "hou-printed-v1:0191:07fd89a6-56ef-4488-842b-27bf31d8c04f",
+        "akh-printed-v1:0251:bec6fced-62bb-4a99-9ea1-374056b5781b",
+        "akh-printed-v1:0258:c559fc49-54f3-426f-b2d2-525790a249a5",
+        "akh-printed-v1:0259:2177da89-184b-4ecd-ae08-a074ac4862e1",
+        "akh-printed-v1:0260:d61c6c6c-319f-4636-8482-26b6909f7b8e",
+        "hou-printed-v1:0186:a735e9b5-1231-4aa9-9eb3-c83037b849f2",
+        "hou-printed-v1:0192:0a4717cd-f9a7-4386-9091-d25218e23d79",
+        "hou-printed-v1:0193:0830bbcf-ee78-4f8a-bc6c-547be3a9fc4c",
+        "akh-printed-v1:0252:60b7c997-e520-4ff6-8b3b-705c2f12a9d4",
+        "akh-printed-v1:0261:62dbed02-6871-4830-8308-9f2f48e6730d",
+        "akh-printed-v1:0262:b6566108-ccc7-4fac-b935-1eb212889543",
+        "akh-printed-v1:0263:6be28351-642c-4ed1-9041-e99ecb79cba8",
+        "hou-printed-v1:0187:ef5cb444-7b48-40c8-a4d9-3fee37429513",
+        "hou-printed-v1:0194:447f8dbc-2f09-4995-81e2-2dc1654031fd",
+        "hou-printed-v1:0195:0e864369-2837-4487-8eee-0d643889d642",
+        "akh-printed-v1:0253:d3112990-3919-46b0-b927-14566c689a81",
+        "akh-printed-v1:0264:37827425-f304-43eb-979b-1ec5b923a2b5",
+        "akh-printed-v1:0265:2eced8a4-67ce-403c-a567-82ace69d1cf1",
+        "akh-printed-v1:0266:9eb742de-57fa-49f5-977e-bee1b8186e9a",
+        "hou-printed-v1:0188:6ad4e9cd-76e2-4ee0-8185-8b3aec3578ce",
+        "hou-printed-v1:0196:b2e439e2-2c7c-42fd-a47b-f615641f7392",
+        "hou-printed-v1:0197:b26e7306-df23-4339-b3af-faf9effe0140",
+        "akh-printed-v1:0254:2c2fc9f7-21af-4416-abf5-6fcb4f543680",
+        "akh-printed-v1:0267:18f4e594-01e5-40ae-903c-f55aad740de0",
+        "akh-printed-v1:0268:14c94463-31e8-4a2e-b879-d096a27cc60e",
+        "akh-printed-v1:0269:7a3b0668-0a4c-489f-aa2b-4faa8ef3e429",
+        "hou-printed-v1:0189:c318bae5-5d3f-4e91-adfe-13c182511ef7",
+        "hou-printed-v1:0198:c5cbd941-53ab-4b02-b96c-a9af7767e606",
+        "hou-printed-v1:0199:e99aacd5-c692-4de8-b565-d5092598295d"
+      ],
+      "decisionFamilies": [
+        "basic-land-main-phase-play-once-per-turn",
+        "basic-land-colored-mana-use",
+        "basic-land-untap-after-mana-use"
+      ],
+      "assertions": [
+        "Plains plays once in its own main phase, produces only W, and untaps next turn",
+        "Island plays once in its own main phase, produces only U, and untaps next turn",
+        "Swamp plays once in its own main phase, produces only B, and untaps next turn",
+        "Mountain plays once in its own main phase, produces only R, and untaps next turn",
+        "Forest plays once in its own main phase, produces only G, and untaps next turn"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-basic-lands.integration.test.ts"
+    },
+    {
+      "id": "basic-lands-engine-v4",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": [
+        "akh-printed-v1:0250:c7191d23-b68f-406b-8c28-8dadbaef6562",
+        "akh-printed-v1:0255:0422da01-0252-4f3b-b2e5-9f5b2c0b94ae",
+        "akh-printed-v1:0256:ba708fff-a428-4783-b405-4c7e6ea72fd3",
+        "akh-printed-v1:0257:e4734a7c-67d0-4124-b76e-d53634557c7d",
+        "hou-printed-v1:0185:c20ec10e-78fc-49dc-a112-7863a34056b1",
+        "hou-printed-v1:0190:ce617aad-2c72-4b47-a9ae-51792459cffd",
+        "hou-printed-v1:0191:07fd89a6-56ef-4488-842b-27bf31d8c04f",
+        "akh-printed-v1:0251:bec6fced-62bb-4a99-9ea1-374056b5781b",
+        "akh-printed-v1:0258:c559fc49-54f3-426f-b2d2-525790a249a5",
+        "akh-printed-v1:0259:2177da89-184b-4ecd-ae08-a074ac4862e1",
+        "akh-printed-v1:0260:d61c6c6c-319f-4636-8482-26b6909f7b8e",
+        "hou-printed-v1:0186:a735e9b5-1231-4aa9-9eb3-c83037b849f2",
+        "hou-printed-v1:0192:0a4717cd-f9a7-4386-9091-d25218e23d79",
+        "hou-printed-v1:0193:0830bbcf-ee78-4f8a-bc6c-547be3a9fc4c",
+        "akh-printed-v1:0252:60b7c997-e520-4ff6-8b3b-705c2f12a9d4",
+        "akh-printed-v1:0261:62dbed02-6871-4830-8308-9f2f48e6730d",
+        "akh-printed-v1:0262:b6566108-ccc7-4fac-b935-1eb212889543",
+        "akh-printed-v1:0263:6be28351-642c-4ed1-9041-e99ecb79cba8",
+        "hou-printed-v1:0187:ef5cb444-7b48-40c8-a4d9-3fee37429513",
+        "hou-printed-v1:0194:447f8dbc-2f09-4995-81e2-2dc1654031fd",
+        "hou-printed-v1:0195:0e864369-2837-4487-8eee-0d643889d642",
+        "akh-printed-v1:0253:d3112990-3919-46b0-b927-14566c689a81",
+        "akh-printed-v1:0264:37827425-f304-43eb-979b-1ec5b923a2b5",
+        "akh-printed-v1:0265:2eced8a4-67ce-403c-a567-82ace69d1cf1",
+        "akh-printed-v1:0266:9eb742de-57fa-49f5-977e-bee1b8186e9a",
+        "hou-printed-v1:0188:6ad4e9cd-76e2-4ee0-8185-8b3aec3578ce",
+        "hou-printed-v1:0196:b2e439e2-2c7c-42fd-a47b-f615641f7392",
+        "hou-printed-v1:0197:b26e7306-df23-4339-b3af-faf9effe0140",
+        "akh-printed-v1:0254:2c2fc9f7-21af-4416-abf5-6fcb4f543680",
+        "akh-printed-v1:0267:18f4e594-01e5-40ae-903c-f55aad740de0",
+        "akh-printed-v1:0268:14c94463-31e8-4a2e-b879-d096a27cc60e",
+        "akh-printed-v1:0269:7a3b0668-0a4c-489f-aa2b-4faa8ef3e429",
+        "hou-printed-v1:0189:c318bae5-5d3f-4e91-adfe-13c182511ef7",
+        "hou-printed-v1:0198:c5cbd941-53ab-4b02-b96c-a9af7767e606",
+        "hou-printed-v1:0199:e99aacd5-c692-4de8-b565-d5092598295d"
+      ],
+      "decisionFamilies": ["basic-land-main-phase-play-once-per-turn", "basic-land-untap-after-mana-use"],
+      "assertions": [
+        "Forge plays Plains at most once per turn in its main phase, cycles, and untaps next turn",
+        "Forge plays Island at most once per turn in its main phase, cycles, and untaps next turn",
+        "Forge plays Swamp at most once per turn in its main phase, cycles, and untaps next turn",
+        "Forge plays Mountain at most once per turn in its main phase, cycles, and untaps next turn",
+        "Forge plays Forest at most once per turn in its main phase, cycles, and untaps next turn"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-basic-lands-bot.integration.test.ts"
+    },
+    {
+      "id": "return-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0212:a4b32135-7061-4278-a01a-4fcbaadc9706"],
+      "decisionFamilies": ["return-either-graveyard-target-exile-and-zombie"],
+      "assertions": [
+        "Return exiles a selected card from seat 0 and creates one Zombie",
+        "Return exiles a selected card from seat 1 and creates one Zombie"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-return.integration.test.ts"
+    },
+    {
+      "id": "censor-counter-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0046:4cb4e315-1a77-479a-9f15-fb23575de805"],
+      "decisionFamilies": ["counter-unless-one-local-payment-and-decline"],
+      "assertions": [
+        "Censor resolves its exact counter-unless-one route: pay, local counter pilot",
+        "Censor resolves its exact counter-unless-one route: decline, local counter pilot"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-counter.integration.test.ts"
+    },
+    {
+      "id": "censor-counter-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0046:4cb4e315-1a77-479a-9f15-fb23575de805"],
+      "decisionFamilies": ["native-counter-against-tapped-out-local-caster"],
+      "assertions": ["Censor resolves its exact counter-unless-one route: decline, engine counter pilot"],
+      "testFile": "packages/forge-export/test/observed-akh-counter.integration.test.ts"
+    },
+    {
+      "id": "dusk-dawn-power-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0210:937dbc51-b589-4237-9fce-ea5c757f7c48"],
+      "decisionFamilies": ["dusk-power-cutoff-and-dawn-own-graveyard-recovery"],
+      "assertions": ["Dusk spares low power; Dawn excludes high power and the other graveyard"],
+      "testFile": "packages/forge-export/test/observed-akh-dusk-dawn.integration.test.ts"
+    },
+    {
+      "id": "match-local-pregame-v1",
+      "scope": "match",
+      "controller": "local",
+      "cardIds": [],
+      "decisionFamilies": ["starting-player", "mulligan", "priority"],
+      "assertions": [
+        "AKH/HOU local starting choice honors seat 0 and reaches legal priority",
+        "AKH/HOU local starting choice honors seat 1 and reaches legal priority",
+        "AKH/HOU local London mulligans bottom exact visible cards and preserve library counts"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-match-local.integration.test.ts"
+    },
+    {
+      "id": "match-engine-priority-v1",
+      "scope": "match",
+      "controller": "engine",
+      "cardIds": [],
+      "decisionFamilies": ["priority"],
+      "assertions": ["AKH/HOU native priority casts a creature and yields before its exact resolution"],
+      "testFile": "packages/forge-export/test/observed-akh-match-engine.integration.test.ts"
+    },
+    {
+      "id": "colored-mana-engine-v2",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": [
+        "akh-printed-v1:0250:c7191d23-b68f-406b-8c28-8dadbaef6562",
+        "akh-printed-v1:0255:0422da01-0252-4f3b-b2e5-9f5b2c0b94ae",
+        "akh-printed-v1:0256:ba708fff-a428-4783-b405-4c7e6ea72fd3",
+        "akh-printed-v1:0257:e4734a7c-67d0-4124-b76e-d53634557c7d",
+        "hou-printed-v1:0185:c20ec10e-78fc-49dc-a112-7863a34056b1",
+        "hou-printed-v1:0190:ce617aad-2c72-4b47-a9ae-51792459cffd",
+        "hou-printed-v1:0191:07fd89a6-56ef-4488-842b-27bf31d8c04f",
+        "akh-printed-v1:0251:bec6fced-62bb-4a99-9ea1-374056b5781b",
+        "akh-printed-v1:0258:c559fc49-54f3-426f-b2d2-525790a249a5",
+        "akh-printed-v1:0259:2177da89-184b-4ecd-ae08-a074ac4862e1",
+        "akh-printed-v1:0260:d61c6c6c-319f-4636-8482-26b6909f7b8e",
+        "hou-printed-v1:0186:a735e9b5-1231-4aa9-9eb3-c83037b849f2",
+        "hou-printed-v1:0192:0a4717cd-f9a7-4386-9091-d25218e23d79",
+        "hou-printed-v1:0193:0830bbcf-ee78-4f8a-bc6c-547be3a9fc4c",
+        "akh-printed-v1:0252:60b7c997-e520-4ff6-8b3b-705c2f12a9d4",
+        "akh-printed-v1:0261:62dbed02-6871-4830-8308-9f2f48e6730d",
+        "akh-printed-v1:0262:b6566108-ccc7-4fac-b935-1eb212889543",
+        "akh-printed-v1:0263:6be28351-642c-4ed1-9041-e99ecb79cba8",
+        "hou-printed-v1:0187:ef5cb444-7b48-40c8-a4d9-3fee37429513",
+        "hou-printed-v1:0194:447f8dbc-2f09-4995-81e2-2dc1654031fd",
+        "hou-printed-v1:0195:0e864369-2837-4487-8eee-0d643889d642",
+        "akh-printed-v1:0253:d3112990-3919-46b0-b927-14566c689a81",
+        "akh-printed-v1:0264:37827425-f304-43eb-979b-1ec5b923a2b5",
+        "akh-printed-v1:0265:2eced8a4-67ce-403c-a567-82ace69d1cf1",
+        "akh-printed-v1:0266:9eb742de-57fa-49f5-977e-bee1b8186e9a",
+        "hou-printed-v1:0188:6ad4e9cd-76e2-4ee0-8185-8b3aec3578ce",
+        "hou-printed-v1:0196:b2e439e2-2c7c-42fd-a47b-f615641f7392",
+        "hou-printed-v1:0197:b26e7306-df23-4339-b3af-faf9effe0140",
+        "akh-printed-v1:0254:2c2fc9f7-21af-4416-abf5-6fcb4f543680",
+        "akh-printed-v1:0267:18f4e594-01e5-40ae-903c-f55aad740de0",
+        "akh-printed-v1:0268:14c94463-31e8-4a2e-b879-d096a27cc60e",
+        "akh-printed-v1:0269:7a3b0668-0a4c-489f-aa2b-4faa8ef3e429",
+        "hou-printed-v1:0189:c318bae5-5d3f-4e91-adfe-13c182511ef7",
+        "hou-printed-v1:0198:c5cbd941-53ab-4b02-b96c-a9af7767e606",
+        "hou-printed-v1:0199:e99aacd5-c692-4de8-b565-d5092598295d"
+      ],
+      "decisionFamilies": ["basic-land-colored-mana-use"],
+      "assertions": [
+        "Native Plains pays the colored cost to cast Adorned Pouncer",
+        "Native Island cannot pay the colored cost to cast Adorned Pouncer",
+        "Native Island pays the colored cost to cycle Censor",
+        "Native Swamp cannot pay the colored cost to cycle Censor",
+        "Native Swamp pays the colored cost to cast Khenra Eternal",
+        "Native Mountain cannot pay the colored cost to cast Khenra Eternal",
+        "Native Mountain pays the colored cost to cast Defiant Khenra",
+        "Native Forest cannot pay the colored cost to cast Defiant Khenra",
+        "Native Forest pays the colored cost to cycle Shefet Monitor",
+        "Native Plains cannot pay the colored cost to cycle Shefet Monitor"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-colored-payment.integration.test.ts"
+    },
+    {
+      "id": "defiant-khenra-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0089:67e3983d-b1ed-46a9-9ab0-96c4d0d77050"],
+      "decisionFamilies": ["textless-creature-cast-and-attack-combat"],
+      "assertions": [
+        "local Defiant Khenra casts, waits to attack, and deals unblocked combat damage",
+        "local Defiant Khenra casts, waits to attack, and trades with a blocker"
+      ],
+      "testFile": "packages/forge-export/test/observed-hou-vanilla.integration.test.ts"
+    },
+    {
+      "id": "defiant-khenra-native-block-v2",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0089:67e3983d-b1ed-46a9-9ab0-96c4d0d77050"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Native Defiant Khenra blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-hou-native-block.integration.test.ts"
+    },
+    {
+      "id": "defiant-khenra-local-block-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0089:67e3983d-b1ed-46a9-9ab0-96c4d0d77050"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Local Defiant Khenra blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-hou-native-block.integration.test.ts"
+    },
+    {
+      "id": "defiant-khenra-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0089:67e3983d-b1ed-46a9-9ab0-96c4d0d77050"],
+      "decisionFamilies": ["textless-creature-cast-and-attack-combat"],
+      "assertions": [
+        "engine Defiant Khenra casts, waits to attack, and deals unblocked combat damage",
+        "engine Defiant Khenra casts, waits to attack, and trades with a blocker"
+      ],
+      "testFile": "packages/forge-export/test/observed-hou-vanilla.integration.test.ts"
+    }
+  ]
+}

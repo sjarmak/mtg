@@ -44,8 +44,7 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createElement as h, Fragment } from 'react';
-import type { ReactElement } from 'react';
+import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { exampleCard } from '@mtg/dsl';
 import { DEFAULT_AUTO_PASS, humanSeat, pendingDecision, scenario } from '@mtg/kernel';
@@ -115,39 +114,15 @@ function board(): GameSession {
   };
 }
 
-/**
- * The bands the real route draws above the mat, so the column is measured with
- * the leftover of a viewport rather than the whole of one. The same two
- * `./landscape-phone.browser.test.ts` argues for, and for the same reason.
- */
-function routeFurniture(): ReactElement {
-  return h(
-    Fragment,
-    null,
-    h('h1', { className: 'mtg-page-title' }, 'Play'),
-    h(
-      'div',
-      { className: 'mtg-toolbar', role: 'group', 'aria-label': 'How to play' },
-      h(
-        'button',
-        { type: 'button', className: 'mtg-btn', 'aria-pressed': true, 'data-variant': 'primary' },
-        'Preconstructed decks',
-      ),
-      h('button', { type: 'button', className: 'mtg-btn', 'aria-pressed': false }, 'Open a sealed pool'),
-    ),
-  );
-}
-
 function page(game: GameSession, shut: boolean): string {
   const markup = renderToStaticMarkup(
     h(Shell, {
       mode: 'play',
       onSelectMode: () => undefined,
-      notice: 'Reduced build: 162 of 249 positions kept.',
+      notice: 'Partial set: 162 of 249 cards.',
       children: h(
         'div',
         { className: 'mtg-play-route' },
-        routeFurniture(),
         h(PlayView, {
           session: game,
           viewer: 0,
@@ -189,6 +164,7 @@ const MEASURE = `(() => {
   const box = pods.getBoundingClientRect();
   const prompt = pods.querySelector('.mtg-prompt');
   const body = pods.querySelector('.mtg-prompt > .mtg-panel__body');
+  const pass = pods.querySelector('.mtg-play__pass');
   const lives = [...pods.querySelectorAll('.mtg-pod__life')];
   return {
     viewport: [window.innerWidth, window.innerHeight],
@@ -206,6 +182,15 @@ const MEASURE = `(() => {
     ),
     prompt: prompt === null ? null : [round(prompt.clientHeight), round(prompt.scrollHeight)],
     promptBody: body === null ? null : round(body.getBoundingClientRect().height),
+    pass: pass === null ? null : (() => {
+      const rect = pass.getBoundingClientRect();
+      return [
+        round(rect.left - box.left),
+        round(rect.right - box.right),
+        round(rect.width),
+        round(rect.height),
+      ];
+    })(),
     namesDrawn: [...pods.querySelectorAll('.mtg-pod__name')].filter(
       (name) => name.getBoundingClientRect().height > 0,
     ).length,
@@ -223,6 +208,7 @@ interface Reading {
   readonly lifeAbove: number;
   readonly prompt: readonly number[] | null;
   readonly promptBody: number | null;
+  readonly pass: readonly number[] | null;
   readonly namesDrawn: number;
   readonly pageOverflowY: number;
 }
@@ -297,6 +283,22 @@ describe('the ask column on a phone held sideways', () => {
             // "and not needing scrolling there either" — the page carrying the
             // mat, which is what the column was stealing height from.
             expect(seen.pageOverflowY, `${state}: the page scrolls`).toBeLessThanOrEqual(SLACK_PX);
+
+            const pass = seen.pass;
+            if (pass === null) throw new Error(`${state}: the pass action is absent`);
+            expect(
+              pass[0] ?? -1,
+              `${state}: the pass action starts outside the column`,
+            ).toBeGreaterThanOrEqual(-SLACK_PX);
+            expect(pass[1] ?? 1, `${state}: the pass action ends outside the column`).toBeLessThanOrEqual(
+              SLACK_PX,
+            );
+            expect(pass[2] ?? 0, `${state}: the pass action is too narrow to use`).toBeGreaterThanOrEqual(
+              TOUCH_TARGET_PX,
+            );
+            expect(pass[3] ?? 0, `${state}: the pass action is too short to use`).toBeGreaterThanOrEqual(
+              TOUCH_TARGET_PX,
+            );
           }
 
           // "to see available ... actions". Shut, the prompt is not drawn and

@@ -1,16 +1,17 @@
 /**
  * The wire between a seat and the table it is sitting at.
  *
- * # The whole protocol is an index in and a position out
+ * # The protocol is a checked answer in and a position out
  *
  * That is not a design choice made here; it is what the kernel already is.
  * `GameSession`'s docblock states it outright — "Seed plus this list is the
  * entire record of a played game" — and `choose(session, index)` is the whole of
- * the input surface. So a client sends an integer that addresses the enumeration
- * the server handed it one message ago, and gets back the position it is
- * entitled to see. It never names a move, and it never could: an index into a
- * list it did not build cannot express a move the kernel did not enumerate, and
- * the server re-derives the list from state before spending it.
+ * the ordinary input surface. So a client normally sends an integer addressing
+ * the enumeration it just received. Combat declarations and bounded text are
+ * the two constructed answers: the first carries a typed public declaration;
+ * the second carries text whose domain cannot be enumerated without leaking or
+ * omitting names. The server supplies the authenticated seat and re-derives
+ * legality from current state before spending either.
  *
  * The one thing a client sends besides the integer is `at`, the decision counter
  * it believed it was answering. A network makes the stale click real — a
@@ -54,7 +55,7 @@ import type {
   PlayerId,
   Step,
 } from '@mtg/kernel';
-import { STEPS } from '@mtg/kernel';
+import { MAX_CARD_NAME_LENGTH, STEPS } from '@mtg/kernel';
 
 /**
  * Bumped when a field changes meaning rather than when one is added.
@@ -83,6 +84,53 @@ export interface WireAutoPass {
   readonly passUnstopped: boolean;
   readonly stops: WireStopSet;
 }
+
+/**
+ * A guest seat as the host's page hands it out: a name, and one URL per address.
+ *
+ * Several URLs rather than one because a machine answers on several addresses
+ * and no process on it can know which network the other device is on — this one
+ * carries a tailnet interface beside the LAN one. The launcher resolves them
+ * (`packages/ui/tools/lan-address.ts`), labels them, and passes the finished
+ * list here; nothing in this package looks at a network interface.
+ */
+export interface InviteLink {
+  /** What kind of address this is, in the words the reader chooses between. */
+  readonly label: string;
+  readonly url: string;
+}
+
+export interface InviteSeat {
+  readonly name: string;
+  readonly links: readonly InviteLink[];
+  /**
+   * Whether this seat has ever asked the table for its position.
+   *
+   * The host's page is otherwise a poster with no idea whether anybody read it,
+   * and "did they get in?" is the only question it is being looked at to answer.
+   * Ever, not currently: a phone that locks its screen is not a player who left.
+   */
+  readonly joined: boolean;
+}
+
+/**
+ * What one table's host may hand out, as the launcher states it.
+ *
+ * `hostSeat` is the seat allowed to read this, and it is the whole of the
+ * access rule. Handing every seat every other seat's link would give the guest
+ * the host's board, which is exactly the thing the token is for; handing it to
+ * nobody leaves the link in the host's terminal scrollback, which is where it
+ * was. So one seat deals and the other seats are dealt.
+ */
+export interface TableInvite {
+  readonly hostSeat: PlayerId;
+  /** The seats to hand out. The host's own is not among them. */
+  readonly guests: readonly InviteSeat[];
+}
+
+/** The invite route's answer. `guests` is absent when the caller is not the host. */
+export type InviteResponse =
+  { readonly host: true; readonly guests: readonly InviteSeat[] } | { readonly host: false };
 
 /**
  * Everything one seat is told about the game, and nothing it is not.
@@ -133,6 +181,7 @@ export type WireDeclaration = DeclarationAction;
 /** What a seat may ask the table to do. */
 export type SeatRequest =
   | { readonly kind: 'choose'; readonly index: number; readonly at: number }
+  | { readonly kind: 'nameCard'; readonly name: string; readonly at: number }
   | { readonly kind: 'declare'; readonly declaration: WireDeclaration; readonly at: number }
   | { readonly kind: 'yield'; readonly boundary: 'endOfTurn' | 'yourNextTurn'; readonly at: number }
   | { readonly kind: 'autoPass'; readonly autoPass: WireAutoPass };
@@ -285,6 +334,17 @@ export function readSeatRequest(body: unknown): SeatRequest | string {
     const at = counter(body['at'], 'at');
     if (typeof at === 'string') return at;
     return { kind: 'choose', index, at };
+  }
+  if (kind === 'nameCard') {
+    const raw: unknown = body['name'];
+    if (typeof raw !== 'string') return `name is ${JSON.stringify(raw)}, which is not text`;
+    const name = raw.trim();
+    if (name.length === 0) return 'name is empty';
+    if (name.length > MAX_CARD_NAME_LENGTH)
+      return `name is ${String(name.length)} characters, over the ${String(MAX_CARD_NAME_LENGTH)} character limit`;
+    const at = counter(body['at'], 'at');
+    if (typeof at === 'string') return at;
+    return { kind: 'nameCard', name, at };
   }
   if (kind === 'declare') {
     const declaration = readDeclaration(body['declaration'], 'declaration');

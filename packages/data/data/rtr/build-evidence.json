@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "rtr",
+  "formatSha256": "3cbb5eed25bfcd270477521be178c0a794dc31242623a190f1b9d0e8eddcf369",
+  "sourceSha256": "4caa75721f0e2dd20d11b623ae66cc15fe238bc19d138b7565e4c973926e8132",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "4caa75721f0e2dd20d11b623ae66cc15fe238bc19d138b7565e4c973926e8132",
+    "recipe.json": "0ddae035af2f190133e4b8e867672356ae83b60f96a4a4b2664ff2ce79d81c7c",
+    "rtr-printed-catalog-v1.json": "44eaf02742a90afb1c8b090d993a012784e229c4e9914f7922f5c16d2eddc9ec",
+    "rtr-limited-format-v1.json": "13586889a169f5df574b45e227b53fb4ea4c33501e20232b4c2a927d5667197b"
+  },
+  "catalogs": [
+    {
+      "code": "RTR",
+      "cards": 274,
+      "contentSha256": "c16473453ef7d64c67094f872277b380326d5bac73daf9710c3fcf6b7b75e287"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1061.0174789999999,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 254,
+    "printings": 274
+  }
+}

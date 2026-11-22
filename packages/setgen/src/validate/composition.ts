@@ -14,11 +14,13 @@ import {
   COLORS,
   RARITIES,
   isPricedEffectKind,
+  isModelAbilityKind,
   tokenNameConflicts,
   validateSetUniqueness,
 } from '@mtg/dsl';
 import type { CurveBucket, SkeletonLiteProfile, SliceGroupPlan, SliceRarity } from '@mtg/design-data';
 import { classify, SLICE_RARITIES } from '@mtg/design-data';
+import type { MechanicDecline } from '../allocate';
 import type { DesiredMechanic, RequiredCard, TierSpellRoles } from '../brief';
 import { slotPoolFor } from '../brief';
 import type { Slot } from '../slot';
@@ -83,18 +85,29 @@ export function checkCreatureShare(entries: readonly Entry[], profile: SkeletonL
  * Filling each bucket to its planned capacity before spilling over is the
  * reading that treats the profile as a target rather than a trap.
  */
-function fitCurve(manaValues: readonly number[], buckets: readonly CurveBucket[]): number[] {
+interface CurveFit {
+  /** One count per planned bucket, in the plan's own order. */
+  readonly counts: readonly number[];
+  /** The creatures no bucket covers, so the caller can name them. */
+  readonly unplaceable: readonly Entry[];
+}
+
+function fitCurve(creatures: readonly Entry[], buckets: readonly CurveBucket[]): CurveFit {
   const counts = buckets.map(() => 0);
+  const unplaceable: Entry[] = [];
   const fits = (bucket: CurveBucket, value: number): boolean =>
     value >= bucket.mvMin && value <= bucket.mvMax;
-  for (const value of [...manaValues].sort((a, b) => a - b)) {
+  const byValue = [...creatures].sort((a, b) => cardManaValue(a.card) - cardManaValue(b.card));
+  for (const entry of byValue) {
+    const value = cardManaValue(entry.card);
     const withRoom = buckets.findIndex(
       (bucket, index) => fits(bucket, value) && (counts[index] ?? 0) < bucket.count,
     );
     const index = withRoom >= 0 ? withRoom : buckets.findIndex((bucket) => fits(bucket, value));
     if (index >= 0) counts[index] = (counts[index] ?? 0) + 1;
+    else unplaceable.push(entry);
   }
-  return counts;
+  return { counts, unplaceable };
 }
 
 export function checkCurve(entries: readonly Entry[], profile: SkeletonLiteProfile): SetFinding[] {
@@ -104,10 +117,26 @@ export function checkCurve(entries: readonly Entry[], profile: SkeletonLiteProfi
     if (first === undefined) continue;
     const plan = planFor(profile, first.slot.rarity, first.slot.color);
     const creatures = bucket.filter((entry) => entry.card.kind === 'creature');
-    const counts = fitCurve(
-      creatures.map((entry) => cardManaValue(entry.card)),
-      plan.creatureCurve,
-    );
+    const { counts, unplaceable } = fitCurve(creatures, plan.creatureCurve);
+
+    // Named first and named as itself. A creature outside every planned bucket
+    // used to be dropped in silence, and the shortfall it left was then
+    // reported as a curve miss against every creature slot in the group -- a
+    // finding that pointed at slots that were fine and never mentioned the card
+    // that went missing (`mtg-69en`). Reachable from both ends: above the top
+    // bucket, which was always possible, and below the bottom one, which free
+    // spells made possible in `4c75dd51`.
+    for (const entry of unplaceable) {
+      found.push(
+        finding(
+          'CURVE_UNPLACEABLE',
+          'error',
+          `group ${key} printed "${entry.card.name}" at MV ${cardManaValue(entry.card)}, which is outside every bucket its creature curve plans (${bucketRange(plan.creatureCurve)})`,
+          [entry.slot.id],
+        ),
+      );
+    }
+
     const off = plan.creatureCurve
       .map((bucketPlan, index) => ({ bucketPlan, actual: counts[index] ?? 0 }))
       .filter((item) => Math.abs(item.actual - item.bucketPlan.count) > TOLERANCE);
@@ -118,16 +147,26 @@ export function checkCurve(entries: readonly Entry[], profile: SkeletonLiteProfi
           `MV ${item.bucketPlan.mvMin}-${item.bucketPlan.mvMax}: ${item.actual}/${item.bucketPlan.count}`,
       )
       .join('; ');
+    const unplaceableSlots = new Set(unplaceable.map((entry) => entry.slot.id));
     found.push(
       finding(
         'CURVE_MISMATCH',
         'error',
         `group ${key} misses its creature curve (${detail})`,
-        creatures.map((entry) => entry.slot.id),
+        // The slots the retry loop should reconsider, which are the ones that
+        // could still be part of the answer. A slot already named by a
+        // `CURVE_UNPLACEABLE` is not one of them: it is a stated problem with a
+        // stated card, not a share of an unattributed shortfall.
+        creatures.map((entry) => entry.slot.id).filter((slotId) => !unplaceableSlots.has(slotId)),
       ),
     );
   }
   return found;
+}
+
+/** The span a creature curve plans, for a finding that has to name it. */
+function bucketRange(buckets: readonly CurveBucket[]): string {
+  return buckets.map((bucket) => `MV ${bucket.mvMin}-${bucket.mvMax}`).join(', ');
 }
 
 /** The profile's plan for a rarity; a tier it does not allocate plans zero. */
@@ -273,7 +312,9 @@ function mechanicMatches(mechanic: DesiredMechanic, card: Card): boolean {
   // brief whose mechanic names only ability kinds could never be covered, and
   // "if the theme isn't at common, it isn't the theme" would fail every set that
   // put the theme exactly where the brief asked.
-  const byAbility = printedAbilityKinds(card).some((kind) => mechanic.abilityKinds.includes(kind));
+  const byAbility = printedAbilityKinds(card).some(
+    (kind) => isModelAbilityKind(kind) && mechanic.abilityKinds.includes(kind),
+  );
   return byKeyword || byEffect || byAbility;
 }
 
@@ -282,10 +323,36 @@ function mechanicMatches(mechanic: DesiredMechanic, card: Card): boolean {
  * requested mechanic must be printed on at least one common. When the allocator
  * could not place a mechanic at all, the finding is a warning naming that fact:
  * regenerating cards cannot fix a slot that was never allocated.
+ *
+ * # Why the unplaceable warning takes the allocator's own declines
+ *
+ * `mtg-xjfa`. There are two ways a mechanic reaches no common slot, and the
+ * warning used to assert the first of them whichever one had happened: that the
+ * allocator places a mechanic only by its keywords, effect kinds or ability
+ * kinds and none of those reached a common role in its colors. The other way is
+ * that the ability pass ran out of commons that carry an ability — six ability
+ * mechanics in one color at 75 cards is enough, and five of them are declined
+ * this way — and for those five the sentence is false: their vocabulary is
+ * identical to the one mechanic that was seated. A brief author reading it
+ * would rewrite a vocabulary that was never the problem.
+ *
+ * So the decline is passed in as a value (`allocate.ts`'s `MechanicDecline`)
+ * rather than inferred here or grepped out of the allocator's notes, and the
+ * two causes get two sentences. The code stays one code: both are the same
+ * fact about the finished set, both are warnings for the same reason (nothing
+ * downstream can regenerate a slot that was never allocated), and a reader
+ * filtering on the code is asking a question the split does not change.
+ *
+ * `declines` is optional and empty by default, which is not a hedge: the check
+ * is called directly by tests over hand-built entries, and a caller with no
+ * allocation in hand genuinely cannot say which cause applied. Absent a
+ * decline, the vocabulary sentence is the one that is true, because the only
+ * other cause records itself.
  */
 export function checkMechanicCoverage(
   entries: readonly Entry[],
   mechanics: readonly DesiredMechanic[],
+  declines: readonly MechanicDecline[] = [],
 ): SetFinding[] {
   const found: SetFinding[] = [];
   for (const mechanic of mechanics) {
@@ -297,11 +364,16 @@ export function checkMechanicCoverage(
       (entry) => entry.slot.rarity === 'common' && entry.slot.mechanics.includes(mechanic.name),
     );
     if (allocated.length === 0) {
+      const crowded = declines.some(
+        (decline) => decline.mechanic === mechanic.name && decline.rarity === 'common',
+      );
       found.push(
         finding(
           'MECHANIC_UNPLACEABLE',
           'warning',
-          `mechanic "${mechanic.name}" was never allocated a common slot: the allocator places a mechanic only by its keywords, effect kinds or ability kinds, and none of those reached a common role in its colors`,
+          crowded
+            ? `mechanic "${mechanic.name}" was never allocated a common slot: every common that carries an ability was already carrying another mechanic, so the brief asks for more ability mechanics than the common tier has permanents to print them on`
+            : `mechanic "${mechanic.name}" was never allocated a common slot: the allocator places a mechanic only by its keywords, effect kinds or ability kinds, and none of those reached a common role in its colors`,
         ),
       );
       continue;

@@ -17,7 +17,41 @@
 import type { Color, Keyword, TokenSpec } from '@mtg/dsl';
 import { isCreatureTokenSpec, KEYWORD_PRINT_NAMES, sortColors, sortKeywords } from '@mtg/dsl';
 
-/** Lowercase, drop everything but letters/digits/spaces, spaces to `_`. */
+/**
+ * Lowercase, drop everything but letters/digits/spaces, spaces to `_`.
+ *
+ * Deliberately not `@mtg/dsl`'s `tokenSlug`, which lowercases and *substitutes*
+ * a hyphen for every run outside `[a-z0-9]`. The two look like one function
+ * derived twice, and they are not: they name things in two different
+ * namespaces, and each namespace's shape is the other's bug.
+ *
+ * `tokenSlug` builds a **DSL card id** — `trophy-horn` — which the kernel's card
+ * registry, the renderer and the art manifest all key on, and hyphen-separated
+ * lowercase is this repository's id convention everywhere else too
+ * (`xmp-swamp`). `slugify` builds a **Forge file name** — `trophy_horn` — and
+ * that convention is read off the shipped 2.0.14 resources rather than chosen:
+ * Forge's own scripts are `lightning_bolt.txt`, `g_2_2_bear`. Making either one
+ * adopt the other's separator would put a file in an exported set that does not
+ * look like the corpus it sits beside, or an id in the manifest that does not
+ * look like every other id.
+ *
+ * The delete-versus-substitute difference follows from the same source. Forge's
+ * `aangs_defense.txt` drops the apostrophe rather than writing `aangs_defense`
+ * from `aang_s_defense`, so punctuation vanishing is the convention, not an
+ * oversight. `tokenSlug` collapses instead, because an id is not being matched
+ * against an external corpus.
+ *
+ * Both are many-to-one, and neither pretends otherwise: `validateTokenSlugCollisions`
+ * (`@mtg/dsl`'s `set-tokens.ts`) turns an id collision into a violation, and
+ * `DUPLICATE_TOKEN_SCRIPT` / `DUPLICATE_CARD_SCRIPT` (`rejection.ts`) turn a
+ * file-name collision into a rejected set. The Forge namespace is strictly the
+ * coarser of the two, because `forgeTokenScriptName` also folds away subtype
+ * words the name already spells; that is why it needs a gate of its own rather
+ * than inheriting the DSL's.
+ *
+ * So: the answer to "should these agree" is no, and `packages/forge-export/test/slug-divergence.test.ts`
+ * pins it so the next reader does not have to re-derive it (`mtg-deub`).
+ */
 export function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -58,7 +92,22 @@ function keywordSlug(keyword: Keyword): string {
  */
 function tokenBodyParts(token: TokenSpec): readonly string[] {
   if (!isCreatureTokenSpec(token)) return ['a'];
+  if (token.creationPowerToughness !== undefined) return ['x', 'x'];
+  if (token.characteristicPowerToughness !== undefined) return ['x', 'x'];
   return [String(token.power), String(token.toughness)];
+}
+
+function tokenCharacteristicParts(token: TokenSpec): readonly string[] {
+  switch (token.characteristicPowerToughness?.kind) {
+    case undefined:
+      return [];
+    case 'controllerLifeTotal':
+      return ['life', 'total'];
+    case 'creaturesYouControl':
+      return ['creatures', 'you', 'control'];
+    case 'controlledSubtype':
+      return ['controlled', token.characteristicPowerToughness.subtype.toLowerCase()];
+  }
 }
 
 /**
@@ -102,13 +151,28 @@ function tokenIdentityParts(token: TokenSpec): readonly string[] {
   return [name, ...extra];
 }
 
+/** Forge's shipped suffix for a token whose combat hit makes that player lose. */
+function tokenAbilityParts(token: TokenSpec): readonly string[] {
+  const losesOnCombatDamage = token.abilities?.some(
+    (ability) =>
+      ability.kind === 'triggered' &&
+      ability.condition === 'selfDealsCombatDamageToPlayer' &&
+      ability.effects.some(
+        (effect) => effect.kind === 'loseGame' && effect.target.kind === 'triggeringPlayer',
+      ),
+  );
+  return losesOnCombatDamage === true ? ['lose_con'] : [];
+}
+
 /** `g_2_2_bear`, `w_2_2_knight_vigilance`, `c_a_trophy_horn_part`. */
 export function forgeTokenScriptName(token: TokenSpec): string {
   const parts = [
     tokenColorPrefix(token.colors),
     ...tokenBodyParts(token),
     ...tokenIdentityParts(token),
+    ...tokenCharacteristicParts(token),
     ...sortKeywords(token.keywords).map(keywordSlug),
+    ...tokenAbilityParts(token),
   ];
   return parts.filter((part) => part.length > 0).join('_');
 }

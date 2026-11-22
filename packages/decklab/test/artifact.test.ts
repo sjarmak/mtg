@@ -105,6 +105,20 @@ describe('toDeckArtifact', () => {
       const roundTripped: unknown = JSON.parse(JSON.stringify(artifact));
       expect(roundTripped).toEqual(artifact);
       expect(JSON.stringify(artifact)).not.toContain('undefined');
+      expect(artifact.construction).toMatchObject({
+        format: {
+          id: 'decklab-constructed-format/v1',
+          source: { kind: 'format', format: 'modern' },
+          deckSize: 40,
+          copyLimit: 4,
+        },
+        selection: {
+          id: 'decklab-model-repair/v1',
+          provider: 'fixture',
+          model: 'fixture-model',
+          fallbackId: 'decklab-verified-partial/v1',
+        },
+      });
     } finally {
       closeStore(store);
     }

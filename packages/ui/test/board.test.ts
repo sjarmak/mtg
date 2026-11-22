@@ -233,11 +233,15 @@ describe('Battlefield', () => {
     // from its width hangs out of the top and loses its leading edge to the
     // row. Neither term alone is the rule - the share alone clips a squashed
     // slot, the height alone brings `mtg-bm1` back on a shrunk one.
+    //
+    // Both terms carry the *same* share, which is `mtg-6hhr`: the second one
+    // was `100cqh`, and a whole slot height is not the width an upright face
+    // beside it draws. See ../../src/styles/board/slot.ts for the measurement.
     const sheet = uiStyleSheet();
     expect(sheet).toContain(`.mtg-slot[data-tapped='true'] > .mtg-card {
   rotate: 90deg;
-  width: min(${cssNumber((CARD_TRIM_MM.width / CARD_TRIM_MM.height) * 100)}%, 100cqh);
-  --card-w: min(${cssNumber((CARD_TRIM_MM.width / CARD_TRIM_MM.height) * 100)}cqw, 100cqh);
+  width: min(${cssNumber((CARD_TRIM_MM.width / CARD_TRIM_MM.height) * 100)}%, ${cssNumber((CARD_TRIM_MM.width / CARD_TRIM_MM.height) * 100)}cqh);
+  --card-w: min(${cssNumber((CARD_TRIM_MM.width / CARD_TRIM_MM.height) * 100)}cqw, ${cssNumber((CARD_TRIM_MM.width / CARD_TRIM_MM.height) * 100)}cqh);
   height: auto; min-width: 0; max-height: none;
 }`);
     expect(sheet).not.toMatch(/\.mtg-slot\[data-tapped='true'\] > \.mtg-card \{[^}]*scale: [\d.]+/);
@@ -313,8 +317,29 @@ describe('Battlefield', () => {
     expect(one).not.toContain('data-empty');
     expect(one).toContain('class="mtg-zone__count">1<');
     const none = renderToStaticMarkup(h(Battlefield, { label: 'Battlefield', permanents: [] }));
-    expect(none).not.toContain('data-empty');
     expect(none).toContain('no permanents');
+    // One `data-empty`, and it is on the zone rather than on a slot. The zone
+    // says it holds nothing so the sheet can stop handing an empty seat half the
+    // mat (`../src/styles/board/fit.ts`); a placeholder would be one of these
+    // per card the row does not have, which is the thing that was deleted.
+    expect(none).not.toContain('mtg-slot');
+    expect(none.match(/data-empty="true"/g)).toHaveLength(1);
+    expect(none).toContain('class="mtg-zone" data-tone="sunken" data-empty="true"');
+  });
+
+  it('counts a zone once when it is empty, in the words rather than in the chip', () => {
+    // `mtg-dcxg.10`, from the 2026-08-23 sweep: the replay's graveyard strip read
+    // "THE SKY ISLANDS' GRAVEYARD  0  graveyard is empty" — the name, a zero and
+    // a sentence, three statements of one fact in a 46px column. The chip is
+    // what a zone with cards in it needs; a zone with none has a sentence that
+    // already says so, and the sentence is the one a player reads.
+    const none = renderToStaticMarkup(h(Battlefield, { label: 'Battlefield', permanents: [] }));
+    expect(none).not.toContain('mtg-zone__count');
+    expect(none).toContain('no permanents');
+    const one = renderToStaticMarkup(
+      h(Battlefield, { label: 'Battlefield', permanents: [{ key: 'p1', card: creature() }] }),
+    );
+    expect(one).toContain('class="mtg-zone__count">1<');
   });
 
   it('draws a land as an art tile in a row of its own, and keeps its marks', () => {
@@ -729,6 +754,25 @@ describe('PlayerStatus', () => {
     expect(markup).toContain('Priority');
   });
 
+  it('lists a counter the player holds after the zone counts, and nothing when it holds none', () => {
+    const held = renderToStaticMarkup(
+      h(PlayerStatus, {
+        name: 'you',
+        life: 20,
+        handCount: 7,
+        libraryCount: 33,
+        graveyardCount: 0,
+        counters: [{ name: 'energy', amount: 4 }],
+      }),
+    );
+    expect(held).toMatch(/graveyard.*energy/su);
+
+    const none = renderToStaticMarkup(
+      h(PlayerStatus, { name: 'you', life: 20, handCount: 7, libraryCount: 33, graveyardCount: 0 }),
+    );
+    expect(none).not.toContain('energy');
+  });
+
   it('renders a floating mana pool', () => {
     render(
       h(PlayerStatus, {
@@ -786,6 +830,6 @@ describe('Board', () => {
     expect(screen.getByLabelText('Your battlefield')).toBeTruthy();
     expect(screen.getByLabelText('Your hand')).toBeTruthy();
     expect(screen.getByLabelText('Stack')).toBeTruthy();
-    expect(screen.getByText('graveyard is empty')).toBeTruthy();
+    expect(screen.getAllByText('empty').length).toBeGreaterThan(0);
   });
 });

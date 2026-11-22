@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "avr",
+  "name": "Avacyn Restored",
+  "sourceCodes": ["AVR"],
+  "products": [{ "id": "avr-draft", "setCode": "AVR", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["avr-draft", "avr-draft", "avr-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["avr-draft", "avr-draft", "avr-draft", "avr-draft", "avr-draft", "avr-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

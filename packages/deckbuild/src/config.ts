@@ -18,6 +18,8 @@
  */
 import type {
   AnyEffectKind,
+  Card,
+  CardKind,
   EffectScope,
   Keyword,
   KeywordAbility,
@@ -26,13 +28,14 @@ import type {
 } from '@mtg/dsl';
 import {
   ALL_EFFECT_KINDS,
+  CARD_KINDS,
   EFFECT_SCOPES,
   KEYWORD_ABILITY_KINDS,
   KEYWORDS,
   STATIC_SCOPES,
   TRIGGER_CONDITIONS,
 } from '@mtg/dsl';
-import { DEFAULT_EFFECT_VALUE, DEFAULT_TOP_END_REACHABILITY } from './evaluate';
+import { DEFAULT_EFFECT_VALUE, DEFAULT_REMOVAL_SATURATION, DEFAULT_TOP_END_REACHABILITY } from './evaluate';
 import type { CurveBucket, CurveHistogram } from './curve-bucket';
 import { CURVE_BUCKETS, curveTotal } from './curve-bucket';
 import { checkUnknownConfigKeys } from './config-unknown-keys';
@@ -66,13 +69,13 @@ export interface EffectWeight {
  *
  * Three parts rather than `EffectWeight`'s two, and the third is why this is a
  * record of its own rather than another pair of tables beside `keywordBase`
- * and `keywordPowerScale`. `KeywordAbilitySchema`'s six split cleanly into two
+ * and `keywordPowerScale`. `KeywordAbilitySchema`'s seven split cleanly into two
  * shapes that cannot share a scaling term:
  *
  *  - **combat-shaped** (`defender`, `landwalk`, `doubleStrike`), which change
  *    what the creature does with the power it has, and so read `perPower` the
  *    way `keywordPowerScale` does; and
- *  - **survival-shaped** (`hexproof`, `indestructible`, `protection`), which
+ *  - **survival-shaped** (`hexproof`, `indestructible`, `protection`, `shroud`), which
  *    change how long the body keeps doing it, and so read a share of the whole
  *    body's stat value — power *and* toughness — because what they protect is
  *    the whole body. A 0/6 indestructible wall is the case that settles it: on
@@ -134,7 +137,7 @@ export interface CardScoreWeights {
    * What each of `KEYWORD_ABILITY_KINDS` is worth on the permanent printing it.
    *
    * The second keyword vocabulary, and until `mtg-gloz` the unpriced one: the
-   * six live on `card.keywordAbilities` rather than `card.keywords`, and
+   * seven live on `card.keywordAbilities` rather than `card.keywords`, and
    * `keywordValue` above reads only the latter, so a 0/6 with `defender` and a
    * 0/6 vanilla were the same card to this builder while the kernel played
    * them as different cards. `DEFAULT_KEYWORD_ABILITY_VALUE` carries the
@@ -181,6 +184,36 @@ export interface CardScoreWeights {
    * applies only to spells and noncreature artifacts.
    */
   readonly spellManaPenaltyPerMana: number;
+  /**
+   * Flat premium on an instant, over the same text printed as a sorcery.
+   *
+   * Both words are in the vocabulary and until now both cost the same, so a
+   * spell that answers a blocker after blockers are declared and one that can
+   * only be cast in your own main phase were one number to `buildDeck`
+   * (`mtg-x5pv`). It is printed everywhere: the flagship prints 91 instants
+   * against 33 sorceries, and the reduced M11, M13 and RTR print 70 more.
+   *
+   * Read off `removalPremiumActivatedScale` rather than picked. That row halves
+   * a removal premium for three differences at once and names them: an
+   * activated outlet answers nothing the turn it lands, answers at most one
+   * thing per turn, and pays mana every time. The first of the three is a
+   * timing clause, and it is the one instant speed is about — a sorcery-speed
+   * answer is also an answer that cannot be made at the moment it is wanted,
+   * and it differs from an instant in that and in nothing else. So instant
+   * speed is worth a third of what that halving charges:
+   * `removalPremium * (1 - removalPremiumActivatedScale) / 3`. The identity is
+   * asserted in `instant-speed.test.ts` rather than left as a comment, because
+   * a derived number written out as a literal goes stale the first time the row
+   * it was derived from moves.
+   *
+   * Flat rather than per mana, and on every instant rather than on removal
+   * alone. Flat because the choice of moment is one choice whatever the spell
+   * cost — holding up six mana is dearer than holding up one, but the card
+   * being held is not worth less for it. On every instant because a combat
+   * trick and a draw spell held to the opponent's end step buy the same thing
+   * the removal spell buys, and a deck feels all three the same way.
+   */
+  readonly instantSpeedPremium: number;
   /**
    * Baseline for a noncreature artifact carrying nothing. An artifact with no
    * printed ability does nothing at all, so it starts negative; one that
@@ -238,6 +271,76 @@ export interface CardScoreWeights {
    * a second one earns its own weight when a card needs it rather than before.
    */
   readonly enabledWhileFactor: number;
+  /**
+   * What protection is worth as a share of the body, over the games in which it
+   * is live at all.
+   *
+   * CR 702.16 is the widest of the four survival abilities where it applies:
+   * against the named quality it is hexproof and indestructible and unblockable
+   * at once, which puts it above `indestructible`'s 0.25. Half a second body is
+   * the claim, and the half a body it is *not* worth is the games where the
+   * opponent never presents the named quality.
+   *
+   * How often that is, is the census `format-context.ts` runs, so this is the
+   * live rate rather than the expected one and it is a separate weight from
+   * `keywordAbilityValue.protection.bodyShare` for exactly that reason: the
+   * table's row is this number times a share, and multiplying it by a share
+   * again would charge the format twice. `evaluate.ts` reads this one when it
+   * has a format and the row when it does not, and
+   * `test/format-context.test.ts` pins the row to `0.5 * (COLORS_PER_DECK / 5)`
+   * so the two cannot drift.
+   */
+  readonly protectionLiveBodyShare: number;
+  /**
+   * Multiplier applied to what a Siege's back face is worth, cast for nothing.
+   *
+   * Defeating a battle exiles it and gives its controller a free cast of the
+   * face on the other side (`kernel/src/stack.ts`,
+   * `awaitTransformedFreeCast`), so the reward is a whole second card and it is
+   * priced by evaluating that card rather than by a number of its own. What
+   * this factor buys is the two ways the reward is worse than holding that card
+   * in hand, and each half is a row already in this table:
+   *
+   * - `enabledWhileFactor`, because the back face is off until the battle is
+   *   defeated and may never come on, which is the same shape as a static that
+   *   carries `enabledWhile`.
+   * - The timing third of `removalPremiumActivatedScale`'s halving, because the
+   *   reward is not there the turn the battle lands. That row halves a premium
+   *   for three differences at once and only one of them is timing, which is
+   *   the same third `instantSpeedPremium` reads off it.
+   *
+   * `enabledWhileFactor * (1 - (1 - removalPremiumActivatedScale) / 3)` =
+   * `0.6 * 0.8333…` = `0.5`. The identity is asserted in
+   * `test/battle-back-face.test.ts` rather than left here, because a literal
+   * derived from two other rows goes stale the first time one of them moves.
+   *
+   * What is deliberately not in it: how hard the battle is to break. A Siege
+   * with defense 8 hands over its back face far less often than one with
+   * defense 1, and this factor is flat in `defense` (`mtg-lrg9`).
+   */
+  readonly battleBackFaceFactor: number;
+  /**
+   * The share of the spells a built deck casts that each card type accounts
+   * for, which is how much of `triggerFireCount.youCastSpell` a
+   * `costReduction` narrowed to a card type actually reaches.
+   *
+   * A printed reduction is worth what the mana it saves is worth, once per
+   * qualifying spell cast while the permanent is out:
+   * `spellManaPenaltyPerMana * amount * triggerFireCount.youCastSpell`, times
+   * this share when `cardType` names one. All three terms are rows this file
+   * already argues, and the third is the only one that needed a measurement of
+   * its own — `DEFAULT_COST_REDUCTION_CAST_SHARE` above carries it, the
+   * denominators, and the two rows it had to guess.
+   *
+   * Two limits it does not model, both filed as `mtg-3it6`. A deck casts in
+   * proportion to what it draws only if its types share a curve, and a
+   * reduction reaches the spells cast *after* it lands rather than all of
+   * them, so a class of cheap cards is over-counted and a class of expensive
+   * ones under-counted. And the share is the share of *these* decks: a set
+   * built around one card type would want its own reading, which is a
+   * `DeckContext` field rather than a weight.
+   */
+  readonly costReductionCastShare: Readonly<Record<CardKind, number>>;
   /**
    * Multiplier applied to a tap when the effect also holds the permanent
    * through its controller's next untap step (Frost Breath, Sleep).
@@ -394,8 +497,8 @@ export interface CardScoreWeights {
    * The reasoning this replaces had it upside down, and the size of the error
    * is the reason to record it. This was 2.5, placed above every conditional
    * `triggerFireCount` row on the argument that repeatable removal is a bomb in
-   * Limited because the deck decides when it happens. It measured 0.608, which
-   * puts it under `selfAttacks` and barely over `selfDies`. What the argument
+   * Limited because the deck decides when it happens. It measured 0.655, which
+   * puts it under `selfAttacks` and over `selfDies` by a third. What the argument
    * missed is that "the deck decides" is a claim about permission, not about
    * mana: the flagship's median game is 7 rounds, every one of those turns has
    * a land drop and a spell competing for the same pool, and an ability the
@@ -406,6 +509,25 @@ export interface CardScoreWeights {
    * clear it by four times rather than bracketing it, and the old note's guess
    * that they *should* outrun it was the one part of that paragraph the sweep
    * agreed with.
+   *
+   * **It is fitted over plain paid abilities alone, and that is `mtg-vm54`.**
+   * The first fit pooled every activated ability the sweep saw, sacrifice
+   * outlets included, and `evaluateCard` then multiplies an outlet by
+   * `sacrificeSupplyFactor` as well, so the outlet discount was charged twice
+   * and the plain ability was charged part of somebody else's. The partition
+   * says how much: on the current flagship at 223 games/matchup, a paid ability
+   * whose cost eats another permanent was activated 64 times over 5,355
+   * arrivals — 0.012 uses each — against 0.655 for the 23,406 arrivals that do
+   * not, a ratio of 0.018. Pooling the two reads 0.536, which understates the
+   * plain ability by a sixth. That pooled fit is what this weight used to
+   * carry; it shipped as 0.608, the same pooling over a wider sweep.
+   *
+   * What the partition does *not* settle is whether `sacrificeSupplyFactor` is
+   * the right size for the outlet half. Composing 0.655 against a measured
+   * 0.012 asks for a factor near 0.02, and `subtypeSupply` returns nothing like
+   * that; whether the gap is the supply model or the bot's willingness to eat
+   * its own board needs a per-deck join this instrument cannot make. Filed as
+   * `mtg-n3tn`.
    */
   readonly activationUseCount: number;
   /**
@@ -478,6 +600,30 @@ export interface CardScoreWeights {
    */
   readonly auraCombatDenialShare: number;
   /**
+   * The power at which "this creature cannot attack" costs exactly
+   * `auraCombatDenialShare * singleCreatureAnswerValue`.
+   *
+   * `defender` and a self-facing `cantAttack` static are one rules text and
+   * carried one flat price, so a 0/6 wall paid the full 1.3 for an attack it
+   * could never profitably make and a 5/5 that gains defender paid the same 1.3
+   * for the attack that was its whole point (`mtg-eetd`). `combatDenialValue`
+   * in `evaluate.ts` rotates that price around this power instead: below it the
+   * denial costs less, above it more, and at it the number is what shipped.
+   *
+   * Three, and it is measured rather than chosen. Over the three balance
+   * subjects the median power of a creature in a built deck is 3 on every one
+   * of them, and the mean is 2.98 (tideglass, 157 creatures), 2.85 (the 79-card
+   * flagship, 138) and 2.95 (the 371-card flagship, 141). The pools themselves
+   * read 2.98, 3.11 and 3.12 over 62, 47 and 208 creatures. A reference that
+   * lands on the same integer under six different populations is not a knob.
+   *
+   * Rotating rather than re-leveling is the point: the shipped price was not
+   * wrong about the creature the builder actually plays, it was wrong at the
+   * ends, so pinning the curve through the measured middle changes what a wall
+   * and a giant are worth and leaves the median creature where it was.
+   */
+  readonly combatDenialReferencePower: number;
+  /**
    * How many single-creature answers taking control of a creature is worth.
    *
    * A multiple rather than a share, because this is the one Aura clause that
@@ -540,6 +686,20 @@ export interface CardScoreWeights {
    * sources.
    */
   readonly topEndReachability: readonly number[];
+  /**
+   * What the nth answer in a deck earns as a fraction of `removalPremium`,
+   * indexed by `n - 1` and clamped to the last entry past the table.
+   *
+   * The premium itself is flat per card, which prices a deck's tenth answer
+   * like its first; an answer is only cashed in against a creature worth
+   * answering, and no deck answers more creatures than the opponent presents.
+   * `evaluate.ts`'s `DEFAULT_REMOVAL_SATURATION` derives the default from that
+   * ceiling and this format's own deck size and draw count, through the same
+   * hypergeometric machinery `topEndReachability` uses. It applies only where a
+   * deck exists to count: a card scored without a `DeckContext` — which is
+   * every card in the color-pair ranking — pays the flat premium.
+   */
+  readonly removalSaturation: readonly number[];
 }
 
 /** How the 17 lands are split and how the split is judged. */
@@ -597,6 +757,23 @@ export interface DeckBuildConfig {
   readonly curvePriority: readonly CurveBucket[];
   readonly weights: CardScoreWeights;
   readonly manaBase: ManaBaseConfig;
+  /**
+   * The set the deck is being built for, whose printed basics back it up.
+   *
+   * `null` means "read the basics off the pool", which is right for a pool that
+   * is a whole set and wrong for one that is six boosters. A sealed pool holds
+   * whichever basics its packs happened to open, so `setBasics` finds a printed
+   * Swamp on one seed and mints `m11-swamp` on the next, and the minted id is a
+   * card the set's art manifest has no key for: every Swamp in that deck draws
+   * the pending frame for the whole game. Measured over the reduced Magic 2011,
+   * 21 of 40 sealed pools mint at least one basic the set prints (`mtg-aqxi.9`).
+   *
+   * So a caller that knows the set says so, and the mana base plays the set's
+   * own printing. A caller that does not — a fixture, a pool with no set behind
+   * it — leaves it null and gets the old behavior, which is the best answer
+   * available from a pool alone.
+   */
+  readonly set: readonly Card[] | null;
 }
 
 /** Deep-partial input accepted by `resolveConfig`; every record merges per key. */
@@ -609,6 +786,13 @@ export interface DeckBuildConfigInput {
   readonly curvePriority?: readonly CurveBucket[];
   readonly weights?: CardScoreWeightsInput;
   readonly manaBase?: Partial<ManaBaseConfig>;
+  /**
+   * The set whose printed basics back the deck; see `DeckBuildConfig.set`.
+   *
+   * `null` as well as absent, because `resolveConfig(resolveConfig(x))` is a
+   * stated property of this config and a resolved one states `set: null`.
+   */
+  readonly set?: readonly Card[] | null;
 }
 
 export interface CardScoreWeightsInput extends Partial<
@@ -657,11 +841,11 @@ export const DEFAULT_KEYWORD_POWER_SCALE: Readonly<Record<Keyword, number>> = {
 };
 
 /**
- * What each of the six keyword abilities is worth, and where each number comes
+ * What each of the seven keyword abilities is worth, and where each number comes
  * from.
  *
  * Nothing here is a fresh constant. Every row is an arithmetic statement about
- * weights this file already carries, because the alternative — six invented
+ * weights this file already carries, because the alternative — seven invented
  * numbers for a vocabulary the evaluator had never read at all — is how a
  * scorer stops being auditable. The derivations are checked against these
  * literals in `evaluate.test.ts`, so retuning `destroyPermanent` or
@@ -674,18 +858,27 @@ export const DEFAULT_KEYWORD_POWER_SCALE: Readonly<Record<Keyword, number>> = {
  * A `cantAttack` static aimed at the caster's own creature is scored at exactly
  * that in `evaluate.ts`, and CR 702.3b's defender is that restriction printed
  * on the card instead of enchanted onto it. One rules text, one price. It is
- * the only negative row here, which is the whole shape of the vocabulary: five
- * of the six add a capability and this one removes half of a creature's job.
+ * the only negative row here, which is the whole shape of the vocabulary: six
+ * of the seven add a capability and this one removes half of a creature's job.
  *
- * The rejected alternative was to scale it on power, so that a 0/6 wall pays
- * less than a 6/6 would. Two things argue it down. It would put two prices on
- * one rules text — the aura clause is flat, so a power-scaled `defender` and a
- * flat `cantAttack` would disagree about the same wall — and the file has
- * already decided that a zero-power creature attacking is worth something:
- * `ZERO_AT_ZERO_POWER`'s docblock excludes `vigilance` precisely because a
- * 0-power creature "still attacks to pressure a planeswalker at 0 power," and
- * defender is what takes that away. Power-scaling both together is a change to
- * a shipped price and belongs in its own bead.
+ * It is now the price **at `combatDenialReferencePower`** rather than the price
+ * at every power. `mtg-eetd` is the bead this row used to defer to, and the two
+ * objections that deferral rested on are answered rather than overruled.
+ *
+ * The first was that power-scaling either spelling alone would put two prices
+ * on one rules text. `evaluate.ts`'s `combatDenialValue` is now the only place
+ * either spelling is priced, and the self-facing `cantAttack` static reads this
+ * row through it, so the printed word and the enchanted clause cannot disagree
+ * about a wall.
+ *
+ * The second was that a zero-power creature attacking is worth something rather
+ * than nothing, so the fix could not be a share of power that vanishes at zero.
+ * It is not: the curve floors at `keywordBase.vigilance` instead of at zero.
+ *
+ * The rate between the two is whatever carries the floor to this row's value at
+ * the reference power; the arithmetic is in `combatDenialValue`'s docblock, and
+ * this row stays the number every other part of that derivation is measured
+ * against.
  *
  * ## `landwalk`: the price this file already pays for granting it
  *
@@ -699,18 +892,25 @@ export const DEFAULT_KEYWORD_POWER_SCALE: Readonly<Record<Keyword, number>> = {
  * `enabledWhileFactor` is the conditional discount, and landwalk is conditional
  * on a thing this evaluator cannot see: whether the *opponent* plays the named
  * basic land type. Nothing in `CardScoreWeights` models the opposing deck, and
- * the file's usual answer to that (`blockOnlyCreaturesWithKeyword`,
- * `cantBeBlockedBySubtype`) is to price at zero rather than guess. Zero is
- * wrong here only because the file has already declined to take it — the aura
- * clause pays 0.72 — so the printed word matches the granted one.
+ * the file's usual answer to that (`blockOnlyCreaturesWithKeyword`) is to price
+ * at zero rather than guess. Zero is wrong here only because the file has
+ * already declined to take it — the aura clause pays 0.72 — so the printed word
+ * matches the granted one.
  *
  * This understates, and deliberately. Landwalk when it is live is strictly
  * better than flying (unblockable beats hard-to-block), so the true value is a
  * share of something *above* `keywordBase.flying`, not of `keywordBase.flying`
- * itself. Doing better needs the one input this package does not have: the
- * share of decks in the format that play the named basic type. A format-level
- * basic-land census, fed in the way `DeckContext` feeds this file its own
- * deck's contents, is what it would take.
+ * itself. That half of the understatement stands.
+ *
+ * The other half no longer does. `enabledWhileFactor` stood in for the share of
+ * decks in the format that play the named basic type, and `format-context.ts`
+ * measures that share off the set the deck is being built for. So this row is
+ * what a caller that stated no set gets: `evaluate.ts` prices a printed
+ * landwalk at `keywordBase.flying` and `keywordPowerScale.flying` times the
+ * measured share when it has a format, and reads this row when it does not. On
+ * an evenly colored five-color set the measured share is 0.4 against this row's
+ * 0.6, so the row is the generous arm of the two, which is the right way round
+ * for the arm that guessed.
  *
  * ## `doubleStrike`: first strike, plus most of a second body's worth of power
  *
@@ -728,9 +928,9 @@ export const DEFAULT_KEYWORD_POWER_SCALE: Readonly<Record<Keyword, number>> = {
  * and nothing when it kills what it hit, so half is the split rather than a
  * shading of one.
  *
- * ## `hexproof`, `indestructible`, `protection`: a share of the body
+ * ## `hexproof`, `indestructible`, `protection`, `shroud`: a share of the body
  *
- * These three do not change what the creature does; they change how long it
+ * These four do not change what the creature does; they change how long it
  * keeps doing it. So each is a share of `statValue(power, toughness)` — the
  * body's own stat contribution — and the ceiling on that share is 1.0, which
  * would say the ability delivers a second copy of the body outright.
@@ -750,14 +950,26 @@ export const DEFAULT_KEYWORD_POWER_SCALE: Readonly<Record<Keyword, number>> = {
  * targeted exile and targeted bounce go through indestructible and stop at
  * hexproof. Not a containment, so the half is a judgment; stated as one.
  *
+ * `shroud` takes **0.2**, the same body share the color arm of protection uses
+ * below. Unlike protection it denies every targeted answer, but it also denies
+ * every beneficial spell and ability its controller could aim at the host. The
+ * two effects pull in opposite directions; reusing an existing protection rate
+ * states that uncertainty without inventing another calibration constant.
+ *
  * `protection` takes **0.2** for a color quality. CR 702.16 is the widest of
- * the three when it applies: against the named quality it is hexproof and
+ * the four when it applies: against the named quality it is hexproof and
  * indestructible and unblockable at once, which puts its live value above
- * indestructible's 0.25 — call it 0.5, half a second body. But it applies only
- * against the named color, and a Limited opponent's two-color deck covers 2 of
- * the 5 colors, so `0.5 * (2/5)` = 0.2 is the expected share. That the 2/5 is a
- * format-wide prior rather than a fact about the opponent is the same bound
- * landwalk states above, and it points the same way.
+ * indestructible's 0.25 — call it 0.5, half a second body, which is the
+ * `protectionLiveBodyShare` weight. But it applies only against the named
+ * color, and a Limited opponent's two-color deck covers 2 of the 5 colors, so
+ * `protectionLiveBodyShare * (2/5)` = 0.2 is the expected share.
+ *
+ * The 2/5 is the even-format reading of `format-context.ts`'s color census
+ * rather than a number that census replaces: `COLORS_PER_DECK * (1/5)` on a set
+ * with five equal colors is exactly 0.4. `evaluate.ts` prices a printed
+ * protection at `protectionLiveBodyShare` times the measured share when it has
+ * a format and at this row when it does not, and a test pins the row to the
+ * product so the two spellings of one claim cannot drift.
  *
  * **The two protection qualities are priced differently**, because
  * `ProtectionQualitySchema`'s two arms differ by more than a name: a color is
@@ -769,21 +981,32 @@ export const DEFAULT_KEYWORD_POWER_SCALE: Readonly<Record<Keyword, number>> = {
  * is a borrowed number and it is borrowed loosely: 0.5 was fitted for a deck
  * *built around* the subtype, and the count of any one creature type in a
  * random opponent's deck is lower than that. So subtype protection is the one
- * row in this table that overstates, by at most half of `0.2 * statValue`, and
- * a subtype census over the format is what would replace it.
+ * row in this table that overstates, by at most half of `0.2 * statValue`.
  *
- * ## What is priced at zero, and why it is a hole rather than an answer
+ * That is what a caller that stated no set still gets. With one,
+ * `format-context.ts` counts the share of the format's creatures carrying the
+ * subtype and `evaluate.ts` prices the arm at `protectionLiveBodyShare` times
+ * it, which is the same expression the color arm uses against the same live
+ * rate: two qualities of one ability differing by which census answers them
+ * rather than by which constant was to hand.
  *
- * `indestructible` and `hexproof` are legal on any permanent, not only on
+ * ## The body each of the four permanent kinds hands these rows
+ *
+ * `indestructible`, `hexproof` and `shroud` are legal on any permanent, not only on
  * creatures (`typeline.ts`'s `CREATURE_ONLY_KEYWORD_ABILITY_KINDS` lists the
- * other four). On a planeswalker `evaluate.ts` has a body to take a share of —
- * loyalty, which it already prices at `creatureToughnessWeight` for being the
- * quantity an attacker spends combat damage on — so the walker arm reads these
- * two. On an artifact or an enchantment there is no body at all, the share is a
- * share of nothing, and both price at zero. That is a hole: an indestructible
- * artifact is worth more than a destructible one. Filling it means taking a
- * share of the permanent's own text value, which is computed after the card
- * kind is switched on, and that reordering is its own change.
+ * other four), so `bodyShare` is asked its question by four card kinds and
+ * each answers with a different quantity. A creature answers with its printed
+ * stats. A planeswalker answers with its loyalty, which `evaluate.ts` already
+ * prices at `creatureToughnessWeight` for being the quantity an attacker
+ * spends combat damage on. An artifact and an enchantment answer with their
+ * own text value, because a permanent with no stat line still has something an
+ * opponent wants gone and the text is all of it; `permanentTextBody` is that
+ * sum and states which components it reads and which one it refuses.
+ *
+ * The three shares are one rate per keyword across all four, which is the
+ * claim this table is making: what indestructible is worth is a fraction of
+ * whatever the permanent would cost to answer, and the card kind decides only
+ * what that quantity is.
  */
 export const DEFAULT_KEYWORD_ABILITY_VALUE: Readonly<Record<KeywordAbility['kind'], KeywordAbilityWeight>> = {
   // -auraCombatDenialShare * (destroyPermanent.base + destroyPermanent.perUnit).
@@ -792,10 +1015,21 @@ export const DEFAULT_KEYWORD_ABILITY_VALUE: Readonly<Record<KeywordAbility['kind
   landwalk: { flat: 0.72, perPower: 0.09, bodyShare: 0 },
   hexproof: { flat: 0, perPower: 0, bodyShare: 0.125 },
   indestructible: { flat: 0, perPower: 0, bodyShare: 0.25 },
+  shroud: { flat: 0, perPower: 0, bodyShare: 0.2 },
   // The color quality's rate; evaluate.ts narrows the subtype quality.
   protection: { flat: 0, perPower: 0, bodyShare: 0.2 },
   // firstStrike's base, and its power rate plus half of creaturePowerWeight.
   doubleStrike: { flat: 0.55, perPower: 0.695, bodyShare: 0 },
+  // Timing flexibility changes deployment, not the board value the body contributes.
+  flash: { flat: 0, perPower: 0, bodyShare: 0 },
+  // Landwalk's row, for the same conditional-evasion bound, and this is what a
+  // caller that states no set gets. With a set stated the two part company:
+  // each reads `format-context.ts`'s census, a landwalk at the share of decks
+  // playing its basic type and an intimidate at the share of the format's
+  // creatures that can neither block it by color nor block it as an artifact.
+  intimidate: { flat: 0.72, perPower: 0.09, bodyShare: 0 },
+  // The optional +1/+1 entry counter; declining avoids the conditional block restriction.
+  unleash: { flat: 2, perPower: 0, bodyShare: 0 },
 };
 
 /**
@@ -818,6 +1052,13 @@ export const DEFAULT_EFFECT_SCOPE_REACH: Readonly<Record<EffectScope, number>> =
   // over a game rather than one dealt at its start, and by the turn this scope
   // is worth casting it holds a comparable creature share to a mid-game hand.
   creatureCardsInPlayerGraveyard: 2,
+  // Both graveyards at the point an eight-loyalty ultimate resolves. Kept as
+  // the sum of the two one-graveyard estimates; the hand-authored scope never
+  // enters a generated role, but the evaluator's scope table remains total.
+  creatureCardsInAllGraveyards: 4,
+  // The chosen player or planeswalker is one body, followed by the same
+  // assumed three-creature board as the targeted-player scope above.
+  targetAndPermanentsItsPlayerControls: 4,
   // Three again for all three board sweeps, and the equal figure is the claim
   // worth stating. A symmetric wrath reaches both boards, so counting six would
   // price Day of Judgment as twice Plague Wind — backwards, because half of
@@ -875,14 +1116,83 @@ export const DEFAULT_STATIC_SCOPE_REACH: Readonly<Record<StaticScope, number>> =
  * four rares that opened `mtg-fe2n` are still negative under measured numbers,
  * and why measuring this table did not rescue them.
  */
+/**
+ * The share of the spells a built deck casts that each card type accounts for.
+ *
+ * Measured off the decks `@mtg/deckbuild` itself builds, rather than off the
+ * balance sweep: all ten color pairs of all three balance subjects, 23 spells
+ * per deck, n=690 non-land cards. A deck casts roughly what it draws, and what
+ * it draws is what is in it, so the composition of the built deck is the
+ * question `costReduction` asks — "of the spells I cast under this permanent,
+ * how many are of the named type".
+ *
+ * Why not off the sweep, which is where every other count in this file comes
+ * from: the two rows that could have answered it, `youCastSpell` and
+ * `youCastInstantOrSorcery`, are both probe-pass rows, measured on separately
+ * deformed decks that the builder would never assemble. Their ratio is 0.151
+ * against a built-deck instant-and-sorcery share of 0.238, and neither
+ * denominator is the other's, so the ratio is a share of nothing.
+ *
+ * The pooled figure is what ships; the per-subject spread is the width of the
+ * claim, and for the three rows a single subject carries it is wide:
+ *
+ * | type         | pooled | tideglass / XMP / XMP-253 |
+ * | ---          |   ---: | ---                       |
+ * | creature     | 0.6203 | 0.674 / 0.596 / 0.591     |
+ * | instant      | 0.1420 | 0.174 / 0.130 / 0.122     |
+ * | artifact     | 0.1014 | 0.000 / 0.200 / 0.104     |
+ * | sorcery      | 0.0957 | 0.152 / 0.074 / 0.061     |
+ * | enchantment  | 0.0275 | 0.000 / 0.000 / 0.083     |
+ * | planeswalker | 0.0130 | 0.000 / 0.000 / 0.039     |
+ *
+ * What the shares are shares *of* is the spells, not the cards: a land is put
+ * onto the battlefield and never cast, so a clause naming one reduces the cost
+ * of nothing and the row is zero by arithmetic rather than for want of a
+ * reading. That is also why the other seven sum to one.
+ */
+export const DEFAULT_COST_REDUCTION_CAST_SHARE: Readonly<Record<CardKind, number>> = {
+  creature: 0.6203, // n=428 of 690
+  instant: 0.142, // n=98
+  artifact: 0.1014, // n=70
+  sorcery: 0.0957, // n=66
+  enchantment: 0.0275, // n=19
+  planeswalker: 0.013, // n=9
+  // A land is never cast, so this is zero by arithmetic and is the row that
+  // says what the other seven are shares of.
+  land: 0,
+  // No denominator: none of the three subjects prints a battle, so no built
+  // deck holds one. Borrowed from `planeswalker`, the nearest measured row —
+  // also a rare, expensive, non-creature permanent these decks barely play —
+  // and it is a guess until a subject prints one (`lantern-fen.set.json` is
+  // the only committed set that does).
+  battle: 0.013,
+};
+
 export const DEFAULT_TRIGGER_FIRE_COUNT: Readonly<Record<TriggerCondition, number>> = {
   selfEnters: 1.0, // pass 1, n=27557
   selfAttacks: 1.221, // pass 1, n=7317
   selfDies: 0.463, // pass 1, n=18572
+  selfLeavesBattlefield: 0.5,
+  selfPutIntoGraveyardFromBattlefield: 0.463,
+  selfPutIntoGraveyardFromAnywhere: 0.463,
+  // Unmeasured. The trigger needs both an attached creature and that creature
+  // to die, so the measured ordinary death rate is the least speculative
+  // baseline until a reference corpus provides its own denominator.
+  enchantedCreatureDies: 0.463,
+  // Unmeasured. It additionally needs the enchanted land to be used.
+  enchantedLandBecomesTapped: 1.0,
+  // Unmeasured: a source is aimed at less often than it attacks, but spells and
+  // all three ability families can each supply the event.
+  selfBecomesTarget: 0.5,
+  enchantedCreatureBecomesTarget: 0.5,
+  selfBecomesTargetByOpponent: 0.35,
   selfDiesNotSacrificed: 0.337, // pass 1, n=1631
   controlledCreatureAttacksAlone: 0.802, // pass 1, n=2494
+  selfAttacksAlone: 0.802,
+  selfAndThreeOthersAttack: 0.25,
   selfDealsCombatDamageToCreature: 0.274, // pass 1, n=1321
   beginningOfYourUpkeep: 2.511, // probe, n=2671
+  beginningOfEachPlayersUpkeep: 5.022, // derived = 2 x beginningOfYourUpkeep
   beginningOfYourEndStep: 2.708, // probe, n=5349
   // Twice the row above, derived rather than probed: an end step happens on
   // every turn and this member fires on all of them, where "your end step"
@@ -895,13 +1205,39 @@ export const DEFAULT_TRIGGER_FIRE_COUNT: Readonly<Record<TriggerCondition, numbe
   // `anotherControlledCreatureEnters` because a land drop counts for this one
   // and not for that one.
   anotherControlledPermanentEnters: 2.0,
+  // A normal limited game supplies several land drops, but this authored
+  // condition can function outside the battlefield and has no flagship-set
+  // denominator yet. Keep the conservative permanent-entry baseline.
+  controlledLandSubtypeEnters: 2.0,
+  // At least as broad as the measured `another` sibling and guaranteed to see
+  // a creature source's own arrival. Unmeasured until a sweep includes one.
+  controlledCreatureEnters: 1.5,
   anotherControlledCreatureEnters: 1.39, // pass 1, n=559
+  // Unmeasured. It sees either player's arrivals, so twice the measured
+  // controller-scoped row is the least speculative initial denominator.
+  anotherCreatureEnters: 2.78,
+  controlledCreatureDies: 0.463,
   youCastSpell: 1.662, // probe, n=1683
   youCastInstantOrSorcery: 0.251, // probe, n=13673
   selfDealsCombatDamageToPlayer: 0.46, // pass 1, n=2282
+  // Unmeasured per watcher; use the measured single-source player-hit rate.
+  controlledCreatureDealsCombatDamageToPlayer: 0.46,
   selfBlocks: 0.381, // probe, n=5304
+  // Unmeasured sum of the host's two combat opportunities. The first exact
+  // card carrying it is an Aura, so the source itself is not the attacker or
+  // blocker counted by the neighboring rows.
+  enchantedCreatureAttacksOrBlocks: 1.602, // derived = selfAttacks + selfBlocks
+  // Unmeasured. Ordinary creatures block one attacker, so the pair-shaped
+  // wording and the unqualified wording share a first estimate; unlimited
+  // blocks make this one fire more often and the first reference sweep that
+  // exercises them should replace the estimate.
+  selfBlocksCreature: 0.381,
   selfBlocksOrIsBlockedByGreaterPower: 0.091, // pass 1, n=10839
   youGainLife: 0.112, // probe, n=4411
+  // Unmeasured. A draw engine can make this repeat, but an isolated card scorer
+  // cannot assume one; keep it near the measured life-gain trigger until the
+  // first sweep containing Jace's Erasure gives it a denominator.
+  youDrawCard: 0.2,
   // Unmeasured, and the sum of two rows that are: it fires on the arrival every
   // `selfEnters` fires on and on every attack `selfAttacks` fires on, so the
   // count a deck sees is the two added rather than either alone. No card in the
@@ -926,6 +1262,12 @@ export const DEFAULT_TRIGGER_FIRE_COUNT: Readonly<Record<TriggerCondition, numbe
   // 1.39, which is this event with the power clause dropped. Halved, because
   // roughly half the creatures a built deck plays are under power 3.
   anotherControlledCreatureWithPowerThreeOrGreaterEnters: 0.7,
+  // Unmeasured. An opposing discard is less controllable than the source
+  // controller's own draw, but one batch may fire it more than once.
+  opponentDiscardsCard: 0.15,
+  selfPlusOnePlusOneCounterRemoved: 0,
+  creatureAttacksYouOrPlaneswalkerYouControl: 0,
+  selfIsDealtDamage: 0,
 };
 
 export const DEFAULT_SCORE_WEIGHTS: CardScoreWeights = {
@@ -941,25 +1283,33 @@ export const DEFAULT_SCORE_WEIGHTS: CardScoreWeights = {
   removalPremiumActivatedScale: 0.5,
   removalDamageFloor: 2,
   spellManaPenaltyPerMana: 0.55,
+  instantSpeedPremium: 0.25,
   vanillaArtifactBaseline: -1.0,
   staticScopeReach: DEFAULT_STATIC_SCOPE_REACH,
   effectScopeReach: DEFAULT_EFFECT_SCOPE_REACH,
   computedAmountAssumption: 3,
   staticSubtypeReachFactor: 0.5,
+  // Half a second body while it is live; keywordAbilityValue.protection.bodyShare
+  // is this number at the even-format color share.
+  protectionLiveBodyShare: 0.5,
   enabledWhileFactor: 0.6,
+  battleBackFaceFactor: 0.5,
+  costReductionCastShare: DEFAULT_COST_REDUCTION_CAST_SHARE,
   heldTapFactor: 2.0,
   restrictedTargetFactor: 0.5,
   tolledSpellFactor: 0.8,
   triggerFireCount: DEFAULT_TRIGGER_FIRE_COUNT,
-  activationUseCount: 0.608, // pass 1, n=32446
+  activationUseCount: 0.655, // pass 1, n=23406 plain paid arrivals (outlets excluded, mtg-vm54)
   activationTapFactor: 0.397, // pass 1, n=2199
   activationCostPerMana: 0.35,
   equipHostCount: 0.684, // pass 1, n=27884
   auraCombatDenialShare: 0.5,
+  combatDenialReferencePower: 3, // measured: median built-deck creature power on all three balance subjects
   auraControlMultiple: 2,
   planeswalkerActivations: 3,
   formatMedianRounds: 7,
   topEndReachability: DEFAULT_TOP_END_REACHABILITY,
+  removalSaturation: DEFAULT_REMOVAL_SATURATION,
 };
 
 export const DEFAULT_MANA_BASE_CONFIG: ManaBaseConfig = {
@@ -991,6 +1341,7 @@ export const DEFAULT_DECK_BUILD_CONFIG: DeckBuildConfig = {
   curvePriority: DEFAULT_CURVE_PRIORITY,
   weights: DEFAULT_SCORE_WEIGHTS,
   manaBase: DEFAULT_MANA_BASE_CONFIG,
+  set: null,
 };
 
 function mergeNumberRecord<K extends string>(
@@ -1076,12 +1427,20 @@ function mergeWeights(overrides: CardScoreWeightsInput | undefined): CardScoreWe
     removalPremiumActivatedScale: overrides.removalPremiumActivatedScale ?? base.removalPremiumActivatedScale,
     removalDamageFloor: overrides.removalDamageFloor ?? base.removalDamageFloor,
     spellManaPenaltyPerMana: overrides.spellManaPenaltyPerMana ?? base.spellManaPenaltyPerMana,
+    instantSpeedPremium: overrides.instantSpeedPremium ?? base.instantSpeedPremium,
     vanillaArtifactBaseline: overrides.vanillaArtifactBaseline ?? base.vanillaArtifactBaseline,
     staticScopeReach: mergeNumberRecord(base.staticScopeReach, STATIC_SCOPES, overrides.staticScopeReach),
     effectScopeReach: mergeNumberRecord(base.effectScopeReach, EFFECT_SCOPES, overrides.effectScopeReach),
     computedAmountAssumption: overrides.computedAmountAssumption ?? base.computedAmountAssumption,
     staticSubtypeReachFactor: overrides.staticSubtypeReachFactor ?? base.staticSubtypeReachFactor,
+    protectionLiveBodyShare: overrides.protectionLiveBodyShare ?? base.protectionLiveBodyShare,
     enabledWhileFactor: overrides.enabledWhileFactor ?? base.enabledWhileFactor,
+    battleBackFaceFactor: overrides.battleBackFaceFactor ?? base.battleBackFaceFactor,
+    costReductionCastShare: mergeNumberRecord(
+      base.costReductionCastShare,
+      CARD_KINDS,
+      overrides.costReductionCastShare,
+    ),
     restrictedTargetFactor: overrides.restrictedTargetFactor ?? base.restrictedTargetFactor,
     tolledSpellFactor: overrides.tolledSpellFactor ?? base.tolledSpellFactor,
     heldTapFactor: overrides.heldTapFactor ?? base.heldTapFactor,
@@ -1095,10 +1454,12 @@ function mergeWeights(overrides: CardScoreWeightsInput | undefined): CardScoreWe
     activationCostPerMana: overrides.activationCostPerMana ?? base.activationCostPerMana,
     equipHostCount: overrides.equipHostCount ?? base.equipHostCount,
     auraCombatDenialShare: overrides.auraCombatDenialShare ?? base.auraCombatDenialShare,
+    combatDenialReferencePower: overrides.combatDenialReferencePower ?? base.combatDenialReferencePower,
     auraControlMultiple: overrides.auraControlMultiple ?? base.auraControlMultiple,
     planeswalkerActivations: overrides.planeswalkerActivations ?? base.planeswalkerActivations,
     formatMedianRounds: overrides.formatMedianRounds ?? base.formatMedianRounds,
     topEndReachability: overrides.topEndReachability ?? base.topEndReachability,
+    removalSaturation: overrides.removalSaturation ?? base.removalSaturation,
   };
 }
 
@@ -1142,6 +1503,7 @@ export function resolveConfig(input: DeckBuildConfigInput = {}): DeckBuildConfig
     curvePriority: input.curvePriority ?? DEFAULT_CURVE_PRIORITY,
     weights: mergeWeights(input.weights),
     manaBase: mergeManaBase(input.manaBase),
+    set: input.set ?? null,
   };
 
   if (!Number.isInteger(config.deckSize) || config.deckSize <= 0) {

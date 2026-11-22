@@ -75,6 +75,8 @@
  * the one a card printed today gets. Change this one entry if the older wording
  * is wanted.
  */
+import { formatOverloadCost, type OverloadProfile } from './overload';
+import { HYBRID_MANA_COLORS, hybridPips, type ManaCost } from './mana';
 import type { CardKind, Keyword } from './vocabulary';
 import { BASIC_LAND_TYPES, COLOR_WORDS, COLORS, KEYWORD_PRINT_NAMES, sortKeywords } from './vocabulary';
 import { capitalize, joinWithOr, withArticle } from './text-util';
@@ -100,6 +102,22 @@ export const KEYWORD_REMINDER_TEXT: Readonly<Record<Keyword, string | null>> = {
   reach: 'This creature can block creatures with flying.',
   firstStrike: 'This creature deals combat damage before creatures without first strike.',
 };
+
+/**
+ * The source-faithful payment gloss for a single two-color hybrid pip.
+ *
+ * Returns `null` outside that deliberately narrow printed shape. Card
+ * validation requires this non-null shape whenever
+ * `printedHybridManaReminder` is present, so a face never guesses which of
+ * several symbols it was meant to explain.
+ */
+export function hybridManaReminderText(cost: ManaCost): string | null {
+  const pips = hybridPips(cost);
+  const only = pips[0];
+  if (pips.length !== 1 || only === undefined || only[1] !== 1) return null;
+  const [first, second] = HYBRID_MANA_COLORS[only[0]];
+  return `({${only[0]}} can be paid with either {${first}} or {${second}}.)`;
+}
 
 /**
  * The two runs a reminder line is set in: the keyword, and the gloss on it.
@@ -188,6 +206,11 @@ export function keywordReminderLine(keyword: Keyword): string | null {
  * Creature-only for the same reason Defender and landwalk are — a permanent
  * that never deals combat damage has nowhere to put it — so its gloss names
  * "this creature" outright and `selfNamingReminder` leaves it alone.
+ *
+ * Shroud is the seventh kind (`mtg-nhyv.90`). Its fixed reminder differs from
+ * Hexproof only by removing the controller exception, and the same permanent-
+ * type substitution therefore serves both: a creature says "this creature"
+ * while an Equipment such as Whispersilk Cloak says "this artifact".
  */
 const LANDWALK_REMINDER: Readonly<Record<string, string>> = Object.fromEntries(
   BASIC_LAND_TYPES.map((landType) => [
@@ -197,11 +220,12 @@ const LANDWALK_REMINDER: Readonly<Record<string, string>> = Object.fromEntries(
 );
 
 /**
- * The two reminders whose wording depends on what the card *is* (`mtg-rji`).
+ * The three reminders whose wording depends on what the card *is* (`mtg-rji`,
+ * `mtg-nhyv.90`).
  *
- * Hexproof and indestructible are static abilities of any permanent (CR
- * 702.11b, CR 702.12a), and `checkKeywords` lets a noncreature permanent print
- * either one, so their reminders cannot say "this creature" the way Defender's
+ * Hexproof, indestructible and shroud are static abilities of any permanent
+ * (CR 702.11b, CR 702.12a, CR 702.18a), and `checkKeywords` lets a noncreature
+ * permanent print any of them, so their reminders cannot say "this creature" the way Defender's
  * and landwalk's can — those two are refused anywhere but a creature, because
  * their rules are about attacking and blocking. The gloss names the card's own
  * type instead — CR 205.1a's five permanent types are the nouns — which is one
@@ -222,14 +246,23 @@ const SELF_NAMING_REMINDER = {
   Hexproof: (self: string) =>
     `This ${self} can't be the target of spells or abilities your opponents control.`,
   Indestructible: (self: string) => `Damage and effects that say "destroy" don't destroy this ${self}.`,
+  Shroud: (self: string) => `This ${self} can't be the target of spells or abilities.`,
 } as const;
 
 export const ABILITY_LINE_REMINDER_TEXT: Readonly<Record<string, string>> = {
   Exalted: 'Whenever a creature you control attacks alone, that creature gets +1/+1 until end of turn.',
+  'Other creatures you control have exalted.':
+    'If a creature has multiple instances of exalted, each triggers separately.',
   Defender: "This creature can't attack.",
   'Double strike': 'This creature deals both first-strike and regular combat damage.',
   Hexproof: SELF_NAMING_REMINDER.Hexproof('creature'),
   Indestructible: SELF_NAMING_REMINDER.Indestructible('creature'),
+  Shroud: SELF_NAMING_REMINDER.Shroud('creature'),
+  Flash: 'You may cast this spell any time you could cast an instant.',
+  Intimidate:
+    "This creature can't be blocked except by artifact creatures and/or creatures that share a color with it.",
+  Unleash:
+    "You may have this creature enter with a +1/+1 counter on it. It can't block as long as it has a +1/+1 counter on it.",
   ...LANDWALK_REMINDER,
 };
 
@@ -246,6 +279,7 @@ export const ABILITY_LINE_REMINDER_TEXT: Readonly<Record<string, string>> = {
 function selfNamingReminder(line: string, kind: CardKind): string | null {
   if (line === 'Hexproof') return SELF_NAMING_REMINDER.Hexproof(kind);
   if (line === 'Indestructible') return SELF_NAMING_REMINDER.Indestructible(kind);
+  if (line === 'Shroud') return SELF_NAMING_REMINDER.Shroud(kind);
   return null;
 }
 
@@ -347,6 +381,52 @@ function gloomLineReminder(line: string): KeywordReminder | null {
   };
 }
 
+const POPULATE_COPY_ACTION = "create a token that's a copy of a creature token you control.";
+
+/** Populate's reminder, derived from any exact rules row that prints the action. */
+function populateLineReminder(line: string): KeywordReminder | null {
+  const startsTheRow = line.startsWith('Populate.');
+  const followsAnAction = /, then populate\.$/.test(line) || /(?:,|:|\.) (?:populate|Populate)\.$/.test(line);
+  if (!startsTheRow && !followsAnAction) return null;
+  return {
+    keyword: line,
+    gloss: `(${startsTheRow ? `To populate, ${POPULATE_COPY_ACTION}` : capitalize(POPULATE_COPY_ACTION)})`,
+  };
+}
+
+const OVERLOAD_REMINDER_TEXT =
+  '(You may cast this spell for its overload cost. If you do, change "target" in its text to "each.")';
+
+/** Overload's printed keyword and reminder runs, derived from its structured profile. */
+export function overloadReminder(profile: OverloadProfile): KeywordReminder {
+  return {
+    keyword: `Overload ${formatOverloadCost(profile)}`,
+    gloss: OVERLOAD_REMINDER_TEXT,
+  };
+}
+
+/** Overload's reminder is cost-independent and derived from its rendered keyword line. */
+function overloadLineReminder(line: string): KeywordReminder | null {
+  if (!/^Overload (?:\{[^}]+\})+$/.test(line)) return null;
+  return {
+    keyword: line,
+    gloss: OVERLOAD_REMINDER_TEXT,
+  };
+}
+
+/** Reminder presentation for an activated ability that grants its own creature a keyword. */
+function activatedSelfGrantReminder(line: string): KeywordReminder | null {
+  const match = /^.+: This creature gains ([a-z ]+) until end of turn\.$/.exec(line);
+  const printedKeyword = match?.[1];
+  if (printedKeyword === undefined) return null;
+  const entry = (Object.entries(KEYWORD_PRINT_NAMES) as [Keyword, string][]).find(
+    ([, printed]) => printed === printedKeyword,
+  );
+  if (entry === undefined) return null;
+  const reminder = KEYWORD_REMINDER_TEXT[entry[0]];
+  return reminder === null ? null : { keyword: line, gloss: `(${reminder})` };
+}
+
 /**
  * One ability line's printed reminder, in its two runs, or `null` when the line
  * has none.
@@ -362,7 +442,14 @@ export function abilityLineReminder(line: string, kind: CardKind = 'creature'): 
   if (selfNamed !== null) return { keyword: line, gloss: `(${selfNamed})` };
   const reminder = ABILITY_LINE_REMINDER_TEXT[line];
   if (reminder !== undefined) return { keyword: line, gloss: `(${reminder})` };
-  return protectionLineReminder(line) ?? flurryRushLineReminder(line) ?? gloomLineReminder(line);
+  return (
+    protectionLineReminder(line) ??
+    flurryRushLineReminder(line) ??
+    gloomLineReminder(line) ??
+    populateLineReminder(line) ??
+    overloadLineReminder(line) ??
+    activatedSelfGrantReminder(line)
+  );
 }
 
 /** The keywords of a card that print bare, in canonical order. */

@@ -78,6 +78,13 @@
  * in here — so the end of the list is where a surface that has to beat nothing
  * belongs, and it reads beside the rule it replaces.
  *
+ * `./pod.ts` is last and `./command.ts` is straight before it, because a pod
+ * tile restacks the command panel that sheet sizes, a strip above the board rather
+ * than a column beside it: `.mtg-pod-tile .mtg-board__side[data-side-panel='true']`
+ * outweighs `./command.ts`'s selector by a class and would win from anywhere, so
+ * the order is where a reader expects the override. Every other rule in it is
+ * scoped to a class only the pod arm writes.
+ *
  * Joined with no separator rather than a newline, which is what `../index.ts`
  * uses between the top-level sheets. That is not a style choice: the blocks each
  * open with their own newline, and joining them any other way moves bytes in a
@@ -102,9 +109,12 @@ import { DECLARE_CSS } from './declare';
 import { ASK_FLYOUT_CSS } from './ask-flyout';
 import { BEAT_CSS } from './beat';
 import { ATTACH_CSS } from './attach';
+import { PILE_CSS } from './pile';
 import { BAND_CSS } from './band';
 import { ARRIVAL_CSS } from './arrival';
 import { MOTION_CSS } from './motion';
+import { COMMAND_CSS } from './command';
+import { POD_CSS } from './pod';
 
 /** Every board surface, in cascade order. */
 export const BOARD_SHEETS: readonly string[] = [
@@ -127,12 +137,23 @@ export const BOARD_SHEETS: readonly string[] = [
   ASK_FLYOUT_CSS,
   BEAT_CSS,
   ATTACH_CSS,
+  PILE_CSS,
   BAND_CSS,
   ARRIVAL_CSS,
   MOTION_CSS,
+  COMMAND_CSS,
+  POD_CSS,
 ];
 
 export const BOARD_CSS = BOARD_SHEETS.join('');
 
 export { PICKER_INSET_REM, PICKER_WIDTH_REM } from './picker';
 export { PLAY_ASK_REM, PLAY_RAIL_REM } from './rail';
+export { COMMAND_ZONE_WIDTH_REM } from './command';
+export {
+  TILE_BOARD_BASIS_REM,
+  TILE_COMMANDER_REM,
+  TILE_CROWDED_SLOT_REM,
+  TILE_LAND_REM,
+  TILE_SLOT_REM,
+} from './pod';

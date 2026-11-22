@@ -24,6 +24,8 @@ import { createElement as h } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { EXAMPLE_CARDS } from '@mtg/dsl';
+import { App } from '../../src/app/App';
+import type { UiViews } from '../../src/app/App';
 import { LabApp } from '../../src/dev/LabApp';
 import { SHELL_NOTICE_LABEL } from '../../src/app/Shell';
 import { readReduction, reducedNoticeText } from '../../src/lab/reduced-notice';
@@ -156,22 +158,32 @@ describe('the sentence', () => {
   it('names the set, the split and what a drop is not', () => {
     if (found === null) throw new Error('this test needs a reduction');
     expect(reducedNoticeText(found)).toBe(
-      "Reduced build: 20 of a pinned reference printing's 249 collector positions. " +
-        'The other 229 were refused by the translation gate and are not in this set; ' +
-        'nothing was approximated or substituted.',
+      "Partial set: 20 of a pinned reference printing's 249 cards. " +
+        'The other 229 are missing rather than approximated.',
     );
   });
 
-  it('does not claim a refusal when the reduction refused nothing', () => {
+  it('says nothing when the reduction refused nothing', () => {
     const whole = readReduction(reducedDocument(reduction(249, 0)));
     if (whole === null) throw new Error('this test needs a reduction');
-    expect(reducedNoticeText(whole)).toContain('No collector position was refused');
-    expect(reducedNoticeText(whole)).toContain('nothing was approximated or substituted');
+    expect(reducedNoticeText(whole)).toBeNull();
   });
 });
 
 describe('the shell over a staged reduced set', () => {
-  it.each(['#/play', '#/cards', '#/deck', '#/draft', '#/analysis', '#/replay'])(
+  /**
+   * `#/play` and `#/draft` used to be on this list, and `mtg-aqxi.16` took them
+   * off. The notice is a standing paragraph about the missing cards, and on
+   * those two routes it stood above a board and above a pack — the two surfaces
+   * in the app with the least room, on a phone and on a desktop alike. It is a
+   * fact about the set, it never changes while a game is on, and the set picker
+   * beside it already ends a reduced build's name with `(reduced)`.
+   *
+   * So the reading routes keep the sentence and the playing routes drop it, and
+   * both halves are asserted here rather than one: a disclosure that quietly
+   * stops being drawn anywhere is the failure this test exists to catch.
+   */
+  it.each(['#/cards', '#/customize/decks', '#/analysis', '#/analysis/replay'])(
     'discloses the refused positions on %s',
     async (hash) => {
       stubFetch({ 'set.json': reducedDocument() });
@@ -183,10 +195,40 @@ describe('the shell over a staged reduced set', () => {
       // package types an element's DOM properties.
       const notice = await waitFor(() => screen.getByRole('status', { name: SHELL_NOTICE_LABEL }));
       expect(notice).toBeTruthy();
-      expect(screen.getByText(/20 of a pinned reference printing's 249 collector positions/)).toBeTruthy();
-      expect(screen.getByText(/The other 229 were refused/)).toBeTruthy();
+      expect(screen.getByText(/20 of a pinned reference printing's 249 cards/)).toBeTruthy();
+      expect(screen.getByText(/The other 229 are missing rather than approximated/)).toBeTruthy();
     },
   );
+
+  it.each(['#/play', '#/play/draft'])('keeps the sentence off the table on %s', async (hash) => {
+    stubFetch({ 'set.json': reducedDocument() });
+    setHash(hash);
+    openLab();
+
+    await waitFor(() => {
+      expect(screen.getByRole('main')).toBeTruthy();
+    });
+    expect(screen.queryByRole('status', { name: SHELL_NOTICE_LABEL })).toBeNull();
+    expect(screen.queryByText(/Partial set:/)).toBeNull();
+  });
+
+  it('keeps the sentence off a table the deck builder seated under Customize', () => {
+    // The builder hosts a game of its own on the Decks section, and while it
+    // does the notice would stand above that board exactly the way it stood
+    // above Play's. The route reports the seat and the shell drops the line.
+    setHash('#/customize/decks');
+    const views: UiViews = {
+      play: () => 'play',
+      customize: () => 'a game on the table',
+      cards: () => 'cards',
+      analysis: () => 'analysis',
+    };
+    render(h(App, { views, notice: 'Partial set: a sentence', seated: true, withStyles: false }));
+
+    expect(screen.getByRole('main')).toBeTruthy();
+    expect(screen.queryByRole('status', { name: SHELL_NOTICE_LABEL })).toBeNull();
+    expect(screen.queryByText(/Partial set:/)).toBeNull();
+  });
 
   it('says nothing extra over an ordinary set', async () => {
     stubFetch({ 'set.json': COMPLETE });

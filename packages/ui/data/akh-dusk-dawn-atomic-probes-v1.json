@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "dusk-dawn-atomic-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0210:937dbc51-b589-4237-9fce-ea5c757f7c48"],
+      "decisionFamilies": [
+        "dusk-power-cutoff-and-dawn-own-graveyard-recovery",
+        "dusk-power-two-survives-power-three-dies",
+        "dawn-own-low-power-recovery-high-power-and-opponent-exclusion"
+      ],
+      "assertions": ["Dusk spares low power; Dawn excludes high power and the other graveyard"],
+      "testFile": "packages/forge-export/test/observed-akh-dusk-dawn.integration.test.ts"
+    },
+    {
+      "id": "dusk-atomic-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0210:937dbc51-b589-4237-9fce-ea5c757f7c48"],
+      "decisionFamilies": [
+        "dusk-native-power-two-survives-power-three-dies",
+        "dusk-power-two-survives-power-three-dies"
+      ],
+      "assertions": [
+        "Forge casts Dusk destroying power-three creatures while preserving power-two creatures"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-dusk-bot.integration.test.ts"
+    },
+    {
+      "id": "dawn-atomic-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0210:937dbc51-b589-4237-9fce-ea5c757f7c48"],
+      "decisionFamilies": [
+        "dawn-native-low-power-recovery-high-power-and-opponent-exclusion",
+        "dawn-own-low-power-recovery-high-power-and-opponent-exclusion"
+      ],
+      "assertions": [
+        "Forge Dawn recovers low power, excludes high power, and leaves the other graveyard unchanged"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-dawn-bot.integration.test.ts"
+    }
+  ]
+}

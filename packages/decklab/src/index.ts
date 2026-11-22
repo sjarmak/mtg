@@ -46,6 +46,31 @@ export type { BaselineDeck, BaselineEntry, BaselineResult } from './baseline';
 export { formatEvalReport, runEval } from './eval';
 export type { EvalResult, EvalSummary, RunEvalInput, Scenario, ScenarioOutcome, TraceSummary } from './eval';
 
+export {
+  ConstructedGameplayComparisonSchema,
+  parseConstructedGameplayComparison,
+  serializedConstructedGameplayComparison,
+  summarizeConstructedGameplayComparison,
+} from './constructed-evaluation';
+export type { ConstructedCandidateSummary, ConstructedGameplayComparison } from './constructed-evaluation';
+
+export { compareConstructedPromotion } from './constructed-promotion';
+export type { ConstructedTrialGameOptions } from './constructed-runtime';
+export { constructedDeckList, constructedPoolSha256, runConstructedTrialGames } from './constructed-runtime';
+
+export {
+  CONSTRUCTED_FORMAT_CONTRACT,
+  constructedFormatContract,
+  constructedSelectionPolicy,
+  DECKLAB_MODEL_REPAIR_SELECTION_POLICY,
+  DECKLAB_VERIFIED_PARTIAL_FALLBACK_POLICY,
+} from './constructed-policy';
+export type {
+  ConstructedFormatContract,
+  ConstructedPoolSource,
+  ConstructedSelectionPolicy,
+} from './constructed-policy';
+
 export { traceCriteria } from './trace';
 export type { CriterionTrace, TraceFinding, TraceFindingKind } from './trace';
 
@@ -63,6 +88,26 @@ export type {
 
 export { buildInformedDeck, EmptyUniverseError } from './build';
 export type { BuildDeckInput, BuiltDeck } from './build';
+
+export { DeckbuildingEvidenceError } from './deck-evidence';
+export type { DeckbuildingEvidenceRequest } from './deck-evidence';
+
+export {
+  candidateFromDslCard,
+  ConflictingReprintError,
+  DuplicateSetCardError,
+  DuplicateSetCardIdError,
+  FormatlessStoreBuildError,
+  FormatOverSetPoolError,
+  setDeckPool,
+  SetsOverStorePoolError,
+  storeDeckPool,
+  UnpricedPoolError,
+} from './pool';
+export type { DeckPool, PoolSet, PrintedFormatPool, SetPool, StorePool } from './pool';
+
+export { printedFormatDeckPool, toPrintedConstructedDeck } from './printed-format-pool';
+export type { PrintedPoolCatalog } from './printed-format-pool';
 
 export {
   isCreatureCard,
@@ -86,6 +131,7 @@ export {
   DECK_SIZES,
   DeckCriteriaSchema,
   enumerateCriteria,
+  OpponentPopulationSchema,
 } from './criteria';
 // `ResolvedCriteria` is a class, and it is exported here as a type on purpose:
 // under `export type` a caller can name one and hold one, and `new` is not on
@@ -98,6 +144,7 @@ export type {
   DeckCriteria,
   DeckCriteriaInput,
   DeckFormat,
+  OpponentPopulation,
   ResolvedCriteria,
 } from './criteria';
 
@@ -118,8 +165,31 @@ export type { HybridPip, ParsedManaCost } from './mana-cost';
 export { formatConstructedDeckReport } from './report';
 export type { DeckReportInput } from './report';
 
-export { DEFAULT_MAX_ROUNDS, DeckProposalSchema, defaultMaxSpendUsd, selectCards } from './select';
+export {
+  DEFAULT_MAX_ROUNDS,
+  DeckProposalSchema,
+  defaultMaxSpendUsd,
+  ROUND_COST_USD,
+  roundsCeiling,
+  selectCards,
+} from './select';
 export type { DeckProposal, SelectionOptions, SelectionResult, SelectionStop } from './select';
 
-export { cardCount, copyLimit, deckPrice, enforceDeckBudget, verifyProposals } from './verify';
-export type { Inclusion, Proposal, Rejection, RejectionCode, UniverseLookup, VerifyResult } from './verify';
+export {
+  cardCount,
+  copyLimit,
+  deckPrice,
+  enforceDeckBudget,
+  statedCopyLimit,
+  verifyProposals,
+} from './verify';
+export type {
+  Adjustment,
+  AdjustmentCode,
+  Inclusion,
+  Proposal,
+  Rejection,
+  RejectionCode,
+  UniverseLookup,
+  VerifyResult,
+} from './verify';

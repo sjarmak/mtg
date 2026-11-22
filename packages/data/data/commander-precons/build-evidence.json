@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "commander-precons",
+  "formatSha256": "d0e2371284271b6b66963da70c3ed66ef13e4d7d05b6e41f9f68f1f8f3c4195a",
+  "forgeVersion": "2.0.14",
+  "builds": [
+    {
+      "sourceCodes": ["SCD"],
+      "sourceSha256": "c1694b761d3b0ffd3440be2ba14ea5514cb5cccf9f4c4dbd5ed13b325bbc36d6",
+      "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+      "scriptReads": 337,
+      "elapsedMs": 1167.459596
+    },
+    {
+      "sourceCodes": ["C17", "ALA", "C13", "CMA", "C16", "CMM"],
+      "sourceSha256": "564e567bd53812d7adeec53c246fcd2cadc5fc33b820eb3bc4746d0fa9ccde2c",
+      "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+      "scriptReads": 1789,
+      "elapsedMs": 18990.557962
+    }
+  ],
+  "artifactSha256": {
+    "scd-printed-catalog-v1.json": "d2b507cef0f4516505ddfdb9fb2451db203d977d4aa6686132e499114a6a932f",
+    "c17-printed-catalog-v1.json": "4d08df572541f32f6d385b668fa641695a8645329a0e13f90bc11c25e92369b6",
+    "ala-printed-catalog-v1.json": "aee58eb293fc065a46cf4b1a7b54ccc76dbe8e8f710fbe02ac3e81eb73499048",
+    "c13-printed-catalog-v1.json": "9bcef81fc5a9e95867fb3b4196a265cef8bab47cd6f61cbc36721520983708c5",
+    "cma-printed-catalog-v1.json": "3b8e6c082319f3f68010db94ba2eebeb69b5c879b02b4ad10062f71e8524c277",
+    "c16-printed-catalog-v1.json": "6bbb8272f80d32d1b8c5f7034c4ec4e9fdaa1c3079e2cba3be1f0ede3d643924",
+    "cmm-printed-catalog-v1.json": "562c72b2b099c7aba1117374fe75122090b613d3295df6b4faa6b8b35d64916d",
+    "commander-precons-constructed-format-v1.json": "2903e16048c10b450def7051c85611fe9d2128a095b5daad15989edbc193e1ad",
+    "onboarding-format-v1.json": "42552cdf368129fccf300de51ee8ba0fed59f085fa8aee3020efed85ae2b2579",
+    "commander-precons-printed-sources-v1.json": "564e567bd53812d7adeec53c246fcd2cadc5fc33b820eb3bc4746d0fa9ccde2c"
+  },
+  "catalogs": [
+    {
+      "code": "SCD",
+      "cards": 352,
+      "contentSha256": "be47a0caa4d133d2bb924b2a77cf0699ff1dd1cf64f607e717e3c7b3f2cc7763"
+    },
+    {
+      "code": "C17",
+      "cards": 309,
+      "contentSha256": "f612772ab7fbfad49200803af69de916d1df2f6fbf4d211af3a6e446a6c91efe"
+    },
+    {
+      "code": "ALA",
+      "cards": 250,
+      "contentSha256": "abe5935109de9d9ec7bcef2280de14d81259a817ab5b55dce5368b330a8aa442"
+    },
+    {
+      "code": "C13",
+      "cards": 356,
+      "contentSha256": "021c35fda0857ac542869b4d302c8706222b659103dd2ab57d77c4b6e0f1e742"
+    },
+    {
+      "code": "CMA",
+      "cards": 320,
+      "contentSha256": "375e31a91e286611bd87b13839deca0e9fda434113a3da3077cbf66b1fea027c"
+    },
+    {
+      "code": "C16",
+      "cards": 351,
+      "contentSha256": "01366bcb864d48eb20d107803850b122395ba3a7e52485df1ca5e8e29f3d46c3"
+    },
+    {
+      "code": "CMM",
+      "cards": 1067,
+      "contentSha256": "ac3ef371a92e55b552841433c4bbd994fdd270a93b5457b221caa6d8a209cba0"
+    }
+  ],
+  "metrics": {
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 2126,
+    "printings": 3005
+  }
+}

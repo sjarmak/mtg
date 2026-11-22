@@ -45,6 +45,7 @@ const MANIFEST: RunManifest = {
   recordedAt: '2026-08-13T16:00:00.000Z',
   calls: 2,
   keys: ['aaa', 'bbb'],
+  generator: { name: '@mtg/setgen', semanticsVersion: 2 },
 };
 
 let dir = '';
@@ -94,6 +95,29 @@ describe('a run manifest round trip', () => {
     const stale = 'The brief moved past this run, so its keys no longer hash.';
     writeRunManifest(manifestPath(), { ...MANIFEST, stale });
     expect(readRunManifest(manifestPath()).stale).toBe(stale);
+  });
+
+  it('keeps the producer semantics needed to replay the recorded request sequence', () => {
+    writeRunManifest(manifestPath(), MANIFEST);
+    expect(readRunManifest(manifestPath()).generator).toStrictEqual({
+      name: '@mtg/setgen',
+      semanticsVersion: 2,
+    });
+  });
+
+  it('accepts an older manifest recorded before producer semantics were written down', () => {
+    const { generator: _generator, ...legacy } = MANIFEST;
+    writeRunManifest(manifestPath(), legacy);
+    expect(readRunManifest(manifestPath()).generator).toBeUndefined();
+  });
+
+  it('refuses undeclared producer configuration rather than guessing how to replay it', () => {
+    writeFileSync(
+      manifestPath(),
+      JSON.stringify({ ...MANIFEST, generator: { ...MANIFEST.generator, mode: 'legacy' } }),
+      'utf8',
+    );
+    expect(() => readRunManifest(manifestPath())).toThrow(/does not match the manifest schema/);
   });
 
   it('refuses a field nobody declared rather than dropping it', () => {

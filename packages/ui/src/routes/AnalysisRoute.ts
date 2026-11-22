@@ -9,8 +9,8 @@
  * carrying gate verdicts and their bands, and this one takes per-game rows of
  * 17lands columns. Both are about a run, so `RunSummaryPanels` is exported
  * headless and the dashboard mounts it as its `games` section: the master half
- * of `mtg-2ayr`. The detail half — `ReplayRoute`'s per-game turn walk over the
- * same log — belongs directly under it and is still open.
+ * of `mtg-2ayr`. The detail half — the per-game turn walk over the same log —
+ * is `./analysis/game-detail.ts`, drawn directly under these panels.
  *
  * `AnalysisRoute` keeps the heading and the panels together for the callers
  * that render it as a whole route, which is every test that checks this
@@ -41,7 +41,18 @@ export type AnalysisLogState =
   | { readonly status: 'loading' }
   | { readonly status: 'ready'; readonly log: ReplayLog }
   | { readonly status: 'absent' }
-  | { readonly status: 'failed'; readonly message: string };
+  | { readonly status: 'failed'; readonly message: string }
+  /**
+   * A statistics log is staged and it measured another set.
+   *
+   * `mtg-ahr5`, and the same fifth state `ReplayState` gained for the same
+   * reason. The staged log is chosen by set code and the games in it were played
+   * with that set's decks, so it says nothing about the set the picker moved to;
+   * summarizing it here would put another set's win rates under this set's name.
+   * Withholding it is right and withholding it silently is not, because
+   * "Nothing measured yet" reads as a checkout that has never run a sweep.
+   */
+  | { readonly status: 'elsewhere'; readonly belongsTo: string; readonly showing: string };
 
 export interface AnalysisRouteProps {
   readonly state: AnalysisLogState;
@@ -220,6 +231,12 @@ export function RunSummaryPanels(props: RunSummaryPanelsProps): ReactElement {
   const { state } = props;
   if (state.status === 'loading') return empty('Reading the statistics log…', 'One moment.');
   if (state.status === 'absent') return empty('Nothing measured yet', props.sourceHint ?? NO_LOG_HINT);
+  if (state.status === 'elsewhere') {
+    return empty(
+      'The measured games are of another set',
+      `The staged statistics log measured ${state.belongsTo}, and this tab is showing ${state.showing}. Choose ${state.belongsTo} in the set picker to read it, or run \`npm run slice\` on ${state.showing} to measure a sweep of its own.`,
+    );
+  }
   if (state.status === 'failed') return empty('That statistics log could not be read', state.message);
 
   const { log } = state;

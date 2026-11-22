@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "gtc",
+  "archetypes": [
+    {
+      "id": "boros-battalion",
+      "name": "Boros Battalion",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Sunhome Guildmage",
+        "physicalId": "gtc-printed-v1:0200:42d1122a-099b-49bf-9b53-52429658816a"
+      },
+      "plan": "Build around Sunhome Guildmage: Curve out with multiple attackers, trigger battalion every combat, and use tricks to preserve the attacking force."
+    },
+    {
+      "id": "dimir-cipher",
+      "name": "Dimir Cipher",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Duskmantle Guildmage",
+        "physicalId": "gtc-printed-v1:0158:9a1509ff-387e-4ccd-bda0-86e8738a98fb"
+      },
+      "plan": "Build around Duskmantle Guildmage: Clear a path for evasive creatures, encode high-value spells on them, and protect the repeated combat trigger."
+    },
+    {
+      "id": "gruul-bloodrush",
+      "name": "Gruul Bloodrush",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Skarrg Guildmage",
+        "physicalId": "gtc-printed-v1:0196:00f206c0-a8a7-4ca0-b88f-4736c3dac588"
+      },
+      "plan": "Build around Skarrg Guildmage: Attack every turn, represent bloodrush from hand, and choose between another creature or a combat-winning pump spell."
+    },
+    {
+      "id": "orzhov-extort",
+      "name": "Orzhov Extort",
+      "colors": ["W", "B"],
+      "signpost": {
+        "name": "Vizkopa Guildmage",
+        "physicalId": "gtc-printed-v1:0206:41f505a3-2c54-43a9-b4a9-43a1451b36f6"
+      },
+      "plan": "Build around Vizkopa Guildmage: Stabilize with defensive creatures, cast multiple cheap spells, and drain repeatedly with extort to win long games."
+    },
+    {
+      "id": "simic-evolve",
+      "name": "Simic Evolve",
+      "colors": ["U", "G"],
+      "signpost": {
+        "name": "Zameck Guildmage",
+        "physicalId": "gtc-printed-v1:0209:feeaf99b-7720-42e3-8cb1-23218b646458"
+      },
+      "plan": "Build around Zameck Guildmage: Order creatures from smallest to largest so evolve triggers repeatedly, then exploit the accumulated counters."
+    }
+  ]
+}

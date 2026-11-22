@@ -44,9 +44,11 @@ import type { GameState, ObjectId, PlayerId, Target } from '@mtg/kernel';
 import {
   attachmentOf,
   characteristicsOf,
+  copiableValuesOf,
   counterCount,
   hasKeyword,
   isCreatureObject,
+  isDetained,
   isGameOver,
   powerOf,
   toughnessOf,
@@ -61,6 +63,7 @@ import type { GraveyardCard } from '../../board/Graveyard';
 import type { HandCard } from '../../board/Hand';
 import type { ManaPoolView, PlayerStatusProps } from '../../board/PlayerStatus';
 import type { StackItem } from '../../board/StackZone';
+import { stackModeLabel } from '../../board/stack-mode';
 import type { ArtResolver } from '../../lab/art-manifest';
 import { artCopies } from './art-copies';
 
@@ -100,8 +103,8 @@ function artLookup(state: GameState, artFor: PositionArt): ArtOf {
  * What to call each seat, indexed by `PlayerId`.
  *
  * Seat-indexed rather than viewer-relative (`{ you, opponent }`) because the
- * viewer moves. With two people at one screen the seat being asked changes hands
- * every decision, and a relative scheme would have renamed both players every
+ * viewer moves. On a two-human table the seat being asked changes hands every
+ * decision, and a relative scheme would have renamed both players every
  * time the question crossed the table.
  */
 export type SeatNames = readonly [string, string];
@@ -156,7 +159,8 @@ interface CombatFacts {
   readonly blocking: boolean;
   readonly attackingDefender?: string;
   readonly blockedBy?: readonly string[];
-  readonly blockingAttacker?: string;
+  readonly blockingAttackers?: readonly string[];
+  readonly blockingKeys?: readonly string[];
 }
 
 function combatFacts(state: GameState, oid: ObjectId, names: SeatNames): CombatFacts {
@@ -164,10 +168,11 @@ function combatFacts(state: GameState, oid: ObjectId, names: SeatNames): CombatF
   const blockedBy = state.combat.blocks
     .filter((block) => block.attacker === oid)
     .flatMap((block) => block.blockers.map((blocker) => ownedName(state, names, blocker)));
-  const blocking = state.combat.blocks.find((block) => block.blockers.includes(oid));
+  const blocking = state.combat.blocks.filter((block) => block.blockers.includes(oid));
+  const blockingAttackers = blocking.map((block) => ownedName(state, names, block.attacker));
   return {
     attacking: attack !== undefined,
-    blocking: blocking !== undefined,
+    blocking: blockingAttackers.length > 0,
     ...(attack === undefined
       ? {}
       : {
@@ -177,7 +182,9 @@ function combatFacts(state: GameState, oid: ObjectId, names: SeatNames): CombatF
               : ownedName(state, names, attack.defender.oid),
         }),
     ...(blockedBy.length === 0 ? {} : { blockedBy }),
-    ...(blocking === undefined ? {} : { blockingAttacker: ownedName(state, names, blocking.attacker) }),
+    ...(blockingAttackers.length === 0
+      ? {}
+      : { blockingAttackers, blockingKeys: blocking.map((block) => String(block.attacker)) }),
   };
 }
 
@@ -212,7 +219,7 @@ function gainedKeywords(state: GameState, oid: ObjectId, card: Card): readonly s
  * One walk of the stack for the whole table, for `artLookup`'s reason: what is
  * aimed at what is a fact about the state rather than about a seat, and both
  * rows ask the same question of it. A permanent in either seat's row can be the
- * target — `mtg-njrp` is about the *bot's* equip and a hot-seat table has no
+ * target — `mtg-njrp` is about the *bot's* equip and a two-human table has no
  * "your" seat at all — so nothing here filters by controller.
  *
  * `order` counts from the top of the stack, matching what `../../board/
@@ -273,11 +280,12 @@ function permanentProps(
   // appears now that the rail's sizes panel is gone.
   const host = attachmentOf(state, oid);
   const attachments = attachmentNames(state, oid);
-  const gained = gainedKeywords(state, oid, object.card);
+  const card = copiableValuesOf(state, oid);
+  const gained = gainedKeywords(state, oid, card);
   const targetedBy = aims.get(oid) ?? [];
   return {
     key: String(oid),
-    card: object.card,
+    card,
     tapped: object.tapped,
     // The board's mark reads "this has to wait", so what it reports is the
     // restriction and not the flag. Haste leaves the flag set and lifts both
@@ -288,9 +296,15 @@ function permanentProps(
     summoningSick: object.summoningSick && isCreatureObject(state, oid) && !hasKeyword(state, oid, 'haste'),
     damage: object.damage,
     counters,
-    ...(object.card.kind === 'planeswalker' ? { loyalty: counterCount(object.counters, 'loyalty') } : {}),
+    ...(card.kind === 'planeswalker' ? { loyalty: counterCount(object.counters, 'loyalty') } : {}),
+    ...(card.kind === 'battle'
+      ? {
+          defense: counterCount(object.counters, 'defense'),
+          protector: object.protector ?? object.controller,
+        }
+      : {}),
     ...combatFacts(state, oid, names),
-    art: artOf(oid, object.card),
+    art: artOf(oid, card),
     ...(isCreatureObject(state, oid)
       ? { stats: { power: powerOf(state, oid), toughness: toughnessOf(state, oid) } }
       : {}),
@@ -303,6 +317,7 @@ function permanentProps(
     ...(attachments.length === 0 ? {} : { attachments }),
     ...(gained.length === 0 ? {} : { gainedKeywords: gained }),
     ...(targetedBy.length === 0 ? {} : { targetedBy }),
+    ...(isDetained(state, oid) ? { detained: true } : {}),
   };
 }
 
@@ -473,7 +488,17 @@ function stackItems(state: GameState, names: SeatNames): readonly StackItem[] {
       ...(entry.ability === null ? {} : { ability: true }),
       ...(onBoard ? { onBoard } : {}),
     };
-    items.push(targets.length === 0 ? base : { ...base, targetLabel: `→ ${targets.join(', ')}` });
+    // Which spell this is, out of the ones the card offers (CR 700.2). The
+    // replay row has said this since `mtg-7si0` and the live row said nothing
+    // until `mtg-dwlr`, off the same entry field and the same renderer: an
+    // activated ability's modes hang off the printed ability the entry names,
+    // a spell's off the card.
+    const mode = stackModeLabel(card, entry.mode, entry.ability?.index);
+    items.push({
+      ...base,
+      ...(mode === null ? {} : { modeLabel: mode }),
+      ...(targets.length === 0 ? {} : { targetLabel: `→ ${targets.join(', ')}` }),
+    });
   }
   return items;
 }

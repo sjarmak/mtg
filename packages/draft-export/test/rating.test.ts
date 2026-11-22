@@ -11,12 +11,132 @@ import { DEFAULT_SCORE_WEIGHTS, evaluateCard } from '@mtg/deckbuild';
 import type { Card } from '@mtg/dsl';
 import { BASIC_LANDS, EXAMPLE_CARDS, EXAMPLE_SET, exampleCard, isLand } from '@mtg/dsl';
 import {
+  communityPickOrderRating,
+  evaluatorRating,
+  playDataRating,
   RATING_MAX,
   RATING_MIN,
   RATING_RANGE_IN_COLOR_CARDS,
   rateCards,
+  ratingValueOf,
+  resolveCardRating,
+  seventeenLandsRating,
   SIMPLE_BOT_COLOR_BONUS,
 } from '@mtg/draft-export';
+import type { CardRating, EvaluatorRating, PlayDataRating } from '@mtg/draft-export';
+
+describe('a rating carries its source', () => {
+  it('rateCards produces evaluator-sourced ratings, never bare numbers', () => {
+    for (const rated of rateCards(EXAMPLE_SET)) {
+      expect(rated.source).toBe('evaluator');
+      expect(typeof rated.score).toBe('number');
+    }
+  });
+
+  it('evaluatorRating and playDataRating stamp their own source', () => {
+    const [card] = EXAMPLE_SET;
+    if (card === undefined) throw new Error('EXAMPLE_SET is empty');
+    expect(evaluatorRating(card, 1.2, 3).source).toBe('evaluator');
+    expect(playDataRating(card, 0.54, 3).source).toBe('play-data');
+  });
+
+  it('communityPickOrderRating stamps its source and carries Forge quality', () => {
+    const rated = communityPickOrderRating('ktk-1-abzan-falconer', 4.2);
+    expect(rated.source).toBe('community-pick-order');
+    expect(rated.quality).toBe(4.2);
+  });
+
+  it('seventeenLandsRating stamps its own source, distinct from play-data', () => {
+    const rated = seventeenLandsRating('ktk-1-abzan-falconer', 0.58, 4.1);
+    expect(rated.source).toBe('seventeen-lands');
+    expect(rated.source).not.toBe('play-data');
+    expect(rated.mappedRating).toBe(4.1);
+    expect(rated.winRate).toBe(0.58);
+  });
+
+  it('a function typed over CardRating cannot read a variant-specific field without narrowing', () => {
+    // @ts-expect-error `score`, `winRate` and `quality` each live on exactly one
+    // member of the union; the ADR-0005 claim that averaging two different
+    // sources fails to typecheck rests on there being no field a caller can
+    // read across `CardRating` without first narrowing on `source`.
+    const readEvidence = (rating: CardRating): number => rating.score;
+    expect(typeof readEvidence).toBe('function');
+  });
+
+  it('mtg-1j00i.6: averaging two CardRating sources fails to typecheck', () => {
+    // @ts-expect-error `rating` is not a shared field either: only
+    // `EvaluatorRating` carries it, while `PlayDataRating`,
+    // `CommunityPickOrderRating` and `SeventeenLandsRating` hold their 0-5
+    // value under `simRating`, `quality` and `mappedRating` instead —
+    // precisely so this blend, which ADR-0005 forbids, cannot compile.
+    const mean = (a: CardRating, b: CardRating): number => (a.rating + b.rating) / 2;
+    expect(typeof mean).toBe('function');
+  });
+
+  it('mtg-tye7s: averaging an EvaluatorRating and a PlayDataRating still fails to typecheck', () => {
+    // @ts-expect-error Both are rung 3 (ADR-0005), and narrowing to these two
+    // concrete members — rather than the wider `CardRating` union the test
+    // above covers — is exactly the gap `mtg-1j00i.6` left open: each still
+    // declared its 0-5 number as a bare `rating: number`, so a function typed
+    // over these two specific interfaces could average them without ever
+    // checking `source`. `PlayDataRating` no longer shares that field name.
+    const mean = (a: EvaluatorRating, b: PlayDataRating): number => (a.rating + b.rating) / 2;
+    expect(typeof mean).toBe('function');
+  });
+
+  it('ratingValueOf reads the right field for every source, no blending possible', () => {
+    const [card] = EXAMPLE_SET;
+    if (card === undefined) throw new Error('EXAMPLE_SET is empty');
+    expect(ratingValueOf(evaluatorRating(card, 1.2, 3))).toBe(3);
+    expect(ratingValueOf(playDataRating(card, 0.54, 3.5))).toBe(3.5);
+    expect(ratingValueOf(communityPickOrderRating('ktk-1-abzan-falconer', 4))).toBe(4);
+    expect(ratingValueOf(seventeenLandsRating('ktk-1-abzan-falconer', 0.58, 4.1))).toBe(4.1);
+  });
+});
+
+describe('resolveCardRating walks ADR-0005 section 2s ladder', () => {
+  const [CARD] = EXAMPLE_SET;
+  if (CARD === undefined) throw new Error('EXAMPLE_SET is empty');
+  const evaluator = evaluatorRating(CARD, 1.2, 3);
+  const communityPickOrder = communityPickOrderRating('ktk-1-abzan-falconer', 4);
+  const simPlayData = playDataRating(CARD, 0.54, 3.5);
+  const seventeenLands = seventeenLandsRating('ktk-1-abzan-falconer', 0.58, 4.1);
+
+  it('falls through to the evaluator rung when nothing higher was supplied', () => {
+    expect(resolveCardRating({ evaluator })).toBe(evaluator);
+  });
+
+  it('prefers a staged community pick order over the evaluator', () => {
+    expect(resolveCardRating({ communityPickOrder, evaluator })).toBe(communityPickOrder);
+  });
+
+  it('prefers our own sim play data over the evaluator', () => {
+    expect(resolveCardRating({ simPlayData, evaluator })).toBe(simPlayData);
+  });
+
+  it('prefers 17lands over our own sim play data, a community pick order, and the evaluator', () => {
+    expect(resolveCardRating({ seventeenLands, simPlayData, communityPickOrder, evaluator })).toBe(
+      seventeenLands,
+    );
+  });
+
+  it('a sim-derived rating never outranks a Forge community pick order', () => {
+    expect(resolveCardRating({ simPlayData, communityPickOrder })).toBe(communityPickOrder);
+    expect(resolveCardRating({ simPlayData, communityPickOrder })).not.toBe(simPlayData);
+  });
+
+  it('falls through cleanly to undefined rather than throwing or inventing a zero', () => {
+    expect(resolveCardRating({})).toBeUndefined();
+    expect(
+      resolveCardRating({
+        seventeenLands: undefined,
+        communityPickOrder: undefined,
+        simPlayData: undefined,
+        evaluator: undefined,
+      }),
+    ).toBeUndefined();
+  });
+});
 
 describe('rateCards', () => {
   it('keeps every rating inside the documented 0-5 band', () => {

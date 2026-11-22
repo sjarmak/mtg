@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "nph",
+  "formatSha256": "9db4d8dee6f33c52d69066ab3fbd902e907d52bee940ca45fb14f167767f08be",
+  "sourceSha256": "d56e3cd914f155a23f2a9d5262109e5b9013b664e4421869fd7f95a18613c930",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "d56e3cd914f155a23f2a9d5262109e5b9013b664e4421869fd7f95a18613c930",
+    "recipe.json": "de7a61ddf8705f02e6763db9ca34de0c4e3091acf637bd83e1f5a5f3254de4b1",
+    "nph-printed-catalog-v1.json": "002da070bc471d8971cfc9b2a2aaa99972c626312af4192777079631330e5dbc",
+    "nph-limited-format-v1.json": "f3ee61fe5ade686fb1549d8bcabe349161114d9c7411ceee035c096e4a380bd8"
+  },
+  "catalogs": [
+    {
+      "code": "NPH",
+      "cards": 175,
+      "contentSha256": "826cb243cd5145b11045e098da63de89eae8d0e3a7c3920000e8431c8884f74b"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 2340.667551,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 170,
+    "printings": 175
+  }
+}

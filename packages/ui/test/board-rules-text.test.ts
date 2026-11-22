@@ -36,6 +36,23 @@ import { uiStyleSheet } from '../src/styles/index';
 
 const SHEET = uiStyleSheet();
 
+/**
+ * The band that takes the played rules box out of the column, the width it
+ * fires at, and the width it stops at.
+ *
+ * It is a band rather than a ceiling because the panel has a floor as well as a
+ * head: under `BOARD_RULES_PANEL_MIN_REM` the window is too short to hold a line
+ * of text between the cost pips and the P/T badge, and the box goes after all.
+ * The whole band body is captured rather than the first rule's declarations,
+ * because the badge reserve is a second rule inside it.
+ *
+ * Two tests read it: the one that asserts what it declares, and the one that
+ * asserts the hand's own bands all start above it. One expression rather than
+ * two, because a sheet change that moved the panel would otherwise silently
+ * pass half of them.
+ */
+const PANEL_BAND = /@container \(max-width: ([\d.]+)rem\) and \(min-width: ([\d.]+)rem\) \{\n([\s\S]*?)\n\}/;
+
 /** The one rule whose selector is exactly this, or null when nothing declares it. */
 function rule(selector: string): string | null {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -126,17 +143,49 @@ describe('a card in play prints its rules text', () => {
     expect(box, 'the box offers a scrollbar nobody can reach').not.toContain('overflow: auto');
   });
 
-  it('gives the box back to the picture on a face too narrow to set it', () => {
+  it('takes the box out of the column on a face too narrow to set it there', () => {
     // The one region that gives is the window (`../src/styles/card.ts`,
-    // BOARD_FACE), so below the width at which a line stops holding a keyword
-    // the box goes rather than the picture. jsdom evaluates no container query,
-    // so the rule is read out of the sheet; the widths it fires at are in the
-    // constant's docblock and were measured in a browser.
-    expect(SHEET).toMatch(
-      /@container \(max-width: [\d.]+rem\) \{\n {2}\.mtg-card\[data-size='board'\] > \[data-region='rules'\] \{ display: none; \}/,
-    );
+    // BOARD_RULES_PANEL_MAX_REM), so below the width at which a column can
+    // spend two line boxes and still leave a picture worth looking at, the box
+    // leaves the column and draws as a panel over the foot of the window. It
+    // used to go entirely, and `mtg-8kc` is the measurement that says why it no
+    // longer does: at a 63.3px face the shipped sheet drew zero characters on
+    // all eleven flagship subjects. It still goes below the panel's own floor,
+    // where the window has no room for a line of text between the cost pips and
+    // the P/T badge, so the sheet declares both and this reads both.
+    //
+    // jsdom evaluates no container query and lays nothing out, so what is
+    // checkable here is that the declarations are in the sheet and that the old
+    // one is gone. Where the panel lands and what it draws there are browser
+    // claims, held by `./card-board-panel.browser.test.ts`.
+    const panel = PANEL_BAND.exec(SHEET);
+    expect(panel, 'the sheet declares no board rules panel').not.toBeNull();
+    const declared = panel?.[3] ?? '';
+    expect(declared, 'the box never leaves the column').toContain('position: absolute');
+    // Clear of the P/T badge rather than under it, which is the arrangement
+    // that was chosen over two others and the reason `--board-pt-box` exists at
+    // all: CSS cannot read a sibling's box, so the badge's height is an
+    // expression the panel subtracts.
+    expect(declared, 'the panel does not clear the P/T badge').toContain('--board-pt-box');
+    expect(SHEET, 'the badge height it clears is never declared').toContain('--board-pt-box:');
+
+    // The box still goes on a face narrower than the panel's own floor, and the
+    // two widths have to be the same number: the hide fires at the panel's head
+    // and the panel takes the band back from its floor up. Read out of the sheet
+    // rather than typed, so moving one and not the other fails here.
+    const hidden =
+      /@container \(max-width: ([\d.]+)rem\) \{\n {2}\.mtg-card\[data-size='board'\] > \[data-region='rules'\] \{ display: none; \}\n\}/.exec(
+        SHEET,
+      );
+    expect(hidden, 'nothing hides the board rules box under the panel band').not.toBeNull();
+    expect(hidden?.[1], 'the hide band and the panel band fire at different widths').toBe(panel?.[1]);
+    // And the panel's floor is under its head, which is what makes the pair a
+    // band rather than two rules that cancel.
+    expect(Number(panel?.[2])).toBeLessThan(Number(panel?.[1]));
+
     // And a step between the two: a narrow face draws fewer lines rather than
-    // none, so the keyword line survives further down than the box does.
+    // all of them, so the keyword line survives further down than the full
+    // budget does.
     expect(SHEET).toMatch(
       /@container \(max-width: [\d.]+rem\) \{\n {2}\.mtg-card\[data-size='board'\] > \[data-region='rules'\] \{ -webkit-line-clamp: 2; \}/,
     );
@@ -231,13 +280,14 @@ describe('a card in hand prints more of it than the same card in play', () => {
    * It has to be resolved, because the played budget is itself banded and the
    * bands are narrower than the hand's: comparing against the unqualified `3`
    * would have let the 4.5rem hand band tie a budget that is 2 at that width and
-   * still read as a pass. Zero means the played face draws no box at all.
+   * still read as a pass.
+   *
+   * There is no zero arm. A played face used to draw no box at all under
+   * `BOARD_RULES_PANEL_MAX_REM`; since `mtg-8kc` the box moves over the picture
+   * instead of going, and the panel changes where the two lines are drawn and
+   * not how many there are.
    */
   function playedBudgetAt(width: number): number {
-    const hidden =
-      /@container \(max-width: ([\d.]+)rem\) \{\n {2}\.mtg-card\[data-size='board'\] > \[data-region='rules'\] \{ display: none; \}/.exec(
-        SHEET,
-      );
     const narrow =
       /@container \(max-width: ([\d.]+)rem\) \{\n {2}\.mtg-card\[data-size='board'\] > \[data-region='rules'\] \{ -webkit-line-clamp: (\d+); \}/.exec(
         SHEET,
@@ -246,9 +296,7 @@ describe('a card in hand prints more of it than the same card in play', () => {
     expect(played, 'the sheet declares no board rules box').not.toBeNull();
     const budget = /-webkit-line-clamp: (\d+)/.exec(played ?? '');
     expect(budget, 'the board box states no line budget').not.toBeNull();
-    expect(hidden, 'the sheet never hides the board rules box').not.toBeNull();
     expect(narrow, 'the board box has no narrow band').not.toBeNull();
-    if (width <= Number(hidden?.[1])) return 0;
     if (width <= Number(narrow?.[1])) return Number(narrow?.[2]);
     return Number(budget?.[1]);
   }
@@ -268,19 +316,21 @@ describe('a card in hand prints more of it than the same card in play', () => {
     }
   });
 
-  it('never asks a face that draws no box to draw five lines', () => {
-    // Below a width the played face gives the box back to the picture outright.
-    // The hand raises a budget; it does not reopen that decision, so its
-    // narrowest band has to start above the width at which the box goes.
-    const hidden =
-      /@container \(max-width: ([\d.]+)rem\) \{\n {2}\.mtg-card\[data-size='board'\] > \[data-region='rules'\] \{ display: none; \}/.exec(
-        SHEET,
-      );
-    expect(hidden, 'the sheet never hides the board rules box').not.toBeNull();
-    const floor = Number(hidden?.[1]);
+  it('never asks a panel drawn over the picture to draw five lines', () => {
+    // Below a width the played box stops taking its own height and draws over
+    // the foot of the window instead. The hand raises a budget; it does not
+    // reopen that decision, and five line boxes in a panel would cover the
+    // illustration it is drawn on. So the narrowest hand band has to start
+    // above the width at which the box becomes a panel, and the two bands are
+    // read out of one sheet rather than compared against a number typed here.
+    const panel = PANEL_BAND.exec(SHEET);
+    expect(panel, 'the sheet declares no board rules panel').not.toBeNull();
+    const floor = Number(panel?.[1]);
     const narrowest = handBands()[0];
     expect(narrowest, 'the sheet emits no hand rules band at all').toBeDefined();
-    expect(narrowest?.width, 'the narrowest hand band fires on a face with no box').toBeGreaterThan(floor);
+    expect(narrowest?.width, 'the narrowest hand band fires on a face drawing a panel').toBeGreaterThan(
+      floor,
+    );
   });
 
   it('changes the budget and nothing else, and only where a card is held', () => {

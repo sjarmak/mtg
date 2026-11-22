@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "m11",
+  "name": "Magic 2011",
+  "sources": [
+    {
+      "code": "M11",
+      "catalogFormat": "m11-printed-v1",
+      "catalogSha256": "ea0c6153e664b1c21aed2054a7bd0af617700997d3836f7977be809d5eec5dfe",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/M11.json",
+        "sha256": "e211decab4921f15aba522f3b3931b8cc2dac95d9fb69eb65da38bcb1f7b4aa9",
+        "version": "5.3.0+20260927"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "red-green-ramp",
+      "name": "Red-Green Ramp",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m11-printed-v1:0184:c4d1835a-913f-4979-953b-ddd933214538",
+          "name": "Llanowar Elves",
+          "count": 4
+        },
+        {
+          "physicalId": "m11-printed-v1:0168:2ef3dbe4-5c03-4be4-ab48-45b6689b6712",
+          "name": "Cultivate",
+          "count": 4
+        },
+        {
+          "physicalId": "m11-printed-v1:0198:5f73ea30-c6d2-4224-ae54-f6b89e006cf4",
+          "name": "Sylvan Ranger",
+          "count": 2
+        },
+        {
+          "physicalId": "m11-printed-v1:0149:e768c957-3a1f-42f5-853a-96942f645df5",
+          "name": "Lightning Bolt",
+          "count": 4
+        },
+        {
+          "physicalId": "m11-printed-v1:0128:9a5111b5-4911-47f9-bea7-18c4550e167d",
+          "name": "Chandra's Outrage",
+          "count": 3
+        },
+        {
+          "physicalId": "m11-printed-v1:0167:73e94674-50c3-4302-b3d8-ac4d1eb33d6b",
+          "name": "Cudgel Troll",
+          "count": 3
+        },
+        {
+          "physicalId": "m11-printed-v1:0188:6694496c-45b9-4ddf-bfcd-b632441b8811",
+          "name": "Obstinate Baloth",
+          "count": 4
+        },
+        {
+          "physicalId": "m11-printed-v1:0175:0135ada3-e5ae-4382-a717-872839bf1d5a",
+          "name": "Garruk Wildspeaker",
+          "count": 2
+        },
+        {
+          "physicalId": "m11-printed-v1:0192:feee9327-b937-46ba-a2aa-6c015ab6cdd5",
+          "name": "Primeval Titan",
+          "count": 2
+        },
+        {
+          "physicalId": "m11-printed-v1:0146:f1e4a028-6462-4373-9864-a8adfc78d52b",
+          "name": "Inferno Titan",
+          "count": 2
+        },
+        {
+          "physicalId": "m11-printed-v1:0174:68f610a9-73b0-4ef8-b725-f3eee1b78fad",
+          "name": "Gaea's Revenge",
+          "count": 1
+        },
+        {
+          "physicalId": "m11-printed-v1:0138:b34d3714-f629-4066-8eaa-08817ad01cbb",
+          "name": "Fireball",
+          "count": 1
+        },
+        {
+          "physicalId": "m11-printed-v1:0227:abacafc8-ae6f-4e7b-ad8b-4492ac29338f",
+          "name": "Rootbound Crag",
+          "count": 4
+        },
+        {
+          "physicalId": "m11-printed-v1:0242:dd9b48f1-7c3a-4b1f-9a00-7b75eb6ea831",
+          "name": "Mountain",
+          "count": 12
+        },
+        {
+          "physicalId": "m11-printed-v1:0246:e36b8794-c117-4d3d-bcde-39a3ae436f1e",
+          "name": "Forest",
+          "count": 12
+        }
+      ]
+    }
+  ],
+  "contentSha256": "6c784e2165a247a6dda5fc5aa007dcbfdf5b73a3412ef7e53fa596cc02b0ecf8"
+}

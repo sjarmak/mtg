@@ -16,14 +16,24 @@
  * something asked. `snapshot.seat` is where the board is drawn from, and it
  * comes from the server rather than from a prop, so a page cannot decide to be
  * the other player.
+ *
+ * **The invite is drawn here rather than beside the link.** A host opens their
+ * own seat before the guest has opened theirs — that is what starting a table
+ * means — so the screen the guest's link has to appear on is this one, above the
+ * board, while the game waits. `./LanInvite.ts` draws itself for the host seat
+ * only and removes itself once the guest arrives; both of those are decided by
+ * the server, from the token, and neither is a prop this file could get wrong.
  */
-import { createElement } from 'react';
+import { createElement, useCallback, useRef } from 'react';
 import type { ReactElement } from 'react';
 import type { AutoPassSettings, PlayerId, Step } from '@mtg/kernel';
 import type { SeatSnapshot } from '@mtg/netplay';
+import { useFeedbackSubject } from '../../feedback/subject';
+import type { FeedbackSubject } from '../../feedback/wire';
 import { sessionViewOf } from '../../net/snapshot';
 import { useRemoteTable } from '../../net/remote-table';
 import type { PositionArt } from './position';
+import { LanInvite } from './LanInvite';
 import { PlayView } from './PlayView';
 
 /** The title of the panel drawn while there is no position to draw. */
@@ -70,14 +80,32 @@ export function RemoteGame(props: RemoteGameProps): ReactElement {
     props.token,
   );
 
+  // A feedback report over this seat carries the projection it was drawn from
+  // and the revision, since a served table is reopened by asking the server.
+  const latest = useRef(snapshot);
+  latest.current = snapshot;
+  const token = props.token;
+  const readSubject = useCallback((): FeedbackSubject | null => {
+    const view = latest.current;
+    return view === null ? null : { kind: 'observed-table', token, revision: view.revision, view };
+  }, [token]);
+  useFeedbackSubject(readSubject);
+
+  const invite = createElement(LanInvite, { base: props.base, token: props.token });
+
   if (snapshot === null) {
     // Nothing has arrived yet. The error line is the whole of what this page
     // knows, and it is the useful half: a mistyped link and a server that is not
     // running are both "no board", and only one of them is worth restarting
     // anything over.
-    return notice(
-      CONNECTING_LABEL,
-      error === null ? 'Asking the table for this seat.' : `Cannot reach the table: ${error}`,
+    return createElement(
+      'div',
+      { className: 'mtg-live' },
+      invite,
+      notice(
+        CONNECTING_LABEL,
+        error === null ? 'Asking the table for this seat.' : `Cannot reach the table: ${error}`,
+      ),
     );
   }
 
@@ -90,6 +118,7 @@ export function RemoteGame(props: RemoteGameProps): ReactElement {
   return createElement(
     'div',
     { className: 'mtg-live' },
+    invite,
     connected
       ? null
       : createElement(

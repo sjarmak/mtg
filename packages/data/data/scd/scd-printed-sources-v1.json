@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-15T13:16:54.516Z",
+  "sources": [
+    {
+      "code": "SCD",
+      "mtgjson": {
+        "file": "SCD-ee2e96bc50372ef32e47b0cddb0ed46bb1ee2599ef128d4925fbab4efd7bcd3f.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/SCD.json",
+        "sha256": "ee2e96bc50372ef32e47b0cddb0ed46bb1ee2599ef128d4925fbab4efd7bcd3f",
+        "meta": {
+          "date": "2026-09-14",
+          "version": "5.3.0+20260914"
+        }
+      },
+      "scryfall": {
+        "file": "SCD-c5a911390ef62f9371b42d90711514e1f44d3af13929c120e388115f4c5e2c1f.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Ascd+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "c5a911390ef62f9371b42d90711514e1f44d3af13929c120e388115f4c5e2c1f",
+        "cards": 352
+      }
+    }
+  ]
+}

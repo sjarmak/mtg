@@ -5,30 +5,64 @@
  * data, so a move is "drop the id from one list, add it to another, rewrite one
  * object". Library index 0 is the top of the library.
  */
-import type { LibraryPosition, TokenSpec } from '@mtg/dsl';
-import { printedEntryReplacement, tokenCard } from '@mtg/dsl';
+import type { Card, Color, LibraryPosition, TokenSpec } from '@mtg/dsl';
+import { isAuraCard, printedEntryReplacement, tokenCard } from '@mtg/dsl';
 import { effectsRegisteredBy, registerStatics } from './abilities';
-import { detached } from './attach';
-import type { Counters } from './continuous';
-import { counterCount, effectsPinnedTo, hasCounters, NO_COUNTERS, setCounterCount } from './continuous';
+import { attachAuraTo, detached, isLegalAuraEntryHost, unattachFromHost } from './attach';
+import type { ContinuousEffect, Counters } from './continuous';
+import {
+  addCounters,
+  counterCount,
+  detachEffectsFromSubject,
+  hasCounters,
+  NO_COUNTERS,
+  setCounterCount,
+} from './continuous';
 import { costModifiersRegisteredBy, registerCostModifiers } from './cost';
 import { registerStaticReplacements, staticReplacementsRegisteredBy } from './static-replacements';
 import type { ObjectId, PlayerId } from './ids';
 import { objectId } from './ids';
+import { lifeLostByOpponentsThisTurn } from './life-history';
 import {
   characteristicsOf,
+  copiableValuesOf,
   controllerOf,
   hasCardType,
   hasSubtype,
   isCreatureObject,
   startingLoyaltyOf,
+  startingDefenseOf,
 } from './layers';
-import { applyReplacements } from './replacement';
+import { applyReplacements, earliestTimestamp } from './replacement';
 import type { ReplacementEffect } from './replacement-effects';
 import { shuffle } from './rng';
-import type { GameObject, GameState, ZoneId } from './state';
+import type {
+  GameObject,
+  GameState,
+  EntryCounterKind,
+  PendingBattlefieldEntry,
+  PendingBattlefieldEntryBatch,
+  ZoneId,
+} from './state';
+import { copiableCardOf } from './state';
 import type { Trace } from './trace';
 import { emit, playerOf, putObject, updatePlayer, withState } from './trace';
+import { zoneChangeReplacementsFor } from './zone-change-replacements';
+import { sweepDetentionsForSubject } from './detention';
+import { battleProtector } from './siege';
+import { loseLife } from './life';
+import { removeObjectFromCombat } from './combat-state';
+import {
+  answerBattlefieldEntryBatch,
+  answerEntryTimestampNext as answerEntryTimestampNextInBatch,
+  awaitEntryChoice,
+  cardWithEntryCharacteristics,
+  entryBatchEvaluationState,
+  entryChoiceFor,
+  mergeEntryBatchReplacements,
+  startBattlefieldEntryBatch,
+  type ResolvedEntryChoices,
+} from './battlefield-entry';
 
 export function tryObject(state: GameState, oid: ObjectId): GameObject | undefined {
   return state.objects[oid];
@@ -136,35 +170,90 @@ interface Arrival {
  * replacement — none exists yet — would see one event to replace rather than
  * two ways of arriving.
  */
-function arrivalOf(state: GameState, oid: ObjectId, controller: PlayerId, forcedTapped = false): Arrival {
+function arrivalOf(
+  state: GameState,
+  oid: ObjectId,
+  controller: PlayerId,
+  forcedTapped = false,
+  copiedCard?: Card,
+  chosenX = 0,
+  optionalCounter?: { readonly counter: EntryCounterKind; readonly count: number },
+  paidEntryLife?: boolean,
+): Arrival {
   const object = getObject(state, oid);
   // Every card kind that prints an entry clause, read through the one
   // derivation in `@mtg/dsl` (`printedEntryReplacement`). This asked
   // `card.kind === 'land'` until `mtg-hgmz`, which is why a mana rock could
   // not buy its discount with a turn of tempo: the machinery below never cared
   // which kind produced the modification, and the question was the limit.
-  const printed = printedEntryReplacement(object.card);
+  const printed = printedEntryReplacement(copiedCard ?? copiableCardOf(object));
   const entersTapped =
     forcedTapped ||
     printed?.kind === 'entersTapped' ||
+    (printed?.kind === 'payLifeOrEntersTapped' && paidEntryLife !== true) ||
     (printed?.kind === 'entersTappedUnlessControlsLandSubtype' &&
       !landsControlledBy(state, controller).some((land) =>
         printed.landTypes.some((type) => hasSubtype(state, land.oid, type)),
       ));
-  const intrinsic: ReplacementEffect | undefined = entersTapped
-    ? {
-        id: `intrinsic:${oid}:entry`,
-        sourceOid: oid,
-        controller,
-        timestamp: -1,
-        duration: 'whileOnBattlefield',
-        selfReplacement: true,
-        trigger: { kind: 'enters', oid, controller },
-        modification: { kind: 'entersTapped' },
-      }
-    : undefined;
+  const intrinsics: readonly ReplacementEffect[] = [
+    ...(entersTapped
+      ? [
+          {
+            id: `intrinsic:${oid}:entry`,
+            sourceOid: oid,
+            controller,
+            timestamp: -2,
+            duration: 'whileOnBattlefield' as const,
+            selfReplacement: true,
+            trigger: { kind: 'enters' as const, oid, controller },
+            modification: { kind: 'entersTapped' as const },
+          },
+        ]
+      : []),
+    ...(printed?.kind === 'entersWithCounters'
+      ? [
+          {
+            id: `intrinsic:${oid}:entry:counters`,
+            sourceOid: oid,
+            controller,
+            timestamp: -1,
+            duration: 'whileOnBattlefield' as const,
+            selfReplacement: true,
+            trigger: { kind: 'enters' as const, oid, controller },
+            modification: {
+              kind: 'entersWithCounters' as const,
+              counter: printed.counter,
+              count:
+                typeof printed.count === 'number'
+                  ? printed.count
+                  : printed.count.kind === 'chosenX'
+                    ? chosenX
+                    : lifeLostByOpponentsThisTurn(state, controller),
+            },
+          },
+        ]
+      : []),
+    ...(optionalCounter === undefined
+      ? []
+      : [
+          {
+            id: `intrinsic:${oid}:entry:optional-counter`,
+            sourceOid: oid,
+            controller,
+            timestamp: 0,
+            duration: 'whileOnBattlefield' as const,
+            selfReplacement: true,
+            trigger: { kind: 'enters' as const, oid, controller },
+            modification: {
+              kind: 'entersWithCounters' as const,
+              counter: optionalCounter.counter,
+              count: optionalCounter.count,
+            },
+          },
+        ]),
+  ];
   const prepared: GameState =
-    intrinsic === undefined ? state : { ...state, replacements: [...state.replacements, intrinsic] };
+    intrinsics.length === 0 ? state : { ...state, replacements: [...state.replacements, ...intrinsics] };
   const outcome = applyReplacements(prepared, {
     kind: 'enters',
     oid,
@@ -172,27 +261,75 @@ function arrivalOf(state: GameState, oid: ObjectId, controller: PlayerId, forced
     tapped: false,
     plusOnePlusOne: 0,
     minusOneMinusOne: 0,
+    charge: 0,
   });
+  const intrinsicIds = new Set(intrinsics.map((effect) => effect.id));
   const withEffects: GameState = {
     ...state,
     replacements:
-      intrinsic === undefined
+      intrinsics.length === 0
         ? outcome.replacements
-        : outcome.replacements.filter((effect) => effect.id !== intrinsic.id),
+        : outcome.replacements.filter((effect) => !intrinsicIds.has(effect.id)),
   };
   const event = outcome.event;
   const appliedIds = outcome.appliedIds;
   if (event === null || event.kind !== 'enters') {
     return { state: withEffects, tapped: false, counters: NO_COUNTERS, appliedIds };
   }
-  return {
-    state: withEffects,
-    tapped: event.tapped,
-    counters: {
+  // Entry replacements first determine how many counters the permanent would
+  // receive. Battlefield counter-placement replacements then rewrite that
+  // proposal while their sources are live. The entering object has not yet
+  // registered its own static abilities, so Corpsejack cannot double its own
+  // entry counters; another Corpsejack already on the battlefield can.
+  const recipientCard = copiedCard ?? copiableCardOf(object);
+  const plusOutcome = applyReplacements(withEffects, {
+    kind: 'counterPlacement',
+    oid,
+    controller,
+    counter: 'plusOnePlusOne',
+    count: event.plusOnePlusOne,
+    recipientCard,
+  });
+  const plusEvent = plusOutcome.event;
+  const minusState = { ...withEffects, replacements: plusOutcome.replacements };
+  const minusOutcome = applyReplacements(minusState, {
+    kind: 'counterPlacement',
+    oid,
+    controller,
+    counter: 'minusOneMinusOne',
+    count: event.minusOneMinusOne,
+    recipientCard,
+  });
+  const minusEvent = minusOutcome.event;
+  const chargeState = { ...withEffects, replacements: minusOutcome.replacements };
+  const chargeOutcome = applyReplacements(chargeState, {
+    kind: 'counterPlacement',
+    oid,
+    controller,
+    counter: 'charge',
+    count: event.charge,
+    recipientCard,
+  });
+  const chargeEvent = chargeOutcome.event;
+  const entryCounters = setCounterCount(
+    {
       ...NO_COUNTERS,
-      plusOnePlusOne: event.plusOnePlusOne,
-      minusOneMinusOne: event.minusOneMinusOne,
+      plusOnePlusOne:
+        plusEvent?.kind === 'counterPlacement' && plusEvent.counter === 'plusOnePlusOne'
+          ? plusEvent.count
+          : 0,
+      minusOneMinusOne:
+        minusEvent?.kind === 'counterPlacement' && minusEvent.counter === 'minusOneMinusOne'
+          ? minusEvent.count
+          : 0,
     },
+    'charge',
+    chargeEvent?.kind === 'counterPlacement' && chargeEvent.counter === 'charge' ? chargeEvent.count : 0,
+  );
+  return {
+    state: { ...withEffects, replacements: chargeOutcome.replacements },
+    tapped: event.tapped,
+    counters: entryCounters,
     appliedIds,
   };
 }
@@ -214,7 +351,7 @@ function arrivalOf(state: GameState, oid: ObjectId, controller: PlayerId, forced
  * the record exists and before anything downstream asks what this permanent
  * costs its controller to trigger with.
  */
-function completeArrival(trace: Trace, oid: ObjectId, arrival: Arrival): Trace {
+function completeArrival(trace: Trace, oid: ObjectId, arrival: Arrival, auraHost?: ObjectId): Trace {
   // The CR 614 replacement a printed doubler registers rides the same pre-pass
   // as the other two, for the third time and the same reason
   // (`static-replacements.ts` states it).
@@ -222,8 +359,10 @@ function completeArrival(trace: Trace, oid: ObjectId, arrival: Arrival): Trace {
     registerCostModifiers(registerStatics(trace.state, oid), oid),
     oid,
   );
-  const object = getObject(state, oid);
-  let entered = emit(withState(trace, state), {
+  const registered = withState(trace, state);
+  const attached = auraHost === undefined ? registered : attachAuraTo(registered, oid, auraHost);
+  const object = getObject(attached.state, oid);
+  let entered = emit(attached, {
     type: 'permanentEntered',
     oid,
     controller: object.controller,
@@ -231,12 +370,14 @@ function completeArrival(trace: Trace, oid: ObjectId, arrival: Arrival): Trace {
   if (arrival.tapped) entered = emit(entered, { type: 'permanentTapped', oid });
   if (hasCounters(arrival.counters)) {
     const loyalty = counterCount(arrival.counters, 'loyalty');
+    const defense = counterCount(arrival.counters, 'defense');
     entered = emit(entered, {
       type: 'countersChanged',
       oid,
       plusOnePlusOne: arrival.counters.plusOnePlusOne,
       minusOneMinusOne: arrival.counters.minusOneMinusOne,
       ...(loyalty === 0 ? {} : { loyalty }),
+      ...(defense === 0 ? {} : { defense }),
     });
   }
   return entered;
@@ -275,29 +416,189 @@ function completeArrival(trace: Trace, oid: ObjectId, arrival: Arrival): Trace {
 export interface ArrivalEntry {
   readonly tapped?: boolean;
   readonly controller?: PlayerId;
+  /** X announced for the permanent spell that is becoming this permanent. */
+  readonly chosenX?: number;
+  /** A non-spell Aura's CR 303.4f host, chosen before it changes zones. */
+  readonly auraHost?: ObjectId;
 }
 
-export function moveObject(trace: Trace, oid: ObjectId, to: ZoneId, entry: ArrivalEntry = {}): Trace {
+export function moveObject(
+  trace: Trace,
+  oid: ObjectId,
+  requestedDestination: ZoneId,
+  entry: ArrivalEntry = {},
+): Trace {
+  return moveObjectWithEntryChoices(
+    trace,
+    oid,
+    requestedDestination,
+    entry,
+    entry.auraHost === undefined ? {} : { auraHost: entry.auraHost },
+  );
+}
+
+function moveObjectWithEntryChoices(
+  trace: Trace,
+  oid: ObjectId,
+  requestedDestination: ZoneId,
+  entry: ArrivalEntry,
+  resolved: ResolvedEntryChoices,
+): Trace {
   const object = getObject(trace.state, oid);
-  if (object.zone === to) return trace;
+  if (object.zone === requestedDestination) return trace;
+  const nextController =
+    requestedDestination === 'battlefield' ? (entry.controller ?? object.controller) : object.owner;
+  if (requestedDestination === 'battlefield') {
+    const item: PendingBattlefieldEntry = {
+      oid,
+      controller: nextController,
+      tapped: entry.tapped ?? false,
+      chosenX: entry.chosenX ?? 0,
+      ...resolved,
+    };
+    const choice = entryChoiceFor(trace.state, oid, nextController, resolved);
+    if (choice?.kind === 'auraUnavailable') return trace;
+    if (choice?.kind === 'aura' && trace.state.pendingBattlefieldEntryBatch === undefined) {
+      return startBattlefieldEntryBatch(trace, [item], commitBattlefieldEntry);
+    }
+    if (choice !== null) return awaitEntryChoice(trace, item, choice);
+  }
+  return commitMoveObject(trace, oid, requestedDestination, entry, resolved);
+}
+
+function commitMoveObject(
+  trace: Trace,
+  oid: ObjectId,
+  requestedDestination: ZoneId,
+  entry: ArrivalEntry,
+  resolved: ResolvedEntryChoices,
+  batch?: PendingBattlefieldEntryBatch,
+): Trace {
+  const {
+    copiedCard,
+    counterPermanent,
+    characteristicsMode,
+    chosenPlayer,
+    chosenCardName,
+    chosenColors,
+    optionalCounter,
+    paidEntryLife,
+  } = resolved;
+  const object = getObject(trace.state, oid);
+  if (object.zone === requestedDestination) return trace;
+  const nextController =
+    requestedDestination === 'battlefield' ? (entry.controller ?? object.controller) : object.owner;
+  const currentEntryReplacement = printedEntryReplacement(copiedCard ?? copiableCardOf(object));
+  const enteringCard =
+    characteristicsMode === undefined
+      ? copiedCard
+      : cardWithEntryCharacteristics(copiedCard ?? copiableCardOf(object), characteristicsMode);
+  const replacementState = batch === undefined ? trace.state : entryBatchEvaluationState(trace.state, batch);
+  const entryCard = enteringCard ?? copiableCardOf(object);
+  if (requestedDestination === 'battlefield' && isAuraCard(entryCard)) {
+    if (resolved.auraHost === null) return trace;
+    if (resolved.auraHost === undefined) {
+      throw new Error(`commitMoveObject: Aura ${oid} has no resolved entry host`);
+    }
+    if (!isLegalAuraEntryHost(replacementState, entryCard, resolved.auraHost)) return trace;
+  }
+  const proposed = {
+    kind: 'zoneChange' as const,
+    oid,
+    owner: object.owner,
+    from: object.zone,
+    destination: requestedDestination,
+  };
+  const replacement = applyReplacements(
+    replacementState,
+    proposed,
+    earliestTimestamp,
+    zoneChangeReplacementsFor(replacementState, proposed),
+  );
+  let prepared = withState(trace, {
+    ...trace.state,
+    replacements:
+      batch === undefined
+        ? replacement.replacements
+        : mergeEntryBatchReplacements(trace.state, replacement.replacements, batch),
+  });
+  for (const id of replacement.appliedIds) {
+    prepared = emit(prepared, { type: 'replacementApplied', id, event: 'zoneChange' });
+  }
+  const replacedEvent = replacement.event;
+  if (replacedEvent === null || replacedEvent.kind !== 'zoneChange') return prepared;
+  const to = replacedEvent.destination;
+  if (object.zone === to) return prepared;
   const from = object.zone;
-  const departingCharacteristics =
+  const attachmentSources =
     from === 'battlefield'
-      ? (() => {
-          const current = characteristicsOf(trace.state, oid);
-          return { colors: [...current.colors], subtypes: [...current.subtypes] };
-        })()
-      : undefined;
+      ? trace.state.battlefield.filter((source) => trace.state.objects[source]?.attachedTo === oid)
+      : [];
+  const attachedSources = attachmentSources.length === 0 ? undefined : attachmentSources;
+  const lastKnownController = attachedSources === undefined ? undefined : controllerOf(trace.state, oid);
+  const departing = from === 'battlefield' ? characteristicsOf(trace.state, oid) : undefined;
+  const departingCreature = departing?.cardTypes.includes('creature') === true ? departing : undefined;
+  const departingCreaturePower = departingCreature?.power;
+  const departingCreatureToughness = departingCreature?.toughness;
+  const departingBattlefieldIncarnation =
+    departingCreaturePower === undefined ? undefined : (object.incarnation ?? 0);
+  if (from === 'battlefield') prepared = unattachFromHost(prepared, oid);
+  const departingCharacteristics =
+    departing === undefined
+      ? undefined
+      : {
+          colors: [...departing.colors],
+          subtypes: [...departing.subtypes],
+          keywords: [...departing.keywords],
+        };
+  const departingAbilities = departing === undefined ? undefined : [...departing.abilities];
   const entering = to === 'battlefield';
+  if (entering && counterPermanent !== undefined) {
+    const recipient = getObject(prepared.state, counterPermanent);
+    const replacement = currentEntryReplacement;
+    if (recipient.zone === 'battlefield' && replacement?.kind === 'putCounterOnControlledPermanent') {
+      prepared = withState(
+        prepared,
+        putObject(prepared.state, {
+          ...recipient,
+          counters: addCounters(recipient.counters, replacement.counter, replacement.count),
+        }),
+      );
+    }
+  }
   // The controller is settled before the replacement pass rather than after it,
   // because a CR 614 "enters tapped" or "enters with a counter" replacement is
   // read against the seat the permanent is entering under. Applying those as
   // the old controller and then handing the finished permanent to a new one
   // would be two different answers to `arrivalOf`'s question.
-  const nextController = entering ? (entry.controller ?? object.controller) : object.owner;
-  const arrival: Arrival = entering
-    ? arrivalOf(trace.state, oid, nextController, entry.tapped ?? false)
-    : { state: trace.state, tapped: false, counters: NO_COUNTERS, appliedIds: [] };
+  const arrivalState =
+    batch === undefined ? prepared.state : entryBatchEvaluationState(prepared.state, batch);
+  const evaluatedArrival: Arrival = entering
+    ? arrivalOf(
+        arrivalState,
+        oid,
+        nextController,
+        entry.tapped ?? false,
+        enteringCard ?? undefined,
+        entry.chosenX ?? 0,
+        optionalCounter ?? undefined,
+        paidEntryLife,
+      )
+    : { state: arrivalState, tapped: false, counters: NO_COUNTERS, appliedIds: [] };
+  const arrival: Arrival =
+    batch === undefined
+      ? evaluatedArrival
+      : {
+          ...evaluatedArrival,
+          state: {
+            ...prepared.state,
+            replacements: mergeEntryBatchReplacements(
+              prepared.state,
+              evaluatedArrival.state.replacements,
+              batch,
+            ),
+          },
+        };
 
   // CR 400.7: the object is new in the zone it arrives in, so every piece of
   // battlefield status resets. An attachment is one of them, which is what "an
@@ -305,25 +606,64 @@ export function moveObject(trace: Trace, oid: ObjectId, to: ZoneId, entry: Arriv
   // here; the continuous effect it registered is dropped a few lines below by
   // `effectsRegisteredBy`, which every printed ability's record goes through.
   const reset = { ...object };
+  const preserveFace = (from === 'exile' && to === 'stack') || (from === 'stack' && to === 'battlefield');
+  const activeFace = preserveFace ? object.faceCard : undefined;
+  delete reset.faceCard;
+  const currentCopiableCard = from === 'battlefield' ? copiableValuesOf(trace.state, oid) : undefined;
+  const departingCopiableCard = currentCopiableCard === object.card ? undefined : currentCopiableCard;
+  delete reset.copiableCard;
+  delete reset.chosenPlayer;
+  delete reset.chosenCardName;
+  delete reset.chosenColors;
+  delete reset.lastKnownCopiableCard;
+  const departingLinkedExile = from === 'battlefield' ? object.linkedExile : undefined;
+  delete reset.linkedExile;
+  // A linked relation names the object this card became when the search moved
+  // it to exile. Any later zone change creates a new object under CR 400.7,
+  // even when this engine deliberately keeps the physical card's oid stable.
+  delete reset.linkedExileId;
   delete reset.loyaltyActivatedTurn;
+  delete reset.activationLimitedTurns;
+  delete reset.battlefieldTimestamp;
+  delete reset.protector;
+  delete reset.siegeDefeatPending;
   // A held permanent that changed zones is a new object and owes nothing
   // (CR 400.7). Bouncing your own creature out from under a Sleep is a real
   // line, and the debt following it back would be the kernel remembering a
   // permanent that no longer exists.
   delete reset.skipsNextUntap;
-  if (entering) delete reset.lastKnownSourceCharacteristics;
+  if (entering) {
+    delete reset.lastKnownSourceCharacteristics;
+    delete reset.lastKnownAbilities;
+    delete reset.lastKnownController;
+    delete reset.lastKnownLinkedExile;
+  }
+  const battlefieldTimestamp = entering ? arrival.state.nextId : undefined;
   let moved: GameObject = detached({
     ...reset,
     zone: to,
+    incarnation: (object.incarnation ?? 0) + 1,
     controller: nextController,
     tapped: arrival.tapped,
     damage: 0,
     deathtouched: false,
     counters: arrival.counters,
     summoningSick: entering,
+    ...(activeFace === undefined ? {} : { faceCard: activeFace }),
+    ...(entering && enteringCard !== null && enteringCard !== undefined
+      ? { copiableCard: enteringCard }
+      : {}),
+    ...(entering && chosenPlayer !== undefined ? { chosenPlayer } : {}),
+    ...(entering && chosenCardName !== undefined ? { chosenCardName } : {}),
+    ...(entering && chosenColors !== undefined ? { chosenColors: [...chosenColors] } : {}),
+    ...(battlefieldTimestamp === undefined ? {} : { battlefieldTimestamp }),
     ...(departingCharacteristics === undefined
       ? {}
       : { lastKnownSourceCharacteristics: departingCharacteristics }),
+    ...(departingAbilities === undefined ? {} : { lastKnownAbilities: departingAbilities }),
+    ...(departing === undefined ? {} : { lastKnownController: departing.controller }),
+    ...(departingLinkedExile === undefined ? {} : { lastKnownLinkedExile: [...departingLinkedExile] }),
+    ...(departingCopiableCard === undefined ? {} : { lastKnownCopiableCard: departingCopiableCard }),
   });
 
   // A token that leaves the battlefield goes where it was headed, like anything
@@ -336,8 +676,22 @@ export function moveObject(trace: Trace, oid: ObjectId, to: ZoneId, entry: Arriv
   // ever emitted one. the flagship set's whole economy is a Monster dying and
   // leaving a part, so that was not a corner.
   let state = removeFromZone(arrival.state, object);
+  if (battlefieldTimestamp !== undefined) state = { ...state, nextId: battlefieldTimestamp + 1 };
   state = putObject(state, moved);
   state = addToZone(state, moved, to);
+  if (from === 'battlefield') state = removeObjectFromCombat(state, oid);
+  if (from === 'battlefield' && to === 'graveyard') {
+    state = {
+      ...state,
+      turn: {
+        ...state.turn,
+        battlefieldToGraveyardThisTurn: [
+          ...state.turn.battlefieldToGraveyardThisTurn,
+          { oid, incarnation: moved.incarnation ?? 0 },
+        ],
+      },
+    };
+  }
   let completedArrival = arrival;
   if (entering) {
     const startingLoyalty = startingLoyaltyOf(state, oid);
@@ -347,6 +701,17 @@ export function moveObject(trace: Trace, oid: ObjectId, to: ZoneId, entry: Arriv
       state = putObject(state, moved);
       completedArrival = { ...arrival, counters };
     }
+    const startingDefense = startingDefenseOf(state, oid);
+    if (startingDefense !== null) {
+      const counters = setCounterCount(completedArrival.counters, 'defense', startingDefense);
+      moved = {
+        ...moved,
+        counters,
+        protector: battleProtector(copiableValuesOf(state, oid), nextController),
+      };
+      state = putObject(state, moved);
+      completedArrival = { ...completedArrival, counters };
+    }
   }
 
   // A permanent's printed static abilities exist exactly while it is on the
@@ -355,19 +720,18 @@ export function moveObject(trace: Trace, oid: ObjectId, to: ZoneId, entry: Arriv
   // `completeArrival`'s, which every arrival runs.
   //
   // A grant made *to* this permanent ends on the same event, off the mirrored
-  // sweep: `effectsRegisteredBy` matches the effects this object is the source
-  // of, `effectsPinnedTo` matches the ones it is the subject of. Both are
-  // swept in one pass so one `continuousEffectsExpired` event names everything
-  // the zone change ended, which is what the log has to say for a replay to
-  // rebuild the same board. `continuous.ts` argues the second lifetime; the
-  // short version is that this kernel reuses an object's id across a zone
-  // change, so a grant with no duration would come back with the card.
-  const expired =
-    from === 'battlefield'
-      ? [...effectsRegisteredBy(state.continuous, oid), ...effectsPinnedTo(state.continuous, oid)]
-      : [];
-  if (expired.length > 0) {
-    state = { ...state, continuous: state.continuous.filter((effect) => !expired.includes(effect)) };
+  // operation: `effectsRegisteredBy` matches the records this object sourced,
+  // while `detachEffectsFromSubject` removes this incarnation from records it
+  // was explicitly affecting. The latter narrows a group record rather than
+  // expiring it, so creatures that stayed on the battlefield keep the shared
+  // effect. `expired` therefore names only whole records that ended.
+  let expired: readonly ContinuousEffect[] = [];
+  if (from === 'battlefield') {
+    const sourceExpired = effectsRegisteredBy(state.continuous, oid);
+    const withoutSource = state.continuous.filter((effect) => !sourceExpired.includes(effect));
+    const detachedSubject = detachEffectsFromSubject(withoutSource, oid);
+    expired = [...sourceExpired, ...detachedSubject.expired];
+    state = { ...state, continuous: detachedSubject.effects };
   }
   if (from === 'battlefield') {
     // Two sweeps over one array, and the split is the point. The regeneration
@@ -399,9 +763,9 @@ export function moveObject(trace: Trace, oid: ObjectId, to: ZoneId, entry: Arriv
   }
 
   // A turn-scoped combat rule ends when its subject leaves the battlefield, the
-  // `effectsPinnedTo` half of the sweep above and for that half's reason: this
-  // kernel reuses an object's id across a zone change, so a rule left behind
-  // would come back with the card. The source is deliberately not swept on —
+  // subject-detachment half of the operation above and for that half's reason:
+  // this kernel reuses an object's id across a zone change, so a rule left
+  // behind would come back with the card. The source is deliberately not swept on —
   // both rules are one-shots that finished resolving, and the player
   // `attacksYouThisTurnIfAble` names was fixed then (CR 109.5), so the source
   // dying afterwards changes nothing.
@@ -411,17 +775,349 @@ export function moveObject(trace: Trace, oid: ObjectId, to: ZoneId, entry: Arriv
       turnCombatRules: state.turnCombatRules.filter((imposed) => imposed.subject !== oid),
     };
   }
+  if (from === 'battlefield' && state.detentions.length > 0) {
+    state = sweepDetentionsForSubject(state, oid);
+  }
 
-  let next = withState(trace, state);
+  if (departingBattlefieldIncarnation !== undefined) {
+    state = {
+      ...state,
+      stack: state.stack.map((entry) =>
+        entry.triggerContext !== null &&
+        'triggeringCreature' in entry.triggerContext &&
+        entry.triggerContext.triggeringCreature === oid &&
+        entry.triggerContext.triggeringCreatureIncarnation === departingBattlefieldIncarnation
+          ? {
+              ...entry,
+              triggerContext: {
+                ...entry.triggerContext,
+                ...(departingCreaturePower === undefined
+                  ? {}
+                  : { triggeringCreaturePower: departingCreaturePower }),
+                ...(departingCreatureToughness === undefined
+                  ? {}
+                  : { triggeringCreatureToughness: departingCreatureToughness }),
+              },
+            }
+          : entry,
+      ),
+    };
+  }
+
+  let next = withState(prepared, state);
   for (const id of arrival.appliedIds) {
     next = emit(next, { type: 'replacementApplied', id, event: 'enters' });
   }
-  next = emit(next, { type: 'zoneChanged', oid, from, to, owner: object.owner });
+  next = emit(next, {
+    type: 'zoneChanged',
+    oid,
+    from,
+    to,
+    owner: object.owner,
+    ...(lastKnownController === undefined ? {} : { lastKnownController }),
+    ...(attachedSources === undefined ? {} : { attachedSources }),
+    ...(departingCreaturePower === undefined ? {} : { departingCreaturePower }),
+    ...(departingCreatureToughness === undefined ? {} : { departingCreatureToughness }),
+    ...(departingBattlefieldIncarnation === undefined ? {} : { departingBattlefieldIncarnation }),
+  });
   if (expired.length > 0) {
     next = emit(next, { type: 'continuousEffectsExpired', ids: expired.map((effect) => effect.id) });
   }
   if (!entering) return next;
-  return completeArrival(next, oid, completedArrival);
+  return completeArrival(next, oid, completedArrival, resolved.auraHost ?? undefined);
+}
+
+function commitBattlefieldEntry(
+  trace: Trace,
+  prepared: PendingBattlefieldEntry,
+  batch: PendingBattlefieldEntryBatch,
+): Trace {
+  return commitMoveObject(
+    trace,
+    prepared.oid,
+    'battlefield',
+    {
+      controller: prepared.controller,
+      tapped: prepared.tapped,
+      chosenX: prepared.chosenX,
+    },
+    prepared,
+    batch,
+  );
+}
+
+export interface SimultaneousBattlefieldEntry {
+  readonly oid: ObjectId;
+  readonly entry?: ArrivalEntry;
+}
+
+/**
+ * Moves one public-zone cohort onto the battlefield as one CR 400.7 event.
+ *
+ * All as-entry choices are banked before any member moves. The commit then
+ * evaluates every member against the same pre-entry battlefield, while still
+ * carrying forward replacement effects consumed by an earlier member. No
+ * decision, trigger, state-based action, or priority window occurs inside the
+ * cohort.
+ */
+export function moveObjectsToBattlefieldSimultaneously(
+  trace: Trace,
+  entries: readonly SimultaneousBattlefieldEntry[],
+): Trace {
+  const seen = new Set<ObjectId>();
+  const remaining: PendingBattlefieldEntry[] = [];
+  for (const requested of entries) {
+    if (seen.has(requested.oid)) {
+      throw new Error(`moveObjectsToBattlefieldSimultaneously: duplicate object ${requested.oid}`);
+    }
+    seen.add(requested.oid);
+    const object = getObject(trace.state, requested.oid);
+    if (object.zone === 'battlefield') continue;
+    remaining.push({
+      oid: requested.oid,
+      controller: requested.entry?.controller ?? object.controller,
+      tapped: requested.entry?.tapped ?? false,
+      chosenX: requested.entry?.chosenX ?? 0,
+      ...(requested.entry?.auraHost === undefined ? {} : { auraHost: requested.entry.auraHost }),
+    });
+  }
+  return startBattlefieldEntryBatch(trace, remaining, commitBattlefieldEntry);
+}
+
+/** Finishes the zone change banked by a copy-as-entry decision. */
+export function answerEntryCopy(trace: Trace, copyOf: ObjectId | null): Trace {
+  const pending = trace.state.pendingEntryCopy;
+  if (pending === undefined) throw new Error('answerEntryCopy: no copy-as-entry choice is pending');
+  const copiedCard = copyOf === null ? null : copiableValuesOf(trace.state, copyOf);
+  const { pendingEntryCopy: _answered, ...withoutPending } = trace.state;
+  const cleared = withState(trace, {
+    ...withoutPending,
+    turn: { ...withoutPending.turn, awaiting: null, awaitingPlayer: null },
+  });
+  if (cleared.state.pendingBattlefieldEntryBatch !== undefined) {
+    return answerBattlefieldEntryBatch(cleared, pending.oid, { copiedCard }, commitBattlefieldEntry);
+  }
+  return moveObjectWithEntryChoices(
+    cleared,
+    pending.oid,
+    'battlefield',
+    { controller: pending.controller, tapped: pending.tapped },
+    { copiedCard },
+  );
+}
+
+/** Finishes the zone change banked by an as-entry counter choice. */
+export function answerEntryCounter(trace: Trace, permanent: ObjectId): Trace {
+  const pending = trace.state.pendingEntryCounterChoice;
+  if (pending === undefined) throw new Error('answerEntryCounter: no entry counter choice is pending');
+  const { pendingEntryCounterChoice: _answered, ...withoutPending } = trace.state;
+  const cleared = withState(trace, {
+    ...withoutPending,
+    turn: { ...withoutPending.turn, awaiting: null, awaitingPlayer: null },
+  });
+  if (cleared.state.pendingBattlefieldEntryBatch !== undefined) {
+    return answerBattlefieldEntryBatch(
+      cleared,
+      pending.oid,
+      { copiedCard: pending.copiedCard, counterPermanent: permanent },
+      commitBattlefieldEntry,
+    );
+  }
+  return moveObjectWithEntryChoices(
+    cleared,
+    pending.oid,
+    'battlefield',
+    { controller: pending.controller, tapped: pending.tapped },
+    { copiedCard: pending.copiedCard, counterPermanent: permanent },
+  );
+}
+
+/** Finishes the zone change banked by a characteristic-mode entry choice. */
+export function answerEntryCharacteristics(trace: Trace, mode: number): Trace {
+  const pending = trace.state.pendingEntryCharacteristicsChoice;
+  if (pending === undefined) {
+    throw new Error('answerEntryCharacteristics: no entry characteristic choice is pending');
+  }
+  const chosen = pending.modes[mode];
+  if (chosen === undefined) throw new Error(`answerEntryCharacteristics: unknown mode ${String(mode)}`);
+  const { pendingEntryCharacteristicsChoice: _answered, ...withoutPending } = trace.state;
+  const cleared = withState(trace, {
+    ...withoutPending,
+    turn: { ...withoutPending.turn, awaiting: null, awaitingPlayer: null },
+  });
+  if (cleared.state.pendingBattlefieldEntryBatch !== undefined) {
+    return answerBattlefieldEntryBatch(
+      cleared,
+      pending.oid,
+      { copiedCard: pending.copiedCard, characteristicsMode: chosen },
+      commitBattlefieldEntry,
+    );
+  }
+  return moveObjectWithEntryChoices(
+    cleared,
+    pending.oid,
+    'battlefield',
+    { controller: pending.controller, tapped: pending.tapped },
+    { copiedCard: pending.copiedCard, characteristicsMode: chosen },
+  );
+}
+
+/** Finishes an optional as-entry counter choice without moving the object early. */
+export function answerEntryOptionalCounter(trace: Trace, accept: boolean): Trace {
+  const pending = trace.state.pendingEntryOptionalCounterChoice;
+  if (pending === undefined) {
+    throw new Error('answerEntryOptionalCounter: no optional entry counter choice is pending');
+  }
+  const { pendingEntryOptionalCounterChoice: _answered, ...withoutPending } = trace.state;
+  const cleared = withState(trace, {
+    ...withoutPending,
+    turn: { ...withoutPending.turn, awaiting: null, awaitingPlayer: null },
+  });
+  const optionalCounter = accept ? { counter: pending.counter, count: pending.count } : null;
+  if (cleared.state.pendingBattlefieldEntryBatch !== undefined) {
+    return answerBattlefieldEntryBatch(
+      cleared,
+      pending.entry.oid,
+      { optionalCounter },
+      commitBattlefieldEntry,
+    );
+  }
+  const { oid, controller, tapped, chosenX, ...priorChoices } = pending.entry;
+  return moveObjectWithEntryChoices(
+    cleared,
+    oid,
+    'battlefield',
+    { controller, tapped, chosenX },
+    { ...priorChoices, optionalCounter },
+  );
+}
+
+/** Pays or declines a land's as-entry life choice without moving it early. */
+export function answerEntryPayLife(trace: Trace, pay: boolean): Trace {
+  const pending = trace.state.pendingEntryPayLifeChoice;
+  if (pending === undefined) {
+    throw new Error('answerEntryPayLife: no entry life-payment choice is pending');
+  }
+  const { pendingEntryPayLifeChoice: _answered, ...withoutPending } = trace.state;
+  const cleared = withState(trace, {
+    ...withoutPending,
+    turn: { ...withoutPending.turn, awaiting: null, awaitingPlayer: null },
+  });
+  const paid = pay ? loseLife(cleared, pending.player, pending.life) : cleared;
+  if (paid.state.pendingBattlefieldEntryBatch !== undefined) {
+    return answerBattlefieldEntryBatch(
+      paid,
+      pending.entry.oid,
+      { paidEntryLife: pay },
+      commitBattlefieldEntry,
+    );
+  }
+  const { oid, controller, tapped, chosenX, ...priorChoices } = pending.entry;
+  return moveObjectWithEntryChoices(
+    paid,
+    oid,
+    'battlefield',
+    { controller, tapped, chosenX },
+    { ...priorChoices, paidEntryLife: pay },
+  );
+}
+
+/** Finishes the zone change banked by a mandatory as-entry player choice. */
+export function answerEntryPlayer(trace: Trace, player: PlayerId): Trace {
+  const pending = trace.state.pendingEntryPlayerChoice;
+  if (pending === undefined) throw new Error('answerEntryPlayer: no entry player choice is pending');
+  const { pendingEntryPlayerChoice: _answered, ...withoutPending } = trace.state;
+  const cleared = withState(trace, {
+    ...withoutPending,
+    turn: { ...withoutPending.turn, awaiting: null, awaitingPlayer: null },
+  });
+  const choices = { copiedCard: pending.copiedCard, chosenPlayer: player } as const;
+  if (cleared.state.pendingBattlefieldEntryBatch !== undefined) {
+    return answerBattlefieldEntryBatch(cleared, pending.oid, choices, commitBattlefieldEntry);
+  }
+  return moveObjectWithEntryChoices(
+    cleared,
+    pending.oid,
+    'battlefield',
+    { controller: pending.controller, tapped: pending.tapped },
+    choices,
+  );
+}
+
+/** Finishes the zone change banked by Tablet's mandatory two-color choice. */
+export function answerEntryColors(trace: Trace, colors: readonly [Color, Color]): Trace {
+  const pending = trace.state.pendingEntryColorsChoice;
+  if (pending === undefined) throw new Error('answerEntryColors: no entry color choice is pending');
+  const { pendingEntryColorsChoice: _answered, ...withoutPending } = trace.state;
+  const cleared = withState(trace, {
+    ...withoutPending,
+    turn: { ...withoutPending.turn, awaiting: null, awaitingPlayer: null },
+  });
+  const choices = { copiedCard: pending.copiedCard, chosenColors: colors } as const;
+  if (cleared.state.pendingBattlefieldEntryBatch !== undefined) {
+    return answerBattlefieldEntryBatch(cleared, pending.oid, choices, commitBattlefieldEntry);
+  }
+  return moveObjectWithEntryChoices(
+    cleared,
+    pending.oid,
+    'battlefield',
+    { controller: pending.controller, tapped: pending.tapped },
+    choices,
+  );
+}
+
+/** Finishes the zone change banked by a mandatory as-entry card-name choice. */
+export function answerEntryCardName(trace: Trace, name: string): Trace {
+  const pending = trace.state.pendingEntryCardNameChoice;
+  if (pending === undefined) throw new Error('answerEntryCardName: no entry card-name choice is pending');
+  const { pendingEntryCardNameChoice: _answered, ...withoutPending } = trace.state;
+  const cleared = withState(trace, {
+    ...withoutPending,
+    turn: { ...withoutPending.turn, awaiting: null, awaitingPlayer: null },
+  });
+  const choices = { copiedCard: pending.copiedCard, chosenCardName: name } as const;
+  if (cleared.state.pendingBattlefieldEntryBatch !== undefined) {
+    return answerBattlefieldEntryBatch(cleared, pending.oid, choices, commitBattlefieldEntry);
+  }
+  return moveObjectWithEntryChoices(
+    cleared,
+    pending.oid,
+    'battlefield',
+    { controller: pending.controller, tapped: pending.tapped },
+    choices,
+  );
+}
+
+/** Finishes the CR 303.4f host choice banked for a non-spell Aura entry. */
+export function answerEntryAura(trace: Trace, host: ObjectId): Trace {
+  const pending = trace.state.pendingEntryAuraChoice;
+  if (pending === undefined) throw new Error('answerEntryAura: no Aura entry choice is pending');
+  const { pendingEntryAuraChoice: _answered, ...withoutPending } = trace.state;
+  const cleared = withState(trace, {
+    ...withoutPending,
+    turn: { ...withoutPending.turn, awaiting: null, awaitingPlayer: null },
+  });
+  if (cleared.state.pendingBattlefieldEntryBatch !== undefined) {
+    return answerBattlefieldEntryBatch(
+      cleared,
+      pending.entry.oid,
+      { auraHost: host },
+      commitBattlefieldEntry,
+    );
+  }
+  const { oid, controller, tapped, chosenX, ...priorChoices } = pending.entry;
+  return moveObjectWithEntryChoices(
+    cleared,
+    oid,
+    'battlefield',
+    { controller, tapped, chosenX },
+    { ...priorChoices, auraHost: host },
+  );
+}
+
+/** Banks one next-earliest object in the active CR 613.7m controller group. */
+export function answerEntryTimestampNext(trace: Trace, oid: ObjectId): Trace {
+  return answerEntryTimestampNextInBatch(trace, oid, commitBattlefieldEntry);
 }
 
 export function tapObject(trace: Trace, oid: ObjectId): Trace {
@@ -447,6 +1143,26 @@ export function holdTapped(trace: Trace, oid: ObjectId): Trace {
   const object = getObject(trace.state, oid);
   const held = withState(trace, putObject(trace.state, { ...object, tapped: true, skipsNextUntap: true }));
   return object.tapped ? held : emit(held, { type: 'permanentTapped', oid });
+}
+
+/**
+ * Makes a permanent miss its controller's next untap step without tapping it.
+ *
+ * Wall of Frost supplies the distinction: an attacker is usually already
+ * tapped, but vigilance may leave it untapped and the triggered ability does
+ * not change that. `untapStep` owns consumption of the shared debt, including
+ * clearing it when the permanent is already untapped, and zone changes already
+ * strip the battlefield-only field under CR 400.7.
+ */
+export function skipNextUntap(trace: Trace, oid: ObjectId): Trace {
+  const object = getObject(trace.state, oid);
+  return withState(trace, putObject(trace.state, { ...object, skipsNextUntap: true }));
+}
+
+/** Whether CR 701.21 can untap this current battlefield object. */
+export function canUntapObject(state: GameState, oid: ObjectId): boolean {
+  const object = tryObject(state, oid);
+  return object !== undefined && object.zone === 'battlefield' && object.tapped;
 }
 
 export function untapObject(trace: Trace, oid: ObjectId): Trace {
@@ -547,6 +1263,30 @@ export function putOnLibrary(trace: Trace, oid: ObjectId, position: LibraryPosit
 }
 
 /**
+ * Moves each distinct existing object to the top of its owner's library, then
+ * shuffles each library that actually received at least one of those objects.
+ *
+ * The two phases are load-bearing: a multi-object instruction performs all
+ * zone changes before any shuffle, and a same-owner pair causes one shuffle,
+ * not one per object. Owners are captured before movement because cards outside
+ * the battlefield have no controller; success is read afterwards so a
+ * replacement that redirects a move does not invent an affected library.
+ */
+export function putObjectsOnOwnersLibrariesThenShuffle(trace: Trace, oids: readonly ObjectId[]): Trace {
+  const distinct = oids.filter((oid, index) => oids.indexOf(oid) === index);
+  const planned = distinct.flatMap((oid) => {
+    const object = tryObject(trace.state, oid);
+    return object === undefined ? [] : [{ oid, owner: object.owner }];
+  });
+  const moved = planned.reduce((current, entry) => putOnLibrary(current, entry.oid, 'top'), trace);
+  const owners = planned
+    .filter((entry) => tryObject(moved.state, entry.oid)?.zone === 'library')
+    .map((entry) => entry.owner)
+    .filter((owner, index, all) => all.indexOf(owner) === index);
+  return owners.reduce((current, owner) => shuffleLibrary(current, owner), moved);
+}
+
+/**
  * Shows the top `count` cards of a library to both seats without moving them.
  *
  * The short-library case is the whole reason this reads a slice rather than
@@ -563,6 +1303,63 @@ export function revealTopCards(trace: Trace, player: PlayerId, count: number): T
 }
 
 /**
+ * Reveals the current top card and moves that same physical card to hand.
+ *
+ * This is not a draw: no draw replacement applies, no `cardDrawn` trigger
+ * fires, and an empty library does not set the failed-draw loss marker. The oid
+ * is captured before either action, published by the existing reveal event,
+ * and then handed to the ordinary zone-change choke point. `moveObject` keeps
+ * the physical card id stable while incrementing its incarnation, which lets a
+ * later resolution-scoped amount identify the card without retaining a stale
+ * library position.
+ */
+export function revealTopCardToHand(trace: Trace, player: PlayerId): Trace {
+  const top = playerOf(trace.state, player).library[0];
+  if (top === undefined) return trace;
+  return moveObject(revealTopCards(trace, player, 1), top, 'hand');
+}
+
+/**
+ * Reveals the shortest library prefix containing `count` creature cards.
+ *
+ * A short library reveals fully. Creature cards move in revealed order through
+ * `moveObject`, preserving the ordinary entry path and new-object semantics;
+ * everything else was already in the library and joins the unrevealed suffix
+ * in the one seeded shuffle. A zero count reveals nothing but still performs
+ * the instructed shuffle.
+ */
+export function revealUntilCreatureCards(trace: Trace, player: PlayerId, count: number): Trace {
+  const library = [...playerOf(trace.state, player).library];
+  let found = 0;
+  let length = 0;
+  if (count > 0) {
+    for (const oid of library) {
+      length += 1;
+      if (trace.state.objects[oid]?.card.kind === 'creature') found += 1;
+      if (found >= count) break;
+    }
+  }
+  const revealed = library.slice(0, length);
+  let current = revealTopCards(trace, player, length);
+  for (const oid of revealed) {
+    if (current.state.objects[oid]?.card.kind === 'creature') {
+      current = moveObject(current, oid, 'battlefield', { controller: player });
+    }
+  }
+  return shuffleLibrary(current, player);
+}
+
+/** Reveals and mills the shortest top prefix that includes a land card. */
+export function revealUntilLandToGraveyard(trace: Trace, player: PlayerId): Trace {
+  const library = [...playerOf(trace.state, player).library];
+  const firstLand = library.findIndex((oid) => trace.state.objects[oid]?.card.kind === 'land');
+  const length = firstLand < 0 ? library.length : firstLand + 1;
+  const revealed = library.slice(0, length);
+  const shown = revealTopCards(trace, player, length);
+  return revealed.reduce((current, oid) => moveObject(current, oid, 'graveyard'), shown);
+}
+
+/**
  * Exiles every card in one player's graveyard, in graveyard order.
  *
  * Every card, not every creature card: `objectsInEffectScope`'s graveyard arm
@@ -574,6 +1371,47 @@ export function revealTopCards(trace: Trace, player: PlayerId, count: number): T
 export function exileGraveyard(trace: Trace, player: PlayerId): Trace {
   const cards = playerOf(trace.state, player).graveyard;
   return cards.reduce((current, oid) => moveObject(current, oid, 'exile'), trace);
+}
+
+/** Exiles the pre-move cohort of the named players' hands and graveyards. */
+export function exileHandsAndGraveyards(trace: Trace, players: readonly PlayerId[]): Trace {
+  const cards = players.flatMap((player) => {
+    const seat = playerOf(trace.state, player);
+    return [...seat.hand, ...seat.graveyard];
+  });
+  return cards.reduce((current, oid) => moveObject(current, oid, 'exile'), trace);
+}
+
+export interface NamedGraveyardExile {
+  readonly trace: Trace;
+  /** Unique printed names of cards that actually reached exile. */
+  readonly names: readonly string[];
+}
+
+/**
+ * Exiles one graveyard except its basic land cards and reports the names that
+ * really arrived in exile.
+ *
+ * The result, rather than the intended member list, supplies the names. That
+ * is the “exiled this way” boundary: a future replacement that changes or
+ * prevents one move must not let the redirected card seed a hidden-zone
+ * search. Names are unique because the later predicate asks membership; two
+ * graveyard copies widen nothing and must not create duplicate search paths.
+ */
+export function exileNonbasicGraveyard(trace: Trace, player: PlayerId): NamedGraveyardExile {
+  const cards = [...playerOf(trace.state, player).graveyard];
+  return cards.reduce<NamedGraveyardExile>(
+    (current, oid) => {
+      const object = getObject(current.trace.state, oid);
+      if (object.card.supertypes.includes('basic')) return current;
+      const moved = moveObject(current.trace, oid, 'exile');
+      if (tryObject(moved.state, oid)?.zone !== 'exile' || current.names.includes(object.card.name)) {
+        return { ...current, trace: moved };
+      }
+      return { trace: moved, names: [...current.names, object.card.name] };
+    },
+    { trace, names: [] },
+  );
 }
 
 /**
@@ -602,6 +1440,14 @@ export function shuffleGraveyardIntoLibrary(trace: Trace, player: PlayerId, extr
   const owner = extra === null ? player : getObject(gathered.state, extra).owner;
   const shuffled = shuffleLibrary(gathered, player);
   return owner === player ? shuffled : shuffleLibrary(shuffled, owner);
+}
+
+/** Moves one player's hand and graveyard into their library, then shuffles it. */
+export function shuffleHandAndGraveyardIntoLibrary(trace: Trace, player: PlayerId): Trace {
+  const seat = playerOf(trace.state, player);
+  const cards = [...seat.hand, ...seat.graveyard];
+  const gathered = cards.reduce((current, oid) => moveObject(current, oid, 'library'), trace);
+  return shuffleLibrary(gathered, player);
 }
 
 export function millCards(trace: Trace, player: PlayerId, count: number): Trace {
@@ -636,12 +1482,12 @@ export function millCards(trace: Trace, player: PlayerId, count: number): Trace 
  * the other half — a permanent watching some *other* permanent arrive — because
  * every DSL v1 trigger condition is about its own source.
  */
-export function createToken(trace: Trace, controller: PlayerId, spec: TokenSpec): Trace {
+function createTokenCard(trace: Trace, controller: PlayerId, card: Card): Trace {
   const counter = trace.state.nextId;
   const oid = objectId(counter);
   const object: GameObject = {
     oid,
-    card: tokenCard(spec),
+    card,
     owner: controller,
     controller,
     zone: 'battlefield',
@@ -651,6 +1497,7 @@ export function createToken(trace: Trace, controller: PlayerId, spec: TokenSpec)
     damage: 0,
     deathtouched: false,
     counters: NO_COUNTERS,
+    battlefieldTimestamp: counter,
   };
 
   // The one step `moveObject` cannot lend, because it is the step that makes a
@@ -671,9 +1518,18 @@ export function createToken(trace: Trace, controller: PlayerId, spec: TokenSpec)
   const placed: GameState = addToZone(putObject(arrival.state, arrived), arrived, 'battlefield');
 
   let next = withState(trace, placed);
-  next = emit(next, { type: 'tokenCreated', oid, controller, name: spec.name });
+  next = emit(next, { type: 'tokenCreated', oid, controller, name: card.name });
   for (const id of arrival.appliedIds) {
     next = emit(next, { type: 'replacementApplied', id, event: 'enters' });
   }
   return completeArrival(next, oid, arrival);
+}
+
+export function createToken(trace: Trace, controller: PlayerId, spec: TokenSpec): Trace {
+  return createTokenCard(trace, controller, tokenCard(spec));
+}
+
+/** Creates a token from already-derived copiable card values through the ordinary token arrival path. */
+export function createCopiedToken(trace: Trace, controller: PlayerId, card: Card): Trace {
+  return createTokenCard(trace, controller, card);
 }

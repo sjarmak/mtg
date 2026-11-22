@@ -100,12 +100,32 @@ export interface DeclarationSubject {
   readonly oid: ObjectId;
   /** Named as every other move on this surface names a permanent (`naming.ts`). */
   readonly name: string;
+  /** True only for a blocker the kernel says may choose several attackers. */
+  readonly multiple: boolean;
   /** Never empty: a creature with nothing to be declared against is not a subject. */
   readonly candidates: readonly DeclarationCandidate[];
 }
 
-/** What a creature is currently declared against; absent means it declines. */
-export type Assignment = ReadonlyMap<ObjectId, AssignmentKey>;
+/**
+ * What a creature is currently declared against; absent means it declines.
+ *
+ * The string spelling is retained for capacity-one subjects and for callers
+ * written before Palace Guard. An array is the canonical in-progress spelling
+ * for a blocker that may choose several attackers; every reader normalizes the
+ * two before comparing or emitting an action.
+ */
+export type AssignmentValue = AssignmentKey | readonly AssignmentKey[];
+export type Assignment = ReadonlyMap<ObjectId, AssignmentValue>;
+
+function assignmentKeys(value: AssignmentValue | undefined): readonly AssignmentKey[] {
+  if (value === undefined) return [];
+  return typeof value === 'string' ? [value] : value;
+}
+
+/** Every target currently held for one declaration subject. */
+export function assignedKeys(assignment: Assignment, oid: ObjectId): readonly AssignmentKey[] {
+  return assignmentKeys(assignment.get(oid));
+}
 
 export interface DeclarationPlan {
   readonly kind: DeclarationKind;
@@ -113,7 +133,7 @@ export interface DeclarationPlan {
   readonly player: PlayerId;
   /** The eligible creatures, in the order the kernel listed them. */
   readonly subjects: readonly DeclarationSubject[];
-  /** Every enumerated declaration, found by the assignment it is. */
+  /** Every complete enumerated declaration, found by the assignment it is. */
   readonly byAssignment: ReadonlyMap<string, number>;
 }
 
@@ -192,7 +212,7 @@ export function declarationWords(kind: DeclarationKind): DeclarationWords {
  */
 export function assignmentKey(assignment: Assignment): string {
   return [...assignment.entries()]
-    .map(([oid, key]) => `${oid}>${key}`)
+    .flatMap(([oid, value]) => assignmentKeys(value).map((key) => `${oid}>${key}`))
     .sort()
     .join('|');
 }
@@ -203,7 +223,11 @@ function assignmentOf(action: Action): Assignment | null {
     return new Map(action.attackers.map((attack) => [attack.oid, defenderKey(attack.defender)]));
   }
   if (action.type === 'declareBlockers') {
-    return new Map(action.blocks.map((block) => [block.blocker, block.attacker]));
+    const grouped = new Map<ObjectId, AssignmentKey[]>();
+    for (const block of action.blocks) {
+      grouped.set(block.blocker, [...(grouped.get(block.blocker) ?? []), block.attacker]);
+    }
+    return grouped;
   }
   return null;
 }
@@ -225,7 +249,11 @@ function actionOf(plan: DeclarationPlan, assignment: Assignment): Action | null 
   const player = plan.player;
   if (plan.kind === 'declareAttackers') {
     const attackers: { readonly oid: ObjectId; readonly defender: CombatDefender }[] = [];
-    for (const [oid, key] of assignment) {
+    for (const [oid, value] of assignment) {
+      const keys = assignmentKeys(value);
+      if (keys.length !== 1) return null;
+      const key = keys[0];
+      if (key === undefined) return null;
       const defender = defenderOf(key);
       if (defender === null) return null;
       attackers.push({ oid, defender });
@@ -239,7 +267,9 @@ function actionOf(plan: DeclarationPlan, assignment: Assignment): Action | null 
   return {
     type: 'declareBlockers',
     player,
-    blocks: [...assignment].map(([blocker, attacker]) => ({ blocker, attacker })),
+    blocks: [...assignment].flatMap(([blocker, value]) =>
+      assignmentKeys(value).map((attacker) => ({ blocker, attacker })),
+    ),
   };
 }
 
@@ -256,13 +286,20 @@ function actionOf(plan: DeclarationPlan, assignment: Assignment): Action | null 
  * against nothing — a ground blocker against a lone flyer — has no entry here
  * and is left out of the roster entirely, which is the true statement about it.
  */
-function candidatesFor(decision: Decision): ReadonlyMap<ObjectId, readonly AssignmentKey[]> {
-  const found = new Map<ObjectId, readonly AssignmentKey[]>();
+interface OfferedCandidates {
+  readonly keys: readonly AssignmentKey[];
+  readonly multiple: boolean;
+}
+
+function candidatesFor(decision: Decision): ReadonlyMap<ObjectId, OfferedCandidates> {
+  const found = new Map<ObjectId, OfferedCandidates>();
   if (decision.kind === 'declareAttackers') {
     const defenders = decision.defenders.map(defenderKey);
-    for (const oid of decision.eligible) found.set(oid, defenders);
+    for (const oid of decision.eligible) found.set(oid, { keys: defenders, multiple: false });
   } else if (decision.kind === 'declareBlockers') {
-    for (const entry of decision.candidates) found.set(entry.blocker, entry.attackers);
+    for (const entry of decision.candidates) {
+      found.set(entry.blocker, { keys: entry.attackers, multiple: entry.capacity === 'any' });
+    }
   }
   return found;
 }
@@ -289,10 +326,25 @@ export function declarationPlan(
   decision: Decision,
 ): DeclarationPlan | null {
   if (decision.kind !== 'declareAttackers' && decision.kind !== 'declareBlockers') return null;
-  if (decision.options.length < 2 && decision.complete) return null;
+  if (decision.options.filter((option) => option.type !== 'concede').length < 2 && decision.complete)
+    return null;
 
   const byAssignment = new Map<string, number>();
   for (const [index, option] of decision.options.entries()) {
+    // `settled` is the kernel's capped-enumeration fallback: the option answers
+    // only a prefix of the declaration and deliberately leaves another
+    // declaration decision pending. The staged surface builds a whole action,
+    // so treating one of those prefixes as the whole assignment would submit
+    // early, reset its local state, and make the next answer unable to retain
+    // the pairs the kernel already settled. Only a terminal enumerated action
+    // is an index for a staged declaration; otherwise `declarationChoice`
+    // constructs and validates the complete action below.
+    if (
+      (option.type === 'declareAttackers' || option.type === 'declareBlockers') &&
+      option.settled !== undefined
+    ) {
+      continue;
+    }
     const assignment = assignmentOf(option);
     if (assignment === null) continue;
     const key = assignmentKey(assignment);
@@ -305,16 +357,17 @@ export function declarationPlan(
   const offered = candidatesFor(decision);
   const subjects: DeclarationSubject[] = [];
   for (const oid of decision.eligible) {
-    const keys = offered.get(oid);
-    if (keys === undefined || keys.length === 0) continue;
+    const offer = offered.get(oid);
+    if (offer === undefined || offer.keys.length === 0) continue;
     subjects.push({
       oid,
+      multiple: offer.multiple,
       // A roster row is a button over one specific creature, unlike a target
       // slot: `rosterName` disambiguates two indistinguishable siblings that
       // `permanentName`'s twin qualifier deliberately leaves reading alike
       // (`mtg-rf12`).
       name: rosterName(state, oid, decision.eligible),
-      candidates: keys.map((key): DeclarationCandidate => ({
+      candidates: offer.keys.map((key): DeclarationCandidate => ({
         key,
         label: candidateLabel(state, names, key),
       })),
@@ -401,19 +454,30 @@ export type RosterPress =
   | { readonly kind: 'ask'; readonly oid: ObjectId };
 
 export function rosterPress(subject: DeclarationSubject, assignment: Assignment): RosterPress {
-  const held = assignment.get(subject.oid);
+  const held = assignmentKeys(assignment.get(subject.oid));
   const only = subject.candidates[0];
   if (subject.candidates.length === 1 && only !== undefined) {
-    return { kind: 'assign', oid: subject.oid, to: held === undefined ? only.key : null };
+    return { kind: 'assign', oid: subject.oid, to: held.includes(only.key) ? null : only.key };
   }
   return { kind: 'ask', oid: subject.oid };
 }
 
 /** The assignment with one creature's answer replaced, or removed for `null`. */
-export function withAssignment(assignment: Assignment, oid: ObjectId, to: AssignmentKey | null): Assignment {
+export function withAssignment(
+  assignment: Assignment,
+  oid: ObjectId,
+  to: AssignmentKey | null,
+  multiple = false,
+): Assignment {
   const next = new Map(assignment);
   if (to === null) next.delete(oid);
-  else next.set(oid, to);
+  else if (!multiple) next.set(oid, to);
+  else {
+    const held = assignmentKeys(assignment.get(oid));
+    const selected = held.includes(to) ? held.filter((key) => key !== to) : [...held, to];
+    if (selected.length === 0) next.delete(oid);
+    else next.set(oid, selected);
+  }
   return next;
 }
 
@@ -461,8 +525,8 @@ export function withAssignment(assignment: Assignment, oid: ObjectId, to: Assign
  * equivalent that would be a second model of the same assignment.
  */
 export interface BlockAssignment {
-  /** The attacking permanent, by the id the board keys its cards on. */
-  readonly attacker: ObjectId;
+  /** The attacking permanents, by the ids the board keys its cards on. */
+  readonly attackers: readonly ObjectId[];
   /** And as the panel already says it — `Bot's Ember Courser` (`naming.ts`). */
   readonly label: string;
 }
@@ -508,17 +572,24 @@ export function blockGesture(view: DeclarationView | null): BlockGesture {
   const asked = view.stage.kind === 'target' ? view.stage.subject : null;
   const assigned = new Map<ObjectId, BlockAssignment>();
   for (const subject of view.plan.subjects) {
-    const held = view.assignment.get(subject.oid);
-    if (held === undefined) continue;
-    const candidate = subject.candidates.find((one) => one.key === held);
+    const held = assignmentKeys(view.assignment.get(subject.oid));
+    if (held.length === 0) continue;
+    const candidates = held.flatMap((key) => {
+      const candidate = subject.candidates.find((one) => one.key === key);
+      return candidate === undefined ? [] : [candidate];
+    });
     // A block's assignment key is the attacking permanent's own id
     // (`assignmentOf`), so the key is the attacker and the label is the one the
     // panel would print beside it. A held key the subject no longer offers is
     // dropped rather than named: the assignment is scoped to a decision *count*
     // and two positions can share one, so this is the same staleness the roster
     // answers by finding no index for it.
-    if (candidate === undefined) continue;
-    assigned.set(subject.oid, { attacker: held, label: candidate.label });
+    const first = candidates[0];
+    if (first === undefined) continue;
+    assigned.set(subject.oid, {
+      attackers: candidates.map((candidate) => candidate.key),
+      label: candidates.map((candidate) => candidate.label).join(', '),
+    });
   }
   return {
     pressable: new Set(view.plan.subjects.map((subject) => subject.oid)),

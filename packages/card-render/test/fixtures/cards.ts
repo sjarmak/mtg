@@ -313,9 +313,115 @@ const ABILITY_CARDS: readonly CardInput[] = [
       },
     ],
   },
+  {
+    id: 'ability-player-rule',
+    name: 'Angelic Arbiter',
+    kind: 'creature',
+    rarity: 'rare',
+    set: { code: 'M11', collectorNumber: 4 },
+    colors: ['W'],
+    subtypes: ['Angel'],
+    keywords: ['flying'],
+    manaCost: { generic: 5, W: 2 },
+    power: 5,
+    toughness: 6,
+    abilities: [
+      {
+        kind: 'staticPlayerRule',
+        players: 'eachOpponent',
+        rule: 'cantAttackWithCreaturesIfCastSpellThisTurn',
+      },
+      {
+        kind: 'staticPlayerRule',
+        players: 'eachOpponent',
+        rule: 'cantCastSpellsIfAttackedWithCreatureThisTurn',
+      },
+    ],
+  },
+  {
+    id: 'ability-game-rule',
+    name: 'Platinum Angel',
+    kind: 'creature',
+    rarity: 'mythic',
+    set: { code: 'M11', collectorNumber: 212 },
+    colors: [],
+    subtypes: ['Angel'],
+    keywords: ['flying'],
+    manaCost: { generic: 7 },
+    artifact: true,
+    power: 4,
+    toughness: 4,
+    abilities: [
+      {
+        kind: 'staticGameRule',
+        rule: 'controllerCantLoseAndOpponentsCantWin',
+      },
+    ],
+  },
+  {
+    id: 'ability-state-trigger',
+    name: 'Marker-Bound Guardian',
+    kind: 'creature',
+    rarity: 'rare',
+    set: { code: 'ABL', collectorNumber: 7 },
+    colors: ['B'],
+    subtypes: ['Zombie'],
+    keywordAbilities: [{ kind: 'indestructible' }],
+    manaCost: { B: 3 },
+    power: 5,
+    toughness: 5,
+    abilities: [
+      {
+        kind: 'stateTriggered',
+        condition: { kind: 'controllerControlsNoPermanentWithCounter', counter: 'phylactery' },
+        effects: [{ kind: 'sacrificeSelf', target: { kind: 'selfCreature' } }],
+      },
+    ],
+  },
+  {
+    id: 'ability-static-bundle',
+    name: 'Vampire Nocturnus',
+    kind: 'creature',
+    rarity: 'mythic',
+    set: { code: 'M13', collectorNumber: 113 },
+    colors: ['B'],
+    subtypes: ['Vampire'],
+    manaCost: { generic: 1, B: 3 },
+    power: 3,
+    toughness: 3,
+    abilities: [
+      {
+        kind: 'staticBundle',
+        scope: 'otherCreaturesYouControl',
+        subtype: 'Vampire',
+        includeSelf: true,
+        enabledWhile: { kind: 'controllerTopLibraryHasColor', color: 'B' },
+        modifications: [
+          { kind: 'statBonus', power: 2, toughness: 1 },
+          { kind: 'grantKeyword', keyword: 'flying' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ability-static-activation-rule',
+    name: 'Pithing Needle',
+    kind: 'artifact',
+    rarity: 'rare',
+    set: { code: 'RTR', collectorNumber: 231 },
+    colors: [],
+    manaCost: { generic: 1 },
+    entryReplacement: { kind: 'chooseCardName' },
+    abilities: [
+      {
+        kind: 'staticActivationRule',
+        rule: 'chosenNameNonManaAbilitiesCantActivate',
+      },
+    ],
+  },
 ];
 
-/** Cards carrying static abilities. All pass `parseCard`. */
+/** Cards carrying engine-authored static or state abilities. All pass `parseCard`. */
 export function abilityCards(): readonly Card[] {
   return ABILITY_CARDS.map((input) => parseCard(input));
 }
@@ -819,12 +925,6 @@ const PLANESWALKER_CARDS: readonly CardInput[] = [
         cost: { mana: {} },
         loyaltyCost: 1,
         effects: [{ kind: 'gainLife', amount: 2, target: { kind: 'targetPlayer' } }],
-      },
-      {
-        kind: 'activated',
-        cost: { mana: {} },
-        loyaltyCost: -3,
-        effects: [{ kind: 'drawCards', count: 2, target: { kind: 'noTarget' } }],
       },
     ],
   },

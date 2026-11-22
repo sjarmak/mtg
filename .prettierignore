@@ -14,5 +14,41 @@ packages/cube/fixtures/
 # it here would put `npm run format` and every rebuild of the deck in a loop.
 packages/decklab/fixtures/
 
+# Installed play admissions are content-addressed evidence. Their parent
+# manifests bind the exact bytes of qualification and probe receipts, so a
+# source formatter must not rewrite them after verification.
+packages/data/data/*/play-admission-*/
+
 # Run outputs.
 out/
+
+# `build-printed-format` binds the exact bytes of the catalog and format files it
+# emits in build-evidence.json (artifactSha256), and
+# packages/data/test/isd-printed-format.test.ts checks that binding (the
+# Starter Commander test checks the recipe file the same way). Keep them as
+# emitted; the display metadata and README beside them are ordinary source.
+packages/data/data/isd/isd-printed-catalog-v1.json
+packages/data/data/isd/isd-limited-format-v1.json
+packages/data/data/scd/scd-printed-catalog-v1.json
+packages/data/data/scd/scd-constructed-format-v1.json
+packages/data/data/scd/onboarding-format-v1.json
+
+# The SCD builder emits and evidence-binds the recipe, catalog and constructed
+# format by the same contract. Preserve those bytes across the formatting gate.
+packages/data/data/scd/onboarding-format-v1.json
+packages/data/data/scd/scd-printed-catalog-v1.json
+packages/data/data/scd/scd-constructed-format-v1.json
+
+packages/data/data/commander-precons/scd-printed-catalog-v1.json
+packages/data/data/commander-precons/c17-printed-catalog-v1.json
+packages/data/data/commander-precons/ala-printed-catalog-v1.json
+packages/data/data/commander-precons/c13-printed-catalog-v1.json
+packages/data/data/commander-precons/cma-printed-catalog-v1.json
+packages/data/data/commander-precons/c16-printed-catalog-v1.json
+packages/data/data/commander-precons/cmm-printed-catalog-v1.json
+packages/data/data/commander-precons/commander-precons-constructed-format-v1.json
+packages/data/data/commander-precons/onboarding-format-v1.json
+packages/data/data/commander-precons/commander-precons-printed-sources-v1.json
+
+# Launcher-staged browser copies of printed catalogs and formats (gitignored).
+packages/ui/public/formats/

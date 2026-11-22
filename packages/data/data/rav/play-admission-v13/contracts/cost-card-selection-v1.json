@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-controller-contract-receipt",
+  "id": "cost-card-selection-v1",
+  "engineRuntime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "protocolVersion": 2
+  },
+  "decisionFamilies": [
+    "cost-card-selection"
+  ],
+  "sourceRegions": [
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        PaymentDecision chooseGraveyardExileCost(",
+      "endMarker": "        PaymentDecision chooseTitanEscapeExileCost(",
+      "sha256": "41fd5a2d76c7342b44ef17cd3c8e46164bbc4fa95a893bad2f6910642ffdf690"
+    },
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        private static int parsePositiveFixedAmount(String amount) {",
+      "endMarker": "        private boolean isScopedAkhHouSingleSacrificeCost(",
+      "sha256": "823890de1d5c7fe37c0a1c7b36e2424b912b387909004ae86f4df342dca25a98"
+    }
+  ],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "scenarioReceiptIds": [
+        "stitched-drake-local-cost-card-selection-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "scenarioReceiptIds": [
+        "stitched-drake-engine-cost-card-selection-v1"
+      ]
+    }
+  ],
+  "evidence": {
+    "scenarioReceipts": [
+      {
+        "receiptId": "stitched-drake-engine-cost-card-selection-v1",
+        "file": {
+          "path": "scenarios/stitched-drake-engine-cost-card-selection-v1.json",
+          "sha256": "ff7fa428d7068e4b5e7f145b06f82e3b040379a763621ae9c89183133f00099d"
+        }
+      },
+      {
+        "receiptId": "stitched-drake-local-cost-card-selection-v1",
+        "file": {
+          "path": "scenarios/stitched-drake-local-cost-card-selection-v1.json",
+          "sha256": "b8d280f2bc1c9d81914d22a0cc77801619cfbea9650b296be5c4d2f03c92706e"
+        }
+      }
+    ]
+  }
+}

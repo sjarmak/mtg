@@ -7,36 +7,56 @@
  * It scores enumerated options and takes the best, ties going to enumeration
  * order, so it is fully deterministic.
  */
-import type { Card, Effect, ManaCost, PumpAmount } from '@mtg/dsl';
-import { assertNever, counterStatBonus, effectsFor, manaValue, printedEffects, resolveX } from '@mtg/dsl';
-import { activatedAbilityAt } from './abilities';
+import type { Card, Effect, ManaCost, OverloadEffect, PumpAmount } from '@mtg/dsl';
+import {
+  assertNever,
+  counterStatBonus,
+  EFFECT_CAPABILITIES,
+  effectsFor,
+  effectsForActivatedAbility,
+  isOverloadOnlyEffect,
+  manaValue,
+  overloadEffectForMember,
+  printedEffects,
+  resolveX,
+  spellEffectsFor,
+} from '@mtg/dsl';
 import type { Action } from './actions';
 import type { AgentView, PlayerAgent } from './agent';
 import { scoringAgent } from './agent';
-import { effectiveManaCost } from './cost';
+import { effectiveManaCost, selectedCastingManaCost } from './cost';
+import { canCounterStackEntry } from './counter';
 import type { ObjectId, PlayerId } from './ids';
 import { opponentOf } from './ids';
-import { powerOf, toughnessOf } from './layers';
+import { controllerOf, currentActivatedAbilityAt, powerOf, toughnessOf } from './layers';
 import { canPay, planPayment } from './mana';
 import { spellAwaitingMay } from './may-choice';
+import { pendingPluralContext } from './pending-plural-context';
 import { playerOf } from './trace';
-import { spellAwaitingUnless } from './unless-choice';
+import { stackAwaitingUnless } from './unless-choice';
 import type { GameState, Target } from './state';
+import { satisfiesTargetFilter } from './target-filter';
 import { triggerOnStack } from './trigger-choice';
 import { creaturesControlledBy, getObject, isOnBattlefield } from './zones';
 
-function castValue(state: GameState, action: Extract<Action, { type: 'castSpell' }>): number {
-  const card = getObject(state, action.oid).card;
+function exchangeControlTargetScore(view: AgentView, target: Target): number | null {
+  if (view.decision.kind !== 'pluralTargets' || target.kind !== 'permanent') return null;
+  const pending = view.state.pendingPluralTargets;
+  if (pending === undefined) return null;
+  const effect = pendingPluralContext(view.state, pending).effects[view.decision.effectIndex];
+  if (effect?.kind !== 'exchangeControl') return null;
+
+  const targetMine = controllerOf(view.state, target.oid) === view.player;
+  const first = view.decision.selected[0];
+  if (first === undefined) return targetMine ? 20 : -20;
+  if (first.kind !== 'permanent') return -20;
+  const firstMine = controllerOf(view.state, first.oid) === view.player;
+  return firstMine === targetMine ? -20 : 20;
+}
+
+function castValue(card: Card): number {
   const creatureBonus = card.kind === 'creature' ? 6 : 0;
-  const cost =
-    card.kind === 'land'
-      ? 0
-      : card.manaCost.generic +
-        card.manaCost.W +
-        card.manaCost.U +
-        card.manaCost.B +
-        card.manaCost.R +
-        card.manaCost.G;
+  const cost = card.kind === 'land' ? 0 : manaValue(card.manaCost);
   return 40 + creatureBonus + cost;
 }
 
@@ -80,6 +100,7 @@ function blockValue(
   action: Extract<Action, { type: 'declareBlockers' }>,
 ): number {
   const me = view.player;
+  if (state.combat.blockDeclarationAuthority === me) return -action.blocks.length;
   const incoming = state.combat.attacks
     .filter((attack) => typeof attack.defender === 'number' && attack.defender === me)
     .reduce((sum, attack) => sum + Math.max(0, powerOf(state, attack.oid)), 0);
@@ -134,14 +155,7 @@ function discardValue(
   for (const oid of action.oids) {
     const card = getObject(state, oid).card;
     if (card.kind === 'land') total -= 2;
-    else
-      total +=
-        card.manaCost.generic +
-        card.manaCost.W +
-        card.manaCost.U +
-        card.manaCost.B +
-        card.manaCost.R +
-        card.manaCost.G;
+    else total += manaValue(card.manaCost);
   }
   return total;
 }
@@ -174,155 +188,38 @@ function fixedAmount(amount: PumpAmount): number {
  * is not scored neutrally, it is scored as a *gift*, and the bot aims it at its
  * own board and is penalized for aiming it anywhere else.
  *
- * Two of the fourteen kinds have no fixed answer, and it is the same situation
- * twice: the primitive that moves a stat line points one way when the number is
- * positive and the other way when it is negative. "Target creature gets -2/-2"
- * and "target creature gets +2/+2" are one `pumpUntilEndOfTurn`; a gloom
- * counter and a +1/+1 counter are one `putCounters`. So the sign is read off
- * the stat line rather than guessed from the kind.
- *
- * Written as an exhaustive switch rather than as a list of `||`s because that
- * is the form a fifteenth effect kind cannot slip past: the three ways this
- * function was wrong before `mtg-4f2y` were all silence rather than a wrong
- * answer. `exileTarget` was absent outright, so "Exile target creature. You
- * gain 2 life." exiled the bot's own blocker and gained it two life for doing
- * so - reported from a live game on 2026-08-18, on a 1/3 the bot had played
- * itself. `pumpUntilEndOfTurn` was absent, so every card in the flagship
- * reading "target creature gets -N/-N" - six of them - was aimed at the bot's
- * own creatures. And `putCounters` read its sign only when the effect was
- * *scoped*, so the set's two single-target gloom spells were gifts as well.
- *
- * Two of the harmful kinds name a player rather than a permanent, and both are
- * harmful for the same reason: what `millCards` and `revealHand` do to the seat
- * they name is something that seat would rather avoid. They sit in the group
- * without a note of their own on the case, because a comment is a statement to
- * `no-fallthrough` and an empty case that holds one is a case it reports.
- *
- * `fight` is the one kind that hurts the chooser's own body as well, and it is
- * still harmful here without qualification: this function answers "which way
- * should this be aimed", the fight vocabulary can only be aimed at a creature
- * the chooser does not control, and a bot that read a fight as a gift would aim
- * a removal spell at nothing. Whether the fight is *worth* casting is a
- * question about the two power values, which this seat does not ask about any
- * effect.
+ * Most kinds take their fixed classification from `EFFECT_CAPABILITIES`, whose
+ * total record makes a new primitive declare an answer before it compiles.
+ * Three families need the effect value too: signed P/T movement, signed
+ * counters, and the targeted form of graveyard exile. This reader owns those
+ * contextual decisions while the shared row owns which reader applies.
  */
 function isHarmful(effect: Effect): boolean {
-  switch (effect.kind) {
-    case 'dealDamage':
-    case 'destroyPermanent':
-    case 'exileTarget':
-    case 'tapPermanent':
-    case 'returnToHand':
-    case 'millCards':
-    case 'revealHand':
-    case 'fight':
-    case 'discardCards':
-    case 'chooseDiscard':
-    case 'sacrificePermanent':
-      // CR 701.8 costs its target cards whoever chooses them, so both discards
-      // are harmful in the one sense this predicate measures — aim them at an
-      // opponent. `chooseDiscard` is the strictly better of the two for the
-      // same reason it is unpriced separately, and this seat has no policy fine
-      // enough to say so. `sacrificePermanent` joins them for the identical
-      // reason: CR 701.17a costs its target a permanent whoever chooses which
-      // one, unlike `sacrificeSelf` below, whose referent is fixed at print
-      // time and never a target at all.
+  const harmfulness = EFFECT_CAPABILITIES[effect.kind].harmfulness;
+  switch (harmfulness) {
+    case 'harmful':
       return true;
-    case 'putCounters': {
+    case 'beneficial':
+      return false;
+    case 'counterDelta': {
+      if (effect.kind !== 'putCounters') {
+        throw new Error(`counterDelta harmfulness cannot classify ${effect.kind}`);
+      }
       const bonus = counterStatBonus(effect.counter);
       return bonus.power + bonus.toughness < 0;
     }
-    case 'pumpUntilEndOfTurn':
+    case 'pumpDelta':
+      if (effect.kind !== 'pumpUntilEndOfTurn') {
+        throw new Error(`pumpDelta harmfulness cannot classify ${effect.kind}`);
+      }
       return fixedAmount(effect.power) + fixedAmount(effect.toughness) < 0;
-    // The aim question for a base P/T set is a question about the *body*: base
-    // 1/1 is a curse on a 5/5 and a gift on a 0/1, and the difference is the
-    // creature rather than the effect. This predicate is handed the effect
-    // alone, so it cannot ask, and `true` is the answer that is correct for
-    // every card that can print this kind — it is hand-authored only
-    // (`UNPRICED_EFFECT_KINDS`), and Diminish and its printed kin all shrink.
-    //
-    // A hand-authored base P/T *raise* is where this arm would be wrong, and
-    // the fix is not a threshold here: `@mtg/sim`'s target policy scores the
-    // same effect with the board in hand and already reads the current stats,
-    // which is where a state-dependent answer belongs.
-    case 'setBasePtUntilEndOfTurn':
-      return true;
-    case 'addMana':
-    case 'counterSpell':
-    case 'createToken':
-    case 'drawCards':
-    case 'gainLife':
-    case 'returnFromGraveyard':
-    case 'scry':
-    case 'shuffleLibrary':
-    case 'revealTopCards':
-    case 'exileGraveyard':
-    case 'shuffleGraveyardIntoLibrary':
-    case 'searchLibrary':
-    case 'chooseFromGraveyard':
-    case 'setLife':
-    case 'preventCombatDamage':
-      // Neither of the last two names a target at all, so "which way should
-      // this be aimed" has no answer and `false` is the one that stops the bot
-      // aiming anything. `setLife` is the interesting one: it is a gift or a
-      // killing blow depending on a life total this function is not handed, and
-      // it is still untargeted either way — the total it moves is always the
-      // controller's.
-      return false;
-    // Unlike the two effects just above, this one does name a target — but it
-    // is a shield, not a strike, so `false` is still the right answer and
-    // `effectTargetBonus` below is what makes the bot point it at its own
-    // board rather than leaving it unscored.
-    case 'preventAllDamageToTarget':
-      return false;
-    // The same shape and the same answer: an untap is something a seat does to
-    // its own board, so `false` points it there. What this seat cannot say is
-    // that the permanent should be *tapped* — `effectTargetBonus` scores a
-    // permanent by its body and its controller and asks nothing else — so the
-    // bot will happily untap an untapped creature and get a no-op. That is a
-    // policy this agent has nowhere to put rather than a missing arm here, and
-    // it is the same blunt reading that makes it pump the biggest body instead
-    // of the one that is about to trade.
-    case 'untapPermanent':
-      return false;
-    // Never harmful, and unlike the untap above it there is no second reading
-    // at all: `KEYWORDS` carries nine, every one of them an upgrade, so the
-    // worst a grant does to the creature it names is nothing.
-    case 'grantKeywordUntilEndOfTurn':
-      return false;
-    // Evasion for a turn, and never a drawback: the same reading the grant
-    // above it gets, so `false` points it at this seat's own board.
-    case 'cantBeBlockedThisTurn':
-      return false;
-    // The one arm in this switch that is harmful *and* aimed at a creature
-    // rather than at a player. A creature compelled to attack leaves its
-    // controller's board undefended and may die doing it, so the seat it names
-    // is the seat that would rather avoid it — which is `isHarmful`'s whole
-    // question, and `true` is what points the bot across the table.
-    case 'attacksYouThisTurnIfAble':
-      return true;
-    // Life loss is `dealDamage`'s answer for `dealDamage`'s reason: it is the
-    // one thing the seat it names would rather avoid.
-    case 'loseLife':
-      return true;
-    // The one arm where the question has no answer, and `false` is what says
-    // so. A sacrifice of the source is aimed at a retained referent -- the
-    // permanent whose ability this is -- so there is no tuple to point either
-    // way and this predicate is never the thing that decides anything about
-    // it. `false` rather than `true` because the single legal referent is
-    // always on this seat's own board, and pointing across the table would be
-    // pointing at nothing.
-    case 'sacrificeSelf':
-      return false;
-    case 'putOnLibrary':
-      // The one library effect that aims at something, and it is removal: a
-      // permanent tucked into its owner's library has left the battlefield and
-      // has to be drawn again. `exileGraveyard` is above it in the benign group
-      // for the opposite reason — it names a graveyard by `whose` rather than
-      // by target, so there is no way to aim it and nothing here to score.
-      return true;
+    case 'targetedGraveyard':
+      if (effect.kind !== 'exileGraveyard') {
+        throw new Error(`targetedGraveyard harmfulness cannot classify ${effect.kind}`);
+      }
+      return 'target' in effect;
     default:
-      return assertNever(effect, 'isHarmful');
+      return assertNever(harmfulness, 'isHarmful');
   }
 }
 
@@ -367,6 +264,41 @@ function effectTargetBonus(
       const value = powerOf(state, target.oid) + toughnessOf(state, target.oid);
       const desirable = harmful === !owned;
       bonus += desirable ? 3 + value + xValue : -8 - xValue;
+    }
+  }
+  return bonus;
+}
+
+/** Scores an untargeted Overload replacement against the cohort it will read. */
+function overloadEffectBonus(
+  state: GameState,
+  me: PlayerId,
+  sourceCard: Card,
+  effects: readonly OverloadEffect[],
+  chosenX: number,
+): number {
+  let bonus = 0;
+  for (const effect of effects) {
+    if (!isOverloadOnlyEffect(effect)) {
+      bonus += effectTargetBonus(state, me, [effect], [null], chosenX);
+      continue;
+    }
+    if (effect.kind === 'counterSpell') {
+      bonus +=
+        state.stack.filter(
+          (entry) =>
+            entry.ability === null &&
+            entry.controller !== me &&
+            canCounterStackEntry(state, entry.oid, sourceCard),
+        ).length * 4;
+      continue;
+    }
+    const ownSide = effect.kind === 'cantBeBlockedThisTurn';
+    const memberEffect = overloadEffectForMember(effect);
+    for (const oid of state.battlefield) {
+      if ((controllerOf(state, oid) === me) !== ownSide) continue;
+      if (!satisfiesTargetFilter(state, oid, effect.scopeFilter)) continue;
+      bonus += effectTargetBonus(state, me, [memberEffect], [{ kind: 'permanent', oid }], chosenX);
     }
   }
   return bonus;
@@ -569,7 +501,16 @@ function castBreaksHold(
 ): boolean {
   const card = getObject(state, action.oid).card;
   if (card.kind === 'land' || countersSpells(card)) return false;
-  const plan = planPayment(state, me, effectiveManaCost(state, me, card, action.x), action.oid);
+  // An alternative with no mana component leaves the held-open sources alone.
+  // The life and permanent price may still make it a poor cast, but it cannot
+  // spend the mana this predicate alone exists to reserve.
+  if (action.castingCost === 'alternative' || action.castingCost === 'withoutMana') return false;
+  const plan = planPayment(
+    state,
+    me,
+    selectedCastingManaCost(state, me, card, action.x, action.castingCost ?? 'mana'),
+    action.oid,
+  );
   if (plan === null) return false;
   return breaksHold(state, me, action.oid, plan.taps);
 }
@@ -580,9 +521,12 @@ function castBreaksHold(
  * An activation is mana off the table exactly as a cast is, and the arm below
  * already exists to spend *leftover* mana. Left unguarded it would spend the
  * reserve instead — the agent would decline the creature, pass, and then hand
- * the same two lands to a pinger. `tapSelf` is excluded from the sources for
- * the reason `onActivateAbility` excludes it: the permanent taps as part of the
- * cost, so it was never going to pay for anything else.
+ * the same two lands to a pinger. `tapSelf` and a chosen matching cohort are
+ * excluded from the sources for the reason `onActivateAbility` excludes them:
+ * those permanents tap as part of the cost, so they were never going to pay for
+ * anything else. The cohort also has to reach the hold check itself, because it
+ * can spend the reserve with a zero printed mana cost and leave `plan.taps`
+ * empty.
  *
  * The announced X is resolved into the cost first, for the same reason the
  * reducer resolves it: an `{X}{G}{G}` activation for six takes six more mana off
@@ -595,17 +539,14 @@ function activationBreaksHold(
   me: PlayerId,
   action: Extract<Action, { type: 'activateAbility' }>,
 ): boolean {
-  const ability = activatedAbilityAt(state, action.oid, action.abilityIndex);
+  const ability = currentActivatedAbilityAt(state, action.oid, action.abilityIndex);
   if (ability === undefined) return false;
-  const plan = planPayment(
-    state,
-    me,
-    resolveX(ability.cost.mana, action.x ?? 0),
-    undefined,
-    ability.cost.tapSelf ? [action.oid] : [],
-  );
+  const plan = planPayment(state, me, resolveX(ability.cost.mana, action.x ?? 0), undefined, [
+    ...(ability.cost.tapSelf ? [action.oid] : []),
+    ...(action.taps ?? []),
+  ]);
   if (plan === null) return false;
-  return breaksHold(state, me, null, plan.taps);
+  return breaksHold(state, me, null, [...(action.taps ?? []), ...plan.taps]);
 }
 
 /**
@@ -646,18 +587,51 @@ export function simpleAgent(name: string): PlayerAgent {
         // mana this seat needs" are both answers of "not this option", and
         // neither is a number to be traded off against a bigger creature.
         if (castBreaksHold(state, view.player, action)) return HELD_OPEN;
-        return aimedValue(
-          castValue(state, action),
-          effectTargetBonus(
-            state,
-            view.player,
-            effectsFor(getObject(state, action.oid).card, action.mode ?? null),
-            action.targets,
-            action.x ?? 0,
-          ),
+        {
+          const physical = getObject(state, action.oid);
+          const card =
+            state.pendingFreeCast?.oid === action.oid
+              ? (state.pendingFreeCast.card ?? physical.card)
+              : physical.card;
+          const bonus =
+            action.castingCost === 'overload'
+              ? overloadEffectBonus(
+                  state,
+                  view.player,
+                  card,
+                  spellEffectsFor(card, null, 'overload'),
+                  action.x ?? 0,
+                )
+              : effectTargetBonus(
+                  state,
+                  view.player,
+                  spellEffectsFor(card, action.mode ?? null, 'ordinary'),
+                  action.targets,
+                  action.x ?? 0,
+                );
+          return aimedValue(castValue(card), bonus);
+        }
+      case 'beginCastSpell':
+        return castValue(
+          state.pendingFreeCast?.oid === action.oid
+            ? (state.pendingFreeCast.card ?? getObject(state, action.oid).card)
+            : getObject(state, action.oid).card,
         );
+      case 'choosePluralTarget':
+        if (action.target === null) return 0;
+        {
+          const exchangeScore = exchangeControlTargetScore(view, action.target);
+          if (exchangeScore !== null) return exchangeScore;
+        }
+        if (action.target.kind === 'player') return action.target.player === view.player ? -10 : 10;
+        if (action.target.kind === 'spell') return 1;
+        return controllerOf(state, action.target.oid) === view.player ? -10 : 10;
+      case 'allocateDividedDamage':
+        return action.amount;
       case 'activateManaAbility':
         return -10;
+      case 'chooseManaColor':
+        return 0;
       case 'activateAbility': {
         // Below every cast and above passing: this agent spends leftover mana
         // on an ability rather than holding it, and never at the price of a
@@ -670,10 +644,16 @@ export function simpleAgent(name: string): PlayerAgent {
         // meant a pinger with no opposing creature shot one of its own, for
         // exactly the reason the cast arm did.
         if (activationBreaksHold(state, view.player, action)) return HELD_OPEN;
-        const ability = activatedAbilityAt(state, action.oid, action.abilityIndex);
+        const ability = currentActivatedAbilityAt(state, action.oid, action.abilityIndex);
         return aimedValue(
           20,
-          effectTargetBonus(state, view.player, ability?.effects ?? [], action.targets, action.x ?? 0),
+          effectTargetBonus(
+            state,
+            view.player,
+            ability === undefined ? [] : effectsForActivatedAbility(ability, action.mode ?? null),
+            action.targets,
+            action.x ?? 0,
+          ),
         );
       }
       case 'chooseTriggerTargets':
@@ -739,9 +719,10 @@ export function simpleAgent(name: string): PlayerAgent {
         // What neither reads is what that mana was being saved for. A policy
         // that weighs the toll against the payer's own turn belongs to
         // `@mtg/sim`'s tier-1 bots, the same place `keepLegend` sends its own.
-        const pending = spellAwaitingUnless(state);
+        const pending = stackAwaitingUnless(state);
         if (pending === null) return 0;
-        if (action.pay) return -manaValue(pending.clause.cost);
+        if (action.pay) return -manaValue(pending.cost);
+        if (pending.kind !== 'spell') return 0;
         return -effectTargetBonus(
           state,
           pending.entry.controller,
@@ -749,6 +730,8 @@ export function simpleAgent(name: string): PlayerAgent {
           pending.entry.targets,
         );
       }
+      case 'declineFreeCast':
+        return 0;
       case 'keepLegend':
         // CR 704.5j, and the second arm where scoring the act would be
         // meaningless: every option keeps a legend, and they differ only in
@@ -760,6 +743,36 @@ export function simpleAgent(name: string): PlayerAgent {
           toughnessOf(state, action.oid) -
           (getObject(state, action.oid).damage > 0 ? 1 : 0)
         );
+      case 'chooseEntryCopy':
+        // Entering normally is a real option, but a 0/0 copy creature will be
+        // lost to state-based actions. This minimal policy chooses the largest
+        // offered current body; richer ability valuation remains a sim policy.
+        return action.copyOf === null ? 0 : powerOf(state, action.copyOf) + toughnessOf(state, action.copyOf);
+      case 'chooseEntryCounterPermanent':
+      case 'chooseEntryAuraHost':
+      case 'chooseEntryTimestampNext':
+      case 'chooseEntryPlayer':
+      case 'chooseEntryColors':
+        return 0;
+      case 'chooseEntryCharacteristics': {
+        const mode = state.pendingEntryCharacteristicsChoice?.modes[action.mode];
+        return mode === undefined
+          ? 0
+          : mode.power +
+              mode.toughness +
+              (mode.addKeywords?.length ?? 0) +
+              (mode.addKeywordAbilities?.length ?? 0) +
+              (mode.addSubtypes?.length ?? 0);
+      }
+      case 'chooseEntryOptionalCounter':
+        return action.accept ? 2 : 0;
+      case 'chooseEntryPayLife':
+        return action.pay
+          ? playerOf(state, view.player).life > action.life &&
+            state.pendingEntryPayLifeChoice?.entry.tapped !== true
+            ? 1
+            : -1
+          : 0;
       case 'sacrificePermanent':
         // CR 701.17a, and `keepLegend`'s formula negated rather than a second
         // one: that switch scores the option `scoringAgent` should take, and
@@ -772,10 +785,20 @@ export function simpleAgent(name: string): PlayerAgent {
           toughnessOf(state, action.oid) -
           (getObject(state, action.oid).damage > 0 ? 1 : 0)
         );
+      case 'choosePermanentToUntap':
+        if (action.oid === null) return 0;
+        return controllerOf(state, action.oid) === view.player && getObject(state, action.oid).tapped
+          ? 1
+          : -1;
       case 'scry':
+      case 'orderTopLibrary':
+      case 'separateTopLibraryPiles':
+      case 'chooseTopLibraryPile':
         // The unchanged top order is enumerated first. This minimal agent has
         // no card-quality policy, so retaining it is the honest default.
         return 0;
+      case 'selectFromTopLibrary':
+        return action.chosen === null ? 0 : 1;
       case 'chooseFromGraveyard':
         // `searchLibrary` below, one zone over and with the same caveat: this
         // agent has no card-quality policy, so every match ties and the tie
@@ -785,6 +808,12 @@ export function simpleAgent(name: string): PlayerAgent {
         // generated set a blank and the balance simulations would report that as
         // a fact about the set.
         return action.chosen === null ? 0 : 1;
+      case 'chooseFromBattlefield':
+        // Mandatory self-bounce: prefer the smallest creature so the simple
+        // policy does not return its best threat when several choices exist.
+        return -(powerOf(state, action.chosen) + toughnessOf(state, action.chosen));
+      case 'choosePopulateToken':
+        return powerOf(state, action.token) + toughnessOf(state, action.token);
       case 'searchLibrary':
         // Taking a card beats failing to find, and every card the filter
         // matched scores the same. This agent has no card-quality policy (see
@@ -796,15 +825,34 @@ export function simpleAgent(name: string): PlayerAgent {
         // the tie among matches breaks on library order, which is where the
         // seeded shuffle already put it.
         return action.found === null ? 0 : 1;
+      case 'chooseSearchDestination':
+        // This minimal policy has no card-quality judgment. Every found card
+        // ties, so enumeration order makes the choice deterministic.
+        return 0;
+      case 'chooseCardName':
+      case 'chooseNamedZoneExile':
+        return 0;
+      case 'chooseSpellTargets':
+        // The unchanged tuple is enumerated first. This minimal agent has no
+        // stack-evaluation policy, so retaining it is the deterministic floor.
+        return 0;
+      case 'allocateDamagePrevention':
+        // The kernel enumerates the complete legal interval. This minimal
+        // agent makes the deterministic first choice and leaves valuation to
+        // the simulation bots.
+        return 0;
       case 'declareAttackers':
         return attackValue(state, action);
       case 'declareBlockers':
         return blockValue(state, view, action);
       case 'orderBlockers':
+      case 'orderAttackers':
         return 0;
       case 'discard':
       case 'chooseDiscards':
         return discardValue(state, action);
+      case 'chooseFromRevealedHand':
+        return action.chosen === null ? 0 : 1;
       case 'keepHand':
         // This agent always keeps its opening seven. It exists to prove the
         // kernel plays a game through, and a mulligan policy is a judgment about
@@ -812,6 +860,8 @@ export function simpleAgent(name: string): PlayerAgent {
         // profile behind it. Keeping outranks mulliganing so the game starts on
         // the hand it was dealt, whatever the deck looks like.
         return 1;
+      case 'chooseOpeningHandAction':
+        return action.oid === null ? 0 : 1;
       case 'mulligan':
         return 0;
       case 'concede':

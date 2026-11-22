@@ -9,11 +9,11 @@
  *  - CR 702.6b: `Equip [cost]` attaches its source to target creature you
  *    control, at sorcery speed. `legal.ts` enumerates and refuses it; the
  *    attaching itself is `attachTo` below, called when the ability resolves.
- *  - CR 613: what an equipped creature gets is one `ContinuousEffect` per
- *    printed modification, each with `affects` naming that creature and each
- *    built by `effectForModification` — the same function a printed static
- *    ability goes through. There is no attachment-aware branch anywhere in the
- *    layer walk, and that is the whole reason this file is short. A weapon
+ *  - CR 613: each layered modification becomes one `ContinuousEffect` with
+ *    `affects` naming that creature, built by `effectForModification` — the same
+ *    function a printed static ability goes through. Combat restrictions stay
+ *    live on the attachment relation and are read by `combat.ts`; they are not
+ *    characteristics and have no layer to register in. A weapon
  *    granting a keyword *and* a stat bonus therefore registers a layer-6 record
  *    and a layer-7c one, and the walk applies them in that order whatever order
  *    the card listed them in, because `computeAll` iterates `LAYER_ORDER` and
@@ -41,15 +41,20 @@
  * unattachment does emit `continuousEffectsExpired`, because that is what
  * happened and the event already exists for it.
  */
-import type { AttachingAbility, AuraModification, Card } from '@mtg/dsl';
-import { isAuraCard, isStaticAuraModification } from '@mtg/dsl';
+import type { AttachModification, AttachingAbility, AuraModification, Card } from '@mtg/dsl';
+import { isAuraCard, isLayeredStaticModification, isStaticAuraModification } from '@mtg/dsl';
 import { effectForModification } from './abilities';
-import type { AbilityChangeEffect, ContinuousEffect, ControlEffect } from './continuous';
+import type {
+  AbilityChangeEffect,
+  ContinuousEffect,
+  ControlEffect,
+  PtControllerHandScaledModEffect,
+} from './continuous';
 import { onlyObject } from './continuous';
 import type { ObjectId, PlayerId } from './ids';
 import { continuousEffectId } from './ids';
-import { controllerOf, isCreatureObject } from './layers';
-import { isProtectedFrom } from './keyword-abilities';
+import { controllerOf, copiableValuesOf, hasCardType, isCreatureObject } from './layers';
+import { canBeTargetedBy, isProtectedFrom } from './keyword-abilities';
 import type { GameObject, GameState } from './state';
 import type { Trace } from './trace';
 import { emit, putObject, withState } from './trace';
@@ -112,6 +117,13 @@ export function unattach(trace: Trace, equipment: ObjectId): Trace {
   return emit(next, { type: 'continuousEffectsExpired', ids: expired.map((effect) => effect.id) });
 }
 
+/** Drops every attachment from a host the moment that host leaves the battlefield. */
+export function unattachFromHost(trace: Trace, host: ObjectId): Trace {
+  return trace.state.battlefield
+    .filter((oid) => trace.state.objects[oid]?.attachedTo === host)
+    .reduce((current, oid) => unattach(current, oid), trace);
+}
+
 /**
  * CR 701.3a: the Equipment becomes attached to the creature, and CR 701.3c
  * unattaches it from whatever it was attached to before.
@@ -123,7 +135,7 @@ export function unattach(trace: Trace, equipment: ObjectId): Trace {
  * stamped when it entered would not. Layer 7c cannot tell, because both P/T
  * modifications DSL v1 expresses are additive.
  *
- * A clause with two modifications mints one id and one timestamp per record,
+ * A clause with two layered modifications mints one id and one timestamp per record,
  * the way `staticEffectsFor` does for a permanent entering with two static
  * abilities. Consecutive rather than shared, because an id has to be unique and
  * the two are minted from the same counter; consecutive timestamps a moment
@@ -146,6 +158,7 @@ export function attachTo(
   let counter = dropped.state.nextId;
   const effects: ContinuousEffect[] = [];
   for (const modification of ability.attach.modifications) {
+    if (!isLayeredStaticModification(modification)) continue;
     effects.push(
       effectForModification(modification, {
         id: continuousEffectId(counter),
@@ -173,7 +186,22 @@ export function attachTo(
 export function isLegalAuraHost(state: GameState, aura: Card, host: ObjectId): boolean {
   if (!isAuraCard(aura)) return false;
   const object = state.objects[host];
-  return object !== undefined && object.zone === 'battlefield' && isCreatureObject(state, host);
+  if (object === undefined || object.zone !== 'battlefield') return false;
+  switch (aura.aura.enchant) {
+    case 'creature':
+      return isCreatureObject(state, host);
+    case 'artifactOrCreature':
+      return isCreatureObject(state, host) || hasCardType(state, host, 'artifact');
+    case 'land':
+      return hasCardType(state, host, 'land');
+    case 'nonlandPermanent':
+      return !hasCardType(state, host, 'land');
+  }
+}
+
+/** CR 303.4f's non-targeted as-entry attachment legality. */
+export function isLegalAuraEntryHost(state: GameState, aura: Card, host: ObjectId): boolean {
+  return isLegalAuraHost(state, aura, host) && !isProtectedFrom(state, host, aura);
 }
 
 /**
@@ -182,12 +210,12 @@ export function isLegalAuraHost(state: GameState, aura: Card, host: ObjectId): b
  * card and are queried from the attachment relation.
  */
 export function attachAuraTo(trace: Trace, auraOid: ObjectId, host: ObjectId): Trace {
-  const source = objectAt(trace.state, auraOid);
-  if (!isAuraCard(source.card)) throw new Error(`${source.card.name} is not an Aura`);
+  const card = copiableValuesOf(trace.state, auraOid);
+  if (!isAuraCard(card)) throw new Error(`${card.name} is not an Aura`);
   const dropped = unattach(trace, auraOid);
   let counter = dropped.state.nextId;
   const effects: ContinuousEffect[] = [];
-  for (const modification of source.card.aura.modifications) {
+  for (const modification of card.aura.modifications) {
     const common = {
       id: continuousEffectId(counter),
       timestamp: counter,
@@ -209,6 +237,40 @@ export function attachAuraTo(trace: Trace, auraOid: ObjectId, host: ObjectId): T
         addKeywords: [],
         addKeywordAbilities: [{ kind: 'landwalk', landType: modification.landType }],
         removeKeywords: [],
+        removeKeywordAbilities: [],
+        addAbilities: [],
+        prohibitActivation: false,
+        removeAll: false,
+      };
+      effects.push(effect);
+    } else if (
+      modification.kind === 'grantTriggeredAbility' ||
+      modification.kind === 'grantActivatedAbility'
+    ) {
+      const effect: AbilityChangeEffect = {
+        ...common,
+        kind: 'abilityChange',
+        layer: '6',
+        addKeywords: [],
+        addKeywordAbilities: [],
+        removeKeywords: [],
+        removeKeywordAbilities: [],
+        addAbilities: [modification.ability],
+        prohibitActivation: false,
+        removeAll: false,
+      };
+      effects.push(effect);
+    } else if (modification.kind === 'cantActivateAbilities') {
+      const effect: AbilityChangeEffect = {
+        ...common,
+        kind: 'abilityChange',
+        layer: '6',
+        addKeywords: [],
+        addKeywordAbilities: [],
+        removeKeywords: [],
+        removeKeywordAbilities: [],
+        addAbilities: [],
+        prohibitActivation: true,
         removeAll: false,
       };
       effects.push(effect);
@@ -239,6 +301,22 @@ export function attachAuraTo(trace: Trace, auraOid: ObjectId, host: ObjectId): T
     }
     counter += 1;
   }
+  if (card.aura.enchantedControllerHandSizeBonus === true) {
+    const effect: PtControllerHandScaledModEffect = {
+      id: continuousEffectId(counter),
+      timestamp: counter,
+      sourceOid: auraOid,
+      duration: 'whileAttached',
+      affects: onlyObject(host),
+      enabledWhile: null,
+      kind: 'ptControllerHandScaledMod',
+      layer: '7c',
+      power: 1,
+      toughness: 1,
+    };
+    effects.push(effect);
+    counter += 1;
+  }
   const attached: GameObject = { ...objectAt(dropped.state, auraOid), attachedTo: host };
   return withState(dropped, {
     ...putObject(dropped.state, attached),
@@ -255,11 +333,40 @@ export function hasAuraModification(
 ): boolean {
   return state.battlefield.some((oid) => {
     const source = state.objects[oid];
-    return (
-      source !== undefined &&
-      source.attachedTo === host &&
-      isAuraCard(source.card) &&
-      source.card.aura.modifications.some((modification) => modification.kind === kind)
+    if (source === undefined || source.attachedTo !== host) return false;
+    const card = copiableValuesOf(state, oid);
+    return isAuraCard(card) && card.aura.modifications.some((modification) => modification.kind === kind);
+  });
+}
+
+/** Whether the attached Aura grants Urban Burgeoning's extra untap action. */
+export function hasAuraOtherPlayerUntap(state: GameState, host: ObjectId): boolean {
+  return state.battlefield.some((oid) => {
+    const source = state.objects[oid];
+    if (source === undefined || source.attachedTo !== host) return false;
+    const card = copiableValuesOf(state, oid);
+    return isAuraCard(card) && card.aura.untapsDuringEachOtherPlayersUntapStep === true;
+  });
+}
+
+/** True when any battlefield Aura or Equipment attached to `host` grants `kind`. */
+export function hasAttachmentModification(
+  state: GameState,
+  host: ObjectId,
+  kind: AuraModification['kind'] | AttachModification['kind'],
+): boolean {
+  return state.battlefield.some((oid) => {
+    const source = state.objects[oid];
+    if (source === undefined || source.attachedTo !== host) return false;
+    const card = copiableValuesOf(state, oid);
+    if (isAuraCard(card)) {
+      return card.aura.modifications.some((modification) => modification.kind === kind);
+    }
+    return card.abilities.some(
+      (ability) =>
+        ability.kind === 'activated' &&
+        ability.attach !== undefined &&
+        ability.attach.modifications.some((modification) => modification.kind === kind),
     );
   });
 }
@@ -284,7 +391,7 @@ export function isLegalHost(
   return (
     isCreatureObject(state, host) &&
     controllerOf(state, host) === controller &&
-    (sourceOid === undefined || !isProtectedFrom(state, host, sourceOid))
+    (sourceOid === undefined || canBeTargetedBy(state, host, sourceOid, controller))
   );
 }
 
@@ -309,10 +416,9 @@ export function illegalAttachments(state: GameState): readonly ObjectId[] {
     const source = state.objects[oid];
     if (source === undefined) return false;
     const host = attachmentOf(state, oid);
-    if (isAuraCard(source.card)) {
-      return (
-        host === undefined || !isLegalAuraHost(state, source.card, host) || isProtectedFrom(state, host, oid)
-      );
+    const card = copiableValuesOf(state, oid);
+    if (isAuraCard(card)) {
+      return host === undefined || !isLegalAuraHost(state, card, host) || isProtectedFrom(state, host, oid);
     }
     if (host === undefined) return false;
     if (isCreatureObject(state, oid)) return true;

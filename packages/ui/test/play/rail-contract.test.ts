@@ -78,6 +78,7 @@ import {
   DEFAULT_ENUMERATION_CAP,
   driveDeclaration,
   humanSeat,
+  ownedDecision,
   pendingDecision,
   reduce,
   scenario,
@@ -483,7 +484,7 @@ function blockingSession(cap = DEFAULT_ENUMERATION_CAP): GameSession {
   // (`mtg-tb7v`, `mtg-y16d`).
   let state = driveDeclaration(built.state, 'declareAttackers');
   for (let guard = 0; guard < 20; guard += 1) {
-    const decision = pendingDecision(state, cap);
+    const decision = ownedDecision(state, cap);
     if (decision === null) throw new Error('the blocking board left nobody to ask');
     if (decision.kind === 'declareBlockers') {
       return {
@@ -498,7 +499,7 @@ function blockingSession(cap = DEFAULT_ENUMERATION_CAP): GameSession {
         committed: null,
       };
     }
-    const option = decision.options[decision.options.length - 1];
+    const option = [...decision.options].reverse().find((candidate) => candidate.type !== 'concede');
     if (option === undefined) throw new Error('a decision on the way to blockers was empty');
     state = reduce(state, option).state;
   }
@@ -519,12 +520,12 @@ describe('the rail narrows at a combat declaration, and only there', () => {
     // fixture that stopped being exponential would leave the count below true
     // and meaningless.
     expect(BLOCK_SPACE).toBe(64);
-    expect(decision.options).toHaveLength(BLOCK_SPACE);
+    expect(decision.options.filter((option) => option.type === 'declareBlockers')).toHaveLength(BLOCK_SPACE);
 
     render(h(PlayView, { session, viewer: 1, names: SEATS, onChoose: vi.fn() }));
     // Six creatures and one confirm. Linear in the board, where the list it
     // replaced was 2 to the power of it.
-    expect(within(rail()).getAllByRole('button')).toHaveLength(BLOCKERS + 1);
+    expect(within(rail()).getAllByRole('button')).toHaveLength(BLOCKERS + 2);
   });
 
   it('draws every entry as a real button, exactly as the flat list does', () => {

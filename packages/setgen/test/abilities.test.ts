@@ -25,8 +25,8 @@ import {
   checkMechanicCoverage,
   checkSlotConformance,
   FillBatchSchema,
-  FillBatchWithAbilitiesSchema,
   FilledCardSchema,
+  fillSchemaForCapabilities,
   fillSchemaFor,
   parseBrief,
 } from '@mtg/setgen';
@@ -41,6 +41,7 @@ const briefAt = (name: string): SetBrief =>
 
 const HEARTHGLASS = briefAt('hearthglass-vigil.json');
 const TIDEGLASS = briefAt('tideglass-reach.json');
+const FillBatchWithAbilitiesSchema = fillSchemaForCapabilities(['abilities']);
 
 /** A mechanic stating one vocabulary and defaulting the rest, as a brief may. */
 function mechanic(stated: Partial<DesiredMechanic>): DesiredMechanic {
@@ -137,6 +138,14 @@ describe('the answer schema a batch is shown', () => {
     const abilities = JSON.stringify(toJsonSchema(FillBatchWithAbilitiesSchema));
     expect(cards).not.toContain('planeswalker');
     expect(abilities).not.toContain('loyaltyCost');
+  });
+
+  it('keeps hand-authored Flash machinery outside model output', () => {
+    const json = JSON.stringify(toJsonSchema(FillBatchWithAbilitiesSchema));
+    expect(json).not.toContain('"flash"');
+    expect(json).not.toContain('keywordAbilities');
+    expect(json).not.toContain('castSpellsAsThoughFlash');
+    expect(json).not.toContain('spellFilter');
   });
 
   /**
@@ -700,6 +709,19 @@ describe('a mechanic that names no colors reaches the colorless pool', () => {
   });
 
   /**
+   * The four kinds `choosesNothing` keeps out of a trigger-only menu: three by
+   * the target rule and `counterSpell` by name. One list, read by the test that
+   * pins the menu and by the test that proves the menu is not about legality,
+   * so the two cannot drift apart into agreeing about nothing.
+   */
+  const WITHHELD_FROM_A_TRIGGER = [
+    'destroyPermanent',
+    'tapPermanent',
+    'returnToHand',
+    'counterSpell',
+  ] as const;
+
+  /**
    * The bug this was written for. `abilityEffectKinds(null, ['triggered'])`
    * returned exactly `['destroyPermanent']`, whose only legal target is
    * `targetCreature`, and `checkTriggeredEffectTarget` refused any triggered
@@ -707,18 +729,55 @@ describe('a mechanic that names no colors reaches the colorless pool', () => {
    * generator would have spent a regeneration round finding that out.
    *
    * That validator was deleted in `10c72ed`: a trigger chooses its targets now,
-   * and the card the old menu could not print validates clean. What this pins
-   * is therefore today's `choosesNothing`, not today's engine — the filter
-   * outlived its reason, `prompts.ts` says so on the function, and widening it
-   * is a design change that re-keys every fixture holding a trigger-only slot.
+   * and the card the old menu could not print validates clean. So the sentence
+   * this test used to carry — that these are the effects a colorless trigger
+   * "could legally print" — stopped being true, and so did the reason it gave
+   * per kind. Both are corrected here rather than left standing, because a test
+   * that pins behavior on a lapsed reason is how the behavior outlives it.
+   *
+   * What the menu is today is a scope decision, kept because of what the corpus
+   * was recorded under and not because of what the engine allows. `mtg-ys1o`
+   * holds the lift and the measurement behind it: one recording of 152 was taken
+   * with this filter applied. `prompts.ts` states it on `choosesNothing`.
    */
-  it('offers a colorless trigger only effects it could legally print', () => {
+  it('withholds four effect kinds from a colorless trigger as a scope choice', () => {
     const vocabulary = effectVocabulary(promptForPool(['triggered'], null));
     expect(vocabulary, 'the trigger was offered no effects at all').toBeDefined();
     expect(vocabulary).toContain('createToken');
-    for (const kind of ['destroyPermanent', 'tapPermanent', 'returnToHand', 'counterSpell']) {
-      expect(vocabulary, `${kind} cannot use noTarget and must not be offered`).not.toContain(kind);
+    for (const kind of WITHHELD_FROM_A_TRIGGER) {
+      expect(vocabulary, `${kind} is outside the recorded trigger menu`).not.toContain(kind);
     }
+  });
+
+  /**
+   * The other half, and the half that keeps the one above honest.
+   *
+   * `counterSpell` is included deliberately. `prompts.ts` withholds it by a
+   * name check rather than by the target table, on the stated grounds that the
+   * validator refuses it for naming a spell on the stack, and that is not true
+   * of this tree either: it validates like the other three. An exception written
+   * against a rule and an exception written against a name fail the same way when
+   * the rule goes, so both are read off the engine here.
+   */
+  it.each(WITHHELD_FROM_A_TRIGGER)('is legal on a trigger today: %s', (kind) => {
+    const card = parseCard({
+      kind: 'artifact',
+      id: `tst-trigger-legality-${kind.toLowerCase()}`,
+      name: `Trigger Legality ${kind}`,
+      rarity: 'common',
+      set: { code: 'TST', collectorNumber: 1 },
+      manaCost: { generic: 5 },
+      colors: [],
+      abilities: [
+        {
+          kind: 'triggered',
+          condition: 'selfEnters',
+          effects: [kind === 'counterSpell' ? { kind } : { kind, target: { kind: 'targetCreature' } }],
+        },
+      ],
+    });
+
+    expect(validateCard(card)).toStrictEqual([]);
   });
 
   /**

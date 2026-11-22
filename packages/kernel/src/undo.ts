@@ -208,6 +208,12 @@ function boundaryOf(event: GameEvent): CommitReason | null {
         player: event.player,
         why: `player ${String(event.player)} scried and cannot un-learn the library cards they saw`,
       };
+    case 'coinFlipped':
+      return {
+        event: event.type,
+        player: event.player,
+        why: `player ${String(event.player)} saw a random coin result and a replay would reveal the same result`,
+      };
     case 'handKept':
       return {
         event: event.type,
@@ -215,6 +221,7 @@ function boundaryOf(event: GameEvent): CommitReason | null {
         why: `player ${String(event.player)} kept an opening hand, which CR 103.4 gives no take-back on`,
       };
     case 'libraryTopRevealed':
+    case 'libraryCardsRevealed':
     case 'librarySearchRevealed':
       return {
         event: event.type,

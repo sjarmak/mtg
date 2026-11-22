@@ -21,19 +21,19 @@
  * in the kernel — it is an enumerated action nothing scores.
  */
 import type { AttachingAbility } from '@mtg/dsl';
-import { isAttachingAbility, manaValue } from '@mtg/dsl';
+import { effectsForActivatedAbility, isAttachingAbility, manaValue } from '@mtg/dsl';
 import type { Action, AgentView, GameState, ObjectId } from '@mtg/kernel';
 import {
-  activatedAbilityAt,
   attachmentOf,
   creaturesControlledBy,
+  currentActivatedAbilityAt,
   opponentOf,
   powerOf,
   toughnessOf,
   tryObject,
 } from '@mtg/kernel';
 import type { GreedyBotConfig } from '../config';
-import { modificationValue, modificationValueOn } from '../evaluate';
+import { boardCreatureValue, modificationValue, modificationValueOn } from '../evaluate';
 import { blockersNeeded, legalBlockersFor } from './combat';
 import { scoreEffectTargets } from './target';
 
@@ -213,20 +213,32 @@ function attachmentValue(
 
 function activationValue(view: AgentView, config: GreedyBotConfig, option: ActivateAction): number | null {
   const state = view.state;
-  const ability = activatedAbilityAt(state, option.oid, option.abilityIndex);
+  const ability = currentActivatedAbilityAt(state, option.oid, option.abilityIndex);
   if (ability === undefined) return null;
+  const sacrifices = [...option.sacrifices, ...(ability.cost.sacrificeSelf ? [option.oid] : [])];
   const payload = isAttachingAbility(ability)
     ? attachmentValue(state, config, ability, option)
     : scoreEffectTargets(
         state,
         view.player,
-        ability.effects,
+        effectsForActivatedAbility(ability, option.mode ?? null),
         option.targets,
         config.cast,
         config.target,
         config.race,
+        0,
+        option.oid,
+        option.multiTargets,
+        option.damageAllocations,
+        sacrifices,
       );
-  return payload - manaValue(ability.cost.mana) * config.activate.manaValueWeight;
+  const sacrificed = sacrifices.reduce((sum, oid) => sum + boardCreatureValue(config.cast, state, oid), 0);
+  const tapped =
+    (option.taps ?? []).reduce(
+      (sum, oid) => sum + config.target.tapValue + boardCreatureValue(config.cast, state, oid),
+      0,
+    ) * config.activate.tapPaymentValueShare;
+  return payload - manaValue(ability.cost.mana) * config.activate.manaValueWeight - sacrificed - tapped;
 }
 
 /**

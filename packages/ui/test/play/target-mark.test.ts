@@ -53,8 +53,8 @@ import { uiStyleSheet } from '../../src/styles/index';
 afterEach(cleanup);
 
 const NAMES: SeatNames = ['You', 'Bot'];
-/** Both seats named, which is the hot-seat table and has no "your" seat. */
-const HOTSEAT: SeatNames = ['Player one', 'Player two'];
+/** Both seats named, which is the two-human table and has no "your" seat. */
+const TWO_HUMAN: SeatNames = ['Player one', 'Player two'];
 
 const TWIN: Card = parseCard({
   kind: 'creature',
@@ -353,18 +353,18 @@ describe('the mark on the board', () => {
 });
 
 describe('both seats', () => {
-  it('marks a permanent in either row, and says no "your" at a hot-seat table', () => {
+  it('marks a permanent in either row, and says no "your" at a two-human table', () => {
     const staged = equipStaged();
     // Seat 0 is the one equipping, so from seat 1's chair the marked creature is
     // in the far row and from seat 0's it is in the near one. Same mark.
     for (const viewer of [0, 1] as const) {
-      const position = boardPosition(staged, viewer, HOTSEAT);
+      const position = boardPosition(staged, viewer, TWO_HUMAN);
       const rows = [position.you, position.opponent];
       const marked = rows.flatMap((side) =>
         side.battlefield.permanents.filter((permanent) => (permanent.targetedBy ?? []).length > 0),
       );
       expect(marked).toHaveLength(1);
-      expect(marked[0]?.targetedBy?.[0]?.source).toBe(`an ability of ${HOTSEAT[0]}'s ${BLADE.name}`);
+      expect(marked[0]?.targetedBy?.[0]?.source).toBe(`an ability of ${TWO_HUMAN[0]}'s ${BLADE.name}`);
     }
   });
 

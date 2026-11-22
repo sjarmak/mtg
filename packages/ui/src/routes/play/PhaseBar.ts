@@ -118,6 +118,8 @@ import {
   stopStateOf,
 } from './stops';
 import type { StopState } from './stops';
+import { DEFAULT_PACE, nextPace, PACE_WORDS } from '../../motion/pace';
+import type { Pace } from '../../motion/pace';
 
 export interface PhaseBarProps {
   /**
@@ -132,8 +134,12 @@ export interface PhaseBarProps {
   readonly head?: ReactNode;
   readonly settings: AutoPassSettings;
   readonly onChange: (next: AutoPassSettings) => void;
-  /** Where the game is right now, so the node it is in is marked as current. */
-  readonly step: Step;
+  /**
+   * Where the game is right now, so the node it is in is marked as current.
+   * Null keeps the complete turn structure visible before a standard turn has
+   * begun, without pretending that the backend is already in one of its steps.
+   */
+  readonly step: Step | null;
   /**
    * Which moments the game pauses at, so the bar can mark the ones that are
    * steps.
@@ -161,6 +167,9 @@ export interface PhaseBarProps {
    * dead one.
    */
   readonly onBeats?: ((next: BeatSet) => void) | undefined;
+  /** How fast the table moves for this viewer, and how to change it. */
+  readonly pace?: Pace | undefined;
+  readonly onPace?: ((next: Pace) => void) | undefined;
 }
 
 /** The accessible name of the bar, which is how every test finds it. */
@@ -198,6 +207,35 @@ export function beatAnnouncement(watching: boolean): string {
   return watching
     ? 'Beats on: the game pauses to show each attack, block, damage step and death.'
     : 'Beats off: combat and deaths resolve without pausing.';
+}
+
+/**
+ * The pace control's accessible name.
+ *
+ * The name is the setting and the drawn word is the value, which is the split
+ * `node` above already makes for a step: the button reads "Quick" and is named
+ * "Table pace", so a voice control has something stable to say and a screen
+ * reader hears what the word is an answer to. The visible word is inside the
+ * name (WCAG 2.5.3) by way of the announcement rather than the label, because a
+ * name that changed with the value would be a control that renames itself under
+ * the user's hand.
+ */
+export const PACE_CONTROL_LABEL = 'Table pace';
+/** A compact playback-speed mark; its spoken value stays in the adjacent hint. */
+export const PACE_MARK = '»';
+
+/**
+ * What the live region says when the pace is cycled, as a whole sentence.
+ *
+ * `still` gets its own sentence because it is not the fourth speed, it is off,
+ * and a player who cycled into it by accident needs to be told the table has
+ * stopped animating rather than that it is now very fast.
+ */
+export function paceAnnouncement(pace: Pace): string {
+  if (pace === 'still') {
+    return 'Pace still: cards change without animating. The board and the log are unchanged.';
+  }
+  return `Pace ${PACE_WORDS[pace].toLowerCase()}: cards move at ${PACE_WORDS[pace].toLowerCase()} speed.`;
 }
 
 /**
@@ -332,12 +370,14 @@ function node(props: PhaseBarProps, step: Step, announce: (text: string) => void
     // text is already the word the board header uses for the step.
     return createElement('span', shared, ...body);
   }
+  const name = nodeName(step, state, beats);
   return createElement(
     'button',
     {
       ...shared,
       type: 'button',
-      'aria-label': nodeName(step, state, beats),
+      'aria-label': name,
+      title: name,
       onClick: () => {
         const next = cycleStop(props.settings, step);
         props.onChange(next);
@@ -372,7 +412,11 @@ function beatsToggle(
       type: 'button',
       className: 'mtg-phasebar__beats',
       'aria-label': WATCH_BEATS_LABEL,
+      'aria-description': watching
+        ? 'Watching combat and death pauses.'
+        : 'Combat and death pauses are skipped.',
       'aria-pressed': watching,
+      title: WATCH_BEATS_LABEL,
       onClick: () => {
         onBeats(watching ? NO_BEATS : DEFAULT_BEATS);
         announce(beatAnnouncement(!watching));
@@ -380,6 +424,45 @@ function beatsToggle(
     },
     createElement('span', { className: 'mtg-phasebar__beats-mark', 'aria-hidden': true }, BEAT_MARK),
     createElement('span', { className: 'mtg-phasebar__beats-text' }, WATCH_BEATS_TEXT),
+  );
+}
+
+/**
+ * The pace control, beside the beats toggle at the end of the bar (`mtg-kwu`).
+ *
+ * A cycling button rather than a select or four buttons, and the bar chose that
+ * idiom before this control existed: every step node on it cycles its stop, and
+ * the bar's own instructions say so. One press advances one step through
+ * `PACES`, wrapping, so the whole setting costs one node of a bar that is
+ * already short of width — which is the same reason the beats are one toggle
+ * instead of four checkboxes.
+ *
+ * The cost of cycling is that reaching `quick` from `normal` takes three
+ * presses. That is the right trade here: the setting is chosen roughly once,
+ * there are four values rather than fourteen, and the alternative spends four
+ * times the width on every frame of every game to save two presses in one.
+ */
+function paceToggle(
+  pace: Pace,
+  onPace: (next: Pace) => void,
+  announce: (text: string) => void,
+): ReactElement {
+  return createElement(
+    'button',
+    {
+      type: 'button',
+      className: 'mtg-phasebar__pace',
+      'aria-label': PACE_CONTROL_LABEL,
+      'aria-description': `Cards move at ${PACE_WORDS[pace].toLowerCase()} speed. Press to change pace.`,
+      title: `${PACE_CONTROL_LABEL}: ${PACE_WORDS[pace]}`,
+      onClick: () => {
+        const next = nextPace(pace);
+        onPace(next);
+        announce(paceAnnouncement(next));
+      },
+    },
+    createElement('span', { className: 'mtg-phasebar__pace-mark', 'aria-hidden': true }, PACE_MARK),
+    createElement('span', { className: 'mtg-phasebar__pace-text' }, PACE_WORDS[pace]),
   );
 }
 
@@ -396,7 +479,7 @@ export function PhaseBar(props: PhaseBarProps): ReactElement {
    * sentence standing rather than narrating a press nobody made.
    */
   const [announced, setAnnounced] = useState('');
-  const { onBeats } = props;
+  const { onBeats, onPace } = props;
   return createElement(
     'div',
     { className: 'mtg-phasebar', role: 'group', 'aria-label': PHASE_BAR_LABEL },
@@ -406,15 +489,37 @@ export function PhaseBar(props: PhaseBarProps): ReactElement {
     // turn label clipped to an ellipsis would be a fact nobody can read.
     props.head ?? null,
     // The steps are their own element rather than direct children of the group,
-    // because they are the part that has to give under width pressure and the
-    // toggle beside them is the part that must not: thirteen equal columns that
-    // clip their own words, and one control that keeps its size.
+    // because they are the part that has to give under width pressure: thirteen
+    // columns that keep their words and wrap when the row runs out.
+    //
+    // The bar's own two controls are *inside* that element, which is `mtg-t9n7`
+    // and is the whole of it. Beside it they were `flex: none` siblings of a
+    // `flex: 1 1 0` row, so they took their width off the steps before the steps
+    // wrapped, and the shortfall then landed on every wrapped line rather than
+    // on one: 105.8px of bar at 1024x768 against 69.9 before the pace control
+    // existed, which is 32px of table, which is where four browser gates went
+    // red (a mana tile clipped by 15.1px, a type line 2.2px under its floor, a
+    // combat face 1.7px under its ceiling). Inside the row they wrap with it and
+    // cost a short third line instead of a slice of all three.
+    //
+    // What that would otherwise break is the short table, where `styles/mobile.ts`
+    // makes this row a sideways scroller on purpose: a control inside a scroller
+    // scrolls out of reach. `.mtg-phasebar__controls` is pinned against the
+    // scrollport with `position: sticky` for exactly that, so the two controls
+    // are where they were on every table and the steps move under them.
     createElement(
       'div',
       { className: 'mtg-phasebar__steps' },
       ...STEPS.map((step) => node(props, step, setAnnounced)),
+      onBeats === undefined && onPace === undefined
+        ? null
+        : createElement(
+            'div',
+            { className: 'mtg-phasebar__controls' },
+            onBeats === undefined ? null : beatsToggle(props.beats ?? DEFAULT_BEATS, onBeats, setAnnounced),
+            onPace === undefined ? null : paceToggle(props.pace ?? DEFAULT_PACE, onPace, setAnnounced),
+          ),
     ),
-    onBeats === undefined ? null : beatsToggle(props.beats ?? DEFAULT_BEATS, onBeats, setAnnounced),
     createElement(
       'p',
       { className: 'mtg-phasebar__status', role: 'status', 'aria-label': PHASE_BAR_STATUS_LABEL },

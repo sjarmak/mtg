@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "dka",
+  "name": "Dark Ascension / Innistrad",
+  "sourceCodes": ["DKA", "ISD"],
+  "products": [
+    { "id": "dka-draft", "setCode": "DKA", "boosterKey": "draft" },
+    { "id": "isd-draft", "setCode": "ISD", "boosterKey": "draft" }
+  ],
+  "draft": {
+    "seats": 8,
+    "rounds": ["dka-draft", "isd-draft", "isd-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["dka-draft", "dka-draft", "isd-draft", "isd-draft", "isd-draft", "isd-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

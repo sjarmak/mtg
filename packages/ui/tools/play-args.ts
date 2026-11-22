@@ -3,6 +3,7 @@ export interface PlayArgs {
   readonly set: string | undefined;
   readonly port: number | undefined;
   readonly artManifest: string | undefined;
+  readonly feedbackModel: boolean;
 }
 
 interface ArtManifestArg {
@@ -34,6 +35,15 @@ export function takeArtManifestArg(argv: readonly string[]): ArtManifestArg {
   return { argv: rest, artManifest };
 }
 
+/** Removes `--feedback-model`, the switch that arms the feedback panel's model round. */
+export function takeFeedbackModelArg(argv: readonly string[]): {
+  readonly argv: readonly string[];
+  readonly feedbackModel: boolean;
+} {
+  const rest = argv.filter((value) => value !== '--feedback-model');
+  return { argv: rest, feedbackModel: rest.length !== argv.length };
+}
+
 /**
  * Reads a set path followed by an optional web port.
  *
@@ -41,18 +51,35 @@ export function takeArtManifestArg(argv: readonly string[]): ArtManifestArg {
  * and extra values are refused instead of being left for Vite to ignore.
  */
 export function readPlayArgs(argv: readonly string[]): PlayArgs {
-  const extracted = takeArtManifestArg(argv);
+  const flagged = takeFeedbackModelArg(argv);
+  const extracted = takeArtManifestArg(flagged.argv);
   if (extracted.argv.length > 2) {
     throw new Error('npm run play takes at most a set path and port');
   }
   const set = extracted.argv[0];
-  const rawPort = extracted.argv[1];
-  if (rawPort === undefined) return { set, port: undefined, artManifest: extracted.artManifest };
-  const port = Number(rawPort);
+  return {
+    set,
+    port: readPort(extracted.argv[1]),
+    artManifest: extracted.artManifest,
+    feedbackModel: flagged.feedbackModel,
+  };
+}
+
+/**
+ * A port from a command line, or `undefined` when nobody named one.
+ *
+ * Shared with `lab.ts`, which takes the same pair of positional arguments for
+ * the same reason: a stated port is a promise about the address the launcher is
+ * about to print, so a value that is not a port is refused here rather than
+ * handed to Vite, which would ignore it and listen somewhere else.
+ */
+export function readPort(raw: string | undefined): number | undefined {
+  if (raw === undefined) return undefined;
+  const port = Number(raw);
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
-    throw new Error(`${rawPort} is not a port`);
+    throw new Error(`${raw} is not a port`);
   }
-  return { set, port, artManifest: extracted.artManifest };
+  return port;
 }
 
 /**
@@ -84,7 +111,20 @@ export function portBusyMessage(port: number): string {
   );
 }
 
+/**
+ * The port half of Vite's arguments, empty when nobody named one.
+ *
+ * `--strictPort` rides along with a stated port and never without it. A port
+ * somebody typed is a promise about the address the launcher is about to print,
+ * and Vite's own habit of walking upward from a busy port turns that promise
+ * into a wrong URL; the config's default port already carries its own
+ * `strictPort` for the reason `portBusyMessage` above explains.
+ */
+export function vitePortArgs(port: number | string | undefined): readonly string[] {
+  return port === undefined ? [] : ['--port', String(port), '--strictPort'];
+}
+
 /** Vite arguments for either its ordinary default or a promised address. */
 export function viteArgsFor(port: number | string | undefined): readonly string[] {
-  return port === undefined ? ['vite', '--open'] : ['vite', '--open', '--port', String(port), '--strictPort'];
+  return ['vite', '--open', ...vitePortArgs(port)];
 }

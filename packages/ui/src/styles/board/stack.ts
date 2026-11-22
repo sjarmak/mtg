@@ -34,11 +34,15 @@
  * decision is the difference between the two — a strip that grew without the
  * top moving would eat the 7.6px below it silently.
  *
- * **The guarantee is asserted, not stated.** `../../test/play/stack-seam.browser.test.ts`
+ * **The guarantee is asserted, not stated.** `../../../test/play/stack-seam.browser.test.ts`
  * re-measures the whole matrix in a real browser: every interactive element on
  * the page must answer its own center under `elementFromPoint`, and every slot
  * on both battlefields must have the identical rect with the stack empty and
  * with the stack loaded. A comment cannot fail; those do.
+ * `../../../test/play/stack-mode.browser.test.ts` measures the same viewports
+ * over the row that carries both card-authored parts at once, which is the row
+ * the shared floor below exists for; it asserts that only a card-authored part
+ * is ever cut, so a strip that cuts its own frame fails there.
  *
  * # What happens when there is no room
  *
@@ -101,6 +105,19 @@ export const STACK_SEAM_REM = 2;
  * scarce side out of the plentiful one.
  */
 export const STACK_SEAM_TOP_REM = -0.75;
+
+/**
+ * The least of a target the strip will draw before it clips instead.
+ *
+ * Without a floor the one shrinkable part takes the entire deficit and vanishes:
+ * measured at 844x390 on a two-object stack, the row is 131px short and the
+ * target came out 2px wide — a sentence that had said "aimed at" and then
+ * nothing. 4rem is four or five characters of a card name past the arrow, which
+ * is enough to know a name is there and which end of the table it is on. Past
+ * the floor the row clips at its own edge again, and what it clips is the
+ * closing word, which is the part `../mobile.ts` takes off a table anyway.
+ */
+const TARGET_MIN_REM = 4;
 
 export const STACK_CSS = `
 /* The seam is what the strip is positioned against, which is also why the strip
@@ -188,6 +205,13 @@ export const STACK_CSS = `
   border-radius: var(--mtg-radius-md);
   line-height: 1.5;
 }
+/* Focusable so a press can read the object (mtg-mis1), which means it can hold
+   the focus ring, which means it has to draw one: a UA outline on a 32px strip
+   over the mat is drawn half outside the element. Inset, and only for a
+   keyboard-shaped focus, because a pointer press focuses this too and a ring
+   that appeared on every click would be reporting a selection nobody made. */
+.mtg-stack__entry:focus { outline: none; }
+.mtg-stack__entry:focus-visible { outline: 2px solid var(--mtg-accent); outline-offset: -2px; }
 .mtg-stack__entry[data-top='true'] { border-color: var(--mtg-accent); background: var(--mtg-accent-soft); }
 /* The move, on the object it is about (mtg-atq). Its own width rather than the
    column's, because there is no column any more; and no block padding, because
@@ -196,9 +220,16 @@ export const STACK_CSS = `
    the input the fallback at the foot of this sheet exists for. */
 .mtg-stack__resolve { flex: none; padding-block: 0; }
 .mtg-stack__name {
-  flex: 0 1 auto; min-width: 0;
+  flex: none; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  font-family: var(--mtg-font-card); font-weight: 700; font-size: var(--mtg-text-sm);
+  font-family: var(--mtg-font-card); font-weight: 700; font-size: var(--mtg-text-xs);
+}
+.mtg-stack__inspect {
+  border: 0; padding: 0; background: transparent; color: inherit;
+  cursor: pointer; text-align: start;
+}
+.mtg-stack__inspect:focus-visible {
+  outline: 2px solid var(--mtg-accent); outline-offset: 2px;
 }
 .mtg-stack__order { color: var(--mtg-ink-muted); font-family: var(--mtg-font-ui); font-weight: 600; }
 .mtg-stack__meta {
@@ -206,6 +237,48 @@ export const STACK_CSS = `
   align-items: center; gap: var(--mtg-space-2);
   overflow: hidden; white-space: nowrap;
   font-size: var(--mtg-text-xs); color: var(--mtg-ink-muted);
+}
+/* One part of it gives, and it is the part whose length is a card name.
+
+   \`overflow: hidden\` on the row is what stops a long target from pushing the
+   Resolve button off the strip, and on its own it cuts through a letter: measured
+   at 844x390 on a two-object stack, 345px of parts in a 214px row came out as
+   "→ your Skywat" hard against the button's edge. Letting every part shrink
+   instead is worse and was measured too — controller 29px of 53, cost 18 of 33,
+   the closing word 37 of 68: five things half-said to shorten one. So the parts
+   hold their natural width, \`.mtg-stack__target\` takes the whole shrink, and the
+   row ends in an ellipsis where it used to end mid-letter.
+
+   \`.mtg-stack__mode\` shrinks beside it under \`mtg-sujc\`, which split a modal
+   spell's chosen mode out of the target line into a field of its own. It is the
+   same text it always was — card-authored, long, and the part of the row worth
+   cutting before a name the file wrote — so it takes the same rule rather than a
+   second one, and a row carrying both still gives before any other part does. */
+.mtg-stack__meta > * { flex: none; }
+.mtg-stack__mode,
+.mtg-stack__target {
+  flex: 0 1 auto; min-width: ${cssNumber(TARGET_MIN_REM)}rem;
+  overflow: hidden; text-overflow: ellipsis;
+}
+/* Two of them in one row share the floor the row was sized for, rather than each
+   taking it whole. \`TARGET_MIN_REM\` is the width at which a shrunken part still
+   says something, and until \`mtg-dwlr\` no row could hold two parts that claimed
+   it. Measured at 1024x768 on a modal spell aimed at a creature: the two floors
+   came to 128px and pushed \`.mtg-stack__meta\` 18px past its own box, where its
+   \`overflow: hidden\` cut the closing word mid-letter — the failure the rule above
+   exists to have fixed, arriving through the part that was added later. At
+   844x390 the same pair cost 23px. Halved, the pair asks for exactly the 64px one
+   of them used to, and neither number is over at all.
+
+   Stated as a pair on both sides rather than shrinking the mode alone, because a
+   modal spell with no target is a row with one card-authored part in it and that
+   part is entitled to the whole floor — the same reason the rule above is one
+   rule over two classes. \`:has\` on one side and \`+\` on the other say the same
+   thing in the two directions the selector runs, and \`../band.ts\` already selects
+   on \`:has\` in this sheet. */
+.mtg-stack__mode:has(+ .mtg-stack__target),
+.mtg-stack__mode + .mtg-stack__target {
+  min-width: ${cssNumber(TARGET_MIN_REM / 2)}rem;
 }
 /* A finger gets the reflow the mouse no longer pays for. The selector matches
    the absolute rule above rather than the bare class, because that rule is two

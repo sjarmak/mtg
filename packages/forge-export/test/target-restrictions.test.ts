@@ -26,12 +26,14 @@ import { mustTranspile, spell } from './helpers';
 
 const SAMPLES: Readonly<Record<TargetRestrictionKind, TargetRestriction>> = {
   maxPower: { kind: 'maxPower', power: 3 },
+  maxToughness: { kind: 'maxToughness', toughness: 2 },
   minPower: { kind: 'minPower', power: 4 },
   tapped: { kind: 'tapped' },
   untapped: { kind: 'untapped' },
   withKeyword: { kind: 'withKeyword', keyword: 'flying' },
   withoutKeyword: { kind: 'withoutKeyword', keyword: 'flying' },
   withCounter: { kind: 'withCounter', counter: 'plusOnePlusOne' },
+  playerLostLifeThisTurn: { kind: 'playerLostLifeThisTurn' },
 };
 
 function abilityLine(card: Card): string {
@@ -59,12 +61,14 @@ describe('every restriction the DSL can print', () => {
 
   it('spells each one the way the shipped cards spell it', () => {
     expect(forgeTargetRestriction(SAMPLES.maxPower)).toBe('powerLE3');
+    expect(forgeTargetRestriction(SAMPLES.maxToughness)).toBe('toughnessLE2');
     expect(forgeTargetRestriction(SAMPLES.minPower)).toBe('powerGE4');
     expect(forgeTargetRestriction(SAMPLES.tapped)).toBe('tapped');
     expect(forgeTargetRestriction(SAMPLES.untapped)).toBe('untapped');
     expect(forgeTargetRestriction(SAMPLES.withKeyword)).toBe('withFlying');
     expect(forgeTargetRestriction(SAMPLES.withoutKeyword)).toBe('withoutFlying');
     expect(forgeTargetRestriction(SAMPLES.withCounter)).toBe('counters_GE1_P1P1');
+    expect(forgeTargetRestriction(SAMPLES.playerLostLifeThisTurn)).toBe('LostLifeThisTurn');
   });
 
   /**
@@ -106,15 +110,18 @@ describe('attaching the qualifier to the selector', () => {
   });
 
   /**
-   * `Artifact,Enchantment` is two selectors, and a qualifier written after the
-   * comma would narrow only the second. The DSL refuses the combination at
-   * validation (`restrictionFitsTargetKind` admits a restriction only on a kind
-   * whose target space is exactly `['creature']`), so this is unreachable from
-   * a parsed card; it is asserted here because the transpiler is a public seam
-   * that takes an `Effect` directly.
+   * `Creature.attacking,Creature.blocking` is two selectors, and a qualifier
+   * written after the comma would narrow only the second, so Forge writes it on
+   * both: `res/cardsfolder/s/searing_light.txt` is
+   * `ValidTgts$ Creature.attacking+powerLE2,Creature.blocking+powerLE2`.
    */
-  it('refuses a selector that is already a list', () => {
-    expect(forgeRestrictedTarget('Artifact,Enchantment', 'tapped')).toBeNull();
+  it('writes the qualifier on every member of a list', () => {
+    expect(forgeRestrictedTarget('Creature.attacking,Creature.blocking', 'powerLE2')).toBe(
+      'Creature.attacking+powerLE2,Creature.blocking+powerLE2',
+    );
+    expect(forgeRestrictedTarget('Artifact,Enchantment', 'tapped')).toBe(
+      'Artifact.tapped,Enchantment.tapped',
+    );
   });
 });
 
@@ -155,6 +162,25 @@ describe('the exported script', () => {
     );
     expect(script).toContain('ValidTgts$ Creature.tapped');
     expect(script).toContain('TargetUnique$ True');
+  });
+
+  /**
+   * Searing Light is the shipped card this pins against, and the flagship's
+   * Bomb Flower is the same card with a 3 in front of it: an instant that names
+   * an attacking or blocking creature with a power bound. The combat role makes
+   * the selector a union, so the power bound has to be written twice, and both
+   * halves come from the corpus rather than from a rule we inferred.
+   */
+  it('writes a power bound on both halves of an attacking-or-blocking union', () => {
+    const line = lineFor(
+      'Searing Light',
+      smite({
+        kind: 'targetCreature',
+        restriction: { kind: 'maxPower', power: 2 },
+        filter: { combat: 'attackingOrBlocking' },
+      }),
+    );
+    expect(line).toContain('ValidTgts$ Creature.attacking+powerLE2,Creature.blocking+powerLE2');
   });
 
   it('rejects by name rather than dropping a restriction it cannot spell', () => {

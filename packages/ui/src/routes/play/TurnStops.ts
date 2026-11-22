@@ -58,6 +58,8 @@
 import { createElement, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { AutoPassSettings, YieldBoundary } from '@mtg/kernel';
+import { YIELDS } from './yields';
+import type { TriggerYield } from './trigger-yields';
 import { withFullControl, withPassUnstopped } from '@mtg/kernel';
 import { useDismissable } from './dismiss';
 import { asContainer, asFocusable } from './focus';
@@ -89,8 +91,25 @@ export interface TurnStopsProps {
   readonly settings: AutoPassSettings;
   readonly onChange: (next: AutoPassSettings) => void;
   /** Absent, or false, when no priority is pending and a yield would do nothing. */
-  readonly canYield: boolean;
-  readonly onYield: (boundary: YieldBoundary) => void;
+  readonly canYield?: boolean | undefined;
+  /** Absent when this backend cannot express a yield boundary exactly. */
+  readonly onYield?: ((boundary: YieldBoundary) => void) | undefined;
+  /**
+   * The optional triggers whose answer the player has settled, and the way to
+   * unsettle one.
+   *
+   * They are listed here because this is the panel that holds the settings a
+   * bar cannot carry, and a per-ability yield is exactly that: it belongs to no
+   * step, it is set somewhere else entirely (`../play/rail.ts`'s prompt), and
+   * the place it is set stops being drawn the moment it takes effect. Left off
+   * this panel, the only way back would be to restart the game.
+   *
+   * Absent, or empty, draws nothing at all rather than an empty list with a
+   * heading: a player who has settled no answers has no such setting, and a
+   * heading over nothing is a control that reads as broken.
+   */
+  readonly triggerYields?: readonly TriggerYield[] | undefined;
+  readonly onClearTriggerYield?: ((key: string) => void) | undefined;
 }
 
 /** The accessible name of the panel the indicator expands into. */
@@ -114,6 +133,19 @@ export const ONLY_STOPS_LABEL = 'Only my stops';
 /** The accessible name of the legend that says what the bar's marks mean. */
 export const STOP_LEGEND_LABEL = 'What the phase bar marks mean';
 
+/** The accessible name of the list of settled optional-trigger answers. */
+export const TRIGGER_YIELDS_LABEL = 'Ability yields';
+
+/** What the button on each row says, so one string finds it from either side. */
+export function clearTriggerYieldLabel(yielded: TriggerYield): string {
+  return `Ask again about ${yielded.label}`;
+}
+
+/** How a settled answer reads on the panel: the ability, and which way. */
+export function triggerYieldRowText(yielded: TriggerYield): string {
+  return `${yielded.accept ? 'Always take' : 'Always decline'} ${yielded.label}`;
+}
+
 /**
  * The close control's name, which contains the word it draws.
  *
@@ -132,11 +164,6 @@ export const TURN_STOPS_CLOSE_LABEL = 'Close auto-pass settings';
  * finished game draws no second indicator.
  */
 const PANEL_ID = 'mtg-turn-stops';
-
-const YIELDS: readonly { readonly boundary: YieldBoundary; readonly label: string }[] = [
-  { boundary: 'endOfTurn', label: 'Yield to end of turn' },
-  { boundary: 'yourNextTurn', label: 'Yield to next own turn' },
-];
 
 /**
  * Every mark on the bar and what it means, in the node's own top-to-bottom
@@ -165,6 +192,41 @@ function legend(): ReactElement {
         { key: entry.key, className: 'mtg-turnstops__legend-row', 'data-mark': entry.key },
         createElement('span', { className: 'mtg-turnstops__legend-mark', 'aria-hidden': true }, entry.mark),
         entry.meaning,
+      ),
+    ),
+  );
+}
+
+/**
+ * The settled optional-trigger answers, each with the way out of it.
+ *
+ * A list for the reason the legend is one: these are pairings a screen reader
+ * should be able to walk, and each row is a fact plus the control that undoes
+ * it. The row's words are outside the button, so the button's own name has to
+ * carry the ability too — `clearTriggerYieldLabel` writes both halves of that
+ * sentence in one place.
+ */
+function triggerYieldList(yields: readonly TriggerYield[], onClear: (key: string) => void): ReactElement {
+  return createElement(
+    'ul',
+    { className: 'mtg-turnstops__yields', 'aria-label': TRIGGER_YIELDS_LABEL },
+    ...yields.map((yielded) =>
+      createElement(
+        'li',
+        { key: yielded.key, className: 'mtg-turnstops__yield-row' },
+        createElement('span', { className: 'mtg-turnstops__yield-name' }, triggerYieldRowText(yielded)),
+        createElement(
+          'button',
+          {
+            type: 'button',
+            className: 'mtg-btn',
+            'aria-label': clearTriggerYieldLabel(yielded),
+            onClick: (): void => {
+              onClear(yielded.key);
+            },
+          },
+          'Ask again',
+        ),
       ),
     ),
   );
@@ -232,26 +294,33 @@ export function turnStopsPanel(props: TurnStopsProps, onClose: () => void): Reac
         },
         ONLY_STOPS_LABEL,
       ),
-      ...YIELDS.map((yielded) =>
-        createElement(
-          'button',
-          {
-            key: yielded.boundary,
-            type: 'button',
-            className: 'mtg-btn',
-            disabled: !props.canYield,
-            onClick: () => {
-              props.onYield(yielded.boundary);
-            },
-          },
-          yielded.label,
-        ),
-      ),
+      ...(props.onYield === undefined
+        ? []
+        : YIELDS.map((yielded) =>
+            createElement(
+              'button',
+              {
+                key: yielded.boundary,
+                type: 'button',
+                className: 'mtg-btn',
+                disabled: !props.canYield,
+                onClick: () => {
+                  props.onYield?.(yielded.boundary);
+                },
+              },
+              yielded.label,
+            ),
+          )),
     ),
+    ...(props.triggerYields === undefined ||
+    props.triggerYields.length === 0 ||
+    props.onClearTriggerYield === undefined
+      ? []
+      : [triggerYieldList(props.triggerYields, props.onClearTriggerYield)]),
     createElement(
       'p',
       { className: 'mtg-turnstops__hint' },
-      'Space or Enter takes the pass, and continues a combat pause. Press a phase on the bar to cycle its stop. A stop asks only where you have a play to make; full control asks everywhere. Only my stops passes everything the bar does not name. A yield stops early for anything the other seat casts that you could answer. Watch combat, at the end of the bar, is the pause itself: it asks nothing and records nothing, so it is not a stop and no step holds it.',
+      `Space or Enter takes the pass, and continues a combat pause. Press a phase on the bar to cycle its stop. A stop asks only where you have a play to make; full control asks everywhere. Only my stops passes everything the bar does not name.${props.onYield === undefined ? '' : ' A yield stops early for anything the other seat casts that you could answer.'} Watch combat, at the end of the bar, is the pause itself: it asks nothing and records nothing, so it is not a stop and no step holds it. Always take and Always decline, on an optional trigger, settle the answer for that ability for the rest of the game; the ones you have settled are listed here.`,
     ),
     legend(),
   );

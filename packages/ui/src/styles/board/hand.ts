@@ -1,17 +1,48 @@
 /**
  * Responsive geometry for cards on the played table.
  *
- * A hand lays out seven slots across, never narrower than a complete face, and
- * stops growing at 7.5rem. Battlefield cards keep the original 11rem row-width
- * basis and stop at 10rem. The board therefore remains the primary reading
- * surface without turning either zone into poster-sized cards; crowded rows
- * scroll at a readable size, and so does a hand whose seven no longer fit.
+ * A hand lays out seven slots across, never narrower than a complete face.
+ * Battlefield cards keep the original 11rem row-width basis. Both zones stop
+ * growing at the same 10rem face, crowded rows scroll at a readable size, and so
+ * does a hand whose seven no longer fit.
  *
- * Real-Chrome coverage holds that hierarchy from 390px phones through the
- * supplied 2048 x 1280 screenshot and 2784 x 1532 high-density view: sparse
- * battlefield cards are never smaller than the visible hand, and become
- * strictly larger when the table has enough room. Crowded rows may meet the
- * hand at their shared readable scrolling ceiling.
+ * The rule between the two zones is PARITY, and it is the playtester's call
+ * (`mtg-gohr`, 2026-09-03): on a table, on a sparse board, off combat, a held
+ * card and a permanent draw the same size within a tolerance. Neither of the two
+ * sentences this file and `../../../tools/hand-scale.ts` used to carry survived
+ * her reading of them — one said the board outranks the hand, the other said
+ * the hand outranks the board, and they were written eleven days apart. The
+ * evidence for neither is in Magic Online: measured off three of Wizards' own
+ * client screenshots, the same client draws a permanent at 0.82, 1.26 and 2.29
+ * times its hand card, because the player sizes the zones. So there is no ratio
+ * to copy, and what is left is that the card you are deciding from and the card
+ * you are deciding about should not be two different sizes for no reason.
+ *
+ * Three exceptions, each measured rather than assumed, and each one a rule in
+ * this file rather than a caveat about it:
+ *
+ * - CROWDING. Past seven represented permanents in a row, the hand becomes a
+ *   labeled 48px thumbnail rail and direct board places keep a 72px floor before
+ *   they wrap. Rows remain direct through nine nonland places; at ten, their
+ *   exact-state duplicate cohorts may pile. the playtester chose battlefield
+ *   legibility over hand parity on 2026-09-07 and deferred duplicate compaction
+ *   to ten board places on 2026-09-12.
+ * - COMBAT. `COMBAT_HAND_FACE_MAX_REM` spends the vertical budget on the rows
+ *   while there are attackers on the table, so there the board draws larger and
+ *   the hand is a labeled 56px thumbnail rail. the playtester accepted that explicit
+ *   exception on 2026-09-07.
+ * - A WINDOW THAT IS NOT A TABLE. Below the three-column table and outside the
+ *   upright-tablet band the hand sits on `./fit.ts`'s slot floor at 48px beside
+ *   a 100px permanent, because seven complete faces are 700px of row on a 390px
+ *   phone. the playtester accepted that as a labeled thumbnail rail on 2026-09-07;
+ *   the fixed zoom remains the reading surface.
+ *
+ * Measured at the parity ceiling, resting board, five-card hand, held card
+ * against the viewer's permanent: 1024x768 88/87.8, 1280x801 101.1/101.1,
+ * 1440x900 124/124, 1920x1080 and every wider viewport 160/160, 768x1024 and
+ * 810x1080 100/100. The two short-table cells are the tolerance: 1280x800
+ * 88/100 and 1392x766 88/98.4, and `SHORT_TABLE_HAND_FACE_MAX_REM` is where the
+ * sweep that says why lives.
  *
  * The slot height follows the printed trim. `min-height: 0` is required
  * because a preferred aspect ratio otherwise takes its content as an automatic
@@ -19,7 +50,9 @@
  */
 import { CARD_TRIM_MM } from '../../card/anatomy';
 import { cssNumber } from '../number';
-import { RATIO, TABLE, THREE_COLUMN_MIN_WIDTH_PX } from './geometry';
+import { TRAY_BLOCK_CHROME_PX } from './attach';
+import { MIN_SLOT_WIDTH_REM } from './fit';
+import { playedPlace, playedSlot, RATIO, TABLE, THREE_COLUMN_MIN_WIDTH_PX } from './geometry';
 import { PLAY_RAIL_REM, RAIL_WIDTH_VAR } from './rail';
 
 /**
@@ -51,15 +84,44 @@ export const HAND_ACROSS = 7;
 export const HAND_GAP = 'var(--mtg-space-2)';
 
 /**
- * A wide monitor should reveal more table, not turn the hand into seven poster
- * prints. Seven and a half rem keeps a held card readable without letting
- * hidden options dominate the permanents that determine combat. The
- * battlefield may grow to ten rem; crowded rows lower this cap with their own
- * scrolling ceiling.
+ * Battlefield cards grow with the available row until they reach this width.
+ *
+ * It is declared here, above the hand's ceiling rather than beside its crowded
+ * and short-table variants, because the hand's ceiling is this one: the parity
+ * rule is a single number with two names, and two `10`s written out separately
+ * would be free to drift apart.
  */
-const HAND_FACE_MAX_REM = 7.5;
+const BOARD_FACE_MAX_REM = 10;
 
-/** Preserve the measured battlefield curve while lowering only the hand. */
+/**
+ * The hand's ceiling, which is the board's ceiling: this is the parity rule as a
+ * number.
+ *
+ * It was 7.5rem, and the sentence under it said a wide monitor should reveal
+ * more table rather than turn the hand into seven poster prints. That is the
+ * hierarchy `mtg-gohr` retired: what 7.5 against `BOARD_FACE_MAX_REM`'s 10
+ * actually drew was a held card three quarters the size of the permanent it was
+ * about, on every window from 1920 up — 120px against 160 — while the two
+ * zones were the same size at 1024x768 and at 1440x900, where neither ceiling
+ * binds. So the hierarchy was not a hierarchy, it was a ceiling that only
+ * appeared on large screens.
+ *
+ * Raising it to the board's is the whole change, and it is free rather than a
+ * trade: measured over `../../../test/play/battlefield-geometry.browser.test.ts`'s
+ * resting fixture at fifteen viewports, the battlefield face is identical at
+ * every one of them (160 at 1920x1080 and above, 124 at 1440x900), the page
+ * overflows on neither axis, and the whole `browser` project is unchanged. The
+ * hand is height-capped by its own row and by `--hand-face-floor` long before
+ * this ceiling binds anywhere under 1440px wide.
+ */
+export const HAND_FACE_MAX_REM = BOARD_FACE_MAX_REM;
+
+/**
+ * The battlefield's width basis, which is not the hand's and never was.
+ *
+ * A board face is sized from the row it sits in and then capped; this is the
+ * basis half, kept at the measured 11rem while the two ceilings met at 10.
+ */
 const BOARD_WIDTH_BASIS_MAX_REM = 11;
 
 /**
@@ -95,6 +157,32 @@ export const COMBAT_HAND_FACE_MAX_REM = 3.5;
  * A subtraction from `100vh`, which is a proxy for the room the rows have and
  * not the room itself; `FACE_COMPLETE_REM`'s rule below replaces exactly this
  * kind of arithmetic off combat and says why it stops at the band.
+ *
+ * **What the number buys, measured** (`mtg-zhbz`, 2026-08-27,
+ * `../../../tools/combat-cap.ts`: four boards, six viewports, ten ceilings).
+ * Nothing clips at any of them, including with the rule deleted — no face, no
+ * mana tile, no hand card, no band entry, and neither the page nor the table
+ * overflows on the block axis. So this is not what keeps the combat board from
+ * cutting a card; `./slot.ts`'s height guard on the rotated face is, which is
+ * what the comment under the rule below already says. The hand does not move
+ * with it either: its face is identical at all ten ceilings.
+ *
+ * What it does decide is a trade with no winner in it. On a sparse board it only
+ * shrinks the face — at 1440x900 the row can afford 129.2px of card width, an
+ * unbound face draws 124.0, and this number draws 105.5. On a crowded board the
+ * row overflows on the inline axis, so a smaller face is more permanents
+ * reachable without scrolling: at 1392x766 this number shows 8 of the near
+ * seat's 12 where deleting the rule shows 7 and a flat 10rem ceiling shows 6.
+ * The 8.2px the bead's first note measured off the near mana band at 1440x560 is
+ * real and is the clamp's floor rather than this subtraction — there the
+ * arithmetic yields 20.5px and every chrome number from 20rem to 36rem lands on
+ * the same 4.5rem floor.
+ *
+ * So 29.875 stays: no swept value dominates it, and card size against
+ * reachability is not a choice pixels can make. Moving it is a decision, and
+ * `../../../test/play/combat-cap.browser.test.ts` is what makes it one — before
+ * that test, deleting this rule outright left the whole `browser` project and
+ * every `@mtg/ui` unit test byte-identical to baseline.
  */
 const COMBAT_BOARD_VERTICAL_CHROME_REM = 29.875;
 
@@ -130,28 +218,42 @@ const COMBAT_BOARD_VERTICAL_CHROME_REM = 29.875;
  * 6.4px under the hand at 780, 1.2 under at 795, 0.20 at 798, and 0.01 from 799
  * upward.
  *
- * **What holds the line at 800 is a fourth reading the first three missed.** On
- * the full table at eight a side, a row that mixes tapped and upright permanents
- * draws them at two different sizes: `../../test/play/table-allocation.browser.test.ts`
- * asserts one size per seat, and moving 800 to the tall arm fails it at 103.3
- * tapped against 96.9 upright. The row asks for more width than it has —
- * `./fit.ts` gives a battlefield slot a flex-shrink of 1, and a tapped slot
- * carries an explicit width off `--board-face` while an upright one takes its
- * width from the row's height under the slot's aspect ratio — so the two kinds
- * do not shrink alike and the upright permanents come out the smaller. It is not
- * this bound's defect: measured on the tall arm as it already ships, the same
- * split is there at 1280x801 (103.3 / 97.3), 1360x801 and 1400x801
- * (103.4 / 96.5) and 1440x801 (112 / 105.4), and gone by 1280x900 and 1440x900.
- * A band of heights just above this bound is broken at eight a side, and 800
- * sits against it.
+ * **A fourth reading used to hold the line at 800, and no longer does.** On the
+ * full table at eight a side, a row that mixes tapped and upright permanents
+ * drew them at two different sizes, and moving 800 to the tall arm failed
+ * `../../../test/play/table-allocation.browser.test.ts`'s one-size-per-seat
+ * assertion at 103.3 tapped against 96.9 upright. That was `mtg-6hhr`'s defect
+ * rather than this bound's — the rotated face's height guard read the slot's
+ * whole height where the upright face read the printed share of it — and
+ * `08dc7ae8` fixed it at the guard. Re-measured on the tall arm afterwards, the
+ * split is gone: 1280x801, 1360x801, 1400x801 and 1440x801 all read parity at
+ * eight and at twelve a side, on rows carrying 126 to 786px of sideways scroll,
+ * and those four cells are in the rig now so it cannot come back unmeasured.
  *
- * So 800 stays short and the query stays inclusive, and this is the condition on
- * revisiting rather than a verdict against the tall arm: fix the crowded tapped
- * row, and 800 wants to move up one pixel.
- * `../../test/play/short-table-boundary.browser.test.ts` pins both faces at
+ * So the condition this bound was waiting on has been met, and what is left is
+ * to re-measure the other three readings and decide: `mtg-rkld` owns that, and
+ * 800 stays short until it answers.
+ * `../../../test/play/short-table-boundary.browser.test.ts` pins both faces at
  * 1280x800 and at 1280x801 so the line cannot move by accident either way.
  */
 const SHORT_TABLE_MAX_HEIGHT_REM = 50;
+
+/** The lower picture/rules strip a following wrapped row may cover, never the name. */
+const CROWDED_ROW_FAN_REM = 4;
+
+/**
+ * The narrowest window `TALL_NARROW_TABLE_QUERY` below will floor a hand face
+ * in: 768px, an upright tablet's short edge.
+ *
+ * Named as a width rather than as a device because what it is bounding is the
+ * room, and it sits above `../mobile.ts`'s `PHONE_MAX_REM` by a whole band on
+ * purpose. It is restated here rather than imported because `../mobile.ts`
+ * imports this file, so the arrow cannot run the other way;
+ * `../../../test/play/hand-floor-band.browser.test.ts` pins the two numbers
+ * against each other so the gap between them stays deliberate, and measures the
+ * band's two edges.
+ */
+const TALL_NARROW_TABLE_MIN_WIDTH_REM = 48;
 
 /**
  * The short table's own condition, written once because two rules ask it.
@@ -163,17 +265,42 @@ const SHORT_TABLE_MAX_HEIGHT_REM = 50;
 const SHORT_TABLE_QUERY = `(min-width: ${String(THREE_COLUMN_MIN_WIDTH_PX)}px) and (max-height: ${cssNumber(SHORT_TABLE_MAX_HEIGHT_REM)}rem)`;
 
 /**
- * Battlefield cards grow with the available row until they reach this width.
- * Its ceiling is above the hand's because permanents determine combat and must
- * remain the primary reading surface during play.
+ * The narrowest table that is still tall enough to seat a complete hand face,
+ * and the second arm of the floor below.
+ *
+ * A tablet held upright is under `THREE_COLUMN_MIN_WIDTH_PX` and is not a phone,
+ * and the floor's first arm alone left that band with the smallest face on the
+ * table in the zone the player reads most: measured 2026-08-28 at 810x1080 and
+ * 768x1024 in chrome-headless-shell 1234 over `../../../tools/hand-scale.ts`,
+ * a held card came out 48x67 against a 100x139.7 permanent, drew no rules box
+ * at all where every permanent beside it drew one, and read 0.48 of the face it
+ * was being played onto. 48px is `./fit.ts`'s `MIN_SLOT_WIDTH_REM`, so the hand
+ * was on a floor the battlefield does not share — its own is
+ * `BOARD_FACE_MIN_REM` at 72px, and the row it sits in reads its height as well
+ * as its width while the hand slot is a seventh of a row and nothing else. A
+ * tall narrow window is exactly where a width-only basis is furthest from the
+ * room that is there: the seat had 641px of column and spent 95 of it on the
+ * hand. `mtg-g52`.
+ *
+ * Both bounds are what the floor cannot afford to cross rather than device
+ * names. 48rem is 768px, the narrowest upright tablet, and holds the floor off
+ * the 641-to-767 band where the table is cramped on both axes anyway — at
+ * 700x900 a permanent is already 55.5px, and a hand card floored at 100 would
+ * be twice the card it is played onto. 50rem is `SHORT_TABLE_MAX_HEIGHT_REM`,
+ * the same line the short table is drawn at, and it is what keeps a landscape
+ * phone out: 844x390 clears the width and fails the height, which is the
+ * shape the first arm's own note measured against.
  */
-const BOARD_FACE_MAX_REM = 10;
+const TALL_NARROW_TABLE_QUERY = `(min-width: ${cssNumber(TALL_NARROW_TABLE_MIN_WIDTH_REM)}rem) and (min-height: ${cssNumber(SHORT_TABLE_MAX_HEIGHT_REM)}rem)`;
 
-/** A row past seven permanents scrolls at a readable, height-safe face width. */
+/** A row past seven permanents shrinks toward this readable face ceiling. */
 const CROWDED_BOARD_FACE_MAX_REM = 7;
 
 /** The crowded-row ceiling when the three-column table is also short. */
 const SHORT_CROWDED_BOARD_FACE_MAX_REM = 5.25;
+
+/** A crowded table uses the same 48px thumbnail floor as the phone tier. */
+export const CROWDED_HAND_FACE_MAX_REM = MIN_SLOT_WIDTH_REM;
 
 /**
  * The smallest readable battlefield width.
@@ -214,7 +341,7 @@ const BOARD_FACE_MIN_REM = 4.5;
  * the same sentence about extra height, and without it a tall row would draw
  * four enormous permanents and scroll away the fifth.
  */
-const FACE_COMPLETE_REM = 6.25;
+export const FACE_COMPLETE_REM = 6.25;
 
 /**
  * And the guard under it: the tallest a battlefield slot may be drawn, as a share
@@ -243,7 +370,7 @@ const FACE_COMPLETE_REM = 6.25;
  * standing on the rest. `./lands.ts`'s tile went from 3rem to 3.5rem
  * (2026-08-14, "I want the lands to show up a bit bigger"), and at 85% those
  * eight pixels came straight off the face's height with its width unmoved: read
- * over `../../tools/card-uniformity.ts`, a 1280x800 board at four a side went
+ * over `../../../tools/card-uniformity.ts`, a 1280x800 board at four a side went
  * from 82.6 x 115.4 to 82.6 x 103.3, a trim of 0.800 against the printed 0.716.
  * A squashed card is a worse answer than a smaller one and this share is what
  * was choosing it.
@@ -337,7 +464,7 @@ const HAND_BASIS_TRIM_VAR = '--hand-basis-trim';
  * Under 4.5rem of content box the ladder does not fire and the board's own two
  * lines stand: `--hand-face-floor` above keeps a held card at a complete face on
  * the three-column table, so a hand face that narrow is a phone's, and a phone is
- * `../mat.ts`'s different arrangement rather than this ladder's narrow end.
+ * `./mat.ts`'s different arrangement rather than this ladder's narrow end.
  *
  * **The 88px face at 1280x800 is where this stops, and the cause is one pixel of
  * viewport.** `SHORT_TABLE_MAX_HEIGHT_REM` is 50rem and the query is inclusive,
@@ -360,9 +487,11 @@ const HAND_BASIS_TRIM_VAR = '--hand-basis-trim';
  * shape the recommendation actually points at, and the battlefield pays for it:
  * the viewer's permanent goes 124 to 115.6 at 1440x900, 100 to 68.9 at 1280x800
  * and 100 to 57.9 at 1024x768. The last two are under `../card.ts`'s
- * `BOARD_RULES_MIN_REM`, so a hand card sized like Magic Online's takes the rules
- * box off every permanent on the table — `mtg-u69`'s defect, moved one zone over
- * — and 57.9 is under `BOARD_FACE_MIN_REM`, which is where a name starts
+ * `BOARD_RULES_PANEL_MAX_REM`, so a hand card sized like Magic Online's puts every
+ * permanent on the table under the threshold where its rules box stops taking its
+ * own height and draws over its picture instead — `mtg-u69`'s defect moved one
+ * zone over, and `mtg-8kc` turned that from a card with no text into a card whose
+ * text costs the picture — and 57.9 is under `BOARD_FACE_MIN_REM`, which is where a name starts
  * clipping. Seven 176px faces are also 1288px of row against the 924 a 1440x900
  * table has, so the hand would overlap or scroll on top of that. A bigger face is
  * a trade between two zones; a bigger budget is a trade inside one card.
@@ -403,6 +532,21 @@ const HAND_RULES_CSS = HAND_RULES_LADDER.map(
 }`,
 ).join('');
 
+/**
+ * The board is in combat, as the condition every rule here asks it by.
+ *
+ * Five rules in this file turn on it and each one used to spell it out. That
+ * was one declaration per reader of a selector whose *weight* is the thing two
+ * of them are settled by — `mtg-a7hm` is what it cost to have it written five
+ * times and reasoned about once — so it is written here and read there, the way
+ * `./geometry.ts` holds `TABLE` for the same reason.
+ *
+ * Composed onto `.mtg-board` rather than including it, because two of the five
+ * readers negate it (`:not(${COMBAT_BOARD})`) and one reaches a descendant
+ * through it, and a selector that carried its own subject could do neither.
+ */
+const COMBAT_BOARD = `:has(.mtg-board__divider[data-combat='true'])`;
+
 export const HAND_CSS = `
 ${TABLE} .mtg-board {
   --hand-face-cap: ${cssNumber(HAND_FACE_MAX_REM)}rem;
@@ -410,41 +554,126 @@ ${TABLE} .mtg-board {
   --hand-face-floor: 0px;
   ${HAND_BASIS_TRIM_VAR}: calc(${cssNumber(PLAY_RAIL_REM)}rem - var(${RAIL_WIDTH_VAR}));
 }
-/* The complete-face floor is the three-column table's, and stops at its
-   breakpoint rather than reaching the phone.
+/* The complete-face floor is the three-column table's, and one band under it.
 
    Below 901px the mat is a different arrangement (./mat.ts) with a different
    thing to spend height on, and the floor is a claim about a table whose two
    lanes each hold a battlefield. Measured at 390x844 in chrome-headless-shell
-   151 over ../../test/play/battlefield-geometry.browser.test.ts, letting a
+   151 over ../../../test/play/battlefield-geometry.browser.test.ts, letting a
    43.1px hand slot jump to a complete face took enough off both lanes to split
    the far side's own base width — a tapped permanent came out 72px against an
    upright 69.2, and that test's whole subject is the two being one number.
    A phone hand is unreadable at either size and the fix for it is a phone's,
-   not a floor borrowed from a 1024px table. */
-@media (min-width: ${String(THREE_COLUMN_MIN_WIDTH_PX)}px) {
+   not a floor borrowed from a 1024px table.
+
+   The second arm is TALL_NARROW_TABLE_QUERY above, and it is the band that note
+   never measured: an upright tablet is neither a phone nor a three-column
+   table, and with the first arm alone it drew the smallest face on the table in
+   the hand — 48x67 against a 100x139.7 permanent, no rules box on any of the
+   seven, 0.48 of the card being played onto (mtg-g52). The floor reaches it and
+   stops there. A landscape phone fails the height bound and the cramped
+   641-to-767 band fails the width bound, so the shape the note above measured
+   is still outside.
+
+   What it costs is the overview, and the cost is stated rather than hidden: at
+   768x1024 the seat's hand row went from five of seven faces in view to two,
+   and at 810x1080 from six to three, because 347px of column cannot hold seven
+   complete faces at any floor. The row says so — ../fit.ts paints
+   .mtg-board__spells a thin scrollbar, measured as a 10px gutter on exactly the
+   rows that overflow — and the arrangement is the 1024x768 table's already,
+   where five of seven are in view against an 88px face. The battlefield pays
+   nothing: a permanent measured 100x139.7 before and after, and the height the
+   hand took came out of the seat's slack rather than off the far lane. */
+@media (min-width: ${String(THREE_COLUMN_MIN_WIDTH_PX)}px), ${TALL_NARROW_TABLE_QUERY} {
   ${TABLE} .mtg-board {
     --hand-face-floor: ${cssNumber(FACE_COMPLETE_REM)}rem;
   }
 }
-${TABLE} .mtg-board:has(.mtg-board__spells > .mtg-slot:nth-child(8)) {
-  --hand-face-cap: ${cssNumber(CROWDED_BOARD_FACE_MAX_REM)}rem;
+/* A crowded board lowers the hand cap, and off combat is where it may.
+
+   Both this rule and the combat one below it exist only to make the hand
+   smaller, and until \`mtg-a7hm\` they were settled against each other by
+   weight: a \`:has()\` carrying a class, an \`:is()\` and an \`:nth-child()\`
+   outranks one carrying a class and an attribute, so on a board that was both
+   the 7rem won and the 3.5rem did nothing. Measured on \`../../../tools/combat-board.ts\`'s
+   \`crowded-tapped\` fixture, the hand drew 112px at 1440x900 and 84 at 1280x800
+   where the same board off a crowded row drew 56. A rule that only ever narrows
+   the hand had undone another rule that only ever narrows the hand, and the
+   busier the table the larger the cards it drew over it.
+
+   Excluded rather than restated, because "the crowded cap is the one for a board
+   that is not in combat" is the rule, and \`--board-face-max\` two blocks down is
+   already written that way round — its combat ceiling is the heavier selector,
+   which is why the battlefield face was combat's on a crowded board while the
+   hand was not. \`../mobile.ts\` found the same fight on a landscape phone and
+   answered it by restating the combat value under the crowded selector; that
+   arm is left alone, because a phone's tier wins on order and has no fight to
+   settle here. */
+${TABLE} .mtg-board:has(.mtg-board__spells[data-crowded='true']):not(${COMBAT_BOARD}) {
+  --hand-face-cap: ${cssNumber(CROWDED_HAND_FACE_MAX_REM)}rem;
 }
 @media ${SHORT_TABLE_QUERY} {
   ${TABLE} .mtg-board {
     --hand-face-cap: ${cssNumber(SHORT_TABLE_HAND_FACE_MAX_REM)}rem;
     --board-width-basis-cap: ${cssNumber(SHORT_TABLE_BOARD_WIDTH_BASIS_MAX_REM)}rem;
   }
-  ${TABLE} .mtg-board:has(.mtg-board__spells > .mtg-slot:nth-child(8)) {
-    --hand-face-cap: ${cssNumber(SHORT_CROWDED_BOARD_FACE_MAX_REM)}rem;
+  ${TABLE} .mtg-board:has(.mtg-board__spells[data-crowded='true']):not(${COMBAT_BOARD}) {
+    --hand-face-cap: ${cssNumber(CROWDED_HAND_FACE_MAX_REM)}rem;
   }
 }
-${TABLE} .mtg-board:has(.mtg-board__divider[data-combat='true']) {
+${TABLE} .mtg-board${COMBAT_BOARD} {
   --hand-face-cap: ${cssNumber(COMBAT_HAND_FACE_MAX_REM)}rem;
+}
+/* A constrained hand is a labeled thumbnail rail, not a failed card row.
+
+   The normal table keeps the head out of the way and preserves hand-to-board
+   parity. Combat and a row with eight directly represented places spend that
+   height on the battlefield instead. The cards stay selectable and retain
+   their full hover/focus detail; the visible note names the deliberate mode. */
+${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] > .mtg-zone__head,
+${TABLE} .mtg-board:has(.mtg-board__spells[data-crowded='true']) .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] > .mtg-zone__head {
+  display: flex;
+  position: absolute; inset-block-start: 50%; inset-inline-start: var(--mtg-space-2);
+  inline-size: 5rem; max-inline-size: 5rem; translate: 0 -50%; z-index: 1;
+  padding-inline: var(--mtg-space-1);
+  background: var(--mtg-surface-rail);
+  flex-wrap: wrap; overflow-wrap: anywhere;
+  font-size: var(--mtg-text-xs); line-height: 1;
+}
+${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'],
+${TABLE} .mtg-board:has(.mtg-board__spells[data-crowded='true']) .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] {
+  position: relative;
+  /* A 48/56px thumbnail is the whole rail, not a full card floating inside the
+     ordinary rail's two layers of hover-halo padding. Keeping both layers
+     would spend 16px of scarce block space on chrome after the card was
+     deliberately reduced. */
+  padding-block: 0; padding-inline-start: 5.75rem;
+}
+${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] > .mtg-zone__body,
+${TABLE} .mtg-board:has(.mtg-board__spells[data-crowded='true']) .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] > .mtg-zone__body {
+  padding-block: 0;
 }
 /* The row is as tall as its cards and no taller: the zone takes no share of the
    column's height, so what the hand does not need is the battlefield's. */
 ${TABLE} .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] { flex: none; }
+/* And the divider itself, which costs the lane nothing to draw.
+
+   .mtg-split is display: none until a surface places it (../panel.ts), and
+   this is the placement. It is drawn on every table rather than only on a
+   dragged one, because a control nobody can find is a control nobody has: the
+   whole of it is a 2px line in the 8px gap the lane already leaves between the
+   step bar and the hand.
+
+   The negative margins are the draft divider's, for the reason ../panel.ts
+   gives there: a handle between two children of a gapped column costs its own
+   8px *and* a second 8px gap, and this lane's height is spent on cards. One
+   gutter back either side leaves the undragged table the pixels mtg-gohr
+   measured, which is what ../../../test/play/hand-seam.browser.test.ts asserts
+   before it drags anything. */
+${TABLE} .mtg-board__side[data-seat='you'] > .mtg-split {
+  display: block;
+  margin-block: calc(var(--mtg-space-2) * -1);
+}
 /* The row's block padding is left where ./zone.ts put it, and that is a
    measurement rather than an omission. ./slot.ts lights a castable card with
    three channels and the third is a halo spilling 16px onto the rail; the body
@@ -469,13 +698,15 @@ ${TABLE} .mtg-board__side[data-seat='you'] > .mtg-zone[data-tone='rail'] > .mtg-
 
    A seventh of the row is the same proxy the battlefield stopped using two
    blocks down, and the hand went on paying for it after that lane was fixed
-   (mtg-s3re). Measured in chrome-headless-shell 151 over ../../test/play/
+   (mtg-s3re). Measured in chrome-headless-shell 151 over ../../../test/play/
    hand-allocation.browser.test.ts, a 1024x768 table gave the row 556.3px, a
    seventh of it is a 71.5px face, and on the face of that date — 4px of border
    and 4px of padding a side, before mtg-iqyc made the band proportional — 71.5
-   left a 55.5px content box, under ../card.ts's BOARD_RULES_MIN_REM. So
+   left a 55.5px content box, under ../card.ts's BOARD_RULES_PANEL_MAX_REM. So
    none of the seven cards in the opening hand drew a word of rules text at any
-   board size, while a permanent beside them was 100px and drew all of it. The
+   board size, while a permanent beside them was 100px and drew all of it. (That
+   threshold hid the box outright until mtg-8kc; the same face today draws a panel
+   over its picture, which is a cost rather than a silence.) The
    hand is the zone a player reads most and it was the one region on the table
    that could not be read.
 
@@ -540,6 +771,85 @@ ${TABLE} .mtg-slot[data-slot='hand']:not([data-empty='true']) > .mtg-card {
   width: 100%; height: auto; max-height: none; min-height: 0;
   aspect-ratio: ${cssNumber(CARD_TRIM_MM.width)} / ${cssNumber(CARD_TRIM_MM.height)};
 }
+/* And where the player has dragged the seam, the row is as tall as they said.
+
+   mtg-7rhk. Everything above this line is a default, and mtg-gohr is what
+   made the difference matter: parity is the right answer for somebody who has
+   not said how they want the lane divided, and it is nobody's answer to how
+   they want it divided. ../../routes/play/hand-seam.ts is the control and
+   carries the rest of the argument; this is the arm of the sheet it writes to.
+
+   **Three declarations, because a dragged hand is sized on the other axis.** A
+   hand slot above is width-driven off a seventh of its row and the printed trim
+   answers for the height, which is why nothing about this row's height decides
+   how big a held card is. Under a seam the row is given a height, the slot
+   stretches to it, and the trim answers for the width instead. So the zone takes
+   the height (the body has to grow into it, which is the second rule, since the
+   row is flex: none above and would otherwise stay as tall as its cards), and
+   the slot takes align-self: stretch with width: auto (the third).
+
+   min-content rather than a typed floor on the zone, and MIN_SLOT_WIDTH_REM
+   rather than a second number under the slot. The floor a dragged hand may not
+   pass is ../fit.ts's, which is stated on a *card*; what the zone needs is
+   that card plus this row's own chrome, and min-content is that sum derived
+   rather than a constant that goes stale the day ./zone.ts changes a padding.
+
+   **After every default it replaces**, which is where this file already puts a
+   rule that answers another (the empty-slot marker two blocks up says so in as
+   many words). The seam attribute puts every rule in this arm ahead of the
+   default it answers on specificity alone, so the order is not what makes them
+   win; it is what keeps a reader who has just read a default from having to
+   scroll up to find out it was overridden.
+
+   **Empty places are excluded for the third time in this file**, and it is the
+   same rule each time: ./slot.ts draws a place with nothing in it as a 2.25rem
+   marker, and a marker stretched to a dragged row's height is the card-sized box
+   mtg-ej5 removed. align-items: flex-start on the body stays where it is and
+   the stretch is asked for per slot, which is what keeps the markers out of it.
+
+   **Not in combat, which is this bead's one open question answered by the
+   geometry rather than by preference.** Combat is already a re-division of the
+   same lane -- ./band.ts gives the near side NEAR_GROW_IN_COMBAT and the
+   ceiling above drops the hand to COMBAT_HAND_FACE_MAX_REM so the fight has
+   room -- and a seam that survived it would either fight that ceiling for the
+   same pixels or hold a dragged row open with a capped card in it and hand the
+   battlefield dead space instead of height. Suspending it is the one answer with
+   no second opinion in it: while attackers are declared the table is exactly the
+   table mtg-gohr measured, and the seam comes back with the board. The crowded
+   and short-table ceilings above are *not* suspended and are overridden on
+   purpose, because both are the same default this control exists to replace --
+   what stops a crowded board being squeezed by a dragged hand is the battlefield
+   face's own floor two blocks down and the limits the handle may be dragged
+   between.
+
+   **Measure this arm with a still page.** The whole of it read as a no-op for
+   an afternoon -- the zone took the dragged height and the card in it stayed at
+   48x67 at every share and every viewport -- and the layout was never the
+   subject. ../../../test/support/chrome-driver.ts's stillPage says why in full:
+   a rig emulates prefers-reduced-motion, the app answers that with a 1ms
+   transition on everything rather than none, and a measurement expression that
+   sets data-seam and then reads a box synchronously reads t=0, which is the
+   value from before it wrote. ../../../tools/seam-probe.ts wraps its mutating
+   expression and the same sweep came back with the numbers in
+   ../../routes/play/hand-seam.ts. Nothing about the selectors changed. */
+${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__side[data-seat='you'][data-seam='true'] > .mtg-zone[data-tone='rail'] {
+  block-size: var(--hand-seam);
+  min-block-size: min-content;
+}
+${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__side[data-seat='you'][data-seam='true'] > .mtg-zone[data-tone='rail'] > .mtg-zone__body {
+  flex: 1 1 auto; min-block-size: 0;
+}
+${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__side[data-seat='you'][data-seam='true'] .mtg-slot[data-slot='hand']:not([data-empty='true']) {
+  align-self: stretch;
+  width: auto;
+  min-height: calc(${cssNumber(MIN_SLOT_WIDTH_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)});
+}
+/* And the face follows the slot onto the other axis, for the reason the
+   width-driven rule above gives from the other side: a card is one rectangle
+   and the trim answers for whichever side is not being sized. */
+${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__side[data-seat='you'][data-seam='true'] .mtg-slot[data-slot='hand']:not([data-empty='true']) > .mtg-card {
+  width: auto; height: 100%;
+}
 /* And what the face does with the height it has, which is the half of the
    question the slot's width cannot answer. HAND_RULES_LADDER above carries the
    distribution it is chosen from, the floor under the picture, and the larger
@@ -559,12 +869,18 @@ ${TABLE} .mtg-slot[data-slot='hand']:not([data-empty='true']) > .mtg-card {
 
    It carries no --mtg- prefix, for the reason ../card.ts's --name-scale
    carries none: that prefix is the design vocabulary, declared once in
-   ../tokens.ts and checked against every reference by ../../test/tokens.test.ts,
+   ../tokens.ts and checked against every reference by ../../../test/tokens.test.ts,
    and this is one sheet publishing a number to itself two selectors later. */
 ${TABLE} .mtg-board__spells {
   --hand-slot: min(
     var(--board-width-basis-cap),
     calc((100% - ${String(HAND_ACROSS - 1)} * ${HAND_GAP}) / ${String(HAND_ACROSS)})
+  );
+  /* The one-row fit counts actual width pressure, including the long side of a
+     tapped face. At the readable floor any residual pressure is handed to
+     flex-wrap instead of to a scrollbar or a smaller card. */
+  --board-one-row-fit: calc(
+    (100% - (var(--board-place-count) - 1) * ${HAND_GAP}) / var(--board-width-units)
   );
 }
 /* The battlefield grows from the same available-width basis as the hand, with
@@ -576,16 +892,111 @@ ${TABLE} .mtg-board__spells {
 ${TABLE} .mtg-board__spells {
   --board-face-max: ${cssNumber(BOARD_FACE_MAX_REM)}rem;
 }
-${TABLE} .mtg-board__spells:has(> .mtg-slot:nth-child(8)) {
+${TABLE} .mtg-board__spells[data-crowded='true'] {
   --board-face-max: ${cssNumber(CROWDED_BOARD_FACE_MAX_REM)}rem;
 }
+${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__spells[data-crowded='true'] {
+  --board-face-max: ${cssNumber(BOARD_FACE_MIN_REM)}rem;
+  min-height: calc(
+    2 * ${cssNumber(BOARD_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
+    - ${cssNumber(CROWDED_ROW_FAN_REM)}rem
+  );
+  column-gap: 0;
+}
+/* At 1024px a twelve-place tapped row is the only measured combat row that
+   needs three lines: six long edges do not fit. Pay for the visible extent of
+   its final rotated face only there; wider rows keep the two-line floor above. */
+@media (max-width: 64rem) {
+  ${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__spells[data-crowded='true']:has(> .mtg-attach > .mtg-slot[data-tapped='true']) {
+    min-height: calc(
+      3 * ${cssNumber(BOARD_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
+      - 2 * ${cssNumber(CROWDED_ROW_FAN_REM)}rem
+      - (${cssNumber(BOARD_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)} - ${cssNumber(BOARD_FACE_MIN_REM)}rem) / 2
+      + var(--mtg-space-1)
+    );
+  }
+}
+/* Once distinct places wrap, their card edges provide the row boundary. Keep
+   the ordinary inline gap for scanning left to right, but do not charge a full
+   card-to-card gutter again between stacked rows: at 1024x768 that gutter is
+   exactly the difference between two complete 72px faces and a clipped first
+   row. */
+${TABLE} .mtg-board__spells[data-crowded='true'] {
+  align-content: flex-start;
+  align-items: flex-start;
+  min-height: calc(
+    ${cssNumber(BOARD_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
+  );
+  row-gap: 0;
+  column-gap: var(--mtg-space-1);
+  /* The wrapped row is no longer an overflow scroller, so its old scrollbar /
+     hover-halo reserve is dead chrome on the block axis. */
+  padding-block: 0;
+}
+/* Ten directly rendered places can require three wrapped lines once tapped
+   cards spend their long edge on the row axis. Publish that visible extent to
+   the lane instead of letting the final face hang below the row. On a phone the
+   same population needs a fourth line; the board body remains the scroller, so
+   increasing the row's honest content height preserves every exact object. */
+${TABLE} .mtg-board__spells[data-crowded='true']:has(> :nth-child(10)) {
+  min-height: calc(
+    3 * ${cssNumber(BOARD_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
+    - 2 * ${cssNumber(CROWDED_ROW_FAN_REM)}rem
+  );
+}
+@media (max-width: 27rem) {
+  ${TABLE} .mtg-board__spells[data-crowded='true']:has(> :nth-child(10)),
+  ${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__spells[data-crowded='true']:has(> :nth-child(10)) {
+    min-height: calc(
+      4 * ${cssNumber(BOARD_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
+      - 3 * ${cssNumber(CROWDED_ROW_FAN_REM)}rem
+    );
+  }
+}
+/* Wrapping spends cross-axis overlap, not the 72px identity floor. In combat
+   the row is intentionally not a size container, so its children must publish
+   the complete face height that establishes each flex line. */
+${playedSlot(`${TABLE} .mtg-board__spells[data-crowded='true']`)}:not([data-empty='true']) {
+  min-height: calc(
+    ${cssNumber(BOARD_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
+  );
+  max-height: none;
+}
+/* Four complete mixed-tap rows cannot coexist with the side rails once a row
+   wraps, even after the hand and mana rail have reached their decided
+   constrained sizes. Fan wrapped rows through the lower picture/rules region:
+   every identity and name bar remains exposed, the last row remains complete, and
+   hover/focus raises the exact permanent being inspected. The trailing reserve
+   keeps the last face inside its row while negative end margin shortens each
+   line pitch and leaves each name band exposed at the legibility floor. A
+   single-line row is unchanged because its reserve and offset cancel. */
+${TABLE} .mtg-board__spells[data-crowded='true'] {
+  padding-block-end: ${cssNumber(CROWDED_ROW_FAN_REM)}rem;
+}
+${playedPlace(`${TABLE} .mtg-board__spells[data-crowded='true']`)} {
+  position: relative;
+  margin-block-end: calc(-1 * ${cssNumber(CROWDED_ROW_FAN_REM)}rem);
+}
+${playedPlace(`${TABLE} .mtg-board__spells[data-crowded='true']`)}:hover,
+${playedPlace(`${TABLE} .mtg-board__spells[data-crowded='true']`)}:focus-within { z-index: 2; }
+/* A rotated name bar lies on the lower edge that the following fan covers.
+   Repeat only that public identity horizontally at the safe leading edge;
+   the Card remains the sole accessible name. */
+${TABLE} .mtg-board__spells[data-crowded='true'] .mtg-slot[data-tapped='true'] > .mtg-slot__fan-name {
+  position: absolute; inset-block-start: 0; inset-inline-start: 0; z-index: 1;
+  display: block; max-width: 100%; padding-block: 1px; padding-inline: var(--mtg-space-1);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--mtg-ink); background: var(--mtg-surface-raised);
+  font-family: var(--mtg-font-card); font-size: var(--mtg-text-xs); line-height: 1.15;
+  pointer-events: none;
+}
 @media ${SHORT_TABLE_QUERY} {
-  ${TABLE} .mtg-board__spells:has(> .mtg-slot:nth-child(8)) {
+  ${TABLE} .mtg-board__spells[data-crowded='true'] {
     --board-face-max: ${cssNumber(SHORT_CROWDED_BOARD_FACE_MAX_REM)}rem;
   }
 }
 @media (min-width: ${String(THREE_COLUMN_MIN_WIDTH_PX)}px) {
-  ${TABLE} .mtg-board:has(.mtg-board__divider[data-combat='true']) .mtg-board__spells {
+  ${TABLE} .mtg-board${COMBAT_BOARD} .mtg-board__spells {
     --board-face-max: clamp(
       ${cssNumber(BOARD_FACE_MIN_REM)}rem,
       calc((100vh - ${cssNumber(COMBAT_BOARD_VERTICAL_CHROME_REM)}rem) / 4),
@@ -599,9 +1010,10 @@ ${TABLE} .mtg-board__spells:has(> .mtg-slot:nth-child(8)) {
    A seventh of the row's width is a proxy for the room a face has, and measured
    over ../../../tools/hand-scale.ts in chrome-headless-shell 151 it is wrong by
    most of a card: at 1024x768 a seventh of a 556.3px row is a 72px face, whose
-   56px content box is under ../card.ts's BOARD_RULES_MIN_REM and under its
+   56px content box is under ../card.ts's BOARD_RULES_PANEL_MAX_REM and under its
    BOARD_TYPE_LINE_MIN_REM, so no permanent on that table drew a type line or a
-   rules box at any board size - while the row it sat in was 170.4px tall and the
+   rules box at any board size (the box became a panel over the picture in
+   mtg-8kc; it was hidden then) - while the row it sat in was 170.4px tall and the
    slot inside it 100.6, which is 67.6px of the row's height spent on nothing.
    The width basis had no way to see that, because a row's height is the one
    thing a length in the row's own width cannot be a proxy for.
@@ -625,8 +1037,27 @@ ${TABLE} .mtg-board__spells:has(> .mtg-slot:nth-child(8)) {
    That is a change to how combat divides the table, which is ./band.ts's
    decision and not this one's, so the combat board keeps the ceiling it had.
    What protects it instead is ./slot.ts's height guard on the rotated face,
-   which is where the same shortfall was being paid in clipped words. */
-${TABLE} .mtg-board:not(:has(.mtg-board__divider[data-combat='true'])) .mtg-board__spells {
+   which is where the same shortfall was being paid in clipped words.
+
+   **This declaration is also what keeps shutting the side panel from shrinking
+   a battlefield face**, which is mtg-t34 and is measured by
+   ../../../test/play/rail-collapse-board.browser.test.ts. Before it a face was
+   what the lane had left after the hand took its share, so a hand row that grew
+   on collapse took the growth off the battlefield under it and the viewer's own
+   face came out smaller than the opponent's. A face that is the largest card
+   fitting its row cannot be paid for that way, and that is this rule.
+
+   The natural reading is that --hand-basis-trim below is what holds that, and
+   it is not. Zeroing the trim leaves the outcome green at all six viewports the
+   test measures: at 1280x900 the hand goes 101.1 -> 120 and the near board face
+   still goes 101.1 -> 111.2 on collapse, at 1366x900 113.4 -> 120 and 101.5 ->
+   111.2, against clean shut readings of 120.2 and 114.3. The trim is worth
+   9.0px of face there, so it earns its keep; what it is not is the thing
+   standing between here and mtg-t34. The collapse hands the lane 228px and the
+   hand can take about 33 of them, which is why no face comes back smaller
+   either way (mtg-8xpu). Weaken the containment above and a test three
+   directories away is what fails, so this is the paragraph that names both. */
+${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__spells {
   container-type: size;
 }
 /* The battlefield and hand grow together until their independent ceilings.
@@ -646,17 +1077,84 @@ ${TABLE} .mtg-board:not(:has(.mtg-board__divider[data-combat='true'])) .mtg-boar
    it is the same rule of ./slot.ts's being outweighed: without it a battlefield
    with room in it drew four markers at 85% of the row, which is bigger than the
    card-sized boxes mtg-ej5 removed. */
-${TABLE} .mtg-board__spells > .mtg-slot:not([data-empty='true']) {
-  --board-face: clamp(
+${playedSlot(`${TABLE} .mtg-board__spells`)}:not([data-empty='true']) {
+  --board-face: max(
     ${cssNumber(BOARD_FACE_MIN_REM)}rem,
-    var(--hand-slot),
-    var(--board-face-max)
+    min(var(--board-one-row-fit), var(--hand-slot), var(--board-face-max))
   );
   flex: 0 0 auto;
   width: var(--board-face);
   height: auto; min-height: 0;
   max-height: ${cssNumber(BOARD_FACE_MAX_SHARE)}%;
   align-self: center;
+}
+/* And a tray takes the half of that rule that is about being on the row rather
+   than about being a card, which is \`mtg-ijze\`'s second half.
+
+   A permanent holding an Equipment is drawn as a \`.mtg-attach\` tray with two
+   cards in it (\`../../board/Battlefield.ts\`), so it cannot take the width above
+   — that is one card's width, and \`--board-face\` carries a percentage of the
+   row that would re-resolve against the tray anyway. What it can take, and had
+   to have, is the zero shrink factor: \`./attach.ts\` starts the tray at
+   \`flex: 0 1 auto\` and both boxes inside it declare \`min-width: 0\`, so on a
+   row that overflows the tray was the one item flexbox could take the overflow
+   out of. It took all of it. Measured at 1440x900 with eight permanents on the
+   row, the tray was **6px wide** — its own padding and border with nothing
+   between them — its host was pinned at \`./fit.ts\`'s \`MIN_SLOT_WIDTH_REM\`, and
+   both cards were drawn outside the keyline whose whole purpose is to say the
+   two of them belong together. The row scrolls instead now, which is what every
+   other place on it already did.
+
+   **The height is where the width cap reaches these cards**, and that is the
+   whole of the second bound. A tray keeps \`./fit.ts\`'s stretch rather than
+   taking \`align-self: center\`, because everything inside it is sized off its
+   height — \`./attach.ts\` draws the held card at 70% of it and the host takes
+   the rest, both of them deriving a width from \`aspect-ratio\` — so a tray is
+   height-driven where every bare place beside it is width-driven. Bound only by
+   the row's share, the two axes disagree exactly when the crowded cap bites: at
+   1280x800 with eight permanents, the cap held a bare face to 84px and the tray
+   took 96% of the row, so its host came out **100.9px, 20% larger than the
+   neighbor it is crowded against**. The bigger card on the more crowded board
+   is the same wrong picture \`mtg-ijze\` was filed for, one axis over.
+
+   So the tray is *also* bounded by the tallest a face at the cap may be drawn:
+   the maximum width times the printed trim, plus what \`./attach.ts\` spends on
+   its own keyline. \`--board-face-max\` rather than \`--board-face\` because
+   \`--board-face\` carries a percentage of the row, which a declaration on a
+   tray's *child* re-resolves against the tray — that is what makes the width
+   above unusable here, and it is not a bound that can be moved to the tray
+   itself, because the tray's own width has two cards and a link in it. The
+   max is a \`clamp()\` upper bound and is always a length: rems in the three
+   caps here, viewport units in \`../mobile.ts\`'s combat one. Where the row is
+   the narrower constraint the row still wins, which is what \`min()\` says.
+   Measured after: 84px host against 84px bare at 1280x800, 112 against 112 at
+   1440x900. */
+${TABLE} .mtg-board__spells > .mtg-attach:not([data-holds='false']) {
+  flex: 0 0 auto;
+  max-height: min(
+    ${cssNumber(BOARD_FACE_MAX_SHARE)}%,
+    calc(
+      var(--board-face-max) * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
+      + ${cssNumber(TRAY_BLOCK_CHROME_PX)}px
+    )
+  );
+}
+/* A crowded row may wrap but may not buy a fit by making the host inside an
+   attachment tray less legible than a bare permanent. Trays are height-driven,
+   so state the same 72px face floor on their block axis, plus the keyline they
+   own; the row's wrap/fan policy absorbs the extra place instead of clipping
+   either exact object. */
+${TABLE} .mtg-board__spells[data-crowded='true'] > .mtg-attach:not([data-holds='false']) {
+  min-height: calc(
+    ${cssNumber(BOARD_FACE_MIN_REM)}rem * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)}
+    + ${cssNumber(TRAY_BLOCK_CHROME_PX)}px
+  );
+  max-height: none;
+  align-self: center;
+}
+${TABLE} .mtg-board__spells[data-crowded='true'] > .mtg-attach:not([data-holds='false']) > .mtg-slot {
+  flex: 0 0 auto;
+  width: ${cssNumber(BOARD_FACE_MIN_REM)}rem;
 }
 /* And where the row is a container, the same face bounded by the room it is in.
 
@@ -676,15 +1174,28 @@ ${TABLE} .mtg-board__spells > .mtg-slot:not([data-empty='true']) {
 
    It carries the same :not() the container above does, because a cqh with no
    size container over it resolves against the small viewport, which is not a
-   row. */
-${TABLE} .mtg-board:not(:has(.mtg-board__divider[data-combat='true'])) .mtg-board__spells > .mtg-slot:not([data-empty='true']) {
-  --board-face: clamp(
+   row.
+
+   **The floor is absolute on a constrained table.** The previous curve let the
+   row's room overrule name legibility. The crowded-board contract now spends
+   the hand first, shrinks faces only to BOARD_FACE_MIN_REM, and then wraps
+   distinct exact-state places. A face never becomes an unlabeled sliver merely
+   to preserve a one-row layout.
+
+   The combat rule above keeps the bare floor. The row is not a size container
+   in combat (./band.ts's lane factors need its content in the flex basis), so
+   there is no cqh to floor against, and inventing a second proxy for the room
+   here would be a second opinion about the number this rule exists to read. */
+${playedSlot(`${TABLE} .mtg-board:not(${COMBAT_BOARD}) .mtg-board__spells`)}:not([data-empty='true']) {
+  --board-room: calc(${cssNumber(BOARD_FACE_MAX_SHARE)}cqh * ${cssNumber(CARD_TRIM_MM.width)} / ${cssNumber(CARD_TRIM_MM.height)});
+  --board-face: max(
     ${cssNumber(BOARD_FACE_MIN_REM)}rem,
     min(
-      calc(${cssNumber(BOARD_FACE_MAX_SHARE)}cqh * ${cssNumber(CARD_TRIM_MM.width)} / ${cssNumber(CARD_TRIM_MM.height)}),
-      max(var(--hand-slot), ${cssNumber(FACE_COMPLETE_REM)}rem)
-    ),
-    var(--board-face-max)
+      var(--board-one-row-fit),
+      var(--board-room),
+      max(var(--hand-slot), ${cssNumber(FACE_COMPLETE_REM)}rem),
+      var(--board-face-max)
+    )
   );
 }
 /* And the face inside it keeps the trim's shape even where the cap above binds,
@@ -716,14 +1227,17 @@ ${TABLE} .mtg-board:not(:has(.mtg-board__divider[data-combat='true'])) .mtg-boar
    A tapped face is excluded by name: ./slot.ts rotates it a quarter turn and
    sizes it off the square slot's width, which is a different sentence with the
    same purpose, and this selector would outweigh it. */
-${TABLE} .mtg-board__spells > .mtg-slot:not([data-empty='true']):not([data-tapped='true']) > .mtg-card {
+${playedSlot(`${TABLE} .mtg-board__spells`)}:not([data-empty='true']):not([data-tapped='true']) > .mtg-card {
   width: auto; height: 100%; max-width: 100%; margin-inline-end: auto;
 }
 /* A tapped slot reserves the long side of the same face before rotating it.
    The short-table and crowded-row ceilings above keep that request below the
-   row's height guard; a zero shrink factor keeps flexbox from shrinking only the
-   tapped slot's wider row-axis box. */
-${TABLE} .mtg-board__spells > .mtg-slot[data-tapped='true']:not([data-empty='true']) {
+   row's height guard; the zero shrink factor is the flex: 0 0 auto on the
+   spells slot above, which this selector narrows rather than replaces, and it
+   keeps flexbox from shrinking only the tapped slot's wider row-axis box. A
+   crowded row overflows into its own scroller instead, which is what lets the
+   two states stay one size at every width. */
+${playedSlot(`${TABLE} .mtg-board__spells`)}[data-tapped='true']:not([data-empty='true']) {
   width: calc(var(--board-face) * ${cssNumber(CARD_TRIM_MM.height)} / ${cssNumber(CARD_TRIM_MM.width)});
 }
 `;

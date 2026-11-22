@@ -169,6 +169,35 @@ describe('the kernel behind the neutral contract', () => {
     expect(refusals[0]).toContain('DSL cards');
   });
 
+  it('refuses a commander table by name, at supports and at open', async () => {
+    // The variant is a routing fact: the kernel plays the standard two-player
+    // game and says so, rather than dealing that game under a table whose
+    // rules named another one.
+    const spec = table('backend/commander');
+    const commander = {
+      ...spec,
+      rules: { variant: 'commander' as const, startingLife: 40 },
+      seats: [
+        { ...spec.seats[0], deck: { ...spec.seats[0].deck, commanders: [{ name: 'General', count: 1 }] } },
+        spec.seats[1],
+      ] as const,
+    };
+    const refusals = await kernelBackend({ content }).supports(commander);
+    expect(refusals).toHaveLength(1);
+    expect(refusals[0]).toContain('standard two-player game');
+    const opened = await kernelBackend({ content }).open(commander);
+    expect(opened.ok).toBe(false);
+    if (opened.ok) return;
+    expect(opened.error.message).toContain('standard two-player game');
+    // Stated rules that are the standard game are the standard game.
+    expect(
+      await kernelBackend({ content }).supports({
+        ...spec,
+        rules: { variant: 'standard', startingLife: 20 },
+      }),
+    ).toEqual([]);
+  });
+
   it('names what it could not resolve', async () => {
     const spec = table('backend/unresolved');
     const opened = await kernelBackend({ content }).open({
@@ -266,14 +295,13 @@ describe('the kernel behind the neutral contract', () => {
 
 /**
  * `moveIdOf` is the write side of a recorded move (`indexOf` is the read
- * side), and it is not reachable from `kernelBackend`'s own contract today:
- * `submit` only ever resolves a `MoveId` to an index and hands that index to
- * `choose` (never `chooseAction`), so nothing in this file can drive a
- * `RecordedSession` into recording a constructed action. What is checked here
- * is the function `wrap` calls, fed a choice built the way `chooseAction`
- * itself builds one when the enumeration truncates — the same technique
- * `attack-enumeration.test.ts` uses to force that — so the case this guards
- * against is real kernel output, not a hand-rolled stand-in for it (mtg-2guj).
+ * side). `kernelBackend` reaches a constructed action only for the generic
+ * bounded text descriptor; every enumerated decision still hands an index to
+ * `choose`. What is checked here is the function `wrap` calls, fed a choice
+ * built the way `chooseAction` itself builds one when the enumeration
+ * truncates — the same technique `attack-enumeration.test.ts` uses to force
+ * that — so the case this guards against is real kernel output, not a
+ * hand-rolled stand-in for it (mtg-2guj).
  */
 describe('moveIdOf, the write side of a recorded move', () => {
   it('renders an index as its digit string', () => {
@@ -404,7 +432,7 @@ describe('the kernel behind the contract, on a board wide enough to truncate', (
    * `checkReproduction` replays is the walk that was played.
    */
   function eager(decision: PendingDecision): MoveId {
-    const active = decision.options.find((option) => option.text !== 'Pass');
+    const active = decision.options.find((option) => option.text !== 'Pass' && option.text !== 'concede');
     const move = active ?? decision.options[0];
     if (move === undefined) throw new Error('the decision offered nothing to take');
     return move.id;
@@ -553,7 +581,7 @@ describe(
 
     /** `eager` again, and pure for the same reason `ConformanceOptions.pick` is. */
     function eager(decision: PendingDecision): MoveId {
-      const active = decision.options.find((option) => option.text !== 'Pass');
+      const active = decision.options.find((option) => option.text !== 'Pass' && option.text !== 'concede');
       const move = active ?? decision.options[0];
       if (move === undefined) throw new Error('the decision offered nothing to take');
       return move.id;

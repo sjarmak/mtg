@@ -74,6 +74,10 @@ const CREATURE_DISCOUNT = costReducer('Warden of Cheap Beasts', { amount: 1, car
 const ARTIFACT_DISCOUNT = costReducer('Foundry of Thrift', { amount: 1, cardType: 'artifact' });
 const UNIVERSAL_DISCOUNT = costReducer('Font of Free Casting', { amount: 1, cardType: null });
 const HUGE_DISCOUNT = costReducer('Overwhelming Largesse', { amount: 5, cardType: 'creature' });
+const INSTANT_SORCERY_DISCOUNT = creatureCostReducer('Goblin Electromancer', {
+  amount: 1,
+  cardTypes: ['instant', 'sorcery'],
+});
 
 function myLands(count: number) {
   return lands(MOUNTAIN, count).map((land) => ({ card: land, controller: 0 as const }));
@@ -101,6 +105,17 @@ describe('effectiveManaCost', () => {
       hands: [[ZAP], []],
     });
     expect(effectiveManaCost(start.state, 0, ZAP)).toStrictEqual(ZAP.manaCost);
+  });
+
+  it('applies one finite filter to both instant and sorcery spells, and not creatures', () => {
+    const start = scenario({
+      seed: 'cost/instant-sorcery-filter',
+      battlefield: [{ card: INSTANT_SORCERY_DISCOUNT, controller: 0 }],
+      hands: [[ZAP, WRATH, BEAR], []],
+    });
+    expect(effectiveManaCost(start.state, 0, ZAP).generic).toBe(0);
+    expect(effectiveManaCost(start.state, 0, WRATH).generic).toBe(3);
+    expect(effectiveManaCost(start.state, 0, BEAR)).toStrictEqual(BEAR.manaCost);
   });
 
   it('an artifact-typed reduction reaches an artifact creature spell', () => {
@@ -172,7 +187,7 @@ describe('effectiveManaCost', () => {
     });
     expect(start.state.costModifiers.length).toBe(1);
     expect(start.state.costModifiers[0]?.amount).toBe(1);
-    expect(start.state.costModifiers[0]?.cardType).toBe('creature');
+    expect(start.state.costModifiers[0]?.cardTypes).toEqual(['creature']);
   });
 });
 

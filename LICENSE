@@ -1,48 +1,73 @@
-MIT License
+mtg-lab license
+---------------
 
-Copyright (c) 2026 the mtg-lab authors
+Copyright (C) 2026 the mtg-lab authors
 
-WHAT THIS LICENSE COVERS, AND WHAT IT DOES NOT
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
 
-The permission below is granted over the original source code, tests,
-documentation and generated example content in this repository. It is not, and
-cannot be, a grant of rights in material this project does not own:
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+details.
+
+The full license text is in LICENSE-AGPL-3.0. SPDX: AGPL-3.0-or-later.
+
+Earlier releases of this repository were published under the MIT License.
+Copies obtained under those terms keep them; everything from this release on
+is AGPL-3.0-or-later.
+
+
+WHAT IS UNDER A DIFFERENT LICENSE
+
+Forge (https://github.com/Card-Forge/forge) is licensed under the GNU General
+Public License, version 3. Two kinds of Forge-derived material are in this
+tree, and both remain under that license (full text in LICENSE-GPL-3.0):
+
+  * The Java bridge under packages/forge-export/bridge/, whose files carry
+    `SPDX-License-Identifier: GPL-3.0-only`. It is compiled against an
+    installed Forge and runs as a separate process.
+
+  * Lines of Forge card script quoted as evidence of what a Forge release
+    does: the play-admission records under packages/data/data/ (chiefly each
+    `script-coverage.json`), packages/data/data/forge-syntax-review-v1.json,
+    packages/data/data/legacy-cube-2021-forge-decisions-v1.json, and the
+    exact-script checks in packages/data/src/legacy-cube/ and its tests.
+
+Section 13 of the GNU GPL version 3 permits combining a work under it with a
+work under the GNU Affero GPL version 3. Each part keeps its own license, and
+the AGPL's network-interaction requirement applies to the combination.
+
+Forge itself is not in this tree. It is downloaded separately (see
+tools/forge/README.md) and is never redistributed here.
+
+
+WHAT NO LICENSE HERE COVERS
+
+The licenses above are granted over the source code, tests, documentation and
+generated example content in this repository. They are not, and cannot be, a
+grant of rights in material this project does not own:
 
   * Magic: The Gathering, its rules text, card names, mana symbols, set names
     and other marks are the property of Wizards of the Coast LLC. Nothing here
     licenses any of it.
 
-  * Card data reached through this software comes from Scryfall and MTGJSON and
-    is used under their own terms. No card data, card image or card symbol
-    artwork is redistributed by this repository; it is fetched on demand and
-    cached locally.
+  * The printed-set catalogs under packages/data/data/ carry card names, types
+    and rules text taken from Scryfall (https://scryfall.com) under its API
+    guidelines. Card images and symbol artwork are not redistributed; they are
+    fetched on demand and cached locally.
 
   * The mana symbols this project draws are original shapes on the categories
     each color has always used. The SVG path data is the authors' work and is
-    covered below. The symbol designs themselves are Wizards' and are not.
+    covered by the license above. The symbol designs themselves are Wizards'
+    and are not.
 
   * Using this software together with Wizards' intellectual property is subject
     to the Wizards Fan Content Policy, which permits such use only on a
     non-commercial basis. That policy governs that use; it is not a restriction
-    added to the code grant below, and the code grant does not override it.
+    added to the license above, and the license does not override it.
 
 This project is unofficial Fan Content. It is not approved, endorsed,
 sponsored or affiliated with Wizards of the Coast in any way.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.

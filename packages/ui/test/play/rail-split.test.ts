@@ -298,6 +298,12 @@ describe('moving four panels across the table left the accessible tree alone', (
     render(h(PlayView, { session: prioritySession(), viewer: 0, names: NAMES, onChoose: vi.fn() }));
     const toggle = screen.getByRole('button', { name: new RegExp(`^${GAME_LOG_LABEL},`) });
     const disclosure = toggle as unknown as ElementLike;
+    // Open is where a played table starts since the 2026-08-22 interface pass:
+    // this column holds the log and nothing else, so a shut one left 272px drawn
+    // around a one-line strip. Shutting it and opening it again is what says the
+    // disclosure is still a disclosure.
+    expect(disclosure.getAttribute('aria-expanded')).toBe('true');
+    fireEvent.click(toggle);
     expect(disclosure.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(toggle);
     expect(disclosure.getAttribute('aria-expanded')).toBe('true');

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "scd",
+  "formatSha256": "b8a9738a0ee68be1e7c49e336aaeed068364e40a27edb00b13cdc936c14e0478",
+  "sourceSha256": "c1694b761d3b0ffd3440be2ba14ea5514cb5cccf9f4c4dbd5ed13b325bbc36d6",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "c1694b761d3b0ffd3440be2ba14ea5514cb5cccf9f4c4dbd5ed13b325bbc36d6",
+    "recipe.json": "a2f8925dd0c0c89c4a7d77652f87f3b98f91701be3159d8c7dd1e5d6b8477cbe",
+    "scd-printed-catalog-v1.json": "d2b507cef0f4516505ddfdb9fb2451db203d977d4aa6686132e499114a6a932f",
+    "scd-constructed-format-v1.json": "bf8fed02a1de6d58610d76d1936fe3beb0fe302c1c522149fd71cd57c67b6f84"
+  },
+  "catalogs": [
+    {
+      "code": "SCD",
+      "cards": 352,
+      "contentSha256": "be47a0caa4d133d2bb924b2a77cf0699ff1dd1cf64f607e717e3c7b3f2cc7763"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1167.459596,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 337,
+    "printings": 352
+  }
+}

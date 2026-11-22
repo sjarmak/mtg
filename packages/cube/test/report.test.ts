@@ -149,7 +149,7 @@ describe('a cube the report drafted', () => {
     const report = formatCubeReport(cube);
 
     expect(report).toContain(
-      '2 seeded drafts of 4 seats at 45 cards each — 8 seat-drafts, seed `cube/availability/report`.',
+      '2 seeded drafts of 4 seats at 45 cards each — 8 seat-drafts, seed `cube/availability/report`, bot `native-deck-conditioned/v1`.',
     );
     expect(report).toContain('seat-drafts could assemble it (');
     expect(report).toContain('no minimum stated');

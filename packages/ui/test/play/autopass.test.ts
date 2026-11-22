@@ -265,23 +265,16 @@ describe('the mark legend', () => {
 });
 
 describe('full control', () => {
-  /**
-   * The control the request asked for by name, and the assertion is that it
-   * moves the game rather than only its own label. Opened at full control the
-   * table sits on the first priority of the turn, where the only legal move is
-   * the pass; switching auto-pass on has to settle the session forward to
-   * somewhere there is something to decide, without the player clicking a move.
-   */
   it('settles the session forward the moment it is switched off', () => {
     render(h(PlayRoute, { config: { ...dealt().config, autoPass: FULL_CONTROL } }));
     expandStops();
     keepOpeningHand();
     const opening = textOf(screen.getByText(/legal$/));
-    expect(opening).toBe('1 legal');
+    expect(opening).toBe('2 legal');
 
     fireEvent.click(screen.getByRole('button', { name: 'Full control' }));
 
-    expect(textOf(screen.getByText(/legal$/))).not.toBe('1 legal');
+    expect(textOf(screen.getByText(/legal$/))).not.toBe('2 legal');
     expect(attr(screen.getByRole('button', { name: 'Full control' }), 'aria-pressed')).toBe('false');
   });
 

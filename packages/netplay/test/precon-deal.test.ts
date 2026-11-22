@@ -39,6 +39,7 @@ describe('dealing written decks to a network table', () => {
     expect(dealt.decks.map((deck) => deck.name)).toEqual(['Ember plan', 'Thorn plan']);
     expect(dealt.decks.map((deck) => deck.cards.length)).toEqual([40, 40]);
     expect(dealt.spec.setup.seed).toBe('netplay/precon/v0');
+    expect(dealt.spec.format).toBe('constructed');
     expect(dealt.spec.seating.map((seat) => seat.token)).toEqual(['one-token', 'two-token']);
   });
 });

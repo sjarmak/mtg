@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "ths",
+  "name": "Theros",
+  "sourceCodes": ["THS"],
+  "products": [{ "id": "ths-draft", "setCode": "THS", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["ths-draft", "ths-draft", "ths-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["ths-draft", "ths-draft", "ths-draft", "ths-draft", "ths-draft", "ths-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

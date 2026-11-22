@@ -16,38 +16,44 @@
  */
 import type { TargetRestriction } from '@mtg/dsl';
 import { assertNever } from '@mtg/dsl';
-import type { ObjectId } from './ids';
+import type { ObjectId, PlayerId } from './ids';
 import { counterCount } from './continuous';
-import { hasKeyword, powerOf } from './layers';
+import { hasKeyword, powerOf, toughnessOf } from './layers';
 import type { GameState } from './state';
 import { getObject } from './zones';
 
-/** True when this permanent is one the restriction admits. */
+/** True when this permanent or player is one the typed restriction admits. */
 export function satisfiesTargetRestriction(
   state: GameState,
-  oid: ObjectId,
+  subject: ObjectId | PlayerId,
   restriction: TargetRestriction,
 ): boolean {
+  if (restriction.kind === 'playerLostLifeThisTurn') {
+    return typeof subject === 'number' && state.turn.lifeLostThisTurn[subject] > 0;
+  }
+  if (typeof subject !== 'string') return false;
   switch (restriction.kind) {
     case 'maxPower':
-      return powerOf(state, oid) <= restriction.power;
+      return powerOf(state, subject) <= restriction.power;
+    case 'maxToughness':
+      return toughnessOf(state, subject) <= restriction.toughness;
     case 'minPower':
-      return powerOf(state, oid) >= restriction.power;
+      return powerOf(state, subject) >= restriction.power;
     case 'tapped':
-      return getObject(state, oid).tapped;
+      return getObject(state, subject).tapped;
     case 'untapped':
-      return !getObject(state, oid).tapped;
+      return !getObject(state, subject).tapped;
     case 'withKeyword':
-      return hasKeyword(state, oid, restriction.keyword);
+      return hasKeyword(state, subject, restriction.keyword);
     case 'withoutKeyword':
-      return !hasKeyword(state, oid, restriction.keyword);
+      return !hasKeyword(state, subject, restriction.keyword);
     // A counter is stored on the object rather than derived from it, so this
     // arm reads `getObject` directly where its neighbors go through the layer
     // system. That is not an inconsistency: layer 7d reads these same counters
     // to produce power, so asking the layers "does it carry a gloom counter"
     // would be asking a derived value about its own input.
     case 'withCounter':
-      return counterCount(getObject(state, oid).counters, restriction.counter) > 0;
+      return counterCount(getObject(state, subject).counters, restriction.counter) > 0;
     default:
       return assertNever(restriction, 'satisfiesTargetRestriction');
   }

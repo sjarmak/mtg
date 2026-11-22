@@ -27,23 +27,37 @@
  */
 import type {
   Action,
+  Choice,
   DeckList,
   Decision,
   GameEvent,
+  GameSession,
+  GameSetup,
   GameState,
   ObjectId,
   PlayerAgent,
   PlayerId,
+  Seat,
+  SessionOptions,
   StackEntry,
 } from '@mtg/kernel';
 import {
+  DEFAULT_CONFIG,
+  agentView,
   attachmentOf,
+  choose,
+  copiableValuesOf,
   counterCount,
   createGame,
+  createSession,
   isCreatureObject,
+  isDetained,
   pendingDecision,
   powerOf,
   reduce,
+  seatName,
+  settleAgentAction,
+  spellCardByOid,
   toughnessOf,
 } from '@mtg/kernel';
 import type { Card, MutuallyAssignable } from '@mtg/dsl';
@@ -102,13 +116,32 @@ export const STACK_ENTRY_KEYS_HANDLED = [
   'oid',
   'controller',
   'targets',
+  'targetIncarnations',
   'ability',
+  'sourceCard',
+  'castingCost',
   'mode',
   'multiTargets',
+  'multiTargetIncarnations',
+  'damageAllocations',
   'triggerContext',
   'x',
   'sourceCharacteristics',
+  'paidSacrificePower',
+  'paidSacrificeToughness',
+  'paidDiscardManaValue',
   'copiedSpell',
+  // These source-memory fields affect future resolution but not this board
+  // snapshot: linked cards are already visible in `exile`, and an obsolete
+  // source incarnation has no visual representation in the replay viewer.
+  // Naming them here records that omission and keeps the exhaustive guard.
+  'sourceBattlefieldIncarnation',
+  'sourceIncarnationAtStackCreation',
+  'sourceLinkedExile',
+  'delayedZoneChange',
+  'siegeDefeat',
+  'delayedCounterPlacement',
+  'delayedSpellCopy',
 ] as const satisfies readonly (keyof StackEntry)[];
 export type StackEntryKeysCovered = MutuallyAssignable<
   keyof StackEntry,
@@ -122,20 +155,29 @@ export function snapshotOf(state: GameState): LogSnapshot {
     const object = state.objects[oid];
     if (object === undefined) throw new Error(`battlefield names unknown object ${oid}`);
     const creature = isCreatureObject(state, oid);
+    const card = copiableValuesOf(state, oid);
     return {
       oid,
+      ...(card === object.card ? {} : { copiedCard: card }),
       controller: object.controller,
       tapped: object.tapped,
       summoningSick: object.summoningSick,
       damage: object.damage,
       plusCounters: object.counters.plusOnePlusOne,
       minusCounters: object.counters.minusOneMinusOne,
-      ...(object.card.kind === 'planeswalker' ? { loyalty: counterCount(object.counters, 'loyalty') } : {}),
+      ...(card.kind === 'planeswalker' ? { loyalty: counterCount(object.counters, 'loyalty') } : {}),
+      ...(card.kind === 'battle'
+        ? {
+            defense: counterCount(object.counters, 'defense'),
+            protector: object.protector ?? object.controller,
+          }
+        : {}),
       power: creature ? powerOf(state, oid) : null,
       toughness: creature ? toughnessOf(state, oid) : null,
       attachedTo: attachmentOf(state, oid) ?? null,
       attacking: attacking.has(oid),
       blocking: blocking.has(oid),
+      ...(isDetained(state, oid) ? { detained: true } : {}),
     };
   });
   const seats = state.players.map((seat) => ({
@@ -152,31 +194,42 @@ export function snapshotOf(state: GameState): LogSnapshot {
     seats: [you, opponent],
     battlefield,
     exile: [...state.exile],
-    stack: state.stack.map((entry) => ({
-      oid: entry.oid,
-      controller: entry.controller,
-      card: entry.ability?.sourceOid ?? entry.copiedSpell?.sourceOid ?? entry.oid,
-      source: entry.ability === null ? null : entry.ability.sourceOid,
-      copiedFrom: entry.copiedSpell?.copiedFrom ?? null,
-      chosenX: entry.x,
-      mode: entry.mode,
-      triggerContext:
-        entry.triggerContext === null
-          ? null
-          : {
-              kind: entry.triggerContext.kind,
-              triggeringCreature: entry.triggerContext.triggeringCreature,
-            },
-      sourceCharacteristics:
-        entry.sourceCharacteristics === null
-          ? null
-          : {
-              colors: [...entry.sourceCharacteristics.colors],
-              subtypes: [...entry.sourceCharacteristics.subtypes],
-            },
-      targets: [...entry.targets],
-      ...(entry.multiTargets === undefined ? {} : { multiTargets: entry.multiTargets }),
-    })),
+    stack: state.stack.map((entry) => {
+      const physical = state.objects[entry.oid]?.card;
+      const active = entry.ability === null ? spellCardByOid(state, entry.oid) : null;
+      const sourceCard = entry.sourceCard ?? (active !== null && active !== physical ? active : undefined);
+      return {
+        oid: entry.oid,
+        controller: entry.controller,
+        card: entry.ability?.sourceOid ?? entry.copiedSpell?.sourceOid ?? entry.oid,
+        ...(sourceCard === undefined ? {} : { sourceCard }),
+        source: entry.ability === null ? null : entry.ability.sourceOid,
+        ...(entry.ability === null ? {} : { abilityIndex: entry.ability.index }),
+        copiedFrom: entry.copiedSpell?.copiedFrom ?? null,
+        chosenX: entry.x,
+        ...(entry.castingCost === undefined ? {} : { castingCost: entry.castingCost }),
+        mode: entry.mode,
+        triggerContext: entry.triggerContext,
+        sourceCharacteristics:
+          entry.sourceCharacteristics === null
+            ? null
+            : {
+                colors: [...entry.sourceCharacteristics.colors],
+                subtypes: [...entry.sourceCharacteristics.subtypes],
+              },
+        targets: [...entry.targets],
+        ...(entry.multiTargets === undefined ? {} : { multiTargets: entry.multiTargets }),
+        ...(entry.damageAllocations === undefined ? {} : { damageAllocations: entry.damageAllocations }),
+        ...(entry.paidSacrificePower === undefined ? {} : { paidSacrificePower: entry.paidSacrificePower }),
+        ...(entry.paidSacrificeToughness === undefined
+          ? {}
+          : { paidSacrificeToughness: entry.paidSacrificeToughness }),
+        ...(entry.paidDiscardManaValue === undefined
+          ? {}
+          : { paidDiscardManaValue: entry.paidDiscardManaValue }),
+        ...(entry.siegeDefeat === undefined ? {} : { siegeDefeat: true }),
+      };
+    }),
   });
 }
 
@@ -184,7 +237,7 @@ function sameAction(a: Action, b: Action): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function decisionRecord(decision: Decision, action: Action, limit: number): unknown {
+export function decisionRecord(state: GameState, decision: Decision, action: Action, limit: number): unknown {
   const all = decision.options;
   const fullIndex = all.findIndex((option) => sameAction(option, action));
   const kept: Action[] = [...all.slice(0, limit)];
@@ -198,6 +251,9 @@ function decisionRecord(decision: Decision, action: Action, limit: number): unkn
   return DecisionSchema.parse({
     kind: decision.kind,
     player: decision.player,
+    ...(decision.kind === 'freeCast' && state.pendingFreeCast?.card !== undefined
+      ? { activeCard: state.pendingFreeCast.card }
+      : {}),
     optionCount: all.length,
     truncated: all.length > limit,
     complete: decision.complete,
@@ -265,8 +321,12 @@ export function recordGame(options: RecordGameOptions): RecordedGame {
       throw new Error(`recording ${options.seed} exceeded ${MAX_DECISIONS} decisions`);
     }
     const agent = options.agents[decision.player];
-    const action = agent.decide({ state, player: decision.player, decision });
-    const record = decisionRecord(decision, action, limit);
+    const action = agent.decide(
+      agentView(state, decision.player, decision, `replay:${String(steps.length)}`, (candidate) =>
+        settleAgentAction(state, candidate),
+      ),
+    );
+    const record = decisionRecord(state, decision, action, limit);
     const before = state;
     const stepped = reduce(state, action);
     state = stepped.state;
@@ -286,26 +346,153 @@ export function recordGame(options: RecordGameOptions): RecordedGame {
     );
   }
 
-  const result = state.result;
-  if (result === null) throw new Error(`game ${options.seed} stopped owing no decision but with no result`);
-
-  const [first, second] = options.decks;
-  const game = GameRecordSchema.parse({
-    record: 'game',
-    game: options.index,
+  if (state.result === null) {
+    throw new Error(`game ${options.seed} stopped owing no decision but with no result`);
+  }
+  const setup: GameSetup = {
     seed: options.seed,
+    decks: options.decks,
     startingPlayer: options.startingPlayer,
     maximumTurns: options.maximumTurns,
+  };
+  const seats: readonly [string, string] = [options.agents[0].name, options.agents[1].name];
+  return { game: gameRecordOf(options.index, setup, seats, state, steps.length), steps };
+}
+
+/**
+ * The game row over a finished state: what `recordGame` and `recordChoices`
+ * both write once the steps are in hand. Throws when the state has no result,
+ * because a game row is a row about a finished game.
+ */
+export function gameRecordOf(
+  index: number,
+  setup: GameSetup,
+  seats: readonly [string, string],
+  state: GameState,
+  steps: number,
+): GameRecord {
+  if (state.result === null) throw new Error(`game ${setup.seed} has no result to record`);
+  const [first, second] = setup.decks;
+  return GameRecordSchema.parse({
+    record: 'game',
+    game: index,
+    seed: setup.seed,
+    startingPlayer: setup.startingPlayer ?? DEFAULT_CONFIG.startingPlayer,
+    maximumTurns: setup.maximumTurns ?? DEFAULT_CONFIG.maximumTurns,
     seats: [
-      { bot: options.agents[0].name, deck: first.name },
-      { bot: options.agents[1].name, deck: second.name },
+      { bot: seats[0], deck: first.name },
+      { bot: seats[1], deck: second.name },
     ],
     cards: cardDictionary(state),
     objects: objectTable(state),
-    steps: steps.length,
-    result,
+    steps,
+    result: state.result,
   });
-  return { game, steps };
+}
+
+/**
+ * A played game as the kernel's session layer records it: the seed, the seats,
+ * and every choice a human made. Seed plus choices is the whole record, so this
+ * is what a recorder is handed and asked to reproduce.
+ */
+export interface RecordChoicesOptions {
+  readonly index: number;
+  readonly setup: GameSetup;
+  readonly seats: readonly [Seat, Seat];
+  readonly choices: readonly Choice[];
+  /** How many enumerated options a decision record carries. */
+  readonly optionLimit?: number;
+}
+
+/**
+ * Thrown when the choice list and the game disagree: a choice arrives while no
+ * human decision is owed, an index names an option the kernel did not offer,
+ * or the list runs out before the game ends. `choiceIndex` is the position in
+ * the list where the disagreement was found, so a refusal can name it.
+ */
+export class ReplayDivergedError extends Error {
+  constructor(
+    readonly choiceIndex: number,
+    message: string,
+  ) {
+    super(`choice ${String(choiceIndex)}: ${message}`);
+    this.name = 'ReplayDivergedError';
+  }
+}
+
+/**
+ * The session options a reproduction runs under. No auto-pass, because a pass
+ * the player never chose is a decision the record does not hold; no beats,
+ * because a pause is not a decision either. `replaySession` in the kernel
+ * strips the same three.
+ */
+const DETERMINISTIC: SessionOptions = { autoPass: undefined, seatAutoPass: undefined, watchBeats: undefined };
+
+interface ReplayedStep {
+  readonly session: GameSession;
+  readonly events: readonly GameEvent[];
+  readonly action: Action;
+  readonly decision: unknown;
+}
+
+/** One human choice applied, with the events it and the bots' replies produced. */
+function nextStep(session: GameSession, choice: Choice, position: number, limit: number): ReplayedStep {
+  const pending = session.pending;
+  if (pending === null) throw new ReplayDivergedError(position, 'no human decision was owed');
+  if (
+    typeof choice === 'number' &&
+    (!Number.isInteger(choice) || choice < 0 || choice >= pending.options.length)
+  ) {
+    throw new ReplayDivergedError(
+      position,
+      `index ${String(choice)} names none of the ${String(pending.options.length)} options offered`,
+    );
+  }
+  const action = typeof choice === 'number' ? (pending.options[choice] as Action) : choice;
+  const decision = decisionRecord(session.state, pending, action, limit);
+  const next = choose(session, choice, DETERMINISTIC);
+  return { session: next, events: next.events.slice(session.events.length), action, decision };
+}
+
+/**
+ * Re-plays `choices` from `setup` and writes the same rows `recordGame` does,
+ * one step per human choice, with the events the choice and the bots' replies
+ * produced. The game must end exactly when the list does: a list that runs out
+ * first, or runs on after the result, is a `ReplayDivergedError`, and an action
+ * the kernel refuses is whatever `choose` throws.
+ */
+export function recordChoices(options: RecordChoicesOptions): RecordedGame {
+  const limit = options.optionLimit ?? DEFAULT_OPTION_LIMIT;
+  let session = createSession(options.setup, options.seats, DETERMINISTIC);
+  let previous = snapshotOf(session.state);
+  const steps: StepRecord[] = [
+    stepRecord(options.index, 0, session.state, session.events, previous, null, null),
+  ];
+  for (const [position, choice] of options.choices.entries()) {
+    if (session.result !== null) throw new ReplayDivergedError(position, 'the game had already ended');
+    const before = session.state;
+    const stepped = nextStep(session, choice, position, limit);
+    session = stepped.session;
+    const snapshot = snapshotOf(session.state);
+    const changed = JSON.stringify(snapshot) !== JSON.stringify(previous);
+    previous = snapshot;
+    steps.push(
+      stepRecord(
+        options.index,
+        steps.length,
+        before,
+        stepped.events,
+        changed ? snapshot : null,
+        stepped.decision,
+        stepped.action,
+      ),
+    );
+  }
+  if (session.result === null) {
+    throw new ReplayDivergedError(options.choices.length, 'the list ran out before the game ended');
+  }
+  const seats: readonly [string, string] = [seatName(options.seats[0]), seatName(options.seats[1])];
+  return { game: gameRecordOf(options.index, options.setup, seats, session.state, steps.length), steps };
 }
 
 /** Serializes recorded games as the JSONL the viewer reads. */

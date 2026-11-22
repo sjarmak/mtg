@@ -17,60 +17,56 @@
  */
 import { CARD_TRIM_MM } from '../../card/anatomy';
 import { cssNumber } from '../number';
-import type { UiMode } from '../../app/router';
-import { routeScope } from '../tokens';
+import { routeScope, viewScope } from '../tokens';
 
 /**
  * Which routes draw the board as a table that fits a screen rather than a
  * frame read down a page.
  *
- * Three. The replay viewer joined in `mtg-ryix`: it rendered the same `Board` in
- * ordinary document flow and came out 1038.7px tall at every viewport, so a
- * 1280x800 window carried 2,451px of page and neither battlefield was whole —
- * measured in chrome-headless-shell 151.0.7922.34 on game 0 seq 120 of
- * `tools/stage-replay.ts`'s log. the playtester asked for "the sizing to match the
- * play sizing view", and the load-bearing half of that ask is *where the
- * numbers come from*: a second set of rules that agreed today is the pair that
- * drifts, so the replay board reads this sheet rather than a copy of it.
+ * Play, and the replay viewer under Analysis. The replay viewer joined in
+ * `mtg-ryix`: it rendered the same `Board` in ordinary document flow and came
+ * out 1038.7px tall at every viewport, so a 1280x800 window carried 2,451px of
+ * page and neither battlefield was whole — measured in chrome-headless-shell
+ * 151.0.7922.34 on game 0 seq 120 of `tools/stage-replay.ts`'s log. the playtester
+ * asked for "the sizing to match the play sizing view", and the load-bearing
+ * half of that ask is *where the numbers come from*: a second set of rules that
+ * agreed today is the pair that drifts, so the replay board reads this sheet
+ * rather than a copy of it.
  *
- * The draft tab joined the same way and for the same reason, one report later.
- * `../../routes/draft/DraftGame.ts` hands a finished pool to `LiveGame`, which
- * is the `PlayView` the Play tab mounts and not a second surface — but
- * `../../app/Shell.ts` stamps `data-mtg-mode` from the router, so that identical
- * markup renders under `draft`, and this list named `play` and `replay`.
- * Counted off the built sheet, a draft game matched 6 scoped rules, which is
- * what `deck`, `cards` and `analysis` match: the per-mode palette and nothing
- * else. A played game matched 107. So the table fell back to document flow and
- * was drawn 895px past the foot of a 1280x800 window, both battlefields were
- * enormous and empty, the ask column was squeezed to its content width, and both
- * disclosures flipped an attribute that no rule read — pressing either one did
- * nothing, which is the half a person notices first.
- *
- * The list is the drift, not the CSS: every rule under it was already correct
- * for a draft game, because it is the same game. So the pin is a measurement
- * rather than a second reading of this array —
+ * The draft table is under Play now, and it is here by construction rather than
+ * by listing. It was a tab of its own once, and this list named `play` and
+ * `replay` while `../../app/Shell.ts` stamped `draft`: counted off the built
+ * sheet, a draft game matched 6 scoped rules, which is what the reading tabs
+ * match, and a played game matched 107. So the table fell back to document flow
+ * and was drawn 895px past the foot of a 1280x800 window, both battlefields
+ * were enormous and empty, and both disclosures flipped an attribute no rule
+ * read. `mtg-a982g.1` made Draft a section of Play, so the whole mode is
+ * scoped and no section of it can fall out of this list; the pin is still a
+ * measurement rather than a second reading of this array —
  * `../../../test/play/draft-table.browser.test.ts` renders the draft table
  * beside the played one and asks both for the same three properties.
  *
- * A `:is()` list rather than one emission of every rule per mode, because
+ * A `:is()` list rather than one emission of every rule per scope, because
  * `:is()` takes the specificity of its widest argument — one attribute selector
- * here, exactly what a bare `routeScope` was — so nothing downstream of these
- * rules changes which declaration wins.
+ * here, exactly what a bare `routeScope` is, since `viewScope` keeps its section
+ * half inside `:where()` — so nothing downstream of these rules changes which
+ * declaration wins. `../../../test/play/tapped-slot.test.ts` is the pin: the
+ * tapped square is an unscoped override written to tie with the slot's trim.
  */
-const FITTED_MODES: readonly UiMode[] = ['play', 'draft', 'replay'];
+const FITTED: readonly string[] = [routeScope('play'), viewScope('analysis', 'replay')];
 
 /**
  * The mat's rules under this selector belong to a board on a height budget:
  * the played table and the replay viewer.
  */
-export const TABLE = `:is(${FITTED_MODES.map((mode) => routeScope(mode)).join(', ')})`;
+export const TABLE = `:is(${FITTED.join(', ')})`;
 
 /**
  * Which routes are a game being *played*, for the rules that are about playing
  * rather than about fitting.
  *
- * The same two modes a person can take a turn in, and the difference this draws
- * is against the replay viewer, where both of these rules would say something
+ * The one mode a person can take a turn in, and the difference this draws is
+ * against the replay viewer, where both of these rules would say something
  * false. The opponent's hand is a row of face-down chips in a fixed narrow track
  * on a played table and five face-up cards on a replay
  * (`routes/replay/frame.ts`: "Hands are drawn face up … the whole reason to
@@ -79,18 +75,21 @@ export const TABLE = `:is(${FITTED_MODES.map((mode) => routeScope(mode)).join(',
  * played table puts in that column.
  *
  * A draft game is a played game by both of those tests — its opponent is a bot
- * whose hand is face down, and its rail carries the log — so it is in here for
- * the same reason it is in `FITTED_MODES`, and it was missing for the same one.
+ * whose hand is face down, and its rail carries the log — and it is a section
+ * of Play, so the mode scope reaches it.
  */
-const PLAYED_MODES: readonly UiMode[] = ['play', 'draft'];
-
-export const PLAY = `:is(${PLAYED_MODES.map((mode) => routeScope(mode)).join(', ')})`;
+export const PLAY = routeScope('play');
 
 /** The printed 63:88 trim, as the value an `aspect-ratio` declaration takes. */
 export const RATIO = `${cssNumber(CARD_TRIM_MM.width)} / ${cssNumber(CARD_TRIM_MM.height)}`;
 
 /** The interactive face's hover lift, and the same lift on a tapped one. */
 export const HOVER_SCALE = 1.03;
+
+export const playedSlot = (row: string): string =>
+  `:is(${row} > .mtg-slot, ${row} > .mtg-attach > .mtg-slot)`;
+export const playedPlace = (row: string): string =>
+  `:is(${row} > .mtg-slot, ${row} > .mtg-attach[data-holds='false'] > .mtg-slot, ${row} > .mtg-attach[data-holds='true'])`;
 
 /**
  * The width at which the table stops affording three columns.

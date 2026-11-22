@@ -1,0 +1,505 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "ktk",
+  "name": "Khans of Tarkir",
+  "sources": [
+    {
+      "code": "KTK",
+      "catalogFormat": "ktk-printed-v1",
+      "catalogSha256": "1d3991ff0440b1e55e1f63b8069fce8ff185ca08ee3276197b5df67ed3235713",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/KTK.json",
+        "sha256": "a8aeffdafc553ca6fb662bfe2c1765627f83b7d722ed5a602bdd8f9bc9bc27ba",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "abzan-outlast",
+      "name": "Abzan Outlast",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ktk-printed-v1:0175:8f7b7598-35b0-4bb5-8347-8c868500f846",
+          "name": "Abzan Charm",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0012:e8bf6ed4-48f3-419f-bafd-d1ee4d798482",
+          "name": "Herald of Anafenza",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0003:22d2a844-17fc-4628-9591-684555e98f7b",
+          "name": "Ainok Bond-Kin",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0170:b341cc65-d316-41bb-95b8-294afa019a71",
+          "name": "Tuskguard Captain",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0002:21ee4f3c-dc94-4156-b0ed-60fe6310451a",
+          "name": "Abzan Falconer",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0001:8f5427b1-f1c2-4bb3-8736-701667ac2256",
+          "name": "Abzan Battle Priest",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0084:fe8589b2-9527-46ba-bf9e-0dec7d84d5d2",
+          "name": "Mer-Ek Nightblade",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0177:c8b432a7-53da-4480-b571-e6feb1364a3a",
+          "name": "Anafenza, the Foremost",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0218:9011126a-20bd-4c86-a63b-1691f79ac247",
+          "name": "Siege Rhino",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0230:39643107-8873-42f6-9b4d-b546a0a976ba",
+          "name": "Utter End",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0265:2dd40d90-c939-458a-9a98-27d10da6ff2f",
+          "name": "Sandsteppe Citadel",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0272:e7b28650-cddc-4878-b1d1-b5a764f4df49",
+          "name": "Windswept Heath",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0253:a32a1c0b-f6ea-475a-aa01-3618ea7d8647",
+          "name": "Blossoming Sands",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0266:0824a960-dd89-45c5-90f0-3ec9eb47d9ce",
+          "name": "Scoured Barrens",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0257:fea27aa7-7fcf-4198-b03a-5034a03ba81f",
+          "name": "Jungle Hollow",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0274:2576dc74-1847-44b8-aef9-9d74f333b9cc",
+          "name": "Plains",
+          "count": 6
+        },
+        {
+          "physicalId": "ktk-printed-v1:0282:09d7e861-8dda-4073-bfd6-4ade3bca5cff",
+          "name": "Swamp",
+          "count": 6
+        },
+        {
+          "physicalId": "ktk-printed-v1:0290:3e5342f9-3f91-48e4-bfd1-49fbf9ca89cf",
+          "name": "Forest",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "id": "jeskai-prowess",
+      "name": "Jeskai Prowess",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ktk-printed-v1:0195:ca268705-ef04-4bf1-8a5d-866bb3e5bb61",
+          "name": "Jeskai Charm",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0132:b81c6c8b-a9cf-4866-89ba-7f8ad077b836",
+          "name": "Monastery Swiftspear",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0023:3c17e350-44f7-4413-ad24-7c5d6616effd",
+          "name": "Seeker of the Way",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0198:82d5ce46-7118-4ede-ba1d-c387e7ce16e7",
+          "name": "Mantis Rider",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0044:bff9907c-4090-4dcc-aaf5-bc2a8dacce8b",
+          "name": "Jeskai Elder",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0007:39ec83fa-5cb4-4633-8827-36d874a2d2e7",
+          "name": "Defiant Strike",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0058:6f8626c4-306f-4e9d-8840-2bb73fe87e87",
+          "name": "Stubborn Denial",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0010:b6173466-30db-4b95-a556-dd69e03b731e",
+          "name": "Feat of Resistance",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0061:7a59d4b1-6cf4-44ec-8a96-1bb7094fea21",
+          "name": "Treasure Cruise",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0108:35c7c392-6782-40c8-bb24-6aad24f14660",
+          "name": "Arc Lightning",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0255:8c2996d9-3287-4480-8c04-7a378e37e3cf",
+          "name": "Flooded Strand",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0258:bae51d77-e06b-4e5a-9543-a17dd0b2a333",
+          "name": "Mystic Monastery",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0267:e782d005-a563-4738-978a-73a3465de78f",
+          "name": "Swiftwater Cliffs",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0270:0f840bd2-c4f5-4ac4-918c-91b4feeb8783",
+          "name": "Tranquil Cove",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0271:3b296781-78ac-411f-88fc-2d924ad22986",
+          "name": "Wind-Scarred Crag",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0274:2576dc74-1847-44b8-aef9-9d74f333b9cc",
+          "name": "Plains",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0278:9c010ca5-b609-4ae9-8c23-adf5723a9daa",
+          "name": "Island",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0286:802b1bb0-6c73-481a-ac3e-7d4e1682b4c2",
+          "name": "Mountain",
+          "count": 7
+        }
+      ]
+    },
+    {
+      "id": "sultai-delve",
+      "name": "Sultai Delve",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ktk-printed-v1:0224:993c9028-9b1b-4903-81b2-3cf4f37b7229",
+          "name": "Sultai Charm",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0216:ffa2b070-952e-4242-83bb-3e73135ceeeb",
+          "name": "Sidisi, Brood Tyrant",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0151:090d678c-f0e4-4757-8900-93dfe67aefe9",
+          "name": "Hooting Mandrills",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0061:7a59d4b1-6cf4-44ec-8a96-1bb7094fea21",
+          "name": "Treasure Cruise",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0037:5c18c2d8-995c-4736-bdef-464abcd1d31a",
+          "name": "Dig Through Time",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0086:b2dadff2-883f-4134-a881-be145cdcbd84",
+          "name": "Murderous Cut",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0088:093426d2-29e0-49e4-b02a-a70cce3b25d5",
+          "name": "Necropolis Fiend",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0162:eb15c6c7-8fe6-496c-9977-3e7942b920c4",
+          "name": "Scout the Borders",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0067:e42f5aa9-2a47-47c3-ab87-dc25735b0e54",
+          "name": "Bitter Revelation",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0222:3314d77a-039f-43e4-a457-6ceba20c0ffe",
+          "name": "Sultai Ascendancy",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0263:ff2f5f58-9a95-4ca6-93a0-813738f0072f",
+          "name": "Polluted Delta",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0262:21326575-80b9-4a4e-a93c-6880ec6575d5",
+          "name": "Opulent Palace",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0254:63742780-47ee-4a66-993a-69e06c14967d",
+          "name": "Dismal Backwater",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0257:fea27aa7-7fcf-4198-b03a-5034a03ba81f",
+          "name": "Jungle Hollow",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0268:9e57abd9-e864-4047-a3c8-618952071858",
+          "name": "Thornwood Falls",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0278:9c010ca5-b609-4ae9-8c23-adf5723a9daa",
+          "name": "Island",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0282:09d7e861-8dda-4073-bfd6-4ade3bca5cff",
+          "name": "Swamp",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0290:3e5342f9-3f91-48e4-bfd1-49fbf9ca89cf",
+          "name": "Forest",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "id": "mardu-raid",
+      "name": "Mardu Raid",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ktk-printed-v1:0068:34bc9bb0-5ec1-400f-89e7-b450980a3391",
+          "name": "Bloodsoaked Champion",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0132:b81c6c8b-a9cf-4866-89ba-7f8ad077b836",
+          "name": "Monastery Swiftspear",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0140:e8d1714b-ff65-4c5c-ad21-b469f2c72286",
+          "name": "War-Name Aspirant",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0183:28822a9a-97fa-4784-ad97-072fcfc7b9ed",
+          "name": "Chief of the Edge",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0023:3c17e350-44f7-4413-ad24-7c5d6616effd",
+          "name": "Seeker of the Way",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0124:a5c1bf52-2737-423a-b340-07448afcaea6",
+          "name": "Hordeling Outburst",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0018:23426221-30a8-4be2-9c70-f0eb022edad7",
+          "name": "Mardu Hordechief",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0182:4c76027b-9c8d-4181-9311-270fed0212e3",
+          "name": "Butcher of the Horde",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0185:f83c7d53-2599-42a9-ae96-a2699c5164cb",
+          "name": "Crackling Doom",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0260:fb6ae4a5-227d-465b-9e99-bae158b7d410",
+          "name": "Nomad Outpost",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0252:7f430794-0d86-4f6a-97e0-4bbb6716d613",
+          "name": "Bloodstained Mire",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0266:0824a960-dd89-45c5-90f0-3ec9eb47d9ce",
+          "name": "Scoured Barrens",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0271:3b296781-78ac-411f-88fc-2d924ad22986",
+          "name": "Wind-Scarred Crag",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0251:15a7b30a-c59f-4a87-9e8a-b29daea27422",
+          "name": "Bloodfell Caves",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0274:2576dc74-1847-44b8-aef9-9d74f333b9cc",
+          "name": "Plains",
+          "count": 5
+        },
+        {
+          "physicalId": "ktk-printed-v1:0282:09d7e861-8dda-4073-bfd6-4ade3bca5cff",
+          "name": "Swamp",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0286:802b1bb0-6c73-481a-ac3e-7d4e1682b4c2",
+          "name": "Mountain",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "id": "temur-ferocious",
+      "name": "Temur Ferocious",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ktk-printed-v1:0228:e2ee3e36-a849-42b0-b84b-027a08427c35",
+          "name": "Temur Charm",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0213:4c9dddd3-7c8d-4669-8298-58149b142b8a",
+          "name": "Savage Knuckleblade",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0148:0995e041-fe90-4459-8c70-fd9851ecf830",
+          "name": "Heir of the Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0219:f5d9aa9b-1ed4-46db-89d1-6c9593c29f55",
+          "name": "Snowhorn Rider",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0151:090d678c-f0e4-4757-8900-93dfe67aefe9",
+          "name": "Hooting Mandrills",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0058:6f8626c4-306f-4e9d-8840-2bb73fe87e87",
+          "name": "Stubborn Denial",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0041:dda70b3e-4b70-404e-a579-41dd126be084",
+          "name": "Force Away",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0118:95dde66b-b4a1-4a1e-8c9e-0bec4790b1e5",
+          "name": "Crater's Claws",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0226:03032d89-caca-43ff-b2ea-028e376c829c",
+          "name": "Surrak Dragonclaw",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0227:11746bf1-d813-4ade-8ce4-9935cebef856",
+          "name": "Temur Ascendancy",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0256:e4335951-e73e-45cb-b2a5-6e9d14ba87ee",
+          "name": "Frontier Bivouac",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0273:a8503cca-7e7d-44c4-8587-81376b396398",
+          "name": "Wooded Foothills",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0267:e782d005-a563-4738-978a-73a3465de78f",
+          "name": "Swiftwater Cliffs",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0268:9e57abd9-e864-4047-a3c8-618952071858",
+          "name": "Thornwood Falls",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0264:501ce6cb-0324-4cca-bc79-903cefe1ac1f",
+          "name": "Rugged Highlands",
+          "count": 2
+        },
+        {
+          "physicalId": "ktk-printed-v1:0278:9c010ca5-b609-4ae9-8c23-adf5723a9daa",
+          "name": "Island",
+          "count": 7
+        },
+        {
+          "physicalId": "ktk-printed-v1:0286:802b1bb0-6c73-481a-ac3e-7d4e1682b4c2",
+          "name": "Mountain",
+          "count": 3
+        },
+        {
+          "physicalId": "ktk-printed-v1:0290:3e5342f9-3f91-48e4-bfd1-49fbf9ca89cf",
+          "name": "Forest",
+          "count": 2
+        }
+      ]
+    }
+  ],
+  "contentSha256": "c4f28790e78a25f8c8f19807079bcf1720bb5556c9a4acbd978fc534975c0675"
+}

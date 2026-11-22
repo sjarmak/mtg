@@ -2,7 +2,7 @@
 /**
  * The page at one seat of a networked table.
  *
- * `play/play.test.ts` clicks a whole hot-seat game through the rendered surface;
+ * `play/play.test.ts` clicks a whole two-human game through the rendered surface;
  * this is the same surface with the game somewhere else, so what it checks is
  * only what the wire changed:
  *
@@ -92,6 +92,11 @@ function stubFetch(live: Table): void {
     value: async (input: unknown, init?: { method?: string; body?: string }): Promise<Response> => {
       const url = new URL(String(input), 'http://page.invalid');
       const parts = url.pathname.split('/').filter((part) => part.length > 0);
+      // This table was dealt without links to hand out, which is what a table
+      // stood up in a test is. `LanInvite` reads the 404 as *nothing to
+      // invite anybody to* and draws no panel, which is what these tests want
+      // over the board.
+      if (parts[3] === 'invite') return answer({ refused: 'no links to hand out' }, 404);
       const token = parts[2] ?? '';
       const seat = live.seatOf(token);
       if (seat === null) return answer({ refused: 'no seat answers to that link' }, 404);

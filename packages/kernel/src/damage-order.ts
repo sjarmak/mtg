@@ -39,7 +39,9 @@
  *     the creature is also blocking. `pointedAt` walks the whole position for
  *     mentions rather than listing the places a mention can hide, so a kernel
  *     that learns a new field does not quietly start merging creatures that
- *     field distinguishes.
+ *     field distinguishes. Layer-4 statics are the one derived-state exception:
+ *     their CR 613.7 source timestamps can distinguish future boards without a
+ *     source record in state, so those sources stay separate explicitly.
  *
  * Both directions of the answer are load-bearing. Merging two blockers a player
  * could tell apart deletes a legal decision; refusing to merge two nobody can
@@ -48,10 +50,11 @@
  * loses a game and the second only costs a longer list.
  */
 import { canonicalJson } from '@mtg/dsl';
+import { isDerivedStaticLayerAbility } from './abilities';
 import type { Action } from './actions';
 import { characteristicsOf } from './layers';
 import type { ObjectId } from './ids';
-import type { GameState } from './state';
+import { copiableCardOf, type GameState } from './state';
 
 /**
  * Every object id the position mentions outside the containers that merely hold
@@ -103,14 +106,26 @@ function pointedAt(state: GameState): ReadonlySet<string> {
   return found;
 }
 
-/** Everything the object's own record and the layers say, minus which one it is. */
+/** Everything the object's own record and the layers say, minus entry-time identity. */
 function profileOf(state: GameState, oid: ObjectId): string {
   const object = state.objects[oid];
   if (object === undefined) return `missing:${oid}`;
+  // Registered effects point back at their source and derived layer effects
+  // are singled out below, so every remaining timestamp is allocator identity,
+  // not a difference between damage-order slots. Current characteristics and a
+  // copied face remain in the profile, preserving every visible difference.
+  const { battlefieldTimestamp: _identity, ...record } = object;
   return canonicalJson({
-    record: { ...object, oid: '' },
+    record: { ...record, oid: '' },
     current: characteristicsOf(state, oid),
   });
+}
+
+/** Whether this source contributes a derived effect whose timestamp is rules-visible. */
+function hasDerivedLayerEffect(state: GameState, oid: ObjectId): boolean {
+  const object = state.objects[oid];
+  if (object === undefined) return false;
+  return copiableCardOf(object).abilities.some(isDerivedStaticLayerAbility);
 }
 
 /**
@@ -137,7 +152,7 @@ export function damageOrderClasses(
 
   const classes = new Map<ObjectId, string>();
   for (const blocker of blockers) {
-    const singled = pointed.has(blocker) || blocksTwice.has(blocker);
+    const singled = pointed.has(blocker) || blocksTwice.has(blocker) || hasDerivedLayerEffect(state, blocker);
     classes.set(blocker, singled ? `alone:${blocker}` : profileOf(state, blocker));
   }
   return classes;

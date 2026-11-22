@@ -31,8 +31,12 @@ const BRUISER = exampleCard('slc-ironclad-golem');
 function board(): GameState {
   return scenario({
     seed: 'ui/attack-staging-sync',
-    battlefield: Array.from({ length: 3 }, () => ({
-      card: BRUISER,
+    battlefield: Array.from({ length: 3 }, (_, index) => ({
+      card: {
+        ...BRUISER,
+        id: `${BRUISER.id}-${String(index)}`,
+        name: `${BRUISER.name} ${String(index + 1)}`,
+      },
       controller: 0 as PlayerId,
       summoningSick: false,
     })),

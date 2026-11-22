@@ -53,6 +53,7 @@ function bolt(target: PlayerId | ObjectId, amount: number): DamageInstance {
     amount,
     deathtouch: false,
     lifelink: false,
+    preventable: true,
     combat: false,
   };
 }
@@ -159,6 +160,7 @@ describe('CR 616.1 the affected player chooses the order', () => {
         amount: 4,
         deathtouch: false,
         lifelink: false,
+        preventable: true,
         combat: false,
       }),
     ).toBe(1);
@@ -174,6 +176,7 @@ describe('CR 616.1 the affected player chooses the order', () => {
       amount: 4,
       deathtouch: false,
       lifelink: false,
+      preventable: true,
       combat: false,
     };
 
@@ -211,6 +214,7 @@ describe('CR 616.1 the affected player chooses the order', () => {
           amount: 4,
           deathtouch: false,
           lifelink: false,
+          preventable: true,
           combat: false,
         },
         () => other,

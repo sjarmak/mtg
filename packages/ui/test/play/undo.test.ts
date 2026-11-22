@@ -66,10 +66,16 @@ function actionIndex(session: GameSession): number | null {
  * behind, and hands back the session as it stood one press earlier.
  */
 function toFirstUndoable(handle: { current: PlaySessionHandle }): GameSession {
-  for (let step = 0; step < 400 && handle.current.session.pending !== null; step += 1) {
+  for (let step = 0; step < 400; step += 1) {
     const before = handle.current.session;
     const decision = before.pending;
-    if (decision === null) break;
+    if (decision === null) {
+      if (handle.current.beat === null) break;
+      act(() => {
+        handle.current.resume();
+      });
+      continue;
+    }
     const index = actionIndex(before) ?? passIndex(decision) ?? 0;
     act(() => {
       handle.current.choose(index);

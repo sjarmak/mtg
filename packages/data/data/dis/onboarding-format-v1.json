@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "dis",
+  "name": "Dissension / Guildpact / Ravnica: City of Guilds",
+  "sourceCodes": ["DIS", "GPT", "RAV"],
+  "products": [
+    { "id": "dis-draft", "setCode": "DIS", "boosterKey": "draft" },
+    { "id": "gpt-draft", "setCode": "GPT", "boosterKey": "draft" },
+    { "id": "rav-draft", "setCode": "RAV", "boosterKey": "draft" }
+  ],
+  "draft": {
+    "seats": 8,
+    "rounds": ["dis-draft", "gpt-draft", "rav-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["dis-draft", "dis-draft", "gpt-draft", "gpt-draft", "rav-draft", "rav-draft"]
+  },
+  "basicLandPolicy": "keep"
+}

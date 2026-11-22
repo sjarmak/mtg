@@ -1,0 +1,311 @@
+{
+  "schemaVersion": 1,
+  "sets": [
+    {
+      "code": "T10E",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3At10e+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "2ff2fe2d9a63987d5858c3de8d0dafc15fbd165840e360c7bbcdd63edf35fc4c",
+      "fetchedAt": "2026-09-19T11:49:40.818Z"
+    },
+    {
+      "code": "TALA",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atala+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "8e4841d3c9d7840329943155a621a6f3679e6cfc18744947ef9b20d8a8db6368",
+      "fetchedAt": "2026-09-19T11:49:40.847Z"
+    },
+    {
+      "code": "TDDD",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atddd+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "6952b7d5a8728fad1ea445126150b7c107c49d0bde9f19455e76aa94606e539c",
+      "fetchedAt": "2026-09-19T11:49:40.941Z"
+    },
+    {
+      "code": "TROE",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atroe+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "ae3f47e179529b7634b61a632c39907e9b87533e8690aabca02964895d85d8db",
+      "fetchedAt": "2026-09-19T11:49:41.050Z"
+    },
+    {
+      "code": "TZEN",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atzen+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "2686b05f7d78fab831c305cec41a4799ad8666653521df0acb93f336b93e4649",
+      "fetchedAt": "2026-09-19T11:49:41.145Z"
+    }
+  ],
+  "engine": { "name": "forge", "version": "2.0.14" },
+  "tokens": [
+    {
+      "physicalId": "t10e-token:0003:993b3b90-74c3-479b-b3e6-3f1cd8f1da04",
+      "position": 3,
+      "setCode": "T10E",
+      "name": "Dragon",
+      "observedNames": ["Dragon Token"],
+      "oracleId": "60fe4897-6760-4c5a-8074-c92bd64df52b",
+      "scryfallId": "993b3b90-74c3-479b-b3e6-3f1cd8f1da04",
+      "typeLine": "Token Creature — Dragon",
+      "power": "5",
+      "toughness": "5",
+      "loyalty": null,
+      "colors": ["R"],
+      "faces": [
+        {
+          "name": "Dragon",
+          "manaCost": null,
+          "typeLine": "Token Creature — Dragon",
+          "oracleText": "Flying",
+          "power": "5",
+          "toughness": "5",
+          "loyalty": null,
+          "colors": ["R"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "993b3b90-74c3-479b-b3e6-3f1cd8f1da04",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/9/9/993b3b90-74c3-479b-b3e6-3f1cd8f1da04.jpg?1783943087"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tala-token:0008:39a4b6d1-c5f5-4a2d-a00c-97f6395c941b",
+      "position": 8,
+      "setCode": "TALA",
+      "name": "Ooze",
+      "observedNames": ["Ooze Token"],
+      "oracleId": "bb3da6d2-aed7-4057-b94b-6882fb45cc89",
+      "scryfallId": "39a4b6d1-c5f5-4a2d-a00c-97f6395c941b",
+      "typeLine": "Token Creature — Ooze",
+      "power": "*",
+      "toughness": "*",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Ooze",
+          "manaCost": null,
+          "typeLine": "Token Creature — Ooze",
+          "oracleText": "",
+          "power": "*",
+          "toughness": "*",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "39a4b6d1-c5f5-4a2d-a00c-97f6395c941b",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/3/9/39a4b6d1-c5f5-4a2d-a00c-97f6395c941b.jpg?1783942525"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tddd-token:t3:e357b329-b624-4c9a-bacf-d4744745860a",
+      "position": 3,
+      "setCode": "TDDD",
+      "name": "Elephant",
+      "observedNames": ["Elephant Token"],
+      "oracleId": "079c46cc-feb0-4998-8593-c8b739afdb82",
+      "scryfallId": "e357b329-b624-4c9a-bacf-d4744745860a",
+      "typeLine": "Token Creature — Elephant",
+      "power": "3",
+      "toughness": "3",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Elephant",
+          "manaCost": null,
+          "typeLine": "Token Creature — Elephant",
+          "oracleText": "",
+          "power": "3",
+          "toughness": "3",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "e357b329-b624-4c9a-bacf-d4744745860a",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/e/3/e357b329-b624-4c9a-bacf-d4744745860a.jpg?1783942094"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "troe-token:1a:e0e3826c-3c85-4910-bd6c-04894ea328d0",
+      "position": 1,
+      "setCode": "TROE",
+      "name": "Eldrazi Spawn",
+      "observedNames": ["Eldrazi Spawn Token"],
+      "oracleId": "3aaf906a-e749-4e86-ac79-97650b92f271",
+      "scryfallId": "e0e3826c-3c85-4910-bd6c-04894ea328d0",
+      "typeLine": "Token Creature — Eldrazi Spawn",
+      "power": "0",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": [],
+      "faces": [
+        {
+          "name": "Eldrazi Spawn",
+          "manaCost": null,
+          "typeLine": "Token Creature — Eldrazi Spawn",
+          "oracleText": "Sacrifice this creature: Add {C}.",
+          "power": "0",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "e0e3826c-3c85-4910-bd6c-04894ea328d0",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/e/0/e0e3826c-3c85-4910-bd6c-04894ea328d0.jpg?1783941948"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "troe-token:0002:fd0c9fb3-5f4c-47f9-a9b3-369d4936de60",
+      "position": 2,
+      "setCode": "TROE",
+      "name": "Elemental",
+      "observedNames": ["Elemental Token"],
+      "oracleId": "ae6c93a3-8be3-4218-a32a-ce804578058e",
+      "scryfallId": "fd0c9fb3-5f4c-47f9-a9b3-369d4936de60",
+      "typeLine": "Token Creature — Elemental",
+      "power": "*",
+      "toughness": "*",
+      "loyalty": null,
+      "colors": ["R"],
+      "faces": [
+        {
+          "name": "Elemental",
+          "manaCost": null,
+          "typeLine": "Token Creature — Elemental",
+          "oracleText": "",
+          "power": "*",
+          "toughness": "*",
+          "loyalty": null,
+          "colors": ["R"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "fd0c9fb3-5f4c-47f9-a9b3-369d4936de60",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/f/d/fd0c9fb3-5f4c-47f9-a9b3-369d4936de60.jpg?1783941946"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "troe-token:0003:acabc3ce-a3c1-4c6c-8022-9a96ffba59c6",
+      "position": 3,
+      "setCode": "TROE",
+      "name": "Hellion",
+      "observedNames": ["Hellion Token"],
+      "oracleId": "4b7f673b-b7ce-4158-97c5-3fb3d3f24ba7",
+      "scryfallId": "acabc3ce-a3c1-4c6c-8022-9a96ffba59c6",
+      "typeLine": "Token Creature — Hellion",
+      "power": "4",
+      "toughness": "4",
+      "loyalty": null,
+      "colors": ["R"],
+      "faces": [
+        {
+          "name": "Hellion",
+          "manaCost": null,
+          "typeLine": "Token Creature — Hellion",
+          "oracleText": "",
+          "power": "4",
+          "toughness": "4",
+          "loyalty": null,
+          "colors": ["R"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "acabc3ce-a3c1-4c6c-8022-9a96ffba59c6",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/a/c/acabc3ce-a3c1-4c6c-8022-9a96ffba59c6.jpg?1783941946"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tzen-token:0003:d9623e74-3b94-4842-903f-ed52931bdf6a",
+      "position": 3,
+      "setCode": "TZEN",
+      "name": "Kor Soldier",
+      "observedNames": ["Kor Soldier Token"],
+      "oracleId": "8d8945e4-efa0-4656-8b3c-ddcf86df5190",
+      "scryfallId": "d9623e74-3b94-4842-903f-ed52931bdf6a",
+      "typeLine": "Token Creature — Kor Soldier",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Kor Soldier",
+          "manaCost": null,
+          "typeLine": "Token Creature — Kor Soldier",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "d9623e74-3b94-4842-903f-ed52931bdf6a",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/d/9/d9623e74-3b94-4842-903f-ed52931bdf6a.jpg?1783942179"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

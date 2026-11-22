@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "m15",
+  "formatSha256": "127811a57e811c4a6064b4f185c3c38e35ec5124889734a393ac8416d5d74cba",
+  "sourceSha256": "814d999aed2feacad2b1b3e9748edf72fb60fbabcab75a9ae15bb8306c0fa914",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "814d999aed2feacad2b1b3e9748edf72fb60fbabcab75a9ae15bb8306c0fa914",
+    "recipe.json": "e63337a87c07481fee73a83ee8704cfead79b6e979264ec56199d25d87050bbc",
+    "m15-printed-catalog-v1.json": "43f3ade7b0fea07ea938f7ca65f6ab23b3f355f9242e71285b3e675c57c6c04f",
+    "m15-limited-format-v1.json": "5db488a537d21ea35b0cc3c4beb6e462cb092505463fd5bea2a16add728bd73a"
+  },
+  "catalogs": [
+    {
+      "code": "M15",
+      "cards": 284,
+      "contentSha256": "93f568b56f99d400b97f2720cb61c5895ab429f8fb9cbd4474baae5139cf92e0"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 2846.6381570000003,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 269,
+    "printings": 284
+  }
+}

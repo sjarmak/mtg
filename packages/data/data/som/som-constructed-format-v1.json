@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "som",
+  "name": "Scars of Mirrodin",
+  "sources": [
+    {
+      "code": "SOM",
+      "catalogFormat": "som-printed-v1",
+      "catalogSha256": "93c88c20cd37ac8c7a5fd7719542fec90ad7bd07ef29572e1c75a577f8e272d3",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/SOM.json",
+        "sha256": "f9fc5ec2ae255855653a14ef3c6e8c9a7f8257ccbee1a7f824832bdcc3943636",
+        "version": "5.3.0+20260917"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-metalcraft",
+      "name": "White-Blue Metalcraft",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "som-printed-v1:0142:ce881675-690f-4d4c-a951-ab8302e904ab",
+          "name": "Chrome Steed",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0174:469cc4e0-49c0-4009-97ea-28e44addec69",
+          "name": "Memnite",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0156:0a742da4-638d-4888-94f1-db2f4ada9f94",
+          "name": "Glint Hawk Idol",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0052:ffbc2a26-32f1-4d9c-8ee7-74698f64dce0",
+          "name": "Vedalken Certarch",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0004:e274a8b3-2d92-43d9-a436-d3f6f619ca95",
+          "name": "Auriok Sunchaser",
+          "count": 3
+        },
+        {
+          "physicalId": "som-printed-v1:0218:e6478389-15be-405f-b755-108c942d72ec",
+          "name": "Tumble Magnet",
+          "count": 3
+        },
+        {
+          "physicalId": "som-printed-v1:0199:d2419dd5-9c31-42b2-b6ef-bbdf11c558ac",
+          "name": "Rusted Relic",
+          "count": 2
+        },
+        {
+          "physicalId": "som-printed-v1:0028:280e75af-7e43-4c15-a8a8-bec7389c6c4e",
+          "name": "Argent Sphinx",
+          "count": 2
+        },
+        {
+          "physicalId": "som-printed-v1:0005:7b3330a1-98b6-4b09-9bca-6c7c89447ba2",
+          "name": "Dispense Justice",
+          "count": 2
+        },
+        {
+          "physicalId": "som-printed-v1:0229:99939b90-e88c-4c2f-ba78-56d455611703",
+          "name": "Seachrome Coast",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0230:a410e95b-afd0-4ac4-beb5-96163b411fe2",
+          "name": "Plains",
+          "count": 13
+        },
+        {
+          "physicalId": "som-printed-v1:0234:d2748f53-0d81-4656-8e4b-5f0128215879",
+          "name": "Island",
+          "count": 15
+        }
+      ]
+    },
+    {
+      "id": "blue-black-proliferate",
+      "name": "Blue-Black Proliferate",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "som-printed-v1:0047:dc2dd336-e457-49a1-88ae-c35f0c846e99",
+          "name": "Thrummingbird",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0075:aae856bc-f65f-42ba-9344-1a30b356c041",
+          "name": "Plague Stinger",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0166:faef8b8b-2c45-4fed-b6ba-a8ac49c66330",
+          "name": "Ichorclaw Myr",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0185:8d2e522b-e6f8-4fae-8c08-ce2bb8bed04f",
+          "name": "Necropede",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0144:7fafcefa-d33c-4d73-b3b7-2930f28b845e",
+          "name": "Contagion Clasp",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0065:cda628ba-19f4-4e24-9500-cca295a992bb",
+          "name": "Grasp of Darkness",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0045:6fe212ed-31cb-4f10-8ba7-e97af1d30d24",
+          "name": "Steady Progress",
+          "count": 3
+        },
+        {
+          "physicalId": "som-printed-v1:0211:583d7386-3eb5-4f1d-8da9-f00e020a307b",
+          "name": "Throne of Geth",
+          "count": 2
+        },
+        {
+          "physicalId": "som-printed-v1:0226:e530388b-eb19-4211-abd8-8a4c3c38c3af",
+          "name": "Darkslick Shores",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0234:d2748f53-0d81-4656-8e4b-5f0128215879",
+          "name": "Island",
+          "count": 11
+        },
+        {
+          "physicalId": "som-printed-v1:0238:42a1264f-bda3-45ac-b959-463c6e532fd3",
+          "name": "Swamp",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "black-green-infect",
+      "name": "Black-Green Infect",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "som-printed-v1:0075:aae856bc-f65f-42ba-9344-1a30b356c041",
+          "name": "Plague Stinger",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0166:faef8b8b-2c45-4fed-b6ba-a8ac49c66330",
+          "name": "Ichorclaw Myr",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0185:8d2e522b-e6f8-4fae-8c08-ce2bb8bed04f",
+          "name": "Necropede",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0112:cf9b3335-565c-406d-bd94-f36974602552",
+          "name": "Blight Mamba",
+          "count": 2
+        },
+        {
+          "physicalId": "som-printed-v1:0066:94ca493e-f09b-4b11-bb47-0562dfc203ca",
+          "name": "Hand of the Praetors",
+          "count": 2
+        },
+        {
+          "physicalId": "som-printed-v1:0065:cda628ba-19f4-4e24-9500-cca295a992bb",
+          "name": "Grasp of Darkness",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0131:17979f0e-bd39-449f-b4ed-9156c229223b",
+          "name": "Untamed Might",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0238:42a1264f-bda3-45ac-b959-463c6e532fd3",
+          "name": "Swamp",
+          "count": 20
+        },
+        {
+          "physicalId": "som-printed-v1:0246:34cc6a36-b551-40c7-b081-53beffbca235",
+          "name": "Forest",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "red-green-dinosaurs",
+      "name": "Red-Green Dinosaurs",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "som-printed-v1:0125:d1340a63-f549-440b-aad3-14247113896a",
+          "name": "Molder Beast",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0146:323efe27-da58-4207-9c0c-dba5031bfa04",
+          "name": "Copper Myr",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0168:5bd0a588-b695-4060-b5d5-c6a74710ff0f",
+          "name": "Iron Myr",
+          "count": 3
+        },
+        {
+          "physicalId": "som-printed-v1:0190:18c016ad-bb82-4944-8c06-ab180b808041",
+          "name": "Palladium Myr",
+          "count": 2
+        },
+        {
+          "physicalId": "som-printed-v1:0091:f5881bbc-8600-464d-9dcd-5a7780918d1d",
+          "name": "Galvanic Blast",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0192:4b942605-eb4a-452d-9b07-a4f912f96958",
+          "name": "Perilous Myr",
+          "count": 3
+        },
+        {
+          "physicalId": "som-printed-v1:0191:e9a29832-8630-498a-9ac3-bc709a6dc95d",
+          "name": "Panic Spellbomb",
+          "count": 3
+        },
+        {
+          "physicalId": "som-printed-v1:0165:9d93378e-1de2-4954-9458-dd3306f2996e",
+          "name": "Horizon Spellbomb",
+          "count": 3
+        },
+        {
+          "physicalId": "som-printed-v1:0096:7ee07266-a95d-4cd8-9863-1664922e9490",
+          "name": "Kuldotha Rebirth",
+          "count": 3
+        },
+        {
+          "physicalId": "som-printed-v1:0210:7caa3ce3-15a9-40ca-ad45-baff0f276483",
+          "name": "Sylvok Replica",
+          "count": 2
+        },
+        {
+          "physicalId": "som-printed-v1:0223:33672990-4860-4aa6-ac1b-f9da66f5da59",
+          "name": "Wurmcoil Engine",
+          "count": 1
+        },
+        {
+          "physicalId": "som-printed-v1:0225:28f1d784-f286-418d-a712-bc07ad10d4a2",
+          "name": "Copperline Gorge",
+          "count": 4
+        },
+        {
+          "physicalId": "som-printed-v1:0242:6df2f49d-097e-4685-8ddb-69c55f07f60c",
+          "name": "Mountain",
+          "count": 16
+        },
+        {
+          "physicalId": "som-printed-v1:0246:34cc6a36-b551-40c7-b081-53beffbca235",
+          "name": "Forest",
+          "count": 8
+        }
+      ]
+    }
+  ],
+  "contentSha256": "5005031d624a1a197a4d0f9b4e5a6409b2bcbd0ae6988363292cefd50c3c06f1"
+}

@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "gpt",
+  "name": "Guildpact / Ravnica: City of Guilds",
+  "sources": [
+    {
+      "code": "GPT",
+      "catalogFormat": "gpt-printed-v1",
+      "catalogSha256": "c814483c64a356b30bcf6d1d988dd0ffff2badb45033895a23dd4663484f5ac5",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/GPT.json",
+        "sha256": "8c872c726a55ab41f195b8cb04733cd225f1a3e7bcd7e48fce98fdae274387fc",
+        "version": "5.3.0+20260930"
+      }
+    },
+    {
+      "code": "RAV",
+      "catalogFormat": "rav-printed-v1",
+      "catalogSha256": "def1de60dabbe5293fac93ebc2dd943f6f78387a37feb089e5a524fda5ce1394",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/RAV.json",
+        "sha256": "91cccb1d3c661e9f173cdd0c4a86c7d902fc9b804ec52c87663a27633fed1a61",
+        "version": "5.3.0+20260930"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "gruul-bloodthirst",
+      "name": "Gruul Bloodthirst",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "gpt-printed-v1:0146:cb5a61f8-aab1-48d7-aebb-cf500ac5cb0e",
+          "name": "Gruul Guildmage",
+          "count": 4
+        },
+        {
+          "physicalId": "gpt-printed-v1:0098:cc65d7ea-e8f4-4be9-94e4-2fa2e4d83177",
+          "name": "Skarrgan Pit-Skulk",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0125:d307d8c7-b9b5-4f8f-933d-f1c64cbbf92f",
+          "name": "Frenzied Goblin",
+          "count": 4
+        },
+        {
+          "physicalId": "gpt-printed-v1:0130:93e040a6-9e10-4528-8ee1-ef3a00e93cbc",
+          "name": "Scab-Clan Mauler",
+          "count": 4
+        },
+        {
+          "physicalId": "gpt-printed-v1:0106:c6492648-8115-41ff-a184-08efebae28b1",
+          "name": "Burning-Tree Bloodscale",
+          "count": 3
+        },
+        {
+          "physicalId": "gpt-printed-v1:0107:133863fc-e820-4be6-a354-a02e7fe25eae",
+          "name": "Burning-Tree Shaman",
+          "count": 4
+        },
+        {
+          "physicalId": "gpt-printed-v1:0145:8a83dbc9-802f-4ebf-93de-b2bf4844cc9e",
+          "name": "Giant Solifuge",
+          "count": 2
+        },
+        {
+          "physicalId": "rav-printed-v1:0117:ff3a24af-e995-4d05-ac2c-e9676048675d",
+          "name": "Char",
+          "count": 3
+        },
+        {
+          "physicalId": "rav-printed-v1:0299:dad3662a-f7b4-45d5-a35e-fc6c38474692",
+          "name": "Mountain",
+          "count": 16
+        },
+        {
+          "physicalId": "rav-printed-v1:0303:706be1bd-720d-4e74-b71f-568081afcab1",
+          "name": "Forest",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "izzet-replicate",
+      "name": "Izzet Replicate",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "gpt-printed-v1:0147:ecce6ade-8741-4567-8ed3-3e03becc6f1b",
+          "name": "Izzet Guildmage",
+          "count": 4
+        },
+        {
+          "physicalId": "gpt-printed-v1:0074:c22c9dab-e8d5-48b3-8fd2-9f4138ee0c7c",
+          "name": "Pyromatics",
+          "count": 4
+        },
+        {
+          "physicalId": "gpt-printed-v1:0041:e98f5890-a494-4609-acae-f9e9bacd991d",
+          "name": "Train of Thought",
+          "count": 4
+        },
+        {
+          "physicalId": "gpt-printed-v1:0027:bf9f85b3-eb8c-43de-aaac-8a887e9c58da",
+          "name": "Gigadrowse",
+          "count": 3
+        },
+        {
+          "physicalId": "gpt-printed-v1:0113:ef42b5b2-6504-486c-aaa0-9d5e4769ba1d",
+          "name": "Electrolyze",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0063:581f3780-c480-48c6-b15c-1618f2feccb9",
+          "name": "Remand",
+          "count": 4
+        },
+        {
+          "physicalId": "gpt-printed-v1:0033:9e7dd929-4bba-46a6-86c9-b8ed853eb721",
+          "name": "Repeal",
+          "count": 3
+        },
+        {
+          "physicalId": "rav-printed-v1:0117:ff3a24af-e995-4d05-ac2c-e9676048675d",
+          "name": "Char",
+          "count": 2
+        },
+        {
+          "physicalId": "gpt-printed-v1:0166:054f2276-2dd5-43da-bb26-c57c560861fe",
+          "name": "Steam Vents",
+          "count": 4
+        },
+        {
+          "physicalId": "gpt-printed-v1:0161:666f455e-3a3d-475d-b67a-a1fdd74820eb",
+          "name": "Izzet Boilerworks",
+          "count": 4
+        },
+        {
+          "physicalId": "rav-printed-v1:0291:db6c8056-f155-434c-a4cb-a532a4707245",
+          "name": "Island",
+          "count": 14
+        },
+        {
+          "physicalId": "rav-printed-v1:0299:dad3662a-f7b4-45d5-a35e-fc6c38474692",
+          "name": "Mountain",
+          "count": 10
+        }
+      ]
+    }
+  ],
+  "contentSha256": "f601f05e9f1884a18ac18d5086f925678f4230dd3890646445a9dfd579bf8679"
+}

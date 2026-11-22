@@ -43,6 +43,16 @@ export interface DeckTileProps {
   readonly omit?: readonly string[];
   /** The pane's density. Absent reads as full, which is what every caller drew before. */
   readonly mode?: DeckViewMode;
+  /**
+   * What the build chose, where this tile is a card whose count a person moved.
+   *
+   * `mtg-ipse`. The head prints the count the deck holds now, and once that is
+   * editable the number stops saying which deck it belongs to. So a tile whose
+   * count has moved prints the built one beside it, and a tile at the built
+   * count prints nothing extra -- the ordinary case stays exactly as wide as it
+   * was. Absent is the same as equal: a screen that does not edit says nothing.
+   */
+  readonly builtCount?: number | undefined;
 }
 
 function isColor(value: string): value is Color {
@@ -106,6 +116,9 @@ export function DeckTile(props: DeckTileProps): ReactElement {
       'span',
       { className: 'mtg-deck-card__head' },
       createElement('span', { className: 'mtg-deck-card__count' }, `${String(entry.count)}×`),
+      props.builtCount === undefined || props.builtCount === entry.count
+        ? null
+        : createElement('span', { className: 'mtg-deck-card__built' }, `built ${String(props.builtCount)}×`),
       // The compact strip clips the name to one row (`../../styles/deck.ts`), so
       // the whole name goes in the attribute a browser shows on hover. The text
       // node is untouched either way, so nothing that reads the tree loses it.

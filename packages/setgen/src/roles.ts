@@ -186,9 +186,10 @@
  * artifacts and enchantments are authored cards rather than filled slots for
  * exactly the first reason (`mtg-xhm0`).
  */
-import type { AbilityKind, Color, EffectKind, ModelAuraModificationKind } from '@mtg/dsl';
+import type { Color, EffectKind, ModelAbilityKind, ModelAuraModificationKind } from '@mtg/dsl';
 import { isPricedEffectKind, MODEL_EFFECT_KINDS } from '@mtg/dsl';
 import { classify, PLAY_BOOSTER_2024 } from '@mtg/design-data';
+import type { FillCapability } from './capabilities';
 
 export interface ManaValueRange {
   readonly min: number;
@@ -219,6 +220,12 @@ export interface RoleProfile {
    * prompt and the pie check does the reading back.
    */
   readonly effectKinds: readonly EffectKind[];
+  /** Exact reviewed schema additions this role activates. */
+  readonly capabilities?: readonly FillCapability[];
+  /** Parameter-sensitive color-pie routing for a capability, never a global kind row. */
+  readonly allowedColors?: readonly Color[];
+  /** Exact per-slot contract printed only for newly introduced roles. */
+  readonly instruction?: string;
   /** Mana-value window when the role itself implies one (e.g. "burn 6 for 5"). */
   readonly manaValue?: ManaValueRange;
   /**
@@ -236,7 +243,7 @@ export interface RoleProfile {
    * permanent slot carries are `reserveAbilitySlots`' to hand out per brief
    * mechanic, not this table's to state per role.
    */
-  readonly abilityKinds?: readonly AbilityKind[];
+  readonly abilityKinds?: readonly ModelAbilityKind[];
   /**
    * Present when the slice cannot print the canon role as written, saying what
    * is missing and what the slot prints instead.
@@ -393,6 +400,43 @@ export const ROLE_PROFILES: Readonly<Record<string, RoleProfile>> = {
     substitution: 'DSL v0 has no mana abilities; the ramp slot prints a body instead.',
   },
   dig: { cardKind: 'sorcery', effectKinds: ['drawCards'] },
+  // Reviewed capability roles are new names so no recorded prompt moves. Their
+  // color contracts are per bundle, not new global color-pie rows.
+  grantControlledCreatureKeyword: {
+    cardKind: 'instant',
+    effectKinds: [],
+    capabilities: ['controlledCreatureKeywordGrant'],
+    allowedColors: ['W', 'U', 'B', 'R', 'G'],
+    instruction: 'grant one on-pie keyword to target creature you control until end of turn',
+  },
+  untapControlledCreature: {
+    cardKind: 'instant',
+    effectKinds: [],
+    capabilities: ['untapControlledCreature'],
+    allowedColors: ['W', 'U', 'G'],
+    instruction: 'untap target creature you control; this cannot target a land or arbitrary permanent',
+  },
+  bounceArtifactOrEnchantment: {
+    cardKind: 'instant',
+    effectKinds: ['returnToHand'],
+    capabilities: ['artifactOrEnchantmentBounce'],
+    allowedColors: ['U'],
+    instruction: 'return target artifact or enchantment to its owner hand',
+  },
+  returnOwnCreatureCard: {
+    cardKind: 'sorcery',
+    effectKinds: [],
+    capabilities: ['ownGraveyardToHand'],
+    allowedColors: ['W', 'B', 'G'],
+    instruction: 'choose one creature card from your graveyard and put it into your hand',
+  },
+  returnOwnInstantOrSorceryCard: {
+    cardKind: 'sorcery',
+    effectKinds: [],
+    capabilities: ['ownGraveyardToHand'],
+    allowedColors: ['U', 'R', 'G'],
+    instruction: 'choose one instant or sorcery card from your graveyard and put it into your hand',
+  },
   // Colorless
   removalExpensive: {
     cardKind: 'sorcery',
@@ -604,7 +648,7 @@ export function roleAuraModifications(role: string): readonly ModelAuraModificat
 }
 
 /** The ability kinds this role's slot must print, empty on every other role. */
-export function roleAbilityKinds(role: string): readonly AbilityKind[] {
+export function roleAbilityKinds(role: string): readonly ModelAbilityKind[] {
   return ROLE_PROFILES[role]?.abilityKinds ?? [];
 }
 
@@ -654,7 +698,17 @@ export function roleProfile(role: string): RoleProfile {
  */
 export function allowedEffectKinds(role: string, color: Color): readonly EffectKind[] {
   const profile = roleProfile(role);
-  const allowed = profile.effectKinds.filter((kind) => classify(kind, color).verdict !== 'fail');
+  if (profile.allowedColors !== undefined) {
+    if (!profile.allowedColors.includes(color)) {
+      throw new Error(
+        `role "${role}" is not design-legal in ${color}; allowed colors: ${profile.allowedColors.join(', ')}`,
+      );
+    }
+    return profile.effectKinds;
+  }
+  const allowed = profile.effectKinds.filter(
+    (kind): kind is EffectKind => isPricedEffectKind(kind) && classify(kind, color).verdict !== 'fail',
+  );
   if (allowed.length === 0) {
     throw new Error(
       `role "${role}" has no on-pie effect primitive in ${color}: ` +

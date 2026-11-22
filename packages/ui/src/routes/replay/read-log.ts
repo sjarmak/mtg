@@ -16,6 +16,7 @@ import type { Card } from '@mtg/dsl';
 import {
   GameRecordSchema,
   HeaderRecordSchema,
+  READABLE_EVENT_LOG_SCHEMA_VERSIONS,
   StepRecordSchema,
   type GameRecord,
   type HeaderRecord,
@@ -142,7 +143,9 @@ function checkSnapshotIds(
     // no source and is checked by its own id, which is a real object.
     ...snapshot.stack.map((entry) => entry.card),
     ...snapshot.stack.flatMap((entry) =>
-      entry.triggerContext === null ? [] : [entry.triggerContext.triggeringCreature],
+      entry.triggerContext === null || !('triggeringCreature' in entry.triggerContext)
+        ? []
+        : [entry.triggerContext.triggeringCreature],
     ),
     ...snapshot.seats.flatMap((seat) => [...seat.hand, ...seat.graveyard]),
   ];
@@ -160,7 +163,9 @@ function checkSnapshotSemantics(
   for (const permanent of snapshot.battlefield) {
     const object = objects.get(permanent.oid);
     if (object === undefined) continue;
-    const planeswalker = object.card.kind === 'planeswalker';
+    const card = permanent.copiedCard ?? object.card;
+    const planeswalker = card.kind === 'planeswalker';
+    const battle = card.kind === 'battle';
     if (version === 'mtg-ui/event-log/3' || version === 'mtg-ui/event-log/4') {
       if (planeswalker) {
         throw new EventLogError(line, `${version} cannot carry battlefield planeswalker ${permanent.oid}`);
@@ -177,6 +182,15 @@ function checkSnapshotSemantics(
     if (!planeswalker && permanent.loyalty !== undefined) {
       throw new EventLogError(line, `nonplaneswalker ${permanent.oid} carries loyalty`);
     }
+    if (!versionAtLeast(version, 'mtg-ui/event-log/8') && battle) {
+      throw new EventLogError(line, `${version} cannot carry battlefield Battle ${permanent.oid}`);
+    }
+    if (battle && (permanent.defense === undefined || permanent.protector === undefined)) {
+      throw new EventLogError(line, `Battle ${permanent.oid} is missing defense or protector`);
+    }
+    if (!battle && (permanent.defense !== undefined || permanent.protector !== undefined)) {
+      throw new EventLogError(line, `non-Battle ${permanent.oid} carries Battle state`);
+    }
   }
 }
 
@@ -186,13 +200,17 @@ function checkTaggedDefenders(
   objects: ReadonlyMap<string, ReplayObject>,
   line: number,
 ): void {
-  const claims: { readonly oid: string; readonly attacker: LogPlayerId }[] = [];
+  const claims: {
+    readonly kind: 'planeswalker' | 'battle';
+    readonly oid: string;
+    readonly attacker: LogPlayerId;
+  }[] = [];
   const actions = [record.action, ...(record.decision?.options ?? [])];
   for (const action of actions) {
     if (action?.type !== 'declareAttackers') continue;
     for (const attack of action.attackers) {
       if (typeof attack.defender === 'object') {
-        claims.push({ oid: attack.defender.oid, attacker: action.player });
+        claims.push({ kind: attack.defender.kind, oid: attack.defender.oid, attacker: action.player });
       }
     }
   }
@@ -200,7 +218,7 @@ function checkTaggedDefenders(
     if (event.type !== 'attackersDeclared') continue;
     for (const attack of event.attacks) {
       if (typeof attack.defender === 'object') {
-        claims.push({ oid: attack.defender.oid, attacker: event.player });
+        claims.push({ kind: attack.defender.kind, oid: attack.defender.oid, attacker: event.player });
       }
     }
   }
@@ -208,17 +226,22 @@ function checkTaggedDefenders(
   for (const claim of claims) {
     const object = objects.get(claim.oid);
     if (object === undefined) {
-      throw new EventLogError(line, `unknown planeswalker defender ${claim.oid}`);
-    }
-    if (object.card.kind !== 'planeswalker') {
-      throw new EventLogError(line, `defender ${claim.oid} is not a planeswalker`);
+      throw new EventLogError(line, `unknown ${claim.kind} defender ${claim.oid}`);
     }
     const permanent = snapshot.battlefield.find((candidate) => candidate.oid === claim.oid);
     if (permanent === undefined) {
-      throw new EventLogError(line, `planeswalker defender ${claim.oid} is not on the battlefield`);
+      throw new EventLogError(line, `${claim.kind} defender ${claim.oid} is not on the battlefield`);
     }
-    if (permanent.controller === claim.attacker) {
-      throw new EventLogError(line, `planeswalker defender ${claim.oid} is controlled by its attacker`);
+    const card = permanent.copiedCard ?? object.card;
+    if (card.kind !== claim.kind) {
+      throw new EventLogError(line, `defender ${claim.oid} is not a ${claim.kind}`);
+    }
+    const defendingPlayer = claim.kind === 'battle' ? permanent.protector : permanent.controller;
+    if (defendingPlayer === claim.attacker) {
+      throw new EventLogError(
+        line,
+        `${claim.kind} defender ${claim.oid} is ${claim.kind === 'battle' ? 'protected' : 'controlled'} by its attacker`,
+      );
     }
   }
 }
@@ -233,6 +256,12 @@ interface GameBuild {
 
 type EventLogSchemaVersion = HeaderRecord['schema'];
 
+function versionAtLeast(version: EventLogSchemaVersion, floor: EventLogSchemaVersion): boolean {
+  return (
+    READABLE_EVENT_LOG_SCHEMA_VERSIONS.indexOf(version) >= READABLE_EVENT_LOG_SCHEMA_VERSIONS.indexOf(floor)
+  );
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -245,7 +274,7 @@ function stepHasTaggedDefender(value: unknown): boolean {
   if (Array.isArray(value)) return value.some(stepHasTaggedDefender);
   if (!isRecord(value)) return false;
   const defender = value.defender;
-  if (isRecord(defender) && defender.kind === 'planeswalker') return true;
+  if (isRecord(defender) && (defender.kind === 'planeswalker' || defender.kind === 'battle')) return true;
   return Object.values(value).some(stepHasTaggedDefender);
 }
 
@@ -280,6 +309,16 @@ function stepHasRegenerationEventEvidence(value: unknown): boolean {
   );
 }
 
+function stepHasCurrentReplacementEventEvidence(value: unknown): boolean {
+  if (!isRecord(value) || !Array.isArray(value.events)) return false;
+  return value.events.some(
+    (event) =>
+      isRecord(event) &&
+      event.type === 'replacementApplied' &&
+      (event.event === 'discard' || event.event === 'zoneChange'),
+  );
+}
+
 function stepHasScryAction(value: unknown): boolean {
   if (!isRecord(value)) return false;
   if (isRecord(value.action) && value.action.type === 'scry') return true;
@@ -300,8 +339,60 @@ function stepHasScryDecision(value: unknown): boolean {
   return isRecord(value) && isRecord(value.decision) && value.decision.kind === 'scry';
 }
 
+function stepHasDetentionEvidence(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  const state = value.state;
+  if (!isRecord(state) || !Array.isArray(state.battlefield)) return false;
+  return state.battlefield.some((permanent) => isRecord(permanent) && hasOwn(permanent, 'detained'));
+}
+
+function stepHasVersion9CastingCostEvidence(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  const carriesOverload = (candidate: unknown): boolean =>
+    isRecord(candidate) && candidate.castingCost === 'overload';
+  if (carriesOverload(value.action)) return true;
+  if (
+    isRecord(value.decision) &&
+    Array.isArray(value.decision.options) &&
+    value.decision.options.some(carriesOverload)
+  ) {
+    return true;
+  }
+  const state = value.state;
+  return (
+    isRecord(state) &&
+    Array.isArray(state.stack) &&
+    state.stack.some((entry) => isRecord(entry) && hasOwn(entry, 'castingCost'))
+  );
+}
+
+function stepHasVersion9EntryPaymentEvidence(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  const isEntryPayment = (candidate: unknown): boolean =>
+    isRecord(candidate) && candidate.type === 'chooseEntryPayLife';
+  if (isEntryPayment(value.action)) return true;
+  const decision = value.decision;
+  return (
+    isRecord(decision) &&
+    (decision.kind === 'entryPayLife' ||
+      (Array.isArray(decision.options) && decision.options.some(isEntryPayment)))
+  );
+}
+
 function assertVersionedStep(version: EventLogSchemaVersion, value: unknown, line: number): void {
-  if (version !== 'mtg-ui/event-log/8') {
+  if (!versionAtLeast(version, 'mtg-ui/event-log/9') && stepHasVersion9EntryPaymentEvidence(value)) {
+    throw new EventLogError(line, `${version} cannot contain /9 entry-payment evidence`);
+  }
+  if (!versionAtLeast(version, 'mtg-ui/event-log/9') && stepHasVersion9CastingCostEvidence(value)) {
+    throw new EventLogError(line, `${version} cannot contain /9 casting-cost evidence`);
+  }
+  if (!versionAtLeast(version, 'mtg-ui/event-log/8')) {
+    if (stepHasDetentionEvidence(value)) {
+      throw new EventLogError(line, `${version} cannot contain /8 detention evidence`);
+    }
+    if (stepHasCurrentReplacementEventEvidence(value)) {
+      throw new EventLogError(line, `${version} cannot contain current replacement event evidence`);
+    }
     if (stepHasScryAction(value)) {
       throw new EventLogError(line, `${version} cannot contain scry action evidence`);
     }
@@ -312,14 +403,14 @@ function assertVersionedStep(version: EventLogSchemaVersion, value: unknown, lin
       throw new EventLogError(line, `${version} cannot contain scry decision evidence`);
     }
   }
-  if (version === 'mtg-ui/event-log/8') return;
-  if (version !== 'mtg-ui/event-log/7' && stepHasRegenerationEventEvidence(value)) {
+  if (versionAtLeast(version, 'mtg-ui/event-log/8')) return;
+  if (!versionAtLeast(version, 'mtg-ui/event-log/7') && stepHasRegenerationEventEvidence(value)) {
     throw new EventLogError(line, `${version} cannot contain /7 regeneration event evidence`);
   }
-  if (version !== 'mtg-ui/event-log/7' && stepHasSourceCharacteristics(value)) {
+  if (!versionAtLeast(version, 'mtg-ui/event-log/7') && stepHasSourceCharacteristics(value)) {
     throw new EventLogError(line, `${version} cannot contain /7 source-characteristic evidence`);
   }
-  if (version !== 'mtg-ui/event-log/6' && version !== 'mtg-ui/event-log/7' && stepHasTriggerContext(value)) {
+  if (!versionAtLeast(version, 'mtg-ui/event-log/6') && stepHasTriggerContext(value)) {
     throw new EventLogError(line, `${version} cannot contain /6 retained trigger context`);
   }
   if (
@@ -365,9 +456,11 @@ function assertVersionedStep(version: EventLogSchemaVersion, value: unknown, lin
   }
 }
 
-/** Upgrade released stack shapes to the current `/8` semantic union. */
 function migrateStep(version: EventLogSchemaVersion, value: unknown): unknown {
-  if (version === 'mtg-ui/event-log/8' || !isRecord(value)) return value;
+  const current = READABLE_EVENT_LOG_SCHEMA_VERSIONS[READABLE_EVENT_LOG_SCHEMA_VERSIONS.length - 1];
+  if (version === current || !isRecord(value)) {
+    return value;
+  }
   const migrated = structuredClone(value);
   if (version === 'mtg-ui/event-log/3') {
     const events = migrated.events;
@@ -388,10 +481,11 @@ function migrateStep(version: EventLogSchemaVersion, value: unknown): unknown {
       entry.copiedFrom = null;
       entry.chosenX = null;
     }
-    if (version !== 'mtg-ui/event-log/6' && version !== 'mtg-ui/event-log/7') {
+    if (!versionAtLeast(version, 'mtg-ui/event-log/6')) {
       entry.triggerContext = null;
     }
-    if (version !== 'mtg-ui/event-log/7') entry.sourceCharacteristics = null;
+    if (!versionAtLeast(version, 'mtg-ui/event-log/7')) entry.sourceCharacteristics = null;
+    if (!hasOwn(entry, 'mode')) entry.mode = null;
   }
   return migrated;
 }

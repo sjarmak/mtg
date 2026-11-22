@@ -102,7 +102,7 @@
  * reached before a single card is asked for.
  */
 import type { Ability, Card, Effect, StaticModification } from '@mtg/dsl';
-import { hasAbilityEffects, hasTarget, isCreatureTokenSpec } from '@mtg/dsl';
+import { hasAbilityEffects, hasTarget, isCreatureTokenSpec, staticModificationIdentity } from '@mtg/dsl';
 import type { SliceRarityRules } from '@mtg/design-data';
 import type { Entry } from './composition';
 import type { SetFinding } from './findings';
@@ -110,49 +110,11 @@ import { finding } from './findings';
 import { rarityPolicy } from '../rarity';
 
 function modificationIdentity(modification: StaticModification): string {
-  switch (modification.kind) {
-    case 'grantKeyword':
-      return `grantKeyword:${modification.keyword}`;
-    case 'statBonus':
-      return 'statBonus';
-    case 'definePt':
-      return 'definePt';
-    // Keyed by what it counts, not by the rate: two cards that both read
-    // "for each Mountain you control" are the repeat this check exists to
-    // find, whether one prints +0/+1 and the other +1/+1.
-    case 'statBonusPer':
-      return `statBonusPer:${JSON.stringify(modification.each)}`;
-    // Constant, for `statBonus`'s reason: neither doubler carries a parameter,
-    // so the kind is the whole of what a player reads. Unreachable from a
-    // generated set today — neither is on `ModelStaticModificationSchema` — and
-    // still answered here rather than left to a default, because this function
-    // is also the duplicate check a hand-authored set goes through.
-    case 'doubleDamage':
-      return 'doubleDamage';
-    case 'doubleLifeGain':
-      return 'doubleLifeGain';
-    // The seven combat modifications (`static-modification-class.ts`'s
-    // `'combat'` class): none carries a parameter but
-    // `blockOnlyCreaturesWithKeyword` and `cantBeBlockedBySubtype`,
-    // mirroring `staticModificationIdentity` in `@mtg/dsl`'s
-    // `validate/abilities.ts`, which this duplicate check is otherwise a second
-    // copy of. Unreachable from a generated set today for the same
-    // containment reason as the two doublers above.
-    case 'cantAttack':
-      return 'cantAttack';
-    case 'cantBlock':
-      return 'cantBlock';
-    case 'cantBeBlocked':
-      return 'cantBeBlocked';
-    case 'attacksEachCombatIfAble':
-      return 'attacksEachCombatIfAble';
-    case 'mustBeBlockedIfAble':
-      return 'mustBeBlockedIfAble';
-    case 'blockOnlyCreaturesWithKeyword':
-      return `blockOnlyCreaturesWithKeyword:${modification.keyword}`;
-    case 'cantBeBlockedBySubtype':
-      return `cantBeBlockedBySubtype:${modification.subtype}`;
-  }
+  // `designTemplate` is public, so retain its existing object-key spelling for
+  // this structured suffix while sharing every exhaustive kind decision.
+  return modification.kind === 'cantAttackWithoutAnyOf'
+    ? `cantAttackWithoutAnyOf:${JSON.stringify(modification.anyOf)}`
+    : staticModificationIdentity(modification);
 }
 
 /**
@@ -178,6 +140,8 @@ function abilityIdentity(ability: Ability): string {
       return `static:${ability.scope}:${modificationIdentity(ability.modification)}`;
     case 'triggered':
       return `triggered:${ability.condition}:${effects}`;
+    case 'stateTriggered':
+      return `stateTriggered:${ability.condition.kind}:${ability.condition.counter}:${effects}`;
     case 'activated': {
       const attach =
         ability.attach === undefined
@@ -185,6 +149,16 @@ function abilityIdentity(ability: Ability): string {
           : `attach[${ability.attach.modifications.map(modificationIdentity).join(',')}]`;
       return `activated:${attach}${effects}`;
     }
+    case 'staticPlayerRule':
+      return `staticPlayerRule:${ability.players}:${ability.rule}`;
+    case 'staticGameRule':
+      return `staticGameRule:${ability.rule}`;
+    case 'staticBundle':
+      return `staticBundle:${ability.scope}:${ability.modifications
+        .map((modification) => modificationIdentity(modification))
+        .join(',')}`;
+    case 'staticActivationRule':
+      return `staticActivationRule:${ability.rule}`;
   }
 }
 

@@ -63,11 +63,19 @@
  */
 import { z } from 'zod';
 import type { LlmProvider } from '@mtg/llm';
-import type { CandidateUniverse } from './candidates';
+import type { CandidateCard, CandidateUniverse } from './candidates';
 import type { ResolvedCriteria } from './criteria';
 import { enumerateCriteria } from './criteria';
-import type { Inclusion, Proposal, Rejection, UniverseLookup } from './verify';
-import { enforceDeckBudget, enforceLandSlot, landCount, spellCount, verifyProposals } from './verify';
+import type { DeckPool } from './pool';
+import type { Adjustment, Inclusion, Proposal, Rejection, UniverseLookup } from './verify';
+import {
+  enforceDeckBudget,
+  enforceLandSlot,
+  landCount,
+  spellCount,
+  statedCopyLimit,
+  verifyProposals,
+} from './verify';
 
 /** Rounds every build gets, as long as each of them tells the loop something. */
 export const DEFAULT_MAX_ROUNDS = 3;
@@ -81,7 +89,7 @@ export const DEFAULT_MAX_ROUNDS = 3;
  * on: a ceiling sized on the typical round is a ceiling that clips the expensive
  * one, which is the failure this constant exists to stop reproducing.
  */
-const ROUND_COST_USD = 0.55;
+export const ROUND_COST_USD = 0.55;
 
 /** The per-round fill the ceiling is sized around: one legal four-of. */
 const SPELLS_PER_ROUND_FLOOR = 4;
@@ -154,6 +162,11 @@ const SYSTEM = [
   'your picks, and anything you say about them is discarded.',
   'Propose only real cards whose exact printed names you are certain of.',
   'Every card must cite at least one of the stated criterion ids, verbatim.',
+  'This deck is for competitive constructed play. Skip a card that is legal and',
+  'fits the criteria but is too weak to earn a slot in a real constructed deck at',
+  'this power level (for example a plain life-gain spell with no other effect),',
+  'in favor of a stronger card that also fits, even if the weaker card would',
+  'otherwise satisfy the stated criteria.',
 ].join(' ');
 
 export interface SelectionOptions {
@@ -204,12 +217,34 @@ export type SelectionStop =
   /** The cap on the rounds the loop grants itself ran out. */
   | { readonly kind: 'ceiling'; readonly limit: number };
 
+/** What one selection cost, against what it was allowed to cost. */
+export interface SelectionSpend {
+  readonly spentUsd: number;
+  readonly maxSpendUsd: number;
+}
+
 export interface SelectionResult {
   readonly inclusions: readonly Inclusion[];
   /** Problems still outstanding after the last round. */
   readonly rejections: readonly Rejection[];
+  /** Counts this build trimmed to the stated limit, over every round. */
+  readonly adjustments: readonly Adjustment[];
   readonly plan: string;
   readonly rounds: number;
+  /**
+   * What this selection cost, and the ceiling it ran under.
+   *
+   * `mtg-yp33.7`. The meter ran on every round and its reading was thrown away
+   * with the run: `stop` named the dollars only when the dollars were what ended
+   * the loop, so every build that finished comfortably recorded nothing at all.
+   * On a surface whose whole safety story is a stated ceiling, the one number
+   * nobody could read afterwards was dollars.
+   *
+   * `maxSpendUsd` is the ceiling that was actually in force, not the one the
+   * caller stated: the default is derived from the deck's size, and a caller who
+   * stated nothing is the ordinary case rather than an exception.
+   */
+  readonly spend: SelectionSpend;
   /**
    * Spells the loop never filled, and 0 when it filled them. This is the number
    * the report owes the reader when a deck comes back under its size: "58 cards
@@ -224,6 +259,8 @@ export interface SelectionResult {
 /** What every round is asked with; fixed for the length of one build. */
 interface RoundContext {
   readonly provider: LlmProvider;
+  readonly pool: DeckPool;
+  /** `pool.universe`, held beside it because most of the loop only wants this. */
   readonly universe: CandidateUniverse;
   readonly criteria: ResolvedCriteria;
   readonly lookup: UniverseLookup;
@@ -233,6 +270,16 @@ interface RoundContext {
 interface RoundState {
   readonly accepted: readonly Inclusion[];
   readonly rejections: readonly Rejection[];
+  /**
+   * Every count this build trimmed, accumulated across rounds.
+   *
+   * Deliberately not fed back into the prompt: the accepted list the next round
+   * is handed already reads `1x Cultivate`, which is the same fact stated where
+   * the model is already looking, and the limit itself is now a line near the
+   * top. This list exists for the report, where a reader who is looking at a
+   * singleton deck wants to know the model asked for four of everything.
+   */
+  readonly adjustments: readonly Adjustment[];
   /** The first round's plan; later rounds are repairs and do not restate it. */
   readonly plan: string;
 }
@@ -242,7 +289,7 @@ interface RoundBounds {
   readonly maxRounds: number;
   readonly ceiling: number;
   /** This selection's spend and its ceiling, read fresh before every round. */
-  readonly spend: () => { readonly spentUsd: number; readonly maxSpendUsd: number };
+  readonly spend: () => SelectionSpend;
 }
 
 interface RoundsRun {
@@ -253,24 +300,29 @@ interface RoundsRun {
 
 export async function selectCards(
   provider: LlmProvider,
-  universe: CandidateUniverse,
+  pool: DeckPool,
   criteria: ResolvedCriteria,
   lookup: UniverseLookup,
   options: SelectionOptions = {},
 ): Promise<SelectionResult> {
-  const context: RoundContext = { provider, universe, criteria, lookup };
+  const context: RoundContext = { provider, pool, universe: pool.universe, criteria, lookup };
   const spellTarget = Math.max(0, criteria.size - criteria.landCount);
+  // Held rather than inlined: the meter is read once more after the loop, and
+  // the reading has to come from the same meter the bounds were checked against.
+  const spend = spendMeter(provider, options.maxSpendUsd ?? defaultMaxSpendUsd(spellTarget));
   const run = await runRounds(context, spellTarget, {
     maxRounds: options.maxRounds ?? DEFAULT_MAX_ROUNDS,
     ceiling: roundsCeiling(spellTarget),
-    spend: spendMeter(provider, options.maxSpendUsd ?? defaultMaxSpendUsd(spellTarget)),
+    spend,
   });
 
   return {
     inclusions: run.state.accepted,
     rejections: run.state.rejections,
+    adjustments: run.state.adjustments,
     plan: run.state.plan,
     rounds: run.rounds,
+    spend: spend(),
     shortBy: Math.max(0, spellTarget - spellCount(run.state.accepted)),
     stop: run.stop,
   };
@@ -297,7 +349,7 @@ async function runRounds(
   spellTarget: number,
   bounds: RoundBounds,
 ): Promise<RoundsRun> {
-  let state: RoundState = { accepted: [], rejections: [], plan: '' };
+  let state: RoundState = { accepted: [], rejections: [], adjustments: [], plan: '' };
   let round = 0;
   // Whether the round just run added spells; each round past the guarantee is
   // bought by the one before it. No round has run yet, so a stated budget of
@@ -434,7 +486,7 @@ async function runRound(context: RoundContext, state: RoundState, need: number):
   const { universe, criteria } = context;
   const { value } = await context.provider.complete({
     system: SYSTEM,
-    prompt: buildPrompt(criteria, universe, need, state.accepted, state.rejections),
+    prompt: buildPrompt(criteria, context.pool, need, state.accepted, state.rejections),
     schema: DeckProposalSchema,
   });
 
@@ -452,24 +504,51 @@ async function runRound(context: RoundContext, state: RoundState, need: number):
   return {
     accepted: slotted.inclusions,
     rejections: [...verified.rejections, ...budgeted.rejections, ...slotted.rejections],
+    // Accumulated rather than replaced: a trim is a thing that happened to this
+    // build, not a problem outstanding at the end of it, so unlike `rejections`
+    // it does not reset when the next round comes back clean.
+    adjustments: [...state.adjustments, ...verified.adjustments],
     plan: state.plan === '' ? value.plan : state.plan,
   };
 }
 
+/**
+ * The copy limit as a sentence, singular when it is one.
+ *
+ * "At most 1 copies" is the tell that a limit was templated rather than
+ * written, and the one number this most needs to be believed at is 1.
+ */
+function copyLimitLine(limit: number): string {
+  const copies = limit === 1 ? '1 copy' : `${String(limit)} copies`;
+  return (
+    `At most ${copies} of any one card, unless the card's own text says a deck may have ` +
+    'any number of it. Asking for more is trimmed to the limit rather than refused, so a ' +
+    'count over it costs you the copies and not the card.'
+  );
+}
+
 function buildPrompt(
   criteria: ResolvedCriteria,
-  universe: CandidateUniverse,
+  pool: DeckPool,
   need: number,
   accepted: readonly Inclusion[],
   rejections: readonly Rejection[],
 ): string {
+  const universe = pool.universe;
   const stated = enumerateCriteria(criteria);
   const landRoom = criteria.landCount - landCount(accepted);
   const lines: string[] = [
     `The player asked for: ${criteria.prompt}`,
     '',
-    `Format: ${criteria.format}. Deck size ${criteria.size}: ${criteria.size - criteria.landCount} non-land cards and ${criteria.landCount} lands.`,
+    criteria.format === undefined
+      ? `Deck size ${criteria.size}: ${criteria.size - criteria.landCount} non-land cards and ${criteria.landCount} lands.`
+      : `Format: ${criteria.format}. Deck size ${criteria.size}: ${criteria.size - criteria.landCount} non-land cards and ${criteria.landCount} lands.`,
     `Choose ${need} more non-land cards (counting copies).`,
+    // `mtg-yp33.6`. `verifyProposals` has always enforced this and the prompt has
+    // never said it: a 60-card singleton build got the ordinary four-of spread
+    // and lost 57 of 60 cards to a rule nobody stated. A limit the answer is
+    // checked against belongs in the question.
+    copyLimitLine(statedCopyLimit(criteria)),
     '',
     'Lands. You may also name nonbasic lands: duals, fetches, filters, creature-lands,',
     'and utility lands are deck choices and belong to you. Do not name basic lands.',
@@ -486,6 +565,21 @@ function buildPrompt(
     ...universe.filters.map((filter) => `  ${filter}`),
     `The pool holds ${universe.cards.length} legal cards. A card outside it will be rejected.`,
   ];
+
+  // A closed pool is stated in full, and an open one never is. See `pool.ts`:
+  // the store's universe is thousands of cards the model already knows, and a
+  // staged set is hundreds it cannot know, so asking it to propose from memory
+  // returns invented names every time. There is no size cap on this listing on
+  // purpose — a cap is a ranking, and ranking the pool in code is the judgment
+  // the model was asked to make.
+  if (pool.kind === 'set') {
+    lines.push(
+      '',
+      'These are every card in the pool. Choose only from this list; these cards are',
+      'from a generated set, so nothing you remember from real Magic exists here:',
+      ...universe.cards.map((card) => `  ${describePoolCard(card)}`),
+    );
+  }
 
   if (accepted.length > 0) {
     lines.push(
@@ -504,4 +598,18 @@ function buildPrompt(
   }
 
   return lines.join('\n');
+}
+
+/**
+ * One line of the stated pool: enough to judge the card by, and no more.
+ *
+ * The rules text is included in full rather than summarized, because what a card
+ * *does* is the entire basis of the judgment being asked for, and a summary
+ * would be code deciding which half of a card matters.
+ */
+function describePoolCard(card: CandidateCard): string {
+  const cost = card.manaCost === null ? '' : ` ${card.manaCost}`;
+  const body = card.power === null ? '' : ` [${card.power}/${card.toughness ?? ''}]`;
+  const text = card.oracleText === null ? '' : ` — ${card.oracleText.replace(/\n/g, ' / ')}`;
+  return `${card.name}${cost} · ${card.typeLine}${body}${text}`;
 }

@@ -94,6 +94,24 @@ const COARSE_TARGETS: readonly { readonly selector: string; readonly note: strin
     note: 'the chrome buttons, Pass among them; 28.8px',
   },
   {
+    // Every text control on the surface: the card search, the deck name, and
+    // the whole brief editor, which is the one route that is mostly them.
+    // 28.8px, read on a 390x844 phone in
+    // `../../test/design/design-phone.browser.test.ts`. A field is aimed at
+    // with a fingertip before it is typed into, and missing one puts the
+    // keyboard up over the wrong field.
+    selector: '.mtg-input',
+    note: 'the text fields, the brief editor among them; 28.8px',
+  },
+  {
+    // The closed-list toggles: a mechanic's keyword, a color, a spell role.
+    // 32px. They are a selection rather than an action (`./deck-card.ts` argues
+    // the difference), and a selection made wrongly is still a press that has to
+    // be found and undone.
+    selector: '.mtg-chip',
+    note: 'the closed-list toggles; 32px',
+  },
+  {
     // The turn badge that discloses the stop settings, in the toolbar. The
     // shortest control on the route.
     //
@@ -120,6 +138,13 @@ const COARSE_TARGETS: readonly { readonly selector: string; readonly note: strin
     // floored from the same reasoning rather than from a measurement.
     selector: '.mtg-browser__row',
     note: 'a card in an open graveyard; not drawn on either measured page',
+  },
+  {
+    // The mark in the corner, which is the way to the landing page and, on a
+    // landscape table, the only shell control still drawn (`mtg-aqxi.17`).
+    // Sized here rather than in `./base.ts` so a mouse keeps the bar it has.
+    selector: '.mtg-shell__mark',
+    note: 'the mark, which is the home control; text height',
   },
   {
     // The shell's own route links, which is how a player gets back to the table

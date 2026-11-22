@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "ktk",
+  "archetypes": [
+    {
+      "id": "abzan-outlast",
+      "name": "Abzan Outlast",
+      "colors": ["W", "B", "G"],
+      "signpost": {
+        "name": "Abzan Charm",
+        "physicalId": "ktk-printed-v1:0175:8f7b7598-35b0-4bb5-8347-8c868500f846"
+      },
+      "plan": "Build around Abzan Charm: Develop creatures early, outlast when combat pauses, and turn the accumulated counters into shared keywords."
+    },
+    {
+      "id": "jeskai-prowess",
+      "name": "Jeskai Prowess",
+      "colors": ["W", "U", "R"],
+      "signpost": {
+        "name": "Jeskai Charm",
+        "physicalId": "ktk-printed-v1:0195:ca268705-ef04-4bf1-8a5d-866bb3e5bb61"
+      },
+      "plan": "Build around Jeskai Charm: Sequence creatures before cheap noncreature spells, trigger prowess in combat, and preserve mana for protection."
+    },
+    {
+      "id": "sultai-delve",
+      "name": "Sultai Delve",
+      "colors": ["U", "B", "G"],
+      "signpost": {
+        "name": "Sultai Charm",
+        "physicalId": "ktk-printed-v1:0224:993c9028-9b1b-4903-81b2-3cf4f37b7229"
+      },
+      "plan": "Build around Sultai Charm: Fill the graveyard without losing board presence, then spend unused cards to cast delve threats ahead of schedule."
+    },
+    {
+      "id": "mardu-raid",
+      "name": "Mardu Raid",
+      "colors": ["W", "B", "R"],
+      "signpost": {
+        "name": "Mardu Charm",
+        "physicalId": "ktk-printed-v1:0200:c35fb7a3-7c7f-4470-b1ad-5b8709a608e6"
+      },
+      "plan": "Build around Mardu Charm: Attack early to turn on raid, replace attackers efficiently, and keep enough pressure that raid remains reliable."
+    },
+    {
+      "id": "temur-ferocious",
+      "name": "Temur Ferocious",
+      "colors": ["U", "R", "G"],
+      "signpost": {
+        "name": "Temur Charm",
+        "physicalId": "ktk-printed-v1:0228:e2ee3e36-a849-42b0-b84b-027a08427c35"
+      },
+      "plan": "Build around Temur Charm: Establish a four-power creature, unlock ferocious bonuses, and use tempo plays to keep the largest threat attacking."
+    }
+  ]
+}

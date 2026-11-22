@@ -87,8 +87,10 @@
  */
 import type { Card, OracleRow } from '@mtg/dsl';
 import {
+  BASIC_LAND_TYPES,
   abilityLineReminder,
   bareKeywordLine,
+  keywordLineGroupText,
   keywordReminder,
   keywordRowText,
   oracleRows,
@@ -280,6 +282,46 @@ function abilityLineBlock(card: Card, row: OracleRow): TextBlock {
   };
 }
 
+function groupedKeywordBlocks(
+  card: Card,
+  groups: NonNullable<Card['keywordLineGroups']>,
+): readonly TextBlock[] {
+  return groups.flatMap((group) => {
+    type Item = (typeof group)[number];
+    const state = group.reduce<{
+      readonly blocks: readonly TextBlock[];
+      readonly bare: readonly Item[];
+    }>(
+      (current, item) => {
+        const line = keywordLineGroupText([item]);
+        const reminder =
+          typeof item === 'string' ? keywordReminder(item) : abilityLineReminder(line, card.kind);
+        if (reminder === null) return { ...current, bare: [...current.bare, item] };
+        const preceding =
+          current.bare.length === 0
+            ? []
+            : ([{ kind: 'rules', text: keywordLineGroupText(current.bare) }] as const);
+        return {
+          blocks: [
+            ...current.blocks,
+            ...preceding,
+            {
+              kind: 'reminder',
+              text: `${reminder.keyword} ${reminder.gloss}`,
+              roman: reminder.keyword,
+            },
+          ],
+          bare: [],
+        };
+      },
+      { blocks: [], bare: [] },
+    );
+    const trailing =
+      state.bare.length === 0 ? [] : ([{ kind: 'rules', text: keywordLineGroupText(state.bare) }] as const);
+    return [...state.blocks, ...trailing];
+  });
+}
+
 /**
  * The same rules text with each keyword's reminder printed under it, and any
  * other reminded ability line — Exalted today — marked off in place.
@@ -319,8 +361,31 @@ function abilityLineBlock(card: Card, row: OracleRow): TextBlock {
  * row for.
  */
 export function remindedBlocks(card: Card): readonly TextBlock[] {
-  if (card.kind === 'land') return oracleBlocks(card);
+  if (card.kind === 'land') {
+    const blocks = oracleBlocks(card);
+    const hasPrintedBasicLandSubtype =
+      card.basicLandType === undefined &&
+      card.subtypes.some((subtype) => BASIC_LAND_TYPES.some((landType) => landType === subtype));
+    if (!hasPrintedBasicLandSubtype || card.producesMana.length === 0) return blocks;
+    const manaText = `{T}: Add ${card.producesMana.map((color) => `{${color}}`).join(' or ')}.`;
+    return blocks.map((block) =>
+      block.text === manaText ? { kind: 'reminder', text: `(${manaText})`, roman: manaText } : block,
+    );
+  }
   const rows = oracleRows(card);
+  if (card.keywordLineGroups !== undefined) {
+    const groupTexts = card.keywordLineGroups.map(keywordLineGroupText);
+    const first = rows.findIndex((row) => row.text === groupTexts[0]);
+    const actual = rows.slice(first, first + groupTexts.length).map((row) => row.text);
+    if (first === -1 || actual.some((text, index) => text !== groupTexts[index])) {
+      throw new Error('text-box: card keyword line groups do not match oracleRows');
+    }
+    return [
+      ...rows.slice(0, first).map((row) => abilityLineBlock(card, row)),
+      ...groupedKeywordBlocks(card, card.keywordLineGroups),
+      ...rows.slice(first + groupTexts.length).map((row) => abilityLineBlock(card, row)),
+    ];
+  }
   if (card.keywords.length === 0) return rows.map((row) => abilityLineBlock(card, row));
   const keywordRow = rows.findIndex((row) => row.text === keywordRowText(card.keywords));
   if (keywordRow === -1) {

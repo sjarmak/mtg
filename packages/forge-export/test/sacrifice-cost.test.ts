@@ -75,7 +75,7 @@ describe('a sacrifice in the Forge cost string', () => {
     const lines = text.split('\n');
 
     expect(lines).toContain(
-      'A:AB$ DealDamage | Cost$ 1 R T Sac<1/CARDNAME> | ValidTgts$ Any | NumDmg$ 2 | SpellDescription$ {1}{R}, {T}, Sacrifice CARDNAME: CARDNAME deals 2 damage to any target.',
+      'A:AB$ DealDamage | Cost$ 1 R T Sac<1/CARDNAME> | ValidTgts$ Any | NumDmg$ 2 | SpellDescription$ CARDNAME deals 2 damage to any target.',
     );
     expect(text).toContain(`Oracle:${renderOracleText(card)}`);
     expect(lines.filter((line) => line.startsWith('SVar:'))).toEqual([]);
@@ -99,7 +99,7 @@ describe('a sacrifice in the Forge cost string', () => {
     const lines = readFileSync(join(customDir, 'cards', 'keepsake_chime.txt'), 'utf8').split('\n');
 
     expect(lines).toContain(
-      'A:AB$ GainLife | Cost$ Sac<1/CARDNAME> | Defined$ You | LifeAmount$ 2 | SpellDescription$ Sacrifice CARDNAME: You gain 2 life.',
+      'A:AB$ GainLife | Cost$ Sac<1/CARDNAME> | Defined$ You | LifeAmount$ 2 | SpellDescription$ You gain 2 life.',
     );
     // Never `Cost$ 0 Sac<…>`: a Forge cost of nothing is written `0`, and a
     // cost that has something in it must not carry the zero as well.

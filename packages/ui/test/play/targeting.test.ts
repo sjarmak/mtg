@@ -39,7 +39,13 @@ import { botSeat, humanSeat, pendingDecision, scenario, simpleAgent } from '@mtg
 import type { CastTargetStage } from '../../src/routes/play/cast';
 import { CAST_BACK_LABEL, castCancelLabel, castLabel, PlayView } from '../../src/routes/play/PlayView';
 import type { SeatNames } from '../../src/routes/play/position';
-import { aimableTargets, NO_TARGET_GESTURE, targetGesture } from '../../src/routes/play/targeting';
+import {
+  aimablePlayers,
+  aimableSpells,
+  aimableTargets,
+  NO_TARGET_GESTURE,
+  targetGesture,
+} from '../../src/routes/play/targeting';
 
 afterEach(cleanup);
 
@@ -292,10 +298,13 @@ describe('an illegal object is visibly inert rather than hidden', () => {
 
     clickCard(table.container, oneOf(table.state, LASH.name));
 
-    // `anyTarget` reaches both players and the creature. The board can only draw
-    // the creature — a seat's pod is a vitals block, not an object — so the panel
-    // is still the complete list and the board is an added door to it. A lane
-    // that had moved the question to the table would show one answer here.
+    // `anyTarget` reaches both players and the creature, and the panel lists all
+    // three whatever the board does. `mtg-bz2.16` wired the other two aims to
+    // the seats' own pods, so this is no longer a claim about what a board
+    // cannot draw; it is the contract `../../src/routes/play/rail.ts` states —
+    // the board is an added door to the enumeration, never a narrowing of it.
+    // A lane that had moved the question to the table would show one answer
+    // here. Where the pods are pressed is `./aim-off-board.test.ts`.
     expect(panelAnswers(LASH.name)).toEqual(['you', 'Bot', `Bot's ${DRAKE.name}`]);
   });
 });
@@ -388,6 +397,10 @@ describe('the gesture is derived from the open slot and holds nothing of its own
   };
 
   it('keeps only the aims a card on the battlefield can carry', () => {
+    // `aimableTargets` is the *permanents* half and stays that way: the seats and
+    // the stack entries are keyed by different things and read by different
+    // surfaces, so `aimablePlayers` and `aimableSpells` are their own maps
+    // (`mtg-bz2.16`, and `./aim-off-board.test.ts` presses them).
     // Named one at a time rather than by count, because the count is satisfied
     // by keeping the wrong one.
     expect([...aimableTargets(stage).keys()]).toEqual(['o7']);
@@ -399,15 +412,31 @@ describe('the gesture is derived from the open slot and holds nothing of its own
     expect(aim).toBe(stage.candidates[1]?.target);
   });
 
+  it('sorts the other two shapes into their own maps, keyed the way each surface reads', () => {
+    // Three maps rather than one, because a seat, a stack entry and a card are
+    // keyed by three different things and one map over all of them would collide
+    // the day two of those spaces overlap (`mtg-bz2.16`). The stack's key is the
+    // *string* the strip draws under, which is the one place the two spellings
+    // of an object id meet.
+    expect([...aimablePlayers(stage).keys()]).toEqual([1]);
+    expect(aimablePlayers(stage).get(1)).toBe(stage.candidates[0]?.target);
+    expect([...aimableSpells(stage).keys()]).toEqual(['o9']);
+    expect(aimableSpells(stage).get('o9')).toBe(stage.candidates[2]?.target);
+  });
+
   it('lights nothing at all when no slot is open', () => {
     expect(targetGesture(null)).toEqual(NO_TARGET_GESTURE);
     expect(targetGesture(null).source).toBeNull();
     expect(targetGesture(null).answers.size).toBe(0);
+    expect(targetGesture(null).players.size).toBe(0);
+    expect(targetGesture(null).spells.size).toBe(0);
   });
 
   it('names the spell doing the aiming, so the table knows what it is drawing quiet for', () => {
     const gesture = targetGesture({ oid: 'o1', stage });
     expect(gesture.source).toBe('o1');
     expect([...gesture.answers]).toEqual(['o7']);
+    expect([...gesture.players]).toEqual([1]);
+    expect([...gesture.spells]).toEqual(['o9']);
   });
 });

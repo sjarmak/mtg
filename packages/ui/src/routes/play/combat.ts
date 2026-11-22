@@ -97,6 +97,7 @@ import { createElement } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { Action, AttackDeclaration, Choice, Decision, GameState, ObjectId, PlayerId } from '@mtg/kernel';
 import { validateAction } from '@mtg/kernel';
+import type { AttackTargeting } from './attack-targets';
 import { declarationWords } from './declare';
 import type { Assignment, DeclarationPlan } from './declare';
 import type { DeclarationConfirm } from './declare-panel';
@@ -171,10 +172,21 @@ export interface AttackStaging {
    * second spelling is the one that goes stale.
    */
   readonly confirm: Choice | null;
+  /**
+   * The question a pod asks before a creature is staged: whom it attacks.
+   * Absent at a table with one opponent, which is every table the kernel deals,
+   * so the band draws exactly what it always drew there (`./attack-targets.ts`).
+   */
+  readonly targets?: AttackTargeting;
 }
 
 function attackerSet(action: Action): ReadonlySet<string> | null {
-  if (action.type !== 'declareAttackers') return null;
+  // A defined `settled` marks the kernel's capped, one-creature-at-a-time
+  // fallback. It is a prefix answer, not the whole staged declaration this
+  // band confirms; matching it would commit early and reset the remaining
+  // local staging. The roster applies the same terminal-only rule in
+  // `declare.ts`.
+  if (action.type !== 'declareAttackers' || action.settled !== undefined) return null;
   return new Set(action.attackers.map((attack) => String(attack.oid)));
 }
 
@@ -185,8 +197,8 @@ function sameSet(one: ReadonlySet<string>, two: ReadonlySet<string>): boolean {
 }
 
 /**
- * What declares exactly this set of attackers: the enumeration's index where one
- * names it, the declaration itself where none does.
+ * What declares exactly this set of attackers: the complete enumeration's index
+ * where one names it, the declaration itself where none does.
  *
  * The index is preferred and the action is the fallback, which is `session.ts`'s
  * own order and what keeps this invisible to every board under the cap: a game
@@ -309,6 +321,57 @@ export function useAttackStaging(
 /** What the confirm says when nothing has been staged: a real declaration of none. */
 export const NO_ATTACKS_LABEL = 'No attacks';
 
+/** The question the picker asks while nobody is chosen, and the whole of its instruction. */
+export const CHOOSE_DEFENDER_LABEL = 'Choose who to attack, then the creatures that go at them';
+
+/**
+ * Who the next creature staged attacks, one radio per player or planeswalker.
+ *
+ * A radio group rather than a row of ordinary buttons because exactly one is
+ * chosen at a time and the group is the thing a screen reader announces as a
+ * question; the count on each is how many staged creatures are already going at
+ * that defender, which is the only place the table says so (the projection
+ * carries that a creature attacks and not at whom). Nothing is checked until the
+ * player checks one, and the sentence says so, because a default would be the
+ * silent choice `./attack-targets.ts` exists to remove.
+ */
+function targetPicker(targets: AttackTargeting): ReactElement {
+  return createElement(
+    'div',
+    {
+      key: 'targets',
+      className: 'mtg-combat__targets',
+      role: 'radiogroup',
+      'aria-label': 'Who to attack',
+      'data-picked': targets.picked === null ? 'false' : 'true',
+    },
+    targets.picked === null
+      ? createElement('span', { key: 'ask', className: 'mtg-combat__targets-ask' }, CHOOSE_DEFENDER_LABEL)
+      : null,
+    ...targets.options.map((option) => {
+      const going = targets.counts.get(option.key) ?? 0;
+      return createElement(
+        'button',
+        {
+          key: option.key,
+          type: 'button',
+          role: 'radio',
+          className: 'mtg-combat__button mtg-combat__target',
+          'aria-checked': targets.picked === option.key,
+          'data-kind': option.kind,
+          'data-target': option.key,
+          'data-going': String(going),
+          onClick: (): void => {
+            targets.pick(option.key);
+          },
+        },
+        option.label,
+        going === 0 ? null : createElement('span', { className: 'mtg-combat__target-count' }, String(going)),
+      );
+    }),
+  );
+}
+
 /**
  * The controls at the end of the combat band, which are the confirm boundary.
  *
@@ -337,6 +400,7 @@ export function attackControls(staging: AttackStaging, onChoose: (choice: Choice
   if (confirm === null) return null;
   const count = staging.staged.size;
   const buttons: ReactElement[] = [];
+  if (staging.targets !== undefined) buttons.push(targetPicker(staging.targets));
   const confirmLabel = count === 0 ? NO_ATTACKS_LABEL : `Attack with ${String(count)}`;
   buttons.push(
     createElement(

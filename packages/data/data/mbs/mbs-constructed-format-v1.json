@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "mbs",
+  "name": "Mirrodin Besieged",
+  "sources": [
+    {
+      "code": "MBS",
+      "catalogFormat": "mbs-printed-v1",
+      "catalogSha256": "d2c50838a04a14b260842f4dc2eac02a6bb1e70199278cf06ccd69d57a3131c0",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/MBS.json",
+        "sha256": "08417b70c6f8c145cfbfec541844a211fa4258a2d8dd190a3be75b8ceaabf2df",
+        "version": "5.3.0+20260917"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "red-white-battle-cry",
+      "name": "Red-White Battle Cry",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "mbs-printed-v1:0131:be065962-f2ed-4ab9-be6b-bfc66d63ff4e",
+          "name": "Signal Pest",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0064:2e220c87-1223-4998-b0e5-23e2d930fa6b",
+          "name": "Goblin Wardriver",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0008:8a3853ec-e307-46e0-96d7-0706b5c45c5e",
+          "name": "Hero of Bladehold",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0013:04f54188-2cfc-4964-add7-b452f32d57ef",
+          "name": "Master's Call",
+          "count": 2
+        },
+        {
+          "physicalId": "mbs-printed-v1:0146:0eb24b22-d812-466b-b8bf-6562283ee335",
+          "name": "Plains",
+          "count": 21
+        },
+        {
+          "physicalId": "mbs-printed-v1:0152:47a55065-555a-4bdb-8ab1-8830ca5ba6fd",
+          "name": "Mountain",
+          "count": 25
+        }
+      ]
+    },
+    {
+      "id": "black-green-infect",
+      "name": "Black-Green Infect",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "mbs-printed-v1:0094:0cc13aee-5a74-4dab-a6af-7dc31255981d",
+          "name": "Viridian Corrupter",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0050:32aaa8b9-987b-4809-8a54-aa29bdc18805",
+          "name": "Phyrexian Crusader",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0125:8f932690-9a38-4a3f-8805-a192208152a3",
+          "name": "Plague Myr",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0043:1c665cfc-7e9a-444b-96b5-e8e4ef57a98a",
+          "name": "Go for the Throat",
+          "count": 3
+        },
+        {
+          "physicalId": "mbs-printed-v1:0057:7ae09e1a-c257-45e9-88c8-7b1a7a6d714b",
+          "name": "Virulent Wound",
+          "count": 2
+        },
+        {
+          "physicalId": "mbs-printed-v1:0039:03bdcf52-50b8-42c0-9665-931d83f5f314",
+          "name": "Black Sun's Zenith",
+          "count": 1
+        },
+        {
+          "physicalId": "mbs-printed-v1:0145:ec50c1c3-885e-47d3-ada7-cc0edbf09df1",
+          "name": "Inkmoth Nexus",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0150:ca98a492-5c4e-4527-8c03-2ab2442ba7e1",
+          "name": "Swamp",
+          "count": 20
+        },
+        {
+          "physicalId": "mbs-printed-v1:0154:c8c84076-d503-48df-9b6c-9d4a835501b6",
+          "name": "Forest",
+          "count": 18
+        }
+      ]
+    },
+    {
+      "id": "blue-black-proliferate",
+      "name": "Blue-Black Proliferate",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "mbs-printed-v1:0103:05414ba7-0f59-4c73-931c-e599d149d3ba",
+          "name": "Core Prowler",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0050:32aaa8b9-987b-4809-8a54-aa29bdc18805",
+          "name": "Phyrexian Crusader",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0125:8f932690-9a38-4a3f-8805-a192208152a3",
+          "name": "Plague Myr",
+          "count": 3
+        },
+        {
+          "physicalId": "mbs-printed-v1:0043:1c665cfc-7e9a-444b-96b5-e8e4ef57a98a",
+          "name": "Go for the Throat",
+          "count": 3
+        },
+        {
+          "physicalId": "mbs-printed-v1:0025:4126e0e5-9b23-496f-8a09-7a35499f9a09",
+          "name": "Fuel for the Cause",
+          "count": 2
+        },
+        {
+          "physicalId": "mbs-printed-v1:0056:de42a771-4f5c-4295-b070-8cb857a0279e",
+          "name": "Spread the Sickness",
+          "count": 2
+        },
+        {
+          "physicalId": "mbs-printed-v1:0055:8e7915d9-b941-4675-9a1b-18e579977144",
+          "name": "Septic Rats",
+          "count": 2
+        },
+        {
+          "physicalId": "mbs-printed-v1:0145:ec50c1c3-885e-47d3-ada7-cc0edbf09df1",
+          "name": "Inkmoth Nexus",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0148:39c7b858-61e1-43ea-95b6-2a0079a802d2",
+          "name": "Island",
+          "count": 16
+        },
+        {
+          "physicalId": "mbs-printed-v1:0150:ca98a492-5c4e-4527-8c03-2ab2442ba7e1",
+          "name": "Swamp",
+          "count": 20
+        }
+      ]
+    },
+    {
+      "id": "white-blue-artifacts",
+      "name": "White-Blue Artifacts",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "mbs-printed-v1:0131:be065962-f2ed-4ab9-be6b-bfc66d63ff4e",
+          "name": "Signal Pest",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0011:f7eb723d-aa4c-4a38-98de-1faefffab56b",
+          "name": "Leonin Skyhunter",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0108:5970d053-e2e8-471b-b342-2e9b9177724c",
+          "name": "Gust-Skimmer",
+          "count": 3
+        },
+        {
+          "physicalId": "mbs-printed-v1:0013:04f54188-2cfc-4964-add7-b452f32d57ef",
+          "name": "Master's Call",
+          "count": 2
+        },
+        {
+          "physicalId": "mbs-printed-v1:0033:bb40de7c-1905-4615-844b-4abc231fb01e",
+          "name": "Steel Sabotage",
+          "count": 2
+        },
+        {
+          "physicalId": "mbs-printed-v1:0005:fe7c7a65-5a96-4986-877b-b34583092bb6",
+          "name": "Divine Offering",
+          "count": 2
+        },
+        {
+          "physicalId": "mbs-printed-v1:0001:df0a4370-729d-40e7-b68b-21902648492d",
+          "name": "Accorder Paladin",
+          "count": 2
+        },
+        {
+          "physicalId": "mbs-printed-v1:0145:ec50c1c3-885e-47d3-ada7-cc0edbf09df1",
+          "name": "Inkmoth Nexus",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0146:0eb24b22-d812-466b-b8bf-6562283ee335",
+          "name": "Plains",
+          "count": 21
+        },
+        {
+          "physicalId": "mbs-printed-v1:0148:39c7b858-61e1-43ea-95b6-2a0079a802d2",
+          "name": "Island",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "red-green-dinosaurs",
+      "name": "Red-Green Dinosaurs",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "mbs-printed-v1:0079:f5cf62a2-d03a-495d-924a-bf79524175fa",
+          "name": "Fangren Marauder",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0134:7a2c0735-1816-489b-9793-89d1060d78f7",
+          "name": "Sphere of the Suns",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0095:129fa334-f561-4fbd-9f51-2fa044b674e1",
+          "name": "Viridian Emissary",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0110:2d1ea522-a0f6-45a8-8985-6fcca95d60cc",
+          "name": "Ichor Wellspring",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0069:189fea03-24db-4574-bbc2-4d3bc9e629a5",
+          "name": "Kuldotha Flamefiend",
+          "count": 3
+        },
+        {
+          "physicalId": "mbs-printed-v1:0136:59313b00-ac75-484a-ad74-db9d8960c0f8",
+          "name": "Spine of Ish Sah",
+          "count": 2
+        },
+        {
+          "physicalId": "mbs-printed-v1:0081:02335747-54e3-4827-ae19-4e362863da9b",
+          "name": "Green Sun's Zenith",
+          "count": 3
+        },
+        {
+          "physicalId": "mbs-printed-v1:0145:ec50c1c3-885e-47d3-ada7-cc0edbf09df1",
+          "name": "Inkmoth Nexus",
+          "count": 4
+        },
+        {
+          "physicalId": "mbs-printed-v1:0152:47a55065-555a-4bdb-8ab1-8830ca5ba6fd",
+          "name": "Mountain",
+          "count": 14
+        },
+        {
+          "physicalId": "mbs-printed-v1:0154:c8c84076-d503-48df-9b6c-9d4a835501b6",
+          "name": "Forest",
+          "count": 18
+        }
+      ]
+    }
+  ],
+  "contentSha256": "bc91c704d46724e64bc8d00e066cc55972115f9ce97062bc240e680153eb792b"
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "som",
+  "formatSha256": "17afe767dd600e25fbb4301894cb760c726e38522c7897cfc531fd78f4db09a0",
+  "sourceSha256": "7975fc773ac3de2071f5d00e0617965bf907d554502b9115b7e344230b0a194d",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "7975fc773ac3de2071f5d00e0617965bf907d554502b9115b7e344230b0a194d",
+    "recipe.json": "b95173bd29356c261c6ba4ec5cde0457876742bbe4b24596a39d030a62179c2b",
+    "som-printed-catalog-v1.json": "566da9a48c3ed2a60e1d2de469279c4ddbead5c452937443ee0a62c93a2b8842",
+    "som-limited-format-v1.json": "1aa47fece58acc1461a6886c84a31c66a8ff35dabc987199e6b9e386adfc0f07"
+  },
+  "catalogs": [
+    {
+      "code": "SOM",
+      "cards": 249,
+      "contentSha256": "93c88c20cd37ac8c7a5fd7719542fec90ad7bd07ef29572e1c75a577f8e272d3"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1029.719897,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 234,
+    "printings": 249
+  }
+}

@@ -143,7 +143,7 @@ function blocking(props: BoardProps): BoardProps {
   const permanents = props.you.battlefield.permanents.map((permanent) => {
     const attacker = pairing.get(permanent.key);
     if (attacker === undefined) return permanent;
-    return { ...permanent, stagedBlock: attacker.card.name, stagedBlockKey: attacker.key };
+    return { ...permanent, stagedBlock: attacker.card.name, stagedBlockKeys: [attacker.key] };
   });
   return {
     ...props,

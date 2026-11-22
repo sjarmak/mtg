@@ -27,6 +27,7 @@ export type ScriptedAnswer = DeckProposal | LandPlanAnswer | BaselineDeck | Verd
 export interface ScriptedProvider extends LlmProvider {
   /** Every prompt the provider was given, in order. */
   readonly prompts: string[];
+  readonly systems: string[];
 }
 
 export interface ScriptedProviderOptions {
@@ -44,6 +45,7 @@ export function scriptedProvider(
   options: ScriptedProviderOptions = {},
 ): ScriptedProvider {
   const prompts: string[] = [];
+  const systems: string[] = [];
   const costUsd = options.costUsd ?? 0;
   const budget: BudgetGuard = unlimitedBudget();
   let call = 0;
@@ -52,8 +54,10 @@ export function scriptedProvider(
     model: 'scripted',
     budget,
     prompts,
+    systems,
     async complete<T>(request: CompletionRequest<T>): Promise<CompletionResult<T>> {
       prompts.push(request.prompt);
+      systems.push(request.system);
       budget.record({ costUsd, usage: ZERO_USAGE });
       const answer = answers[Math.min(call, answers.length - 1)];
       if (answer === undefined) {

@@ -29,6 +29,7 @@ import { MOTION_CSS } from '../../src/styles/board/motion';
 import { BOARD_CSS } from '../../src/styles/board';
 import { uiStyleSheet } from '../../src/styles/index';
 import { MARK_FAST_MS, MARK_MS } from '../../src/motion/timing';
+import { paceCss } from '../../src/motion/pace';
 
 /** Everything between `{` and `}` in the mark's keyframes. */
 function markKeyframes(): string {
@@ -88,8 +89,8 @@ describe('the sheet animates nothing that has a size', () => {
 
   /** The tokens are the sheet's numbers, read back rather than restated. */
   it('spends the durations the timing file names', () => {
-    expect(MOTION_CSS).toContain(`animation: mtg-motion-mark ${String(MARK_MS)}ms`);
-    expect(MOTION_CSS).toContain(`animation-duration: ${String(MARK_FAST_MS)}ms`);
+    expect(MOTION_CSS).toContain(`animation: mtg-motion-mark ${paceCss(MARK_MS)}`);
+    expect(MOTION_CSS).toContain(`animation-duration: ${paceCss(MARK_FAST_MS)}`);
   });
 });
 

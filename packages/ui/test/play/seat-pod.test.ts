@@ -154,7 +154,53 @@ describe('SeatPod', () => {
       h(SeatPod, { name: 'You', life: 20, handCount: 5, libraryCount: 30, graveyardCount: 2 }),
     );
     const labels = [...host.querySelectorAll('.mtg-pod__chip-label')];
-    expect(labels.map((label) => label.textContent)).toEqual(['library', 'hand']);
+    // Hand first: the two chips share one line now, and the count that changes
+    // every turn reads before the one that only counts down.
+    expect(labels.map((label) => label.textContent)).toEqual(['hand', 'library']);
+  });
+
+  /**
+   * `mtg-vzxqq`. Energy and poison are the two counters a printed set can put
+   * on a player, and a row of them on every pod would be a cost the nineteen
+   * formats without either pay for the two with them, so the row is drawn from
+   * what the caller hands over and only then.
+   */
+  it('draws a chip per counter the seat holds, under the name, and no row for a seat that holds none', () => {
+    const { document } = windowLike();
+    const podWith = (counters?: readonly { name: string; amount: number }[]): ElementLike => {
+      const host = document.createElement('div');
+      host.innerHTML = renderToStaticMarkup(
+        h(SeatPod, {
+          name: 'You',
+          life: 20,
+          handCount: 5,
+          libraryCount: 30,
+          graveyardCount: 2,
+          ...(counters === undefined ? {} : { counters }),
+        }),
+      );
+      return host;
+    };
+
+    const held = podWith([
+      { name: 'poison', amount: 3 },
+      { name: 'energy', amount: 4 },
+    ]);
+    const row = held.querySelector('.mtg-pod__counters');
+    expect([...(row?.querySelectorAll('.mtg-pod__chip') ?? [])].map((chip) => chip.textContent)).toEqual([
+      'poison3',
+      'energy4',
+    ]);
+
+    expect(podWith().querySelector('.mtg-pod__counters')).toBeNull();
+    expect(podWith([]).querySelector('.mtg-pod__counters')).toBeNull();
+    // The counters are their own row: the hand and library chips keep the line they had.
+    expect([...held.querySelectorAll('.mtg-pod__chip-label')].map((label) => label.textContent)).toEqual([
+      'hand',
+      'library',
+      'poison',
+      'energy',
+    ]);
   });
 
   it('marks a low life total and the active seat, and names who holds priority', () => {
@@ -239,12 +285,15 @@ describe('the board puts both seats in one column', () => {
       [...pod.querySelectorAll('.mtg-pod__chip-label')].map((c) => c.textContent),
     );
     expect(chips).toEqual([
-      ['library', 'hand'],
-      ['library', 'hand'],
+      ['hand', 'library'],
+      ['hand', 'library'],
     ]);
     const column = one(host, '.mtg-board__pods');
-    expect(column.textContent).toContain('Your graveyard');
-    expect(one(host, '.mtg-board__rail').textContent).not.toContain('Your graveyard');
+    // By the name it is read aloud by: the strip prints the zone alone, because
+    // the pod above it is what says whose it is (`mtg-dcxg.10`, and the sentence
+    // below was already the reason).
+    expect(one(column, '.mtg-browser').getAttribute('aria-label')).toBe('Your graveyard');
+    expect(one(host, '.mtg-board__rail').textContent).not.toContain('graveyard');
     // Under the pod it belongs to rather than at the foot of the column, which
     // is what lets it need no seat name of its own to be read.
     const browser = one(column, '.mtg-browser');

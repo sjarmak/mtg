@@ -1,21 +1,18 @@
 /**
- * The one effect primitive whose other half is the card it is printed on.
+ * Fight has a source-body form and an ordered two-target spell form.
  *
  * Every other effect in the vocabulary is a sentence about its target. `fight`
- * is a sentence about two creatures (CR 701.12a), and the DSL only carries one
- * `TargetSpec` per effect — `targetChoicesForEffects` returns one slot per
- * printed effect and the kernel, the bots and the UI all read that shape — so
- * the second fighter cannot be a second target. It is the source, which is why
- * the printed template is Affectionate Indrik's and not Prey Upon's: "When this
- * enters the battlefield, it fights target creature you don't control."
+ * is a sentence about two creatures (CR 701.12a). Source-body triggers use the
+ * source as one fighter. Prey Upon carries its two fixed selectors as an
+ * ordered pair through the plural-target side channel.
  *
- * That makes `fight` legal in exactly one placement, and most of this file is
- * the four refusals around it. A spell has no body to fight with; an activated
- * ability's "it" has no antecedent in the printed sentence; an attack trigger
- * and a death trigger are creature triggers this slice has not argued for.
- * Each is refused by the validator rather than left for the kernel to discover
- * at resolution, which is the same rule `defending-player-target.test.ts`
- * states for the kind that can only appear on an attack trigger.
+ * The source-body form is legal on the two creature triggers whose source is still
+ * on the battlefield: entering and attacking. A spell has no body to fight
+ * with; an activated ability's "it" has no antecedent in the printed sentence;
+ * a death trigger has already lost one fighter. Each impossible placement is
+ * refused by the validator rather than left for the kernel to discover at
+ * resolution. The attack form composes with the narrower target kind pinned by
+ * `defending-player-target.test.ts`, which is how Cyclops Gladiator is written.
  *
  * The freeze is the property every target-kind file in this directory restates:
  * `MODEL_TARGET_KINDS` is still the four and `ModelEffectSchema` still has no
@@ -40,8 +37,10 @@ import { parseCard } from '../src/parse';
 import { targetKindsCanCollide } from '../src/targets';
 
 const FOE: TargetKind = 'targetCreatureYouDontControl';
+const DEFENDER: TargetKind = 'targetCreatureDefendingPlayerControls';
 
 const FIGHT: Effect = { kind: 'fight', target: { kind: FOE } };
+const ATTACK_FIGHT: Effect = { kind: 'fight', target: { kind: DEFENDER } };
 
 function creatureInput(abilities: readonly AbilityInput[]): Record<string, unknown> {
   return {
@@ -88,6 +87,11 @@ function enters(effects: readonly Effect[], optional?: true): AbilityInput {
   return (optional === undefined ? ability : { ...ability, optional }) as AbilityInput;
 }
 
+function attacks(effects: readonly Effect[], optional?: true): AbilityInput {
+  const ability = { kind: 'triggered', condition: 'selfAttacks', effects: [...effects] };
+  return (optional === undefined ? ability : { ...ability, optional }) as AbilityInput;
+}
+
 describe('the fight primitive', () => {
   it('is a kind the engine runs and the generator cannot name', () => {
     expect(ALL_EFFECT_KINDS).toContain('fight');
@@ -107,8 +111,8 @@ describe('the fight primitive', () => {
     expect(isSourceBodyEffect('dealDamage')).toBe(false);
   });
 
-  it('takes the one target kind and no other', () => {
-    expect([...legalTargetsFor('fight')]).toEqual([FOE]);
+  it('takes the arrival-fight and defending-player target kinds and no others', () => {
+    expect([...legalTargetsFor('fight')]).toEqual([FOE, DEFENDER]);
   });
 
   it('appends its target kind rather than inserting it, so the frozen four stay put', () => {
@@ -153,6 +157,26 @@ describe('the fight primitive', () => {
     expect(text).not.toContain('you may it fights');
   });
 
+  it('admits Cyclops Gladiator as an optional attack-trigger fight against the defending player board', () => {
+    const card = parseCard({
+      ...creatureInput([attacks([ATTACK_FIGHT], true)]),
+      id: 'm11-cyclops-gladiator',
+      name: 'Cyclops Gladiator',
+      rarity: 'rare',
+      set: { code: 'M11', collectorNumber: 131 },
+      manaCost: { generic: 1, R: 3 },
+      colors: ['R'],
+      subtypes: ['Cyclops', 'Warrior'],
+      power: 4,
+      toughness: 4,
+    } as CardInput);
+
+    expect(validateCard(card)).toEqual([]);
+    expect(renderOracleText(card)).toContain(
+      'Whenever Cyclops Gladiator attacks, you may have it fight target creature defending player controls.',
+    );
+  });
+
   it('is refused on a spell, which has no body to fight with', () => {
     expect(codesFor(sorceryInput([FIGHT]))).toContain('EFFECT_ILLEGAL_ON_CARD_TYPE');
   });
@@ -167,13 +191,12 @@ describe('the fight primitive', () => {
     ).toContain('ABILITY_ILLEGAL_ON_CARD_TYPE');
   });
 
-  it('is refused on the other trigger conditions this slice did not argue for', () => {
-    for (const condition of ['selfAttacks', 'selfDies'] as const) {
-      expect(
-        codesFor(creatureInput([{ kind: 'triggered', condition, effects: [FIGHT] } as AbilityInput])),
-        condition,
-      ).toContain('ABILITY_ILLEGAL_ON_CARD_TYPE');
-    }
+  it('is refused on a death trigger, whose source has already left the battlefield', () => {
+    expect(
+      codesFor(
+        creatureInput([{ kind: 'triggered', condition: 'selfDies', effects: [FIGHT] } as AbilityInput]),
+      ),
+    ).toContain('ABILITY_ILLEGAL_ON_CARD_TYPE');
   });
 
   it('is refused on a non-creature card, whose enters trigger has no power to fight with', () => {

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "kld-aer",
+  "formatSha256": "4f37aa27144d3ad5808703d243be88e093f8ac62bdcb1b2a025a7b595f1dbae7",
+  "sourceSha256": "def80a9bd5d50c6ead4db47e0d98a91aa5a56901a6b6f3fff0f9c542d10ef6c2",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "def80a9bd5d50c6ead4db47e0d98a91aa5a56901a6b6f3fff0f9c542d10ef6c2",
+    "recipe.json": "8d263b2dfdfd6b8eb33ca09fe9e6427d91dfb12d3655a96746bf7805c53fb562",
+    "aer-printed-catalog-v1.json": "b32757be9f3cb9d7f89b7932840d552e4d36841a63d1e7f7e69dfe8c4458a906",
+    "kld-printed-catalog-v1.json": "e60ec15762f990cf99a6ace58a8cc69f54241def47da678662fc37a632484c62",
+    "mps-printed-catalog-v1.json": "89e2e1f1046c6e76afe1b8f89c13da710827191279d2799c07a1d608434b144f",
+    "kld-aer-limited-format-v1.json": "5085a45ceb570621ca063c69ef1b95a61d41bc4fae1ab0f9948333d18ee8fca2"
+  },
+  "catalogs": [
+    {
+      "code": "AER",
+      "cards": 197,
+      "contentSha256": "fdfe0274608a88d828b369745fc4342feed20a9d4635e6b4a4b362954d586a3e"
+    },
+    {
+      "code": "KLD",
+      "cards": 278,
+      "contentSha256": "26a4ddefd9ebe42387b8e84f4448129f1161fdebe15fcd47fdff3b8fca3515cb"
+    },
+    {
+      "code": "MPS",
+      "cards": 54,
+      "contentSha256": "30478120f37b1f0bd21f9db0fcee6bf0d003dfbf6f672bb15cae2505addfbe7f"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 2046.250886,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 504,
+    "printings": 529
+  }
+}

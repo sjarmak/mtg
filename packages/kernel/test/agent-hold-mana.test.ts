@@ -29,7 +29,7 @@ import { describe, expect, it } from 'vitest';
 import type { AbilityInput, Card } from '@mtg/dsl';
 import type { GameEvent, GameState } from '@mtg/kernel';
 import { eventsOfType, playOut, scenario, serializeEvents, simpleAgent } from '@mtg/kernel';
-import { creature, instant, ISLAND, lands, MOUNTAIN } from './cards';
+import { artifact, creature, instant, ISLAND, lands, MOUNTAIN } from './cards';
 
 const COUNTER = 'Test Counter';
 const DRAKE = 'Test Drake';
@@ -62,6 +62,13 @@ const PING: AbilityInput = {
   effects: [{ kind: 'dealDamage', amount: 1, target: { kind: 'targetCreature' } }],
 };
 
+/** Tap two lands: Test Cohort Beacon deals 1 damage to target creature. */
+const COHORT_PING: AbilityInput = {
+  kind: 'activated',
+  cost: { mana: {}, tapMatching: { count: 2, filter: { cardTypes: ['land'] } } },
+  effects: [{ kind: 'dealDamage', amount: 1, target: { kind: 'targetCreature' } }],
+};
+
 interface Position {
   /** Blue's own creature, which `holdWindowOpen` requires before it will hold. */
   readonly body: boolean;
@@ -77,6 +84,8 @@ interface Position {
    * there is something across the table to shoot (`agent-bad-aim.test.ts`).
    */
   readonly beacon?: boolean;
+  /** An activation whose chosen cohort, rather than its mana cost, spends the reserve. */
+  readonly cohortBeacon?: boolean;
 }
 
 /**
@@ -109,7 +118,12 @@ function position(spec: Position): { readonly state: GameState; readonly events:
             },
           ]
         : []),
-      ...((spec.beacon ?? false) ? [{ card: creature(BEAR, 2, 2), controller: 1 as const }] : []),
+      ...((spec.cohortBeacon ?? false)
+        ? [{ card: artifact('Test Cohort Beacon', {}, [COHORT_PING]), controller: 0 as const }]
+        : []),
+      ...((spec.beacon ?? false) || (spec.cohortBeacon ?? false)
+        ? [{ card: creature(BEAR, 2, 2), controller: 1 as const }]
+        : []),
       ...blueLands.map((card) => ({ card, controller: 0 as const })),
       ...lands(MOUNTAIN, 2).map((card) => ({ card, controller: 1 as const })),
     ],
@@ -210,6 +224,13 @@ describe('the activation arm of the same reservation', () => {
     // with it and the beacon is the best use of what is left. What must not
     // happen is an activation before the window ever opens.
     const played = position({ body: true, beacon: true, hand: [] });
+    const kinds = played.events.map((event) => event.type);
+    expect(kinds).toContain('spellCountered');
+    expect(kinds.indexOf('abilityActivated')).toBeGreaterThan(kinds.indexOf('spellCountered'));
+  });
+
+  it('counts a chosen cohort against the held mana even when the printed mana cost is zero', () => {
+    const played = position({ body: true, cohortBeacon: true, hand: [] });
     const kinds = played.events.map((event) => event.type);
     expect(kinds).toContain('spellCountered');
     expect(kinds.indexOf('abilityActivated')).toBeGreaterThan(kinds.indexOf('spellCountered'));

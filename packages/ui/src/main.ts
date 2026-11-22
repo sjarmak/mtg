@@ -24,6 +24,8 @@ import { createElement } from 'react';
 import { EXAMPLE_CARDS } from '@mtg/dsl';
 import { LabApp } from './dev/LabApp';
 import { SET_INDEX_URL } from './lab/set-index';
+import { PRINTED_FORMAT_INDEX_URL } from './lab/printed-format';
+import { EVIDENCE_URL } from './routes/analysis/evidence-record';
 import { mount } from './mount';
 
 mount(
@@ -40,6 +42,10 @@ mount(
     calibrationUrl: 'calibration.json',
     // Optional paired before/after proposal. Missing is a named Analysis state.
     retuneUrl: 'retune.json',
+    // Staged by `npm run play` from the ledgers under `out/` and the recorded
+    // games under `data/gameplay/`; absent leaves the Analysis tab's evidence
+    // section naming the command that scans them.
+    evidenceUrl: EVIDENCE_URL,
     // Staged by `npm run play`; absent in a plain `vite dev`, which leaves the
     // Replay tab saying which command records one.
     eventLogUrl: 'replay.events.jsonl',
@@ -53,6 +59,7 @@ mount(
     // sets is a click rather than a server restart. Absent in a plain `vite
     // dev`, which leaves the three flat urls above answering as they always did.
     setIndexUrl: SET_INDEX_URL,
+    printedFormatIndexUrl: PRINTED_FORMAT_INDEX_URL,
     // Staged by `npm run lab`; absent until something builds a deck, which the
     // Deck tab says rather than showing an empty page.
     deckUrl: 'deck.json',
@@ -62,8 +69,12 @@ mount(
     // Staged by `npm run play` alongside the set, when that set has been through
     // the art pipeline. Absent leaves every card on its pending frame.
     artUrl: 'art.json',
+    // A separate printed-card artifact: it is never parsed as a generated set.
+    legacyCubeUrl: 'legacy-cube-2021-card-catalog-v1.json',
+    legacyCubeCalibrationUrl: 'legacy-cube-advisor-calibration.json',
+    legacyCubeForgeReadyUrl: 'legacy-cube-2021-forge-ready-v1.json',
+    legacyCubeTokensUrl: 'legacy-cube-2021-token-printings-v1.json',
     cards: EXAMPLE_CARDS,
     title: 'MTG Lab',
-    subtitle: 'play, analyze, replay',
   }),
 );

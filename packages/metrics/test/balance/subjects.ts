@@ -104,16 +104,28 @@ export const COMMITTED_SUBJECT: BalanceSubject = {
   setPath: COMMITTED_SET_PATH,
   waivers: TIDEGLASS_REACH_WAIVERS,
   spread: {
-    measured: 0.1614,
-    when: '2026-08-16',
+    measured: 0.145,
+    when: '2026-08-27',
     why:
-      'the prototype pool is the control the flagship was read against. Its fixture has not been ' +
-      'edited since `round-robin.ts` recorded it on 2026-08-14, and over six seeds on this tree it ' +
-      'reads mean 0.1445 sd 0.0190 against the mean 0.146 sd 0.017 recorded then — a reproduction, ' +
-      'not a coincidence. That is what makes the flagship moving 0.117 to 0.179 over the same two ' +
-      'days a fact about the flagship rather than about the engine: the sim and kernel commits in ' +
-      'between move this pool nowhere. Re-pinning this one without a fixture edit means an engine ' +
-      'change stopped being balance-neutral, which is a bigger finding than the number.',
+      'the previous entry said a re-pin here without a fixture edit is the finding, so here is the ' +
+      'finding: `mtg-x5pv` gave an instant a premium over the same text printed as a sorcery, and it ' +
+      'is not balance-neutral on this pool. Attributed by rebuilding rather than by reading the ' +
+      'spread — every color pair of all three subjects was built under both scorings, and two of ' +
+      "this pool's ten decks changed by one card each, WR and UR. The fixture is untouched. UB is " +
+      'the ceiling at 1105W-889L = 55.4% and WU the floor at 818W-1181L = 40.9%, so the spread is ' +
+      '0.1450 against the 0.1614 recorded on 2026-08-16, a narrowing of 0.0164 that is inside the ' +
+      '0.02 tolerance and re-pinned anyway: a reading nobody moves back to what the tree reads is a ' +
+      "reading that will fail on somebody else's change. It lands on the six-seed mean of 0.1445 " +
+      'the previous entry measured, which is where a pinned seed sitting 0.0169 above its own mean ' +
+      'was always likely to end up. The WU waiver went with it — the pair cleared the 40% floor and ' +
+      '`baseline.ts` carries what it read. The previous entry, verbatim: "the prototype pool is the ' +
+      'control the flagship was read against. Its fixture has not been edited since ' +
+      '`round-robin.ts` recorded it on 2026-08-14, and over six seeds on this tree it reads mean ' +
+      '0.1445 sd 0.0190 against the mean 0.146 sd 0.017 recorded then — a reproduction, not a ' +
+      'coincidence. That is what makes the flagship moving 0.117 to 0.179 over the same two days a ' +
+      'fact about the flagship rather than about the engine: the sim and kernel commits in between ' +
+      'move this pool nowhere. Re-pinning this one without a fixture edit means an engine change ' +
+      'stopped being balance-neutral, which is a bigger finding than the number."',
   },
   origin: 'declared',
 };

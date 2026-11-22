@@ -12,12 +12,15 @@
  * 23 spells.
  */
 import type { BasicLandType, Card, Color } from '@mtg/dsl';
-import { BASIC_LAND_COLOR, BASIC_LAND_TYPES, basicLand, COLORS, EXAMPLE_CARDS } from '@mtg/dsl';
+import { BASIC_LAND_COLOR, BASIC_LAND_TYPES, basicLand, COLORS, EXAMPLE_CARDS, EXAMPLE_SET } from '@mtg/dsl';
 import type { DeckList } from '@mtg/kernel';
 
 export const DEFAULT_DECK_SIZE = 40;
 export const DEFAULT_LAND_COUNT = 17;
 const FIXTURE_SET_CODE = 'SLC';
+
+/** Public collation distribution behind the synthetic fixture format. */
+export const FIXTURE_FORMAT_POOL: readonly Card[] = EXAMPLE_SET;
 
 function basicFor(color: Color): BasicLandType {
   const found = BASIC_LAND_TYPES.find((type) => BASIC_LAND_COLOR[type] === color);

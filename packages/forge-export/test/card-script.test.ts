@@ -84,6 +84,17 @@ describe('creature scripts', () => {
     }
   });
 
+  it('emits a card-level any-number construction rule as Forge native K: text', () => {
+    const card = parseCard({
+      ...creature('Relentless Rats', { colors: ['B'], manaCost: { generic: 1, B: 2 } }),
+      deckConstruction: { kind: 'anyNumberOfThisCard' },
+    });
+
+    expect(mustTranspile(card)).toContain(
+      'K:A deck can have any number of cards named CARDNAME.\nOracle:A deck can have any number of cards named Relentless Rats.\n',
+    );
+  });
+
   it('emits a vanilla creature with an empty Oracle line', () => {
     expect(mustTranspile(creature('Vanilla Probe', { subtypes: ['Golem'] }))).toBe(
       ['Name:Vanilla Probe', 'ManaCost:1 W', 'Types:Creature Golem', 'PT:2/2', 'Oracle:', ''].join('\n'),
@@ -220,14 +231,14 @@ describe('static ability scripts', () => {
         'Types:Creature Merfolk',
         'PT:2/2',
         'K:Flying',
-        'S:Mode$ Continuous | Affected$ Creature.Other+YouCtrl+Merfolk | AddPower$ +1 | AddToughness$ +1 | Description$ Other Merfolk creatures you control get +1/+1.',
+        'S:Mode$ Continuous | Affected$ Creature.Other+YouCtrl+Merfolk | AddPower$ 1 | AddToughness$ 1 | Description$ Other Merfolk creatures you control get +1/+1.',
         'Oracle:Flying\\nOther Merfolk creatures you control get +1/+1.',
         '',
       ].join('\n'),
     );
   });
 
-  it('writes a conditional static with ConditionPresent$/ConditionCompare$, not as an unconditional S: line', () => {
+  it('writes a conditional static with the IsPresent$/PresentCompare$ pair Forge reads on an S: line', () => {
     const card = creature('Trisigil Kaelen', {
       supertypes: ['legendary'],
       subtypes: ['Human'],
@@ -245,28 +256,33 @@ describe('static ability scripts', () => {
       .split('\n')
       .find((entry) => entry.startsWith('S:'));
     expect(line).toBe(
-      'S:Mode$ Continuous | Affected$ Creature.YouCtrl | AddPower$ +1 | AddToughness$ +1 | ' +
-        'ConditionPresent$ Trisigil.YouCtrl | ConditionCompare$ GE1 | ' +
+      'S:Mode$ Continuous | Affected$ Creature.YouCtrl | AddPower$ 1 | AddToughness$ 1 | ' +
+        'IsPresent$ Trisigil.YouCtrl | PresentCompare$ GE1 | ' +
         'Description$ As long as you control a Trisigil, creatures you control get +1/+1.',
     );
-    // The unfixed bug: an S: line with no ConditionPresent$/ConditionCompare$
-    // runs the modification whether or not the source controls a Trisigil,
-    // which is strictly better than what the card says.
+    // Two ways to lose the condition, and Forge cannot tell them apart: an S:
+    // line that omits it outright, and the ConditionPresent$/ConditionCompare$
+    // pair this wrote until `mtg-qd0e`, which `StaticAbility.checkConditions`
+    // never queries. Either one runs the modification whether or not the source
+    // controls a Trisigil, which is strictly better than what the card says.
+    expect(line).not.toContain('ConditionPresent$');
     expect(line).not.toBe(
-      'S:Mode$ Continuous | Affected$ Creature.YouCtrl | AddPower$ +1 | AddToughness$ +1 | ' +
+      'S:Mode$ Continuous | Affected$ Creature.YouCtrl | AddPower$ 1 | AddToughness$ 1 | ' +
         'Description$ As long as you control a Trisigil, creatures you control get +1/+1.',
     );
   });
 
   /**
-   * `mtg-jp23`'s `anyCreatureHasCounter` is the one `Condition` member
-   * `conditionParams` (`ability-script.ts`) refuses rather than translates:
-   * Forge's `ConditionPresent$`/`ConditionCheckSVar$` grammar for "any
-   * permanent anywhere has counter X" is unverified here, so this follows
-   * `UNMAPPED_TARGET_RESTRICTION`'s precedent (`target-restrictions.test.ts`)
-   * of refusing by name over guessing at syntax nobody has run through Forge.
+   * `mtg-jp23`'s `anyCreatureHasCounter` was the one `Condition` member
+   * `conditionParams` refused, on the reasoning that "any creature, not just
+   * yours" has no scope to write and "any" has no floor to compare. Both are
+   * defaults rather than absences: `IsPresent` collects `PresentPlayer$ Any`,
+   * every seat, when nothing narrows it, and `PresentCompare` defaults to the
+   * `GE1` written here. The selector's counter half is the one the target
+   * restrictions already write (`counters_GE1_M1M1` for a gloom counter), so
+   * the two spellings of a gloom counter cannot drift apart.
    */
-  it('refuses a static conditioned on anyCreatureHasCounter rather than guessing at Forge syntax', () => {
+  it('reads a board-wide gloom counter as an unscoped IsPresent$ selector', () => {
     const card = creature('Blight Counter Probe', {
       abilities: [
         {
@@ -278,6 +294,30 @@ describe('static ability scripts', () => {
         },
       ],
     });
+    const line = mustTranspile(card)
+      .split('\n')
+      .find((entry) => entry.startsWith('S:'));
+    // `Affected$` carries the scope's own `YouCtrl`; the condition beside it
+    // must not, because the counter may sit on a creature at any seat.
+    expect(line).toContain(
+      'Affected$ Creature.YouCtrl | AddPower$ 1 | AddToughness$ 1 | ' +
+        'IsPresent$ Creature.counters_GE1_M1M1 | PresentCompare$ GE1 |',
+    );
+  });
+
+  /** A horn counter is two Forge counters, and `counters_GE1_` can name one. */
+  it('refuses a board-wide condition on a counter with no single Forge type', () => {
+    const card = creature('Horn Counter Probe', {
+      abilities: [
+        {
+          kind: 'static',
+          scope: 'creaturesYouControl',
+          subtype: null,
+          modification: { kind: 'statBonus', power: 1, toughness: 1 },
+          enabledWhile: { kind: 'anyCreatureHasCounter', counter: 'horn' },
+        },
+      ],
+    });
     const result = transpileCard(card);
     expect(result.ok).toBe(false);
     if (result.ok) return;
@@ -285,13 +325,14 @@ describe('static ability scripts', () => {
   });
 
   /**
-   * `mtg-nhyv.28`'s `opponentGraveyardAtLeast` is refused on the same
-   * precedent and for a sharper reason: every `ConditionPresent$` filter this
-   * transpiler writes names permanents on a battlefield, and a graveyard count
-   * needs a zone qualifier no card in the corpus this package was built from
-   * demonstrates. A guess would transpile clean and count the wrong pile.
+   * `mtg-nhyv.28` refused this one on the reasoning that a `ConditionPresent$`
+   * filter names permanents on a battlefield and a graveyard count would need a
+   * zone qualifier nothing demonstrated. Forge does not write the condition as
+   * a board filter at all: `jaces_phantasm.txt`, the printed card the DSL
+   * member was added for, counts it with a player count and compares it with
+   * the same `CheckSVar$`/`SVarCompare$` pair the conditions around it use.
    */
-  it('refuses a static conditioned on a graveyard count rather than guessing at a zone qualifier', () => {
+  it('counts an opponent graveyard the way jaces_phantasm.txt does', () => {
     const card = creature('Graveyard Threshold Probe', {
       abilities: [
         {
@@ -303,10 +344,11 @@ describe('static ability scripts', () => {
         },
       ],
     });
-    const result = transpileCard(card);
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.rejections.map((reason) => reason.code)).toContain('UNMAPPED_EFFECT_KIND');
+    const lines = mustTranspile(card).split('\n');
+    expect(lines.filter((line) => line.startsWith('S:'))).toEqual([
+      'S:Mode$ Continuous | Affected$ Card.Self | AddPower$ 4 | AddToughness$ 4 | CheckSVar$ X | SVarCompare$ GE10 | Description$ As long as an opponent has ten or more cards in their graveyard, CARDNAME gets +4/+4.',
+    ]);
+    expect(lines).toContain('SVar:X:PlayerCountOpponents$HighestCardsInGraveyard');
   });
 
   it('writes a keyword-granting anthem on a noncreature artifact', () => {
@@ -371,7 +413,7 @@ describe('static ability scripts', () => {
       ],
     });
     expect(mustTranspile(card)).toContain(
-      'S:Mode$ Continuous | Affected$ Card.Self | AddPower$ +2 | AddToughness$ -1 | Description$ CARDNAME gets +2/-1.\n',
+      'S:Mode$ Continuous | Affected$ Card.Self | AddPower$ 2 | AddToughness$ -1 | Description$ CARDNAME gets +2/-1.\n',
     );
   });
 
@@ -397,7 +439,7 @@ describe('static ability scripts', () => {
       .split('\n')
       .filter((line) => line.startsWith('S:'));
     expect(statics.length).toBe(2);
-    expect(statics[0]).toContain('AddPower$ +1');
+    expect(statics[0]).toContain('AddPower$ 1');
     expect(statics[1]).toContain('AddKeyword$ Vigilance');
   });
 });
@@ -517,6 +559,12 @@ describe('spell effect scripts', () => {
       'A:SP$ Token | TokenAmount$ 2 | TokenScript$ r_2_2_bear | TokenOwner$ You | SpellDescription$ Create two 2/2 red Bear creature tokens.\n',
     );
     expect(text).toContain('DeckHas:Ability$Token\n');
+  });
+
+  it('populate uses Forge native non-targeting token-copy selection', () => {
+    expect(mustTranspile(spell('Populate Probe', [{ kind: 'populate' }]))).toContain(
+      'A:SP$ CopyPermanent | Populate$ True | SpellDescription$ Populate.\n',
+    );
   });
 
   it('tapPermanent', () => {

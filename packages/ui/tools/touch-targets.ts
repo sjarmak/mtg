@@ -51,7 +51,7 @@ import type { Card as DslCard } from '@mtg/dsl';
 import type { GameSession, GameState, ObjectId, PlayerId } from '@mtg/kernel';
 import { DEFAULT_AUTO_PASS, humanSeat, pendingDecision, scenario } from '@mtg/kernel';
 import { Shell } from '../src/app/Shell';
-import { GameLog } from '../src/log/GameLog';
+import { GameLog, OPEN_BY_DEFAULT } from '../src/log/GameLog';
 import { pickerPanel } from '../src/routes/play/picker';
 import { PlayView } from '../src/routes/play/PlayView';
 import { boardPosition } from '../src/routes/play/position';
@@ -66,7 +66,7 @@ import {
 } from '../src/routes/play/prompt';
 import { promptPanel } from '../src/routes/play/rail';
 import { railToggle } from '../src/routes/play/rail-collapse';
-import { playTable } from '../src/routes/play/table';
+import { playTableHost } from './play-table-host';
 import { NO_STAGING } from '../src/routes/play/combat';
 import { playToolbar, stepBar } from '../src/routes/play/toolbar';
 import { TOUCH_TARGET_PX } from '../src/styles/touch';
@@ -182,13 +182,16 @@ function menuPage(): string {
   const mine = byObject.get(oid) ?? [];
   if (mine.length === 0) throw new Error('the scenario offers no move on the card the menu is opened over');
   const panel = pickerPanel('Lightning Lash', mine, () => undefined);
-  const rendered = playTable({
+  const rendered = playTableHost({
+    // The rig shoots from seat 0, which is the seat `boardPosition` above was
+    // handed; the id only decides which pod an aim at a player would light, and
+    // a rig stages no cast.
+    viewer: 0,
     // A rig owns no session, so nothing is being declared and nothing can be
     // staged (`../src/routes/play/combat.ts`).
     staging: NO_STAGING,
     combat: null,
     position: boardPosition(state, 0, NAMES, null),
-    playable: new Set(state.players[0].hand),
     byObject,
     selection: {
       openKey: oid,
@@ -234,6 +237,9 @@ function menuPage(): string {
       events: [],
       names: { player: (id: PlayerId): string => NAMES[id], card: () => '', target: () => '' },
       viewer: 0,
+      // A measuring rig has no player and therefore no preference: it draws the
+      // shipped default and the toggle goes nowhere.
+      disclosure: { open: OPEN_BY_DEFAULT, toggle: (): void => undefined },
     }),
     // The side panel is collapsible since `mtg-crw`; every page here draws it
     // open, which is the state these rigs have always measured.

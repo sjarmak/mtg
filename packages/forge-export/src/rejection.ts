@@ -37,6 +37,20 @@ export const TRANSPILE_REJECTION_CODES = [
   'UNMAPPED_BASIC_LAND_TYPE',
   /** A card cost contains X, whose Forge payment syntax is not source-proven here. */
   'UNMAPPED_VARIABLE_MANA',
+  /** A filtered discard activation cost whose Forge Valid grammar is not proven. */
+  'UNMAPPED_ACTIVATION_COST_FILTER',
+  /** A spell's sacrifice filter whose Forge `Sac` grammar is not proven. */
+  'UNMAPPED_SPELL_ADDITIONAL_COST_FILTER',
+  /** An alternative casting price whose Forge `Sac` grammar is not proven. */
+  'UNMAPPED_SPELL_ALTERNATIVE_COST_FILTER',
+  /** A static cast-timing filter whose Forge ValidCard grammar is not proven. */
+  'UNMAPPED_CAST_PERMISSION_FILTER',
+  /** A card-level player-turn restriction whose Forge counter grammar is not proven. */
+  'UNMAPPED_CASTING_RESTRICTION',
+  /** A per-additional-target cost other than Fireball's source-proven one generic. */
+  'UNMAPPED_TARGET_COST_INCREASE',
+  /** A counter-removal activation cost whose counter has no single Forge type. */
+  'UNMAPPED_ACTIVATION_COUNTER_COST',
   /** A creature's printed P/T is a CDA rather than the stored numeric sentinel. */
   'UNMAPPED_CHARACTERISTIC_VALUE',
   /** Nonbasic land entry and mana abilities have no exact Forge script mapping yet. */
@@ -131,22 +145,17 @@ export const TRANSPILE_REJECTION_CODES = [
    * CR 700.2's "Choose one —": a modal spell's `card.modes`, printed in place
    * of a fixed `effects` list.
    *
-   * `abilityBlock` builds Forge's `A:`/`SubAbility$`/`SVar:` chain from
-   * `card.effects` alone, which is empty on a modal card by construction
-   * (`checkEffects` refuses a spell that carries both). Forge has its own
-   * modal grammar (`Mode$`/chained `DBEffect` sub-abilities selected by a
-   * player choice), and this transpiler has not built it — writing the
-   * script anyway would either drop every mode silently or transpile only
-   * whichever mode happened to be first, both of which boot cleanly in Forge
-   * and lie about what the card does. Rejecting is the honest outcome until
-   * that grammar exists.
+   * Forge's `Charm` root selects one named `SVar:` chain per DSL mode. This
+   * rejection remains for a mode whose effect list cannot produce even one
+   * Forge ability; emitting a choice with no body would boot cleanly and do
+   * nothing.
    */
   'UNMAPPED_MODAL_SPELL',
   /**
    * CR 601.2c's "You may": a spell's `card.may`, which asks a player whether
    * the printed effect happens at all.
    *
-   * The modal rejection's argument, one step smaller. Forge does have optional
+   * Forge does have optional
    * spell abilities, but not as one general parameter: `Optional$ True` is a
    * per-API flag on the choice that API makes (`Dig`'s "you may put a card into
    * your hand"), and `OptionalDecider$` belongs to triggers. A spell-wide "you
@@ -157,6 +166,51 @@ export const TRANSPILE_REJECTION_CODES = [
    * around a gap rather than a regression.
    */
   'UNMAPPED_MAY_SPELL',
+  /**
+   * CR 702.96's Overload: a spell's `card.overload`, a second casting mode with
+   * its own cost and its own effects.
+   *
+   * The modal rejection's argument again, arriving from the other side. There
+   * the card had no `effects` for `abilityBlock` to read; here it has one set
+   * too many, and the exporter writes only the ordinary one. That is not a card
+   * with a clause missing — it is a card with a *casting mode* missing, while
+   * `renderOracleText` prints "Overload {cost}" on the Oracle line either way.
+   * A boot-legged Cyclonic Rift would advertise a mode Forge could not offer,
+   * which is the same lie one layer up.
+   *
+   * Forge does ship the four RTR overload cards, so the grammar exists in
+   * `res/cardsfolder` and is not one this transpiler has read. Writing an
+   * alternative cast from first principles is what this package refuses to do
+   * everywhere else, so the honest outcome is to refuse the card until somebody
+   * reads the spelling off the corpus. `mtg-1mr1`.
+   */
+  'UNMAPPED_OVERLOAD_SPELL',
+  /**
+   * Two Forge `SVar:` definitions of one name on one card.
+   *
+   * Not an unmapped construct: every part of the card mapped, and the parts
+   * collided when they were put together. A supporting `SVar:` line is a named
+   * definition local to the card, and the effect rows pick their names off the
+   * corpus, where a name is a per-card convention rather than a registry --
+   * `RPrevent` is the name 89 shipped scripts give a prevention replacement,
+   * and none of them defines it twice. Three rows here emit a different
+   * definition under it, so a card carrying two prevention effects writes both.
+   *
+   * Forge reads one definition per name, so such a card boots and enforces
+   * whichever definition it read last. That is the failure this whole file
+   * exists to prevent, arriving from composition rather than from vocabulary:
+   * the card looks complete, the parity oracle disagrees with the kernel, and
+   * neither side reports why. The alternative to refusing is renaming, which
+   * would put every colliding row off the corpus to fix a card shape that may
+   * never be printed. A row may still pick a different name outright where the
+   * corpus offers one -- the life-total conditions in `ability-script.ts` are
+   * named `YourLife` for that reason -- but that is a fixed choice a row makes
+   * alone, not a resolution of a collision it cannot see.
+   *
+   * Raised by the card writer rather than by a row, because no row can see
+   * what another row already wrote (`mtg-9111`).
+   */
+  'COLLIDING_SVAR_DEFINITION',
 ] as const;
 
 export type TranspileRejectionCode = (typeof TRANSPILE_REJECTION_CODES)[number];

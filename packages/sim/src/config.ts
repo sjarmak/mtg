@@ -49,6 +49,8 @@ export interface CastPolicyConfig {
    * did not close.
    */
   readonly grantedKeywordAbilityValue: Readonly<Record<GrantableKeywordAbilityKind, number>>;
+  /** Flat value of granting one basic-landwalk ability through a static. */
+  readonly grantedLandwalkValue: number;
   /**
    * How many permanents a static ability is assumed to reach, for a card still
    * in hand.
@@ -204,12 +206,9 @@ export interface TargetPolicyConfig {
  * cast policy has already declined to use — the greedy bot asks this question
  * after `chooseCast` has said no, so an ability can never take a spell's mana.
  *
- * One thing it *does* compete with, and this is a known limit rather than a
- * modeled one: a tap cost on a creature is mana-free and attack-expensive, and
- * this policy does not know that the creature could have attacked instead. It
- * activates in the precombat window and the attack policy finds the creature
- * tapped. Tuning `minimumValue` upward is the lever until an activation policy
- * that reads the combat step exists.
+ * Tap payments compete with the rest of the turn even when they cost no mana.
+ * The policy prices each chosen permanent as a temporary loss, against the same
+ * body-plus-tempo scale the target policy uses for an untap effect.
  */
 export interface ActivatePolicyConfig {
   /**
@@ -220,6 +219,8 @@ export interface ActivatePolicyConfig {
   readonly minimumValue: number;
   /** Score removed per point of mana the activation costs. */
   readonly manaValueWeight: number;
+  /** Share of a tapped permanent's value charged for losing it until the next untap. */
+  readonly tapPaymentValueShare: number;
   /**
    * What an attach clause is worth on a host the defending board has no legal
    * block for, as a multiple of what the clause says.
@@ -382,6 +383,18 @@ export interface DiscardPolicyConfig {
    * makes a stranded bomb the first card pitched, which is the point.
    */
   readonly uncastablePenalty: number;
+  /**
+   * The floor under a spell we can cast right now.
+   *
+   * `mtg-odaj`. A spell was worth exactly its mana value, which read as "how
+   * much of the game is in this card" only while nothing cost zero. Free
+   * spells became legal DSL in `4c75dd51`, and Ornithopter is the card that
+   * makes this reachable: at a keep value of 0 it sits below
+   * `surplusLandKeepValue`, so the bot pitches a castable spell to keep a land
+   * it has already established it does not need. Above that floor, and below
+   * a castable one-drop, so nothing else in the ordering moves.
+   */
+  readonly castableSpellFloor: number;
 }
 
 export interface GreedyBotConfig {
@@ -403,17 +416,26 @@ export interface GreedyBotConfig {
  * dominate combat maths, vigilance is worth about half a body.
  */
 /**
- * Indestructible prices above every row in `DEFAULT_KEYWORD_VALUE` below, and
- * the ordering is the claim rather than the magnitude — no sweep has measured
+ * Indestructible, hexproof, and shroud price above every row in `DEFAULT_KEYWORD_VALUE`
+ * below, and the ordering is the claim rather than the magnitude — no sweep has measured
  * either table, exactly as `DEFAULT_TRIGGER_VALUE`'s docblock says of its own.
  * A creature that cannot be destroyed survives every removal spell in the M11
  * and M13 commons, survives blocking anything, and stops the board from
- * trading; deathtouch at 1.6 is the best of the nine and buys one trade.
+ * trading; deathtouch at 1.6 is the best of the nine and buys one trade. Shroud
+ * sits below indestructible because it blocks its controller's targeting too.
+ * Hexproof falls between them: it denies opposing targeting without blocking
+ * friendly spells, while still losing to untargeted destruction.
  */
 export const DEFAULT_GRANTED_KEYWORD_ABILITY_VALUE: Readonly<Record<GrantableKeywordAbilityKind, number>> = {
   indestructible: 2.0,
   doubleStrike: 1.7,
+  shroud: 1.8,
+  hexproof: 1.9,
+  intimidate: 0.9,
 };
+
+/** A conditional evasion grant, below the unconditional flying baseline. */
+export const DEFAULT_GRANTED_LANDWALK_VALUE = 0.9;
 
 export const DEFAULT_KEYWORD_VALUE: Readonly<Record<Keyword, number>> = {
   flying: 1.5,
@@ -457,13 +479,26 @@ export const DEFAULT_TRIGGER_VALUE: Readonly<Record<TriggerCondition, number>> =
   selfEnters: 0.8,
   selfAttacks: 1.0,
   selfDies: 0.5,
+  selfLeavesBattlefield: 0.5,
+  selfPutIntoGraveyardFromBattlefield: 0.5,
+  selfPutIntoGraveyardFromAnywhere: 0,
+  enchantedCreatureDies: 0.5,
+  enchantedLandBecomesTapped: 1.0,
+  // Unmeasured. It needs another object to aim at this source and is therefore
+  // no more reliable than a block trigger when a bot values an immediate cast.
+  selfBecomesTarget: 0.35,
+  enchantedCreatureBecomesTarget: 0.35,
+  selfBecomesTargetByOpponent: 0.3,
   selfDiesNotSacrificed: 0.4,
   controlledCreatureAttacksAlone: 1.0,
+  selfAttacksAlone: 1.0,
+  selfAndThreeOthersAttack: 0.8,
   // Priced with `selfAttacks`: it needs the source to attack or block and then
   // to survive to the damage step, which is strictly more than attacking, but
   // it also fires on defense. No sweep has measured it.
   selfDealsCombatDamageToCreature: 0.9,
   beginningOfYourUpkeep: 0.85,
+  beginningOfEachPlayersUpkeep: 0.85,
   beginningOfYourEndStep: 0.85,
   // The same 0.85 rather than a doubled one. This table is what a *cast*
   // decision is worth, and the extra firings this condition buys land on the
@@ -472,19 +507,38 @@ export const DEFAULT_TRIGGER_VALUE: Readonly<Record<TriggerCondition, number>> =
   // the table that counts firings, and it does double it.
   beginningOfEndStep: 0.85,
   anotherControlledPermanentEnters: 0.6,
+  // A graveyard-source return should not make the card look better while the
+  // cast policy is choosing a spell from hand; zone-aware recursion valuation
+  // belongs in a separate policy term.
+  controlledLandSubtypeEnters: 0,
+  controlledCreatureEnters: 0.6,
   anotherControlledCreatureEnters: 0.5,
+  anotherCreatureEnters: 0.65,
+  controlledCreatureDies: 0.5,
   youCastSpell: 0.55,
   youCastInstantOrSorcery: 0.4,
   // Priced with `selfDealsCombatDamageToCreature`: same event, a player
   // recipient instead of a creature one, and neither has been measured.
   selfDealsCombatDamageToPlayer: 0.9,
+  controlledCreatureDealsCombatDamageToPlayer: 0.9,
   selfBlocks: 0.35,
+  // The attached host can supply either combat event. Kept at the attack
+  // trigger's ceiling until a sweep measures an exact Aura carrying it.
+  enchantedCreatureAttacksOrBlocks: 1.0,
+  // Same cast-time reliability as the unqualified block for an ordinary
+  // creature. Its per-pair multiplicity matters only after another effect
+  // grants extra blocks, which an isolated-card score cannot assume.
+  selfBlocksCreature: 0.35,
   // Above `selfBlocks` and under `selfAttacks`, for the reason the deckbuild
   // table gives at the same row: a strictly narrower block, but one that fires
   // on the attacking half of the same event as well, so a deck reaches it from
   // both sides of combat. No sweep has measured it.
   selfBlocksOrIsBlockedByGreaterPower: 0.6,
   youGainLife: 0.45,
+  // A cast-time estimate only. The source needs a later draw event and the bot
+  // cannot infer a draw engine from the isolated ability, so it stays below the
+  // guaranteed self-entry trigger until measured.
+  youDrawCard: 0.5,
   // Above `selfAttacks`, which is this table's ceiling for a single event,
   // because it is the only condition that pays twice from one card: the
   // arrival is guaranteed the moment the spell resolves and every attack
@@ -510,6 +564,13 @@ export const DEFAULT_TRIGGER_VALUE: Readonly<Record<TriggerCondition, number>> =
   // with the power clause dropped: strictly fewer arrivals qualify, so it is
   // worth strictly less to a bot with an unbuilt board. Unmeasured.
   anotherControlledCreatureWithPowerThreeOrGreaterEnters: 0.35,
+  // Unmeasured. It needs an opposing discard effect, a narrower setup than a
+  // controller draw, so it sits just under `youDrawCard` until a sweep carries
+  // an exact discard-punisher deck.
+  opponentDiscardsCard: 0.4,
+  selfPlusOnePlusOneCounterRemoved: 0,
+  creatureAttacksYouOrPlaneswalkerYouControl: 0,
+  selfIsDealtDamage: 0,
 };
 
 /**
@@ -541,6 +602,7 @@ export const DEFAULT_GREEDY_CONFIG: GreedyBotConfig = {
     toughnessWeight: 0.8,
     keywordValue: DEFAULT_KEYWORD_VALUE,
     grantedKeywordAbilityValue: DEFAULT_GRANTED_KEYWORD_ABILITY_VALUE,
+    grantedLandwalkValue: DEFAULT_GRANTED_LANDWALK_VALUE,
     staticAbilityReach: 2,
     definePtAssumedCount: 3,
     triggerValue: DEFAULT_TRIGGER_VALUE,
@@ -581,6 +643,10 @@ export const DEFAULT_GREEDY_CONFIG: GreedyBotConfig = {
   activate: {
     minimumValue: 0.5,
     manaValueWeight: 0.3,
+    // A tap loses one turn of the permanent, not the permanent itself. One
+    // quarter keeps a cheap cohort available for a valuable permanent-control
+    // activation while refusing to exhaust five large attackers for a 1/1.
+    tapPaymentValueShare: 0.25,
     hostUnblockedMultiplier: 1.5,
     hostSurvivesMultiplier: 1.15,
     hostTradesMultiplier: 0.75,
@@ -602,6 +668,7 @@ export const DEFAULT_GREEDY_CONFIG: GreedyBotConfig = {
     landKeepValue: 3,
     surplusLandKeepValue: 0.5,
     uncastablePenalty: 1.5,
+    castableSpellFloor: 0.75,
   },
   /**
    * 2-5 lands of seven that can cast something by turn 3, and never past a
@@ -655,6 +722,60 @@ export function greedyConfig(overrides: DeepPartialConfig = {}): GreedyBotConfig
     race: { ...base.race, ...overrides.race },
   };
 }
+
+/**
+ * The weights a whole-board evaluation is priced against (`../evaluate-state`).
+ *
+ * Separate from `GreedyBotConfig` because nothing in the depth-0 bot reads it:
+ * a policy compares two options, and only a search compares two positions. It
+ * lives here anyway, beside every other named weight, so a profile a caller
+ * sets is still one object and still crosses a worker boundary as data.
+ */
+export interface StateEvalConfig {
+  /** Value of one point of life. */
+  readonly lifeWeight: number;
+  /** Value of one card in hand. */
+  readonly cardWeight: number;
+  /**
+   * Value of a permanent simply being on the battlefield, above whatever the
+   * permanent itself is worth.
+   *
+   * It exists because a card in hand is priced and the alternative would make
+   * playing one a loss. `printedCardValue` returns 0 for a land — correct in the
+   * evaluator it belongs to, which asks what casting a card is worth and a land
+   * is not cast — so without this term a land moved from hand to battlefield
+   * scores `-cardWeight` and a search bot never plays one. Measured: it lost
+   * 100 of 100 head-to-head games to `lifeZero`, mana-screwed from turn one, on
+   * a board evaluator that had inherited a cast evaluator's blind spot.
+   *
+   * Above `cardWeight` on purpose, so resolving anything is an improvement: a
+   * permanent has dodged discard and counterspells and is doing its job, which
+   * is the whole difference between a card and a card in play.
+   */
+  readonly permanentValue: number;
+  /** The score of a won position. Negated for a lost one. */
+  readonly winValue: number;
+  /** The score of a drawn position, which the turn cap makes reachable. */
+  readonly drawValue: number;
+}
+
+/**
+ * A point of life at 0.4 and a card at 1.6 put a full 20 life at about 1.4
+ * bodies and a seven-card hand at about two: material leads, and life is a
+ * resource rather than the objective, which is the same ordering
+ * `DEFAULT_GREEDY_CONFIG.target` already states by pricing `killBonus` above
+ * `faceDamageWeight`. `cardWeight` is `target.cardDrawValue` deliberately — a
+ * card drawn and a card held should not be worth different amounts to the same
+ * bot. `winValue` is an order of magnitude above `target.lethalBonus`, so no
+ * sum of material can price a losing line above a winning one.
+ */
+export const DEFAULT_STATE_EVAL_CONFIG: StateEvalConfig = {
+  lifeWeight: 0.4,
+  cardWeight: 1.6,
+  permanentValue: 2,
+  winValue: 10_000,
+  drawValue: 0,
+};
 
 export interface DeepPartialConfig {
   readonly land?: Partial<LandPolicyConfig>;

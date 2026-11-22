@@ -20,9 +20,11 @@ import { describe, expect, it } from 'vitest';
 import type { Card } from '@mtg/dsl';
 import type { GameState, ObjectId, ReduceResult } from '@mtg/kernel';
 import {
+  beginTrace,
   canBlock,
   eventsOfType,
   hasKeyword,
+  moveObject,
   pendingDecision,
   reduce,
   reduceAll,
@@ -149,6 +151,23 @@ describe('and loses it again', () => {
     expect(hasKeyword(later.state, bearOid, 'flying')).toBe(false);
     expect(eventsOfType(later.events, 'continuousEffectsExpired').length).toBeGreaterThan(0);
   });
+
+  it('does not follow the physical card into a new battlefield incarnation', () => {
+    const bear = creature('Test Bear', 2, 2);
+    const start = scenario({
+      battlefield: [{ card: bear, controller: 0 }, ...lands(2, 0)],
+      hands: [[UPDRAFT], []],
+    });
+    const bearOid = oidOf(start.state, 'Test Bear');
+    const granted = castAndResolve(start, 'Test Updraft', [permanentNamed(start.state, 'Test Bear')]);
+    expect(hasKeyword(granted.state, bearOid, 'flying')).toBe(true);
+
+    const bounced = moveObject(beginTrace(granted.state), bearOid, 'hand');
+    const returned = moveObject(bounced, bearOid, 'battlefield', { controller: 0 });
+
+    expect(hasKeyword(returned.state, bearOid, 'flying')).toBe(false);
+    expect(eventsOfType(returned.events, 'continuousEffectsExpired')).toHaveLength(1);
+  });
 });
 
 /**
@@ -244,5 +263,27 @@ describe('the group a scope reaches', () => {
 
     expect(hasKeyword(done.state, bearOid, 'flying')).toBe(true);
     expect(hasKeyword(done.state, latecomerOid, 'flying')).toBe(false);
+  });
+
+  it('narrows around a member that leaves without ending the grant for the others', () => {
+    const start = scenario({
+      battlefield: [
+        { card: creature('Test Bear', 2, 2), controller: 0 },
+        { card: creature('Test Ox', 1, 4), controller: 0 },
+        ...lands(4, 0),
+      ],
+      hands: [[STAMPEDE], []],
+    });
+    const bearOid = oidOf(start.state, 'Test Bear');
+    const oxOid = oidOf(start.state, 'Test Ox');
+    const granted = castAndResolve(start, 'Test Stampede', [null]);
+
+    const bounced = moveObject(beginTrace(granted.state), bearOid, 'hand');
+    expect(hasKeyword(bounced.state, oxOid, 'flying')).toBe(true);
+    expect(eventsOfType(bounced.events, 'continuousEffectsExpired')).toEqual([]);
+
+    const returned = moveObject(bounced, bearOid, 'battlefield', { controller: 0 });
+    expect(hasKeyword(returned.state, bearOid, 'flying')).toBe(false);
+    expect(hasKeyword(returned.state, oxOid, 'flying')).toBe(true);
   });
 });

@@ -210,6 +210,23 @@ function stacked(game: GameSession, depth: number): GameSession {
 }
 
 /**
+ * The same page with the stack emptied and nothing else touched.
+ *
+ * The twin claim 3 needs is the loaded position minus the strip, and casting is
+ * not reversible by casting less: `stacked` takes its spells out of the hand, so
+ * a twin built by not casting them has a hand two cards deeper. That is a
+ * difference the hand rail is entitled to spend height on, and it did — at
+ * `ASK_PERCENT` 16 and 1024x768 the deeper hand took 10px off the two
+ * battlefields and claim 3 read a 4.8px shorter card as the stack having moved
+ * the board. The stack list is the one field the strip is drawn from, so
+ * clearing it is exactly the edit the claim is about; the zone objects behind it
+ * stay where they are, because no surface reads them to draw this strip.
+ */
+function unstacked(game: GameSession): GameSession {
+  return sessionOn({ ...game.state, stack: [] }, game.events);
+}
+
+/**
  * Attackers declared and a spell on the stack: the seam holding both at once.
  *
  * Walked through the kernel's own enumeration rather than fabricated, the way
@@ -487,7 +504,7 @@ const MEASURE = `(() => {
     // What claim 3 compares between the two pages, in document order.
     sides: [...document.querySelectorAll('.mtg-board__side')].map(boxOf),
     divider: boxOf(divider),
-    playSlots: [...document.querySelectorAll(".mtg-board__spells > .mtg-slot")].map(boxOf),
+    playSlots: [...document.querySelectorAll(".mtg-board__spells > .mtg-attach > .mtg-slot")].map(boxOf),
   };
 })()`;
 
@@ -567,11 +584,11 @@ describe('the stack draws over the board and covers nothing a player may click',
       // claim 3 compares two renders of one position rather than two positions.
       const empty = new Map<number, string>();
       for (const perSide of CROWDINGS) {
-        const open = board(perSide);
+        const loaded = stacked(board(perSide), 2);
         const file = join(directory, `empty-${String(perSide)}.html`);
-        await writeFile(file, page(open, `Empty stack, ${String(perSide)} a side`), 'utf8');
+        await writeFile(file, page(unstacked(loaded), `Empty stack, ${String(perSide)} a side`), 'utf8');
         empty.set(perSide, file);
-        await write(`stack-${String(perSide)}`, stacked(open, 2), 'bar', perSide);
+        await write(`stack-${String(perSide)}`, loaded, 'bar', perSide);
         await write(`combat-${String(perSide)}`, combatStack(perSide), 'combat', perSide);
       }
       await write('control', stacked(board(4), 2), 'control', 4, CONTROL_SCRIPT);

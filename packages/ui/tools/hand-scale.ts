@@ -6,17 +6,27 @@
  * `tools/card-uniformity.ts` is the rig this copies, and it answers the question
  * one zone at a time: it walks `[data-slot='play']` only, so the hand — which is
  * the zone `mtg-rgc.5` is about — is not in its report at all. This one measures
- * both zones on one page and reports the *ratio*, because "the hand is the
- * largest thing on screen" is a claim about two rows and not about either one.
+ * both zones on one page and reports the *ratio*, because a claim about how the
+ * two zones compare is a claim about two rows and not about either one.
  *
- * Magic Online is the reference, and the reference is measured rather than
- * remembered. In `references/maxresdefault-80883895.jpg` (a 1280x720 client) a
- * battlefield card is about 77 x 92 and a hand card about 105 x 145, so the hand
- * is 1.36x the board on the width axis; in `references/068-1083771671.png` (1900
- * wide) a hand card is 178 x 252, a quarter of the window's height. The reason
- * is stated in `mtg-rgc.5` and worth restating wherever the numbers are read:
- * the battlefield is a summary you scan, the hand is the thing you are deciding
- * from, so it gets the pixels.
+ * Magic Online is not the reference, and this file used to say it was. The
+ * sentence here was that the battlefield is a summary you scan while the hand is
+ * the thing you decide from, so the hand gets the pixels, sourced to a 1.36x
+ * measured off `references/maxresdefault-80883895.jpg`. Measuring the rest of
+ * the client's own screenshots retired it: that shot is a 1280x720 client where
+ * a battlefield card is about 77 x 92 against a 105 x 145 hand card (hand 1.36x
+ * the board); `references/068-1083771671.png` at 1900 wide draws a 178 x 252
+ * hand card beside larger permanents (hand 0.82x); a third shot reaches 2.29x
+ * the other way. One client, one build, a 0.82-to-2.29 span, because every zone
+ * in it is a pane the player drags. So no ratio is derivable from those files
+ * and nobody should re-derive one; the span is recorded here to save the next
+ * reader the measurement.
+ *
+ * What replaced it is PARITY, decided on `mtg-gohr`: on a table, on a sparse
+ * board, off combat, the held card and the permanent draw the same size. The
+ * rule and its three exceptions live in `../src/styles/board/hand.ts`, which is
+ * where the numbers are; this rig's job is unchanged, to report the ratio those
+ * numbers produce rather than to argue for one.
  *
  * Node-only, like everything else under `tools/`: it writes files and opens no
  * browser.
@@ -33,20 +43,36 @@
  * row drew and how far apart they are, how many names were cut sideways or
  * below, the rules box's rendered text size and the character column that size
  * yields at that box's width, and the count of faces drawing the playable ring.
+ * Two heights within `./height-clusters.ts`'s tolerance are one height, and
+ * `heightsExact` reports the untolerated count beside it so the tolerance never
+ * hides what was measured.
  * The ratio block is the hand's face box over the viewer's battlefield face box.
+ *
+ * It also counts the **cost badges**, which is `mtg-rgc.10`'s addition and not a
+ * fourth legibility number. That bead's decision says what a held card states —
+ * name, cost, type and the first line of its text — and the rig could answer
+ * three of those four. On a board face the cost is not on the title row: it is
+ * `../src/card/Card.ts`'s `cornerCost`, pinned inside the art window because
+ * `.mtg-art` is `overflow: hidden` and a badge there can never be drawn over the
+ * name. That placement is exactly what makes the badge *clippable*, so the count
+ * is reported beside `costsClipped` rather than alone — a badge drawn and cut is
+ * not a cost the player can read, and the shrinking window is the thing every
+ * other number on this page is about.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { EXAMPLE_SET, isLand, parseCards, renderOracleText, setBasics } from '@mtg/dsl';
+import { EXAMPLE_SET, isLand, renderOracleText, setBasics } from '@mtg/dsl';
 import type { Card as DslCard } from '@mtg/dsl';
 import type { GameSession, GameState, PlayerId } from '@mtg/kernel';
 import { DEFAULT_AUTO_PASS, humanSeat, pendingDecision, scenario } from '@mtg/kernel';
 import { Shell } from '../src/app/Shell';
 import { PlayView } from '../src/routes/play/PlayView';
 import { uiStyleSheet } from '../src/styles/index';
+import { HEIGHT_TOLERANCE_PX, distinctHeights } from './height-clusters';
+import { readSetCards } from './set-file';
 
 const UI_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REPO_ROOT = resolve(UI_ROOT, '..', '..');
@@ -69,15 +95,7 @@ const setPath = process.argv[3];
 /** The cards the page is dealt from; a set that fails to parse stops the run. */
 function cards(): readonly DslCard[] {
   if (setPath === undefined) return EXAMPLE_SET;
-  const document: unknown = JSON.parse(readFileSync(setPath, 'utf8'));
-  const listed =
-    typeof document === 'object' && document !== null && 'cards' in document
-      ? (document as { readonly cards: unknown }).cards
-      : null;
-  if (!Array.isArray(listed)) {
-    throw new Error(`${setPath} has no "cards" array, so it is not a set document`);
-  }
-  return parseCards(listed);
+  return readSetCards(setPath);
 }
 
 const CARDS = cards();
@@ -191,6 +209,8 @@ function dealtSession(count: number): GameSession {
 const MEASURE = `
 window.mtgHandScale = function () {
   var round = function (value) { return Math.round(value * 10) / 10; };
+  var TOLERANCE = ${String(HEIGHT_TOLERANCE_PX)};
+  var distinctHeights = ${String(distinctHeights)};
   var canvas = document.createElement('canvas');
   var pen = canvas.getContext('2d');
   var SAMPLE = 'When this creature enters, draw a card and gain two life.';
@@ -207,6 +227,7 @@ window.mtgHandScale = function () {
     var type = card.querySelector('.mtg-card__type');
     var rules = card.querySelector('.mtg-card__text');
     var art = card.querySelector('.mtg-art');
+    var corner = card.querySelector('.mtg-card__corner');
     var side = slot.closest('.mtg-board__side');
     var rulesStyle = rules === null ? null : getComputedStyle(rules);
     var rulesAdvance = rulesStyle === null ? null : advance(rulesStyle);
@@ -235,7 +256,16 @@ window.mtgHandScale = function () {
       rulesBoxW: rulesWidth === null ? null : round(rulesWidth),
       rulesColumn: rulesWidth === null || rulesAdvance === null || rulesAdvance === 0 ? null : Math.floor(rulesWidth / rulesAdvance),
       rulesLines: !rulesShown ? null : Math.round(rules.scrollHeight / parseFloat(rulesStyle.lineHeight) * 10) / 10,
-      rulesCutBelow: !rulesShown ? false : rules.scrollHeight > rules.clientHeight + 0.5
+      rulesCutBelow: !rulesShown ? false : rules.scrollHeight > rules.clientHeight + 0.5,
+      costShown: corner !== null && corner.getBoundingClientRect().height > 0,
+      costW: corner === null ? null : round(corner.getBoundingClientRect().width),
+      costH: corner === null ? null : round(corner.getBoundingClientRect().height),
+      costInsideArt: corner === null || art === null ? null : (function () {
+        var badge = corner.getBoundingClientRect();
+        var window_ = art.getBoundingClientRect();
+        return badge.height > 0 && badge.top >= window_.top - 0.5 && badge.bottom <= window_.bottom + 0.5
+          && badge.left >= window_.left - 0.5 && badge.right <= window_.right + 0.5;
+      })()
     };
   };
   var faces = [];
@@ -253,7 +283,8 @@ window.mtgHandScale = function () {
     var pick = function (key) { return row.length === 0 ? null : row[0][key]; };
     return {
       faces: row.length,
-      heights: tall.length,
+      heights: distinctHeights(tall, TOLERANCE),
+      heightsExact: tall.length,
       tallest: tall.length === 0 ? null : Math.max.apply(null, tall),
       shortest: tall.length === 0 ? null : Math.min.apply(null, tall),
       spread: tall.length === 0 ? null : round(Math.max.apply(null, tall) - Math.min.apply(null, tall)),
@@ -269,6 +300,8 @@ window.mtgHandScale = function () {
       namesCutSideways: row.filter(function (face) { return face.nameCutSideways; }).length,
       namesCutBelow: row.filter(function (face) { return face.nameCutBelow; }).length,
       typesCut: row.filter(function (face) { return face.typeCutSideways || face.typeCutBelow; }).length,
+      costsDrawn: row.filter(function (face) { return face.costShown; }).length,
+      costsClipped: row.filter(function (face) { return face.costShown && face.costInsideArt === false; }).length,
       cutNames: row.filter(function (face) { return face.nameCutSideways || face.nameCutBelow; })
         .map(function (face) { return face.id + ' (' + face.chars + ' chars, ' + face.nameLines + ' lines)'; })
     };

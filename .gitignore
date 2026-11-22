@@ -30,13 +30,24 @@ data/images
 data/images/
 data/store
 data/store/
+# Recorded games, written by the lab's game server (`packages/ui/tools/gameplay-recorder.ts`).
+data/gameplay
+data/gameplay/
+# UI/UX reports, written by the lab's feedback server (`packages/ui/tools/feedback/server.ts`).
+data/feedback
+data/feedback/
 *.sqlite
 *.sqlite-journal
 
-# Third-party engines used as oracles (never vendored into the tree)
-tools/forge/dist/
+# Third-party engines used as oracles (never vendored into the tree).
+# Listed without a trailing slash: the city places this as a symlink in a
+# worker slot (mayor pre_start, gc-966622), and git treats a symlink as a
+# file, so a directory-only pattern misses it and `git status` sees it as
+# untracked in every slot (mtg-yi2vb).
+tools/forge/dist
 tools/forge/*.tar.bz2
 tools/forge/*.jar
+tools/forge/.install.*
 
 # Simulation output
 out/
@@ -44,12 +55,26 @@ out/
 # Staged by `npm run play`; the set being played is a copy, not a source.
 packages/ui/public/set.json
 packages/ui/public/deck.json
+# Read-only copies staged for the Legacy Cube route. Their sources remain under
+# packages/data; the browser-facing copies must never become source artifacts.
+packages/ui/public/legacy-cube-2021-card-catalog-v1.json
+packages/ui/public/legacy-cube-2021-forge-ready-v1.json
+packages/ui/public/legacy-cube-2021-token-printings-v1.json
+# Held only while a launcher commits the playable pair, and left behind by one
+# that died mid-commit. A launcher names it when it refuses to stage.
+packages/ui/public/.staging.lock
+# Held for as long as a launcher's server is up, so a second one refuses to
+# clear the files the first is still serving (packages/ui/tools/launcher-lock.ts).
+packages/ui/public/.launcher.json
 packages/ui/public/art.json
 packages/ui/public/art/
 # One directory per set the launcher found, each holding that set's own
 # set.json, art manifest, rasters and decks, plus the index the picker reads.
 # Every byte of it is a copy of something under out/ or packages/setgen/.
 packages/ui/public/sets/
+# Printed formats staged by the launcher for the browser (packages/ui/tools/stage-printed-formats.ts):
+# content-addressed copies of catalogs and formats whose sources live under packages/data/data.
+packages/ui/public/formats/
 # The preconstructed decks for the set being played, copied out of the fixture
 # that matched it. A copy, like the set beside it; the source is under
 # packages/setgen/fixtures/decks/.
@@ -67,6 +92,11 @@ packages/ui/public/replay.slice.jsonl
 # id. Recorded rather than committed for the reason above it, and because the
 # numbers in it are true about one set at one revision and nothing else.
 packages/ui/public/analysis.json
+# Written by `npm run play`: the ledgers under out/ and the recorded games under
+# data/gameplay/, scanned into one snapshot for the Analysis tab's evidence
+# section. Revision-specific and machine-specific, like the file above it.
+packages/ui/public/analysis-evidence.json
+packages/ui/public/analysis-evidence.json.tmp
 # Checked calibration evidence staged beside the exact playable set, plus the
 # optional measured before/after proposal. Both are revision-specific outputs.
 packages/ui/public/calibration.json
@@ -80,6 +110,8 @@ packages/ui/public/curation.json
 # designs are Wizards' copyright whatever the file's license says, so this tree
 # references them and holds no copy in git.
 packages/ui/public/symbols/
+# The official set icons, on the same arrangement and for the same reason.
+packages/ui/public/set-icons/
 
 # Python bytecode from the art pipeline scripts
 __pycache__/
@@ -90,4 +122,17 @@ packages/ui/public/token-board.html
 
 # Finder writes these into any directory it has ever displayed, including the
 # reference folders screenshots are dropped into from a Mac.
-.DS_Store
+
+
+# Gas City
+.beads/*
+!.beads/identity.toml
+
+# Operator-local tooling state, never an application input: Gas City's hooks
+# and session brief (`.gc/`) carry workstation paths, and graphify's generated
+# whole-repository graphs and query memory (`graphify-out/`) carry private
+# source content. Ignored rather than declared private in the public-export
+# tiers, because a private-path declaration that matches only untracked files
+# fails the boundary gate in a clean checkout.
+.gc/
+graphify-out/

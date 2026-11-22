@@ -17,9 +17,9 @@
  * all, and that it still refuses a condition the list does not carry.
  */
 import { describe, expect, it } from 'vitest';
-import { TRIGGERING_CREATURE_CONDITIONS } from '@mtg/dsl';
+import { TRIGGERING_CREATURE_CONDITIONS, TRIGGERING_PLAYER_CONDITIONS } from '@mtg/dsl';
 import type { TriggerContext } from '@mtg/kernel';
-import { StackEntrySchema } from '../../src/routes/replay/log-schema';
+import { EventSchema, StackEntrySchema } from '../../src/routes/replay/log-schema';
 
 /**
  * The kernel's stack-side name for the same union, asserted in both directions
@@ -28,8 +28,15 @@ import { StackEntrySchema } from '../../src/routes/replay/log-schema';
  * error here rather than a recorded game nobody can load back.
  */
 type ListMember = (typeof TRIGGERING_CREATURE_CONDITIONS)[number];
-const everyListMemberIsAKernelKind: readonly TriggerContext['kind'][] = TRIGGERING_CREATURE_CONDITIONS;
-const everyKernelKindIsInTheList = (kind: TriggerContext['kind']): ListMember => kind;
+type CreatureTriggerContext = Extract<TriggerContext, { readonly triggeringCreature: string }>;
+const everyListMemberIsAKernelKind: readonly CreatureTriggerContext['kind'][] =
+  TRIGGERING_CREATURE_CONDITIONS;
+const everyKernelKindIsInTheList = (kind: CreatureTriggerContext['kind']): ListMember => kind;
+type PlayerListMember = (typeof TRIGGERING_PLAYER_CONDITIONS)[number];
+type PlayerTriggerContext = Extract<TriggerContext, { readonly triggeringPlayer: number }>;
+const everyPlayerListMemberIsAKernelKind: readonly PlayerTriggerContext['kind'][] =
+  TRIGGERING_PLAYER_CONDITIONS;
+const everyKernelPlayerKindIsInTheList = (kind: PlayerTriggerContext['kind']): PlayerListMember => kind;
 
 function entryWith(kind: string): unknown {
   return {
@@ -39,7 +46,8 @@ function entryWith(kind: string): unknown {
     source: 'o1',
     copiedFrom: null,
     chosenX: null,
-    triggerContext: { kind, triggeringCreature: 'o2' },
+    mode: null,
+    triggerContext: { kind, triggeringCreature: 'o2', triggeringCreatureIncarnation: 0 },
     sourceCharacteristics: null,
     targets: [],
   };
@@ -51,12 +59,82 @@ describe('the replay log’s trigger-context kinds', () => {
     expect(everyKernelKindIsInTheList('selfDealsCombatDamageToCreature')).toBe(
       'selfDealsCombatDamageToCreature',
     );
+    expect(everyPlayerListMemberIsAKernelKind).toStrictEqual([...TRIGGERING_PLAYER_CONDITIONS]);
+    expect(everyKernelPlayerKindIsInTheList('opponentDiscardsCard')).toBe('opponentDiscardsCard');
   });
 
   it('parses every condition that retains a creature', () => {
     for (const kind of TRIGGERING_CREATURE_CONDITIONS) {
       expect(StackEntrySchema.safeParse(entryWith(kind)).success, kind).toBe(true);
     }
+  });
+
+  it('retains creature power and toughness on both the stack context and departure event', () => {
+    const entry = entryWith('anotherCreatureEnters') as Record<string, unknown>;
+    entry.triggerContext = {
+      kind: 'anotherCreatureEnters',
+      triggeringCreature: 'o2',
+      triggeringCreatureIncarnation: 3,
+      triggeringCreaturePower: 7,
+      triggeringCreatureToughness: 8,
+    };
+    expect(StackEntrySchema.parse(entry).triggerContext).toEqual(entry.triggerContext);
+
+    expect(
+      EventSchema.parse({
+        type: 'zoneChanged',
+        oid: 'o2',
+        from: 'battlefield',
+        to: 'graveyard',
+        owner: 0,
+        departingCreaturePower: 7,
+        departingCreatureToughness: 8,
+        departingBattlefieldIncarnation: 3,
+      }),
+    ).toEqual(
+      expect.objectContaining({
+        departingCreaturePower: 7,
+        departingCreatureToughness: 8,
+        departingBattlefieldIncarnation: 3,
+      }),
+    );
+  });
+
+  it('parses the distinct stack-object referent without treating it as a card', () => {
+    const entry = entryWith('selfEnters') as Record<string, unknown>;
+    entry.triggerContext = {
+      kind: 'selfBecomesTargetByOpponent',
+      triggeringStackObject: 'ab2',
+    };
+    expect(StackEntrySchema.safeParse(entry).success).toBe(true);
+  });
+
+  it('parses every condition that retains a player without inventing a target', () => {
+    for (const kind of TRIGGERING_PLAYER_CONDITIONS) {
+      const entry = entryWith('selfEnters') as Record<string, unknown>;
+      entry.triggerContext = { kind, triggeringPlayer: 1 };
+      const parsed = StackEntrySchema.safeParse(entry);
+      expect(parsed.success, kind).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data).toEqual(
+          expect.objectContaining({
+            targets: [],
+            triggerContext: { kind, triggeringPlayer: 1 },
+          }),
+        );
+      }
+    }
+  });
+
+  it('retains the final amount beside the damaged player for combat-damage triggers', () => {
+    const entry = entryWith('selfEnters') as Record<string, unknown>;
+    entry.triggerContext = {
+      kind: 'selfDealsCombatDamageToPlayer',
+      triggeringPlayer: 1,
+      triggeringDamageAmount: 2,
+    };
+
+    expect(StackEntrySchema.parse(entry).triggerContext).toEqual(entry.triggerContext);
   });
 
   it('still refuses a condition the list has no word for', () => {

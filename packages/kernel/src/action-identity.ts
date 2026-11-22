@@ -13,12 +13,12 @@
  * byte-identical output, with keys recursively sorted, so a caller that builds
  * `{ player, type, oid }` matches an enumeration that built `{ type, player,
  * oid }`. It also states the property this cannot use alone: it *preserves
- * array order by design*. Four of the action alphabet's lists are sets in the
+ * array order by design*. Several of the action alphabet's lists are sets in the
  * rules and would compare unequal to their own enumerated twin the moment a
  * player clicked two creatures in the other order, which is exactly how a click
  * built declaration arrives (`mtg-bz2.5`).
  *
- * So the value is canonicalized first — those four lists sorted, everything
+ * So the value is canonicalized first — those unordered lists sorted, everything
  * else left as written — and `canonicalJson` compares the result. Sorting is a
  * claim about the rules and is made only where the rules make it:
  *
@@ -28,19 +28,21 @@
  *  - `discard.oids` and `keepHand.bottom` are sets for the same reason:
  *    `validateAction` checks each against the hand and rejects a repeat, and
  *    the count is what the rule names.
+ *  - `castSpell.sacrifices` is a cost paid simultaneously under CR 601.2h.
+ *    Validation requires distinct eligible objects, and the reducer uses this
+ *    canonical order so a click order cannot change the event log.
  *  - `orderBlockers.orders` is sorted by attacker and *not* inside. The outer
  *    list is one entry per multiply-blocked attacker, which `validateOrdering`
  *    looks up by attacker id; the inner `blockers` list is CR 509.2's damage
  *    assignment order, which is the entire content of the choice.
+ *  - `activateAbility.taps` is a simultaneous cohort payment. The reducer taps
+ *    it in this canonical order, so both action identity and replay events are
+ *    independent of the order a surface collected the five clicks.
  *
- * Two lists are deliberately left positional. `targets` is parallel to an
- * effect list — slot 2 is the second effect's target and swapping two entries
- * is a different aiming of the same spell. `sacrifices` is left positional
- * because nothing here has established that it is not: `validateSacrifices`
- * treats it as a set, but `reduce` sacrifices in the order given, so two orders
- * emit two event logs. A caller that wants to construct one takes the
- * enumeration's order or gets a refusal naming the reason, which is the right
- * failure for a list nobody has checked.
+ * Two other lists are deliberately left positional. `targets` is parallel to
+ * an effect list — slot 2 is the second effect's target and swapping two entries
+ * is a different aiming of the same spell. `activateAbility.sacrifices` keeps
+ * its existing order until its reduction contract establishes otherwise.
  */
 import { canonicalJson } from '@mtg/dsl';
 import type { Action } from './actions';
@@ -51,6 +53,19 @@ function sortedBy<T>(items: readonly T[]): readonly T[] {
     .map((item): readonly [string, T] => [canonicalJson(item), item])
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([, item]) => item);
+}
+
+/** One deterministic spelling and payment order for a spell's chosen cost sets. */
+export function canonicalCastAction(
+  action: Extract<Action, { type: 'castSpell' }>,
+): Extract<Action, { type: 'castSpell' }> {
+  return action.sacrifices === undefined && action.discards === undefined
+    ? action
+    : {
+        ...action,
+        ...(action.sacrifices === undefined ? {} : { sacrifices: [...action.sacrifices].sort() }),
+        ...(action.discards === undefined ? {} : { discards: [...action.discards].sort() }),
+      };
 }
 
 /**
@@ -64,16 +79,22 @@ function sortedBy<T>(items: readonly T[]): readonly T[] {
  */
 export function canonicalAction(action: Action): Action {
   switch (action.type) {
+    case 'castSpell':
+      return canonicalCastAction(action);
     case 'declareAttackers':
       return { ...action, attackers: sortedBy(action.attackers) };
     case 'declareBlockers':
       return { ...action, blocks: sortedBy(action.blocks) };
     case 'orderBlockers':
       return { ...action, orders: sortedBy(action.orders) };
+    case 'orderAttackers':
+      return { ...action, orders: sortedBy(action.orders) };
     case 'discard':
       return { ...action, oids: [...action.oids].sort() };
     case 'keepHand':
       return { ...action, bottom: [...action.bottom].sort() };
+    case 'activateAbility':
+      return action.taps === undefined ? action : { ...action, taps: [...action.taps].sort() };
     default:
       return action;
   }

@@ -1,13 +1,14 @@
 // @vitest-environment node
 /**
- * A game played from the Draft tab is the same table, and it was not drawn like
- * one.
+ * A game played from the Draft section is the same table, and it was not drawn
+ * like one.
  *
  * `../../src/routes/draft/DraftGame.ts` hands a finished pool to `LiveGame`,
  * which is the same `PlayView` the Play tab mounts. What differs is one
  * attribute three ancestors up: `../../src/app/Shell.ts` stamps
- * `data-mtg-mode` from the router, so the identical markup renders under
- * `[data-mtg-mode='draft']` there and `[data-mtg-mode='play']` here. Every rule
+ * `data-mtg-sub` from the router, so the identical markup renders under
+ * `[data-mtg-sub='draft']` there and `[data-mtg-sub='constructed']` here, both
+ * inside the one `[data-mtg-mode='play']` shell. Every rule
  * that makes the board a *table* — the height budget, the three grid tracks,
  * the hand row, both columns and the two disclosures that collapse them — is
  * emitted under `../../src/styles/board/geometry.ts`'s `TABLE` and `PLAY`
@@ -58,7 +59,10 @@ import { exampleCard } from '@mtg/dsl';
 import { DEFAULT_AUTO_PASS, humanSeat, pendingDecision, scenario } from '@mtg/kernel';
 import type { GameSession, PlayerId } from '@mtg/kernel';
 import { afterAll, beforeAll, describe, expect } from 'vitest';
-import type { UiMode } from '../../src/app/router';
+import type { SubOf } from '../../src/app/router';
+
+/** The two sections of Play under test: the played table is the control, the draft table the subject. */
+type PlaySub = SubOf<'play'>;
 import { Shell } from '../../src/app/Shell';
 import { PlayView } from '../../src/routes/play/PlayView';
 import { uiStyleSheet } from '../../src/styles/index';
@@ -106,10 +110,11 @@ function board(): GameSession {
   };
 }
 
-function page(game: GameSession, mode: UiMode, shut: boolean): string {
+function page(game: GameSession, sub: PlaySub, shut: boolean): string {
   const rendered = renderToStaticMarkup(
     h(Shell, {
-      mode,
+      mode: 'play',
+      sub,
       onSelectMode: () => undefined,
       children: h(PlayView, {
         session: game,
@@ -127,7 +132,7 @@ function page(game: GameSession, mode: UiMode, shut: boolean): string {
         .replaceAll('data-rail="open"', 'data-rail="shut"')
         .replaceAll('data-ask="open"', 'data-ask="shut"')
     : rendered;
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${mode}</title><style>${uiStyleSheet()}html,body{margin:0;padding:0}</style></head><body>${markup}</body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${sub}</title><style>${uiStyleSheet()}html,body{margin:0;padding:0}</style></head><body>${markup}</body></html>`;
 }
 
 /**
@@ -169,9 +174,9 @@ const WIDTH = 1280;
 const HEIGHT = 800;
 
 /** The played table is the control; the draft table is the subject. */
-const MODES: readonly UiMode[] = ['play', 'draft'];
+const MODES: readonly PlaySub[] = ['constructed', 'draft'];
 
-describe('a game played from the draft tab', () => {
+describe('a game played from the draft section', () => {
   let chrome: Awaited<ReturnType<typeof launchChrome>> | null = null;
   let dir = '';
 
@@ -189,7 +194,7 @@ describe('a game played from the draft tab', () => {
     if (dir !== '') await rm(dir, { recursive: true, force: true });
   }, 60_000);
 
-  async function read(mode: UiMode, shut: boolean): Promise<Reading> {
+  async function read(mode: PlaySub, shut: boolean): Promise<Reading> {
     const label = `${mode}-${shut ? 'shut' : 'open'}`;
     const file = join(dir, `${label}.html`);
     await writeFile(file, page(board(), mode, shut), 'utf8');
@@ -201,7 +206,7 @@ describe('a game played from the draft tab', () => {
   browserIt(
     'is drawn as a table, the same one the play tab draws',
     async () => {
-      const seen = new Map<UiMode, { readonly open: Reading; readonly shut: Reading }>();
+      const seen = new Map<PlaySub, { readonly open: Reading; readonly shut: Reading }>();
       for (const mode of MODES) {
         seen.set(mode, { open: await read(mode, false), shut: await read(mode, true) });
       }
@@ -235,7 +240,7 @@ describe('a game played from the draft tab', () => {
       // And it is the *same* table, not merely another one that also fits: one
       // surface under two route names, so any figure that differs is a rule
       // that named one of them.
-      const played = seen.get('play');
+      const played = seen.get('constructed');
       const drafted = seen.get('draft');
       if (played === undefined || drafted === undefined) throw new Error('a mode went unmeasured');
       expect(

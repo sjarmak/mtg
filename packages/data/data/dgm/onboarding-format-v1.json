@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "dgm",
+  "name": "Dragon's Maze / Gatecrash / Return to Ravnica",
+  "sourceCodes": ["DGM", "GTC", "RTR"],
+  "products": [
+    { "id": "dgm-draft", "setCode": "DGM", "boosterKey": "draft" },
+    { "id": "gtc-draft", "setCode": "GTC", "boosterKey": "draft" },
+    { "id": "rtr-draft", "setCode": "RTR", "boosterKey": "draft" }
+  ],
+  "draft": {
+    "seats": 8,
+    "rounds": ["dgm-draft", "gtc-draft", "rtr-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["dgm-draft", "dgm-draft", "gtc-draft", "gtc-draft", "rtr-draft", "rtr-draft"]
+  },
+  "basicLandPolicy": "keep"
+}

@@ -42,7 +42,7 @@
  * has to fail here, at the declaration, rather than reach live CSS.
  */
 import type { Card } from '@mtg/dsl';
-import { isPlaneswalker, renderTypeLine } from '@mtg/dsl';
+import { isLand, isPlaneswalker, renderOracleText, renderTypeLine } from '@mtg/dsl';
 import { composeTextBox, oracleBlocks, remindedBlocks } from './text-box';
 import type { TextBlock } from './text-box';
 
@@ -78,6 +78,74 @@ export const COMPACT_FACE_WIDTH_REM: number = 9.5;
  */
 export const FULL_FACE_WIDTH_REM: number = 15.25;
 
+/** The shared enlarged face used wherever pointing opens a card for reading. */
+export const READING_FACE_WIDTH_REM: number = 24;
+
+/**
+ * The size the rules text is set at on a reference-width face, in rem, and that
+ * size as a share of the face.
+ *
+ * `--mtg-text-sm` is 0.8125rem and every pixel below was measured with the box
+ * set at it. That was the whole calibration until `mtg-dcxg.13`: a face is
+ * drawn at whatever `--card-w` a column gives it, everything else on it is a
+ * share of that width, and the rules text alone was a fixed token — so a 366px
+ * phone face grew a 191px box around 42px of type and left 149px of slack under
+ * three lines.
+ *
+ * The share is what makes the calibration width-independent rather than what
+ * replaces it. Type proportional to the face keeps the characters per line
+ * constant, so every line count below is unchanged and every px here is a px at
+ * the reference width; `faceTextScale` converts one to a real face. Under the
+ * reference width nothing changes at all, because the sheet takes the larger of
+ * the token and the share: shrinking a board face's rules text past 13px is a
+ * separate decision from this one and is not made here.
+ */
+export const RULES_TEXT_REM: number = 0.8125;
+
+export const RULES_TEXT_SHARE: number = RULES_TEXT_REM / FULL_FACE_WIDTH_REM;
+
+/**
+ * The deterministic generation boundary for the fixed, full-size hover zoom.
+ *
+ * These are not estimates derived from the ordinary face's fit ladder. The
+ * zoom deliberately overrides that ladder and keeps 13px rules text inside a
+ * fixed 320 x 447px face, so its last safe input was measured in real Chrome
+ * (`@mtg/ui`'s `zoom-read.browser.test.ts`, 2026-09-04). On an ordinary face
+ * the 262-character stress card reads whole and the otherwise identical
+ * 274-character card is cut by 14px. A planeswalker's ruled rows and shield
+ * still give it a distinct measured boundary of 278 characters.
+ *
+ * Card shape still affects wrapping, so this is intentionally a conservative
+ * admission contract for generated cards, not a promise that every imported
+ * card below the number fits or every imported card above it fails. Generic
+ * DSL and set-file parsers do not consult it. The generator does: a new card
+ * past the measured boundary is refused instead of silently printing text its
+ * largest reading surface clips.
+ */
+export const ZOOM_RULES_CHARACTER_CAPACITY: Readonly<{
+  ordinary: number;
+  planeswalker: number;
+}> = Object.freeze({ ordinary: 262, planeswalker: 278 });
+
+/** The measured zoom character boundary for the face shape this card uses. */
+export function zoomRulesCharacterCapacity(card: Card): number {
+  return isPlaneswalker(card)
+    ? ZOOM_RULES_CHARACTER_CAPACITY.planeswalker
+    : ZOOM_RULES_CHARACTER_CAPACITY.ordinary;
+}
+
+/**
+ * How much larger a face's rules text is than the reference face's, which is
+ * how much larger everything the estimate counts is.
+ *
+ * `max(1, …)` mirrors the sheet's `max()` exactly, and both are the same
+ * sentence: a face wider than the reference scales up with it, a narrower one
+ * keeps the readable token.
+ */
+export function faceTextScale(faceWidthPx: number): number {
+  return Math.max(1, faceWidthPx / (FULL_FACE_WIDTH_REM * 16));
+}
+
 /**
  * Trimmed card size in millimeters. The printed face is exactly this; the DOM
  * face is at least this shape, so a card on screen and a card in the hand have
@@ -103,43 +171,62 @@ export const CARD_TRIM_MM: Readonly<{ width: number; height: number }> = { width
  */
 export const FRAME_BAND_MM: number = 2.6;
 
+/**
+ * The black outer edge, in millimeters, and it is the outermost slice of the
+ * band above rather than a ring added outside it.
+ *
+ * A printed card's edge is black on every card of every color, and the color
+ * identity starts just inside it. Both of this repo's faces used to skip that
+ * slice: the DOM face's border was the identity itself all the way to the
+ * silhouette, and the printed face ran the identity ground to the trim and bled
+ * it past the cut, so a mis-cut sheet showed a green hairline rather than
+ * nothing (`mtg-d4g`).
+ *
+ * 0.9 mm of the 2.6 mm band, so the identity keeps 1.7 mm and the *content*
+ * inset does not move at all: every region on both faces is still measured from
+ * `FRAME_BAND_MM`, and this number only says what the outer third of that band
+ * is painted with. That is what lets the edge land on both renderers without
+ * re-fitting a single text box.
+ */
+export const CARD_EDGE_MM: number = 0.9;
+
 export const ART_WINDOW: Readonly<{ width: number; height: number }> = { width: 578, height: 380 };
 
-/**
- * The art window a planeswalker gets instead, and why one card type is allowed
- * its own.
- *
- * `RULES_FIT_STEPS` below states the rule the rest of the set obeys: the window
- * is one shape on every card and the *text* gives. A planeswalker is where that
- * rule runs out. Its box is not one paragraph and a flavor line — it is three or
- * four abilities, each ruled off from the next, each carrying a cost badge that
- * narrows the column it wraps in, and the flagship's wordiest walker asks for
- * ten lines where the wordiest creature asks for six. No step of the shared
- * ladder holds that, and the two ways out that were on the table are both
- * refused elsewhere in this file: clipping the last ability (a planeswalker
- * whose ultimate is unreadable is not a planeswalker) and shrinking the type
- * past the point where text stops being text.
- *
- * So the picture gives, on this card type only, which is what a printed
- * planeswalker does: measured off `references/planeswalkers.png`, a real
- * walker's text box runs from 29% to 40% of the card's height against a
- * creature's 25%, and the height comes out of the window above it. 300 against
- * 380 hands the box 31px of a 341px face and leaves the window 111px — still a
- * landscape window, still the same width, and every planeswalker in a set is
- * the same shape as every other.
- *
- * `@mtg/ui`'s sheet keys this off `:has(.mtg-card__shield)` and
- * `@mtg/card-render`'s `cardGeometry` off `isPlaneswalker`, so the two faces
- * take the height from the same place.
- */
+/** Compatibility name for the planeswalker frame's now-uniform nonland window. */
 export const PLANESWALKER_ART_WINDOW: Readonly<{ width: number; height: number }> = {
   width: 578,
-  height: 300,
+  height: 380,
 };
 
+/** Mana-only lands spend their sparse rules area on a deliberately taller illustration. */
+export const LAND_ART_WINDOW: Readonly<{ width: number; height: number }> = {
+  width: 578,
+  height: 460,
+};
+
+/**
+ * Whether a land can trade rules-box height for illustration height.
+ *
+ * A fetchland, creature-land or utility land asks the player to read as much as
+ * any spell does. Only a single ordinary mana ability qualifies. Parentheses
+ * are accepted because basic land types and the original dual lands print
+ * their intrinsic mana ability that way; costs, riders and second paragraphs
+ * do not. The oracle string is an argument so an imported printing is
+ * classified from the exact words the shared frame paints.
+ */
+export function usesLargeLandArt(card: Card, oracleText = renderOracleText(card)): boolean {
+  if (!isLand(card)) return false;
+  const trimmed = oracleText.trim();
+  const line = trimmed.startsWith('(') && trimmed.endsWith(')') ? trimmed.slice(1, -1) : trimmed;
+  return /^\{T\}: Add (?:one mana of any color|\{[WUBRGC]\}(?:(?:,? or |, )?\{[WUBRGC]\})*)\.$/u.test(line);
+}
+
 /** The art window a card's face is drawn with. */
-export function artWindow(card: Card): Readonly<{ width: number; height: number }> {
-  return isPlaneswalker(card) ? PLANESWALKER_ART_WINDOW : ART_WINDOW;
+export function artWindow(
+  card: Card,
+  oracleText = renderOracleText(card),
+): Readonly<{ width: number; height: number }> {
+  return usesLargeLandArt(card, oracleText) ? LAND_ART_WINDOW : ART_WINDOW;
 }
 
 /**
@@ -281,6 +368,17 @@ export const RULES_FIT_STEPS: readonly number[] = [1, 0.92, 0.85, 0.78];
 const RULES_BOX_LINE_PX: number = 18.85;
 const RULES_BOX_BUDGET_PX: number = 87;
 const RULES_BOX_COLUMN: number = 34;
+/**
+ * Conservative column for immutable printed oracle text.
+ *
+ * The generated-card column was calibrated over generator-shaped prose. The
+ * complete Legacy Cube census includes reminder-heavy, level-up and modal
+ * printings whose word breaks wrap materially earlier in the same rectangle.
+ * Keeping that corpus on its own column preserves the generated-card floor
+ * while ensuring an imported face chooses a small enough rung before Chrome
+ * clips it.
+ */
+const PRINTED_RULES_BOX_COLUMN: number = 26;
 const RULES_PARAGRAPH_GAP_PX: number = 4;
 const RULES_FLAVOR_GAP_PX: number = 8;
 
@@ -304,6 +402,23 @@ const RULES_FLAVOR_GAP_PX: number = 8;
  * of the box* it occupies is what stays fixed across the ladder, and dividing by
  * the scale afterwards is what turns that fraction back into characters.
  *
+ * **0.155, and 0.12 before it, which was read off a card whose costs were two
+ * glyphs wide.** Ajani Goldmane prints `+1`, `−1` and `−6`; Jace Beleren prints
+ * `−10`, and on 2026-08-24 the playtester reported that its ground "doesn't extend
+ * enough past the number on the right." Measured at a 244px face, the badge
+ * drew 19.02px and the ink of `−10` was 18.77px, so before the silhouette was
+ * clipped at all the ground had 0.12px on each side of the number. A share read
+ * off a two-glyph card is a share that fits two glyphs.
+ *
+ * The number that has to fit is the widest cost the type can state, not the
+ * common one, so this is now sized from `−10`: three tabular glyphs are about
+ * 1.57em, the badge's type is a fixed share of the card (`../ui`'s sheet), and
+ * `LOYALTY_BADGE_POINTS` insets each end by 8%, which leaves about 2.4px of
+ * ground on each side of the widest cost at a 244px face and about 1.5px at a
+ * battlefield thumbnail. The 3.5% of the column this costs against the old
+ * value is charged to the sentence by `rulesColumn` below, so the ladder pays
+ * for it rather than the last line of an ability doing so.
+ *
  * **0.12, read off the reference rather than guessed.** It was 0.18 for one
  * revision and that was a sixth of the box spent on two glyphs: measured on
  * Ajani Goldmane in `references/planeswalkers.png`, the badge is 9.3% of the
@@ -313,7 +428,7 @@ const RULES_FLAVOR_GAP_PX: number = 8;
  * of a 100px box, so the difference between reading the reference and eyeballing
  * it is a whole line of a card.
  */
-export const LOYALTY_BADGE_SHARE: number = 0.12;
+export const LOYALTY_BADGE_SHARE: number = 0.155;
 
 /**
  * The part of that share that is empty: the gutter between the badge and the
@@ -437,6 +552,13 @@ const RULES_LOYALTY_LINE_PX: number = 15.6;
 export const LOYALTY_FIT_STEPS: readonly number[] = [1, 0.92, 0.85, 0.78, 0.7, 0.62];
 
 /**
+ * The official-oracle ladder, with four final rungs for immutable printed text
+ * that remains too dense for the planeswalker floor at the shared face width.
+ * Generated cards and generated planeswalkers never reach these rungs.
+ */
+export const PRINTED_RULES_FIT_STEPS: readonly number[] = [...LOYALTY_FIT_STEPS, 0.56, 0.52, 0.46, 0.4];
+
+/**
  * How much room a planeswalker's box has that an ordinary card's does not, and
  * how much of it the loyalty shield takes back.
  *
@@ -480,6 +602,21 @@ interface RulesLadder {
 
 const ORDINARY_LADDER: RulesLadder = { steps: RULES_FIT_STEPS, budgetPx: RULES_BOX_BUDGET_PX };
 const LOYALTY_LADDER: RulesLadder = { steps: LOYALTY_FIT_STEPS, budgetPx: RULES_BOX_LOYALTY_BUDGET_PX };
+/**
+ * The usable content height of the shared official-card face at the 214px
+ * deck/pool width. Its type has reached the design system's 13px minimum while
+ * the physical card continues to scale, so the 87px full-face estimate would
+ * choose one rung too high for the longest immutable oracle paragraphs.
+ */
+const PRINTED_RULES_BOX_BUDGET_PX = 74;
+const PRINTED_ORACLE_LADDER: RulesLadder = {
+  steps: PRINTED_RULES_FIT_STEPS,
+  budgetPx: PRINTED_RULES_BOX_BUDGET_PX,
+};
+const PRINTED_LOYALTY_LADDER: RulesLadder = {
+  steps: PRINTED_RULES_FIT_STEPS,
+  budgetPx: PRINTED_RULES_BOX_BUDGET_PX + RULES_BOX_LOYALTY_BUDGET_PX - RULES_BOX_BUDGET_PX,
+};
 
 /** The ladder a card's rules box is fitted on. */
 function cardLadder(card: Card): RulesLadder {
@@ -520,13 +657,19 @@ export function rulesFitSteps(card: Card): readonly number[] {
  * leading in a narrower column and stands a badge beside itself — and a caller
  * holding only the text cannot supply that.
  */
-function rulesFitCost(blocks: readonly TextBlock[], scale: number): number {
+function rulesFitCost(
+  blocks: readonly TextBlock[],
+  scale: number,
+  column = RULES_BOX_COLUMN,
+  scaleChrome = false,
+): number {
   let height = 0;
   for (const [index, block] of blocks.entries()) {
-    const column = blockColumn(block) / scale;
-    const lines = Math.max(1, Math.ceil(block.text.length / column));
-    height += lines * blockLinePx(block) * scale + blockOverhangPx(block);
-    if (index > 0) height += blockGapPx(block);
+    const lineColumn = blockColumn(block, column) / scale;
+    const lines = Math.max(1, Math.ceil(block.text.length / lineColumn));
+    const chromeScale = scaleChrome ? scale : 1;
+    height += lines * blockLinePx(block) * scale + blockOverhangPx(block) * chromeScale;
+    if (index > 0) height += blockGapPx(block) * chromeScale;
   }
   return height;
 }
@@ -557,8 +700,8 @@ function blockLinePx(block: TextBlock): number {
  * column the badge left it, so charging it the whole width would under-count
  * exactly the rows most likely to wrap.
  */
-function blockColumn(block: TextBlock): number {
-  return block.loyaltyCost === undefined ? RULES_BOX_COLUMN : RULES_BOX_COLUMN * (1 - LOYALTY_BADGE_SHARE);
+function blockColumn(block: TextBlock, column = RULES_BOX_COLUMN): number {
+  return block.loyaltyCost === undefined ? column : column * (1 - LOYALTY_BADGE_SHARE);
 }
 
 /** The margin the sheet puts above a block, in pixels; see the three constants. */
@@ -591,17 +734,68 @@ export function rulesFitStepOf(oracleText: string): number {
 }
 
 /**
+ * Fits unconstrained official oracle text in the ordinary rules rectangle.
+ *
+ * Generated cards stop at the ordinary ladder's readability floor because the
+ * generator is governed to avoid denser text. An imported printing cannot be
+ * rewritten to satisfy that constraint, so it may use the smaller rungs
+ * reserved for official text. The rectangle and cost model are calibrated for
+ * printed oracle copy; generated text continues to use its stricter boundary.
+ */
+export function printedRulesFitStepOf(oracleText: string, loyalty = false): number {
+  if (oracleText.length === 0) return 0;
+  return rulesFitStepOfBlocks(
+    printedRulesTextBlocks(oracleText, loyalty),
+    loyalty ? PRINTED_LOYALTY_LADDER : PRINTED_ORACLE_LADDER,
+    PRINTED_RULES_BOX_COLUMN,
+    true,
+  );
+}
+
+/**
+ * Turns an immutable official oracle string into the same row vocabulary used
+ * by generated planeswalkers. Parsing is gated by the face's loyalty fact, so
+ * an ordinary printed rule that happens to begin with `0:` cannot acquire a
+ * planeswalker badge. The official cost remains exact except that an ASCII
+ * minus is normalized to the minus glyph the shared badge is designed for.
+ */
+export function printedRulesTextBlocks(oracleText: string, loyalty = false): readonly TextBlock[] {
+  const rulesBlock = (text: string, loyaltyCost?: string): TextBlock => {
+    const reminderStart = text.indexOf('(');
+    return {
+      kind: 'rules',
+      text,
+      ...(loyaltyCost === undefined ? {} : { loyaltyCost }),
+      ...(reminderStart <= 0 ? {} : { roman: text.slice(0, reminderStart) }),
+    };
+  };
+  return oracleText.split('\n').map((line) => {
+    if (!loyalty) return rulesBlock(line);
+    const match = /^([+−-]\d+|0):\s*(.*)$/u.exec(line);
+    if (match === null) return rulesBlock(line);
+    const rawCost = match[1] ?? '';
+    const loyaltyCost = rawCost.startsWith('-') ? `−${rawCost.slice(1)}` : rawCost;
+    return rulesBlock(match[2] ?? '', loyaltyCost);
+  });
+}
+
+/**
  * The same question asked of the text box's blocks rather than of one string,
  * for the callers that already hold them.
  *
  * `rulesFitStepOf` splits its argument on newlines into rules blocks and is
  * otherwise this function, so the two cannot disagree about a card.
  */
-function rulesFitStepOfBlocks(blocks: readonly TextBlock[], ladder: RulesLadder): number {
+function rulesFitStepOfBlocks(
+  blocks: readonly TextBlock[],
+  ladder: RulesLadder,
+  column = RULES_BOX_COLUMN,
+  scaleChrome = false,
+): number {
   if (blocks.length === 0) return 0;
   const floor = ladder.steps.length - 1;
   for (let step = 0; step < floor; step += 1) {
-    if (rulesFitCost(blocks, ladderScale(ladder, step)) <= ladder.budgetPx) return step;
+    if (rulesFitCost(blocks, ladderScale(ladder, step), column, scaleChrome) <= ladder.budgetPx) return step;
   }
   return floor;
 }
@@ -700,6 +894,19 @@ export function textBoxCost(card: Card, step: number): number {
 }
 
 /**
+ * The same estimate, for a face drawn at a stated width.
+ *
+ * `textBoxCost` above is in pixels of the reference face, which is the unit the
+ * whole ladder is calibrated in and the only unit its budget means anything in.
+ * A face at another width renders the same lines at a proportional size, so the
+ * estimate a browser at that width can be held to is this one.
+ * `packages/ui/test/card-fit-width.browser.test.ts` is the gate.
+ */
+export function textBoxCostAtWidth(card: Card, step: number, faceWidthPx: number): number {
+  return textBoxCost(card, step) * faceTextScale(faceWidthPx);
+}
+
+/**
  * The type line takes one line at every size, and shrinks rather than wrapping.
  *
  * This is the printed face's rule, stated in `@mtg/card-render`'s `regions.ts`:
@@ -724,9 +931,14 @@ export function textBoxCost(card: Card, step: number): number {
  *
  * Below the floor the line is ellipsized rather than wrapped, which is the rule
  * the small faces in `@mtg/ui`'s `styles/card.ts` already applied for the same reason;
- * the whole line stays reachable through `faceDetailText`. No card in this
- * checkout reaches it — the longest flagship type line is 35 characters, which
- * is step 2, and the floor's column is 38.
+ * the whole line stays reachable through `faceDetailText`.
+ *
+ * How the shipping set sits against this ladder is deliberately not written
+ * here. It was — "the longest flagship type line is 35 characters, which is step
+ * 2" — and by `mtg-r39a` the set had left that sentence five characters behind
+ * with nothing to notice, because prose is not checked. A set-level census
+ * derives the ceiling from the file `npm run play` opens, so the next authored
+ * card that moves it fails a test instead of falsifying a comment.
  */
 const TYPE_LINE_COLUMN: number = 30;
 
@@ -809,10 +1021,13 @@ export function nameFitScale(step: number): number {
  * wraps such a name onto a second line rather than cutting it, because print
  * measures where this arithmetic estimates.
  *
- * The flagship set has exactly one name past the floor,
- * 48 characters against a 40-character limit, and that name is `mtg-acl`'s own
- * subject rather than this ladder's: the bead is open on whether the fixture, the
- * limit or the brief is the thing that gives.
+ * How many flagship names reach the floor is not stated here either, and for the
+ * reason the type-line ladder above gives: this docblock once said "exactly one,
+ * 48 characters against a 40-character limit" of a card the set no longer
+ * prints. A set-level census derives it instead. What is worth keeping from
+ * that sentence is the question it was pointing at, which
+ * is `mtg-acl`'s and not this ladder's: when a name does not fit, the thing that
+ * gives is the fixture, the generator's limit or the brief.
  */
 export function nameFitStepOf(name: string): number {
   const floor = NAME_FIT_STEPS.length - 1;

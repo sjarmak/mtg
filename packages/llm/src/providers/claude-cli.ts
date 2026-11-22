@@ -63,8 +63,16 @@ export type ClaudeEffort = (typeof CLAUDE_EFFORT_LEVELS)[number];
  */
 export const DEFAULT_CLAUDE_CLI_EFFORT: ClaudeEffort = 'medium';
 
-/** Linux caps a single argv entry at 128 KiB; stay well under it. */
-const MAX_ARG_BYTES = 96_000;
+/**
+ * Linux caps a single argv entry at 128 KiB; stay well under it.
+ *
+ * Exported so a schema that has to fit through here can assert it does, in its
+ * own package's tests, against this number rather than a copy of it. On
+ * 2026-08-23 `@mtg/dsl-coverage` could not make a single call: its translation
+ * schema had grown to 773 KB behind an inlining emitter, and nothing failed
+ * until a paid run reached the transport.
+ */
+export const MAX_ARG_BYTES = 96_000;
 
 /**
  * The per-TTL breakdown of the cache-creation line.

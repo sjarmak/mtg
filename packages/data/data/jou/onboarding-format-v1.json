@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "jou",
+  "name": "Journey into Nyx",
+  "sourceCodes": ["BNG", "JOU", "THS"],
+  "products": [{ "id": "jou-draft", "setCode": "JOU", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["jou-draft", "jou-draft", "jou-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["jou-draft", "jou-draft", "jou-draft", "jou-draft", "jou-draft", "jou-draft"]
+  },
+  "basicLandPolicy": "keep"
+}

@@ -3,9 +3,13 @@
  * render without a fallback branch, and everything it rejects must say which
  * line was wrong.
  */
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { EVENT_LOG_SCHEMA_VERSION } from '../../src/routes/replay/log-schema';
 import { EventLogError, readEventLog } from '../../src/routes/replay/read-log';
 import { fixtureLog, fixtureText } from './support/log-fixture';
+
+const READ_LOG_SOURCE = readFileSync(new URL('../../src/routes/replay/read-log.ts', import.meta.url), 'utf8');
 
 function lines(): string[] {
   return fixtureText().trimEnd().split('\n');
@@ -25,16 +29,16 @@ function rewriteJsonRows(rows: string[], rewrite: (record: Record<string, unknow
   }
 }
 
-function downgrade(rows: string[], version: '3' | '4' | '5' | '6' | '7'): void {
+function downgrade(rows: string[], version: '3' | '4' | '5' | '6' | '7' | '8'): void {
   const header = rows[0];
   if (header === undefined) throw new Error('the fixture has no header');
-  rows[0] = header.replace('event-log/8', `event-log/${version}`);
+  rows[0] = header.replace('event-log/10', `event-log/${version}`);
   rewriteJsonRows(rows, (record) => {
     if (record.record !== 'step') return;
     const state = record.state as { readonly stack: Record<string, unknown>[] } | null;
     for (const entry of state?.stack ?? []) {
-      if (version !== '6' && version !== '7') delete entry.triggerContext;
-      if (version !== '7') delete entry.sourceCharacteristics;
+      if (version !== '6' && version !== '7' && version !== '8') delete entry.triggerContext;
+      if (version !== '7' && version !== '8') delete entry.sourceCharacteristics;
     }
   });
 }
@@ -114,6 +118,19 @@ function injectTaggedWalker(rows: string[], loyalty: boolean, tagged = true): vo
   if (!objectAdded || !permanentAdded) throw new Error('the fixture could not host a walker');
 }
 
+function injectReplacementKinds(rows: string[]): void {
+  let inserted = false;
+  rewriteJsonRows(rows, (record) => {
+    if (inserted || record.record !== 'step') return;
+    (record.events as Record<string, unknown>[]).push(
+      { type: 'replacementApplied', id: 'discard-replacement', event: 'discard' },
+      { type: 'replacementApplied', id: 'zone-replacement', event: 'zoneChange' },
+    );
+    inserted = true;
+  });
+  if (!inserted) throw new Error('the fixture has no step for replacement evidence');
+}
+
 type ScryEvidence = 'action' | 'event' | 'decision';
 
 function injectScryEvidence(
@@ -152,6 +169,56 @@ function injectScryEvidence(
 }
 
 describe('readEventLog', () => {
+  it('keeps the current schema literal out of migration decisions', () => {
+    expect(READ_LOG_SOURCE).not.toContain(`'${EVENT_LOG_SCHEMA_VERSION}'`);
+  });
+
+  it('requires mode in current stack entries and backfills it for /9 logs', () => {
+    expect(EVENT_LOG_SCHEMA_VERSION).toBe('mtg-ui/event-log/10');
+    const withoutMode = rebuild((rows) => {
+      rewriteJsonRows(rows, (record) => {
+        if (record.record === 'header') record.schema = 'mtg-ui/event-log/9';
+        if (record.record !== 'step') return;
+        const state = record.state as { readonly stack: Record<string, unknown>[] } | null;
+        for (const entry of state?.stack ?? []) delete entry.mode;
+      });
+    });
+    const legacyStack = readEventLog(withoutMode).games.flatMap((game) =>
+      game.steps.flatMap((step) => step.state.stack),
+    );
+
+    expect(legacyStack.length).toBeGreaterThan(0);
+    expect(legacyStack.every((entry) => entry.mode === null)).toBe(true);
+    expect(() => readEventLog(withoutMode.replace('mtg-ui/event-log/9', EVENT_LOG_SCHEMA_VERSION))).toThrow(
+      /invalid step record/,
+    );
+  });
+
+  it('accepts every replacement kind the current kernel can record', () => {
+    const text = rebuild(injectReplacementKinds);
+    const events = readEventLog(text).games.flatMap((game) => game.steps.flatMap((step) => step.events));
+
+    expect(events).toEqual(
+      expect.arrayContaining([
+        { type: 'replacementApplied', id: 'discard-replacement', event: 'discard' },
+        { type: 'replacementApplied', id: 'zone-replacement', event: 'zoneChange' },
+      ]),
+    );
+  });
+
+  it('rejects discard and zone-change replacement evidence under every older header', () => {
+    for (const version of ['3', '4', '5', '6', '7'] as const) {
+      const text = rebuild((rows) => {
+        if (version === '7') downgrade(rows, version);
+        else rewriteAsReleasedVersion(rows, version);
+        injectReplacementKinds(rows);
+      });
+      expect(() => readEventLog(text)).toThrow(
+        new RegExp(`event-log/${version}.*current replacement event evidence`),
+      );
+    }
+  });
+
   it('reads the committed fixture into games with resolved frames', () => {
     const log = fixtureLog();
     expect(log.games.length).toBe(2);
@@ -335,6 +402,30 @@ describe('readEventLog', () => {
       if (!inserted) throw new Error('the fixture has no step for /7 regeneration evidence');
     });
     expect(readEventLog(text).games).toHaveLength(2);
+  });
+
+  it('rejects pay-life entry actions and decisions under the released /8 grammar', () => {
+    for (const variant of ['action', 'decision'] as const) {
+      const text = rebuild((rows) => {
+        downgrade(rows, '8');
+        let inserted = false;
+        rewriteJsonRows(rows, (record) => {
+          if (inserted || record.record !== 'step') return;
+          const action = {
+            type: 'chooseEntryPayLife',
+            player: 0,
+            oid: 'o0',
+            life: 2,
+            pay: true,
+          };
+          if (variant === 'action') record.action = action;
+          else record.decision = { kind: 'entryPayLife', player: 0, options: [action], complete: true };
+          inserted = true;
+        });
+        if (!inserted) throw new Error('the fixture has no step for /9 entry-payment evidence');
+      });
+      expect(() => readEventLog(text)).toThrow(/event-log\/8.*\/9 entry-payment evidence/);
+    }
   });
 
   it('preserves the /6 trigger context and adds only null source characteristics', () => {

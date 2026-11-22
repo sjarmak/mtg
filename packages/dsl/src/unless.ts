@@ -90,7 +90,7 @@ export type UnlessClause = z.infer<typeof UnlessClauseSchema>;
  * does not have. `targetCreatureYouControl` is absent for the reason `'you'` is
  * absent as a payer word: its controller is the caster, who would not have cast
  * it. `targetCreatureDefendingPlayerControls` is absent because
- * `ATTACK_TRIGGER_ONLY_TARGETS` already makes it illegal on a spell, and a
+ * `SOURCE_ATTACK_TARGETS` already makes it illegal on a spell, and a
  * second list repeating that would be a second place to forget it.
  */
 export const UNLESS_PAYER_TARGETS: Readonly<Record<UnlessPayer, readonly string[]>> = {

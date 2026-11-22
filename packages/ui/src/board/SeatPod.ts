@@ -32,19 +32,23 @@
  * would have been a branch nothing takes. The count is still on
  * `PlayerStatusProps`, and the replay timeline's line still prints it.
  *
- * **And the counters row is absent too.** Magic Online's pod carries poison,
- * energy and experience under the name; `@mtg/kernel`'s `PlayerState` has none
- * of the three and no card in the DSL can create one, so a row of three zeroes
- * would be three facts about a game nobody is playing. When a counter kind
- * arrives in the kernel it arrives here, under the name, where that reference
- * puts it.
+ * **The counters row is drawn only when the seat holds a counter.** Magic
+ * Online's pod carries poison, energy and experience under the name.
+ * `@mtg/kernel`'s `PlayerState` has none of the three and no card in the DSL can
+ * create one, so a row of three zeroes would be three facts about a game nobody
+ * is playing, and nineteen of the twenty-one printed formats have no Energy and
+ * no poison either. So the row is a list of what the caller hands over
+ * (`PlayerStatusProps.counters`, from `SeatView.poison` and
+ * `SeatView.playerCounters`), one chip per counter under the name, and an absent
+ * or empty list draws nothing: a kernel table is pixel-identical to what it was.
+ * The names are the backend's own words, drawn as written.
  *
  * Props only, and the same props `./PlayerStatus.ts` takes, so the two
  * arrangements are two readings of one projection rather than two projections.
  * `../routes/play/position.ts` is where those numbers are derived, and it reads
  * them from the state the *viewer* holds — under `@mtg/netplay` the other seat's
  * hidden objects are removed from the payload rather than merely undrawn, so a
- * count taken from anywhere else would disagree between a hot seat and a wire.
+ * count taken from anywhere else would disagree between a local table and a wire.
  */
 import { createElement } from 'react';
 import type { ReactElement } from 'react';
@@ -56,6 +60,18 @@ import type { PlayerStatusProps } from './PlayerStatus';
 export interface SeatPodProps extends PlayerStatusProps {
   /** Named on the element, so a sheet can tell the two ends of the column apart. */
   readonly seat?: 'opponent' | 'you';
+  /**
+   * This seat is a legal target for the spell being aimed, and pressing the pod
+   * attaches it (`mtg-bz2.16`).
+   *
+   * One optional object rather than a flag beside a handler, so "lit but dead"
+   * and "pressable but unlit" are both unwritable. Present turns the pod into a
+   * real `button`, which is what buys the keyboard and the touch target without
+   * this file inventing either; absent leaves the pod the generic block it has
+   * always been, and every surface that draws a seat outside a live game — the
+   * replay timeline among them — passes nothing and is untouched.
+   */
+  readonly aim?: { readonly onAim: () => void };
 }
 
 /**
@@ -65,6 +81,15 @@ export interface SeatPodProps extends PlayerStatusProps {
  * is the pod's width paying for it. The strip has room to put a large number
  * over a small caption; a chip in a column this narrow is one line, and a line
  * that reads "library 30" is a sentence where "30 library" is a puzzle.
+ *
+ * **The two chips share a line now, hand first.** They were two stacked rows,
+ * each a label at one edge and a number at the other, and the eye crossed the
+ * pod's whole width twice to read two small numbers — 36px of the one axis this
+ * table is short of, spent above the life total, on the block a player glances
+ * at rather than reads. the playtester's interface pass names the wanted shape
+ * outright ("Hand 7 · Library 52"), and hand is first in it because the hand is
+ * the count that changes every turn while the library is the one that only ever
+ * counts down.
  */
 function chip(label: string, value: number | null): ReactElement {
   return createElement(
@@ -82,6 +107,7 @@ function chip(label: string, value: number | null): ReactElement {
 export function SeatPod(props: SeatPodProps): ReactElement {
   const lowAt = props.lowLifeAt ?? 5;
   const pool = props.mana ?? null;
+  const counters = props.counters ?? [];
   const tags: ReactElement[] = [];
   if (props.active === true) {
     tags.push(createElement('span', { key: 'active', className: 'mtg-badge' }, 'Active'));
@@ -89,11 +115,13 @@ export function SeatPod(props: SeatPodProps): ReactElement {
   if (props.priority === true) {
     tags.push(createElement('span', { key: 'priority', className: 'mtg-badge' }, 'Priority'));
   }
+  const aim = props.aim;
   return createElement(
-    'div',
+    aim === undefined ? 'div' : 'button',
     {
       className: 'mtg-pod',
       'data-active': props.active === true,
+      ...(aim === undefined ? {} : { type: 'button' as const, 'data-aimable': true, onClick: aim.onAim }),
       // The same accessible name the strip carries, because it is the same
       // block and a screen reader that finds one must find the other. Said as
       // the seat's, for the reason `PlayerStatus` says it that way.
@@ -103,8 +131,8 @@ export function SeatPod(props: SeatPodProps): ReactElement {
     createElement(
       'div',
       { className: 'mtg-pod__chips' },
-      chip('library', props.libraryCount),
       chip('hand', props.handCount),
+      chip('library', props.libraryCount),
     ),
     createElement(
       'span',
@@ -112,6 +140,13 @@ export function SeatPod(props: SeatPodProps): ReactElement {
       String(props.life),
     ),
     createElement('span', { className: 'mtg-pod__name' }, props.name),
+    counters.length === 0
+      ? null
+      : createElement(
+          'div',
+          { className: 'mtg-pod__counters' },
+          ...counters.map((counter) => chip(counter.name, counter.amount)),
+        ),
     tags.length === 0 ? null : createElement('div', { className: 'mtg-pod__tags' }, ...tags),
     pool === null ? null : poolPips(pool, props.symbols ?? DEFAULT_SYMBOL_SET),
   );

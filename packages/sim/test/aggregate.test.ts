@@ -48,7 +48,13 @@ describe('aggregation', () => {
     expect(aggregate.games).toBe(4);
     expect(aggregate.wins).toEqual([2, 1]);
     expect(aggregate.draws).toBe(1);
-    expect(aggregate.endReasons).toEqual({ lifeZero: 3, emptyLibrary: 0, concede: 0, turnLimit: 1 });
+    expect(aggregate.endReasons).toEqual({
+      lifeZero: 3,
+      emptyLibrary: 0,
+      spellOrAbility: 0,
+      concede: 0,
+      turnLimit: 1,
+    });
   });
 
   it('measures on-play win rate over decided games only', () => {

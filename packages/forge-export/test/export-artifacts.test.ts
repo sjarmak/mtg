@@ -210,7 +210,7 @@ describe('on-disk layout', () => {
     const lines = text.split('\n');
 
     expect(lines).toContain(
-      'A:AB$ DealDamage | Cost$ 1 R T | ValidTgts$ Any | NumDmg$ 1 | SpellDescription$ {1}{R}, {T}: CARDNAME deals 1 damage to any target.',
+      'A:AB$ DealDamage | Cost$ 1 R T | ValidTgts$ Any | NumDmg$ 1 | SpellDescription$ CARDNAME deals 1 damage to any target.',
     );
     expect(text).toContain(`Oracle:${renderOracleText(beacon)}`);
     // No `SP$` line: an activated ability is not what the card does when it
@@ -367,7 +367,7 @@ describe('on-disk layout', () => {
         'Name:Bone Shard Token',
         'ManaCost:no cost',
         'Types:Artifact Part',
-        'A:AB$ PutCounter | Cost$ 1 Sac<1/CARDNAME> | ValidTgts$ Creature | CounterType$ P1P1 | CounterNum$ 1 | SpellDescription$ {1}, Sacrifice CARDNAME: Put a +1/+1 counter on target creature.',
+        'A:AB$ PutCounter | Cost$ 1 Sac<1/CARDNAME> | ValidTgts$ Creature | CounterType$ P1P1 | CounterNum$ 1 | SpellDescription$ Put a +1/+1 counter on target creature.',
         `Oracle:${printed}`,
         '',
       ].join('\n'),
@@ -451,7 +451,7 @@ describe('on-disk layout', () => {
         'Name:Trophy Horn Token',
         'ManaCost:no cost',
         'Types:Artifact Part',
-        `A:AB$ PutCounter | Cost$ 1 Sac<1/CARDNAME> | ValidTgts$ Creature | CounterTypes$ P1P1,First Strike | CounterNum$ 1 | SpellDescription$ {1}, Sacrifice CARDNAME: ${fuse}`,
+        `A:AB$ PutCounter | Cost$ 1 Sac<1/CARDNAME> | ValidTgts$ Creature | CounterTypes$ P1P1,First Strike | CounterNum$ 1 | SpellDescription$ ${fuse}`,
         `Oracle:{1}, Sacrifice Trophy Horn: ${fuse}`,
         '',
       ].join('\n'),

@@ -53,9 +53,42 @@ const AIM_DIM = 0.38;
  * The hand is covered by the same selector because a hand card is a `.mtg-slot`
  * too (`../../board/Hand.ts`), which is what makes "the table goes quiet" one
  * rule instead of three.
+ *
+ * # The two surfaces that are not cards (`mtg-bz2.16`)
+ *
+ * A slot's candidates can also be a seat or an object on the stack, and neither
+ * is drawn as a card: a seat is the vitals pod in the middle column and a stack
+ * entry is a row on the seam. So neither is reached by the selector above, in
+ * either direction — they were not dimmed when the table went quiet and they had
+ * no way to light up when they were the answer.
+ *
+ * Both ends are written here rather than in the pod's and the strip's own
+ * sheets, because this is the file that owns what a target choice looks like and
+ * the two halves of the sentence have to be read together. The lit end
+ * deliberately reuses `--mtg-ready` — the same amber every pressable face wears
+ * — for `AIM_CSS`'s own reason: inside a target choice the rest of the table has
+ * gone quiet, so the existing "you may act on this" ring already reads as "this
+ * is what the spell can be aimed at", and a second color would be a third
+ * vocabulary for one idea.
+ *
+ * The dim is `:not([data-aimable])` rather than the `[data-interactive]` test
+ * the cards use, because these two surfaces are controls only while a slot is
+ * open: outside one there is no attribute on either and no `[data-aiming]` on
+ * the board, so the rules select nothing at all.
  */
 export const AIM_CSS = `
 .mtg-board[data-aiming='true'] .mtg-slot > .mtg-card:not([data-interactive='true']) {
   opacity: ${cssNumber(AIM_DIM)};
+}
+.mtg-board[data-aiming='true'] .mtg-pod:not([data-aimable]),
+.mtg-board[data-aiming='true'] .mtg-stack__entry:not([data-aimable]) {
+  opacity: ${cssNumber(AIM_DIM)};
+}
+.mtg-board[data-aiming='true'] .mtg-pod[data-aimable],
+.mtg-board[data-aiming='true'] .mtg-stack__entry[data-aimable] {
+  cursor: pointer;
+  box-shadow:
+    0 0 0 2px var(--mtg-ready),
+    0 0 10px 2px var(--mtg-ready-soft);
 }
 `;

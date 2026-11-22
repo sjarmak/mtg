@@ -8,7 +8,7 @@
  * artifacts and 54 creatures as a self-replacement, so the field travels to
  * artifacts and creatures.
  *
- * It does not travel to enchantments: zero of the 38,623 print it on
+ * It does not travel to enchantments: zero of the 38,623 print entering tapped on
  * themselves. The four enchantment-typed hits are two modal Aura//Land fronts
  * whose *land* back enters tapped, and two (Ashling's Prerogative, Echoing
  * Assault) whose text is about some other permanent entering tapped, which is
@@ -82,7 +82,7 @@ describe('a nonland permanent that enters tapped (mtg-hgmz)', () => {
     expect(parsed.ok).toBe(false);
   });
 
-  it('does not give an enchantment the field', () => {
+  it('does not give an enchantment the enters-tapped member', () => {
     const blanket = {
       kind: 'enchantment',
       id: 'tst-blanket',
@@ -92,15 +92,15 @@ describe('a nonland permanent that enters tapped (mtg-hgmz)', () => {
       manaCost: { W: 1, generic: 1 },
       colors: ['W'],
     };
-    // `EnchantmentCardSchema` declares no `entryReplacement`, and since
-    // `mtg-nhyv.69` an undeclared key is refused by name rather than dropped:
-    // the card that would have printed nothing about entering tapped while the
-    // author believed otherwise never parses at all.
+    // Mana Bloom gives enchantments one source-bound entry replacement, but
+    // the schema remains closed to enters-tapped. The card that would have
+    // printed nothing about entering tapped while the author believed
+    // otherwise never parses at all.
     const withField = safeParseCard({ ...blanket, entryReplacement: { kind: 'entersTapped' } });
     expect(withField.ok).toBe(false);
     if (withField.ok) return;
     expect(withField.violations.map((found) => found.message)).toContainEqual(
-      expect.stringContaining('"entryReplacement"'),
+      expect.stringContaining('entersWithCounters'),
     );
 
     // The same enchantment without the key is a legal card that prints nothing.

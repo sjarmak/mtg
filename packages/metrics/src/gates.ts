@@ -33,11 +33,14 @@ import type { ColorPairReport } from './win-rate';
  * never change it. Both are visible in the report; neither reads as green.
  *
  * `withinNoise` is the fifth, and it is the one that costs something to have.
- * It is a gate that missed its band by less than the statistic moves on the
- * seed alone at this run's volume (`./seed-noise`), so the run cannot tell the
- * miss from its own dice. That is not a pass — nothing was shown — and it is
+ * It is a gate that landed within one seed deviation of its band at this run's
+ * volume (`./seed-noise`), on either side of it, so the run cannot tell the
+ * result from its own dice. That is not a pass — nothing was shown — and it is
  * not a fail either, because a fail is a claim about the *set* and this is a
- * claim about the sample. `abstainWithinNoise` below is the only thing that
+ * claim about the sample. Either side, because a bound cleared by less than
+ * the dice move the statistic is exactly as undecided as one missed by that
+ * much, and reading the first as green is how a set banks a band it never
+ * cleared (`mtg-ijl6`). `abstainWithinNoise` below is the only thing that
  * produces it, and the price it charges is stated there.
  */
 export type GateStatus = 'pass' | 'fail' | 'underSampled' | 'notApplicable' | 'withinNoise';
@@ -120,40 +123,74 @@ export function gateMargin(gate: GateResult): GateMargin | null {
   return { observed, edge: nearest.edge, distance: -nearest.room };
 }
 
-/** A miss the run cannot distinguish from its own dice, with both numbers. */
+/** A verdict the run cannot distinguish from its own dice, with both numbers. */
 export interface SeedNoiseAbstention {
   /** The statistic's seed deviation at this run's volume. */
   readonly noise: number;
-  /** How far the observation sat outside its band, in the gate's own units. */
+  /**
+   * `gateMargin`'s signed distance: how far outside the band the observation
+   * sat, or the negative of the headroom it had inside it.
+   *
+   * Signed rather than absolute because the two sides read differently on the
+   * row — "missed by 0.004" and "cleared by 0.004" are different sentences
+   * about the same undecidable gate — and a caller that wants the size alone
+   * can take `Math.abs` and has not lost anything by being handed the sign.
+   */
   readonly distance: number;
 }
 
 /**
- * Whether a failing gate missed by less than the seed moves the statistic.
+ * Whether a gate landed closer to its band than the seed moves the statistic.
  *
- * The miss is `gateMargin`'s `distance`, which is the one subtraction in this
- * module and is deliberately not repeated here. The comparison is strict: a
- * miss exactly equal to the deviation is a fail, because the deviation is a
- * standard deviation rounded *up* to the nearest 0.005 and the tie should go
+ * The distance is `gateMargin`'s, which is the one subtraction in this module
+ * and is deliberately not repeated here. The comparison is strict: a distance
+ * exactly equal to the deviation is judged, because the deviation is an upper
+ * bound already rounded *up* to two significant figures and the tie should go
  * to the band rather than to the sample.
+ *
+ * **Both sides of the band, which is what `mtg-ijl6` filed.** This asked only
+ * about misses until 2026-08-27, so a gate that failed its bound by 0.001 was
+ * an abstention and a gate that cleared the same bound by 0.001 was reported
+ * as a pass — the identical measurement, at the identical resolution, read as
+ * "we cannot tell" in one direction and "shown" in the other. The asymmetry
+ * ran the wrong way: the harness declined to call a near-miss a failure, which
+ * is right, and happily called a near-hit a success, which is a claim about
+ * the set made out of the sample. Distance from the bound is the question, and
+ * a distance has no side.
  *
  * **A `null` deviation never abstains.** `seedDeviation` returns `null` for
  * every statistic nobody has measured, and that means "nobody has measured
  * it", not "zero noise" (`./seed-noise` states the same rule from the other
- * side). A gate with no measured deviation therefore fails exactly the way it
- * failed before this function existed, which is what keeps the table an
- * inventory of work done rather than a list of gates somebody softened.
+ * side). A gate with no measured deviation therefore passes or fails exactly
+ * the way it did before this function existed, which is what keeps the table
+ * an inventory of work done rather than a list of gates somebody softened.
  *
- * Only a `fail` is a candidate. A gate that passed is judged, and one that was
- * under-sampled or not applicable has no observation to be near a band with.
+ * A measured **zero** never abstains either, and reaches that by the ordinary
+ * route rather than by a second branch: no distance is smaller than zero. Four
+ * gates read zero over 24 seeds and carry it, so the table can say "measured,
+ * and it does not move" where it used to say nothing at all.
+ *
+ * Only a judged gate is a candidate. `underSampled` and `notApplicable` have
+ * no observation to be near a band with, and re-reading one of them here would
+ * replace a reason with a different reason.
+ *
+ * **`distinctGames`, and the name is the contract.** A rate's confidence comes
+ * from independent games, and two byte-identical trajectories are one piece of
+ * evidence counted twice — the rule `./sample` already states, and sources, for
+ * the under-sampling floor. This asked for the run's *total* until 2026-08-27,
+ * so a sweep that replayed one line a thousand times bought the same narrow
+ * band as a thousand real games and could decide a gate on evidence it never
+ * had (`mtg-pixl`). The parameter is named for what it must be because the two
+ * numbers are both integers in the same range and nothing else would catch a
+ * caller handing over the wrong one.
  */
-export function seedNoiseAbstention(gate: GateResult, games: number): SeedNoiseAbstention | null {
-  if (gate.status !== 'fail') return null;
+export function seedNoiseAbstention(gate: GateResult, distinctGames: number): SeedNoiseAbstention | null {
+  if (gate.status !== 'fail' && gate.status !== 'pass') return null;
   const margin = gateMargin(gate);
   if (margin === null) return null;
-  const noise = scaledSeedDeviation(gate.id, games);
+  const noise = scaledSeedDeviation(gate.id, distinctGames);
   if (noise === null) return null;
-  if (margin.distance >= noise) return null;
+  if (Math.abs(margin.distance) >= noise) return null;
   return { noise, distance: margin.distance };
 }
 
@@ -168,25 +205,44 @@ export function seedNoiseAbstention(gate: GateResult, games: number): SeedNoiseA
  * the balance suite are all reading one verdict instead of three functions
  * each deciding for itself what the printed deviation implies.
  *
- * The abstention is loud. It replaces a red row with a row that says which
- * number it missed by and which number the dice move it by, and `./fairness`
- * counts it as unjudged, so a run holding one can never come back `fair`. What
- * it does not do is soften the pinned suite: 10,035 games put a pair's
- * deviation at 0.02, `format-health.test.ts` fails the run when any gate
- * abstains at that volume, and the relief is therefore spent entirely on the
- * thin sweeps — `npm run analyze` at 2,700, the gate-wiring child at 1,350 —
- * that were judging inside their own dice.
+ * The abstention is loud. It replaces the row with one that says how far the
+ * observation sat from its bound and which number the dice move it by, and
+ * `./fairness` counts it as unjudged, so a run holding one can never come back
+ * `fair`. What it does not do is soften the pinned suite: 10,035 games put a
+ * pair's deviation at 0.019 and `format-health.test.ts` fails the run when any
+ * gate abstains at that volume.
+ *
+ * **It takes green rows as well as red ones**, which is `mtg-ijl6`. Measured
+ * on 2026-08-27 over the three declared subjects at their pinned volume, four
+ * gates move from `pass` to `withinNoise` and none moves the other way: a pair
+ * clearing the 40% floor by 0.0006 on the shipping build, by 0.0032 on the
+ * same build's `WR`, by 0.0081 on the 79-card build and by 0.0092 on the
+ * prototype, against a deviation of 0.019 on all four. Every one of them is a
+ * pool sitting on a bound, which is the state this status exists to name, and
+ * each is now declared in `test/balance/baseline.ts` rather than banked.
+ *
+ * **The volume is the distinct one**, per `seedNoiseAbstention` above. Nothing
+ * moved on the pinned subjects when that landed: all three declared sweeps
+ * report 10,035 games and 10,035 distinct trajectories, 0.0% duplicated. The
+ * rule is there for the runs that are not the pinned one.
  */
-export function abstainWithinNoise(gates: readonly GateResult[], games: number): readonly GateResult[] {
+export function abstainWithinNoise(
+  gates: readonly GateResult[],
+  distinctGames: number,
+): readonly GateResult[] {
   return gates.map((gate) => {
-    const abstention = seedNoiseAbstention(gate, games);
+    const abstention = seedNoiseAbstention(gate, distinctGames);
     if (abstention === null) return gate;
+    // The side is read off the status rather than the sign, because a gate
+    // sitting exactly on its edge has a distance of `-0` and `-0 >= 0` is true.
+    const side = gate.status === 'fail' ? 'missed' : 'cleared';
     return {
       ...gate,
       status: 'withinNoise',
       detail:
-        `${gate.detail}; missed by ${abstention.distance.toFixed(3)}, inside the ` +
-        `${abstention.noise.toFixed(3)} this statistic moves on the seed alone over ${games} games`,
+        `${gate.detail}; ${side} by ${Math.abs(abstention.distance).toFixed(3)}, inside the ` +
+        `${abstention.noise.toFixed(3)} this statistic moves on the seed alone over ${distinctGames} ` +
+        `distinct games`,
     };
   });
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Card, Effect, Keyword } from '@mtg/dsl';
-import { mana, parseCard, TOKEN_NAME_MAX_LENGTH } from '@mtg/dsl';
+import { cardManaValue, isCastable, mana, parseCard, TOKEN_NAME_MAX_LENGTH, ZERO_MANA_COST } from '@mtg/dsl';
 import { classify } from '@mtg/design-data';
 import {
   allocateSlots,
@@ -377,6 +377,79 @@ describe('set-level bands', () => {
     expect(mythicFinding?.slotIds).toContain(promoted[rareIndex]?.slot.id);
   });
 
+  /**
+   * `mtg-69en`. `fitCurve` dropped a creature that fits no bucket without
+   * saying so, and `checkCurve` then reported the shortfall the drop caused
+   * against every creature slot in the group. The finding named slots that were
+   * fine and never named the card that went missing. Both ends are reachable:
+   * above the top bucket, which was always possible, and below the bottom one,
+   * which free spells made possible in `4c75dd51`.
+   */
+  describe('a creature outside every planned curve bucket', () => {
+    function recost(entry: Entry, generic: number): Entry {
+      if (!isCastable(entry.card)) throw new Error(`${entry.card.name} has no mana cost to move`);
+      return { ...entry, card: { ...entry.card, manaCost: { ...entry.card.manaCost, generic } } };
+    }
+
+    /** Free, and colorless, because a colored pip is a mana value of its own. */
+    function free(entry: Entry): Entry {
+      if (!isCastable(entry.card)) throw new Error(`${entry.card.name} has no mana cost to move`);
+      return { ...entry, card: { ...entry.card, manaCost: ZERO_MANA_COST, colors: [] } };
+    }
+
+    function firstCreature(entries: readonly Entry[]): Entry {
+      const found = entries.find((entry) => entry.card.kind === 'creature');
+      if (found === undefined) throw new Error('allocation printed no creature');
+      return found;
+    }
+
+    it('is named as itself, with its mana value, rather than dropped', () => {
+      const entries = entriesFromAllocation();
+      const subject = firstCreature(entries);
+      const overCost = entries.map((entry) => (entry === subject ? recost(entry, 30) : entry));
+      const findings = checkCurve(overCost, allocation.profile);
+      const unplaceable = findings.filter((item) => item.code === 'CURVE_UNPLACEABLE');
+      expect(unplaceable).toHaveLength(1);
+      expect(unplaceable[0]?.message).toContain(subject.card.name);
+      expect(unplaceable[0]?.message).toContain(`MV ${cardManaValue(recost(subject, 30).card)}`);
+      expect(unplaceable[0]?.slotIds).toStrictEqual([subject.slot.id]);
+    });
+
+    it('is reachable from the cheap end too, now that a card can cost nothing', () => {
+      const entries = entriesFromAllocation();
+      const subject = firstCreature(entries);
+      const freed = entries.map((entry) => (entry === subject ? free(entry) : entry));
+      const findings = checkCurve(freed, allocation.profile);
+      expect(findings.map((item) => item.code)).toContain('CURVE_UNPLACEABLE');
+      expect(findings.find((item) => item.code === 'CURVE_UNPLACEABLE')?.message).toContain('MV 0');
+    });
+
+    /**
+     * Two drops, not one: the band forgives a bucket that is off by one, so a
+     * single dropped creature leaves no shortfall to misattribute. Ninety cards
+     * to give one group enough creatures to lose two of.
+     */
+    it('is not also blamed by the shortfall its absence causes', () => {
+      const full = allocateSlots(parseBrief({ ...TEST_BRIEF, targetSize: 90 }));
+      const entries = entriesFor(full.slots);
+      const group = entries.filter(
+        (entry) =>
+          entry.slot.color === 'W' && entry.slot.rarity === 'common' && entry.card.kind === 'creature',
+      );
+      const dropped = group.slice(0, 3);
+      expect(dropped).toHaveLength(3);
+      const overCost = entries.map((entry) => (dropped.includes(entry) ? recost(entry, 30) : entry));
+      const findings = checkCurve(overCost, full.profile);
+      expect(findings.filter((item) => item.code === 'CURVE_UNPLACEABLE')).toHaveLength(3);
+      const mismatch = findings.find(
+        (item) => item.code === 'CURVE_MISMATCH' && item.message.includes('common:W'),
+      );
+      if (mismatch === undefined) throw new Error('the drops left no curve shortfall to attribute');
+      for (const entry of dropped) expect(mismatch.slotIds).not.toContain(entry.slot.id);
+      expect(mismatch.slotIds.length).toBeGreaterThan(0);
+    });
+  });
+
   it('catches duplicate names and functional reprints', () => {
     const entries = entriesFromAllocation();
     const first = entries[0];
@@ -699,5 +772,93 @@ describe('validateGeneratedSet', () => {
 describe('the token name bound against the card name bound', () => {
   it('never lets a token be named longer than a card', () => {
     expect(TOKEN_NAME_MAX_LENGTH).toBeLessThanOrEqual(CARD_NAME_MAX_LENGTH);
+  });
+});
+
+/**
+ * The two ways a mechanic reaches no common slot, told apart (`mtg-xjfa`).
+ *
+ * `MECHANIC_UNPLACEABLE` used to assert one of them whichever had happened: that
+ * the allocator places a mechanic only by its keywords, effect kinds or ability
+ * kinds and none of those reached a common role in its colors. The second case
+ * below is the one that made that false. Five triggered mechanics in one color
+ * take every common permanent that color has, and the sixth, which asks for an
+ * activated ability, is declined for want of a slot rather than for anything
+ * about its vocabulary: on a brief that states it alone it takes CB01.
+ *
+ * Each case asserts the sentence a person reads is true of the run that
+ * produced it, which for the crowded case means demonstrating the other
+ * sentence would have been a lie rather than merely assuming it.
+ */
+describe('why a mechanic was never allocated a common slot', () => {
+  const vocabulary = parseBrief({
+    ...TEST_BRIEF,
+    mechanics: [
+      { name: 'Probe', description: 'One vocabulary at a time.', keywords: ['flying'], colors: ['W'] },
+    ],
+  });
+
+  const ACTIVATED = {
+    name: 'Six',
+    description: 'A part fused on stays fused.',
+    abilityKinds: ['activated'],
+    colors: ['B'],
+  } as const;
+  const crowdedBrief = parseBrief({
+    ...TEST_BRIEF,
+    mechanics: [
+      ...['One', 'Two', 'Three', 'Four', 'Five'].map((name) => ({
+        name,
+        description: 'A slain Monster leaves something behind.',
+        abilityKinds: ['triggered' as const],
+        colors: ['B' as const],
+      })),
+      ACTIVATED,
+    ],
+  });
+  const crowded = allocateSlots(crowdedBrief);
+
+  function entriesOf(allocated: typeof crowded): Entry[] {
+    return allocated.slots.map((item) => {
+      const assembly = assembleCard(item, synthesizeCard(item), allocated.brief.setCode);
+      if (assembly.card === undefined) {
+        throw new Error(`synthesized card for ${item.id} is invalid: ${JSON.stringify(assembly.violations)}`);
+      }
+      return { slot: item, card: assembly.card };
+    });
+  }
+
+  it('says the vocabulary reached no common role when nothing was declined', () => {
+    const [unplaceable] = checkMechanicCoverage([], vocabulary.mechanics, []);
+    expect(unplaceable?.code).toBe('MECHANIC_UNPLACEABLE');
+    expect(unplaceable?.message).toContain('none of those reached a common role');
+    expect(allocateSlots(vocabulary).abilityDeclines).toStrictEqual([]);
+  });
+
+  it('says the commons ran out of permanents when the ability pass declined', () => {
+    const findings = checkMechanicCoverage(
+      entriesOf(crowded),
+      crowdedBrief.mechanics,
+      crowded.abilityDeclines,
+    );
+    expect(findings).toHaveLength(1);
+    const [six] = findings;
+    expect(six?.code).toBe('MECHANIC_UNPLACEABLE');
+    expect(six?.message).toContain('"Six"');
+    expect(six?.message).toContain('every common that carries an ability was already carrying another');
+    expect(six?.message).not.toContain('none of those reached a common role');
+  });
+
+  it('is the run the vocabulary sentence would have lied about', () => {
+    const commons = crowded.abilityDeclines.filter((item) => item.rarity === 'common');
+    expect(commons.map((item) => item.mechanic)).toContain('Six');
+    expect(commons.every((item) => item.reason === 'noPermanentSlotLeft')).toBe(true);
+    // The same mechanic, stated on its own, takes a common slot. So nothing
+    // about its vocabulary kept it off one.
+    const alone = allocateSlots(parseBrief({ ...TEST_BRIEF, mechanics: [ACTIVATED] }));
+    expect(alone.abilityDeclines).toStrictEqual([]);
+    expect(
+      alone.slots.filter((item) => item.rarity === 'common' && item.mechanics.includes('Six')),
+    ).not.toStrictEqual([]);
   });
 });

@@ -45,8 +45,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createElement as h, Fragment } from 'react';
-import type { ReactElement } from 'react';
+import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { isLand, parseCards, setBasics } from '@mtg/dsl';
 import type { Card as DslCard } from '@mtg/dsl';
@@ -70,7 +69,7 @@ const creatures = cards.filter((card) => card.kind === 'creature').slice(0, 3);
 function creature(index: number): DslCard {
   const card = creatures[index % creatures.length];
   if (card === undefined) throw new Error('the fixture set has no creature to fill a battlefield with');
-  return card;
+  return { ...card, id: `${card.id}-position-${String(index)}` };
 }
 
 function land(index: number): DslCard {
@@ -132,30 +131,6 @@ function session(spells: number, lands: number): GameSession {
   };
 }
 
-/**
- * The page furniture the real route draws above the mat: the page title, the
- * precon/sealed switch and the turn badge, as `./spells-row-floor.browser.test.ts`
- * reproduces them and for the reason it records.
- */
-function routeFurniture(): ReactElement {
-  return h(
-    Fragment,
-    null,
-    h('h1', { className: 'mtg-page-title' }, 'Play'),
-    h(
-      'div',
-      { className: 'mtg-toolbar', role: 'group', 'aria-label': 'How to play' },
-      h(
-        'button',
-        { type: 'button', className: 'mtg-btn', 'aria-pressed': true, 'data-variant': 'primary' },
-        'Preconstructed decks',
-      ),
-      h('button', { type: 'button', className: 'mtg-btn', 'aria-pressed': false }, 'Open a sealed pool'),
-    ),
-    h('span', { className: 'mtg-badge' }, 'Turn 6: You'),
-  );
-}
-
 function page(game: GameSession, rail: 'open' | 'shut'): string {
   const markup = renderToStaticMarkup(
     h(Shell, {
@@ -165,7 +140,6 @@ function page(game: GameSession, rail: 'open' | 'shut'): string {
       children: h(
         'div',
         { className: 'mtg-play-route' },
-        routeFurniture(),
         h(PlayView, {
           session: game,
           viewer: 0,
@@ -210,9 +184,19 @@ const MEASURE = `(() => {
     box.bottom = Math.min(box.bottom, view.bottom);
     return box;
   };
-  const widths = (seat) => [...document.querySelectorAll(
+  const faces = (seat) => [...document.querySelectorAll(
     "[data-seat='" + seat + "'] .mtg-board__spells .mtg-slot[data-slot='play'] > .mtg-card"
-  )].map((face) => { const box = visible(face); return round(Math.max(0, box.right - box.left)); });
+  )];
+  const widths = (seat) => faces(seat).map((face) => { const box = visible(face); return round(Math.max(0, box.right - box.left)); });
+  /* The drawn face rather than its visible box, twice over: a face clipped by
+     the row's scroller is still drawn at the row's size and is still
+     card-shaped, so both the trim and "did the card get smaller" are claims
+     about the drawing rather than about how much of it is on screen. */
+  const drawn = (seat) => faces(seat).map((face) => round(face.getBoundingClientRect().width));
+  const trims = (seat) => faces(seat).map((face) => {
+    const rect = face.getBoundingClientRect();
+    return rect.height === 0 ? null : Math.round((rect.width / rect.height) * 1000) / 1000;
+  });
   const rowHeight = (seat) => {
     const row = document.querySelector("[data-seat='" + seat + "'] .mtg-board__spells");
     if (row === null) return null;
@@ -231,6 +215,9 @@ const MEASURE = `(() => {
     nearMin: near.length === 0 ? null : Math.min(...near),
     farMax: far.length === 0 ? null : Math.max(...far),
     nearRowHeight: rowHeight('you'),
+    nearDrawn: drawn('you'),
+    nearTrims: trims('you'),
+    farTrims: trims('opponent'),
     handWidth: handSlot === null ? null : round(handSlot.getBoundingClientRect().width)
   };
 })()`;
@@ -243,6 +230,9 @@ interface Reading {
   readonly nearMin: number | null;
   readonly farMax: number | null;
   readonly nearRowHeight: number | null;
+  readonly nearDrawn: readonly number[];
+  readonly nearTrims: readonly (number | null)[];
+  readonly farTrims: readonly (number | null)[];
   readonly handWidth: number | null;
 }
 
@@ -269,42 +259,186 @@ const VIEWPORTS = [
 /** Rounding slack, the same half pixel `../../tools/board-budget.ts` compares on. */
 const SLACK_PX = 0.5;
 
+/**
+ * The other half of the collapse, and the one `mtg-u9uc`'s two properties do
+ * not reach.
+ *
+ * That bug was an *inversion* — the viewer's face came out under the
+ * opponent's — and the assertion above is that inversion plus the near row
+ * never getting shorter. Both compare two things measured in the same page.
+ * `mtg-t34` is the comparison across the two pages: shutting the panel is sold
+ * as buying board, so a face may not come back smaller than the one the open
+ * panel drew. It measured a reading that went backwards — 1280x800 with four
+ * permanents a side, where the board face fell 82.6px to 77.0 on collapse,
+ * because the whole 228px reclaim went to the hand row's height and the row
+ * under it paid for it.
+ *
+ * Those two properties can hold while this one fails, which is why it is a
+ * second assertion rather than a stronger form of the first: a collapse that
+ * shrinks *both* seats' faces equally keeps near at or above far, and a row
+ * that keeps its height while its slot count grows still draws a smaller card.
+ *
+ * **The drawn face, not its visible box.** The assertion above compares
+ * clipped boxes because a face the scroller has taken off screen is not a face
+ * the viewer can compare to the opponent's. This one compares
+ * `getBoundingClientRect` widths, because "the card got smaller" is a claim
+ * about what was drawn and a face scrolled half out of the row is drawn at the
+ * row's size. Reading the clipped box here would let a scroll position that
+ * moved by a pixel read as a shrunken card. Both are printed, and the pair is
+ * the more useful record anyway: at 1024x768 with twelve a side, collapsing
+ * takes the row from six faces and a sliver to nine and a sliver at the same
+ * 64.4px, which is the reclaim doing the other thing it can do with the width.
+ *
+ * The viewports are the bead's four plus two more, and the two are why the
+ * outcome half of this is measured rather than asserted. Zeroing
+ * `--hand-basis-trim` — the pre-`mtg-u9uc` behavior, where the hand is sized
+ * from the widened lane — moves no battlefield face by a pixel at any of the
+ * bead's four: at 1440x900, 1280x800 and 1024x768 the hand slot is held by a
+ * ceiling in both rail states (7.5rem, then the short-table 5.5, then the
+ * crowded 5.25), and 810x1080 is under `THREE_COLUMN_MIN_WIDTH_PX`, where the
+ * mat is the narrow arrangement and its battlefield is not sized against the
+ * hand at all — the hand there goes 48px to 74.2 under the neuter and the
+ * board does not move. A rig reading only those four would report the fix
+ * holding a property the clamps are holding.
+ *
+ * 1280x900 and 1366x900 are where the slot sits between its floor and its
+ * ceiling, which is the band `./rail-collapse-board`'s first assertion already
+ * chose for the same reason. Zeroing the trim there moves the hand 101.1px to
+ * 120 and costs the near battlefield row 13.1px and its face 9.0px — so the
+ * constant is load-bearing, and worth naming in pixels rather than in prose.
+ *
+ * **What still cannot go red, and why that is the finding.** Even with the
+ * trim zeroed, no face comes back *smaller* than the open panel drew it:
+ * 101.1 open against 111.2 shut at 1280x900. The collapse hands the lane 228px
+ * and the widest the hand can take of that is about 33, so the second
+ * assertion below is now structurally unfailable from `styles/board/hand.ts`
+ * alone. It was failable when `mtg-t34` was written — 1280x800 with four a
+ * side read 82.6 open against 77.0 shut — and the geometry moved out from
+ * under it: the spells row became a size container (`6141773`), so a
+ * battlefield face is the largest card that fits its row rather than what is
+ * left of the column's height after the hand has taken its share.
+ *
+ * So the first assertion is the one that bites and the second is the bead's
+ * own words held to. They are both kept: the first is about the mechanism and
+ * would go red the moment the hand starts taking the reclaim again, the second
+ * is about the outcome and is what anybody actually cares about, and a
+ * mechanism assertion alone is how a guard ends up defending a constant
+ * instead of a card.
+ */
+const FACE_DENSITIES = [4, 8, 12] as const;
+const FACE_LANDS = 5;
+const FACE_VIEWPORTS = [
+  [1440, 900],
+  [1280, 800],
+  [1024, 768],
+  [810, 1080],
+  [1280, 900],
+  [1366, 900],
+] as const;
+
+/** The printed trim, `CARD_TRIM_MM.width / CARD_TRIM_MM.height`, and its slack. */
+const PRINTED_TRIM = 63 / 88;
+const TRIM_SLACK = 0.01;
+
+/**
+ * One browser, one temp directory, and the cleanup written once.
+ *
+ * Both assertions below need the same four steps in the same order — make a
+ * directory, start Chrome, do the work, put both back whichever way the work
+ * ended — and the failure mode of writing that twice is not a longer file: it
+ * is one copy that reports the body's error and swallows the cleanup's, or the
+ * reverse. `AggregateError` with the body first is what keeps a Chrome that
+ * would not shut down from hiding the assertion that failed.
+ */
+async function withChrome(
+  body: (chrome: Awaited<ReturnType<typeof launchChrome>>, directory: string) => Promise<void>,
+): Promise<void> {
+  const directory = await mkdtemp(join(tmpdir(), 'mtg-rail-collapse-'));
+  let chrome: Awaited<ReturnType<typeof launchChrome>> | null = null;
+  let bodyError: unknown;
+  try {
+    chrome = await launchChrome(join(directory, 'chrome'));
+    await body(chrome, directory);
+  } catch (error) {
+    bodyError = error;
+  }
+
+  const cleanupErrors: Error[] = [];
+  if (chrome !== null) {
+    try {
+      await shutdownChrome(chrome);
+    } catch (error) {
+      cleanupErrors.push(error instanceof Error ? error : new Error(String(error)));
+    }
+  }
+  try {
+    await rm(directory, { recursive: true, force: true });
+  } catch (error) {
+    cleanupErrors.push(new Error(`could not remove Chrome fixture ${directory}: ${reason(error)}`));
+  }
+  if (bodyError !== undefined) {
+    cleanupErrors.unshift(bodyError instanceof Error ? bodyError : new Error(String(bodyError)));
+  }
+  if (cleanupErrors.length > 0) {
+    throw new AggregateError(
+      cleanupErrors,
+      `rail collapse Chrome run or cleanup failed: ${cleanupErrors.map((error) => error.message).join('; ')}`,
+    );
+  }
+}
+
+/** Both rail states of one board, at one viewport, measured through one page each. */
+async function readBoth(
+  chrome: Awaited<ReturnType<typeof launchChrome>>,
+  files: Record<'open' | 'shut', string>,
+  width: number,
+  height: number,
+): Promise<Record<'open' | 'shut', Reading>> {
+  return {
+    open: (await measurePage(
+      chrome.client,
+      files.open,
+      width,
+      height,
+      MEASURE,
+      'rail-open',
+    )) as unknown as Reading,
+    shut: (await measurePage(
+      chrome.client,
+      files.shut,
+      width,
+      height,
+      MEASURE,
+      'rail-shut',
+    )) as unknown as Reading,
+  };
+}
+
+/** The two pages one board is measured through, written once per board. */
+async function pagesFor(
+  directory: string,
+  game: GameSession,
+  tag: string,
+): Promise<Record<'open' | 'shut', string>> {
+  const files: Record<'open' | 'shut', string> = { open: '', shut: '' };
+  for (const rail of ['open', 'shut'] as const) {
+    const file = join(directory, `board-${tag}-${rail}.html`);
+    await writeFile(file, page(game, rail), 'utf8');
+    files[rail] = file;
+  }
+  return files;
+}
+
 describe('collapsing the side panel spends the reclaim on the battlefield', () => {
   browserIt(
     'never draws the viewer a smaller face than the opponent, and never shortens the near row',
     async () => {
-      const directory = await mkdtemp(join(tmpdir(), 'mtg-rail-collapse-'));
-      let chrome: Awaited<ReturnType<typeof launchChrome>> | null = null;
-      let bodyError: unknown;
-      try {
-        chrome = await launchChrome(join(directory, 'chrome'));
+      await withChrome(async (chrome, directory) => {
         for (const board of BOARDS) {
           const game = session(board.spells, board.lands);
-          const files: Record<'open' | 'shut', string> = { open: '', shut: '' };
-          for (const rail of ['open', 'shut'] as const) {
-            const file = join(directory, `board-${String(board.spells)}-${rail}.html`);
-            await writeFile(file, page(game, rail), 'utf8');
-            files[rail] = file;
-          }
+          const files = await pagesFor(directory, game, String(board.spells));
           for (const [width, height] of VIEWPORTS) {
-            const readings: Record<'open' | 'shut', Reading> = {
-              open: (await measurePage(
-                chrome.client,
-                files.open,
-                width,
-                height,
-                MEASURE,
-                'rail-open',
-              )) as unknown as Reading,
-              shut: (await measurePage(
-                chrome.client,
-                files.shut,
-                width,
-                height,
-                MEASURE,
-                'rail-shut',
-              )) as unknown as Reading,
-            };
+            const readings = await readBoth(chrome, files, width, height);
             for (const rail of ['open', 'shut'] as const) {
               const reading = readings[rail];
               const where = `${String(board.spells)} permanents, rail ${rail}, ${String(width)}x${String(height)}`;
@@ -325,33 +459,63 @@ describe('collapsing the side panel spends the reclaim on the battlefield', () =
             ).toBeGreaterThanOrEqual((readings.open.nearRowHeight ?? 0) - SLACK_PX);
           }
         }
-      } catch (error) {
-        bodyError = error;
-      }
-
-      const cleanupErrors: Error[] = [];
-      if (chrome !== null) {
-        try {
-          await shutdownChrome(chrome);
-        } catch (error) {
-          cleanupErrors.push(error instanceof Error ? error : new Error(String(error)));
-        }
-      }
-      try {
-        await rm(directory, { recursive: true, force: true });
-      } catch (error) {
-        cleanupErrors.push(new Error(`could not remove Chrome fixture ${directory}: ${reason(error)}`));
-      }
-      if (bodyError !== undefined) {
-        cleanupErrors.unshift(bodyError instanceof Error ? bodyError : new Error(String(bodyError)));
-      }
-      if (cleanupErrors.length > 0) {
-        throw new AggregateError(
-          cleanupErrors,
-          `rail collapse Chrome run or cleanup failed: ${cleanupErrors.map((error) => error.message).join('; ')}`,
-        );
-      }
+      });
     },
     180_000,
+  );
+
+  browserIt(
+    'gives the hand slot none of the reclaim, and never draws a face smaller than the open panel drew',
+    async () => {
+      await withChrome(async (chrome, directory) => {
+        for (const spells of FACE_DENSITIES) {
+          const game = session(spells, FACE_LANDS);
+          const files = await pagesFor(directory, game, `face-${String(spells)}`);
+          for (const [width, height] of FACE_VIEWPORTS) {
+            const readings = await readBoth(chrome, files, width, height);
+            const where = `${String(spells)} permanents, ${String(width)}x${String(height)}`;
+            console.log(
+              `${where}: drawn open ${String(readings.open.nearDrawn[0])} shut ${String(readings.shut.nearDrawn[0])}, ` +
+                `visible open ${JSON.stringify(readings.open.near)} shut ${JSON.stringify(readings.shut.near)}, ` +
+                `hand open ${String(readings.open.handWidth)} shut ${String(readings.shut.handWidth)}, ` +
+                `trims ${JSON.stringify(readings.shut.nearTrims)}`,
+            );
+            // Index by index rather than min against min: the row is ordered
+            // and a collapse that shrank one face while growing another would
+            // pass a comparison of the two extremes.
+            expect(
+              readings.shut.nearDrawn.length,
+              `${where}: the two states drew a different number of faces`,
+            ).toBe(readings.open.nearDrawn.length);
+            for (const [index, open] of readings.open.nearDrawn.entries()) {
+              expect(
+                readings.shut.nearDrawn[index] ?? 0,
+                `${where}: face ${String(index)} shrank on collapse, ${String(open)} to ${String(readings.shut.nearDrawn[index])}`,
+              ).toBeGreaterThanOrEqual(open - SLACK_PX);
+            }
+            for (const rail of ['open', 'shut'] as const) {
+              for (const [index, trim] of readings[rail].nearTrims.entries()) {
+                expect(trim, `${where}, rail ${rail}: face ${String(index)} was not drawn`).not.toBeNull();
+                expect(
+                  Math.abs((trim ?? 0) - PRINTED_TRIM),
+                  `${where}, rail ${rail}: face ${String(index)} reads ${String(trim)} against the printed ${PRINTED_TRIM.toFixed(3)}`,
+                ).toBeLessThanOrEqual(TRIM_SLACK);
+              }
+            }
+            // Equal, not merely no smaller. `--hand-basis-trim` sizes the hand
+            // from the lane as the open state would have measured it, so the
+            // two readings are the same number by construction and either
+            // direction of drift is the fix coming undone: smaller is a hand
+            // paying for the board, larger is the board paying for the hand,
+            // which is the bead.
+            expect(
+              Math.abs((readings.shut.handWidth ?? 0) - (readings.open.handWidth ?? 0)),
+              `${where}: the collapse moved the hand slot, ${String(readings.open.handWidth)} to ${String(readings.shut.handWidth)}`,
+            ).toBeLessThanOrEqual(SLACK_PX);
+          }
+        }
+      });
+    },
+    300_000,
   );
 });

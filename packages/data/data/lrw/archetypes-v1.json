@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "formatId": "lrw",
+  "archetypes": [
+    {
+      "id": "white-green-kithkin",
+      "name": "White-Green Kithkin",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Wizened Cenn",
+        "physicalId": "lrw-printed-v1:0049:585f1c8e-6898-4def-8e3f-d45cd263f776"
+      },
+      "plan": "Build around Wizened Cenn: Curve out with Kithkin, strengthen the whole team with tribal bonuses, and keep pressure on slower decks through combat."
+    },
+    {
+      "id": "white-blue-merfolk",
+      "name": "White-Blue Merfolk",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Summon the School",
+        "physicalId": "lrw-printed-v1:0042:13a4c124-216b-44b1-b49a-3db3f033e4cd"
+      },
+      "plan": "Build around Summon the School: Develop a wide Merfolk board, tap creatures for value, and recur the token maker to win a longer game."
+    },
+    {
+      "id": "blue-black-faeries",
+      "name": "Blue-Black Faeries",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Dreamspoiler Witches",
+        "physicalId": "lrw-printed-v1:0108:7d5c2487-5da0-4d9a-beb2-598feeb068a1"
+      },
+      "plan": "Build around Dreamspoiler Witches: Play at instant speed, disrupt opposing turns, and let evasive Faeries convert tempo into steady damage."
+    },
+    {
+      "id": "black-red-goblins",
+      "name": "Black-Red Goblins",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Mad Auntie",
+        "physicalId": "lrw-printed-v1:0123:39b1655b-ab0a-40d9-8d4d-55d13310ede1"
+      },
+      "plan": "Build around Mad Auntie: Trade Goblins freely, recur useful bodies, and use tribal bonuses and removal to keep attacks profitable."
+    },
+    {
+      "id": "red-white-giants",
+      "name": "Red-White Giants",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Thundercloud Shaman",
+        "physicalId": "lrw-printed-v1:0195:5864f207-2878-461b-8ff6-76475abc324d"
+      },
+      "plan": "Build around Thundercloud Shaman: Use early interaction and cost reduction to reach large Giants, then turn their size and arrival effects into control of combat."
+    },
+    {
+      "id": "black-green-elves",
+      "name": "Black-Green Elves",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Imperious Perfect",
+        "physicalId": "lrw-printed-v1:0220:706fce74-fed9-4bf7-949d-7df6bef29238"
+      },
+      "plan": "Build around Imperious Perfect: Accumulate Elf tokens and tribal payoffs, use black removal to clear blockers, and overwhelm the battlefield."
+    },
+    {
+      "id": "five-color-elementals",
+      "name": "Five-Color Elementals",
+      "colors": ["W", "U", "B", "R", "G"],
+      "signpost": {
+        "name": "Incandescent Soulstoke",
+        "physicalId": "lrw-printed-v1:0178:c8829b3c-5267-44c6-b709-c2dfc683b0a8"
+      },
+      "plan": "Build around Incandescent Soulstoke: Use Elemental mana fixing to cast threats across colors, then exploit tribal bonuses and temporary creatures for explosive turns."
+    },
+    {
+      "id": "white-black-green-treefolk",
+      "name": "White-Black-Green Treefolk",
+      "colors": ["W", "B", "G"],
+      "signpost": {
+        "name": "Doran, the Siege Tower",
+        "physicalId": "lrw-printed-v1:0247:b006b169-295d-4ead-8e8e-29a9c3246025"
+      },
+      "plan": "Build around Doran, the Siege Tower: Fix three colors, defend with high-toughness Treefolk, and turn those defensive bodies into efficient attackers."
+    }
+  ]
+}

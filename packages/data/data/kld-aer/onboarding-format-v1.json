@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "kld-aer",
+  "name": "Kaladesh / Aether Revolt",
+  "sourceCodes": ["AER", "KLD", "MPS"],
+  "products": [
+    { "id": "aer-draft", "setCode": "AER", "boosterKey": "draft" },
+    { "id": "kld-draft", "setCode": "KLD", "boosterKey": "draft" }
+  ],
+  "draft": {
+    "seats": 8,
+    "rounds": ["aer-draft", "aer-draft", "kld-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["aer-draft", "aer-draft", "aer-draft", "aer-draft", "kld-draft", "kld-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

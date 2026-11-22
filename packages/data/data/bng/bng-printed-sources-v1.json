@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-20T02:47:52.657Z",
+  "sources": [
+    {
+      "code": "BNG",
+      "mtgjson": {
+        "file": "BNG-4ab38cf829345a63bd623b2a146e8e05df3ed1f6e3ac091a391d026e28f62cd4.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/BNG.json",
+        "sha256": "4ab38cf829345a63bd623b2a146e8e05df3ed1f6e3ac091a391d026e28f62cd4",
+        "meta": {
+          "date": "2026-09-19",
+          "version": "5.3.0+20260919"
+        }
+      },
+      "scryfall": {
+        "file": "BNG-0e2af87ecd75b5f3f2a069bf688cd6f16b76210a5c1dbf3e69aab13dc4173231.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Abng+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "0e2af87ecd75b5f3f2a069bf688cd6f16b76210a5c1dbf3e69aab13dc4173231",
+        "cards": 165
+      }
+    },
+    {
+      "code": "THS",
+      "mtgjson": {
+        "file": "THS-ce27f9e1b51a4d938ae959d7c0a505d4b6163f6ecd84374583bf5adf4ef2d5b2.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/THS.json",
+        "sha256": "ce27f9e1b51a4d938ae959d7c0a505d4b6163f6ecd84374583bf5adf4ef2d5b2",
+        "meta": {
+          "date": "2026-09-19",
+          "version": "5.3.0+20260919"
+        }
+      },
+      "scryfall": {
+        "file": "THS-47ea82de700ca6f3f1b54476c48e706c37bb4df5c55635eb2e0f35963091dbde.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Aths+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "47ea82de700ca6f3f1b54476c48e706c37bb4df5c55635eb2e0f35963091dbde",
+        "cards": 249
+      }
+    }
+  ]
+}

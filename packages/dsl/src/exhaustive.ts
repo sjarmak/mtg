@@ -8,7 +8,8 @@
  * fails `npm run typecheck` rather than a runtime assertion.
  */
 import type { Ability, StaticModification } from './abilities';
-import type { Card, KeywordAbility } from './card';
+import type { Card } from './card';
+import type { KeywordAbility } from './keyword-ability';
 import type { Effect } from './effects';
 import type { ModelTargetKind, TargetSpec } from './targets';
 import type {
@@ -69,7 +70,7 @@ export type AbilityKindsCovered = MutuallyAssignable<Ability['kind'], (typeof AB
 
 /**
  * Has teeth: `KeywordAbilitySchema` writes each `kind` as a hand-written
- * literal, the same as `AbilityKindsCovered` above. A sixth `KeywordAbility`
+ * literal, the same as `AbilityKindsCovered` above. An eighth `KeywordAbility`
  * kind added to the schema without a matching entry in `KEYWORD_ABILITY_KINDS`
  * fails here, before `reminder.test.ts`'s runtime check ever gets a chance to
  * notice the kind prints with no reminder (mtg-josx).

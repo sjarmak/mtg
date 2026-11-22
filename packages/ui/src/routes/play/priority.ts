@@ -70,10 +70,12 @@
  */
 import { createElement } from 'react';
 import type { ReactElement } from 'react';
-import type { PlayerId } from '@mtg/kernel';
+import type { SeatId } from '@mtg/engine';
+import type { YieldBoundary } from '@mtg/kernel';
 import { seatVerb } from '../../seat';
+import { LAND_DROP_LABEL } from './land-drop';
 import { passButton } from './pass';
-import type { SeatNames } from './position';
+import { undoButton } from './undo';
 
 /** The accessible name of the block, which is how every test finds it. */
 export const PRIORITY_LABEL = 'Priority';
@@ -136,9 +138,9 @@ export const HELD_OVER_YOUR_OWN = 'and may respond to it';
  * blocker assignment, an ordering — and those are precisely the moments a player
  * would otherwise wonder why the pass is dead.
  */
-export function priorityHolderText(holder: PlayerId | null, names: SeatNames): string {
+export function priorityHolderText(holder: SeatId | null, names: readonly string[]): string {
   if (holder === null) return 'Nobody has priority';
-  const label = names[holder];
+  const label = names[holder] ?? `Seat ${String(holder + 1)}`;
   return `${label} ${seatVerb(label, 'has', 'have')} priority`;
 }
 
@@ -150,8 +152,9 @@ export function stackDepthText(depth: number): string {
 
 export interface PriorityFootInput {
   /** `GameState.turn.priority`: the kernel's answer, never a guess. */
-  readonly holder: PlayerId | null;
-  readonly names: SeatNames;
+  readonly holder: SeatId | null;
+  /** One name per seat, in table order: two at a duel and more at a pod. */
+  readonly names: readonly string[];
   readonly stackDepth: number;
   /**
    * True when the viewer holds priority and the top of the stack is theirs —
@@ -177,6 +180,36 @@ export interface PriorityFootInput {
    * it because this block is where the pass is.
    */
   readonly keyNote?: string | null;
+  /**
+   * A yield the pass's second gesture can take, and whether it can be taken.
+   *
+   * `mtg-nxh`: the options are the turn badge's own (`./yields.ts`), reached
+   * from the control the player is already holding. A caller with no yield to
+   * offer gets the button it always had, with no second gesture on it.
+   */
+  readonly canYield?: boolean;
+  readonly onYield?: ((boundary: YieldBoundary) => void) | undefined;
+  /**
+   * The take-back and whether the kernel would move on it (`mtg-bz2.15`).
+   *
+   * A caller that owns no session to rewind passes no `onUndo` and gets no
+   * control, which is the rule every other optional control on this surface
+   * answers to: `@mtg/netplay` has no undo across a wire. `./undo.ts` says why
+   * the control is drawn unavailable rather than withheld, and why it is here
+   * rather than beside the odometer it undoes.
+   */
+  readonly canUndo?: boolean;
+  readonly onUndo?: (() => void) | undefined;
+  /**
+   * What `./land-drop.ts` had to say about the unspent land drop, or null.
+   *
+   * Drawn here because this is where the pass is, and the pass is the control
+   * that spends the window the drop would have been taken in (`mtg-re3`). It is
+   * a sentence rather than a confirm and it does not touch `passAt`: holding a
+   * land is a real decision, and a surface that refused the pass would be wrong
+   * about the game twice a turn.
+   */
+  readonly landNote?: string | null;
 }
 
 /**
@@ -193,6 +226,7 @@ export interface PriorityFootInput {
 export function priorityFoot(input: PriorityFootInput): ReactElement {
   const { holder, names, stackDepth, overYourOwn, passAt, onPass } = input;
   const keyNote = input.keyNote ?? null;
+  const landNote = input.landNote ?? null;
   const who = priorityHolderText(holder, names);
   const depth = stackDepthText(stackDepth);
   return createElement(
@@ -201,7 +235,18 @@ export function priorityFoot(input: PriorityFootInput): ReactElement {
     // The one clause the ask column above cannot give: that the object on top of
     // the stack is the asked seat's own, so the window is theirs to spend.
     overYourOwn ? createElement('p', { className: 'mtg-priority__own' }, HELD_OVER_YOUR_OWN) : null,
-    passButton(passAt, onPass),
+    // Above the button rather than below it, alongside the other clause the ask
+    // column cannot give, so a player reading down the column meets it before
+    // reaching the control it is about.
+    landNote === null ? null : createElement('p', { className: 'mtg-priority__land' }, landNote),
+    passButton({
+      at: passAt,
+      landDrop: landNote !== null,
+      onPass,
+      canYield: input.canYield ?? false,
+      onYield: input.onYield,
+    }),
+    input.onUndo === undefined ? null : undoButton({ canUndo: input.canUndo ?? false, onUndo: input.onUndo }),
     // Always rendered: a live region has to be in the document before its text
     // changes or the change is silent.
     createElement(
@@ -213,6 +258,22 @@ export function priorityFoot(input: PriorityFootInput): ReactElement {
         'aria-label': PRIORITY_STATUS_LABEL,
       },
       `${who}, ${depth}${overYourOwn ? `, ${HELD_OVER_YOUR_OWN}` : ''}. ${input.stepText}.`,
+    ),
+    // A fifth region would be a fifth channel, and this file already argues that
+    // three unnamed ones are one. So the land note gets a region of its own and
+    // a name, for the reason the pass key's has one: it answers a *position*
+    // that arrives and departs mid-turn, and folding it into the running
+    // commentary above would announce the whole position again every time the
+    // count changed. Always in the document, so its arrival is a change.
+    createElement(
+      'p',
+      {
+        className: 'mtg-sr-only',
+        role: 'status',
+        'aria-live': 'polite',
+        'aria-label': LAND_DROP_LABEL,
+      },
+      landNote ?? '',
     ),
     // Always in the document, for the reason the region above is: a live region
     // that arrives with its own text has nothing to announce, because nothing

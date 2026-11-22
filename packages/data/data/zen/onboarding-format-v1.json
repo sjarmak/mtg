@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "zen",
+  "name": "Zendikar",
+  "sourceCodes": ["ZEN"],
+  "products": [{ "id": "zen-draft", "setCode": "ZEN", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["zen-draft", "zen-draft", "zen-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["zen-draft", "zen-draft", "zen-draft", "zen-draft", "zen-draft", "zen-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

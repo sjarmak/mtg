@@ -9,6 +9,7 @@
 | **Amended** | 2026-08-10 (`mtg-z3p`): the frame treatment and the face root's vocabulary moved into the specification, after the artifact mark and the multicolor ring were found to have drifted under a green parity suite. §2.1, §2.2, §2.3 and §4 updated with them. |
 | **Amended** | 2026-08-11 (`mtg-bc2.45.8`): the compact face width is now pinned in the test as well as measured off the cascade, which changes what §6.2's own mutation probe reports. §6.2 updated with it. |
 | **Amended** | 2026-08-11 (`mtg-bc2.46`): the DOM face paints its identity as a 7px border rather than as a ground tint, so one of §2.2's four reasons for having no multicolor ring on screen is no longer true. §2.2 updated with what now decides it, and §3 with the play surface it was waiting on. |
+| **Amended** | 2026-08-28 (`mtg-ey09`): the specification left `@mtg/ui` for `@mtg/render-spec` and `@mtg/card-render` stopped depending on `@mtg/ui` in production. §2.1 and §4 updated with it. |
 | **Bead** | `mtg-bc2.45` |
 | **Blocks** | Nothing. This header read `mtg-bc2.46` while the decision was pending; §4 has released it since, and the bead dependency was removed to match. |
 | **Inputs** | `packages/ui/src/card/`, `packages/card-render/src/`, ADR-0001 §5, `the prior-project reuse audit` |
@@ -73,6 +74,19 @@ now lives in one place.
 It sits in `@mtg/ui` rather than in a new package because `@mtg/card-render` already depends on
 `@mtg/ui` and the reverse dependency would be a cycle — and because `@mtg/ui` is already the
 design-source-of-record for the palette.
+
+**Amended 2026-08-28 (`mtg-ey09`).** The specification moved to `@mtg/render-spec`, a package that
+depends on `@mtg/card-geometry` and `@mtg/dsl` and nothing else, and `@mtg/card-render` stopped
+depending on `@mtg/ui` in production. The reason above was sound and it expired: the cycle it
+avoided is avoided by pointing both renderers at a package below them both, which is what
+`@mtg/card-geometry` had already demonstrated one bead earlier (`mtg-plgg`). Every path named in
+this document still resolves — `packages/ui/src/card/anatomy.ts`, `card/identity.ts`,
+`card/symbols.ts`, `card/set-seal.ts`, `card/path.ts`, `styles/number.ts`, `motion/pace.ts` and the
+palette half of `styles/tokens.ts` are re-exports of `@mtg/render-spec` — so read every `anatomy.ts`
+below as the file that names the specification rather than the file that declares it. What stayed in
+`@mtg/ui`'s `card/anatomy.ts` for real is what a *drawing* decides: the region lists, the pip
+glyphs, the rarity seals, `frameTreatment`. What stayed in `styles/tokens.ts` is the route scoping,
+which needs the app's list of tabs and therefore cannot leave the app.
 
 Declared there, and derived from there by both renderers:
 
@@ -323,12 +337,18 @@ name a layout failure rather than a reflow.
 
 * Adding a region to the face is a three-file change — `anatomy.ts`, both renderers — and the parity
   test names the one you forgot.
-* `@mtg/card-render` cannot stop depending on `@mtg/ui` without duplicating the specification, so
-  the dependency direction is now load-bearing rather than incidental. It is more so since `mtg-z3p`:
+* `@mtg/card-render` cannot stop depending on the specification without duplicating it, so the
+  dependency direction is load-bearing rather than incidental. It is more so since `mtg-z3p`:
   the printed face no longer imports two color-identity functions and assembles a treatment from
   them, it takes the treatment itself, so the specification decides what varies and the package
-  decides only how it is drawn. A `@mtg/card-face` package holding `anatomy.ts` + `tokens.ts` would
-  be the right shape if a third consumer ever appears; two consumers do not justify it.
+  decides only how it is drawn. This bullet used to end by saying a `@mtg/card-face` package holding
+  `anatomy.ts` + `tokens.ts` would be the right shape if a third consumer ever appeared, and that
+  two consumers did not justify it. `mtg-ey09` built it anyway, as `@mtg/render-spec`, and the
+  trigger was not a third consumer: it was that the arrow itself was the cost. A printed SVG
+  renderer that names `@mtg/ui` drags React, the kernel and the simulator behind every question it
+  asks about a pip, and a boundary nothing checks is a boundary that drifts. The check is
+  `packages/slice/test/package-surfaces.test.ts`, which reads every `@mtg` import under every
+  package's `src/` and fails an arrow no list declares.
 * `mtg-bc2.46` may change the play surface freely. Any card-face change it makes lands in
   `anatomy.ts` or fails the parity test. It has since run: the play surface became a playmat with
   the zones as wells and the identity as a printed border, and the two changes that reached the

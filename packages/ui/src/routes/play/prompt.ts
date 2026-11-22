@@ -1,12 +1,11 @@
 /**
  * The kernel's pending decision, in words a person can act on.
  *
- * This module labels; it never decides. Every choice it returns is an index
- * into `decision.options`, so the set of things the UI can offer is exactly the
- * set the kernel already ruled legal from this state. There is deliberately no
- * path here that builds an `Action`: if a move is not in the enumeration, no
- * amount of clicking can reach it, which is the difference between an illegal
- * action being unrepresentable and it being rejected after the fact.
+ * This module labels; it never decides. Enumerated choices remain indices into
+ * `decision.options`. A free-text decision carries the kernel's own bounded
+ * input descriptor instead, because enumerating names would leak hidden decks
+ * and still omit legal names. The rail constructs only the matching typed
+ * answer and `validateAction` rechecks it at the kernel boundary.
  *
  * `truncated` matters and is not decoration. `pendingDecision` caps enumeration,
  * and a capped list means legal moves exist that are not on screen. Saying so is
@@ -14,33 +13,40 @@
  * they were all of them is not.
  */
 import {
+  cardFilterPhrase,
   effectsFor,
   formatManaCost,
+  formatOverloadCost,
   isAttachingAbility,
   renderAbility,
   renderEffect,
   renderOracleText,
 } from '@mtg/dsl';
-import type { Action, Decision, GameState, ObjectId, Step } from '@mtg/kernel';
-import { abilityAt, triggerOnStack, tryObject } from '@mtg/kernel';
-import { seatMention, seatVerb } from '../../seat';
+import type { Card, CardFilter, SearchDestination } from '@mtg/dsl';
+import type { Action, Decision, GameState, ObjectId, PlayerId, Step } from '@mtg/kernel';
+import {
+  currentAbilityAt,
+  copiableValuesOf,
+  opponentOf,
+  spellCardByOid,
+  triggerOnStack,
+  tryObject,
+} from '@mtg/kernel';
+import { seatMention, seatOwn, seatPossessive, seatVerb } from '../../seat';
 import { describeTarget, distinguishingLine, nameOf, permanentName, targetName } from './naming';
 import type { SeatNames } from './position';
 
+export type PlayChoiceKind = Action['type'] | 'other';
+
 export interface PlayChoice {
-  /** Index into `decision.options`. The only thing the UI ever submits. */
+  /** Index into `decision.options`; free-text answers live beside this list. */
   readonly index: number;
   readonly label: string;
   readonly detail: string | null;
-  readonly kind: Action['type'];
-  /**
-   * Objects this choice acts on. It is what makes a card on the table
-   * clickable: `playableFromHand` and `choicesByObject` both read it, and a
-   * card's picker holds the choices that name it. Nothing draws anything from
-   * it on hover; the shipped sheet has no such rule, and the claim that it did
-   * outlived the design it came from.
-   */
+  /** Visual grouping on the shared play surface; `other` is the neutral fallback. */
+  readonly kind: PlayChoiceKind;
   readonly oids: readonly ObjectId[];
+  readonly aimedAt?: readonly ObjectId[];
 }
 
 export interface PlayPrompt {
@@ -49,8 +55,36 @@ export interface PlayPrompt {
   /** One sentence of context under it. */
   readonly explain: string;
   readonly choices: readonly PlayChoice[];
+  /** A constructed free-text answer when the rules cannot enumerate the domain. */
+  readonly textInput: {
+    readonly kind: 'cardName';
+    readonly player: PlayerId;
+    readonly label: string;
+    readonly minLength: number;
+    readonly maxLength: number;
+  } | null;
   /** True when the kernel capped enumeration and legal moves are off-screen. */
   readonly truncated: boolean;
+  /** Optional engine-specific wording; the shared panel owns its placement. */
+  readonly truncationWarning?: string;
+}
+
+function searchDestinationWords(destination: SearchDestination | null | undefined): string {
+  switch (destination) {
+    case 'hand':
+      return 'into hand';
+    case 'battlefield':
+      return 'onto the battlefield';
+    case 'battlefieldTapped':
+      return 'onto the battlefield tapped';
+    case 'exile':
+      return 'into exile';
+    case 'libraryTop':
+      return 'on top of the library';
+    case null:
+    case undefined:
+      return 'into the one-card destination';
+  }
 }
 
 const STEP_LABELS: Readonly<Record<Step, string>> = {
@@ -134,6 +168,27 @@ export function describeStep(state: GameState, names: SeatNames): string {
 }
 
 /**
+ * `Ended on turn 7 · main phase · Player one` — the same three facts, told as a
+ * thing that happened.
+ *
+ * A finished game draws no step bar (`mtg-a1d6`), so where it ended goes back to
+ * game details as a plain badge, and `mtg-rgc.13` was right that dropping it
+ * there would leave a finished game saying less about itself than it said while
+ * it ran. What it kept was the live sentence: `Turn 36 · combat damage · Bot`
+ * over a session the kernel had already settled, which reads as a game waiting
+ * at combat damage for a player who will never be asked again (`mtg-qfv1`).
+ *
+ * The step is the reason this is not simply dropped in favor of the result
+ * panel under it. That panel prints `Bot wins on turn 36: life reached zero`, so
+ * the turn is said twice either way; the step is said once, here, and it is the
+ * only record on the surface of where in the turn play stopped.
+ */
+export function describeEnd(state: GameState, names: SeatNames): string {
+  const step = STEP_LABELS[state.turn.step];
+  return `Ended on turn ${String(state.turn.number)} · ${step} · ${names[state.turn.active]}`;
+}
+
+/**
  * `Turn 7: You` — the same sentence with the step taken out of it.
  *
  * For the strip badge, which sits beside a bar that names all thirteen steps and
@@ -180,13 +235,33 @@ function targetSuffix(state: GameState, names: SeatNames, action: Action): strin
   if (
     action.type !== 'castSpell' &&
     action.type !== 'activateAbility' &&
-    action.type !== 'chooseTriggerTargets'
+    action.type !== 'chooseTriggerTargets' &&
+    action.type !== 'chooseSpellTargets'
   ) {
     return '';
   }
-  const chosen = action.targets.filter((target) => target !== null);
-  if (chosen.length === 0) return '';
-  return `${TARGET_ARROW}${chosen.map((target) => describeTarget(state, names, target)).join(', ')}`;
+  const hasPlural = action.multiTargets !== undefined;
+  const plural = hasPlural
+    ? Object.entries(action.multiTargets)
+        .sort(([left], [right]) => Number(left) - Number(right))
+        .flatMap(([slot, targets]) => {
+          const allocations = action.damageAllocations?.[Number(slot)];
+          return targets.map((target, index) => ({ target, amount: allocations?.[index] }));
+        })
+    : [];
+  const chosen = [
+    ...action.targets.flatMap((target) => (target === null ? [] : [{ target, amount: undefined }])),
+    ...plural,
+  ];
+  if (chosen.length === 0) {
+    return hasPlural ? `${TARGET_ARROW}no targets` : '';
+  }
+  return `${TARGET_ARROW}${chosen
+    .map(
+      ({ target, amount }) =>
+        `${describeTarget(state, names, target)}${amount === undefined ? '' : ` (${String(amount)})`}`,
+    )
+    .join(', ')}`;
 }
 
 /**
@@ -203,7 +278,9 @@ function triggerLine(state: GameState, oid: ObjectId): string | null {
   const pending = triggerOnStack(state, oid);
   if (pending === null) return null;
   const source = tryObject(state, pending.source);
-  return source === undefined ? null : renderAbility(pending.ability, source.card.name);
+  return source === undefined
+    ? null
+    : renderAbility(pending.ability, copiableValuesOf(state, pending.source).name);
 }
 
 /**
@@ -212,8 +289,16 @@ function triggerLine(state: GameState, oid: ObjectId): string | null {
  * offers no other line on screen that says so.
  */
 function spellLine(state: GameState, oid: ObjectId): string | null {
-  const object = tryObject(state, oid);
-  return object === undefined ? null : renderOracleText(object.card);
+  const card = castCard(state, oid);
+  return card === null ? null : renderOracleText(card);
+}
+
+/** Active spell face before, during, or after a resolving free-cast permission. */
+function castCard(state: GameState, oid: ObjectId): Card | null {
+  if (state.pendingFreeCast?.oid === oid && state.pendingFreeCast.card !== undefined) {
+    return state.pendingFreeCast.card;
+  }
+  return spellCardByOid(state, oid) ?? state.objects[oid]?.card ?? null;
 }
 
 /**
@@ -236,11 +321,9 @@ function spellLine(state: GameState, oid: ObjectId): string | null {
  */
 function modeWords(state: GameState, action: Extract<Action, { type: 'castSpell' }>): string {
   if (action.mode === undefined) return '';
-  const object = tryObject(state, action.oid);
-  if (object === undefined) return '';
-  const sentences = effectsFor(object.card, action.mode).map((effect) =>
-    renderEffect(effect, object.card.name),
-  );
+  const card = castCard(state, action.oid);
+  if (card === null) return '';
+  const sentences = effectsFor(card, action.mode).map((effect) => renderEffect(effect, card.name));
   return ` — ${sentences.join(' ')}`;
 }
 
@@ -278,11 +361,16 @@ interface AbilityWords {
  */
 function abilityWords(state: GameState, action: Extract<Action, { type: 'activateAbility' }>): AbilityWords {
   const object = tryObject(state, action.oid);
-  const ability = abilityAt(state, action.oid, action.abilityIndex);
+  const ability = currentAbilityAt(state, action.oid, action.abilityIndex);
   if (object === undefined || ability === undefined) {
     return { act: `Activate ability ${String(action.abilityIndex + 1)}`, note: null };
   }
-  const printed = renderAbility(ability, object.card.name);
+  const printed = renderAbility(ability, copiableValuesOf(state, action.oid).name);
+  if (action.mode !== undefined) {
+    const lines = printed.split('\n');
+    const chosen = lines[action.mode + 1] ?? `Mode ${String(action.mode + 1)}`;
+    return { act: `Activate ${lines[0] ?? printed} ${chosen}`, note: null };
+  }
   if (!isAttachingAbility(ability)) return { act: `Activate ${printed}`, note: null };
   const lines = printed.split('\n');
   const act = lines[lines.length - 1] ?? printed;
@@ -302,17 +390,52 @@ function oidsOf(state: GameState, action: Action): readonly ObjectId[] {
   switch (action.type) {
     case 'playLand':
     case 'castSpell':
+    case 'beginCastSpell':
     case 'activateManaAbility':
     case 'activateAbility':
       return [action.oid];
+    case 'chooseManaColor':
+      return [];
+    case 'choosePluralTarget':
+      return action.target !== null && action.target.kind !== 'player' ? [action.target.oid] : [];
+    case 'allocateDividedDamage':
+      return [action.oid];
+    case 'chooseOpeningHandAction':
+      return action.oid === null ? [] : [action.oid];
     case 'chooseTriggerTargets':
       // The targets rather than the ability, which is what makes aiming a
       // trigger a click on the creature being aimed at. The ability object has
       // no card and is drawn nowhere, so naming it here would produce a picker
       // hanging off nothing.
-      return action.targets.flatMap((target) =>
+      return [...action.targets, ...Object.values(action.multiTargets ?? {}).flat()].flatMap((target) =>
         target !== null && target.kind !== 'player' ? [target.oid] : [],
       );
+    case 'chooseSpellTargets':
+      return [
+        action.oid,
+        ...[...action.targets, ...Object.values(action.multiTargets ?? {}).flat()].flatMap((target) =>
+          target !== null && target.kind !== 'player' ? [target.oid] : [],
+        ),
+      ];
+    case 'chooseEntryCopy':
+      return action.copyOf === null ? [action.oid] : [action.oid, action.copyOf];
+    case 'chooseEntryCounterPermanent':
+      return [action.oid, action.permanent];
+    case 'chooseEntryAuraHost':
+      return [action.oid, action.host];
+    case 'chooseEntryTimestampNext':
+      return [action.oid];
+    case 'chooseEntryCharacteristics':
+      return [action.oid];
+    case 'chooseEntryOptionalCounter':
+      return [action.oid];
+    case 'chooseEntryPayLife':
+      return [action.oid];
+    case 'chooseEntryPlayer':
+    case 'chooseEntryColors':
+      return [action.oid];
+    case 'allocateDamagePrevention':
+      return [action.sourceOid];
     case 'answerOptionalTrigger': {
       // The permanent that triggered, so both answers hang off the card whose
       // printed line is being answered.
@@ -321,6 +444,7 @@ function oidsOf(state: GameState, action: Action): readonly ObjectId[] {
     }
     case 'answerMay':
     case 'answerUnless':
+    case 'declineFreeCast':
       // Unlike a triggered ability, a spell answering "you may" is a card
       // object in its own right (`getObject` finds it directly), so the click
       // target is `oid` itself rather than a source it points back to. A toll
@@ -333,6 +457,8 @@ function oidsOf(state: GameState, action: Action): readonly ObjectId[] {
       return action.blocks.flatMap((block) => [block.blocker, block.attacker]);
     case 'orderBlockers':
       return action.orders.flatMap((order) => [order.attacker, ...order.blockers]);
+    case 'orderAttackers':
+      return action.orders.flatMap((order) => [order.blocker, ...order.attackers]);
     case 'discard':
     case 'chooseDiscards':
       return action.oids;
@@ -344,19 +470,41 @@ function oidsOf(state: GameState, action: Action): readonly ObjectId[] {
       // The survivor, so choosing which legend to keep is a click on it.
       return [action.oid];
     case 'sacrificePermanent':
-      // The creature named, so choosing which one to sacrifice is a click on
+      // The permanent named, so choosing which one to sacrifice is a click on
       // it — `keepLegend`'s reason above, aimed at the opposite outcome.
       return [action.oid];
+    case 'choosePermanentToUntap':
+      return action.oid === null ? [] : [action.oid];
     case 'scry':
       return [...action.top, ...action.bottom];
+    case 'orderTopLibrary':
+      return action.cards;
+    case 'selectFromTopLibrary':
+      return [...(action.chosen === null ? [] : [action.chosen]), ...action.rest];
+    case 'separateTopLibraryPiles':
+      return [...action.first, ...action.second];
+    case 'chooseTopLibraryPile':
+      return state.pendingTopLibrary?.piles?.[action.pile] ?? [];
     case 'searchLibrary':
       // Failing to find names no object, so that option hangs off nothing and
       // is clicked in the list rather than on the table.
       return action.found === null ? [] : [action.found];
+    case 'chooseSearchDestination':
+      return [action.one];
     case 'chooseFromGraveyard':
       // Same shape, and here the click has somewhere real to land: a graveyard
       // is drawn, so the card being taken back is on the table already.
       return action.chosen === null ? [] : [action.chosen];
+    case 'chooseFromRevealedHand':
+      return action.chosen === null ? [] : [action.chosen];
+    case 'chooseFromBattlefield':
+      return [action.chosen];
+    case 'choosePopulateToken':
+      return [action.token];
+    case 'chooseCardName':
+      return [];
+    case 'chooseNamedZoneExile':
+      return action.oid === null ? [] : [action.oid];
     case 'mulligan':
     case 'passPriority':
     case 'concede':
@@ -368,10 +516,57 @@ function labelOf(state: GameState, names: SeatNames, action: Action): string {
   switch (action.type) {
     case 'passPriority':
       return state.stack.length > 0 ? 'Let it resolve' : 'Pass';
+    case 'chooseCardName':
+      return `Name ${action.name}`;
+    case 'chooseManaColor':
+      return `Choose {${action.color}}`;
+    case 'chooseNamedZoneExile':
+      return action.oid === null ? 'Finish choosing cards' : `Exile ${nameOf(state, action.oid)}`;
     case 'playLand':
       return `Play ${nameOf(state, action.oid)}`;
     case 'castSpell':
-      return `Cast ${nameOf(state, action.oid)}${modeWords(state, action)}${action.x === undefined ? '' : ` (X=${String(action.x)})`}${targetSuffix(state, names, action)}`;
+      return `Cast ${nameOf(state, action.oid)}${action.castingCost === 'overload' ? ' — Overload' : ''}${modeWords(state, action)}${action.x === undefined ? '' : ` (X=${String(action.x)})`}${targetSuffix(state, names, action)}`;
+    case 'beginCastSpell':
+      return `Cast ${nameOf(state, action.oid)}${action.castingCost === 'overload' ? ' — Overload' : ''}${action.x === undefined ? '' : ` (X=${String(action.x)})`}`;
+    case 'choosePluralTarget':
+      return action.target === null
+        ? 'Finish choosing targets'
+        : `Add ${
+            action.target.kind === 'player'
+              ? names[action.target.player]
+              : targetName(state, names, action.target.oid)
+          }`;
+    case 'allocateDividedDamage':
+      return `Assign ${String(action.amount)} damage`;
+    case 'chooseSpellTargets': {
+      const aimed = targetSuffix(state, names, action);
+      return aimed.length === 0 ? 'Keep the current targets' : `Aim${aimed}`;
+    }
+    case 'chooseEntryCopy':
+      return action.copyOf === null
+        ? 'Enter normally'
+        : `Enter as a copy of ${permanentName(state, action.copyOf)}`;
+    case 'chooseEntryCounterPermanent':
+      return `Put the counter on ${permanentName(state, action.permanent)}`;
+    case 'chooseEntryAuraHost':
+      return `Enter attached to ${permanentName(state, action.host)}`;
+    case 'chooseEntryTimestampNext':
+      return `Give ${permanentName(state, action.oid)} the next timestamp`;
+    case 'chooseEntryCharacteristics': {
+      const mode = state.pendingEntryCharacteristicsChoice?.modes[action.mode];
+      return mode === undefined
+        ? `Choose form ${String(action.mode + 1)}`
+        : `Enter as ${String(mode.power)}/${String(mode.toughness)}`;
+    }
+    case 'chooseEntryOptionalCounter':
+      return action.accept ? 'Enter with a +1/+1 counter' : 'Enter without a counter';
+    case 'chooseEntryPayLife': {
+      return action.pay ? `Pay ${String(action.life)} life` : 'Enter tapped';
+    }
+    case 'chooseEntryPlayer':
+      return `Choose ${names[action.chosen]}`;
+    case 'chooseEntryColors':
+      return `Choose ${action.colors.join(' and ')}`;
     case 'activateManaAbility':
       // Two untapped basic Plains print one line twice, and that is right: they
       // are the same card in the same state, so the kernel's two options are
@@ -379,7 +574,7 @@ function labelOf(state: GameState, names: SeatNames, action: Action): string {
       // is what makes that a measured statement rather than a hopeful one — the
       // moment one of them is holding something or carrying damage, the two
       // lines come apart.
-      return `Tap ${permanentName(state, action.oid)} for ${action.color}`;
+      return `Tap ${permanentName(state, action.oid)} for ${action.amount === undefined ? action.color : `${String(action.amount)} ${action.color}`}`;
     case 'activateAbility':
       // The cost and the effect, in the card's own words. The source is named
       // in the detail line rather than here, because an effect that says
@@ -421,6 +616,10 @@ function labelOf(state: GameState, names: SeatNames, action: Action): string {
       return action.orders
         .map((order) => `${nameOf(state, order.attacker)}: ${listNames(state, order.blockers)}`)
         .join('; ');
+    case 'orderAttackers':
+      return action.orders
+        .map((order) => `${nameOf(state, order.blocker)}: ${listNames(state, order.attackers)}`)
+        .join('; ');
     case 'discard':
       return `Discard ${listNames(state, action.oids)}`;
     case 'mulligan':
@@ -429,6 +628,8 @@ function labelOf(state: GameState, names: SeatNames, action: Action): string {
       return action.bottom.length === 0
         ? 'Keep this hand'
         : `Keep, bottoming ${listNames(state, action.bottom)}`;
+    case 'chooseOpeningHandAction':
+      return action.oid === null ? 'Finish opening-hand actions' : `Begin with ${nameOf(state, action.oid)}`;
     case 'chooseTriggerTargets': {
       // The targets are the whole of this choice — every option on screen is
       // the same ability — so they are the label, and the printed line is the
@@ -454,6 +655,8 @@ function labelOf(state: GameState, names: SeatNames, action: Action): string {
       // reading "Pay {2}" beside one reading "Let it resolve" invites the
       // reading that declining is the free one.
       return action.pay ? 'Pay the cost' : `Let ${nameOf(state, action.oid)} resolve`;
+    case 'declineFreeCast':
+      return `Leave ${nameOf(state, action.oid)} in exile`;
     case 'keepLegend':
       // Every option here is the same card name, so the name alone would print
       // the same line once per copy. `optionLabels`-style disambiguation lives
@@ -467,23 +670,152 @@ function labelOf(state: GameState, names: SeatNames, action: Action): string {
       // distinguishes the buttons and `distinguishingLine` (`detailOf` below)
       // carries the rest.
       return `Sacrifice ${nameOf(state, action.oid)}`;
+    case 'choosePermanentToUntap':
+      return action.oid === null ? 'Finish choosing' : `Untap ${nameOf(state, action.oid)}`;
     case 'scry':
       return `Keep ${scryGroupNames(state, action.top)} on top; put ${scryGroupNames(state, action.bottom)} on the bottom`;
+    case 'orderTopLibrary':
+      return `Put ${scryGroupNames(state, action.cards)} back in this order`;
+    case 'selectFromTopLibrary':
+      return action.chosen === null
+        ? 'Take nothing; order the rest'
+        : `Take ${nameOf(state, action.chosen)}; order the rest`;
+    case 'separateTopLibraryPiles':
+      return `Pile 1: ${scryGroupNames(state, action.first)}; pile 2: ${scryGroupNames(state, action.second)}`;
+    case 'chooseTopLibraryPile': {
+      const cards = state.pendingTopLibrary?.piles?.[action.pile] ?? [];
+      return `Take pile ${String(action.pile + 1)}: ${scryGroupNames(state, cards)}`;
+    }
     case 'searchLibrary':
       return action.found === null ? 'Find nothing' : `Take ${nameOf(state, action.found)}`;
+    case 'chooseSearchDestination': {
+      const destination = state.pendingSearch?.destination;
+      const one = typeof destination === 'string' ? null : destination?.one;
+      return `Put ${nameOf(state, action.one)} ${searchDestinationWords(one)}`;
+    }
     case 'chooseFromGraveyard':
       return action.chosen === null ? 'Take nothing' : `Take ${nameOf(state, action.chosen)}`;
+    case 'chooseFromRevealedHand':
+      return action.chosen === null ? 'Choose no card' : `Choose ${nameOf(state, action.chosen)}`;
+    case 'chooseFromBattlefield':
+      return `Return ${nameOf(state, action.chosen)}`;
+    case 'choosePopulateToken':
+      return `Copy ${nameOf(state, action.token)}`;
     case 'chooseDiscards':
       return `Discard ${listNames(state, action.oids)}`;
+    case 'allocateDamagePrevention':
+      return `Prevent ${String(action.amount)} from ${nameOf(state, action.sourceOid)}`;
     case 'concede':
       return 'Concede';
   }
+}
+
+type PaymentAction = Extract<Action, { type: 'castSpell' | 'beginCastSpell' | 'activateAbility' }>;
+
+/** The named objects and route that pay for one cast or activation. */
+function paymentDetails(state: GameState, action: PaymentAction): readonly string[] {
+  const mana = (() => {
+    if (action.type !== 'castSpell') return null;
+    const card = castCard(state, action.oid) ?? undefined;
+    if (action.castingCost === 'alternative' && card !== undefined && card.kind !== 'land') {
+      return card.alternativeCost === undefined
+        ? 'Pay the alternative cost'
+        : `Pay ${String(card.alternativeCost.payLife)} life`;
+    }
+    if (action.castingCost === 'withoutMana') return 'Pay no mana';
+    if (
+      action.castingCost === 'overload' &&
+      card !== undefined &&
+      (card.kind === 'instant' || card.kind === 'sorcery') &&
+      card.overload !== undefined
+    ) {
+      return `Pay ${formatOverloadCost(card.overload)} (Overload)`;
+    }
+    return action.castingCost === 'mana' && card !== undefined && card.kind !== 'land'
+      ? `Pay ${formatManaCost(card.manaCost)}`
+      : null;
+  })();
+  const taps = action.type === 'activateAbility' ? (action.taps ?? []) : [];
+  const discards = action.discards ?? [];
+  const sacrifices = action.sacrifices ?? [];
+  return [
+    mana,
+    taps.length === 0 ? null : `Tap ${listNames(state, taps)}`,
+    discards.length === 0 ? null : `Discard ${listNames(state, discards)}`,
+    sacrifices.length === 0 ? null : `Sacrifice ${listNames(state, sacrifices)}`,
+  ].filter((part): part is string => part !== null);
+}
+
+/**
+ * The restriction a `chooseDiscard` prints, in the card's own words.
+ *
+ * `mtg-7mrf`. The prompt used to say "chooses 1 card for them to discard" and
+ * stop, so a player resolving Duress was told to pick one of four revealed
+ * cards while the picker offered two, with no sentence anywhere saying why the
+ * other two were refused. The picker was right — it enumerates the kernel's
+ * `choosable` list — so what was missing was prose, not options.
+ *
+ * The phrase is `@mtg/dsl`'s own (`cardFilterPhrase`), threaded rather than
+ * rewritten: the card face already prints "a noncreature, nonland card" from
+ * this filter, and a second assembly here would be a second chance for the
+ * prompt and the face to disagree about one clause.
+ *
+ * `null` in three cases, and each leaves the old sentence standing rather than
+ * guessing: the source is not in this seat's state (`visibility.ts` strips
+ * the pending record from everyone but the chooser, so the *opponent's* line is
+ * unchanged), the effect prints no filter, or the card reaches more than one
+ * `chooseDiscard` and nothing here can say which one paused. The last is not a
+ * card this project prints today; it is the arm that keeps a future one honest.
+ */
+function discardRestriction(state: GameState): string | null {
+  const pending = state.pendingHandDiscard;
+  if (pending === undefined) return null;
+  // `sourceCard` is set only for a copied spell (`stack.ts` passes the copy's
+  // own card and nothing else does), so the ordinary case reads the source
+  // object, which is still in `objects` after the spell left the stack.
+  const card = pending.sourceCard ?? state.objects[pending.sourceOid]?.card;
+  if (card === undefined) return null;
+  if (card.kind !== 'instant' && card.kind !== 'sorcery') return null;
+  const reachable = [card.effects ?? [], ...(card.modes ?? []).map((mode) => mode.effects)].flat();
+  const chooses = reachable.filter((effect) => effect.kind === 'chooseDiscard');
+  const only = chooses.length === 1 ? chooses[0] : undefined;
+  if (only === undefined || only.kind !== 'chooseDiscard' || only.filter === undefined) return null;
+  return cardFilterPhrase(only.filter);
+}
+
+/**
+ * A filter's phrase, or `null` when the filter restricts nothing.
+ *
+ * `mtg-la2p`. The search and graveyard sentences both count *matching* cards,
+ * and "2 cards match" with no stated predicate is an unfinished sentence: a
+ * player looking at two buttons out of a forty-card library is told the number
+ * and never the rule. Naming the restriction finishes it.
+ *
+ * The unrestricted case is dropped rather than printed, because "searches the
+ * library for a card. 40 cards match" states a rule that refuses nothing and
+ * makes the count read as a restriction it is not. Whether a filter is
+ * unrestricted is asked of `cardFilterPhrase` itself rather than of the filter's
+ * fields, so a clause added to `CardFilter` later is handled here on the day it
+ * is added rather than the day somebody notices.
+ */
+function restrictionPhrase(filter: CardFilter | undefined): string | null {
+  if (filter === undefined) return null;
+  const phrase = cardFilterPhrase(filter);
+  return phrase === cardFilterPhrase({}) ? null : phrase;
 }
 
 function detailOf(state: GameState, action: Action): string | null {
   switch (action.type) {
     case 'passPriority':
       return state.stack.length > 0 ? `${String(state.stack.length)} on the stack` : null;
+    case 'castSpell':
+    case 'beginCastSpell': {
+      const detail = paymentDetails(state, action).join(' · ');
+      return detail.length === 0 ? null : detail;
+    }
+    case 'choosePluralTarget':
+    case 'allocateDividedDamage':
+      return null;
     case 'activateAbility': {
       // `permanentName`, so two copies of one permanent offering one ability do
       // not produce two runs of buttons under two identical shared lines. The
@@ -497,16 +829,38 @@ function detailOf(state: GameState, action: Action): string | null {
       // permanents this cost eats. `oidsOf` never lists a payment, only the
       // source, so without this line two such activations printed one detail
       // for both, whatever told the sacrificed permanents apart.
-      const sacrifice =
-        action.sacrifices.length === 0 ? null : `Sacrifice ${listNames(state, action.sacrifices)}`;
-      return [source, note, sacrifice].filter((part): part is string => part !== null).join(' · ');
+      return [source, note, ...paymentDetails(state, action)]
+        .filter((part): part is string => part !== null)
+        .join(' · ');
     }
     case 'chooseTriggerTargets':
     case 'answerOptionalTrigger':
       return triggerLine(state, action.oid);
     case 'answerMay':
     case 'answerUnless':
+    case 'declineFreeCast':
+    case 'chooseSpellTargets':
       return spellLine(state, action.oid);
+    case 'chooseEntryCopy':
+      return action.copyOf === null ? spellLine(state, action.oid) : distinguishingLine(state, action.copyOf);
+    case 'chooseEntryCounterPermanent':
+      return distinguishingLine(state, action.permanent);
+    case 'chooseEntryAuraHost':
+      return distinguishingLine(state, action.host);
+    case 'chooseEntryTimestampNext':
+      return distinguishingLine(state, action.oid);
+    case 'chooseEntryCharacteristics':
+      return spellLine(state, action.oid);
+    case 'chooseEntryOptionalCounter':
+      return spellLine(state, action.oid);
+    case 'chooseEntryPlayer':
+    case 'chooseEntryColors':
+      return spellLine(state, action.oid);
+    case 'chooseOpeningHandAction': {
+      if (action.oid === null) return null;
+      const card = state.objects[action.oid]?.card;
+      return card === undefined ? null : renderOracleText(card);
+    }
     case 'keepLegend':
       // The label is the same word on every option, so this line carries the
       // whole difference: which of two identically named permanents this is.
@@ -516,10 +870,15 @@ function detailOf(state: GameState, action: Action): string | null {
       // nothing in CR 701.17a requires the target's creatures to be distinct —
       // so this line carries the same disambiguation `keepLegend` needs.
       return distinguishingLine(state, action.oid);
+    case 'choosePermanentToUntap':
+      return action.oid === null ? null : distinguishingLine(state, action.oid);
     case 'declareAttackers':
       return action.attackers.length === 0 ? null : `${String(action.attackers.length)} attacking`;
     case 'declareBlockers':
       return action.blocks.length === 0 ? null : `${String(action.blocks.length)} blocking`;
+    case 'orderAttackers':
+    case 'chooseCardName':
+    case 'chooseNamedZoneExile':
     default:
       return null;
   }
@@ -527,8 +886,14 @@ function detailOf(state: GameState, action: Action): string | null {
 
 function headlineFor(decision: Decision): string {
   switch (decision.kind) {
+    case 'cardName':
+      return 'Name a card';
+    case 'namedZoneExile':
+      return 'Choose cards to exile';
     case 'mulligan':
       return 'Opening hand';
+    case 'openingHandAction':
+      return 'Opening-hand actions';
     case 'priority':
       // The other four headlines name the act, not the actor. This one said
       // "Your priority", which was the only second person left on the surface
@@ -541,10 +906,16 @@ function headlineFor(decision: Decision): string {
       return 'Declare blockers';
     case 'orderBlockers':
       return 'Order blockers';
+    case 'orderAttackers':
+      return 'Order attackers';
     case 'discard':
       return 'Discard down to hand size';
     case 'triggerTargets':
       return 'Choose targets';
+    case 'pluralTargets':
+      return 'Choose targets';
+    case 'damageAllocation':
+      return 'Divide damage';
     case 'optionalTrigger':
       return 'Triggered ability';
     case 'may':
@@ -563,18 +934,34 @@ function headlineFor(decision: Decision): string {
       return 'Legend rule';
     case 'scry':
       return 'Scry';
+    case 'topLibraryOrder':
+      return 'Order library cards';
+    case 'topLibrarySelect':
+      return 'Choose a card';
+    case 'topLibraryPartition':
+      return 'Make two piles';
+    case 'topLibraryPile':
+      return 'Choose a pile';
     case 'searchLibrary':
       // "Search your library" is what the card prints and what the neutral
       // contract's prompt says, and neither is this surface: a hotseat table
       // has two seats reading one screen, so the possessive names whichever of
       // them happens to be looking. The seat is named in the sentence below.
       return 'Search library';
+    case 'searchDestination':
+      return 'Choose where the found cards go';
     case 'graveyardChoice':
       // No possessive here either, and for a second reason on top of the
       // hotseat one: `whose: 'each'` reads both graveyards, so "your
       // graveyard" would be wrong about half the cards on offer rather than
       // merely wrong about which seat is reading.
       return 'Choose from a graveyard';
+    case 'revealedHandChoice':
+      return 'Choose from the revealed hand';
+    case 'battlefieldChoice':
+      return 'Choose a permanent to return';
+    case 'populate':
+      return 'Populate';
     case 'handDiscard':
       // Not "Discard down to hand size", which is `discard`'s headline above
       // and describes a different rule. Two headlines here rather than one,
@@ -582,7 +969,37 @@ function headlineFor(decision: Decision): string {
       // their cards and a hotseat table has both of them reading the screen.
       return decision.owner === decision.player ? 'Discard' : 'Choose their discard';
     case 'permanentSacrifice':
-      return 'Sacrifice a creature';
+      return decision.remaining === 1
+        ? 'Sacrifice a permanent'
+        : `Choose ${String(decision.remaining)} permanents`;
+    case 'permanentUntap':
+      return `Untap up to ${String(decision.remaining)} more`;
+    case 'spellTargets':
+      return 'Choose new targets';
+    case 'freeCast':
+      return decision.optional ? 'Cast transformed or leave in exile' : 'Cast without paying mana';
+    case 'entryCopy':
+      return 'Enter as a copy';
+    case 'entryCounter':
+      return 'Choose a counter bearer';
+    case 'entryAura':
+      return 'Choose an Aura host';
+    case 'entryTimestampOrder':
+      return 'Order entry timestamps';
+    case 'entryCharacteristics':
+      return 'Choose an entry form';
+    case 'entryOptionalCounter':
+      return 'Optional entry counter';
+    case 'entryPayLife':
+      return 'Pay life or enter tapped';
+    case 'entryPlayer':
+      return 'Choose a player';
+    case 'entryColors':
+      return 'Choose two colors';
+    case 'damagePrevention':
+      return 'Allocate damage prevention';
+    case 'manaColor':
+      return 'Choose a mana color';
   }
 }
 
@@ -607,7 +1024,23 @@ function headlineFor(decision: Decision): string {
 function explainFor(state: GameState, decision: Decision, names: SeatNames): string {
   const asked = names[decision.player];
   const verb = (third: string, second: string): string => seatVerb(asked, third, second);
+  const revealedHand = (owner: PlayerId): string => {
+    const label = names[owner];
+    return `${label} revealed ${seatOwn(label)} hand`;
+  };
   switch (decision.kind) {
+    case 'manaColor':
+      return `${asked} ${verb('chooses', 'choose')} which color the resolving mana effect produces.`;
+    case 'cardName': {
+      const earlier = decision.chosen
+        .map((choice) => `${names[choice.player]} named ${choice.name}`)
+        .join('; ');
+      return `${asked} ${verb('chooses', 'choose')} a card name.${
+        earlier.length === 0 ? '' : ` Earlier choices: ${earlier}.`
+      }`;
+    }
+    case 'namedZoneExile':
+      return `${asked} ${verb('chooses', 'choose')} any number of the remaining cards named ${decision.name} to exile.`;
     case 'mulligan':
       // The cost of a mulligan is stated in the sentence rather than left to be
       // inferred from the option list, because it is the whole of the decision:
@@ -622,6 +1055,8 @@ function explainFor(state: GameState, decision: Decision, names: SeatNames): str
           }, so keeping puts ${String(decision.count)} card${
             decision.count === 1 ? '' : 's'
           } on the bottom of the library.`;
+    case 'openingHandAction':
+      return `${asked} may begin the game with an eligible card on the battlefield, or finish opening-hand actions.`;
     case 'priority':
       return state.stack.length > 0
         ? `${asked} may respond, or let the top of the stack resolve.`
@@ -637,11 +1072,24 @@ function explainFor(state: GameState, decision: Decision, names: SeatNames): str
         )
         .join(' or ')}. Attacking taps them unless they have vigilance.`;
     case 'declareBlockers':
-      return `Assign blockers to the ${String(decision.attackers.length)} attacking creature${
-        decision.attackers.length === 1 ? '' : 's'
-      }. Unblocked attackers deal their damage to ${seatMention(asked)}.`;
+      // The gesture is stated because nothing else on the surface states it
+      // (`mtg-cqut`). An eligible blocker wears the amber ring the rest of this
+      // table spends on "you may act on this", and a person who learned the
+      // attack gesture reaches for the attacker first, where nothing happens at
+      // all: `declare.ts` argues at length why blocker-first is the right
+      // direction, and an undiscoverable right direction is still undiscovered.
+      return (
+        `Assign blockers to the ${String(decision.attackers.length)} attacking creature${
+          decision.attackers.length === 1 ? '' : 's'
+        }. Press one of ${seatPossessive(asked)} creatures to block with it, then the attacker it blocks; a press on an ` +
+        `attacker first does nothing. Unblocked attackers deal their damage to ${seatMention(
+          names[opponentOf(state.turn.active)],
+        )}.`
+      );
     case 'orderBlockers':
       return 'Set the order damage is assigned to the blockers, first in the list first.';
+    case 'orderAttackers':
+      return 'Set the order this blocker assigns damage to the attackers, first in the list first.';
     case 'discard':
       return `Choose ${String(decision.count)} card${decision.count === 1 ? '' : 's'} to discard.`;
     case 'triggerTargets':
@@ -652,6 +1100,10 @@ function explainFor(state: GameState, decision: Decision, names: SeatNames): str
         'chooses',
         'choose',
       )} its targets now, before either player can respond.`;
+    case 'pluralTargets':
+      return `${asked} ${verb('chooses', 'choose')} another target, or finishes with ${String(decision.selected.length)} selected.`;
+    case 'damageAllocation':
+      return `${asked} ${verb('assigns', 'assign')} the next positive share of ${String(decision.total)} divided damage.`;
     case 'optionalTrigger':
       return `${nameOf(state, decision.source)}'s triggered ability is resolving, and ${seatMention(
         asked,
@@ -684,47 +1136,131 @@ function explainFor(state: GameState, decision: Decision, names: SeatNames): str
       return `${asked} ${verb('orders', 'order')} ${String(decision.cards.length)} card${
         decision.cards.length === 1 ? '' : 's'
       } between the top and bottom of the library.`;
-    case 'searchLibrary':
-      // The count is the whole of what the sentence can say: the cards
-      // themselves are on the buttons under it, and only this seat is handed
-      // them (`seatState` strips the pending search from the other one).
-      // Failing to find is stated because it is always offered (CR 701.19c)
-      // and reads as a missing option otherwise.
-      return `${asked} ${verb('searches', 'search')} the library. ${String(decision.cards.length)} card${
+    case 'topLibraryOrder':
+      return `${asked} ${verb('orders', 'order')} the looked-at cards.`;
+    case 'topLibrarySelect':
+      return `${asked} ${verb('chooses', 'choose')} an eligible card and ${verb('orders', 'order')} the rest.`;
+    case 'topLibraryPartition':
+      return `${asked} ${verb('separates', 'separate')} the revealed cards into two piles.`;
+    case 'topLibraryPile':
+      return `${asked} ${verb('chooses', 'choose')} one pile for their hand.`;
+    case 'searchLibrary': {
+      // The cards themselves are on the buttons under it, and only this seat is
+      // handed them (`seatState` strips the pending search from the other one).
+      // Failing to find is stated only when the pending rule offers it. An
+      // unrestricted one-card search must take a card from a nonempty library,
+      // and claiming otherwise would put a button in the player's head that the
+      // decision deliberately omits.
+      //
+      // The quota's restriction before the search's, because on a heterogeneous
+      // search the quota is the question actually being asked right now and the
+      // search's own filter is absent (`PendingSearch.filter`).
+      const restriction = restrictionPhrase(
+        state.pendingSearch?.activeFilterQuota?.filter ?? state.pendingSearch?.filter,
+      );
+      const searches = `${verb('searches', 'search')} the library${
+        restriction === null ? '' : ` for ${restriction}`
+      }`;
+      return `${asked} ${searches}. ${String(decision.cards.length)} card${
         decision.cards.length === 1 ? '' : 's'
-      } match, and finding nothing is allowed. The library is shuffled either way.`;
-    case 'graveyardChoice':
+      } match${
+        state.pendingSearch?.mayFail === true
+          ? ', and finding nothing is allowed'
+          : ', and one must be chosen'
+      }. The library is shuffled ${state.pendingSearch?.mayFail === true ? 'either way' : 'afterwards'}.`;
+    }
+    case 'searchDestination': {
+      const destination = state.pendingSearch?.destination;
+      const one = typeof destination === 'string' ? null : destination?.one;
+      const rest = typeof destination === 'string' ? null : destination?.rest;
+      return `${asked} ${verb('chooses', 'choose')} one found card to put ${searchDestinationWords(
+        one,
+      )}; the rest go ${searchDestinationWords(rest)}.`;
+    }
+    case 'graveyardChoice': {
       // The search sentence above with both of its parenthetical facts
       // dropped, because neither is true here: a graveyard is public (CR
       // 400.2), so both seats are handed the same cards and nothing is
       // shuffled after. What survives is the count and the permission to take
       // none, which is the same missing-option problem the search has.
-      return `${asked} ${verb('takes', 'take')} a card out of a graveyard. ${String(
+      //
+      // The restriction replaces the bare noun rather than trailing the verb,
+      // because "takes a creature card out of a graveyard" is how the clause is
+      // printed and "takes a card out of a graveyard for a creature card" is
+      // not English.
+      const restriction = restrictionPhrase(state.pendingGraveyardChoice?.filter);
+      return `${asked} ${verb('takes', 'take')} ${restriction ?? 'a card'} out of a graveyard. ${String(
         decision.cards.length,
       )} card${decision.cards.length === 1 ? '' : 's'} match, and taking none is allowed.`;
+    }
+    case 'revealedHandChoice': {
+      const mayDecline = decision.options.some(
+        (action) => action.type === 'chooseFromRevealedHand' && action.chosen === null,
+      );
+      return `${revealedHand(decision.owner)}, and ${asked} ${verb(
+        'chooses',
+        'choose',
+      )} one of ${String(decision.cards.length)} eligible card${
+        decision.cards.length === 1 ? '' : 's'
+      }${mayDecline ? ', or chooses none' : ''}.`;
+    }
+    case 'battlefieldChoice':
+      return `${asked} must choose one of ${String(decision.permanents.length)} matching permanent${decision.permanents.length === 1 ? '' : 's'} they control to return to its owner's hand.`;
+    case 'populate':
+      return `${asked} must choose one of ${String(decision.tokens.length)} creature token${decision.tokens.length === 1 ? '' : 's'} they control to copy.`;
     case 'handDiscard': {
-      const cards = `${String(decision.count)} card${decision.count === 1 ? '' : 's'}`;
+      // The restriction, when the card prints one, in place of the bare noun:
+      // "chooses a noncreature, nonland card" rather than "chooses 1 card"
+      // (`mtg-7mrf`). Only the singular takes it, because `cardFilterPhrase` is
+      // the singular noun phrase and a count in front of it would read as two
+      // quantities; a filtered discard of more than one card is not printed in
+      // this project and gets the count sentence it always had.
+      const restriction = decision.count === 1 ? discardRestriction(state) : null;
+      const cards = restriction ?? `${String(decision.count)} card${decision.count === 1 ? '' : 's'}`;
       // The reveal is stated in the second branch and not the first, because it
       // is what makes the second question askable: without CR 701.16a this seat
       // would be choosing out of a zone it cannot see. `seatState` hands the
       // cards to this seat alone, exactly as it does for a search.
       return decision.owner === decision.player
         ? `${asked} ${verb('discards', 'discard')} ${cards}.`
-        : `${seatMention(names[decision.owner])} revealed their hand, and ${asked} ${verb(
+        : `${revealedHand(decision.owner)}, and ${asked} ${verb(
             'chooses',
             'choose',
           )} ${cards} for them to discard.`;
     }
     case 'permanentSacrifice':
-      // `graveyardChoice`'s sentence at the opposite rule: no "and taking none
-      // is allowed", because CR 701.17a offers no such arm — a legal candidate
-      // always exists when this decision is asked at all. The kernel never
-      // pauses on a single candidate (`scry.ts` resolves that case without
-      // asking), so the count named below is always a real choice.
-      return `${asked} ${verb('sacrifices', 'sacrifice')} a creature to a resolving effect. ${asked} ${verb(
-        'controls',
-        'control',
-      )} ${String(decision.permanents.length)} to choose from.`;
+      // No decline arm: the effect has already fixed how many of this filtered
+      // group the seat must name. A wide sacrifice is asked one permanent at a
+      // time so each click stays the same public action as the singular edict.
+      return `${asked} ${verb('chooses', 'choose')} ${String(decision.remaining)} more permanent${decision.remaining === 1 ? '' : 's'} to sacrifice. ${String(decision.permanents.length)} legal permanent${decision.permanents.length === 1 ? '' : 's'} remain.`;
+    case 'permanentUntap':
+      return `${asked} may choose up to ${String(decision.remaining)} more permanent${decision.remaining === 1 ? '' : 's'} to untap, or finish now. ${String(decision.permanents.length)} legal permanent${decision.permanents.length === 1 ? '' : 's'} remain.`;
+    case 'spellTargets':
+      return `${asked} may keep or replace any legal subset of this spell's targets.`;
+    case 'freeCast':
+      return decision.optional
+        ? `${asked} may cast the transformed card without paying its mana cost, or leave it in exile.`
+        : `${asked} ${verb('casts', 'cast')} the revealed card without paying its mana cost and chooses its targets and other required declarations now.`;
+    case 'entryCopy':
+      return `${asked} may have ${nameOf(state, decision.oid)} enter as a copy of a creature on the battlefield, or enter normally.`;
+    case 'entryCounter':
+      return `${asked} ${verb('chooses', 'choose')} a permanent to receive the counter as ${nameOf(state, decision.oid)} enters.`;
+    case 'entryAura':
+      return `${asked} ${verb('chooses', 'choose')} what ${nameOf(state, decision.oid)} enters attached to. This choice does not target.`;
+    case 'entryTimestampOrder':
+      return `${asked} ${verb('chooses', 'choose')} which of ${String(decision.remaining.length)} simultaneous entrants receives the next timestamp.`;
+    case 'entryCharacteristics':
+      return `${asked} ${verb('chooses', 'choose')} one of ${String(decision.modes.length)} complete forms as ${nameOf(state, decision.oid)} enters.`;
+    case 'entryOptionalCounter':
+      return `${asked} may have ${nameOf(state, decision.oid)} enter with a +1/+1 counter on it.`;
+    case 'entryPayLife':
+      return `${asked} may pay ${String(decision.life)} life as ${nameOf(state, decision.oid)} enters. Otherwise it enters tapped.`;
+    case 'entryPlayer':
+      return `${asked} ${verb('chooses', 'choose')} a player as ${nameOf(state, decision.oid)} enters.`;
+    case 'entryColors':
+      return `${asked} ${verb('chooses', 'choose')} two colors as ${nameOf(state, decision.oid)} enters.`;
+    case 'damagePrevention':
+      return `${asked} ${verb('allocates', 'allocate')} ${String(decision.remaining)} damage of prevention among simultaneous sources.`;
   }
 }
 
@@ -759,6 +1295,16 @@ export function buildPrompt(state: GameState, decision: Decision, names: SeatNam
     headline: headlineFor(decision),
     explain: explainFor(state, decision, names),
     choices,
+    textInput:
+      decision.kind === 'cardName'
+        ? {
+            kind: 'cardName',
+            player: decision.player,
+            label: decision.input.label,
+            minLength: decision.input.minLength,
+            maxLength: decision.input.maxLength,
+          }
+        : null,
     truncated: !decision.complete,
   };
 }
@@ -804,7 +1350,7 @@ export function playableFromHand(prompt: PlayPrompt): ReadonlySet<ObjectId> {
 export function choicesByObject(prompt: PlayPrompt): ReadonlyMap<ObjectId, readonly PlayChoice[]> {
   const byObject = new Map<ObjectId, PlayChoice[]>();
   for (const choice of prompt.choices) {
-    for (const oid of new Set(choice.oids)) {
+    for (const oid of new Set([...choice.oids, ...(choice.aimedAt ?? [])])) {
       const held = byObject.get(oid);
       if (held === undefined) byObject.set(oid, [choice]);
       else held.push(choice);

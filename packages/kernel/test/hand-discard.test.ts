@@ -37,7 +37,8 @@ import {
   stateFingerprint,
   validateAction,
 } from '@mtg/kernel';
-import { artifact, creature, lands, SWAMP, sorcery } from './cards';
+import { observeState } from '@mtg/kernel';
+import { artifact, creature, ISLAND, lands, SWAMP, sorcery } from './cards';
 import { apply, handOidOf, oidOf } from './helpers';
 
 /** A hand of distinctly named cards, so a graveyard can be read by name. */
@@ -59,6 +60,22 @@ const COERCE = sorcery(
   {
     B: 1,
   },
+);
+
+const WITS_END = sorcery(
+  "Wit's End",
+  [{ kind: 'discardCards', count: 'all', target: { kind: 'targetPlayer' } }],
+  { generic: 5, B: 2 },
+);
+
+const LOOT = sorcery('Untargeted Loot', [{ kind: 'discardCards', count: 2, target: { kind: 'noTarget' } }], {
+  U: 1,
+});
+
+const SPECTER_SWEEP = sorcery(
+  'Specter Sweep',
+  [{ kind: 'discardCards', count: 2, players: 'eachOpponent', target: { kind: 'noTarget' } }],
+  { B: 1 },
 );
 
 /**
@@ -89,6 +106,35 @@ function probeScenario(hand = 4, spell: Card = PROBE, seed = 'hand-discard/probe
 }
 
 describe('discardCards', () => {
+  it('asks the resolving controller without creating a player target', () => {
+    const held = namedHand(4);
+    const start = scenario({
+      battlefield: lands(ISLAND, 2).map((land) => ({ card: land, controller: 0 as const })),
+      hands: [[LOOT, ...held], []],
+      libraries: [lands(SWAMP, 6), lands(SWAMP, 6)],
+      seed: 'hand-discard/untargeted-controller',
+    });
+    const asked = resolveSpell(start, LOOT.name, [null]);
+    const decision = pendingDecision(asked.state);
+    if (decision?.kind !== 'handDiscard') throw new Error('controller discard was not pending');
+
+    expect(decision.player).toBe(0);
+    expect(decision.owner).toBe(0);
+    expect(decision.count).toBe(2);
+    expect(decision.hand).toEqual(asked.state.players[0].hand);
+  });
+
+  it('keeps a materialized sweep seat distinct from a bare controller discard', () => {
+    const asked = resolveSpell(probeScenario(4, SPECTER_SWEEP), SPECTER_SWEEP.name, [null]);
+    const decision = pendingDecision(asked.state);
+    if (decision?.kind !== 'handDiscard') throw new Error('swept discard was not pending');
+
+    expect(decision.player).toBe(1);
+    expect(decision.owner).toBe(1);
+    expect(decision.count).toBe(2);
+    expect(decision.hand).toEqual(asked.state.players[1].hand);
+  });
+
   it('asks the hand owner, not the spell controller', () => {
     const asked = resolveSpell(probeScenario(), PROBE.name, AT_OPPONENT);
     const decision = pendingDecision(asked.state);
@@ -143,6 +189,27 @@ describe('discardCards', () => {
     const asked = resolveSpell(probeScenario(0), PROBE.name, AT_OPPONENT);
     expect(asked.state.turn.awaiting).toBeNull();
     expect(eventsOfType(asked.events, 'cardsDiscarded')).toEqual([]);
+  });
+
+  it('takes the entire hand as it exists when the effect resolves', () => {
+    const held = namedHand(5);
+    const start = scenario({
+      battlefield: lands(SWAMP, 7).map((land) => ({ card: land, controller: 0 as const })),
+      hands: [[WITS_END], held],
+      libraries: [lands(SWAMP, 6), lands(SWAMP, 6)],
+      seed: 'hand-discard/whole-current-hand',
+    });
+    const original = [...start.state.players[1].hand];
+    const resolved = resolveSpell(start, WITS_END.name, AT_OPPONENT);
+
+    expect(pendingDecision(resolved.state)?.kind).not.toBe('handDiscard');
+    expect(resolved.state.players[1].hand).toEqual([]);
+    expect(resolved.state.players[1].graveyard).toEqual(original);
+    expect(eventsOfType(resolved.events, 'cardsDiscarded').at(-1)).toEqual({
+      type: 'cardsDiscarded',
+      player: 1,
+      oids: original,
+    });
   });
 
   it('runs the effects printed after it once the discard is answered', () => {
@@ -346,6 +413,53 @@ describe('discard as an activation cost', () => {
     expect(validateAction(start.state, activate([]))).toBe('the cost discards 1 cards, and 0 was offered');
     expect(validateAction(start.state, activate([mine]))).toBeNull();
   });
+
+  it('offers and accepts only cards matching a typed discard cost', () => {
+    const fauna = artifact('Fauna Probe', { generic: 2 }, [
+      {
+        kind: 'activated',
+        cost: {
+          mana: {},
+          tapSelf: true,
+          discard: 1,
+          discardFilter: { cardTypes: ['creature'] },
+        },
+        effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }],
+      },
+    ]);
+    const first = creature('Pitchable One', 1, 1);
+    const second = creature('Pitchable Two', 2, 2);
+    const start = scenario({
+      battlefield: [{ card: fauna, controller: 0 }],
+      hands: [[first, SWAMP, second], []],
+      libraries: [lands(SWAMP, 6), lands(SWAMP, 6)],
+      seed: 'hand-discard/filtered-cost',
+    });
+    const source = oidOf(start.state, fauna.name);
+    const decision = pendingDecision(start.state);
+    if (decision?.kind !== 'priority') throw new Error('nobody holds priority');
+    const activations = decision.options.filter(
+      (action): action is Extract<Action, { readonly type: 'activateAbility' }> =>
+        action.type === 'activateAbility' && action.oid === source,
+    );
+    expect(
+      activations.map((action) => action.discards?.map((oid) => start.state.objects[oid]?.card.name)),
+    ).toEqual([[first.name], [second.name]]);
+
+    const land = start.state.players[0].hand.find((oid) => start.state.objects[oid]?.card.kind === 'land');
+    if (land === undefined) throw new Error('the filtered hand held no land');
+    expect(
+      validateAction(start.state, {
+        type: 'activateAbility',
+        player: 0,
+        oid: source,
+        abilityIndex: 0,
+        targets: [null],
+        sacrifices: [],
+        discards: [land],
+      }),
+    ).toContain('does not match the discard filter');
+  });
 });
 
 const COERCE_SETUP: GameSetup = {
@@ -410,7 +524,11 @@ describe('hand discard replay', () => {
     for (let step = 0; step < 20 && asked.state.turn.awaiting === 'handDiscard'; step += 1) {
       const decision = pendingDecision(asked.state);
       if (decision?.kind !== 'handDiscard') throw new Error('a hand discard was not pending');
-      const chosen = simpleAgent('discarder').decide({ state: asked.state, player: 1, decision });
+      const chosen = simpleAgent('discarder').decide({
+        state: observeState(asked.state, 1, 'test/hand-discard.test.ts:526'),
+        player: 1,
+        decision,
+      });
       expect(chosen.type).toBe('chooseDiscards');
       asked = apply(asked, chosen);
       answers += 1;

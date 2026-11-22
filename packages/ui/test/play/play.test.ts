@@ -9,11 +9,11 @@
  * hidden and that the buttons on screen are the kernel's enumeration rather
  * than a second opinion about legality.
  *
- * The hotseat block at the end is the same board with a second person in the
+ * The two-human block at the end is the same board with a second person in the
  * other seat, and it exists because that is where the hiding gets hard: the seat
- * being asked changes every decision, so the board has to change with it, and it
- * must not change while the losing side of that swap is still holding the
- * screen. That last part is the handoff card, tested here by clicking it.
+ * being asked changes every decision, so the board has to change with it. The
+ * lab no longer deals that table; `../support/two-human.ts` builds it from the
+ * kernel's own seats, because the hiding rule is still the board's to keep.
  */
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -50,13 +50,14 @@ import {
 import { PHASE_BAR_LABEL } from '../../src/routes/play/PhaseBar';
 import { buildPrompt, describeStep, playableFromHand } from '../../src/routes/play/prompt';
 import type { PlayConfig } from '../../src/routes/play/use-session';
+import { TWO_HUMAN_NAMES, twoHumanMirror } from '../support/two-human';
 
 afterEach(cleanup);
 
 const NAMES = ['You', 'Bot'] as const;
 
-/** What a hotseat game calls its seats, and what the copy assertions read against. */
-const HOTSEAT: SeatNames = ['Player one', 'Player two'];
+/** What a two-human table calls its seats, and what the copy assertions read against. */
+const TWO_HUMAN: SeatNames = TWO_HUMAN_NAMES;
 
 /**
  * Second person in surface copy.
@@ -64,7 +65,7 @@ const HOTSEAT: SeatNames = ['Player one', 'Player two'];
  * Banned on this surface for the same reason the seat names stopped being
  * relative: "you" resolves against whoever is being asked, and that changes
  * hands mid-turn now that the board follows the question. Only checked against
- * hotseat names, since a one-person game legitimately calls its seat "You".
+ * two-human names, since a one-person game legitimately calls its seat "You".
  */
 const SECOND_PERSON = /\byou(r|rs)?\b/i;
 
@@ -105,6 +106,7 @@ function dealt(): ReturnType<typeof dealMirrorGame> {
 interface NodeLike {
   readonly querySelector: (selector: string) => NodeLike | null;
   readonly isConnected: boolean;
+  readonly getAttribute: (name: string) => string | null;
 }
 
 function nodeOf(value: unknown): NodeLike {
@@ -113,11 +115,16 @@ function nodeOf(value: unknown): NodeLike {
     candidate === null ||
     candidate === undefined ||
     typeof candidate.querySelector !== 'function' ||
-    typeof candidate.isConnected !== 'boolean'
+    typeof candidate.isConnected !== 'boolean' ||
+    typeof candidate.getAttribute !== 'function'
   ) {
     throw new Error('expected a node in the document');
   }
   return candidate as NodeLike;
+}
+
+function automaticChoiceButtons(): readonly ReturnType<typeof screen.getByRole>[] {
+  return choiceButtons().filter((button) => nodeOf(button).getAttribute('data-kind') !== 'concede');
 }
 
 /**
@@ -207,15 +214,15 @@ describe('the opening hand', () => {
     expect(session.state.turn.number).toBe(0);
   });
 
-  it('names the question and both answers, in words a person can act on', () => {
+  it('names the question, both opening-hand answers and concession in words a person can act on', () => {
     const session = dealtSession();
     const decision = session.pending;
     if (decision === null) throw new Error('expected a pending decision');
-    const prompt = buildPrompt(session.state, decision, HOTSEAT);
+    const prompt = buildPrompt(session.state, decision, TWO_HUMAN);
 
     expect(prompt.headline).toBe('Opening hand');
     expect(prompt.explain).toContain('shuffles it back');
-    expect(prompt.choices.map((choice) => choice.label)).toEqual(['Keep this hand', 'Mulligan']);
+    expect(prompt.choices.map((choice) => choice.label)).toEqual(['Keep this hand', 'Mulligan', 'Concede']);
   });
 
   /**
@@ -236,7 +243,7 @@ describe('the opening hand', () => {
     expect(buildPrompt(session.state, decision, NAMES).explain).toBe(
       'You keep this hand, or shuffle it back for a new one.',
     );
-    expect(buildPrompt(session.state, decision, HOTSEAT).explain).toBe(
+    expect(buildPrompt(session.state, decision, TWO_HUMAN).explain).toBe(
       'Player one keeps this hand, or shuffles it back for a new one.',
     );
   });
@@ -252,7 +259,9 @@ describe('the opening hand', () => {
     if (decision === null) throw new Error('expected a second opening question');
 
     expect(buildPrompt(after.state, decision, NAMES).explain).toContain('You have mulliganed 1 time');
-    expect(buildPrompt(after.state, decision, HOTSEAT).explain).toContain('Player one has mulliganed 1 time');
+    expect(buildPrompt(after.state, decision, TWO_HUMAN).explain).toContain(
+      'Player one has mulliganed 1 time',
+    );
   });
 
   it('offers both answers as buttons a screen reader can name', () => {
@@ -331,6 +340,71 @@ describe('the position drawn from live state', () => {
     render(h(Board, position));
     expect(
       screen.getByRole('group', { name: `${lion.name}, enchanted by Pacifism, controlled by you` }),
+    ).toBeTruthy();
+  });
+
+  // The mirror of the test above, and the direction a player actually meets
+  // first: the *opponent* answers your creature with a Pacifism. The projection
+  // is written once for both seats, so the two directions share every line of
+  // it — which is exactly why the one nobody had run is worth running. An Aura
+  // the other seat controls has to stay in your row, under the creature it is
+  // stopping, or the card that explains why your creature cannot attack is
+  // sitting across the table from the creature.
+  it('keeps an Aura the opponent cast in your row, under the creature it stops', () => {
+    const pacifism = parseCard({
+      kind: 'enchantment',
+      id: 'm11-pacifism',
+      name: 'Pacifism',
+      rarity: 'common',
+      set: { code: 'M11', collectorNumber: 24 },
+      manaCost: { generic: 1, W: 1 },
+      colors: ['W'],
+      subtypes: ['Aura'],
+      aura: {
+        enchant: 'creature',
+        modifications: [{ kind: 'cantAttack' }, { kind: 'cantBlock' }],
+      },
+    });
+    const lion = exampleCard('slc-thornhide-guardian');
+    const plains = basicLand('Plains', 'M11', 231);
+    const start = scenario({
+      active: 1,
+      battlefield: [
+        { card: lion, controller: 0 },
+        { card: plains, controller: 1 },
+        { card: plains, controller: 1 },
+      ],
+      hands: [[], [pacifism]],
+    }).state;
+    const host = start.battlefield.find((oid) => start.objects[oid]?.card.id === lion.id);
+    const aura = start.players[1].hand[0];
+    if (host === undefined || aura === undefined) throw new Error('the fixture omitted its Aura or host');
+    const attached = reduceAll(start, [
+      {
+        type: 'castSpell',
+        player: 1,
+        oid: aura,
+        targets: [{ kind: 'permanent', oid: host }],
+      },
+      { type: 'passPriority', player: 1 },
+      { type: 'passPriority', player: 0 },
+    ]).state;
+
+    const position = boardPosition(attached, 0, NAMES);
+    expect(position.opponent.battlefield.permanents.map((permanent) => permanent.card.name)).not.toContain(
+      'Pacifism',
+    );
+    expect(position.you.battlefield.permanents.map((permanent) => permanent.card.name)).toEqual([
+      lion.name,
+      'Pacifism',
+    ]);
+    // The Aura is drawn in this row and controlled by the other seat, so it is
+    // not one of this seat's permanents and the count must not have counted it.
+    expect(position.you.battlefield.count).toBe(1);
+
+    render(h(Board, position));
+    expect(
+      screen.getByRole('group', { name: `${lion.name}, enchanted by Pacifism, controlled by Bot` }),
     ).toBeTruthy();
   });
 
@@ -424,17 +498,17 @@ describe('the prompt', () => {
     // The active seat by name. "Your turn" was accurate for one viewer and
     // useless on a shared screen: the viewer changes hands mid-turn, so the
     // header reworded itself while the turn it describes stayed put.
-    expect(describeStep(session.state, HOTSEAT)).toContain('Player one');
-    expect(describeStep(session.state, HOTSEAT)).not.toMatch(SECOND_PERSON);
+    expect(describeStep(session.state, TWO_HUMAN)).toContain('Player one');
+    expect(describeStep(session.state, TWO_HUMAN)).not.toMatch(SECOND_PERSON);
   });
 
   it('names the seat it is asking instead of calling a shared screen "you"', () => {
     const session = freshSession();
     const decision = session.pending;
     if (decision === null) throw new Error('expected a pending decision');
-    const prompt = buildPrompt(session.state, decision, HOTSEAT);
+    const prompt = buildPrompt(session.state, decision, TWO_HUMAN);
 
-    expect(prompt.explain).toContain(HOTSEAT[decision.player]);
+    expect(prompt.explain).toContain(TWO_HUMAN[decision.player]);
     expect(prompt.headline).not.toMatch(SECOND_PERSON);
     expect(prompt.explain).not.toMatch(SECOND_PERSON);
   });
@@ -453,11 +527,29 @@ describe('the prompt', () => {
   it('says the seat mid-sentence as a pronoun, and a named seat as its name', () => {
     const blocking = blockersDecision();
     expect(buildPrompt(blocking.state, blocking.decision, NAMES).explain).toBe(
-      'Assign blockers to the 1 attacking creature. Unblocked attackers deal their damage to you.',
+      'Assign blockers to the 1 attacking creature. Press one of your creatures to block with it, then the ' +
+        'attacker it blocks; a press on an attacker first does nothing. Unblocked attackers deal their damage ' +
+        'to you.',
     );
-    expect(buildPrompt(blocking.state, blocking.decision, HOTSEAT).explain).toBe(
-      'Assign blockers to the 1 attacking creature. Unblocked attackers deal their damage to Player one.',
+    expect(buildPrompt(blocking.state, blocking.decision, TWO_HUMAN).explain).toBe(
+      "Assign blockers to the 1 attacking creature. Press one of Player one's creatures to block with it, then " +
+        'the attacker it blocks; a press on an attacker first does nothing. Unblocked attackers deal their ' +
+        'damage to Player one.',
     );
+  });
+
+  /**
+   * `mtg-cqut`. The gesture is blocker first and nothing on the surface said
+   * so, so a player who had learned the attack gesture pressed the attacker and
+   * got no response at all. The sentence has to name both halves — which card
+   * is pressed first, and that the other order is inert — because either one
+   * alone leaves the dead press unexplained.
+   */
+  it('says how a block is built, in the order the gesture takes', () => {
+    const blocking = blockersDecision();
+    const explain = buildPrompt(blocking.state, blocking.decision, NAMES).explain;
+    expect(explain).toContain('to block with it, then the attacker it blocks');
+    expect(explain).toContain('a press on an attacker first does nothing');
   });
 });
 
@@ -618,7 +710,7 @@ describe('playing a whole game by clicking', () => {
           expect(screen.queryByRole('alert')).toBeNull();
           continue;
         }
-        const buttons = choiceButtons();
+        const buttons = automaticChoiceButtons();
         if (buttons.length === 0) break;
         const target = buttons[0];
         if (target === undefined) break;
@@ -766,8 +858,8 @@ describe('the opponent seat', () => {
  * reach the page.
  */
 describe('two people at one screen', () => {
-  function hotseatGame(): ReturnType<typeof dealMirrorGame> {
-    return dealMirrorGame(EXAMPLE_CARDS, { opponent: 'human' });
+  function twoHumanTable(): PlayConfig {
+    return twoHumanMirror(EXAMPLE_CARDS);
   }
 
   interface Beat {
@@ -816,28 +908,19 @@ describe('two people at one screen', () => {
     return screen.getByLabelText(`${seatPossessive(name)} hand`);
   }
 
-  /** The handoff card's button, when the table is waiting to change hands. */
-  function passButton(): ReturnType<typeof screen.queryByRole> {
-    return screen.queryByRole('button', { name: /^I am Player/ });
-  }
-
-  it('seats two people, and leaves a bot the default', () => {
-    expect(hotseatGame().config.seats.map((seat) => seat.kind)).toEqual(['human', 'human']);
+  it('seats two people in the fixture, and the deal seats a bot', () => {
+    expect(twoHumanTable().seats.map((seat) => seat.kind)).toEqual(['human', 'human']);
     expect(dealt().config.seats.map((seat) => seat.kind)).toEqual(['human', 'bot']);
   });
 
   it('names seats rather than the viewer, so a label holds still while the question moves', () => {
-    expect(hotseatGame().config.names).toEqual(['Player one', 'Player two']);
+    expect(twoHumanTable().names).toEqual(['Player one', 'Player two']);
     expect(dealMirrorGame(EXAMPLE_CARDS, { viewer: 1 }).config.names).toEqual(['Bot', 'You']);
-    expect(dealMirrorGame(EXAMPLE_CARDS, { opponent: 'human', viewer: 1 }).config.names).toEqual([
-      'Player two',
-      'Player one',
-    ]);
   });
 
   it('shows the hand of whoever is being asked and hides the other, in both directions', () => {
-    const game = hotseatGame();
-    const positions = samples(play(game.config).beats);
+    const game = twoHumanTable();
+    const positions = samples(play(game).beats);
     // Both directions, or the loop below proves nothing: a viewer pinned to one
     // seat passes every assertion made about that seat.
     expect(new Set(positions.map((beat) => beat.asked))).toEqual(new Set([0, 1]));
@@ -851,16 +934,16 @@ describe('two people at one screen', () => {
       // hands against this beat's names. The hiding rule is what is under test
       // and it holds at every position either way; keeping the walk exhaustive
       // is what gives it the most positions to hold at.
-      render(h(PlayRoute, { config: { ...game.config, choices: beat.choices, autoPass: FULL_CONTROL } }));
+      render(h(PlayRoute, { config: { ...game, choices: beat.choices, autoPass: FULL_CONTROL } }));
 
-      const shown = handZone(HOTSEAT[beat.asked]);
+      const shown = handZone(TWO_HUMAN[beat.asked]);
       expect(within(shown).queryAllByLabelText('face-down card')).toHaveLength(0);
       for (const card of beat.hands[beat.asked]) {
         expect(within(shown).queryAllByText(card).length).toBeGreaterThan(0);
       }
 
-      expect(screen.queryByLabelText(`${seatPossessive(HOTSEAT[other])} hand`)).toBeNull();
-      const hiddenStatus = screen.getByLabelText(`${HOTSEAT[other]}'s status`);
+      expect(screen.queryByLabelText(`${seatPossessive(TWO_HUMAN[other])} hand`)).toBeNull();
+      const hiddenStatus = screen.getByLabelText(`${TWO_HUMAN[other]}'s status`);
       expect(
         within(hiddenStatus).getByText(String(beat.hands[other].length), {
           selector: '[title="hand"]',
@@ -870,26 +953,29 @@ describe('two people at one screen', () => {
   });
 
   it('is clickable from the same route, with exactly one revealed hand at every step', () => {
-    const game = hotseatGame();
-    render(h(PlayRoute, { config: game.config }));
+    const game = twoHumanTable();
+    render(h(PlayRoute, { config: game }));
 
     let clicks = 0;
-    let handoffs = 0;
+    let crossings = 0;
+    let lastShown: string | null = null;
     for (; clicks < 20; clicks += 1) {
-      const pass = passButton();
-      if (pass !== null) {
-        handoffs += 1;
-        fireEvent.click(pass);
-      }
-      const target = choiceButtons()[0];
+      const target = automaticChoiceButtons()[0];
       if (target === undefined) break;
-      const shownHands = HOTSEAT.map((name) =>
-        screen.queryByLabelText(`${seatPossessive(name)} hand`),
-      ).filter((zone) => zone !== null);
+      // Which seats have a hand drawn, read by name rather than off the zone's
+      // attribute: the workspace has no `lib: dom`, so `getAttribute` is not
+      // typed here, and the name is what the assertion is about anyway.
+      const shownHands = TWO_HUMAN.filter(
+        (name) => screen.queryByLabelText(`${seatPossessive(name)} hand`) !== null,
+      );
       // One hand is playable. Rendering both is a leak; rendering neither is a
       // board nobody can play from.
       expect(shownHands).toHaveLength(1);
-      expect(within(shownHands[0]!).queryAllByLabelText('face-down card')).toHaveLength(0);
+      const shownNow = shownHands[0]!;
+      const shownZone = screen.getByLabelText(`${seatPossessive(shownNow)} hand`);
+      expect(within(shownZone).queryAllByLabelText('face-down card')).toHaveLength(0);
+      if (lastShown !== null && shownNow !== lastShown) crossings += 1;
+      lastShown = shownNow;
       fireEvent.click(target);
       expect(screen.queryByRole('alert')).toBeNull();
     }
@@ -898,52 +984,18 @@ describe('two people at one screen', () => {
     expect(clicks).toBe(20);
     // And the question really did cross the table inside those twenty clicks,
     // which is what makes the alternating assertion mean anything.
-    expect(handoffs).toBeGreaterThan(0);
-  });
-
-  /**
-   * The board follows the question, so the moment one player passes priority the
-   * other player's hand would be on a screen the first player is still holding.
-   * The handoff card is what stands between those two facts, and it fails the
-   * same silent way everything else here does.
-   */
-  it('covers the table while the device changes hands, then opens it on the new seat', () => {
-    const game = hotseatGame();
-    render(h(PlayRoute, { config: game.config }));
-    // Seat 0 is asked first and is holding the screen, so nothing is in the way.
-    expect(passButton()).toBeNull();
-
-    let clicks = 0;
-    for (; clicks < 200 && passButton() === null; clicks += 1) {
-      const target = choiceButtons()[0];
-      if (target === undefined) break;
-      fireEvent.click(target);
-    }
-
-    const pass = passButton();
-    if (pass === null) throw new Error('expected the question to cross the table');
-    // Neither hand and no move on offer: the player still holding the screen has
-    // nothing of the other player's to read.
-    expect(screen.queryByLabelText("Player one's hand")).toBeNull();
-    expect(screen.queryByLabelText("Player two's hand")).toBeNull();
-    expect(choiceButtons()).toHaveLength(0);
-    expect(screen.getByText('Pass the device to Player two')).toBeTruthy();
-
-    fireEvent.click(pass);
-    expect(within(handZone('Player two')).queryAllByLabelText('face-down card')).toHaveLength(0);
-    expect(screen.queryByLabelText("Player one's hand")).toBeNull();
-    expect(choiceButtons().length).toBeGreaterThan(0);
+    expect(crossings).toBeGreaterThan(0);
   });
 
   it('never says "you" to a shared screen, at any decision in a whole game', () => {
-    const game = hotseatGame();
-    let session = createSession(game.config.setup, game.config.seats);
+    const game = twoHumanTable();
+    let session = createSession(game.setup, game.seats);
     let asked = 0;
     while (session.pending !== null && asked < 2000) {
-      const prompt = buildPrompt(session.state, session.pending, HOTSEAT);
+      const prompt = buildPrompt(session.state, session.pending, TWO_HUMAN);
       expect(prompt.headline).not.toMatch(SECOND_PERSON);
       expect(prompt.explain).not.toMatch(SECOND_PERSON);
-      expect(describeStep(session.state, HOTSEAT)).not.toMatch(SECOND_PERSON);
+      expect(describeStep(session.state, TWO_HUMAN)).not.toMatch(SECOND_PERSON);
       session = choose(session, 0);
       asked += 1;
     }
@@ -953,15 +1005,15 @@ describe('two people at one screen', () => {
   });
 
   it('replays the same choices into the same game, whichever seat made them', () => {
-    const game = hotseatGame();
-    const played = play(game.config);
+    const game = twoHumanTable();
+    const played = play(game);
     expect(played.final.result).not.toBeNull();
     expect(played.final.choices.length).toBeGreaterThan(50);
-    // Both people really answered: a hotseat game that quietly ran one seat as a
-    // bot would replay just as well and mean nothing.
+    // Both people really answered: a two-human game that quietly ran one seat as
+    // a bot would replay just as well and mean nothing.
     expect(new Set(played.beats.map((beat) => beat.asked))).toEqual(new Set([0, 1]));
 
-    let replayed = createSession(game.config.setup, game.config.seats);
+    let replayed = createSession(game.setup, game.seats);
     for (const index of played.final.choices) replayed = choose(replayed, index);
 
     expect(replayed.choices).toEqual(played.final.choices);

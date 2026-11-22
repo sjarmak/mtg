@@ -95,12 +95,40 @@ describe('describeEvent over variants the slice has not reached', () => {
     [{ type: 'replacementApplied', id: 're1', event: 'draw' }, /replacement effect rewrote a draw event/],
     [{ type: 'countersChanged', oid: 'o1', plusOnePlusOne: 2, minusOneMinusOne: 0 }, /2 \+1\/\+1/],
     [
+      { type: 'counterRemoved', oid: 'o1', counter: 'plusOnePlusOne', count: 2 },
+      /2 \+1\/\+1 counters are removed/,
+    ],
+    [
       { type: 'countersChanged', oid: 'o1', plusOnePlusOne: 0, minusOneMinusOne: 0, loyalty: 4 },
       /4 loyalty counters/,
     ],
     [
+      { type: 'countersChanged', oid: 'o1', plusOnePlusOne: 0, minusOneMinusOne: 0, defense: 2 },
+      /2 defense counters/,
+    ],
+    [{ type: 'battleDefeated', oid: 'o1' }, /is defeated/],
+    [{ type: 'freeCastDeclined', oid: 'o1', player: 0 }, /leaves .* in exile/],
+    [
       { type: 'continuousEffectAdded', id: 'ce1', targetOid: 'o1', power: 2, toughness: 2, layer: '7c' },
       /gets \+2\/\+2 in layer 7c/,
+    ],
+    [
+      {
+        type: 'permanentAnimated',
+        effectIds: ['ce1', 'ce2', 'ce3'],
+        sourceOid: 'o2',
+        targetOid: 'o1',
+        power: 4,
+        toughness: 5,
+        colors: ['G'],
+        subtypes: ['Treefolk'],
+      },
+      /becomes a 4\/5 green Treefolk creature in addition to its other types.*remains on the battlefield/,
+    ],
+    [{ type: 'controlEffectAdded', id: 'ce1', targetOid: 'o1', controller: 0, layer: '2' }, /gains control/],
+    [
+      { type: 'subtypeAdded', id: 'ce1', targetOid: 'o1', subtype: 'Vampire', layer: '4' },
+      /becomes a Vampire in addition/,
     ],
     [{ type: 'continuousEffectsExpired', ids: ['ce1'] }, /1 continuous effect expire/],
     [{ type: 'permanentDestroyed', oid: 'o1', reason: 'deathtouch' }, /destroyed by deathtouch/],
@@ -108,6 +136,23 @@ describe('describeEvent over variants the slice has not reached', () => {
     // happening. Nothing on the board changes when it fires, so the sentence is
     // the whole of the record that the tap cost its controller a turn.
     [{ type: 'untapSkipped', oid: 'o1' }, /stays tapped and does not untap/],
+    [
+      {
+        type: 'delayedCounterPlacementScheduled',
+        id: 5,
+        source: 'o1',
+        target: 'o1',
+        targetIncarnation: 2,
+        dueTurn: 7,
+        counter: 'plusOnePlusOne',
+        count: 2,
+      },
+      /schedules 2 \+1\/\+1 counters.*turn 7's end step/,
+    ],
+    [
+      { type: 'delayedSpellCopyScheduled', id: 6, source: 'o1', player: 0 },
+      /schedules a copy of their next instant or sorcery spell this turn/,
+    ],
     [{ type: 'blockerOrderChosen', attacker: 'o1', blockers: ['o2', 'o3'] }, /assigns damage to/],
     [{ type: 'cardsMilled', player: 0, oids: ['o1'] }, /mills/],
     [{ type: 'cardsDiscarded', player: 0, oids: ['o1'] }, /discards/],
@@ -125,6 +170,17 @@ describe('describeEvent over variants the slice has not reached', () => {
     [
       { type: 'abilityTriggered', player: 0, oid: 'ab1', source: 'o1', index: 1, condition: 'selfDies' },
       /ability 2 triggers on dying/,
+    ],
+    [
+      {
+        type: 'abilityTriggered',
+        player: 0,
+        oid: 'ab2',
+        source: 'o1',
+        index: 0,
+        condition: 'siegeDefeated',
+      },
+      /last defense counter being removed/,
     ],
     [
       {
@@ -189,9 +245,16 @@ describe('describeAction', () => {
     ],
     [{ type: 'answerOptionalTrigger', player: 0, oid: 'ab1', accept: true }, /^take /],
     [{ type: 'answerOptionalTrigger', player: 0, oid: 'ab1', accept: false }, /^decline /],
+    [{ type: 'declineFreeCast', player: 0, oid: 'o1' }, /^leave .* in exile$/],
     [{ type: 'mulligan', player: 0 }, /^mulligan this hand$/],
     [{ type: 'keepHand', player: 0, bottom: [] }, /^keep this hand$/],
     [{ type: 'keepHand', player: 0, bottom: ['o1'] }, /^keep this hand, bottoming /],
+    [{ type: 'choosePopulateToken', player: 0, token: 'o1' }, /^create a copy of /],
+    [{ type: 'castSpell', player: 0, oid: 'o1', targets: [], discards: ['o2'] }, /^cast .* discarding /],
+    [
+      { type: 'beginCastSpell', player: 0, oid: 'o1', targets: [null], discards: ['o2'] },
+      /^begin casting .* discarding /,
+    ],
   ];
 
   for (const [action, pattern] of cases) {

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-scenario-probe-receipt",
+  "runtime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "53d03a0ca64abbdfeec64af6458d1523c6646004f3d2cc778727491fe8b8ee90",
+    "adapterSha256": "b5c63fa83f6b09086552dfe9c5d21d714f8e0871d3a851bbaca07154f66fb536",
+    "protocolVersion": 2
+  },
+  "result": {
+    "id": "chancellor-of-the-dross-engine-pregame-actions-v1",
+    "scope": "scenario",
+    "controller": "engine",
+    "sourceName": "Chancellor of the Dross",
+    "sourceSeat": 1,
+    "decisionFamilies": [
+      "pregame-actions"
+    ],
+    "assertions": [
+      "NPH pregame-actions contract witnesses lets Forge answer an engine-seat Chancellor reveal itself without exposing the question"
+    ],
+    "status": "passed"
+  },
+  "sourceScript": {
+    "path": "c/chancellor_of_the_dross.txt",
+    "sha256": "f95935d8c76379f1983bd2b6e6a97bea7eae4963ae4e2ac993c412402081ba13"
+  },
+  "sources": [
+    {
+      "path": "packages/forge-export/test/observed-nph-pregame-contract-witness.integration.test.ts",
+      "sha256": "597897cb4c5f4b15924476ea6bb78cb604a466efd7e7a62f8277d6143a7a8c7b"
+    },
+    {
+      "path": "packages/forge-export/test/support/avr-match-fixture.ts",
+      "sha256": "1edd535c0bf36e1b7b8c1a5929a99e3824a02ac16f48d5a3ec4f58ee08f3608c"
+    },
+    {
+      "path": "packages/forge-export/test/support/dka-match-fixture.ts",
+      "sha256": "587c3c41e7f08c40b68bb3c5fa10042a295c8619c2af76d4b90d4ef3221dcbd0"
+    },
+    {
+      "path": "packages/forge-export/test/support/exert-scenarios.ts",
+      "sha256": "91502d7d0dd90d99bcbd67535d561d153cd71558aac8657c0f659629b749935b"
+    },
+    {
+      "path": "packages/forge-export/test/support/isd-match-fixture.ts",
+      "sha256": "e5c0767437e824d6f40669c75a2e9ac0438b2173d4676f4902923b669ac8e66e"
+    },
+    {
+      "path": "packages/forge-export/test/support/m12-match-fixture.ts",
+      "sha256": "b8491f307af01798233d9faa8ce2dce2d17528e93f7e0d14ceb2213206ff79e8"
+    },
+    {
+      "path": "packages/forge-export/test/support/mbs-match-fixture.ts",
+      "sha256": "b98da1f541a2c77742e254bbfd9a588ee7c4b3560ea47ec8df944de1b0628a88"
+    },
+    {
+      "path": "packages/forge-export/test/support/nph-match-fixture.ts",
+      "sha256": "cbb1547ea4256f850228be3495521f3959b53684f8e0e4a0d262ad71aeadefb7"
+    },
+    {
+      "path": "packages/forge-export/test/support/printed-match-probes.ts",
+      "sha256": "246653ef7d2bb516e89b58429f2bbdc2cf490242d7aa452ed504894bb6b8d5e0"
+    },
+    {
+      "path": "packages/forge-export/test/support/roe-match-fixture.ts",
+      "sha256": "542770097d0ba150543b02d89bfb4e51b07f125561693313a3c4765dfaab19c1"
+    },
+    {
+      "path": "packages/forge-export/test/support/scd-match-fixture.ts",
+      "sha256": "954cbe53d0f5cdffb47f46cf9be64507d3559b8387490d1e61576b14d88136af"
+    },
+    {
+      "path": "packages/forge-export/test/support/snapshot-backend.ts",
+      "sha256": "56c29208bc9980e74efec42b19447162f49b2568041e07184fe311607d8aa353"
+    },
+    {
+      "path": "packages/forge-export/test/support/som-match-fixture.ts",
+      "sha256": "ce19ba2154d046d42dbb657c6ef5c0841d7ab02ef86daeeb55ca077578004317"
+    },
+    {
+      "path": "packages/forge-export/test/support/textless-blocking.ts",
+      "sha256": "4cdaa789f2ff3bc8996e405733e2338b2b207ef5da6a4ffcc0f5f19dd265a845"
+    }
+  ],
+  "cases": [
+    {
+      "testFile": "packages/forge-export/test/observed-nph-pregame-contract-witness.integration.test.ts",
+      "testIdentity": {
+        "id": "-258251537_0_1",
+        "ancestorTitles": [
+          "NPH pregame-actions contract witnesses"
+        ],
+        "title": "lets Forge answer an engine-seat Chancellor reveal itself without exposing the question"
+      },
+      "formatId": "nph",
+      "stateSha256": "0598c95f72e6d4240bdb51a23f3ecf1b3da606060f9ac09c075904f8f47995e5",
+      "seed": "nph-dross-engine-pregame-v1",
+      "maximumTurns": 6
+    }
+  ],
+  "evidence": {
+    "report": {
+      "path": "vitest.json",
+      "sha256": "360af1542a36f655103419b14beb8f88b768c0d08bbf6c752d5ff9e645f75f44"
+    },
+    "usage": {
+      "path": "snapshot-usage.jsonl",
+      "sha256": "fab85a5f2214f46e71634b7d81966ba2366959c716a9116cf91a85243289e402"
+    }
+  }
+}

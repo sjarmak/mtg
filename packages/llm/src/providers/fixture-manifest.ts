@@ -57,6 +57,14 @@ const RunManifestSchema = z
     calls: z.number().int().positive(),
     /** Distinct fixture keys, in the order the run first asked for each. */
     keys: z.array(z.string().min(1)).nonempty(),
+    /** Producer-owned semantics that determine the recorded request sequence. */
+    generator: z
+      .object({
+        name: z.string().min(1),
+        semanticsVersion: z.number().int().positive(),
+      })
+      .strict()
+      .optional(),
     /** Why this run no longer replays, when the brief has moved past it. */
     stale: z.string().min(1).optional(),
   })

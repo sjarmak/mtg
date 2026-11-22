@@ -1,11 +1,11 @@
 /**
  * What the backend is asking, and what may be answered.
  *
- * **The neutral channel is the enumeration, and only the enumeration.** The
- * backend lists the moves it will accept; a surface picks one by its id and
- * sends the id back. That is the whole protocol, and it is the narrowest one
- * that both engines can implement, because it needs no agreement about what a
- * move *is* — only that a list can be printed and an element of it named.
+ * **The neutral channel is backend-issued move ids.** Usually the backend lists
+ * the moves it will accept and a surface returns one id. A domain that cannot
+ * honestly be enumerated may instead expose a primitive input descriptor; the
+ * generic encoder below turns its answer into the same opaque `MoveId`. The
+ * contract knows "text", not what that text means to Magic or to another game.
  *
  * `@mtg/kernel` has a second door, `chooseAction`, which takes a constructed
  * move and asks whether it is legal. That door is what the MTGO-style board uses
@@ -22,9 +22,10 @@
  * and the section below is the answer.
  *
  * **A move id is opaque and comes from the backend.** A surface may hold one,
- * compare two, and send one back. It may not build one. The kernel's are the
- * option's index rendered as a string; a subprocess backend's will be whatever
- * its wire format needs, and neither is a contract.
+ * compare two, and send one back. It may derive a text answer only through the
+ * backend's own descriptor and `textSubmission`; it may not invent a backend
+ * move spelling. The kernel's enumerated ids are option indices rendered as
+ * strings, and neither spelling is a contract.
  *
  * # A truncated list is a hole, and the contract is not what fills it
  *
@@ -138,6 +139,7 @@
  * the hole; only not truncating does.
  */
 import type { SeatId } from './table';
+import type { ObjectView } from './projection';
 
 /**
  * The backend's name for one move it will accept.
@@ -150,10 +152,74 @@ import type { SeatId } from './table';
  */
 export type MoveId = string;
 
+/** A backend-defined text box whose answer is recorded as an opaque move id. */
+export interface TextDecisionInput {
+  readonly kind: 'text';
+  readonly id: string;
+  readonly label: string;
+  readonly minLength: number;
+  readonly maxLength: number;
+  /** Backend-validated examples a deterministic client may submit verbatim. */
+  readonly suggestions?: readonly string[];
+}
+
+export type DecisionInput = TextDecisionInput;
+
+const TEXT_SUBMISSION_PREFIX = '\u001ftext:';
+
+/** Returns the structural defect in a text descriptor, if it has one. */
+export function textInputError(input: TextDecisionInput): string | null {
+  if (input.id.length === 0) return 'text input id cannot be empty';
+  if (input.label.length === 0) return 'text input label cannot be empty';
+  if (!Number.isSafeInteger(input.minLength) || input.minLength < 0) {
+    return 'text input minimum length must be a nonnegative safe integer';
+  }
+  if (!Number.isSafeInteger(input.maxLength) || input.maxLength < input.minLength) {
+    return 'text input maximum length must be a safe integer no smaller than its minimum';
+  }
+  if (
+    (input.suggestions ?? []).some(
+      (value) => value.length < input.minLength || value.length > input.maxLength,
+    )
+  ) {
+    return 'text input suggestion must satisfy the declared length bounds';
+  }
+  return null;
+}
+
+/** Encodes a generic text answer without exposing backend taxonomy to the contract. */
+export function textSubmission(input: TextDecisionInput, value: string): MoveId {
+  const problem = textInputError(input);
+  if (problem !== null) throw new Error(problem);
+  if (value.length < input.minLength)
+    throw new Error(`text answer must contain at least ${String(input.minLength)} character(s)`);
+  if (value.length > input.maxLength)
+    throw new Error(`text answer must contain at most ${String(input.maxLength)} character(s)`);
+  return `${TEXT_SUBMISSION_PREFIX}${JSON.stringify([input.id, value])}`;
+}
+
+/** Decodes an answer only for the descriptor that issued it. */
+export function textValueOf(input: TextDecisionInput, move: MoveId): string | null {
+  if (textInputError(input) !== null) return null;
+  if (!move.startsWith(TEXT_SUBMISSION_PREFIX)) return null;
+  try {
+    const parsed: unknown = JSON.parse(move.slice(TEXT_SUBMISSION_PREFIX.length));
+    if (!Array.isArray(parsed) || parsed.length !== 2) return null;
+    const [id, value] = parsed as readonly unknown[];
+    if (id !== input.id || typeof value !== 'string') return null;
+    if (value.length < input.minLength || value.length > input.maxLength) return null;
+    return value;
+  } catch {
+    return null;
+  }
+}
+
 /** An object a move points at, by the projection's own opaque identity. */
 export interface MoveTarget {
   readonly oid: string;
   readonly name: string;
+  /** Safe projected facts when the target is temporarily revealed outside a projected zone. */
+  readonly object?: ObjectView;
 }
 
 export interface MoveOption {
@@ -189,6 +255,8 @@ export interface PendingDecision {
   /** The question, in a sentence. */
   readonly prompt: string;
   readonly options: readonly MoveOption[];
+  /** A non-enumerable answer domain, absent for ordinary option decisions. */
+  readonly input?: DecisionInput;
   /** False when the backend stopped listing before it ran out of legal moves. */
   readonly complete: boolean;
 }

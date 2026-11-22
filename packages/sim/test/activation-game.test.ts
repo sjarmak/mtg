@@ -99,7 +99,9 @@ describe('an activated ability in a seeded game', () => {
     for (const outcome of OUTCOMES) {
       // A game that ended any other way did not end: `playSimGame` throws on a
       // blown decision budget, and the loop cannot leave without a result.
-      expect(['lifeZero', 'emptyLibrary', 'concede', 'turnLimit']).toContain(outcome.reason);
+      expect(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']).toContain(
+        outcome.reason,
+      );
       expect(outcome.turns).toBeGreaterThan(0);
       expect(outcome.log?.turns.length ?? 0).toBeGreaterThan(0);
     }

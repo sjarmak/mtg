@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "sacred-cat-token-departure-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0027:08891c78-13c1-4d84-aa9c-78346b3b7d18"],
+      "decisionFamilies": ["embalm-token-destroyed-public-departure"],
+      "assertions": ["destroying the 'Sacred Cat' token removes it from public zones and choices"],
+      "testFile": "packages/forge-export/test/observed-akh-token-departure.integration.test.ts"
+    },
+    {
+      "id": "pouncer-token-departure-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0002:865e267d-450c-4eeb-b61d-bd0ec5d8534a"],
+      "decisionFamilies": ["eternalize-token-destroyed-public-departure"],
+      "assertions": ["destroying the 'Adorned Pouncer' token removes it from public zones and choices"],
+      "testFile": "packages/forge-export/test/observed-akh-token-departure.integration.test.ts"
+    }
+  ]
+}

@@ -31,7 +31,7 @@
  */
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 
 /** Relative to the repo root, beside `data/store/mtg.sqlite`. Gitignored. */
 export const DEFAULT_IMAGE_CACHE_DIR = 'data/images';
@@ -126,6 +126,32 @@ function writeWholeFile(path: string, bytes: Uint8Array): void {
 }
 
 /**
+ * Hold `dir` to the word `CacheImageOptions` uses for it.
+ *
+ * `mtg-21ka`, 2026-08-23. `DEFAULT_IMAGE_CACHE_DIR` is written relative to the
+ * repo root because that is where it belongs, and every launcher but one joined
+ * it to a root before passing it. The one that did not resolved it against the
+ * cwd of whichever process called it, so a shots run made a second 27 MB cache
+ * at `packages/ui/data/images/` and re-fetched every symbol the repo-root cache
+ * already held. Both directories were correct as far as this package could
+ * tell: it does not know where the repo root is, and must not — it is the
+ * package with no dependencies, taken by launchers that each know their own.
+ *
+ * What it can do is refuse the ambiguous half. An absolute path means the same
+ * directory whoever calls it and from wherever, and a relative one means "the
+ * cache of the process that happened to run this", which is never what a cache
+ * is for.
+ */
+function assertAbsoluteCacheDir(dir: string): void {
+  if (typeof dir !== 'string' || dir.trim() === '' || !isAbsolute(dir)) {
+    throw new Error(
+      `the image cache needs an absolute directory, and was given ${JSON.stringify(dir)}. ` +
+        `Join ${JSON.stringify(DEFAULT_IMAGE_CACHE_DIR)} to the repo root rather than passing it as it stands.`,
+    );
+  }
+}
+
+/**
  * The cached file for a URL, downloading it if this is the first time.
  *
  * Throws when the download fails. Callers decide what a missing image means to
@@ -133,6 +159,7 @@ function writeWholeFile(path: string, bytes: Uint8Array): void {
  * because a viewer who can reach the origin should still see it.
  */
 export async function cacheImage(url: string, options: CacheImageOptions): Promise<CachedImage> {
+  assertAbsoluteCacheDir(options.dir);
   const exists = options.exists ?? existsSync;
   const write = options.write ?? writeWholeFile;
   const download = options.download ?? fetchImage;

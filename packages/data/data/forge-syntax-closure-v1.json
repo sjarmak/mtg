@@ -1,0 +1,3405 @@
+{
+  "schemaVersion": 1,
+  "kind": "forge-syntax-closure-snapshot",
+  "forge": {
+    "version": "2.0.14",
+    "jarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9"
+  },
+  "reviewedTokens": 1131,
+  "library": {
+    "scripts": 33587,
+    "closed": 28393
+  },
+  "editions": [
+    {
+      "code": "10E",
+      "cards": 368,
+      "closed": 365
+    },
+    {
+      "code": "2ED",
+      "cards": 292,
+      "closed": 268
+    },
+    {
+      "code": "2X2",
+      "cards": 332,
+      "closed": 324
+    },
+    {
+      "code": "2XM",
+      "cards": 332,
+      "closed": 326
+    },
+    {
+      "code": "30A",
+      "cards": 286,
+      "closed": 265
+    },
+    {
+      "code": "3ED",
+      "cards": 296,
+      "closed": 279
+    },
+    {
+      "code": "40K",
+      "cards": 286,
+      "closed": 246
+    },
+    {
+      "code": "4ED",
+      "cards": 368,
+      "closed": 349
+    },
+    {
+      "code": "5DN",
+      "cards": 165,
+      "closed": 163
+    },
+    {
+      "code": "5ED",
+      "cards": 434,
+      "closed": 408
+    },
+    {
+      "code": "6ED",
+      "cards": 335,
+      "closed": 328
+    },
+    {
+      "code": "6ED_AA",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "7ED",
+      "cards": 335,
+      "closed": 330
+    },
+    {
+      "code": "8ED",
+      "cards": 342,
+      "closed": 340
+    },
+    {
+      "code": "9ED",
+      "cards": 344,
+      "closed": 341
+    },
+    {
+      "code": "A25",
+      "cards": 249,
+      "closed": 246
+    },
+    {
+      "code": "AA1",
+      "cards": 26,
+      "closed": 26
+    },
+    {
+      "code": "AA2",
+      "cards": 24,
+      "closed": 24
+    },
+    {
+      "code": "AA3",
+      "cards": 25,
+      "closed": 23
+    },
+    {
+      "code": "AA4",
+      "cards": 28,
+      "closed": 28
+    },
+    {
+      "code": "ACR",
+      "cards": 138,
+      "closed": 115
+    },
+    {
+      "code": "AER",
+      "cards": 184,
+      "closed": 184
+    },
+    {
+      "code": "AFC",
+      "cards": 275,
+      "closed": 241
+    },
+    {
+      "code": "AFR",
+      "cards": 266,
+      "closed": 180
+    },
+    {
+      "code": "AJMP",
+      "cards": 18,
+      "closed": 17
+    },
+    {
+      "code": "AKH",
+      "cards": 239,
+      "closed": 239
+    },
+    {
+      "code": "AKR",
+      "cards": 283,
+      "closed": 283
+    },
+    {
+      "code": "ALA",
+      "cards": 234,
+      "closed": 234
+    },
+    {
+      "code": "ALL",
+      "cards": 144,
+      "closed": 125
+    },
+    {
+      "code": "ANA",
+      "cards": 11,
+      "closed": 11
+    },
+    {
+      "code": "ANB",
+      "cards": 120,
+      "closed": 120
+    },
+    {
+      "code": "APC",
+      "cards": 138,
+      "closed": 131
+    },
+    {
+      "code": "ARB",
+      "cards": 145,
+      "closed": 144
+    },
+    {
+      "code": "ARC",
+      "cards": 140,
+      "closed": 138
+    },
+    {
+      "code": "ARN",
+      "cards": 78,
+      "closed": 65
+    },
+    {
+      "code": "ATH",
+      "cards": 81,
+      "closed": 81
+    },
+    {
+      "code": "ATQ",
+      "cards": 85,
+      "closed": 81
+    },
+    {
+      "code": "AVR",
+      "cards": 234,
+      "closed": 234
+    },
+    {
+      "code": "BBD",
+      "cards": 254,
+      "closed": 202
+    },
+    {
+      "code": "BFZ",
+      "cards": 254,
+      "closed": 182
+    },
+    {
+      "code": "BIG",
+      "cards": 30,
+      "closed": 26
+    },
+    {
+      "code": "BLB",
+      "cards": 266,
+      "closed": 174
+    },
+    {
+      "code": "BLC",
+      "cards": 311,
+      "closed": 292
+    },
+    {
+      "code": "BNG",
+      "cards": 165,
+      "closed": 165
+    },
+    {
+      "code": "BOK",
+      "cards": 165,
+      "closed": 133
+    },
+    {
+      "code": "BOT",
+      "cards": 15,
+      "closed": 0
+    },
+    {
+      "code": "BRB",
+      "cards": 105,
+      "closed": 104
+    },
+    {
+      "code": "BRC",
+      "cards": 176,
+      "closed": 170
+    },
+    {
+      "code": "BRO",
+      "cards": 272,
+      "closed": 226
+    },
+    {
+      "code": "BRR",
+      "cards": 63,
+      "closed": 62
+    },
+    {
+      "code": "BTD",
+      "cards": 82,
+      "closed": 79
+    },
+    {
+      "code": "C13",
+      "cards": 340,
+      "closed": 340
+    },
+    {
+      "code": "C14",
+      "cards": 322,
+      "closed": 318
+    },
+    {
+      "code": "C15",
+      "cards": 327,
+      "closed": 324
+    },
+    {
+      "code": "C16",
+      "cards": 339,
+      "closed": 339
+    },
+    {
+      "code": "C17",
+      "cards": 299,
+      "closed": 299
+    },
+    {
+      "code": "C18",
+      "cards": 297,
+      "closed": 282
+    },
+    {
+      "code": "C19",
+      "cards": 289,
+      "closed": 261
+    },
+    {
+      "code": "C20",
+      "cards": 321,
+      "closed": 297
+    },
+    {
+      "code": "C21",
+      "cards": 328,
+      "closed": 312
+    },
+    {
+      "code": "CC1",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "CC2",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "CHK",
+      "cards": 291,
+      "closed": 231
+    },
+    {
+      "code": "CHR",
+      "cards": 116,
+      "closed": 100
+    },
+    {
+      "code": "CLB",
+      "cards": 361,
+      "closed": 273
+    },
+    {
+      "code": "CLU",
+      "cards": 263,
+      "closed": 251
+    },
+    {
+      "code": "CM1",
+      "cards": 18,
+      "closed": 18
+    },
+    {
+      "code": "CM2",
+      "cards": 279,
+      "closed": 273
+    },
+    {
+      "code": "CMA",
+      "cards": 289,
+      "closed": 289
+    },
+    {
+      "code": "CMB1",
+      "cards": 56,
+      "closed": 42
+    },
+    {
+      "code": "CMD",
+      "cards": 302,
+      "closed": 298
+    },
+    {
+      "code": "CMM",
+      "cards": 737,
+      "closed": 737
+    },
+    {
+      "code": "CMR",
+      "cards": 361,
+      "closed": 343
+    },
+    {
+      "code": "CN2",
+      "cards": 221,
+      "closed": 177
+    },
+    {
+      "code": "CNS",
+      "cards": 210,
+      "closed": 185
+    },
+    {
+      "code": "CON",
+      "cards": 145,
+      "closed": 143
+    },
+    {
+      "code": "CP1",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "CP2",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "CP3",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "CSP",
+      "cards": 155,
+      "closed": 116
+    },
+    {
+      "code": "CST",
+      "cards": 52,
+      "closed": 51
+    },
+    {
+      "code": "DBL",
+      "cards": 531,
+      "closed": 404
+    },
+    {
+      "code": "DCI",
+      "cards": 77,
+      "closed": 65
+    },
+    {
+      "code": "DD1",
+      "cards": 56,
+      "closed": 56
+    },
+    {
+      "code": "DD2",
+      "cards": 56,
+      "closed": 53
+    },
+    {
+      "code": "DDC",
+      "cards": 56,
+      "closed": 56
+    },
+    {
+      "code": "DDD",
+      "cards": 57,
+      "closed": 55
+    },
+    {
+      "code": "DDE",
+      "cards": 67,
+      "closed": 67
+    },
+    {
+      "code": "DDF",
+      "cards": 73,
+      "closed": 73
+    },
+    {
+      "code": "DDG",
+      "cards": 72,
+      "closed": 71
+    },
+    {
+      "code": "DDH",
+      "cards": 74,
+      "closed": 74
+    },
+    {
+      "code": "DDI",
+      "cards": 70,
+      "closed": 70
+    },
+    {
+      "code": "DDJ",
+      "cards": 76,
+      "closed": 76
+    },
+    {
+      "code": "DDK",
+      "cards": 71,
+      "closed": 71
+    },
+    {
+      "code": "DDL",
+      "cards": 68,
+      "closed": 68
+    },
+    {
+      "code": "DDM",
+      "cards": 76,
+      "closed": 76
+    },
+    {
+      "code": "DDN",
+      "cards": 71,
+      "closed": 71
+    },
+    {
+      "code": "DDO",
+      "cards": 58,
+      "closed": 58
+    },
+    {
+      "code": "DDP",
+      "cards": 67,
+      "closed": 64
+    },
+    {
+      "code": "DDQ",
+      "cards": 67,
+      "closed": 65
+    },
+    {
+      "code": "DDR",
+      "cards": 62,
+      "closed": 61
+    },
+    {
+      "code": "DDS",
+      "cards": 56,
+      "closed": 53
+    },
+    {
+      "code": "DDT",
+      "cards": 57,
+      "closed": 57
+    },
+    {
+      "code": "DDU",
+      "cards": 71,
+      "closed": 69
+    },
+    {
+      "code": "DFT",
+      "cards": 276,
+      "closed": 176
+    },
+    {
+      "code": "DGM",
+      "cards": 141,
+      "closed": 141
+    },
+    {
+      "code": "DIS",
+      "cards": 170,
+      "closed": 170
+    },
+    {
+      "code": "DKA",
+      "cards": 158,
+      "closed": 158
+    },
+    {
+      "code": "DKM",
+      "cards": 44,
+      "closed": 40
+    },
+    {
+      "code": "DMC",
+      "cards": 191,
+      "closed": 185
+    },
+    {
+      "code": "DMR",
+      "cards": 251,
+      "closed": 241
+    },
+    {
+      "code": "DMU",
+      "cards": 266,
+      "closed": 230
+    },
+    {
+      "code": "DOM",
+      "cards": 254,
+      "closed": 249
+    },
+    {
+      "code": "DPA",
+      "cards": 101,
+      "closed": 101
+    },
+    {
+      "code": "DRB",
+      "cards": 15,
+      "closed": 15
+    },
+    {
+      "code": "DRC",
+      "cards": 161,
+      "closed": 155
+    },
+    {
+      "code": "DRC94",
+      "cards": 1,
+      "closed": 0
+    },
+    {
+      "code": "DRK",
+      "cards": 119,
+      "closed": 111
+    },
+    {
+      "code": "DS0",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "DSC",
+      "cards": 340,
+      "closed": 284
+    },
+    {
+      "code": "DSK",
+      "cards": 253,
+      "closed": 177
+    },
+    {
+      "code": "DST",
+      "cards": 165,
+      "closed": 162
+    },
+    {
+      "code": "DTK",
+      "cards": 254,
+      "closed": 238
+    },
+    {
+      "code": "DVD",
+      "cards": 56,
+      "closed": 56
+    },
+    {
+      "code": "E01",
+      "cards": 101,
+      "closed": 98
+    },
+    {
+      "code": "E02",
+      "cards": 47,
+      "closed": 47
+    },
+    {
+      "code": "EA1",
+      "cards": 20,
+      "closed": 20
+    },
+    {
+      "code": "EA2",
+      "cards": 25,
+      "closed": 23
+    },
+    {
+      "code": "EA3",
+      "cards": 25,
+      "closed": 25
+    },
+    {
+      "code": "ECC",
+      "cards": 153,
+      "closed": 144
+    },
+    {
+      "code": "ECL",
+      "cards": 273,
+      "closed": 247
+    },
+    {
+      "code": "ELD",
+      "cards": 254,
+      "closed": 239
+    },
+    {
+      "code": "EMA",
+      "cards": 249,
+      "closed": 244
+    },
+    {
+      "code": "EMN",
+      "cards": 205,
+      "closed": 170
+    },
+    {
+      "code": "EOC",
+      "cards": 171,
+      "closed": 156
+    },
+    {
+      "code": "EOE",
+      "cards": 266,
+      "closed": 194
+    },
+    {
+      "code": "EOS",
+      "cards": 45,
+      "closed": 44
+    },
+    {
+      "code": "EVE",
+      "cards": 180,
+      "closed": 167
+    },
+    {
+      "code": "EVG",
+      "cards": 56,
+      "closed": 56
+    },
+    {
+      "code": "EXO",
+      "cards": 143,
+      "closed": 135
+    },
+    {
+      "code": "EXP",
+      "cards": 25,
+      "closed": 25
+    },
+    {
+      "code": "F01",
+      "cards": 7,
+      "closed": 7
+    },
+    {
+      "code": "F02",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F03",
+      "cards": 13,
+      "closed": 13
+    },
+    {
+      "code": "F04",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F05",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F06",
+      "cards": 10,
+      "closed": 8
+    },
+    {
+      "code": "F07",
+      "cards": 12,
+      "closed": 11
+    },
+    {
+      "code": "F08",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F09",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F10",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F11",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F12",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F13",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F14",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F15",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "F16",
+      "cards": 12,
+      "closed": 10
+    },
+    {
+      "code": "F17",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "FCA",
+      "cards": 64,
+      "closed": 60
+    },
+    {
+      "code": "FDC",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "FDN",
+      "cards": 276,
+      "closed": 261
+    },
+    {
+      "code": "FEM",
+      "cards": 102,
+      "closed": 100
+    },
+    {
+      "code": "FIC",
+      "cards": 339,
+      "closed": 305
+    },
+    {
+      "code": "FIN",
+      "cards": 299,
+      "closed": 259
+    },
+    {
+      "code": "FNM",
+      "cards": 11,
+      "closed": 10
+    },
+    {
+      "code": "FRA",
+      "cards": 20,
+      "closed": 10
+    },
+    {
+      "code": "FRC",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "FRF",
+      "cards": 180,
+      "closed": 170
+    },
+    {
+      "code": "FUT",
+      "cards": 180,
+      "closed": 165
+    },
+    {
+      "code": "FVE",
+      "cards": 15,
+      "closed": 12
+    },
+    {
+      "code": "G00",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "G01",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "G02",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "G03",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "G04",
+      "cards": 6,
+      "closed": 5
+    },
+    {
+      "code": "G05",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "G06",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "G07",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "G08",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "G09",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "G10",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "G11",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "G18",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "G99",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "GDY",
+      "cards": 9,
+      "closed": 8
+    },
+    {
+      "code": "GK1",
+      "cards": 121,
+      "closed": 121
+    },
+    {
+      "code": "GK2",
+      "cards": 128,
+      "closed": 128
+    },
+    {
+      "code": "GN2",
+      "cards": 59,
+      "closed": 58
+    },
+    {
+      "code": "GN3",
+      "cards": 125,
+      "closed": 124
+    },
+    {
+      "code": "GNT",
+      "cards": 63,
+      "closed": 62
+    },
+    {
+      "code": "GPT",
+      "cards": 165,
+      "closed": 165
+    },
+    {
+      "code": "GRN",
+      "cards": 244,
+      "closed": 229
+    },
+    {
+      "code": "GS1",
+      "cards": 40,
+      "closed": 40
+    },
+    {
+      "code": "GTC",
+      "cards": 249,
+      "closed": 249
+    },
+    {
+      "code": "GVL",
+      "cards": 57,
+      "closed": 55
+    },
+    {
+      "code": "H17",
+      "cards": 1,
+      "closed": 0
+    },
+    {
+      "code": "H1R",
+      "cards": 40,
+      "closed": 39
+    },
+    {
+      "code": "H2R",
+      "cards": 16,
+      "closed": 15
+    },
+    {
+      "code": "HA1",
+      "cards": 20,
+      "closed": 20
+    },
+    {
+      "code": "HA2",
+      "cards": 25,
+      "closed": 25
+    },
+    {
+      "code": "HA3",
+      "cards": 27,
+      "closed": 27
+    },
+    {
+      "code": "HA4",
+      "cards": 25,
+      "closed": 25
+    },
+    {
+      "code": "HA5",
+      "cards": 25,
+      "closed": 25
+    },
+    {
+      "code": "HA6",
+      "cards": 20,
+      "closed": 20
+    },
+    {
+      "code": "HA7",
+      "cards": 25,
+      "closed": 25
+    },
+    {
+      "code": "HBG",
+      "cards": 271,
+      "closed": 187
+    },
+    {
+      "code": "HHO",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "HML",
+      "cards": 115,
+      "closed": 109
+    },
+    {
+      "code": "HOB",
+      "cards": 193,
+      "closed": 160
+    },
+    {
+      "code": "HOC",
+      "cards": 117,
+      "closed": 111
+    },
+    {
+      "code": "HOP",
+      "cards": 184,
+      "closed": 142
+    },
+    {
+      "code": "HOU",
+      "cards": 179,
+      "closed": 179
+    },
+    {
+      "code": "ICE",
+      "cards": 373,
+      "closed": 316
+    },
+    {
+      "code": "IKO",
+      "cards": 264,
+      "closed": 255
+    },
+    {
+      "code": "IMA",
+      "cards": 249,
+      "closed": 247
+    },
+    {
+      "code": "INR",
+      "cards": 287,
+      "closed": 254
+    },
+    {
+      "code": "INV",
+      "cards": 330,
+      "closed": 319
+    },
+    {
+      "code": "INV_AA",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "ISD",
+      "cards": 254,
+      "closed": 254
+    },
+    {
+      "code": "J12",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "J13",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "J14",
+      "cards": 14,
+      "closed": 14
+    },
+    {
+      "code": "J15",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "J16",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "J17",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "J18",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "J19",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "J20",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "J21",
+      "cards": 372,
+      "closed": 333
+    },
+    {
+      "code": "J22",
+      "cards": 819,
+      "closed": 800
+    },
+    {
+      "code": "J25",
+      "cards": 768,
+      "closed": 742
+    },
+    {
+      "code": "JGP",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "JMP",
+      "cards": 460,
+      "closed": 457
+    },
+    {
+      "code": "JOU",
+      "cards": 165,
+      "closed": 165
+    },
+    {
+      "code": "JP1",
+      "cards": 5,
+      "closed": 3
+    },
+    {
+      "code": "JUD",
+      "cards": 143,
+      "closed": 141
+    },
+    {
+      "code": "JVC",
+      "cards": 56,
+      "closed": 53
+    },
+    {
+      "code": "KHC",
+      "cards": 119,
+      "closed": 116
+    },
+    {
+      "code": "KHM",
+      "cards": 280,
+      "closed": 259
+    },
+    {
+      "code": "KLD",
+      "cards": 254,
+      "closed": 254
+    },
+    {
+      "code": "KLR",
+      "cards": 291,
+      "closed": 291
+    },
+    {
+      "code": "KTK",
+      "cards": 254,
+      "closed": 254
+    },
+    {
+      "code": "LCC",
+      "cards": 312,
+      "closed": 295
+    },
+    {
+      "code": "LCI",
+      "cards": 291,
+      "closed": 220
+    },
+    {
+      "code": "LEA",
+      "cards": 290,
+      "closed": 266
+    },
+    {
+      "code": "LEB",
+      "cards": 292,
+      "closed": 268
+    },
+    {
+      "code": "LEG",
+      "cards": 310,
+      "closed": 270
+    },
+    {
+      "code": "LGN",
+      "cards": 145,
+      "closed": 125
+    },
+    {
+      "code": "LMAR",
+      "cards": 4,
+      "closed": 1
+    },
+    {
+      "code": "LRW",
+      "cards": 286,
+      "closed": 286
+    },
+    {
+      "code": "LTC",
+      "cards": 340,
+      "closed": 307
+    },
+    {
+      "code": "LTR",
+      "cards": 266,
+      "closed": 189
+    },
+    {
+      "code": "M10",
+      "cards": 234,
+      "closed": 234
+    },
+    {
+      "code": "M11",
+      "cards": 234,
+      "closed": 234
+    },
+    {
+      "code": "M12",
+      "cards": 234,
+      "closed": 234
+    },
+    {
+      "code": "M13",
+      "cards": 234,
+      "closed": 234
+    },
+    {
+      "code": "M14",
+      "cards": 234,
+      "closed": 234
+    },
+    {
+      "code": "M15",
+      "cards": 254,
+      "closed": 254
+    },
+    {
+      "code": "M19",
+      "cards": 265,
+      "closed": 265
+    },
+    {
+      "code": "M20",
+      "cards": 265,
+      "closed": 260
+    },
+    {
+      "code": "M21",
+      "cards": 264,
+      "closed": 264
+    },
+    {
+      "code": "M3C",
+      "cards": 319,
+      "closed": 287
+    },
+    {
+      "code": "MAR",
+      "cards": 94,
+      "closed": 89
+    },
+    {
+      "code": "MAT",
+      "cards": 50,
+      "closed": 41
+    },
+    {
+      "code": "MB1",
+      "cards": 0,
+      "closed": 0
+    },
+    {
+      "code": "MB2",
+      "cards": 27,
+      "closed": 21
+    },
+    {
+      "code": "MBC",
+      "cards": 68,
+      "closed": 45
+    },
+    {
+      "code": "MBP",
+      "cards": 27,
+      "closed": 25
+    },
+    {
+      "code": "MBS",
+      "cards": 150,
+      "closed": 150
+    },
+    {
+      "code": "MD1",
+      "cards": 26,
+      "closed": 26
+    },
+    {
+      "code": "ME1",
+      "cards": 185,
+      "closed": 167
+    },
+    {
+      "code": "ME2",
+      "cards": 245,
+      "closed": 219
+    },
+    {
+      "code": "ME3",
+      "cards": 220,
+      "closed": 204
+    },
+    {
+      "code": "ME4",
+      "cards": 260,
+      "closed": 243
+    },
+    {
+      "code": "MH1",
+      "cards": 254,
+      "closed": 248
+    },
+    {
+      "code": "MH2",
+      "cards": 240,
+      "closed": 217
+    },
+    {
+      "code": "MH3",
+      "cards": 308,
+      "closed": 253
+    },
+    {
+      "code": "MIC",
+      "cards": 149,
+      "closed": 138
+    },
+    {
+      "code": "MID",
+      "cards": 272,
+      "closed": 215
+    },
+    {
+      "code": "MIR",
+      "cards": 335,
+      "closed": 305
+    },
+    {
+      "code": "MKC",
+      "cards": 301,
+      "closed": 272
+    },
+    {
+      "code": "MKM",
+      "cards": 271,
+      "closed": 174
+    },
+    {
+      "code": "MM2",
+      "cards": 249,
+      "closed": 242
+    },
+    {
+      "code": "MM3",
+      "cards": 249,
+      "closed": 247
+    },
+    {
+      "code": "MMA",
+      "cards": 229,
+      "closed": 220
+    },
+    {
+      "code": "MMQ",
+      "cards": 335,
+      "closed": 331
+    },
+    {
+      "code": "MOC",
+      "cards": 385,
+      "closed": 311
+    },
+    {
+      "code": "MOM",
+      "cards": 281,
+      "closed": 181
+    },
+    {
+      "code": "MOR",
+      "cards": 150,
+      "closed": 140
+    },
+    {
+      "code": "MP2",
+      "cards": 30,
+      "closed": 30
+    },
+    {
+      "code": "MPR",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "MPS_GRN",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "MPS_KLD",
+      "cards": 54,
+      "closed": 54
+    },
+    {
+      "code": "MPS_RNA",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "MPS_WAR",
+      "cards": 8,
+      "closed": 7
+    },
+    {
+      "code": "MRD",
+      "cards": 291,
+      "closed": 280
+    },
+    {
+      "code": "MSC",
+      "cards": 616,
+      "closed": 522
+    },
+    {
+      "code": "MSH",
+      "cards": 281,
+      "closed": 210
+    },
+    {
+      "code": "MUL",
+      "cards": 65,
+      "closed": 60
+    },
+    {
+      "code": "NCC",
+      "cards": 347,
+      "closed": 308
+    },
+    {
+      "code": "NEC",
+      "cards": 140,
+      "closed": 119
+    },
+    {
+      "code": "NEO",
+      "cards": 287,
+      "closed": 225
+    },
+    {
+      "code": "NMS",
+      "cards": 143,
+      "closed": 141
+    },
+    {
+      "code": "NPH",
+      "cards": 170,
+      "closed": 170
+    },
+    {
+      "code": "O90P",
+      "cards": 9,
+      "closed": 8
+    },
+    {
+      "code": "OANA",
+      "cards": 14,
+      "closed": 14
+    },
+    {
+      "code": "OARC",
+      "cards": 45,
+      "closed": 0
+    },
+    {
+      "code": "OBC",
+      "cards": 0,
+      "closed": 0
+    },
+    {
+      "code": "ODY",
+      "cards": 335,
+      "closed": 328
+    },
+    {
+      "code": "OE01",
+      "cards": 20,
+      "closed": 0
+    },
+    {
+      "code": "OGW",
+      "cards": 183,
+      "closed": 117
+    },
+    {
+      "code": "OLGC",
+      "cards": 21,
+      "closed": 21
+    },
+    {
+      "code": "OM1",
+      "cards": 35,
+      "closed": 31
+    },
+    {
+      "code": "OMB",
+      "cards": 40,
+      "closed": 39
+    },
+    {
+      "code": "ONC",
+      "cards": 144,
+      "closed": 133
+    },
+    {
+      "code": "ONE",
+      "cards": 266,
+      "closed": 202
+    },
+    {
+      "code": "ONS",
+      "cards": 335,
+      "closed": 323
+    },
+    {
+      "code": "ORI",
+      "cards": 257,
+      "closed": 257
+    },
+    {
+      "code": "OTC",
+      "cards": 305,
+      "closed": 285
+    },
+    {
+      "code": "OTJ",
+      "cards": 276,
+      "closed": 169
+    },
+    {
+      "code": "OTP",
+      "cards": 64,
+      "closed": 60
+    },
+    {
+      "code": "OVNT",
+      "cards": 13,
+      "closed": 12
+    },
+    {
+      "code": "P03",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "P04",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "P05",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "P06",
+      "cards": 7,
+      "closed": 6
+    },
+    {
+      "code": "P07",
+      "cards": 7,
+      "closed": 7
+    },
+    {
+      "code": "P08",
+      "cards": 7,
+      "closed": 7
+    },
+    {
+      "code": "P09",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "P10",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "P10E",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "P11",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "P15A",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "P22",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "P23",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "P2HG",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "P30A",
+      "cards": 30,
+      "closed": 30
+    },
+    {
+      "code": "P30H",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "P30M",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "P30T",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "P5DN",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "P8ED",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "P9ED",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PA1",
+      "cards": 11,
+      "closed": 11
+    },
+    {
+      "code": "PAER",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "PAKH",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PAL00",
+      "cards": 11,
+      "closed": 11
+    },
+    {
+      "code": "PAL01",
+      "cards": 11,
+      "closed": 11
+    },
+    {
+      "code": "PAL02",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PAL03",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "PAL04",
+      "cards": 10,
+      "closed": 9
+    },
+    {
+      "code": "PAL05",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "PAL06",
+      "cards": 9,
+      "closed": 8
+    },
+    {
+      "code": "PAL99",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "PALA",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PALP",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PANA",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "PAPC",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PARB",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PARL",
+      "cards": 7,
+      "closed": 7
+    },
+    {
+      "code": "PAST",
+      "cards": 12,
+      "closed": 7
+    },
+    {
+      "code": "PAVR",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PBFZ",
+      "cards": 10,
+      "closed": 7
+    },
+    {
+      "code": "PBNG",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "PBOK",
+      "cards": 2,
+      "closed": 1
+    },
+    {
+      "code": "PC2",
+      "cards": 176,
+      "closed": 134
+    },
+    {
+      "code": "PCA",
+      "cards": 222,
+      "closed": 134
+    },
+    {
+      "code": "PCBB",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PCEL",
+      "cards": 4,
+      "closed": 3
+    },
+    {
+      "code": "PCHK",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PCMP",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "PCNS",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PCON",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PCSP",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PCY",
+      "cards": 143,
+      "closed": 138
+    },
+    {
+      "code": "PD2",
+      "cards": 31,
+      "closed": 30
+    },
+    {
+      "code": "PD3",
+      "cards": 27,
+      "closed": 27
+    },
+    {
+      "code": "PDGM",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PDIS",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PDKA",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PDMU",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PDOM",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "PDP10",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PDP12",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PDP13",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PDP14",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PDP15",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PDS",
+      "cards": 41,
+      "closed": 40
+    },
+    {
+      "code": "PDST",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PDTK",
+      "cards": 9,
+      "closed": 8
+    },
+    {
+      "code": "PDTP",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PELP",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PEMN",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "PEVE",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PEWK",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "PEXO",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PF19",
+      "cards": 7,
+      "closed": 7
+    },
+    {
+      "code": "PF20",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PF23",
+      "cards": 4,
+      "closed": 2
+    },
+    {
+      "code": "PF24",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PF25",
+      "cards": 16,
+      "closed": 15
+    },
+    {
+      "code": "PF26",
+      "cards": 11,
+      "closed": 11
+    },
+    {
+      "code": "PFDN",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PFRF",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "PFUT",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PGPT",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PGPX",
+      "cards": 20,
+      "closed": 19
+    },
+    {
+      "code": "PGRN",
+      "cards": 7,
+      "closed": 7
+    },
+    {
+      "code": "PGRU",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PGTC",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "PH17",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PH18",
+      "cards": 2,
+      "closed": 1
+    },
+    {
+      "code": "PH19",
+      "cards": 4,
+      "closed": 3
+    },
+    {
+      "code": "PH20",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PH21",
+      "cards": 3,
+      "closed": 1
+    },
+    {
+      "code": "PH22",
+      "cards": 0,
+      "closed": 0
+    },
+    {
+      "code": "PH23",
+      "cards": 1,
+      "closed": 0
+    },
+    {
+      "code": "PHEL",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PHOU",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "PHPR",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PHTR",
+      "cards": 3,
+      "closed": 2
+    },
+    {
+      "code": "PIDW",
+      "cards": 17,
+      "closed": 16
+    },
+    {
+      "code": "PINV",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PIO",
+      "cards": 278,
+      "closed": 266
+    },
+    {
+      "code": "PIP",
+      "cards": 334,
+      "closed": 288
+    },
+    {
+      "code": "PISD",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PJ21",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "PJAS",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PJJT",
+      "cards": 12,
+      "closed": 12
+    },
+    {
+      "code": "PJOU",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "PJSC",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "PJSE",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "PJUD",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PKLD",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PKTK",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "PL21",
+      "cards": 5,
+      "closed": 4
+    },
+    {
+      "code": "PL22",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PL23",
+      "cards": 5,
+      "closed": 4
+    },
+    {
+      "code": "PL24",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PL25",
+      "cards": 5,
+      "closed": 4
+    },
+    {
+      "code": "PL26",
+      "cards": 4,
+      "closed": 2
+    },
+    {
+      "code": "PLC",
+      "cards": 162,
+      "closed": 155
+    },
+    {
+      "code": "PLG20",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PLG21",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "PLG22",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PLG24",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PLG25",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PLGM",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PLGN",
+      "cards": 1,
+      "closed": 0
+    },
+    {
+      "code": "PLRW",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PLS",
+      "cards": 143,
+      "closed": 141
+    },
+    {
+      "code": "PLST",
+      "cards": 4769,
+      "closed": 4487
+    },
+    {
+      "code": "PLTC",
+      "cards": 4,
+      "closed": 3
+    },
+    {
+      "code": "PM10",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PM11",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PM12",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PM13",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PM14",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PM15",
+      "cards": 13,
+      "closed": 13
+    },
+    {
+      "code": "PM19",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "PM20",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "PM21",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PMBS",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "PMDA",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "PMEI",
+      "cards": 94,
+      "closed": 87
+    },
+    {
+      "code": "PMH1",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PMMQ",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PMOA",
+      "cards": 74,
+      "closed": 0
+    },
+    {
+      "code": "PMOR",
+      "cards": 2,
+      "closed": 1
+    },
+    {
+      "code": "PMPS",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PMPS06",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PMPS07",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PMPS08",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PMPS09",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PMPS10",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PMPS11",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PMRD",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PNAT",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PNEM",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PNPH",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "PO2",
+      "cards": 155,
+      "closed": 154
+    },
+    {
+      "code": "PODY",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "POGW",
+      "cards": 9,
+      "closed": 5
+    },
+    {
+      "code": "PONS",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "POR",
+      "cards": 200,
+      "closed": 198
+    },
+    {
+      "code": "PORI",
+      "cards": 9,
+      "closed": 9
+    },
+    {
+      "code": "PPC1",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PPCY",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PPLC",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PPLS",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PPP1",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PPRO",
+      "cards": 19,
+      "closed": 18
+    },
+    {
+      "code": "PPTK",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PR2",
+      "cards": 0,
+      "closed": 0
+    },
+    {
+      "code": "PR23",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PRAV",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PRCQ",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PRED",
+      "cards": 1,
+      "closed": 0
+    },
+    {
+      "code": "PRES",
+      "cards": 48,
+      "closed": 45
+    },
+    {
+      "code": "PRIX",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PRM",
+      "cards": 2691,
+      "closed": 2423
+    },
+    {
+      "code": "PRNA",
+      "cards": 7,
+      "closed": 5
+    },
+    {
+      "code": "PROE",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "PRTR",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "PRW2",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PRWK",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PS14",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PS15",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PS16",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PS17",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PS18",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PS19",
+      "cards": 5,
+      "closed": 3
+    },
+    {
+      "code": "PSCG",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PSDC",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PSDG",
+      "cards": 10,
+      "closed": 8
+    },
+    {
+      "code": "PSHM",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PSOI",
+      "cards": 10,
+      "closed": 7
+    },
+    {
+      "code": "PSOK",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PSOM",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PSPL",
+      "cards": 13,
+      "closed": 11
+    },
+    {
+      "code": "PSS1",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PSS2",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PSS3",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PSS4",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PSS5",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PSSC",
+      "cards": 0,
+      "closed": 0
+    },
+    {
+      "code": "PSTH",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PSUS",
+      "cards": 18,
+      "closed": 18
+    },
+    {
+      "code": "PSVC",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PTHB",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PTHS",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "PTK",
+      "cards": 170,
+      "closed": 165
+    },
+    {
+      "code": "PTKDF",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "PTMP",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PTOR",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PTSP",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PUDS",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PULG",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PUMA",
+      "cards": 40,
+      "closed": 40
+    },
+    {
+      "code": "PUNK",
+      "cards": 0,
+      "closed": 0
+    },
+    {
+      "code": "PURL",
+      "cards": 17,
+      "closed": 16
+    },
+    {
+      "code": "PUSG",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PUST",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PW11",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PW12",
+      "cards": 3,
+      "closed": 3
+    },
+    {
+      "code": "PW21",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PW22",
+      "cards": 6,
+      "closed": 6
+    },
+    {
+      "code": "PW23",
+      "cards": 11,
+      "closed": 9
+    },
+    {
+      "code": "PW24",
+      "cards": 18,
+      "closed": 18
+    },
+    {
+      "code": "PW25",
+      "cards": 16,
+      "closed": 12
+    },
+    {
+      "code": "PW26",
+      "cards": 23,
+      "closed": 20
+    },
+    {
+      "code": "PWAR",
+      "cards": 7,
+      "closed": 7
+    },
+    {
+      "code": "PWCS",
+      "cards": 46,
+      "closed": 36
+    },
+    {
+      "code": "PWOR",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "PWOS",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "PWWK",
+      "cards": 4,
+      "closed": 4
+    },
+    {
+      "code": "PXLN",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "PXTC",
+      "cards": 10,
+      "closed": 10
+    },
+    {
+      "code": "PZ1",
+      "cards": 149,
+      "closed": 147
+    },
+    {
+      "code": "PZ2",
+      "cards": 282,
+      "closed": 266
+    },
+    {
+      "code": "PZA",
+      "cards": 20,
+      "closed": 19
+    },
+    {
+      "code": "PZEN",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "Q06",
+      "cards": 10,
+      "closed": 9
+    },
+    {
+      "code": "RAV",
+      "cards": 291,
+      "closed": 291
+    },
+    {
+      "code": "REX",
+      "cards": 26,
+      "closed": 19
+    },
+    {
+      "code": "RFIN",
+      "cards": 2,
+      "closed": 2
+    },
+    {
+      "code": "RIX",
+      "cards": 196,
+      "closed": 191
+    },
+    {
+      "code": "RNA",
+      "cards": 244,
+      "closed": 218
+    },
+    {
+      "code": "ROE",
+      "cards": 233,
+      "closed": 233
+    },
+    {
+      "code": "RTR",
+      "cards": 254,
+      "closed": 254
+    },
+    {
+      "code": "RVR",
+      "cards": 281,
+      "closed": 272
+    },
+    {
+      "code": "S00",
+      "cards": 20,
+      "closed": 20
+    },
+    {
+      "code": "S99",
+      "cards": 158,
+      "closed": 156
+    },
+    {
+      "code": "SCD",
+      "cards": 337,
+      "closed": 337
+    },
+    {
+      "code": "SCG",
+      "cards": 143,
+      "closed": 138
+    },
+    {
+      "code": "SCH",
+      "cards": 50,
+      "closed": 42
+    },
+    {
+      "code": "SDS",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "SHM",
+      "cards": 286,
+      "closed": 257
+    },
+    {
+      "code": "SIR",
+      "cards": 281,
+      "closed": 239
+    },
+    {
+      "code": "SIS",
+      "cards": 76,
+      "closed": 76
+    },
+    {
+      "code": "SLC",
+      "cards": 58,
+      "closed": 55
+    },
+    {
+      "code": "SLD",
+      "cards": 1680,
+      "closed": 1546
+    },
+    {
+      "code": "SLP",
+      "cards": 52,
+      "closed": 47
+    },
+    {
+      "code": "SLU",
+      "cards": 16,
+      "closed": 16
+    },
+    {
+      "code": "SLX",
+      "cards": 1,
+      "closed": 1
+    },
+    {
+      "code": "SNC",
+      "cards": 266,
+      "closed": 210
+    },
+    {
+      "code": "SOA",
+      "cards": 65,
+      "closed": 63
+    },
+    {
+      "code": "SOC",
+      "cards": 375,
+      "closed": 340
+    },
+    {
+      "code": "SOI",
+      "cards": 287,
+      "closed": 247
+    },
+    {
+      "code": "SOK",
+      "cards": 165,
+      "closed": 132
+    },
+    {
+      "code": "SOM",
+      "cards": 234,
+      "closed": 234
+    },
+    {
+      "code": "SOS",
+      "cards": 271,
+      "closed": 206
+    },
+    {
+      "code": "SPE",
+      "cards": 26,
+      "closed": 25
+    },
+    {
+      "code": "SPG",
+      "cards": 139,
+      "closed": 127
+    },
+    {
+      "code": "SPM",
+      "cards": 193,
+      "closed": 36
+    },
+    {
+      "code": "SS1",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "SS2",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "SS3",
+      "cards": 8,
+      "closed": 8
+    },
+    {
+      "code": "STA",
+      "cards": 63,
+      "closed": 62
+    },
+    {
+      "code": "STH",
+      "cards": 143,
+      "closed": 133
+    },
+    {
+      "code": "STX",
+      "cards": 275,
+      "closed": 235
+    },
+    {
+      "code": "TD0",
+      "cards": 146,
+      "closed": 141
+    },
+    {
+      "code": "TD1",
+      "cards": 35,
+      "closed": 34
+    },
+    {
+      "code": "TD2",
+      "cards": 80,
+      "closed": 78
+    },
+    {
+      "code": "TDC",
+      "cards": 371,
+      "closed": 350
+    },
+    {
+      "code": "TDLS",
+      "cards": 0,
+      "closed": 0
+    },
+    {
+      "code": "TDM",
+      "cards": 276,
+      "closed": 223
+    },
+    {
+      "code": "THB",
+      "cards": 254,
+      "closed": 241
+    },
+    {
+      "code": "THS",
+      "cards": 234,
+      "closed": 234
+    },
+    {
+      "code": "TLA",
+      "cards": 286,
+      "closed": 207
+    },
+    {
+      "code": "TLE",
+      "cards": 61,
+      "closed": 57
+    },
+    {
+      "code": "TMC",
+      "cards": 116,
+      "closed": 107
+    },
+    {
+      "code": "TMP",
+      "cards": 335,
+      "closed": 319
+    },
+    {
+      "code": "TMT",
+      "cards": 190,
+      "closed": 148
+    },
+    {
+      "code": "TOR",
+      "cards": 143,
+      "closed": 130
+    },
+    {
+      "code": "TPR",
+      "cards": 254,
+      "closed": 246
+    },
+    {
+      "code": "TRC",
+      "cards": 16,
+      "closed": 15
+    },
+    {
+      "code": "TRK",
+      "cards": 37,
+      "closed": 35
+    },
+    {
+      "code": "TSB",
+      "cards": 120,
+      "closed": 116
+    },
+    {
+      "code": "TSP",
+      "cards": 286,
+      "closed": 271
+    },
+    {
+      "code": "TSR",
+      "cards": 286,
+      "closed": 269
+    },
+    {
+      "code": "UDS",
+      "cards": 143,
+      "closed": 136
+    },
+    {
+      "code": "UGF",
+      "cards": 26,
+      "closed": 23
+    },
+    {
+      "code": "UGL",
+      "cards": 38,
+      "closed": 20
+    },
+    {
+      "code": "ULG",
+      "cards": 143,
+      "closed": 140
+    },
+    {
+      "code": "UMA",
+      "cards": 253,
+      "closed": 243
+    },
+    {
+      "code": "UND",
+      "cards": 37,
+      "closed": 10
+    },
+    {
+      "code": "UNF",
+      "cards": 2,
+      "closed": 1
+    },
+    {
+      "code": "UNH",
+      "cards": 21,
+      "closed": 14
+    },
+    {
+      "code": "UNK",
+      "cards": 108,
+      "closed": 93
+    },
+    {
+      "code": "USG",
+      "cards": 335,
+      "closed": 324
+    },
+    {
+      "code": "UST",
+      "cards": 121,
+      "closed": 19
+    },
+    {
+      "code": "V10",
+      "cards": 15,
+      "closed": 15
+    },
+    {
+      "code": "V11",
+      "cards": 15,
+      "closed": 14
+    },
+    {
+      "code": "V12",
+      "cards": 15,
+      "closed": 13
+    },
+    {
+      "code": "V13",
+      "cards": 20,
+      "closed": 20
+    },
+    {
+      "code": "V14",
+      "cards": 15,
+      "closed": 14
+    },
+    {
+      "code": "V15",
+      "cards": 15,
+      "closed": 14
+    },
+    {
+      "code": "V16",
+      "cards": 15,
+      "closed": 15
+    },
+    {
+      "code": "V17",
+      "cards": 15,
+      "closed": 13
+    },
+    {
+      "code": "VAN",
+      "cards": 32,
+      "closed": 0
+    },
+    {
+      "code": "VIS",
+      "cards": 167,
+      "closed": 152
+    },
+    {
+      "code": "VMA",
+      "cards": 325,
+      "closed": 308
+    },
+    {
+      "code": "VOC",
+      "cards": 150,
+      "closed": 136
+    },
+    {
+      "code": "VOW",
+      "cards": 272,
+      "closed": 202
+    },
+    {
+      "code": "W16",
+      "cards": 16,
+      "closed": 16
+    },
+    {
+      "code": "W17",
+      "cards": 30,
+      "closed": 30
+    },
+    {
+      "code": "WAR",
+      "cards": 254,
+      "closed": 244
+    },
+    {
+      "code": "WHO",
+      "cards": 356,
+      "closed": 236
+    },
+    {
+      "code": "WMC",
+      "cards": 5,
+      "closed": 5
+    },
+    {
+      "code": "WOC",
+      "cards": 143,
+      "closed": 134
+    },
+    {
+      "code": "WOE",
+      "cards": 266,
+      "closed": 228
+    },
+    {
+      "code": "WOT",
+      "cards": 63,
+      "closed": 62
+    },
+    {
+      "code": "WTH",
+      "cards": 167,
+      "closed": 145
+    },
+    {
+      "code": "WWK",
+      "cards": 145,
+      "closed": 145
+    },
+    {
+      "code": "XANA",
+      "cards": 20,
+      "closed": 20
+    },
+    {
+      "code": "XLN",
+      "cards": 264,
+      "closed": 264
+    },
+    {
+      "code": "YBLB",
+      "cards": 30,
+      "closed": 9
+    },
+    {
+      "code": "YBRO",
+      "cards": 30,
+      "closed": 10
+    },
+    {
+      "code": "YDFT",
+      "cards": 30,
+      "closed": 8
+    },
+    {
+      "code": "YDMU",
+      "cards": 30,
+      "closed": 12
+    },
+    {
+      "code": "YDSK",
+      "cards": 28,
+      "closed": 9
+    },
+    {
+      "code": "YECL",
+      "cards": 26,
+      "closed": 7
+    },
+    {
+      "code": "YEOE",
+      "cards": 39,
+      "closed": 16
+    },
+    {
+      "code": "YLCI",
+      "cards": 30,
+      "closed": 6
+    },
+    {
+      "code": "YMID",
+      "cards": 63,
+      "closed": 13
+    },
+    {
+      "code": "YMKM",
+      "cards": 30,
+      "closed": 5
+    },
+    {
+      "code": "YNEO",
+      "cards": 30,
+      "closed": 10
+    },
+    {
+      "code": "YONE",
+      "cards": 30,
+      "closed": 5
+    },
+    {
+      "code": "YOTJ",
+      "cards": 30,
+      "closed": 6
+    },
+    {
+      "code": "YSNC",
+      "cards": 30,
+      "closed": 10
+    },
+    {
+      "code": "YSOS",
+      "cards": 27,
+      "closed": 10
+    },
+    {
+      "code": "YTDM",
+      "cards": 29,
+      "closed": 6
+    },
+    {
+      "code": "YWOE",
+      "cards": 30,
+      "closed": 9
+    },
+    {
+      "code": "ZEN",
+      "cards": 234,
+      "closed": 234
+    },
+    {
+      "code": "ZNC",
+      "cards": 139,
+      "closed": 133
+    },
+    {
+      "code": "ZNE",
+      "cards": 30,
+      "closed": 30
+    },
+    {
+      "code": "ZNR",
+      "cards": 270,
+      "closed": 267
+    }
+  ]
+}

@@ -13,8 +13,8 @@
  * bug that leaves a self-consistent grid saying the wrong thing.
  */
 import { describe, expect, it } from 'vitest';
-import { encodeQr, errorCorrection, MAX_PAYLOAD_BYTES, renderQr } from '../../tools/qr';
-import type { QrMatrix } from '../../tools/qr';
+import { encodeQr, errorCorrection, MAX_PAYLOAD_BYTES, renderQr } from '../../src/net/qr';
+import type { QrMatrix } from '../../src/net/qr';
 
 /** Error-correction codewords per block at level L, versions 1 through 5. */
 const EC_CODEWORDS: readonly number[] = [7, 10, 15, 20, 26];

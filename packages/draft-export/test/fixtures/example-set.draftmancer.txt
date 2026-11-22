@@ -15,7 +15,7 @@
     "power": 2,
     "toughness": 1,
     "oracle_text": "Flying, vigilance",
-    "rating": 4.396
+    "rating": 4.167
   },
   {
     "name": "Radiant Charge",
@@ -26,7 +26,7 @@
       "W"
     ],
     "oracle_text": "Target creature gets +2/+2 until end of turn. You gain 2 life.",
-    "rating": 2.33
+    "rating": 2.469
   },
   {
     "name": "Lifebound Cleric",
@@ -43,7 +43,7 @@
     "power": 2,
     "toughness": 3,
     "oracle_text": "Lifelink, first strike",
-    "rating": 3.495
+    "rating": 3.312
   },
   {
     "name": "Windrider Drake",
@@ -59,7 +59,7 @@
     "power": 2,
     "toughness": 2,
     "oracle_text": "Flying",
-    "rating": 2.637
+    "rating": 2.5
   },
   {
     "name": "Dissolving Word",
@@ -70,7 +70,7 @@
       "U"
     ],
     "oracle_text": "Counter target spell. Draw a card.",
-    "rating": 3.626
+    "rating": 3.698
   },
   {
     "name": "Frostbind Current",
@@ -81,7 +81,7 @@
       "U"
     ],
     "oracle_text": "Tap target creature.",
-    "rating": 2.363
+    "rating": 2.5
   },
   {
     "name": "Undertow Snare",
@@ -92,7 +92,7 @@
       "U"
     ],
     "oracle_text": "Return target creature to its owner's hand.",
-    "rating": 2.198
+    "rating": 2.344
   },
   {
     "name": "Graveblade Stalker",
@@ -109,7 +109,7 @@
     "power": 2,
     "toughness": 2,
     "oracle_text": "Deathtouch, menace",
-    "rating": 2.593
+    "rating": 2.458
   },
   {
     "name": "Mortal Verdict",
@@ -120,7 +120,7 @@
       "B"
     ],
     "oracle_text": "Destroy target creature.",
-    "rating": 5
+    "rating": 4.74
   },
   {
     "name": "Grasping Mire",
@@ -131,7 +131,7 @@
       "B"
     ],
     "oracle_text": "Target player mills four cards.",
-    "rating": 1.187
+    "rating": 1.125
   },
   {
     "name": "Emberflow Raider",
@@ -148,7 +148,7 @@
     "power": 2,
     "toughness": 1,
     "oracle_text": "Haste",
-    "rating": 2.967
+    "rating": 2.813
   },
   {
     "name": "Lightning Lash",
@@ -175,7 +175,7 @@
     "power": 3,
     "toughness": 5,
     "oracle_text": "Trample, reach",
-    "rating": 4.077
+    "rating": 3.865
   },
   {
     "name": "Wild Summons",
@@ -186,7 +186,7 @@
       "G"
     ],
     "oracle_text": "Create two 2/2 green Bear creature tokens.",
-    "rating": 4.066
+    "rating": 3.854
   },
   {
     "name": "Ironclad Golem",
@@ -199,7 +199,7 @@
     "colors": [],
     "power": 3,
     "toughness": 3,
-    "rating": 0.989
+    "rating": 0.938
   },
   {
     "name": "Bronze Monument",
@@ -218,67 +218,7 @@
       "G"
     ],
     "oracle_text": "Put two +1/+1 counters on target creature.",
-    "rating": 2.418
-  },
-  {
-    "name": "Plains",
-    "mana_cost": "",
-    "type": "Basic Land — Plains",
-    "subtypes": [
-      "Plains"
-    ],
-    "rarity": "common",
-    "colors": [],
-    "oracle_text": "{T}: Add {W}.",
-    "rating": 0
-  },
-  {
-    "name": "Island",
-    "mana_cost": "",
-    "type": "Basic Land — Island",
-    "subtypes": [
-      "Island"
-    ],
-    "rarity": "common",
-    "colors": [],
-    "oracle_text": "{T}: Add {U}.",
-    "rating": 0
-  },
-  {
-    "name": "Swamp",
-    "mana_cost": "",
-    "type": "Basic Land — Swamp",
-    "subtypes": [
-      "Swamp"
-    ],
-    "rarity": "common",
-    "colors": [],
-    "oracle_text": "{T}: Add {B}.",
-    "rating": 0
-  },
-  {
-    "name": "Mountain",
-    "mana_cost": "",
-    "type": "Basic Land — Mountain",
-    "subtypes": [
-      "Mountain"
-    ],
-    "rarity": "common",
-    "colors": [],
-    "oracle_text": "{T}: Add {R}.",
-    "rating": 0
-  },
-  {
-    "name": "Forest",
-    "mana_cost": "",
-    "type": "Basic Land — Forest",
-    "subtypes": [
-      "Forest"
-    ],
-    "rarity": "common",
-    "colors": [],
-    "oracle_text": "{T}: Add {G}.",
-    "rating": 0
+    "rating": 2.292
   }
 ]
 [Settings]
@@ -308,11 +248,6 @@ Thornhide Guardian
 Ironclad Golem
 Bronze Monument
 Heartwood Graft
-Plains
-Island
-Swamp
-Mountain
-Forest
 [Uncommon]
 Lifebound Cleric
 Dissolving Word

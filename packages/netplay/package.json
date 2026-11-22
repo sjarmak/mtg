@@ -1,7 +1,7 @@
 {
   "name": "@mtg/netplay",
   "version": "0.0.0",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "@mtg/deckbuild": "*",
+    "@mtg/draft-export": "*",
     "@mtg/dsl": "*",
+    "@mtg/engine": "*",
     "@mtg/kernel": "*"
   }
 }

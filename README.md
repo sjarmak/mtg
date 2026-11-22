@@ -1,186 +1,146 @@
-# Magic: The Gathering Set Generation and Playing Lab
+# MTG Lab
 
-A Magic: The Gathering **set generator** and **playing lab**, in strict TypeScript.
+Play Magic: The Gathering against bots in your browser, and design your own sets.
 
-A model designs cards; a typed mechanics DSL is the only thing it is allowed to
-emit; an event-sourced rules kernel runs them; a bot plays tens of thousands of
-seeded games; a metrics gate decides whether the format is healthy; and a
-browser lab lets a person play the result. The load-bearing invariant is that
-the generator's output space stays **inside** the engine's enforceable space:
-cards are emitted in the DSL, never free text the engine cannot run.
+> **Work in progress.** This is a research project published as it develops.
+> Things change often and some parts are rough. The "Known gaps" section below
+> lists what doesn't work yet.
 
-## Play in the browser
+![Replaying a recorded Tideglass Reach game](docs/screenshots/replay.gif)
 
-The browser UI ships in `packages/ui`. It supports sealed-deck play,
-drafting, bot games, replay inspection, card rendering and format analysis. The
-committed Tideglass Reach set works immediately without an API key or network
-connection:
+## Quick start
+
+You need Node 22 or newer and npm.
 
 ```bash
+git clone https://github.com/sjarmak/mtg.git
+cd mtg
 npm ci
+npm run play        # then open http://localhost:5273
+```
+
+That's enough to:
+
+- **Play Tideglass Reach**, the example set, against a bot: sealed, draft or a
+  precon game. It runs on this repo's own rules engine, with no API key, Forge
+  or network needed.
+- **Browse, draft and build with about 30 printed formats**, from Magic 2010
+  through Ixalan plus Ravnica, Lorwyn and the MTGO Legacy Cube. Card art loads
+  from Scryfall on demand, so you don't need to download anything.
+- **Design a set** under Customize. `npm run design` starts the same page with
+  the set designer's checker behind it.
+
+## Playing printed formats against Forge
+
+Matches with real Magic cards (Constructed precons, Commander, Momir Basic,
+draft and sealed pods) run in [Forge](https://github.com/Card-Forge/forge) as
+a separate process. You need a JDK 21 and, on Linux, Xvfb. Then:
+
+```bash
+npm run forge:install   # downloads Forge 2.0.14 (about 300 MB) and checks it
 npm run play
 ```
 
-To run the generation and balance pipeline:
+**This doesn't work in the public repo yet.** Each printed format is only
+allowed to play against the exact Forge adapter it was tested with, and this
+tree's adapter doesn't match that evidence yet. Until the fix lands, starting a
+printed match says "runtime mismatch". The Commander screenshot below comes
+from the private development copy.
+
+## What it looks like
+
+![Commander precon picker with measured win rates](docs/screenshots/commander.png)
+
+_Commander: pick a precon and an opponent, with win rates from human games and
+the lab's own bot-vs-bot results._
+
+![The set designer checking the Tideglass Reach brief](docs/screenshots/set-design.png)
+
+_The set designer: write a brief (world, mechanics, size) and see the set's
+skeleton before any model is called._
+
+![The Magic 2011 card gallery](docs/screenshots/gallery-m11.png)
+
+_Card gallery for a printed format, filterable by color, type, rarity and mana
+value._
+
+![A Magic 2011 sealed pool and suggested build](docs/screenshots/sealed-m11.png)
+
+_Sealed: open a pool and get a suggested 40-card build to edit._
+
+## Making your own set
+
+A set starts from a brief: a short JSON file with the world, up to six
+mechanics and the size. The example is
+`packages/setgen/briefs/tideglass-reach.json`.
 
 ```bash
-npm run slice         # the whole loop: set-gen, deck build, mass sim, metrics verdict
-npm run test:balance  # the seeded 10,035-game format-health gate
-```
-
-![Magic 2011 gameplay on a landscape phone](docs/screenshots/gameplay-m11-mobile.png)
-
-_Current mobile UI work in a developed mid-game position with
-Scryfall-backed M11 art. This is a real sealed game running the reduced,
-exactly executable Magic 2011 reference set._
-
-![Drafting Magic 2013 in the browser lab](docs/screenshots/draft-m13.png)
-
-_Current Draft UI work with Scryfall-backed M13 art. The pack, selected-card rail
-and pick action all read from the same executable Magic 2013 reference set._
-
-## What works today
-
-### UI
-
-- Six browser routes ship now: Play, Draft, Deck, Analysis, Replay and Cards.
-- Play deals a sealed pool or opens committed preconstructed decks, then runs a
-  two-player game against a bot through the same kernel used by simulation.
-- The gameplay surface has dedicated portrait and landscape phone layouts,
-  coarse-pointer controls, touch-safe card inspection and a full-screen
-  landscape table. Desktop and tablet layouts use the same components.
-- Draft supports collated packs and bot seats. Deck renders generated pools and
-  real-card builds. Replay steps through recorded kernel decisions. Analysis
-  reads simulation and calibration artifacts rather than recomputing them in
-  the browser.
-- Missing data is explicit. An unstaged replay, an invalid deck and a card with
-  no art are different visible states, never blank screens.
-
-### Mechanics and rules engine
-
-- The strict DSL and event-sourced two-player kernel cover zones, mana and
-  casting, priority and the stack, targeting, combat, tokens, counters,
-  attachments and Equipment, continuous effects, replacement effects, and
-  static, triggered, activated and loyalty abilities.
-- Implemented keyword behavior includes flying, vigilance, haste, trample,
-  deathtouch, lifelink, menace, reach, first strike, double strike, defender,
-  landwalk, hexproof, indestructible, protection and exalted.
-- The executable effect vocabulary includes damage, destruction, temporary power/toughness
-  changes, card draw, life gain, counterspells, tokens, tapping, bounce,
-  milling, counters, exile, scry and graveyard return.
-- This is deliberately not all of Magic. A real printing is executable only
-  when it has an exact DSL representation that the kernel reaches. Unsupported
-  cards are refused instead of approximated, and the generator is narrower
-  than the hand-authorable engine vocabulary.
-- M11 and M13 are the primary reference sets for measuring that exact subset;
-  additional core sets and expansions are retained as secondary or stress
-  references.
-
-## What is planned
-
-### UI
-
-- Land the navigation and responsive-panel work shown above, including the
-  five-destination mobile bar, compact Draft pack and contextual card rail.
-- Finish real-device mobile review across Deck, Analysis, Replay and Cards.
-  Gameplay has the deepest phone-specific coverage today.
-- Broaden human draft and deckbuilding journeys, connect Replay to Analysis as
-  a per-game drill-down, and make multi-seat play a first-class surface.
-- Keep desktop and phone screenshots reproducible from accessible-name browser
-  journeys so the README always depicts the code that ships.
-
-### Mechanics and rules engine
-
-- Expand the exact executable slice of M11 and M13 card by card, using each
-  refusal as a named missing capability rather than adding a permissive text
-  interpreter.
-- Extend targeting, zone changes, continuous layers and replacement ordering
-  for the complex cards that remain outside the DSL.
-- Widen generation only after the corresponding schema, kernel behavior,
-  simulator policy and regression scenario all exist.
-- Continue Forge subprocess parity checks while keeping GPL code outside this
-  repository.
-
-## Real card data and images
-
-The public repository includes the complete on-demand path used by the Deck
-view:
-
-1. `@mtg/data` streams Scryfall bulk metadata into a gitignored local SQLite
-   store with a descriptive user agent, rate limiting and resumable checkpoints.
-2. `@mtg/decklab` chooses a printing and carries its Scryfall `art_crop` URL,
-   artist and set code in the deck artifact.
-3. `@mtg/image-cache` fetches each URL once into a gitignored cache.
-4. `npm run lab` stages only the illustrations that deck uses onto the UI's
-   origin, preserving visible artist and set credit. It never mirrors the image
-   corpus.
-
-Scryfall supplies the card metadata and image delivery service; it does not own
-or license the underlying Magic artwork. Wizards of the Coast owns the cards
-and artwork. Their use here is governed by the Fan Content terms below, and the
-project remains free and unofficial.
-
-## Fan Content
-
-Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.
-
-This lab is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards.
-
-The code is MIT (see `LICENSE`, which is explicit about what it does and does
-not cover). Attribution for card data, vocabulary data, human play data and the
-engines this project references is in `NOTICE`; npm dependencies are in
-`THIRD-PARTY-NOTICES.md`.
-
-## The shape of it
-
-| Layer       | Packages                                 | What it is                                                                           |
-| ----------- | ---------------------------------------- | ------------------------------------------------------------------------------------ |
-| Language    | `dsl`                                    | the typed mechanics DSL; card, ability and effect schemas, oracle-text rendering     |
-| Engine      | `kernel`                                 | event-sourced rules kernel: layers, replacement effects, the stack, combat           |
-| Play        | `deckbuild`, `sim`, `metrics`            | deck construction, a scoring bot, seeded mass simulation, format-health gates        |
-| Generation  | `llm`, `design-data`, `setgen`           | the provider seam, the color pie and set skeleton, and the generator that fills them |
-| Real cards  | `data`, `decklab`, `cube`, `image-cache` | the Scryfall/MTGJSON ingest and everything built on a real card pool                 |
-| Export      | `forge-export`, `draft-export`           | Forge card scripts as a conformance oracle; Draftmancer custom-set files             |
-| Surface     | `ui`, `card-render`                      | the browser lab and the printed 63 x 88 mm SVG face                                  |
-| Composition | `slice`, `referee`                       | the one-command loop, and the schema-constrained ruling seam                         |
-
-Every package resolves from source. There is no build step in development:
-`tsconfig.json` maps `@mtg/*` straight at `packages/*/src/index.ts`, and the
-vitest config repeats the alias so a test always runs this checkout's sources.
-
-## The example set
-
-`tideglass-reach` is the committed example: 90 original cards, generated by the
-pipeline in this repository from the brief at
-`packages/setgen/briefs/tideglass-reach.json`, replayed deterministically from
-recorded model responses under `packages/setgen/fixtures/llm/`. It needs no API
-key to reproduce:
-
-```bash
+# Rebuild Tideglass Reach from recorded model answers (no API key, no cost)
 npx tsx packages/setgen/src/cli.ts \
   --brief packages/setgen/briefs/tideglass-reach.json --out out/set
 ```
 
-It is also the balance gate's declared subject, measured at 10,035 seeded games
-with an empty waiver list.
+The generator can only write cards in a typed rules language that the engine
+runs, so every card it prints is playable. Cards the engine can't represent
+are refused rather than approximated. To generate a new set with a live model,
+see `packages/setgen` and `packages/llm`.
 
-## Gates
+Tideglass Reach ships without card art on purpose. It's there to show what a
+custom set looks like, so its cards show an "art pending" frame.
+
+To check a set's balance:
 
 ```bash
-npm run typecheck     # tsc --noEmit, strict, noUncheckedIndexedAccess + exactOptionalPropertyTypes
-npm test              # vitest, unit + balance projects
-npm run lint          # eslint packages --max-warnings=0
-npm run format        # prettier --check
+npm run slice         # generate, build decks, simulate thousands of games, report
+npm run test:balance  # the seeded 10,035-game balance gate
 ```
 
-Balance is a continuous-integration assertion rather than a vibe: seeded sims,
-win-rate bands and a no-dominant-strategy guard, all as tests, with every
-known-red gate waived one at a time against the number measured when it was
-waived.
+## Known gaps
 
-## Conventions
+- Printed-format matches refuse to start in this repo (see above).
+- Momir Basic needs the local card store, built with `@mtg/data` from Scryfall
+  bulk data. Without it the format is hidden.
+- With Forge installed, the first launch is slow, a few minutes, while it
+  checks each printed format.
+- The clone is large (about 110 MB of history plus card catalogs).
+- Phone layouts exist for the game table. The other pages are mainly built for
+  desktop.
 
-`AGENTS.md` holds the binding ones: workspace layout, the `package.json`
-template, code style, the LLM-provider rules, third-party engine licensing, the
-destructive-command rule, and two web-UI constraints that fail silently rather
-than loudly. Read it before writing code.
+## How it's built
+
+TypeScript throughout, no build step in development.
+
+| Package                                  | What it does                                                    |
+| ---------------------------------------- | --------------------------------------------------------------- |
+| `dsl`                                    | The typed rules language cards are written in                   |
+| `kernel`                                 | The rules engine: stack, priority, combat, layers, replacements |
+| `deckbuild`, `sim`, `metrics`            | Deck building, bots, mass simulation and balance checks         |
+| `llm`, `design-data`, `setgen`           | The set generator and its color pie and skeleton                |
+| `data`, `decklab`, `cube`, `image-cache` | Real card data from Scryfall and MTGJSON                        |
+| `forge-export`, `draft-export`           | The Forge bridge, and Draftmancer export                        |
+| `ui`, `card-render`                      | The browser app and card faces                                  |
+| `slice`, `referee`                       | The end-to-end pipeline                                         |
+
+Checks:
+
+```bash
+npm run typecheck
+npm test
+npm run lint
+npm run format
+```
+
+`AGENTS.md` has the coding conventions. Read it before sending changes.
+
+## License
+
+The code is AGPL-3.0-or-later. The few files derived from Forge stay
+GPL-3.0; `LICENSE` lists them. Forge itself is downloaded separately and runs
+as its own process. Attribution for card data and other sources is in
+`NOTICE`, and npm dependencies are in `THIRD-PARTY-NOTICES.md`.
+
+Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.
+
+MTG Lab is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards.
+
+Card metadata and images come from Scryfall, which doesn't own the artwork.

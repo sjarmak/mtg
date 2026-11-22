@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-controller-contract-receipt",
+  "id": "pregame-actions-v1",
+  "engineRuntime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "protocolVersion": 2
+  },
+  "decisionFamilies": [
+    "pregame-actions"
+  ],
+  "sourceRegions": [
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        List<SpellAbility> chooseOpeningHandActions(Player player, List<SpellAbility> usable) {",
+      "endMarker": "        static boolean isReviewedPhyrexianManaCost(ManaCost cost) {",
+      "sha256": "fee8c26250265243bf550e13f89dc1abe8cb22b3a24da9e8bd79946da4948061"
+    },
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        public List<SpellAbility> chooseSaToActivateFromOpeningHand(List<SpellAbility> usable) {",
+      "endMarker": "        public boolean playTrigger(Card host, WrappedAbility wrapper, boolean isMandatory) {",
+      "sha256": "3b7ce7aa5ed134902720a2d14167270855ab0fbb9d550588a54126c3babaa310"
+    }
+  ],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "scenarioReceiptIds": [
+        "chancellor-of-the-dross-local-pregame-actions-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "scenarioReceiptIds": [
+        "chancellor-of-the-dross-engine-pregame-actions-v1"
+      ]
+    }
+  ],
+  "evidence": {
+    "scenarioReceipts": [
+      {
+        "receiptId": "chancellor-of-the-dross-engine-pregame-actions-v1",
+        "file": {
+          "path": "scenarios/chancellor-of-the-dross-engine-pregame-actions-v1.json",
+          "sha256": "80591518b475d3d8c12f952748fe34d7ad9c1681f0c68b8d062875119d3a98be"
+        }
+      },
+      {
+        "receiptId": "chancellor-of-the-dross-local-pregame-actions-v1",
+        "file": {
+          "path": "scenarios/chancellor-of-the-dross-local-pregame-actions-v1.json",
+          "sha256": "959529aee6b16ec577da9138426c474d2955f837f8ee6765c0b5cadca999e9c2"
+        }
+      }
+    ]
+  }
+}

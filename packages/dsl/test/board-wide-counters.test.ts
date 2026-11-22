@@ -327,7 +327,7 @@ describe('the attack trigger that shrinks a would-be blocker', () => {
   /**
    * The `selfAttacks` gate is generic and was already enforced, so this row
    * needed no rule of its own — which is the whole reason the widening is one
-   * table entry. Both refusals below come from `ATTACK_TRIGGER_ONLY_TARGETS`.
+   * table entry. Both refusals below come from `SOURCE_ATTACK_TARGETS`.
    */
   it('is refused on any other trigger and on an activated ability', () => {
     expect(codesFor(artifactInput([{ ...REAPER, condition: 'selfEnters' } as AbilityInput]))).toContain(

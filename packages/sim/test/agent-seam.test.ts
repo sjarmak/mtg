@@ -9,28 +9,49 @@
  *  2. A policy the registry has never heard of plugs in through `agentFactory`.
  *  3. The heuristics are load-bearing: greedy beats random decisively, and a
  *     profile change measurably changes how the bot plays.
+ *
+ * # Why two of the blocks carry a clock of their own
+ *
+ * `mtg-0jge`. Every case here pays for real seeded games through the kernel, and
+ * the two blocks below run the most of them. Measured on this box with nothing
+ * else on it, the longest case in each takes 3582ms and 3337ms, which is 72% and
+ * 67% of vitest's 5s default. That is not headroom; it is a file that goes red
+ * the first time another lane takes the cores, and it did, on three separate
+ * full-suite runs.
+ *
+ * The budget is 20s for the audited checkpoint seed test's reason: the
+ * measurement plus room for a loaded machine. A case that has
+ * genuinely become slow still goes red; a case that was merely queued behind
+ * another lane no longer does. It is the second half of a fix rather than the
+ * whole of one — `mtg-qn2d` capped the worker pool at `1add4154`, which bounds
+ * how much of the queueing this run can cause itself, and nothing either of them
+ * does bounds what the other four lanes on the box are doing.
  */
 import { describe, expect, it } from 'vitest';
 import { parseCard } from '@mtg/dsl';
 import type { Action, AgentView, PlayerAgent } from '@mtg/kernel';
-import { pendingDecision, scenario, validateAction } from '@mtg/kernel';
+import { pendingDecision, reduce, scenario, validateAction } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import {
   aggregateFingerprint,
   createBot,
   decidedWinRate,
   FIXTURE_DECK_RW,
   FIXTURE_DECK_UB,
+  FIXTURE_FORMAT_POOL,
   greedyConfig,
   greedySpec,
   randomBot,
   randomSpec,
+  rolloutSpec,
   runMatchSerial,
 } from '@mtg/sim';
 import type { AgentFactory, MatchSpec } from '@mtg/sim';
+import { creature, creatureWithStatic } from './cards';
 
 const decks: MatchSpec['decks'] = [FIXTURE_DECK_RW, { ...FIXTURE_DECK_RW, name: 'RW Mirror' }];
 
-describe('random-policy bot', () => {
+describe('random-policy bot', { timeout: 20_000 }, () => {
   it('plays complete games through the same runner', () => {
     const run = runMatchSerial({
       runSeed: 'seam/random',
@@ -41,7 +62,9 @@ describe('random-policy bot', () => {
     expect(run.outcomes).toHaveLength(12);
     for (const outcome of run.outcomes) {
       expect(outcome.turns).toBeGreaterThan(0);
-      expect(['lifeZero', 'emptyLibrary', 'concede', 'turnLimit']).toContain(outcome.reason);
+      expect(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']).toContain(
+        outcome.reason,
+      );
     }
   });
 
@@ -102,7 +125,11 @@ describe('random-policy bot', () => {
     if (decision === null || decision.kind !== 'declareAttackers') throw new Error('no attack decision');
     const kinds = new Set<string>();
     for (let seed = 0; seed < 64; seed += 1) {
-      const action = randomBot('random', `walker-${String(seed)}`).decide({ state, player: 0, decision });
+      const action = randomBot('random', `walker-${String(seed)}`).decide({
+        state: observeState(state, 0, 'test/agent-seam.test.ts:124'),
+        player: 0,
+        decision,
+      });
       expect(validateAction(state, action)).toBeNull();
       if (action.type !== 'declareAttackers') throw new Error('random bot did not attack');
       const defender = action.attackers[0]?.defender;
@@ -110,13 +137,93 @@ describe('random-policy bot', () => {
     }
     expect(kinds).toEqual(new Set(['player', 'planeswalker']));
   });
+
+  // #301: a coin flip per creature ignored CR 508.1d and 509.1c, and the kernel
+  // refused 12 of 400 random games on reduced M11 and RTR for it.
+  it('sends a creature that attacks each combat if able, on every seed', () => {
+    const state = scenario({
+      active: 0,
+      step: 'declareAttackers',
+      battlefield: [
+        {
+          card: creatureWithStatic('Berserk Runt', 2, 2, { kind: 'attacksEachCombatIfAble' }),
+          controller: 0,
+          summoningSick: false,
+        },
+        { card: creature('Idle Squire', 1, 1), controller: 0, summoningSick: false },
+      ],
+    }).state;
+    const decision = pendingDecision(state);
+    if (decision === null || decision.kind !== 'declareAttackers') throw new Error('no attack decision');
+    for (let seed = 0; seed < 32; seed += 1) {
+      const action = randomBot('random', `runt-${String(seed)}`).decide({
+        state: observeState(state, 0, 'test/agent-seam.test.ts:runt'),
+        player: 0,
+        decision,
+      });
+      expect(validateAction(state, action)).toBeNull();
+    }
+  });
+
+  it('puts every able blocker in front of a must-be-blocked attacker, on every seed', () => {
+    const board = scenario({
+      active: 1,
+      step: 'declareAttackers',
+      battlefield: [
+        { card: creatureWithStatic('Lure Colossus', 6, 6, { kind: 'mustBeBlockedIfAble' }), controller: 1 },
+        { card: creature('Whelp A', 1, 1), controller: 0 },
+        { card: creature('Whelp B', 1, 1), controller: 0 },
+      ],
+    }).state;
+    const lure = Object.keys(board.objects).find((oid) => board.objects[oid]?.card.name === 'Lure Colossus');
+    if (lure === undefined) throw new Error('missing lure');
+    let state = reduce(board, {
+      type: 'declareAttackers',
+      player: 1,
+      attackers: [{ oid: lure, defender: 0 }],
+    }).state;
+    for (let guard = 0; guard < 16; guard += 1) {
+      const pending = pendingDecision(state);
+      if (pending === null || pending.kind !== 'priority') break;
+      state = reduce(state, { type: 'passPriority', player: pending.player }).state;
+    }
+    const decision = pendingDecision(state);
+    if (decision === null || decision.kind !== 'declareBlockers') throw new Error('no block decision');
+    for (let seed = 0; seed < 32; seed += 1) {
+      const action = randomBot('random', `lure-${String(seed)}`).decide({
+        state: observeState(state, 0, 'test/agent-seam.test.ts:lure'),
+        player: 0,
+        decision,
+      });
+      expect(validateAction(state, action)).toBeNull();
+    }
+  });
 });
 
 describe('custom policies through agentFactory', () => {
+  it('hands registry bots the concrete game seed separately from the seat seed', () => {
+    const seen: string[] = [];
+    const recordingFactory: AgentFactory = function (spec, seed, seat, gameSeed) {
+      seen.push(gameSeed);
+      return createBot(greedySpec(spec.name), seed, seat, gameSeed);
+    };
+    runMatchSerial(
+      {
+        runSeed: 'seam/concrete-game-seed',
+        games: 1,
+        decks,
+        rolloutPool: FIXTURE_FORMAT_POOL,
+        bots: [rolloutSpec('rollout'), greedySpec('greedy')],
+      },
+      { agentFactory: recordingFactory },
+    );
+    expect(seen).toEqual(['seam/concrete-game-seed/game/0', 'seam/concrete-game-seed/game/0']);
+  });
+
   it('accepts a policy the registry has never heard of', () => {
     /** A deliberately terrible policy: never attack, never block, never cast. */
-    const pacifist: AgentFactory = (spec, seed, seat) => {
-      const fallback = createBot(spec, seed, seat);
+    const pacifist: AgentFactory = (spec, seed, seat, gameSeed) => {
+      const fallback = createBot(spec, seed, seat, gameSeed);
       return {
         name: `pacifist-${spec.name}`,
         decide(view: AgentView): Action {
@@ -143,8 +250,8 @@ describe('custom policies through agentFactory', () => {
     const withPacifist = runMatchSerial(
       { runSeed: 'seam/custom', games: 8, decks, bots: [greedySpec('greedy'), greedySpec('greedy')] },
       {
-        agentFactory: (spec, seed, seat) =>
-          seat === 1 ? pacifist(spec, seed, seat) : createBot(spec, seed, seat),
+        agentFactory: (spec, seed, seat, gameSeed) =>
+          seat === 1 ? pacifist(spec, seed, seat, gameSeed) : createBot(spec, seed, seat, gameSeed),
       },
     );
     expect(withPacifist.aggregate.wins[0]).toBe(8);
@@ -170,12 +277,12 @@ describe('custom policies through agentFactory', () => {
  * Measured on a contended box, three other lanes running, at a 1-minute load
  * average of 14-16 on 16 cores: 1978ms and 1519ms before, 982ms and 499ms after,
  * against vitest's 5s default — the first of those was 40% of the budget on a
- * machine that was merely busy. It reached 2205ms under a five-lane wave
- * (mtg-w45), which is what put the file on the near-limit list; the work that is
- * left is real — 164 seeded games through the kernel — and at a fifth of the
- * budget it needs no clock of its own.
+ * machine that was merely busy. That halving is why the block plays 48 games
+ * instead of 96, and it is not enough on its own: the case that pays for the
+ * shared baseline takes 3337ms on a quiet box, so it carries the file's 20s
+ * budget for the reason the header gives.
  */
-describe('heuristic profiles are load-bearing', () => {
+describe('heuristic profiles are load-bearing', { timeout: 20_000 }, () => {
   const base: MatchSpec = {
     runSeed: 'seam/profile',
     games: 24,

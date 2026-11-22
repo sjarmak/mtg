@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "ori",
+  "name": "Magic Origins",
+  "sourceCodes": ["ORI"],
+  "products": [{ "id": "ori-draft", "setCode": "ORI", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["ori-draft", "ori-draft", "ori-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["ori-draft", "ori-draft", "ori-draft", "ori-draft", "ori-draft", "ori-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

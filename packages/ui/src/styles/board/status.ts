@@ -16,7 +16,7 @@
  * change and a life total that shifts sideways as it ticks is a number nobody
  * can watch.
  */
-import { cssNumber } from '../number';
+import { cssNumber, MICRO_LABEL } from '../number';
 
 /**
  * How wide the pod column is.
@@ -67,10 +67,15 @@ export const STATUS_CSS = `
 .mtg-status__count { display: flex; flex-direction: column; gap: 1px; align-items: flex-end; }
 .mtg-status__count-value { font-family: var(--mtg-font-mono); font-variant-numeric: tabular-nums; font-weight: 600; }
 .mtg-status__count-label {
-  font-size: var(--mtg-text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  ${MICRO_LABEL}
   color: var(--mtg-ink-faint);
 }
 .mtg-status__mana { display: flex; gap: 2px; }
+/* font/color are inherited explicitly because the pod is a button element while
+   a spell can be aimed at that seat (mtg-bz2.16), and a button takes none of the
+   page's type from the UA sheet. Declared on the class rather than on the
+   aimable state, so the pressable arrangement and the resting one are the same
+   block; switching only the element is the whole point. */
 .mtg-pod {
   flex: none;
   display: flex; flex-direction: column; align-items: center; gap: var(--mtg-space-1);
@@ -79,20 +84,38 @@ export const STATUS_CSS = `
   background: var(--mtg-surface-raised);
   border: 1px solid var(--mtg-line); border-radius: var(--mtg-radius-lg);
   text-align: center;
+  font: inherit; color: inherit;
 }
 .mtg-pod[data-active='true'] { border-color: var(--mtg-accent); }
-.mtg-pod__chips { display: flex; flex-direction: column; gap: 1px; width: 100%; }
-.mtg-pod__chip {
-  display: flex; justify-content: space-between; align-items: baseline;
-  gap: var(--mtg-space-1); min-width: 0;
+/* One line rather than two stacked rows, and the separator is drawn rather than
+   written: a middle dot in the markup would be a character a screen reader reads
+   out between two counts it has already announced as two chips. The row wraps
+   because the shut ask column hides it entirely and nothing else this narrow
+   draws it, so a wrap is the cheap way out of a name nobody measured. */
+.mtg-pod__chips {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline;
+  gap: 1px var(--mtg-space-2); width: 100%;
+}
+/* The counters a seat holds, under the name. Its own class rather than a second
+   .mtg-pod__chips, because the shut ask column hides the chips row and a player
+   deciding whether to pay {E} needs the total most when that column is shut. */
+.mtg-pod__counters {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline;
+  gap: 1px var(--mtg-space-2); width: 100%;
+}
+.mtg-pod__chip { display: flex; align-items: baseline; gap: var(--mtg-space-1); min-width: 0; }
+.mtg-pod__chip + .mtg-pod__chip::before {
+  content: '\\B7'; color: var(--mtg-line-strong);
 }
 .mtg-pod__chip-value {
   font-family: var(--mtg-font-mono); font-size: var(--mtg-text-xs);
   font-variant-numeric: tabular-nums; font-weight: 600; line-height: 1.3;
 }
+/* Sentence case rather than the micro-caps it was: two words beside two numbers
+   on one line read as a sentence, and the tracking that makes a stacked caption
+   legible makes an inline one wide. */
 .mtg-pod__chip-label {
-  font-size: var(--mtg-text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--mtg-ink-faint); line-height: 1.3;
+  font-size: var(--mtg-text-xs); text-transform: capitalize; color: var(--mtg-ink-faint); line-height: 1.3;
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .mtg-pod__life {

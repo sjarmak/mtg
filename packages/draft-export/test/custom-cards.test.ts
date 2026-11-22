@@ -20,7 +20,7 @@ import {
   renderTypeLine,
   typeLineParts,
 } from '@mtg/dsl';
-import { rateCards, toCustomCard, toCustomCards } from '@mtg/draft-export';
+import { evaluatorRating, rateCards, toCustomCard, toCustomCards } from '@mtg/draft-export';
 
 const SCRYFALL_MANA_COST = /^(\{\d+\})?(\{[WUBRG]\})*$/;
 
@@ -95,7 +95,7 @@ describe('card fields', () => {
 
   it('writes colors in WUBRG order whatever order the card declared them', () => {
     const card: Card = { ...exampleCard('slc-wild-summons'), colors: ['G', 'U', 'W'] };
-    expect(toCustomCard({ card, score: 0, rating: 1 }).colors).toEqual(['W', 'U', 'G']);
+    expect(toCustomCard(evaluatorRating(card, 0, 1)).colors).toEqual(['W', 'U', 'G']);
   });
 
   it('prints the rendered oracle text, and omits the field when there is none', () => {

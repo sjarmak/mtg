@@ -42,29 +42,35 @@
  * so an interpolated value is CSS source and one carrying `}` writes rules of
  * its own. `./number.ts` has the argument in full.
  */
+import { READING_FACE_WIDTH_REM } from '@mtg/card-geometry';
 import {
   ART_WINDOW,
+  CARD_EDGE_MM,
   CARD_TRIM_MM,
   COMPACT_FACE_WIDTH_REM,
+  FOIL_SHEEN_CLASS,
   FRAME_BAND_MM,
   FULL_FACE_WIDTH_REM,
   LOYALTY_BADGE_GUTTER,
   LOYALTY_BADGE_PAD_PX,
   LOYALTY_BADGE_POINTS,
   LOYALTY_BADGE_SHARE,
-  LOYALTY_FIT_STEPS,
   LOYALTY_SHIELD_FLAT,
   LOYALTY_SHIELD_POINTS,
   LOYALTY_SHIELD_SHARE,
+  LAND_ART_WINDOW,
   NAME_FIT_STEPS,
+  RULES_TEXT_REM,
+  RULES_TEXT_SHARE,
   PIP_GLYPH_SCALE,
   PLANESWALKER_ART_WINDOW,
+  PRINTED_RULES_FIT_STEPS,
   RARITY_SEAL_INK,
   RULES_FIT_STEPS,
   outlineClipPath,
 } from '../card/anatomy';
 import { TYPE_BAND_NEVER, TYPE_BANDS } from '../card/type-line';
-import { cssNumber } from './number';
+import { cssNumber, MICRO_LABEL } from './number';
 import { COLOR_IDENTITIES } from './tokens';
 
 /**
@@ -72,8 +78,13 @@ import { COLOR_IDENTITIES } from './tokens';
  * generated across this list rather than written once per selector, because the
  * deck tile and the card face read the identity out of the same seven-way
  * mapping and a hand-copied second block is where the two would drift.
+ *
+ * The deck strip joined the list rather than defining a tint of its own, which
+ * is what makes `../routes/deck/StripColumns.ts` able to claim the fill and the
+ * printed cost say the same thing: both resolve through this mapping, so a
+ * strip cannot be tinted a red the pips would not have drawn.
  */
-const FRAMED_SELECTORS: readonly string[] = ['.mtg-card', '.mtg-deck-card'];
+const FRAMED_SELECTORS: readonly string[] = ['.mtg-card', '.mtg-deck-card', '.mtg-strips__card'];
 
 const identityRules = COLOR_IDENTITIES.map(
   (identity) =>
@@ -134,8 +145,29 @@ const ARTIFACT_RULE = `.mtg-card[data-artifact='true'] { --edge: var(--mtg-ink-m
  * no gate measures. `@mtg/card-render`'s `palette.ts` dropped the same rule.
  */
 const SEAL_INK_RULES = Object.entries(RARITY_SEAL_INK)
-  .map(([rarity, token]) => `.mtg-card__seal[data-rarity='${rarity}'] path { fill: var(${token}); }`)
+  .map(
+    ([rarity, token]) =>
+      `.mtg-card__seal[data-rarity='${rarity}'] path { fill: var(${token}); }\n` +
+      `.mtg-card__seal--icon[data-rarity='${rarity}'] { background-color: var(${token}); }`,
+  )
   .join('\n');
+
+/**
+ * An official set's own icon in the seal's box, when a launcher staged it.
+ *
+ * The file is one black glyph (`../card/set-icon.ts` has the licensing
+ * argument for referencing it and nothing more), so it is used as a mask over
+ * the rarity's ink rather than drawn: the rule above paints the box in the same
+ * token the drawn mark's path is filled with, and the mask cuts the glyph out
+ * of it. Same ink, same box, same attributes; only the shape is the set's own.
+ * The prefixed property is kept beside the standard one for the WebKit that an
+ * iPad at the table still runs.
+ */
+const SEAL_ICON_RULES = `
+.mtg-card__seal--icon {
+  -webkit-mask: var(--mtg-set-icon) center / contain no-repeat;
+  mask: var(--mtg-set-icon) center / contain no-repeat;
+}`;
 
 const IDENTITY = `
 ${identityRules}
@@ -147,6 +179,7 @@ ${ARTIFACT_RULE}
 .mtg-pip[data-pip='r'] { background: var(--mtg-color-r); color: var(--mtg-color-r-on); }
 .mtg-pip[data-pip='g'] { background: var(--mtg-color-g); color: var(--mtg-color-g-on); }
 .mtg-pip[data-pip='c'] { background: var(--mtg-color-c); color: var(--mtg-color-c-on); }
+.mtg-pip[data-pip='m'] { background: var(--mtg-color-m); color: var(--mtg-color-m-on); }
 .mtg-pip[data-pip='generic'] { background: var(--mtg-surface-inset); color: var(--mtg-ink-muted); }
 
 .mtg-swatch[data-identity='w'] { background: var(--mtg-color-w); }
@@ -175,6 +208,8 @@ const GLYPH_EXTENT = `${cssNumber(PIP_GLYPH_SCALE * 100)}%`;
  */
 const LOYALTY_BADGE_WIDTH = `${cssNumber((LOYALTY_BADGE_SHARE - LOYALTY_BADGE_GUTTER) * 100)}%`;
 const LOYALTY_BADGE_GAP = `${cssNumber(LOYALTY_BADGE_GUTTER * 100)}%`;
+/* The badge's type, as a share of the card's width. See the rule below. */
+const LOYALTY_BADGE_TYPE_SHARE = 0.045;
 /* The badge's block padding is interpolated rather than written, because the
    fit ladder charges it: a baseline-aligned flex row is as tall as its tallest
    ascent plus its tallest descent, so this padding hangs the badge over the
@@ -566,8 +601,14 @@ const BOARD_NAME_LINES = 3;
  * (`../card/Card.ts`, `textBox`), so the words that survive a clip are the ones
  * combat turns on. The face still publishes `data-fit`, because it is the card's
  * step and the zoom beside it is a `full` face that uses it.
+ *
+ * Exported because `./panel.ts` re-declares this box for a draft pack drawn at a
+ * column wide enough to be read (`mtg-aqxi.15`) and changes only its ceiling.
+ * Restating the share there would be a second number that has to be edited in
+ * two places, and the point of that rule is that the box goes on tracking the
+ * width it was given.
  */
-const BOARD_RULES_CQW = 8.5;
+export const BOARD_RULES_CQW = 8.5;
 
 /**
  * How many lines of rules text a board face draws, and the narrower face that
@@ -590,23 +631,132 @@ const BOARD_RULES_NARROW_LINES = 2;
 const BOARD_RULES_NARROW_MAX_REM = 6;
 
 /**
- * The narrowest board face that draws any rules text at all.
+ * And one under `BOARD_RULES_PANEL_MAX_REM`, where the box is a panel drawn
+ * inside the picture rather than a column below it.
  *
- * Under it the box would take height the picture cannot spare and give back a
- * column too narrow to hold the shortest thing worth reading. The threshold is
- * that column: at 4rem of content box the line holds about fourteen characters
- * at the 9px floor, which is `First strike` and `Deathtouch` and `Vigilance`
- * whole. Below it the box goes and the face is what it was before `mtg-u69`.
+ * Three, two, one: the budget falls as the face does, and this is the last step.
+ * The panel is drawn between two boxes that already live in the window — the
+ * cost pips in its upper corner (`.mtg-card__corner`) and the P/T badge in its
+ * lower one — and a second line box is 10.8px the window has not got at the
+ * bottom of this band. Measured in chrome-headless-shell 151 over
+ * `../../test/play/page-overlap.browser.test.ts`'s own game-over position at
+ * 1280x800: a 56 x 78.2 face, a 46px window, a cost that draws 8.8px from 2px
+ * inside the window's head, and a two-line panel whose head landed 0.4px into
+ * it. Not a near miss and not a wide face's problem either — the window's height
+ * is the face's residual after a title bar that takes one line or two, so the
+ * same collision reaches a 63.3px face whose name wraps.
  *
- * A face gets that narrow when a row is crowded past what a played game reaches
- * — `MIN_SLOT_WIDTH_REM` in `../board/fit.ts` floors a slot at 3rem — so this is
+ * The line the budget keeps is the keyword line, which is the line the panel
+ * exists to print (`BOARD_REGIONS` in `../card/anatomy.ts` prints it first for
+ * this reason). What it costs is the second line of a wordy card at the two
+ * narrowest bands, and what it buys is the cost pips staying readable and half
+ * the picture back: the panel covers 25% to 32% of the window instead of 44% to
+ * 55%.
+ *
+ * The alternative was to bound the panel's head against the pips as well as its
+ * foot against the badge. It is expressible — the pip box is a `clamp()` like
+ * `--board-pt-box` is — and it does not work: a box given both insets stretches
+ * to fill them, so a one-line panel in a tall window would draw an empty band of
+ * opaque ground over the picture, and a box given a `max-height` instead cuts
+ * through the glyphs of the line it is keeping, which is the defect
+ * `-webkit-line-clamp` was chosen over `max-height` to avoid one block above.
+ */
+const BOARD_RULES_PANEL_LINES = 1;
+
+/**
+ * The board face at which the rules box stops taking its own height and draws
+ * as a panel over the foot of the picture.
+ *
+ * `mtg-8kc`. Under this width the box used to go entirely, and height is why: a
+ * column this narrow cannot spend two line boxes on text and still leave a
+ * window worth looking at. Removing it spent the whole of that cost on the
+ * reader, and the zone it emptied first was the hand — `mtg-s3re` put seven held
+ * cards at a 71.5px face beside permanents drawing every word of theirs. A panel
+ * pays the height out of the picture instead, which is the trade the decision
+ * sheet took from MTGO's own smallest face.
+ *
+ * Measured in chrome-headless-shell 151 over `../../tools/board-panel.ts`, nine
+ * flagship creatures and two spells at a 63.3px face — a 60.1px content box:
+ *
+ *     the shipped sheet drew zero characters on all eleven
+ *     the panel draws the keyword line whole at the 9px floor — Vigilance,
+ *       First strike, Flying, Lifelink — in one 14.8px line box
+ *     the window is 46.3 to 67px tall, so the panel costs 22% to 32% of it
+ *
+ * It is raised clear of the P/T badge rather than drawn under it, and the two
+ * alternatives were measured rather than reasoned about. Under the badge, the
+ * badge ate one to six characters of the very line the panel exists to print:
+ * `Vigilanc`, `First stri`. Beside it, clearing the badge's width, cost no
+ * characters but wrapped `First strike` onto a second line, which doubles the
+ * height. Above it costs the picture exactly what under does — the badge already
+ * occupied that strip — covers nothing, and prints every keyword line whole. It
+ * reaches the title bar on none of the eleven, including the two whose names
+ * take two lines, and that clearance is what the badge box below buys: the strut
+ * version of the badge stood 21.75px tall and pushed the panel 1.33px into the
+ * bar.
+ *
+ * The badge is reserved only on a face that draws one, which is the second rule
+ * in the band. `.mtg-card__stats` is absent from a spell's face rather than
+ * empty, so the unconditional reserve spent 17px of a sorcery's picture on a
+ * badge it has not got, and at the bottom of this band those 17px are the
+ * difference between a panel that clears the cost pips and one that does not.
+ *
+ * The type line stays out of the panel, which refines the sheet's decision to
+ * move both regions. Its own ellipsis mark is present at every width up to
+ * 82.6px, so what it draws there is `Creature…` and nothing more, and a second
+ * line box would cost the window 14.8px to repeat what the badge in the corner
+ * below already says.
+ *
+ * A face gets this narrow when a row is crowded past what a played game reaches
+ * — `MIN_SLOT_WIDTH_REM` in `./board/fit.ts` floors a slot at 3rem — so this is
  * the same kind of bound `PENDING_LABEL_MIN_REM` above is rather than the
  * ordinary case. Like every other container query on this face it is evaluated
  * against the *content box*: the face carries no padding and a band that is a
  * share of its own width, so the rule fires at a 69px face with a 65px content
  * box, and the face width that clears it moves whenever the share does.
  */
-const BOARD_RULES_MIN_REM = 4;
+const BOARD_RULES_PANEL_MAX_REM = 4;
+
+/**
+ * And the floor under the panel, below which the box goes after all.
+ *
+ * The panel is drawn between two boxes that are already in the window — the cost
+ * in its upper corner and the P/T badge in its lower one — and the window is the
+ * face's residual after a title bar that takes one line or two. Below some
+ * height those four things do not fit, and the panel's head runs into the cost.
+ * The height is not a width, which is the whole difficulty: at one face width
+ * the same window is 12px shorter on a card whose name wraps, so no width band
+ * can separate the two, and the floor has to be set where the *worst* card
+ * clears rather than where a typical one does.
+ *
+ * Read in chrome-headless-shell 151 over `../../tools/board-panel.ts` with its
+ * subject list opened to every non-land card in the flagship fixture, 79 faces
+ * at each width, as the gap between the panel's head and the cost's foot:
+ *
+ *     content box   worst clearance   faces colliding
+ *     57.06px       -2.11px           10 of 79
+ *     58.91px        +0.5px            0
+ *     60.08px       +2.02px            0
+ *
+ * The floor is 3.75rem — a 60px content box — rather than the 58.91px the
+ * reading first clears at, because half a pixel is not a margin, and the worst
+ * card at 60px keeps 2px. Under it the box is not drawn at all, exactly as it
+ * was before `mtg-8kc`: there is no arrangement of a line of text between those
+ * two corners in that much height, so the honest answer is the one the sheet
+ * already gave. What that costs is real and is written down rather than
+ * rounded off — `page-overlap.browser.test.ts`'s game-over table at 1280x800
+ * draws a 56px face, so a board crowded that far still prints no rules text,
+ * and `mtg-8kc` buys the band from 60px up rather than the whole of it.
+ *
+ * The alternative was to bound the panel's head against the cost the way its
+ * foot is bounded against the badge. It does not work: a box given both insets
+ * stretches to fill them, so a one-line panel in a tall window would draw an
+ * empty band of opaque ground across the picture, and a `max-height` instead of
+ * an inset cuts through the glyphs of the line it is keeping, which is the
+ * defect `-webkit-line-clamp` was chosen over `max-height` to avoid one block
+ * below.
+ */
+const BOARD_RULES_PANEL_MIN_REM = 3.75;
 
 /**
  * The type bar's band ladder: which part of a type line a board face gives up,
@@ -666,12 +816,26 @@ const TYPE_BAND_RULES = `${TYPE_BANDS.map(
  */
 const BOARD_FACE = `
 .mtg-card[data-size='board'] {
-  --pad: 0px;
   /* The slot's own nominal width, which is what a board face is drawn at when
      nothing has stretched or shrunk its slot. ../board/slot.ts overrides it with
      the width the row actually settled on, and that is the value the band's
      attackers are frame-sized from. */
   --card-w: ${cssNumber(COMPACT_FACE_WIDTH_REM)}rem;
+  /* The P/T badge's height, as an expression rather than as a number, because
+     under BOARD_RULES_PANEL_MAX_REM the rules panel has to clear it and CSS
+     cannot read a sibling's box. It is .mtg-card__pt's own type — the same
+     clamp that rule sets — plus its two 1px borders.
+
+     .mtg-card__stats is display: flex below for this to be true. It holds one
+     inline span, so its height was the *line box* around that span, and the
+     strut of that line came from the page's root font rather than from the
+     badge: 21.75px whatever the face's width, against 14px of drawn badge. The
+     corner is a badge and not a line of text, so it is laid out as one, and the
+     2px inset it already declares is now the inset it draws at. */
+  --board-pt-box: calc(
+    clamp(var(--mtg-text-xs), ${cssNumber(BOARD_NAME_CQW)}cqw, var(--mtg-text-base)) *
+      var(--mtg-leading-tight) + 2px
+  );
   gap: 2px; border-radius: var(--mtg-radius-md);
 }
 .mtg-card[data-size='board'] > * { flex: none; }
@@ -855,8 +1019,44 @@ const BOARD_FACE = `
 @container (max-width: ${cssNumber(BOARD_RULES_NARROW_MAX_REM)}rem) {
   .mtg-card[data-size='board'] > [data-region='rules'] { -webkit-line-clamp: ${cssNumber(BOARD_RULES_NARROW_LINES)}; }
 }
-@container (max-width: ${cssNumber(BOARD_RULES_MIN_REM)}rem) {
+/* Under BOARD_RULES_PANEL_MAX_REM the box does not sit in the column: a column
+   this narrow cannot spend a line box on text and still leave a window worth
+   looking at. Written as the removal first and the panel second, because that
+   is the shape of the decision — the box leaves the column at one width and
+   comes back as a panel over the picture only where there is room for one, and
+   BOARD_RULES_PANEL_MIN_REM is that room, measured. */
+@container (max-width: ${cssNumber(BOARD_RULES_PANEL_MAX_REM)}rem) {
   .mtg-card[data-size='board'] > [data-region='rules'] { display: none; }
+}
+/* The panel. Nothing about how the box is *set* changes here — it is already an
+   opaque panel on the badge's own ground and edge, already ellipsized — so this
+   is a position and a line budget, and the box that used to go now sits over the
+   foot of the picture.
+
+   inset-inline: var(--pad) is the content box's own width. The block end puts
+   the panel's foot on the window's, and on a face that draws a P/T badge the
+   second rule lifts it clear of one: 2px is .mtg-card__stats's own inset inside
+   the window and --board-pt-box is the badge. A spell has no badge element at
+   all, so it takes the first block end and keeps the 17px.
+
+   display is restated because the rule above removed it, and it is the same
+   -webkit-box the base rule sets — the clamp counts its line boxes, so a box
+   that came back as a block would ignore the budget entirely.
+
+   BOARD_RULES_PANEL_MAX_REM carries the measurement and the two arrangements
+   this one was chosen over; BOARD_RULES_PANEL_MIN_REM carries the floor and what
+   is given up below it. */
+@container (max-width: ${cssNumber(BOARD_RULES_PANEL_MAX_REM)}rem) and (min-width: ${cssNumber(BOARD_RULES_PANEL_MIN_REM)}rem) {
+  .mtg-card[data-size='board'] > [data-region='rules'] {
+    display: -webkit-box; -webkit-box-orient: vertical;
+    position: absolute; z-index: 1;
+    -webkit-line-clamp: ${cssNumber(BOARD_RULES_PANEL_LINES)};
+    inset-inline: var(--pad);
+    inset-block-end: var(--pad);
+  }
+  .mtg-card[data-size='board']:has(.mtg-card__stats) > [data-region='rules'] {
+    inset-block-end: calc(var(--pad) + 2px + var(--board-pt-box));
+  }
 }
 .mtg-card[data-size='board'] .mtg-card__seal { width: clamp(0.55rem, 10cqw, 0.95rem); height: clamp(0.55rem, 10cqw, 0.95rem); }
 .mtg-card[data-size='board'] .mtg-pip {
@@ -886,13 +1086,15 @@ const BOARD_FACE = `
    window on this face and the window is what an absolute box inside it is
    measured against. */
 .mtg-card[data-size='board'] .mtg-card__stats {
+  display: flex;
   inset-block-end: 2px; inset-inline-end: 2px; max-width: calc(100% - 4px);
 }
 /*
- * The pending frame at board size. The card id goes: under a 130px window it is
- * a row of cut glyphs, and the hatch plus the label already carry the
- * governance rule the slot exists for. The label is pushed clear of the two
- * corner boxes by exactly a pip each, and below PENDING_LABEL_MIN_REM it is not
+ * The pending frame at board size. The card id is not drawn on any face (the
+ * one rule for that is on \`.mtg-art__pending-note\` below, and this size was the
+ * first to need it: under a 130px window the id is a row of cut glyphs), so what
+ * is left here is the label. It is pushed clear of the two corner boxes by
+ * exactly a pip each, and below PENDING_LABEL_MIN_REM it is not
  * drawn at all because a pip is no longer enough; the docblock on that constant
  * has the measurement and what a set with no art loses by it.
  *
@@ -913,7 +1115,6 @@ const BOARD_FACE = `
  * attacking, and no game the previous agent played had ever put a large tapped
  * creature with a pending frame on the board at game over.
  */
-.mtg-card[data-size='board'] .mtg-art__pending-note { display: none; }
 .mtg-card[data-size='board'] .mtg-art__pending-label {
   font-size: clamp(0.5rem, ${cssNumber(BOARD_TEXT_CQW)}cqw, var(--mtg-text-xs));
   padding: 1px var(--mtg-space-1);
@@ -944,6 +1145,36 @@ ${TYPE_BAND_RULES}
 const FRAME_BAND_SHARE = FRAME_BAND_MM / CARD_TRIM_MM.width;
 
 /*
+ * The outer slice of that band, painted black on every card of every color.
+ *
+ * `mtg-d4g`. The band was the identity all the way out to the silhouette, so a
+ * face read as a colored tile rather than as a card: the thing that makes a
+ * pile of cards look like cards at a glance is that every one of them has the
+ * same black edge and a different color just inside it. `CARD_EDGE_MM` is 0.9
+ * of the 2.6, so the identity keeps two thirds of the band and the content
+ * inset does not move — no text box is re-fitted by this rule.
+ *
+ * **A box has one border, and the black takes it.** The first build spent the
+ * border on the identity and drew the black as a ring on `::before` pulled out
+ * to the border box by a negative inset. It painted correctly and broke two
+ * measuring rigs: an absolutely positioned box outside the padding box counts
+ * toward its parent's scrollable overflow, so `test/play/loyalty-hand.browser`
+ * and `test/play/hand-allocation.browser` both read 3-4px of overflow on a face
+ * that had not moved, and their assertion — a face may not overflow its own
+ * trim — is the right one to keep.
+ *
+ * So the band is divided by the box model instead, and nothing is added
+ * outside it: the border is the black edge, the padding under it is the
+ * identity, and `background-clip` is what makes the padding a ring rather than
+ * a second ground. Two layers, top one first: `--frame` clipped to the content
+ * box, `--identity` clipped to the padding box, which is the band's inner
+ * slice and only that. Border plus padding is still `--frame-band` to the
+ * pixel, so the content box is where it was, and the card's own overflow is
+ * unchanged because there is no new box.
+ */
+const CARD_EDGE_SHARE = CARD_EDGE_MM / CARD_TRIM_MM.width;
+
+/*
  * The identity border is the one border in the system above 1px, and DESIGN.md
  * §4 names it as the exception rather than leaving the old sentence to be read
  * as still true. It is a four-sided printed edge, not the colored left stripe
@@ -968,20 +1199,64 @@ const FRAME_BAND_SHARE = FRAME_BAND_MM / CARD_TRIM_MM.width;
  * 320px face wearing 7px of border over 8px of ground) made impossible to miss.
  * The printed face has no such ring: its content starts at the band and the
  * ground shows between the regions, which is what `gap` already draws here. So
- * the padding goes and the face keeps `--frame` where the printed one keeps it.
+ * the padding stopped being `--frame` and the face keeps that color where the
+ * printed one keeps it. The padding itself came back with `mtg-d4g`, carrying
+ * the identity rather than the ground: a ring of the border's own color reads
+ * as part of the border, which is the whole point of dividing the band.
  */
+/**
+ * Everything the face draws besides the rules text, as a ratio of the rules
+ * text's own size.
+ *
+ * `mtg-dcxg.13`. Each of these was a token: 6px between the regions, 8px inside
+ * the text box, 0.6875rem on the type line. A token is a fixed number of pixels
+ * and the card is not, so at a 366px phone face the chrome stayed put while the
+ * card grew and the rules box, which is the residual, took the whole difference.
+ * The printed face has never had this problem — `@mtg/card-render` draws in user
+ * units and scales whole — and these ratios are how the DOM face says the same
+ * thing. Every one of them is its old token over `--mtg-text-sm`, so a face at
+ * the reference width draws exactly what it drew before.
+ */
+const TEXT_XS_RATIO = 0.6875 / RULES_TEXT_REM;
+const SPACE_1_RATIO = 0.25 / RULES_TEXT_REM;
+const SPACE_2_RATIO = 0.5 / RULES_TEXT_REM;
+/** 6px between regions, 3px above and below the title bar, at a 13px channel. */
+const FACE_GAP_RATIO = 6 / 16 / RULES_TEXT_REM;
+const BAR_PAD_RATIO = 3 / 16 / RULES_TEXT_REM;
+const BAR_MIN_RATIO = 1.6 / RULES_TEXT_REM;
+const SEAL_RATIO = 0.95 / RULES_TEXT_REM;
+
 const FACE = `
 .mtg-card {
-  --pad: 0px;
+  --pad: calc(var(--frame-band) - var(--card-edge-band));
   --card-w: ${cssNumber(FULL_FACE_WIDTH_REM)}rem;
+  /* The size the rules text is set at before the fit ladder scales it. The
+     --mtg-text-sm token was the whole answer until mtg-dcxg.13: everything else
+     on a face is a share of --card-w, so a phone column's 366px face grew a
+     191px box around 42px of type. The larger of the two rather than the share
+     alone, so a face narrower than the reference keeps the readable token
+     instead of setting a board slot's rules text at 8px. */
+  --rules-type: max(var(--mtg-text-sm), calc(var(--card-w) * ${cssNumber(RULES_TEXT_SHARE)}));
+  /* Everything else the face sets in type or in space, as a ratio of that one
+     channel rather than as its own token. The rules text alone was not enough:
+     the rules box is the residual after the bar, the window and the foot, so a
+     face whose chrome stayed 13px while the card grew handed the box more than
+     its share of the extra height and the slack came back at a third of its
+     old size. Scaled together, the face is the printed card's own rule -- one
+     drawing at whatever size it is drawn at. */
+  --face-xs: calc(var(--rules-type) * ${cssNumber(TEXT_XS_RATIO)});
+  --face-space-1: calc(var(--rules-type) * ${cssNumber(SPACE_1_RATIO)});
+  --face-space-2: calc(var(--rules-type) * ${cssNumber(SPACE_2_RATIO)});
   --frame-band: calc(var(--card-w) * ${cssNumber(FRAME_BAND_SHARE)});
-  --shield-w: calc(var(--card-w) * ${cssNumber(LOYALTY_SHIELD_SHARE.width)});
-  --shield-h: calc(var(--card-w) * ${cssNumber(LOYALTY_SHIELD_SHARE.height)});
+  --card-edge-band: max(1px, calc(var(--card-w) * ${cssNumber(CARD_EDGE_SHARE)}));
+  --shield-w: calc(100cqw * ${cssNumber(LOYALTY_SHIELD_SHARE.width)});
+  --shield-h: calc(100cqw * ${cssNumber(LOYALTY_SHIELD_SHARE.height)});
   position: relative;
-  display: flex; flex-direction: column; gap: 6px;
+  display: flex; flex-direction: column; gap: calc(var(--rules-type) * ${cssNumber(FACE_GAP_RATIO)});
   width: var(--card-w); padding: var(--pad);
-  background: var(--frame);
-  border: var(--frame-band) solid var(--identity);
+  background: linear-gradient(var(--frame), var(--frame)) content-box,
+    linear-gradient(var(--identity), var(--identity)) padding-box;
+  border: var(--card-edge-band) solid var(--mtg-card-edge);
   border-radius: var(--mtg-radius-card);
   box-shadow: var(--mtg-shadow-card);
   color: var(--mtg-ink);
@@ -1001,12 +1276,12 @@ const FACE = `
    ../card/anatomy.ts is the printed face's copy of the same rule, and
    test/card.test.ts fails when the two stop agreeing. */
 .mtg-card__bar {
-  --pip-box: calc(var(--mtg-text-sm) * var(--mtg-leading-tight));
-  display: flex; align-items: center; gap: var(--mtg-space-2);
-  padding: 3px var(--mtg-space-2);
+  --pip-box: calc(var(--rules-type) * var(--mtg-leading-tight));
+  display: flex; align-items: center; gap: var(--face-space-2);
+  padding: calc(var(--rules-type) * ${cssNumber(BAR_PAD_RATIO)}) var(--face-space-2);
   background: var(--panel);
   border: 1px solid var(--edge); border-radius: var(--mtg-radius-sm);
-  min-height: 1.6rem;
+  min-height: calc(var(--rules-type) * ${cssNumber(BAR_MIN_RATIO)});
 }
 /* The name shrinks to fit its bar before it is ever cut, and --name-scale is
    how: the ladder below sets the channel off the card's own data-fit, and
@@ -1019,7 +1294,7 @@ const FACE = `
    reach. */
 .mtg-card__name {
   flex: 1; min-width: 0;
-  font-family: var(--mtg-font-card); font-size: calc(var(--mtg-text-sm) * var(--name-scale, 1));
+  font-family: var(--mtg-font-card); font-size: calc(var(--rules-type) * var(--name-scale, 1));
   font-weight: 700;
   line-height: var(--mtg-leading-tight);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1033,11 +1308,12 @@ const FACE = `
    line into the face's title either way. */
 .mtg-card__type {
   flex: 1; min-width: 0;
-  font-family: var(--mtg-font-card); font-size: var(--mtg-text-xs); font-weight: 600;
+  font-family: var(--mtg-font-card); font-size: var(--face-xs); font-weight: 600;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.mtg-card__seal { width: 0.95rem; height: 0.95rem; flex: none; display: block; overflow: visible; }
+.mtg-card__seal { width: calc(var(--rules-type) * ${cssNumber(SEAL_RATIO)}); height: calc(var(--rules-type) * ${cssNumber(SEAL_RATIO)}); flex: none; display: block; overflow: visible; }
 ${SEAL_INK_RULES}
+${SEAL_ICON_RULES}
 
 /* The text box, and the white space above its first line.
  *
@@ -1077,13 +1353,20 @@ ${SEAL_INK_RULES}
  */
 .mtg-card__text {
   display: flex; flex-direction: column; justify-content: safe center;
-  padding: var(--mtg-space-2);
+  padding: var(--face-space-2);
   background: var(--panel);
   border: 1px solid var(--edge); border-radius: var(--mtg-radius-sm);
-  font-family: var(--mtg-font-card); font-size: var(--mtg-text-sm); line-height: var(--mtg-leading-normal);
+  font-family: var(--mtg-font-card); font-size: var(--rules-type); line-height: var(--mtg-leading-normal);
 }
 .mtg-card__line { display: block; }
-.mtg-card__line + .mtg-card__line { margin-top: var(--mtg-space-1); }
+.mtg-card__line + .mtg-card__line { margin-top: var(--face-space-1); }
+/* Imported oracle text can descend below the generated-card readability floor.
+   Its paragraph spacing and inset descend with it, so fixed chrome cannot take
+   more of the box than the immutable words at the final rungs. */
+.mtg-card[data-presentation='printed-card'] .mtg-card__text {
+  --face-space-1: 0.3077em;
+  --face-space-2: 0.6154em;
+}
 /* Reminder text and flavor text are set in italics, which is the whole of how a
    reader tells them from the rules text; the parentheses do the rest for a
    reminder. Keyed off the block kind the face publishes (../card/Card.ts,
@@ -1106,7 +1389,7 @@ ${SEAL_INK_RULES}
 /* The flavor text is the foot of the box and gets the gap a printed card gives
    it: more than the space between two rules paragraphs, because it is a change
    of voice rather than a second sentence about the same card. */
-.mtg-card__line[data-block='flavor'] { margin-top: var(--mtg-space-2); }
+.mtg-card__line[data-block='flavor'] { margin-top: var(--face-space-2); }
 /* A planeswalker's text box is ruled into ability rows, and each loyalty
    ability's cost stands in a badge at the left of its own row rather than as
    "[+1]:" at the head of the sentence. Two columns, so the ability wraps in a
@@ -1136,7 +1419,7 @@ ${SEAL_INK_RULES}
    here unchanged; @mtg/dsl refuses one on a planeswalker today. */
 .mtg-card__line[data-loyalty] {
   display: flex; align-items: baseline; column-gap: ${LOYALTY_BADGE_GAP};
-  padding-top: var(--mtg-space-1);
+  padding-top: var(--face-space-1);
   border-top: 1px solid var(--edge);
   line-height: var(--mtg-leading-tight);
 }
@@ -1157,10 +1440,40 @@ ${SEAL_INK_RULES}
   clip-path: ${outlineClipPath(LOYALTY_BADGE_POINTS)};
   background: var(--mtg-ink); color: var(--mtg-ink-inverse);
   text-align: center;
+  /* A share of the card rather than the rules token the sentence beside it is
+     set in, because the two quantities answer to different things. This must be
+     a container unit and not a share of the card-width custom property: galleries, stacked deck cards
+     and draft rails publish that width as 100%, and a percentage reached from
+     font-size is resolved against the inherited type rather than against the
+     card. Jace, the Mind Sculptor therefore kept four correctly sized badge
+     grounds while their numeral ink collapsed to 0px in a full-card builder
+     column; the fixed-rem hover face was the only one that remained readable.
+     The card is already an inline-size container, so cqw names the rendered
+     quantity directly at every surface.
+
+     The sentence shrinks down the fit ladder as a walker gets wordier; the
+     badge holds three glyphs at every rung and its ground is a fixed fraction
+     of the box, so type that shrank with the sentence stayed inside its ground
+     and type that did not, did not. At 0.045 the widest cost ("−10", about
+     1.57em of tabular figures) clears the silhouette's taper at every width the
+     face is drawn at -- which is the arithmetic LOYALTY_BADGE_SHARE states, and
+     ../../test/card-loyalty.browser.test.ts measures rather than trusts.
+
+     The share is capped by the surrounding sentence, while 7px is the measured
+     ink floor at which a multi-glyph cost remains distinguishable in the
+     narrow stacked-card view. A
+     loyalty row is a baseline-aligned flex line and is therefore as tall as its
+     tallest ascent plus its tallest descent, so a badge set larger than the
+     sentence beside it makes the row taller than the lines in it -- and
+     textBoxCost charges the rung's own line height. Uncapped, this rule put
+     the flagship's Hero of the Wild 0.8px over its estimate at rung 5, which is
+     the ladder losing its upper bound. Below the cap the badge shrinks with the
+     sentence and the row is exactly as tall as it was. */
+  font-size: max(7px, min(1em, ${cssNumber(LOYALTY_BADGE_TYPE_SHARE * 100)}cqw));
   font-weight: 700; font-variant-numeric: tabular-nums; font-style: normal;
 }
 
-.mtg-card__foot { display: flex; align-items: center; gap: var(--mtg-space-2); }
+.mtg-card__foot { display: flex; align-items: center; gap: var(--face-space-2); }
 /* The footnote bar, which is all this row carries besides the P/T now that the
    collector line has left the face (FACE_REGIONS in ../card/anatomy.ts). It
    keeps its own panel ground rather than being set on the card: the ground is
@@ -1169,17 +1482,17 @@ ${SEAL_INK_RULES}
    identities in both themes. */
 .mtg-card__collector {
   flex: 1; min-width: 0;
-  padding: 1px var(--mtg-space-2);
+  padding: 1px var(--face-space-2);
   background: var(--panel);
   border: 1px solid var(--edge); border-radius: var(--mtg-radius-sm);
-  font-family: var(--mtg-font-mono); font-size: var(--mtg-text-xs); color: var(--mtg-ink-muted);
+  font-family: var(--mtg-font-mono); font-size: var(--face-xs); color: var(--mtg-ink-muted);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .mtg-card__pt {
-  padding: 1px var(--mtg-space-2);
+  padding: 1px var(--face-space-2);
   background: var(--panel); border: 1px solid var(--edge);
   border-radius: var(--mtg-radius-sm);
-  font-family: var(--mtg-font-card); font-size: var(--mtg-text-sm); font-weight: 700;
+  font-family: var(--mtg-font-card); font-size: var(--rules-type); font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 /* Starting loyalty, which is not the P/T badge in a different number. It is a
@@ -1188,11 +1501,15 @@ ${SEAL_INK_RULES}
    number a reader of a planeswalker looks for first. LOYALTY_SHIELD_POINTS is
    the outline and @mtg/card-render draws the same one.
 
-   Sized off --card-w rather than in em, and the difference is the whole of what
-   the ladder can be told. An em box is a function of the font size the shield
-   happens to inherit, which no arithmetic in @mtg/card-geometry can see; a
-   share of the card's width is a number that file already holds, so the band
-   the box has to give up for the shield is derivable rather than guessed.
+   Sized off the card's container width rather than in em, and the difference is
+   the whole of what the ladder can be told. An em box is a function of the font
+   size the shield happens to inherit, which no arithmetic in
+   @mtg/card-geometry can see; a share of the card's width is a number that file
+   already holds, so the band the box has to give up for the shield is derivable
+   rather than guessed. The container unit is load-bearing in grids where
+   --card-w is 100%: carrying that percentage into the absolutely positioned,
+   shrink-wrapped stats box makes the shield's width depend on itself and
+   collapses it into a vertical line.
    LOYALTY_SHIELD_SHARE is the one declaration, and the printed face scales the
    same pair into user units.
 
@@ -1308,23 +1625,20 @@ ${SEAL_INK_RULES}
 /*
  * The rungs, emitted off the *longer* of the two ladders.
  *
- * `LOYALTY_FIT_STEPS` is `RULES_FIT_STEPS` with two more rungs under it and the
- * same four numbers above them, so one run of rules covers both: a step index
- * means the same size whichever ladder a card came off, and the two extra
- * selectors match nothing on a card that is not a planeswalker. Emitting two
- * runs would have written four of these rules twice, and a duplicated rule is a
- * rule that can be edited in one place.
+ * `PRINTED_RULES_FIT_STEPS` is the longest ladder and shares every upper rung
+ * with the generated-card ladders, so one run covers all three. Its final
+ * selector only matches immutable official oracle text that needed it.
  */
-const RULES_FIT_RULES = LOYALTY_FIT_STEPS.map(
+const RULES_FIT_RULES = PRINTED_RULES_FIT_STEPS.map(
   (scale, step) =>
     `.mtg-card__text[data-fit='${cssNumber(step)}']` +
-    ` { font-size: calc(var(--mtg-text-sm) * ${cssNumber(scale)}); }`,
+    ` { font-size: calc(var(--rules-type) * ${cssNumber(scale)}); }`,
 ).join('\n');
 
 const TYPE_FIT_RULES = RULES_FIT_STEPS.map(
   (scale, step) =>
     `.mtg-card__type[data-fit='${cssNumber(step)}']` +
-    ` { font-size: calc(var(--mtg-text-xs) * ${cssNumber(scale)}); }`,
+    ` { font-size: calc(var(--face-xs) * ${cssNumber(scale)}); }`,
 ).join('\n');
 
 /**
@@ -1345,6 +1659,173 @@ const NAME_FIT_RULES = NAME_FIT_STEPS.map(
   (scale, step) => `.mtg-card__name[data-fit='${cssNumber(step)}'] { --name-scale: ${cssNumber(scale)}; }`,
 ).join('\n');
 
+/**
+ * The printed-text ladder when a whole face is opened specifically to be read.
+ *
+ * The source `data-fit` remains the conservative 214px gallery decision. A
+ * hover face is wider and taller, so repeating that exact scale wastes the
+ * added rules-box area: Vivien, Monsters' Advocate stayed at 5.2px in a 244px
+ * preview with 32px of empty space above and below four rows. These rungs spend
+ * that measured capacity while retaining the original rung as provenance.
+ * The complete-catalog browser census checks the result at both reading widths.
+ */
+const PRINTED_READING_FIT_STEPS: readonly number[] = [1, 1, 1, 1, 1, 1, 0.92, 0.85, 0.78, 0.77];
+
+/**
+ * The three faces opened to be read: the deckbuilder's peek, the board's hover
+ * zoom, and the rail's own reading face (the play rail's Info tab, the draft
+ * rail's chosen card). The peek and the zoom are drawn at one width and take
+ * the token-based ladder above; the rail's width varies and takes its own,
+ * below. What the three share is the dense-planeswalker spacing.
+ */
+const READING_FACES = [
+  '.mtg-cardpeek > .mtg-card',
+  '.mtg-zoom > .mtg-card',
+  '.mtg-rail__body > .mtg-card',
+] as const;
+
+const PRINTED_READING_FIT_RULES = PRINTED_READING_FIT_STEPS.map(
+  (scale, step) =>
+    `.mtg-cardpeek > .mtg-card[data-presentation='printed-card'] .mtg-card__text[data-fit='${cssNumber(step)}'],` +
+    ` .mtg-zoom > .mtg-card[data-presentation='printed-card'] .mtg-card__text[data-fit='${cssNumber(step)}']` +
+    ` { font-size: calc(var(--rules-type) * ${cssNumber(scale)}); }`,
+).join('\n');
+
+/**
+ * The official-text ladder on the draft's full-card face.
+ *
+ * The imported-text estimator remains deliberately conservative because it has
+ * to fit unusual Oracle paragraphs without measuring a browser. A draft pack
+ * does have one fixed 214px minimum and can spend less of its rules rectangle
+ * on ornamental inset. These rungs reclaim that measured room without changing
+ * the source fit decision or the hover face's larger ladder. The complete
+ * 600-position browser census below this rule is the safety boundary.
+ */
+const PRINTED_DRAFT_FIT_STEPS: readonly number[] = [1, 1, 0.92, 0.85, 0.78, 0.68, 0.62, 0.58, 0.5, 0.46];
+
+const PRINTED_DRAFT_FIT_RULES = PRINTED_DRAFT_FIT_STEPS.map(
+  (scale, step) =>
+    `.mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-inline-reminder='true']:not([data-loyalty-frame='true']) .mtg-card__text[data-fit='${cssNumber(step)}']` +
+    ` { font-size: calc(var(--rules-type) * ${cssNumber(scale)}); }`,
+).join('\n');
+
+/**
+ * The official-text ladder on whole cards in the shared deckbuilder and gallery.
+ *
+ * The imported-text estimator records a conservative fit step for a 214px
+ * standalone face. Limited deckbuilding used to squeeze the same face to 194px
+ * at the reference 1280px workbench, where falling back to the generic ladder
+ * made its final rungs 5.2–6.8px. The builder now preserves the face's 244px
+ * reading width and these rungs spend that room while retaining the estimator's
+ * step and monotonic ordering: denser cards still step down, but no printed
+ * rules text falls below 9.5px. Compact bars, paragraph gaps and 1.1 print
+ * leading recover space around the text, leaving the shared art-window
+ * proportions and card trim unchanged.
+ * The live shared-builder browser test holds the named regression cohort, and
+ * the complete-catalog browser census holds the Cube and AKH/HOU positions to the
+ * no-overflow boundary.
+ *
+ * Builder styling is scoped to the pane scrollport, so the sibling `.mtg-cardpeek`
+ * reading surface continues to use its wider reading ladder rather than
+ * inheriting the inline one.
+ */
+const PRINTED_BUILDER_FIT_STEPS: readonly number[] = [1, 1, 1, 0.96, 0.9, 0.84, 0.78, 0.74, 0.74, 0.74];
+const PRINTED_READABLE_CONTEXT = ':is(.mtg-builder-screen .mtg-deck__pane-scroll, .mtg-gallery)';
+
+/**
+ * The rail's reading face is the one reading surface whose width is not a
+ * constant: the draft rail is `RAIL_REM` wide and the play board's split
+ * handle can double it, and a stack card clicked to be read on a wide board
+ * came up as a full-width frame with a large empty rules box and a 13px
+ * paragraph in it. So its rules type is a share of the face's own width
+ * (`cqi`, the face being its own inline-size container) rather than the token,
+ * stepped down the pack's ladder for the dense positions and set on the text
+ * region rather than on `--rules-type`, which the face's geometry reads. The
+ * ladder is the rail's own, steeper at the top than the pack's, because the
+ * dense positions at its floor are what bound the share the sparse ones get:
+ * the pack's floor of 0.74 held the share to 4.9, and 0.66 lets the ordinary
+ * card read at 5.5. Both numbers are the largest that the two-width rail
+ * census in test/card/printed-card-face.browser.test.ts holds to the
+ * no-overflow boundary over the Cube and AKH/HOU positions.
+ */
+const RAIL_RULES_CQI = 5.5;
+const RAIL_FIT_STEPS: readonly number[] = [1, 1, 1, 1, 1, 0.95, 0.88, 0.8, 0.72, 0.66];
+const RAIL_FACE = ".mtg-rail__body > .mtg-card[data-presentation='printed-card']";
+const RAIL_READING_FIT_RULES = RAIL_FIT_STEPS.map(
+  (scale, step) =>
+    `${RAIL_FACE} .mtg-card__text[data-fit='${cssNumber(step)}'] { font-size: calc(${cssNumber(RAIL_RULES_CQI)}cqi * ${cssNumber(scale)}); }`,
+).join('\n');
+
+const PRINTED_BUILDER_FIT_RULES = PRINTED_BUILDER_FIT_STEPS.map(
+  (scale, step) =>
+    `${PRINTED_READABLE_CONTEXT} .mtg-card[data-presentation='printed-card'][data-size='full'] .mtg-card__text[data-fit='${cssNumber(step)}']` +
+    ` { font-size: calc(var(--rules-type) * ${cssNumber(scale)}); }`,
+).join('\n');
+
+const PRINTED_BUILDER_TEXT_RULES = `
+${PRINTED_READABLE_CONTEXT} .mtg-card[data-presentation='printed-card'][data-size='full'] {
+  gap: calc(var(--rules-type) * ${cssNumber(BAR_PAD_RATIO)});
+}
+${PRINTED_READABLE_CONTEXT} .mtg-card[data-presentation='printed-card'][data-size='full'] > .mtg-card__bar {
+  min-height: 0;
+  padding-block: 1px;
+}
+${PRINTED_READABLE_CONTEXT} .mtg-card[data-presentation='printed-card'][data-size='full'] .mtg-card__text {
+  --face-space-1: 0.1em;
+  --face-space-2: 0.25em;
+  line-height: 1.1;
+}
+${PRINTED_READABLE_CONTEXT} .mtg-card[data-presentation='printed-card'][data-size='full'][data-loyalty-frame='true'] .mtg-card__text {
+  --face-space-1: 0.08em;
+  --face-space-2: 0.12em;
+  margin-block-end: 0;
+}
+${PRINTED_READABLE_CONTEXT} .mtg-card[data-presentation='printed-card'][data-size='full'][data-loyalty-frame='true'] .mtg-card__line:last-child {
+  padding-inline-end: calc(var(--shield-w) + var(--face-space-2));
+}
+${PRINTED_READABLE_CONTEXT} .mtg-card[data-presentation='printed-card'][data-size='full'][data-loyalty-frame='true'] .mtg-card__line[data-loyalty] {
+  column-gap: 1.5%;
+  line-height: 1.1;
+}
+${PRINTED_READABLE_CONTEXT} .mtg-card[data-presentation='printed-card'][data-size='full'][data-loyalty-frame='true'] .mtg-card__loyalty {
+  flex-basis: 11.5%;
+}`;
+
+/**
+ * Planeswalker rows are already compact, ruled records rather than ordinary
+ * prose paragraphs. Applying the imported prose floor to them made Vivien's
+ * four rows 5.2px high while leaving a conspicuous band above and below the
+ * table. This draft-only ladder spends that measured capacity on type. At the
+ * wide draft size the text box also stops reserving the shield's height across
+ * its full width: only the final row gives up the corner the shield occupies.
+ * The complete-catalog browser census remains the overflow and collision
+ * boundary for every official walker.
+ */
+const PRINTED_DRAFT_LOYALTY_FIT_STEPS: readonly number[] = [1, 1, 1, 0.92, 0.85, 0.78, 0.7, 0.62, 0.56, 0.5];
+const PRINTED_DRAFT_WIDE_LOYALTY_FIT_STEPS: readonly number[] = [
+  1, 1, 1, 1, 0.95, 0.9, 0.86, 0.83, 0.8, 0.77,
+];
+
+const PRINTED_DRAFT_LOYALTY_FIT_RULES = PRINTED_DRAFT_LOYALTY_FIT_STEPS.map(
+  (scale, step) =>
+    `.mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-loyalty-frame='true'] .mtg-card__text[data-fit='${cssNumber(step)}']` +
+    ` { font-size: calc(var(--rules-type) * ${cssNumber(scale)}); }`,
+).join('\n');
+
+const PRINTED_DRAFT_WIDE_LOYALTY_FIT_RULES = PRINTED_DRAFT_WIDE_LOYALTY_FIT_STEPS.map(
+  (scale, step) =>
+    `.mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-loyalty-frame='true'] .mtg-card__text[data-fit='${cssNumber(step)}']` +
+    ` { font-size: calc(var(--rules-type) * ${cssNumber(scale)}); }`,
+).join('\n');
+
+const PRINTED_DRAFT_CONCISE_RULES = `
+.mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-inline-reminder='true'][data-concise-rules='true']:not([data-loyalty-frame='true']) .mtg-card__text[data-fit='5'] {
+  font-size: calc(var(--rules-type) * 0.74);
+}
+.mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-inline-reminder='true'][data-concise-rules='true']:not([data-loyalty-frame='true']) .mtg-card__text[data-fit='7'] {
+  font-size: calc(var(--rules-type) * 0.66);
+}`;
+
 const FACE_TRIM = `
 .mtg-card[data-size='full'] {
   aspect-ratio: ${cssNumber(CARD_TRIM_MM.width)} / ${cssNumber(CARD_TRIM_MM.height)};
@@ -1353,6 +1834,42 @@ const FACE_TRIM = `
 .mtg-card[data-size='full'] > * { flex: none; }
 .mtg-card[data-size='full'] > [data-region='rules'] { flex: 1 1 auto; min-height: 0; overflow-y: clip; }
 ${RULES_FIT_RULES}
+${PRINTED_BUILDER_FIT_RULES}
+${PRINTED_BUILDER_TEXT_RULES}
+${PRINTED_DRAFT_FIT_RULES}
+${PRINTED_DRAFT_LOYALTY_FIT_RULES}
+${PRINTED_DRAFT_CONCISE_RULES}
+.mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card .mtg-card__text {
+  --face-space-1: 0.2em;
+  --face-space-2: 0.25em;
+}
+.mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-loyalty-frame='true'] .mtg-card__text {
+  justify-content: space-around;
+}
+.mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-inline-reminder='true'][data-concise-rules='true']:not([data-loyalty-frame='true']) .mtg-card__text {
+  justify-content: space-around;
+}
+.mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-loyalty-frame='true'] .mtg-card__line {
+  line-height: 1.15;
+}
+@container (min-width: 14rem) {
+  ${PRINTED_DRAFT_WIDE_LOYALTY_FIT_RULES}
+  .mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-loyalty-frame='true'] .mtg-card__text {
+    --face-space-1: 0.08em;
+    --face-space-2: 0.12em;
+    margin-block-end: 0;
+  }
+  .mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-loyalty-frame='true'] .mtg-card__line[data-loyalty] {
+    column-gap: 1.5%;
+    line-height: 1.05;
+  }
+  .mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-loyalty-frame='true'] .mtg-card__line:last-child {
+    padding-inline-end: calc(var(--shield-w) + var(--face-space-2));
+  }
+  .mtg-draft .mtg-work__scroll > .mtg-thumbs > .mtg-card[data-presentation='printed-card'][data-loyalty-frame='true'] .mtg-card__loyalty {
+    flex-basis: 11.5%;
+  }
+}
 ${TYPE_FIT_RULES}
 ${NAME_FIT_RULES}
 `;
@@ -1377,6 +1894,9 @@ const ART = `
   border: 1px solid var(--edge); border-radius: var(--mtg-radius-sm);
   background: var(--well);
 }
+.mtg-card[data-size='full'][data-large-art='true'] > .mtg-art {
+  aspect-ratio: ${cssNumber(LAND_ART_WINDOW.width)} / ${cssNumber(LAND_ART_WINDOW.height)};
+}
 .mtg-art__image { display: block; width: 100%; height: 100%; object-fit: cover; }
 .mtg-art[data-art-state='pending'] {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -1389,17 +1909,31 @@ const ART = `
   );
 }
 .mtg-art__pending-label {
-  font-size: var(--mtg-text-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  ${MICRO_LABEL}
   color: var(--mtg-pending);
   background: var(--mtg-surface-raised);
   padding: 2px var(--mtg-space-2); border-radius: var(--mtg-radius-pill);
   border: 1px solid var(--mtg-line);
 }
-.mtg-art__pending-note {
-  font-size: var(--mtg-text-xs); color: var(--mtg-ink-muted);
-  max-width: 90%; text-align: center;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
+/*
+   The card id under the pending pill is production metadata, and this is the
+   surface a set is played on. It read \`slc-skywatch-sentinel\` in the draft
+   rail, six inches under the same card's printed name, which is the one place
+   the name is not what a player wants to see.
+
+   Hidden rather than removed: the element is what \`@mtg/card-render\`'s parity
+   suite holds the two renderers to, and the id stays where it is useful — the
+   art window's own \`aria-label\` (\`../card/ArtSlot.ts\`), the SVG proof sheet
+   that the art pipeline reads, and \`npm run verify:art\`, which names every
+   surface still waiting. What the played face keeps is the pill, which says
+   the state without naming a row.
+
+   One rule rather than one per size: it was already hidden at \`board\` (a
+   label across a P/T badge) and at \`art\` (two labels in a 42px tile), and the
+   sizes that still drew it — \`compact\` and \`full\` — are the two with room
+   for the id to be legible, which is the whole complaint.
+*/
+.mtg-art__pending-note { display: none; }
 `;
 
 /**
@@ -1416,8 +1950,7 @@ const ART = `
 const SMALL_FACE_MAX_REM = 7;
 
 /**
- * The full planeswalker face: where its extra room comes from, and where its
- * shield stands.
+ * The full planeswalker face: its ruled rows and shield reservation.
  *
  * Two defects produced this block and they are the same defect seen from two
  * ends. the playtester, 2026-08-18, looking at Vessari, Hero of Hours in the Cards tab:
@@ -1428,17 +1961,10 @@ const SMALL_FACE_MAX_REM = 7;
  * words would have left the words cut off by the frame instead, so both are
  * answered here or neither is.
  *
- * **The window gives, on this card type only.** `FACE_TRIM` above states the
- * opposite rule for every other card and the playtester stated it in those words —
- * "the dimensions of the card art should be consistent across cards but we can
- * adjust the text size within the box". A planeswalker is where the text has
- * nowhere left to go: three abilities, each ruled off from the next and each
- * wrapping in a column its cost badge narrowed, ask for ten lines where the
- * wordiest creature in the set asks for six. `PLANESWALKER_ART_WINDOW` is the
- * shorter window and `@mtg/card-geometry` argues it against the reference,
- * where a printed walker's box runs to 40% of the card's height. Every
- * planeswalker is still the same shape as every other planeswalker, which is
- * the half of the consistency rule that was load-bearing.
+ * The illustration stays the same size as every other nonland. The dense
+ * ability table instead uses the printed-text ladder and tighter ornamental
+ * gaps on its small full face; the enlarged reading face restores comfortable
+ * type without changing the crop.
  *
  * **The shield's band is a margin, not padding.** The box is `overflow-y: clip`
  * and clip cuts at the *padding* box, so a bottom padding is room an
@@ -1456,15 +1982,48 @@ const SMALL_FACE_MAX_REM = 7;
  * the art window, re-offset by its own rule) are untouched, and so is every
  * creature's `.mtg-card__pt`.
  */
+/* See the rule below: the share of the cropped height taken off the top. */
+const PLANESWALKER_ART_TOP_BIAS = 0.15;
+
 const PLANESWALKER = `
 .mtg-card[data-size='full']:has(.mtg-card__shield) > .mtg-art {
   aspect-ratio: ${cssNumber(PLANESWALKER_ART_WINDOW.width)} / ${cssNumber(PLANESWALKER_ART_WINDOW.height)};
+}
+/* Art-forward full faces recover their text room from ornamental chrome, not
+   from differently sized nonland illustrations or unreadable rules type. */
+.mtg-card[data-size='full']:has(.mtg-card__shield) {
+  gap: 0;
+}
+.mtg-card[data-size='full'][data-large-art='true'] {
+  gap: 1px;
+}
+.mtg-card[data-size='full']:has(.mtg-card__shield) > .mtg-card__bar,
+.mtg-card[data-size='full'][data-large-art='true'] > .mtg-card__bar {
+  padding-block: 0;
+}
+/* Where the shorter window takes its crop from, and the reason it is not the
+   middle. A cover fit centers by default, so a window at 578/300
+   against a Scryfall art crop at about 626/457 drops a fifth of the picture's
+   height off the top and the same off the bottom -- and a portrait's head is
+   in the top third of it. Reported on Jace Beleren, 2026-08-24: "the art is too
+   cut off (Jace's head isn't showing)."
+
+   ${cssNumber(PLANESWALKER_ART_TOP_BIAS * 100)}% aligns that line of the image with the same line of the
+   window, so the crop comes almost entirely off the bottom. Only this window
+   states it: every other face's window is close enough to the source's aspect
+   that a centered crop takes a sliver from each edge, which is what a centered
+   crop is for. */
+.mtg-card[data-size='full']:has(.mtg-card__shield) > .mtg-art > .mtg-art__image {
+  object-position: 50% ${cssNumber(PLANESWALKER_ART_TOP_BIAS * 100)}%;
 }
 .mtg-card[data-size='full']:has(.mtg-card__shield) > .mtg-card__text {
   margin-block-end: calc(var(--shield-h) - var(--frame-band));
 }
 .mtg-card[data-size='full'] .mtg-card__stats:has(.mtg-card__shield) {
-  inset-block-end: calc(var(--pad) - var(--frame-band));
+  /* One device pixel inward keeps the pointed shield inside the trim after the
+     reading face's percentage geometry is rounded. Without it the point crosses
+     the card by 0.6px and clips the loyalty numeral on every walker. */
+  inset-block-end: calc(var(--pad) - var(--frame-band) + 5px);
 }
 `;
 
@@ -1591,7 +2150,7 @@ const SMALL_FACE = `
  *
  * Sized in `cqw` so it tracks the tile the way every other label on this surface
  * does, and stated as a `font-size` rather than a width because a symbol is
- * `0.94em` (`../symbols.ts`): one declaration then sizes the box, its disc and
+ * `0.94em` (`./symbols.ts`): one declaration then sizes the box, its disc and
  * its glyph together. The floor is `--mtg-text-base`, which is where a symbol
  * stops reading as a shape at all, and the ceiling stops a wide tile from
  * turning its picture into a backdrop for a pip.
@@ -1606,7 +2165,7 @@ const ART_TILE = `
 .mtg-card[data-size='art'] {
   --pad: 0;
   gap: 0; padding: 0; overflow: hidden;
-  border-width: 1px; border-radius: var(--mtg-radius-md);
+  border: 1px solid var(--identity); border-radius: var(--mtg-radius-md);
   background: none; box-shadow: none;
 }
 .mtg-card[data-size='art'] > [data-region='art'] {
@@ -1614,15 +2173,21 @@ const ART_TILE = `
   border: 0; border-radius: 0;
 }
 .mtg-card[data-size='art'] > [data-region='title'] { display: none; }
+/* The tracking is DESIGN.md's 0.06em, inherited: this block used to retrack the
+   pill to 0.03em, half the Micro-Label Rule, and the argument for it would have
+   been fit — the tile is small and the pill is width: min-content. Rendered both
+   ways over the crowded board at all six combat viewports, the two arms differ by
+   2.3px on the widest pill and change no fit outcome anywhere: nothing overflows
+   at five of the six, and at 1440x560 the same eight tiles overflow under both.
+   mtg-bc2.155, and mtg-90x.3's method. */
 .mtg-card[data-size='art'] .mtg-art__pending-label {
   width: min-content; padding: 1px 3px;
-  letter-spacing: 0.03em; line-height: var(--mtg-leading-tight);
+  line-height: var(--mtg-leading-tight);
 }
-.mtg-card[data-size='art'] .mtg-art__pending-note { display: none; }
 .mtg-card__mana {
   position: absolute; z-index: 1; pointer-events: none;
-  inset-block-end: 3px; inset-inline-start: 3px;
-  display: flex; align-items: flex-end; gap: 1px; line-height: 1;
+  inset-block-start: 3px; inset-inline-end: 3px;
+  display: flex; align-items: flex-start; gap: 1px; line-height: 1;
   font-size: clamp(var(--mtg-text-base), ${cssNumber(LAND_PIP_CQW)}cqw, 1.75rem);
 }
 `;
@@ -1638,21 +2203,21 @@ const ART_TILE = `
  * (`FACE_TRIM`), because a zoom at the same width shrinks it by exactly the same
  * step and a card at the ladder's floor is as small in the zoom as on the table.
  *
- * 20rem is 320 x 447px, and the size is derived rather than picked. The zoom
- * sets its rules text back at step 0, so it has to hold at the full size what a
+ * 24rem is 384 x 536px, and the size is derived rather than picked. The zoom
+ * sets its rules text at 15.6px, so it has to hold at that size what a
  * 15.25rem face holds at the floor. Room is characters per line times lines:
  * at 15.25rem the box is 196 x 82.9px, which is 4.40 lines at 13px and 5.64 at
  * the floor's 10.1px, so the floor case needs about 1.6x the room step 0 has
- * there. At 20rem the box is 272 x 139.2px, which is 7.38 lines at 13px and
- * 2.3x the room — clear of the requirement with the bars' fixed heights already
- * charged, since they do not scale with the face and the picture does.
+ * there. Scaling both the 320px reading face and its 13px type by 1.2 preserves
+ * the calibrated line length while the taller trim adds the reading room the
+ * imported-card census verifies below.
  *
  * It is a ceiling rather than the size. A 447px face does not fit a landscape
  * phone, and the part of it that goes under the fold is the rules box this
  * paragraph is about, so `../styles/mobile.ts` derives a smaller one from the
  * viewport on a short table and re-runs the arithmetic above against it.
  */
-export const ZOOM_FACE_WIDTH_REM = 20;
+export const ZOOM_FACE_WIDTH_REM = READING_FACE_WIDTH_REM;
 
 /*
  * The zoom: the whole card, on hover, over the corner of the window.
@@ -1686,7 +2251,8 @@ const ZOOM = `
 .mtg-zoom {
   display: none;
   position: fixed; z-index: 40;
-  inset-block-end: var(--mtg-space-4); inset-inline-end: var(--mtg-space-4);
+  inset-block-end: max(var(--mtg-space-4), env(safe-area-inset-bottom));
+  inset-inline-end: max(var(--mtg-space-4), env(safe-area-inset-right));
   pointer-events: none;
 }
 /* Three triggers over two rules, and none of them is the pair this started as.
@@ -1746,21 +2312,125 @@ const ZOOM = `
 @media (pointer: coarse) {
   .mtg-slot:hover:not(:focus-within) > .mtg-zoom { display: none; }
   .mtg-slot:focus-within > .mtg-zoom { display: block; }
+  /* Except on the played table, where the rail reads the tapped card instead
+     (mtg-aqxi.1, and it supersedes the tap-to-read panel the rule above landed
+     as). Two answers to one tap is one too many, and this is the answer that
+     does not cover the board a phone is already short of. Scoped rather than
+     replacing the rule, because the Cards gallery and the deck tabs have no rail
+     to hand the reading to and the panel is all they have.
+
+     .mtg-board, not .mtg-play: the sealed builder's root carries .mtg-play too,
+     and it is a screen of card faces with no rail beside them. The rail belongs
+     to the board, so the board is what stands the panel down. */
+  .mtg-board .mtg-slot:focus-within > .mtg-zoom { display: none; }
 }
-.mtg-zoom > .mtg-card { --card-w: ${cssNumber(ZOOM_FACE_WIDTH_REM)}rem; box-shadow: var(--mtg-shadow-table); }
-/* The one place the fit ladder is overruled: a zoom exists to be read, so its
-   rules text goes back to full size whatever step the face it is beside is on.
-   Written at three class selectors so it beats the data-fit rules on
-   specificity rather than on this block being emitted last. */
-.mtg-zoom > .mtg-card .mtg-card__text { font-size: var(--mtg-text-sm); }
+.mtg-zoom > .mtg-card {
+  --card-w: ${cssNumber(ZOOM_FACE_WIDTH_REM)}rem;
+  /* This face grew from 20rem to 24rem so the reading surface could use more of
+     the available screen. Its type grows by the same 1.2 ratio: keeping the old
+     13px token made the enlarged face a larger thumbnail rather than a better
+     reading surface. The complete imported-card census below holds the larger
+     type to the same no-overflow boundary. */
+  --rules-type: calc(var(--mtg-text-sm) * 1.2);
+  box-shadow: var(--mtg-shadow-table);
+}
+/* Deckbuilding uses a different inert wrapper but the same reading face. The
+   wrapper's placement arithmetic reads this shared width as well, so its box
+   and the card inside it cannot disagree. */
+.mtg-cardpeek > .mtg-card {
+  --card-w: ${cssNumber(READING_FACE_WIDTH_REM)}rem;
+  --rules-type: calc(var(--mtg-text-sm) * 1.2);
+}
+/* Generated text stays inside the generator's measured ceiling, so its zoom can
+   spend the extra width on restoring the ordinary type size. Official oracle
+   text is immutable and can be substantially denser: those faces retain their
+   printed-text fit rung even in the zoom, where the wider box makes that rung
+   easier to read without allowing the text to leave the frame. Written at four
+   class/attribute selectors so the generated override beats the data-fit rules
+   by specificity rather than sheet order. */
+.mtg-zoom > .mtg-card:not([data-presentation='printed-card']) .mtg-card__text {
+  font-size: var(--rules-type);
+}
+${PRINTED_READING_FIT_RULES}
+/* The rail's reading face: print leading and paragraph gaps, as the builder's
+   readable context sets them, under the width-scaled ladder above. */
+${RAIL_FACE} .mtg-card__text {
+  --face-space-1: 0.1em;
+  --face-space-2: 0.25em;
+  line-height: 1.1;
+}
+${RAIL_READING_FIT_RULES}
+/* The floor rung contains three especially dense planeswalkers. Space-around
+   spends any remainder between their ability sections instead of leaving two
+   conspicuous empty bands. */
+${READING_FACES.map((face) => `${face}[data-presentation='printed-card']:has(.mtg-card__shield) .mtg-card__text`).join(',\n')} {
+  justify-content: space-around;
+}
 /* And its name, for the same reason and on the same terms. The name box is the
    bar less the cost run and the paddings, all of which are fixed, so the whole
-   of the zoom's extra 76px goes to the name: 137px at the narrowest on a 15.25rem
-   face becomes 213px here, which is 34 characters at 6.23px each against the 22
-   the ladder is calibrated on. 34 covers the ladder's own floor column of 31, so
+   of the zoom's extra 140px goes to the name: 137px at the narrowest on a 15.25rem
+   face becomes 277px here, which is 44 characters at 6.23px each against the 22
+   the ladder is calibrated on. 44 covers the ladder's own floor column of 31, so
    every name it claims to fit fits here at full size; a name past that floor is
    cut at either size and this is the size that shows more of it. */
 .mtg-zoom > .mtg-card .mtg-card__name { --name-scale: 1; }
 `;
 
-export const CARD_CSS = `${IDENTITY}${PIPS}${FACE}${FACE_TRIM}${ART}${PLANESWALKER}${BOARD_FACE}${ART_TILE}${SMALL_FACE}${ZOOM}`;
+/**
+ * The foil sheen, and the one decision in it that is not decoration.
+ *
+ * A swept highlight over the whole face: two stops crossing a transparent
+ * gradient at 115deg, on a background box more than twice the element so the
+ * band has somewhere to travel from and to. `mtg-jpbv` names
+ * the prior-project champion shimmer as the reference and
+ * this is its arithmetic, with the colors taken from tokens rather than written
+ * out and the alpha carried by the tokens themselves: the sheen is painted over
+ * a finished card and has to let the card through.
+ *
+ * **The reduced-motion arm holds a static tint rather than turning the treatment
+ * off**, which is the part worth copying and the part easiest to get wrong. A
+ * foil face is telling the reader something the pool measured and the card
+ * cannot say -- which of two identical copies came off the foil sheet -- so a
+ * rule that removed the paint under `reduce` would remove the information along
+ * with the animation. It stops the sweep at the middle of its travel and thins
+ * it, which is a mark you can still see and cannot mistake for movement.
+ *
+ * It says `animation-name` rather than the shorthand on purpose. `./base.ts`
+ * clamps every animation on the page to `1ms !important` under the same query,
+ * and a shorthand's duration would lose to that while its name would not; naming
+ * the longhand makes the two rules agree instead of racing. The clamp is a
+ * backstop for anything that forgets this block, and this block is what keeps
+ * the frame it stops on from being whichever one 1ms lands in.
+ */
+const SHEEN = `
+.${FOIL_SHEEN_CLASS} {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: linear-gradient(
+    115deg,
+    transparent 32%,
+    var(--mtg-sheen-pearl) 45%,
+    var(--mtg-sheen-amber) 55%,
+    transparent 68%
+  );
+  background-size: 220% 220%;
+  background-position: 0% 0%;
+  animation: mtg-sheen-sweep 2400ms var(--mtg-ease) infinite;
+}
+@keyframes mtg-sheen-sweep {
+  from { background-position: 0% 0%; }
+  to { background-position: 100% 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .${FOIL_SHEEN_CLASS} {
+    animation-name: none;
+    background-position: 50% 50%;
+    opacity: 0.4;
+  }
+}
+`;
+
+export const CARD_CSS = `${IDENTITY}${PIPS}${FACE}${FACE_TRIM}${ART}${PLANESWALKER}${BOARD_FACE}${ART_TILE}${SMALL_FACE}${ZOOM}${SHEEN}`;

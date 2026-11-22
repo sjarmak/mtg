@@ -22,21 +22,44 @@
  */
 
 export type {
+  CardOrigin,
   ContentRef,
   DeckSlot,
   DeckRef,
+  GameVariant,
   MatchResult,
+  MatchRules,
+  PerSeat,
   SeatController,
   SeatId,
   SeatSpec,
   SessionSpec,
 } from './table';
-export { SEAT_IDS } from './table';
+export {
+  COMMANDER_RULES,
+  MOMIR_RULES,
+  MIN_SEATS,
+  STANDARD_RULES,
+  isSeatId,
+  matchRulesRefusals,
+  perSeat,
+  rulesOf,
+  seatIdsOf,
+  seatSpecOf,
+} from './table';
 
-export type { ObjectView, SeatView, TableView, TurnView } from './projection';
-export { PROJECTION_VERSION } from './projection';
+export type { ObjectCharacteristics, ObjectView, SeatView, TableView, TurnView } from './projection';
+export { PROJECTION_VERSION, seatViewOf } from './projection';
 
-export type { MoveId, MoveOption, MoveTarget, PendingDecision } from './decision';
+export type {
+  DecisionInput,
+  MoveId,
+  MoveOption,
+  MoveTarget,
+  PendingDecision,
+  TextDecisionInput,
+} from './decision';
+export { textSubmission, textValueOf } from './decision';
 
 // Two legal moves must not read the same (`mtg-cee`). The half of that rule the
 // projection can carry, with the residue marked on the label rather than left
@@ -47,7 +70,40 @@ export { labelDecision } from './labels';
 
 export type { EngineEvent, EngineReveal } from './events';
 
-export type { OpenResult, SessionError, SessionErrorKind, SubmitResult } from './errors';
+export type {
+  ObjectMove,
+  PlayAttackers,
+  PlayDefender,
+  PlayAutomaticMove,
+  PlayAutomaticMoveReason,
+  PlayCardOrder,
+  PlayCombatDamageAssignment,
+  PlayCombatDamageRecipient,
+  PlayInteraction,
+  PlayCardSelection,
+  PlayCardSelectionZone,
+  PlayManaOutput,
+  PlayManaPool,
+  PlayObjectActionCategory,
+  PlayPromptRole,
+  StandardTurnStep,
+} from './play';
+export {
+  PLAY_AUTOMATIC_MOVE_REASONS,
+  PLAY_CARD_SELECTION_ZONES,
+  PLAY_MANA_OUTPUTS,
+  PLAY_OBJECT_ACTION_CATEGORIES,
+  PLAY_PROMPT_ROLES,
+  STANDARD_TURN_STEPS,
+} from './play';
+
+export type {
+  ContentUnsupportedError,
+  OpenResult,
+  SessionError,
+  SessionErrorKind,
+  SubmitResult,
+} from './errors';
 export { describeSessionError } from './errors';
 
 // The split, and the whole reason this package is not one file. Determinism is
@@ -67,6 +123,11 @@ export type {
   SessionStatus,
 } from './session';
 export { isRecorded, isRecordedSession } from './session';
+
+// Selection is explicit policy over the neutral contract: one route, one
+// backend, and no search-based fallback.
+export type { BackendRoutes, BackendSelection, BackendSelectionError } from './selection';
+export { routeBackend } from './selection';
 
 // Per-seat projection: a member that can be absent rather than a boolean beside
 // a method, for the reason `seats.ts` argues. A surface that must not leak says

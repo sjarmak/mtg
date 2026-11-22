@@ -39,17 +39,22 @@
  * the second and fourth cases into something a player builds a click at a time.
  * Until they land, the honest answer for those is a menu, not a default.
  */
+import type { ObjectId } from '@mtg/kernel';
 import type { PlayChoice } from './prompt';
 
 /**
  * The move a double click on this card plays, or null when the card has none.
  *
- * Takes the choices already narrowed to one card (`choicesByObject`'s value), so
- * it cannot be handed a move that acts on something else and mistake it for a
- * default.
+ * Takes the choices already narrowed to one card (`choicesByObject`'s value) and
+ * that card's own key, so it cannot be handed a move that acts on something else
+ * and mistake it for a default. `choicesByObject` buckets a choice under every
+ * object it names, source or aimed-at, so a card that is only ever a target
+ * shares its bucket with the spell that names it; `oids.includes(key)` is what
+ * keeps that spell from becoming the target's own default.
  */
-export function defaultChoice(choices: readonly PlayChoice[]): PlayChoice | null {
-  const alone = choices.filter((choice) => new Set(choice.oids).size === 1);
+export function defaultChoice(choices: readonly PlayChoice[], key: ObjectId): PlayChoice | null {
+  const own = choices.filter((choice) => choice.oids.includes(key));
+  const alone = own.filter((choice) => new Set(choice.oids).size === 1);
   const only = alone[0];
   return alone.length === 1 && only !== undefined ? only : null;
 }

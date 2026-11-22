@@ -1,0 +1,33 @@
+# Hygiene ledger: mtg / repository
+
+## 2026-09-25
+
+- SHA: d989c2b8d03cd85fc81e802937d0ebb378ed4c06
+- Baseline: `npm run typecheck` -> passed; failing files: none
+- Scope: `packages/data/test/*-printed-format.test.ts`, `packages/data/test/printed-format-coverage.ts`, `eslint.config.js`, `packages/slice/test/printed-format-lint.test.ts`
+- Finding classes: duplication: 19 sites consolidated; quarantined tests: 6 occurrences in 4 files retained; oversize: 136 TypeScript files over 800 lines left unresolved
+- Deleted: 19 copied printed-script coverage assertion bodies
+- Rules added: `no-restricted-imports` prevents printed-format tests from rebuilding the shared coverage proof directly
+
+| # | Mark | Kind | Location | Finding | Evidence | Unlocks | Validate with |
+|---|------|------|----------|---------|----------|---------|---------------|
+| 1 | C | duplication | `packages/data/test/*-printed-format.test.ts` | Nineteen format suites rebuilt the same decision inventory, family contracts, and complete coverage plan | The pre-change audit found 19 identical bodies; after consolidation, `rg -n 'printed-(decision-inventory\|coverage-plan)' packages/data/test/*-printed-format.test.ts` returns no direct imports and `expectPrintedCoverageClosed` is the keeper | Deletes 780 copied lines and gives the coverage contract one owner | `MTG_TEST_WORKERS=1 npx vitest run --project unit packages/data/test/*-printed-format.test.ts packages/slice/test/printed-format-lint.test.ts` |
+| 2 | R | test | Four Forge integration test files | Six skipped Forge witnesses are explicit quarantines with named beads or clearing conditions | `rg -n 'forgeIt\.skip' packages` returns six occurrences; each call names the missing runtime support or tracked unblock | Preserves executable evidence for known Forge gaps | `rg -n 'forgeIt\.skip' packages` |
+| 3 | ? | oversize | `packages/**/*.ts` | 136 TypeScript files exceed the 800-line threshold and need domain-specific ownership analysis before splitting | `find packages -type f \( -name '*.ts' -o -name '*.tsx' \) -print0 \| xargs -0 wc -l` reports 136 files above 800 lines | A later lane can select one cohesive module instead of mixing unrelated refactors into this batch | Re-run the line-count audit and inspect callers for the selected module |
+
+## 2026-10-18
+
+- SHA: 626c140b43c93fdac3daed9d889d663a3cdaae45
+- Baseline and verification: `npm run typecheck` passed; baseline `npm test` passed 20,050 tests, timed out 12 tests or hooks, and independently failed `packages/data/test/forge-effect-families.test.ts`; post-change `npm test` passed 20,041 tests and both 10,035-game balance subjects, repeated that Forge failure, and reported 14 load-attributed test timeouts plus RPC reporting errors; nine captured timeout files passed in one serial rerun, while the 706.5-second calibration timeout was not rerun; the Forge assertion reproduced alone and is tracked by `mtg-ju80ii`; `npm run format` also found three unchanged remote-base files tracked by `mtg-alfa97`
+- Scope: `packages/ui/test/{analysis,tools}`, `packages/slice/test/ui-stagehand-lint.test.ts`, `eslint.config.js`
+- Finding classes: source-shape tests: 50 files sampled, 5 redundant cases deleted; skipped-test syntax: 203 hits retained, dominated by explicit Forge integration quarantines; oversize: 136 TypeScript files over 800 lines retained
+- Deleted: five UI tool tests that asserted source spelling or import text already proved by importing behavior or a mechanical boundary rule
+- Rules added: `no-restricted-syntax` keeps direct Stagehand SDK imports inside its three owners and keeps the live journey's runner and provider value imports behind the armed dynamic branch
+
+| # | Mark | Kind | Location | Finding | Evidence | Unlocks | Validate with |
+|---|------|------|----------|---------|----------|---------|---------------|
+| 1 | C | test | `packages/ui/test/tools/live-journey-args.test.ts`, `packages/ui/test/tools/stagehand-runner.test.ts` | Three tests parsed import text to enforce the Stagehand boundary | The ESLint fixture rejects static and dynamic SDK imports plus static runner and provider value imports, while accepting the armed dynamic runner import; deliberate mutations in `live-journey.ts` made ESLint fail on both the SDK and runner boundaries | Deletes regex-based source readers and makes violations fail at authoring time across every UI tool | `MTG_TEST_WORKERS=1 npx vitest run --project unit packages/slice/test/ui-stagehand-lint.test.ts packages/ui/test/tools/live-journey-args.test.ts packages/ui/test/tools/stagehand-runner.test.ts` |
+| 2 | C | test | `packages/ui/test/tools/stage-evidence.test.ts`, `packages/ui/test/analysis/analyze-claims-arg.test.ts` | Two tests asserted the spelling of entrypoint guards after importing the modules and exercising their exports | Both suites import the guarded modules without triggering their commands; `stage-evidence.test.ts` also calls `stageEvidence`, and `analyze-claims-arg.test.ts` calls `parseArgs` | Removes implementation-coupled assertions without weakening the observable no-side-effect contract | `MTG_TEST_WORKERS=1 npx vitest run --project unit packages/ui/test/tools/stage-evidence.test.ts packages/ui/test/analysis/analyze-claims-arg.test.ts` |
+| 3 | D | baseline | `packages/data/test/forge-effect-families.test.ts` | Eleven current ability API tokens have no row in the committed Forge effect-family audit | The full suite failed the exact inventory assertion, then the file failed identically alone on a quiet one-worker run | Separates a pre-existing audit defect from this cleanup and gives it an owned follow-up | `MTG_TEST_WORKERS=1 npx vitest run --project unit packages/data/test/forge-effect-families.test.ts` |
+| 4 | R | test | Forge integration suites | The 203 textual skip hits include environment-gated executable witnesses, not disposable tests | The audit sampled the skip population and the full run reported 389 skipped files rather than silent passes | Preserves named evidence that becomes executable when Forge capabilities or environment gates arrive | `rg -n '\b(?:describe\|it\|test)\.skip\b\|\.skip\(' packages --glob '*.test.ts'` |
+| 5 | ? | oversize | `packages/**/*.ts` | The prior cycle's 136 files over 800 lines remain a cross-domain refactor rather than one deletion batch | The repeated line-count audit still reports 136; the largest files are generated evidence, decision ledgers, or broad kernel suites with different owners | Keeps this cycle coherent and leaves the population visible for owner-specific splits | `find packages -type f -name '*.ts' -print0 \| xargs -0 wc -l` |

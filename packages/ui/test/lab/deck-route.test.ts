@@ -24,8 +24,16 @@ import { parsePreconFile } from '@mtg/deckbuild';
 import { ART_PENDING_LABEL } from '../../src/card/ArtSlot';
 import { readDeckArtifact } from '../../src/lab/deck-artifact';
 import type { DeckArtifact, DeckArtifactEntry } from '../../src/lab/deck-artifact';
-import { DeckRoute, MAIN_DECK_LABEL, SIDEBOARD_LABEL } from '../../src/routes/DeckRoute';
+import {
+  DECK_DETAILS_LABEL,
+  DeckRoute,
+  MAIN_DECK_LABEL,
+  SIDEBOARD_LABEL,
+  openDeckLabel,
+} from '../../src/routes/DeckRoute';
 import { deckTypeCounts, typeCountsLine } from '../../src/routes/deck/type-counts';
+import { groupingLabel } from '../../src/routes/deck/grouping';
+import { GROUPING_LABEL } from '../../src/routes/deck/GroupingControl';
 import { DeckTile } from '../../src/routes/deck/DeckTile';
 import { ManaBasePanel } from '../../src/routes/deck/ManaBasePanel';
 import { DEFAULT_DECK_VIEW_MODE, deckViewStoreKey, readDeckViewMode } from '../../src/routes/deck/view-mode';
@@ -98,13 +106,16 @@ const LIBRARY_CARDS = [
   } satisfies CardInput),
 ];
 
+/** The one written deck those cards make, named once so a query cannot drift. */
+const LIBRARY_DECK_NAME = 'Library Deck';
+
 const LIBRARY_PRECONS = parsePreconFile({
   formatVersion: 1,
   setCode: 'LIB',
   decks: [
     {
       id: 'library-deck',
-      name: 'Library Deck',
+      name: LIBRARY_DECK_NAME,
       plan: 'Show the staged deck library.',
       payoff: 'library-creature',
       deckSize: 40,
@@ -123,8 +134,63 @@ function firstSpell(): DeckArtifactEntry {
   return first;
 }
 
+/**
+ * The page with the artifact deck open, which is a click since `mtg-nuk3`.
+ *
+ * The tab lands on the library and an open deck takes the whole route, so a
+ * test about a deck's panes has to say which deck it opened. Pressing the tile
+ * is how a person gets there and is therefore what these tests do; the artifact
+ * deck is named by its prompt, the way its tile is.
+ */
+function openArtifact(): void {
+  fireEvent.click(screen.getByRole('button', { name: openDeckLabel(DECK.prompt) }));
+}
+
 function renderDeck(): void {
   render(h(DeckRoute, { state: { status: 'ready', deck: DECK } }));
+  openArtifact();
+}
+
+/**
+ * The same page with its panes switched to full cards.
+ *
+ * A pane opens in compact since `mtg-ljda`, and compact is a decklist: it draws
+ * no art, no illustrator credit, no price and no inclusion reason
+ * (`../../src/routes/deck/DeckTile.ts` lists what it subtracts). Every test that
+ * asserts on one of those is a test about the full tile, so it says so here
+ * rather than inheriting whichever mode is the default this month — which is how
+ * five of them came to be measuring the default instead of the tile.
+ */
+function renderDeckFull(): void {
+  for (const pane of ['main-deck', 'sideboard']) store().setItem(deckViewStoreKey(pane), 'full');
+  renderDeck();
+}
+
+/**
+ * The same page with its panes switched to the name strips.
+ *
+ * The mirror of `renderDeckFull`, and needed for the same reason from the other
+ * side: a pane opens on whole cards again since 2026-09-17
+ * (`../../src/routes/deck/DeckPane.ts`'s `PANE_CARD_VIEWS`), so a test about the
+ * strips states the density it is about instead of inheriting this month's
+ * default.
+ */
+function renderDeckCompact(): void {
+  for (const pane of ['main-deck', 'sideboard']) store().setItem(deckViewStoreKey(pane), 'compact');
+  renderDeck();
+}
+
+/**
+ * The same page with the details panel open.
+ *
+ * `mtg-z4q6`: the plan, the shared criteria and the mana base sit behind the
+ * head's own button, so the page opens on the cards. Every test that asserts on
+ * one of those three says so here rather than reading a closed page — which is
+ * the same reason `renderDeckFull` exists one function up.
+ */
+function renderDeckDetails(): void {
+  renderDeck();
+  fireEvent.click(screen.getByRole('button', { name: DECK_DETAILS_LABEL }));
 }
 
 /**
@@ -143,6 +209,7 @@ function withSideboard(): DeckArtifact {
 
 function renderWithSideboard(): void {
   render(h(DeckRoute, { state: { status: 'ready', deck: withSideboard() } }));
+  openArtifact();
 }
 
 describe('the committed deck fixture', () => {
@@ -169,8 +236,21 @@ describe('rendering a deck', () => {
       }),
     );
     expect(screen.getByRole('heading', { name: 'Decks' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /Library Deck/u })).toBeTruthy();
-    expect(screen.getByText(/6 creatures · 6 noncreature spells · 28 lands/u)).toBeTruthy();
+    const tile = screen.getByRole('button', { name: openDeckLabel(LIBRARY_DECK_NAME) });
+    // Both surfaces say this, and that is the point: the tile's counts line and
+    // the opened deck's section note used to disagree about the middle number,
+    // because the tile printed every nonland card as a "spell" while the note
+    // subtracted the creatures. Both are asserted, so a future edit that moves
+    // one of them fails here rather than shipping the contradiction again.
+    //
+    // Read on either side of the click rather than from one query, because
+    // `mtg-nuk3` gave an open deck the whole route and the two no longer share
+    // a screen. The guard is the same claim: one line, printed identically
+    // wherever the deck is described.
+    const line = /6 creatures · 6 noncreature spells · 28 lands/u;
+    expect(screen.getAllByText(line).length).toBeGreaterThanOrEqual(1);
+    fireEvent.click(tile);
+    expect(screen.getAllByText(line).length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText('No deck staged')).toBeNull();
   });
 
@@ -182,21 +262,32 @@ describe('rendering a deck', () => {
         cards: LIBRARY_CARDS,
       }),
     );
-    const view = screen.getByRole('group', { name: 'Library Deck, View' });
+    fireEvent.click(screen.getByRole('button', { name: openDeckLabel(LIBRARY_DECK_NAME) }));
+    // Named for the pane rather than for the deck since `mtg-pmpu`: this is the
+    // one pane component now, and it names its controls the way the artifact
+    // route's panes do. The deck's own name is at the head of the screen.
+    const view = screen.getByRole('group', { name: `${MAIN_DECK_LABEL}, View` });
+    // Whole cards on opening since 2026-09-17, which is what the deck view opens
+    // on everywhere (`../../src/routes/deck/DeckPane.ts`'s `PANE_CARD_VIEWS`).
     expect(
       (within(view).getByRole('button', { name: 'Full cards' }) as unknown as ElementLike).getAttribute(
         'aria-pressed',
       ),
     ).toBe('true');
+    // The other half of the control, which is what the rest of this case reads:
+    // the strips are what compact draws, and a control that quietly did nothing
+    // would pass a test that never pressed it.
     fireEvent.click(within(view).getByRole('button', { name: 'Compact list' }));
-    expect(
-      (screen.getByRole('group', { name: 'Library Deck cards' }) as unknown as ElementLike).getAttribute(
-        'data-view',
-      ),
-    ).toBe('compact');
-    expect(
-      screen.getAllByText(/^MV [24]$/u).map((node) => (node as unknown as ElementLike).textContent),
-    ).toEqual(['MV 2', 'MV 4']);
+    // One strip per copy, the way every other deck pane on the site draws one.
+    // Twelve here and not two: this pane drew a column of *faces* per mana value
+    // until a written deck from a generated set was the one deck in the lab
+    // organized differently from the rest, and a face carried a copy count
+    // beside it rather than being one of the copies. The count above the column
+    // now counts the things under it, which is the assertion two lines down.
+    const cards = screen.getByRole('group', {
+      name: `${LIBRARY_DECK_NAME} cards`,
+    }) as unknown as { readonly querySelectorAll: (selector: string) => { readonly length: number } };
+    expect(cards.querySelectorAll('.mtg-strips__card').length).toBe(12);
     // mtg-xzxs folded this pane's own copy of the grouping into
     // `routes/deck/columns.ts`, and the fold is only safe if this test still
     // measures the pane rather than trusting the shared rule's own test. So the
@@ -216,7 +307,8 @@ describe('rendering a deck', () => {
   });
 
   it('shows the prompt it was built from and what it costs', () => {
-    renderDeck();
+    // Full, because the price is on the tile's foot and compact has no foot.
+    renderDeckFull();
     expect(screen.getByText(new RegExp(DECK.prompt.slice(0, 20)))).toBeTruthy();
     expect(screen.getAllByText(/\$\d+\.\d\d/).length).toBeGreaterThan(0);
   });
@@ -233,14 +325,54 @@ describe('rendering a deck', () => {
 
   // A name can legitimately appear twice: once as a tile, once as the card that
   // set a color's floor in the panel below.
-  it('renders every card, with its count', () => {
-    renderDeck();
-    for (const entry of DECK.spells) {
-      expect(screen.getAllByText(entry.name).length).toBeGreaterThan(0);
-    }
-    expect(screen.getAllByText(/^\d+×$/).length).toBe(
-      DECK.spells.length + DECK.lands.length + DECK.basics.length,
+  // Compact drew a tile per distinct card with a `4×` badge on it until
+  // `mtg-ar3c`; it now draws one strip per copy, so the count above a column
+  // counts the objects under it rather than a badge on one of them. The
+  // assertion is the same claim it always was — every card is on the page and
+  // its count is stated — read off what the pane now says instead.
+  it('draws one strip per copy, so a column counts the things under it', () => {
+    renderDeckCompact();
+    const region = screen.getByRole('group', { name: `${MAIN_DECK_LABEL}, cards` });
+    const drawn = within(region)
+      .getAllByRole('button')
+      .map((node) => (node as unknown as ElementLike).getAttribute('aria-label'));
+    // `deck/strips.ts`'s `stripLabel`, spelled out rather than imported: a test
+    // that asked the code under test how to name a copy would pass whatever it
+    // renamed them to.
+    const expected = [...DECK.spells, ...DECK.lands, ...DECK.basics].flatMap((entry) =>
+      Array.from({ length: entry.count }, (_, index) =>
+        entry.count === 1 ? entry.name : `${entry.name}, copy ${String(index + 1)} of ${String(entry.count)}`,
+      ),
     );
+    expect(drawn.length).toBe(DECK.totalCards);
+    expect([...drawn].sort()).toEqual([...expected].sort());
+  });
+
+  // mtg-z4q6. The measurement behind it is `tools/deck-density.ts`'s: the plan,
+  // the shared criteria and the mana base are 396px of prose above cards that
+  // are read continuously, and the page opened on none of them.
+  it('opens on the cards, with the deck’s prose behind the head’s own button', () => {
+    renderDeck();
+    expect(screen.queryByText(DECK.plan)).toBeNull();
+    expect(screen.queryByText(/^Every card here satisfies/u)).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Mana base' })).toBeNull();
+    // The counts are the half that is read continuously, so they never leave.
+    expect(
+      screen.getByRole('heading', { name: `${MAIN_DECK_LABEL}: ${String(DECK.totalCards)}` }),
+    ).toBeTruthy();
+
+    const button = screen.getByRole('button', { name: DECK_DETAILS_LABEL });
+    expect((button as unknown as ElementLike).getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(button);
+    expect((button as unknown as ElementLike).getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByText(DECK.plan)).toBeTruthy();
+    expect(screen.getByText(/^Every card here satisfies/u)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Mana base' })).toBeTruthy();
+
+    // It closes again, which is what makes it a disclosure rather than a link
+    // to a page the reader cannot leave.
+    fireEvent.click(button);
+    expect(screen.queryByText(DECK.plan)).toBeNull();
   });
 
   it('splits the pane by type in its own header, the numbers summing to its title', () => {
@@ -253,11 +385,12 @@ describe('rendering a deck', () => {
     ).toBeTruthy();
   });
 
-  it('orders full cards by mana value as well as grouping compact cards by it', () => {
-    renderDeck();
+  it('orders full cards by mana value', () => {
+    // Full, because the flat run of tiles is the only place an order is a run.
     // The whole run, not the spells alone: one pane holds the deck since
     // `mtg-o5z1`, so the lands are the ascending run's own zeroes rather than a
     // pane below it, and asserting on a slice would stop measuring the order.
+    renderDeckFull();
     const values = screen
       .getAllByText(/^\d+×$/u)
       .map((count) => (count as unknown as ElementLike).closest('.mtg-deck-card'))
@@ -266,10 +399,25 @@ describe('rendering a deck', () => {
     expect(values).toEqual([...values].sort((left, right) => Number(left) - Number(right)));
   });
 
+  it('columns compact cards by mana value, ascending, with no empty column', () => {
+    renderDeck();
+    const heads = screen
+      .getAllByRole('group', { name: /^Mana value/u })
+      .map((node) => (node as unknown as ElementLike).getAttribute('aria-label') ?? '');
+    const values = heads.map((label) => Number(/^Mana value (\d+)/u.exec(label)?.[1]));
+    expect(values.length).toBeGreaterThan(1);
+    expect(values).toEqual([...values].sort((left, right) => left - right));
+    // Present values only. An empty column claims a card belongs there, and the
+    // deck's counts have to sum to the pane's own title either way.
+    const cards = heads.map((label) => Number(/, (\d+) cards?$/u.exec(label)?.[1]));
+    expect(cards.reduce((sum, count) => sum + count, 0)).toBe(DECK.totalCards);
+    expect(cards.every((count) => count > 0)).toBe(true);
+  });
+
   it('points the art at the store’s own Scryfall URLs rather than a guess', () => {
     const first = firstSpell();
     if (first.art === null) throw new Error('the fixture lost its art');
-    const markup = renderToStaticMarkup(h(DeckTile, { entry: first }));
+    const markup = renderToStaticMarkup(h(DeckTile, { entry: first, mode: 'full' }));
     expect(markup).toContain(first.art.src);
     expect(markup).toContain('data-art-state="ready"');
   });
@@ -278,21 +426,25 @@ describe('rendering a deck', () => {
     const first = firstSpell();
     const artist = first.art === null ? null : first.art.artist;
     if (artist === null) throw new Error('the fixture lost its artist credit');
-    render(h(DeckTile, { entry: first }));
+    render(h(DeckTile, { entry: first, mode: 'full' }));
     expect(screen.getByText(new RegExp(artist))).toBeTruthy();
   });
 
   it('shows each inclusion’s reason and the criteria it cited', () => {
-    renderDeck();
+    // Full, because the reason is the region compact drops — that subtraction is
+    // the whole of what a reader gives up by opening on the columns.
+    renderDeckFull();
+    fireEvent.click(screen.getByRole('button', { name: DECK_DETAILS_LABEL }));
     const first = firstSpell();
     expect(screen.getByText(first.reason)).toBeTruthy();
     // Every card in this deck cites the same four criteria, so they are named
     // once above the cards rather than repeated on all forty tiles. The claim
-    // is still on the page; it just is not on the tile. Asserted on markup
-    // because this package has no `lib: dom`, per the note at the top.
-    const html = renderToStaticMarkup(h(DeckRoute, { state: { status: 'ready', deck: DECK } }));
-    const shared = html.match(/Every card here satisfies[^<]*/)?.[0] ?? '';
-    for (const id of first.criteria) expect(shared).toContain(id);
+    // is still on the page; it just is not on the tile. Read off the rendered
+    // page rather than off a second `renderToStaticMarkup` of the route: since
+    // `mtg-nuk3` the route arrives on the library, so a markup render with no
+    // click describes no deck at all.
+    const shared = screen.getByText(/^Every card here satisfies/u) as unknown as ElementLike;
+    for (const id of first.criteria) expect(shared.textContent ?? '').toContain(id);
   });
 });
 
@@ -301,7 +453,7 @@ describe('the art slot under a dead URL', () => {
     const first = firstSpell();
     if (first.art === null) throw new Error('the fixture lost its art');
     const { alt } = first.art;
-    render(h(DeckTile, { entry: first }));
+    render(h(DeckTile, { entry: first, mode: 'full' }));
     expect(screen.queryByText(ART_PENDING_LABEL)).toBeNull();
 
     fireEvent.error(screen.getByRole('img', { name: alt }));
@@ -311,7 +463,7 @@ describe('the art slot under a dead URL', () => {
 
   it('renders the pending frame for a card the store had no art for', () => {
     const first = firstSpell();
-    render(h(DeckTile, { entry: { ...first, art: null } }));
+    render(h(DeckTile, { entry: { ...first, art: null }, mode: 'full' }));
     expect(screen.getByLabelText(`${ART_PENDING_LABEL} for ${first.name}`)).toBeTruthy();
   });
 });
@@ -403,7 +555,7 @@ describe('the mana base panel', () => {
   });
 
   it('names the card that set each floor, which is the whole point of the panel', () => {
-    renderDeck();
+    renderDeckDetails();
     for (const report of DECK.manaBase.colors) {
       if (report.binding === null) continue;
       expect(screen.getAllByText(report.binding.cardName).length).toBeGreaterThan(0);
@@ -411,7 +563,7 @@ describe('the mana base panel', () => {
   });
 
   it('shows the band each row was scored against, not one copied into the UI', () => {
-    renderDeck();
+    renderDeckDetails();
     const cheapest = String(Math.floor(DECK.manaBase.castabilityTarget * 100));
     const heaviest = String(Math.floor(DECK.manaBase.heavyCastabilityTarget * 100));
     expect(screen.getByText(new RegExp(`cheapest requirement is held to ${cheapest}%`))).toBeTruthy();
@@ -419,12 +571,12 @@ describe('the mana base panel', () => {
   });
 
   it('says where the land count came from', () => {
-    renderDeck();
+    renderDeckDetails();
     expect(screen.getByText(new RegExp(DECK.landPlan.reason.slice(0, 25)))).toBeTruthy();
   });
 
   it('prints the shortfalls the deck actually has', () => {
-    renderDeck();
+    renderDeckDetails();
     expect(DECK.shortfalls.length).toBeGreaterThan(0);
     for (const shortfall of DECK.shortfalls) expect(screen.getByText(shortfall)).toBeTruthy();
   });
@@ -443,6 +595,75 @@ describe('the mana base panel', () => {
  * chrome-headless-shell 151 over `packages/ui/tools/deck-density.ts`, and that
  * tool's docblock carries the numbers.
  */
+/**
+ * A built artifact's entries carry no rarity, so this pane offers three axes
+ * where a pane of DSL cards offers four (`mtg-6599`; the four are asserted in
+ * `../deck/constructed-builder.test.ts`). Withholding it rather than drawing an
+ * `Unknown rarity` column is `../../src/routes/deck/GroupingControl.ts`'s rule.
+ */
+describe('the grouping control', () => {
+  function options(pane: string): readonly string[] {
+    const control = screen.getByRole('combobox', { name: `${pane}, ${GROUPING_LABEL}` });
+    return within(control)
+      .getAllByRole('option')
+      .map((option) => (option as unknown as ElementLike).textContent ?? '');
+  }
+
+  it('offers three axes, withholding the one the entries cannot answer', () => {
+    renderDeck();
+    expect(options(MAIN_DECK_LABEL)).toEqual([
+      groupingLabel('manaValue'),
+      groupingLabel('color'),
+      groupingLabel('cardType'),
+    ]);
+    expect(options(MAIN_DECK_LABEL)).not.toContain(groupingLabel('rarity'));
+  });
+
+  it('regroups the columns, and the heads still sum to the pane', () => {
+    renderDeck();
+    fireEvent.change(screen.getByRole('combobox', { name: `${MAIN_DECK_LABEL}, ${GROUPING_LABEL}` }), {
+      target: { value: 'color' },
+    });
+    const region = screen.getByRole('group', { name: `${MAIN_DECK_LABEL}, cards` });
+    const heads = within(region)
+      .getAllByRole('group')
+      .map((group) => (group as unknown as ElementLike).getAttribute('aria-label') ?? '')
+      .filter((label) => / \d+ cards?$/u.test(label));
+    expect(heads.length).toBeGreaterThan(0);
+    const counted = heads.reduce((sum, label) => sum + Number(/ (\d+) cards?$/u.exec(label)?.[1] ?? '0'), 0);
+    const cards = [...DECK.spells, ...DECK.lands, ...DECK.basics].reduce(
+      (sum, entry) => sum + entry.count,
+      0,
+    );
+    expect(counted).toBe(cards);
+  });
+
+  // `mtg-pmpu`. This case read the other way round: the control was hidden over
+  // the full grid, because the grid ordered itself by mana value whatever the
+  // control said. A control that is present and inert is worse than one that is
+  // not there, and that was the argument for taking it away -- a real problem
+  // answered by removing the control rather than by making it work. The grid now
+  // reads the pane's grouping, columns flattened, so Sort is the pane's order at
+  // both densities and Display is how a card in it is drawn.
+  it('sorts the full grid too, so one control means one thing at both densities', () => {
+    renderDeckFull();
+    fireEvent.change(screen.getByRole('combobox', { name: `${MAIN_DECK_LABEL}, ${GROUPING_LABEL}` }), {
+      target: { value: 'color' },
+    });
+    const identities = screen
+      .getAllByText(/^\d+×$/u)
+      .map((count) => (count as unknown as ElementLike).closest('.mtg-deck-card'))
+      .map((tile) => (tile as unknown as ElementLike).getAttribute('data-identity') ?? '');
+    expect(identities.length).toBeGreaterThan(0);
+    // Each color is one run of tiles rather than several: a grid ordered by the
+    // grouping keeps a bucket's members together, which is the whole of what the
+    // control now claims at this density.
+    const runs = identities.filter((identity, index) => identity !== identities[index - 1]);
+    expect(runs.length).toBe(new Set(identities).size);
+    expect(runs.length).toBeGreaterThan(1);
+  });
+});
+
 describe('the density control', () => {
   it('draws full and compact as one named control on each pane, pressed where it is', () => {
     renderWithSideboard();
@@ -454,11 +675,16 @@ describe('the density control', () => {
     expect(screen.getAllByRole('button', { name: 'Compact list', pressed: false }).length).toBeGreaterThan(0);
   });
 
-  it('starts full, because full is the page’s argument and compact is opting out of it', () => {
+  it('starts compact, because the columns are the layout the page is copying', () => {
+    // `mtg-ljda`. This assertion used to read the other way, and the sentence it
+    // carried — full is the page's argument, compact is opting out of it — was
+    // written when the two modes were one layout at two densities. Compact is
+    // now the mana-value columns, so the default is a layout rather than a
+    // density, and the layout to open on is the one being copied.
     const first = firstSpell();
     const markup = renderToStaticMarkup(h(DeckTile, { entry: first }));
-    expect(markup).toContain('data-view="full"');
-    expect(markup).toContain(first.reason);
+    expect(markup).toContain('data-view="compact"');
+    expect(markup).not.toContain(first.reason);
   });
 
   it('drops the picture, the reason and the credit in compact, and keeps the head and type', () => {
@@ -481,23 +707,32 @@ describe('the density control', () => {
     const compact = renderToStaticMarkup(h(DeckTile, { entry: first, mode: 'compact' }));
     expect(compact).toContain(`title="${first.name}"`);
     // A full tile has a column's width and needs no attribute standing in for it.
-    expect(renderToStaticMarkup(h(DeckTile, { entry: first }))).not.toContain(`title="${first.name}"`);
+    expect(renderToStaticMarkup(h(DeckTile, { entry: first, mode: 'full' }))).not.toContain(
+      `title="${first.name}"`,
+    );
   });
 
   it('switches only the pane whose control was pressed', () => {
-    const deck = withSideboard();
+    // The set-aside card gets a reason of its own, because `withSideboard` sets
+    // aside a copy of a main-deck spell and the two would otherwise share the
+    // string this test looks for in one pane and not the other.
+    const base = withSideboard();
+    const [copy] = base.sideboard ?? [];
+    if (copy === undefined) throw new Error('the deck lost its sideboard');
+    const deck: DeckArtifact = { ...base, sideboard: [{ ...copy, reason: 'Set aside for the mirror' }] };
     render(h(DeckRoute, { state: { status: 'ready', deck } }));
+    openArtifact();
     const main = screen.getByRole('group', { name: `${MAIN_DECK_LABEL}, View` });
     fireEvent.click(within(main).getByRole('button', { name: 'Compact list' }));
 
     // Queried by pressed state rather than read off the node: `getAttribute` is
     // a DOM property and this workspace has no `lib: dom`, per the note above.
     expect(within(main).getByRole('button', { name: 'Compact list', pressed: true })).toBeTruthy();
-    // The main deck lost its reasons; the pane beside it still has its own.
+    // The main deck lost its reasons; the pane beside it still has its own,
+    // which is what a per-pane control is for. Pressed the other way since both
+    // panes open on whole cards (2026-09-17).
     expect(screen.queryByText(firstSpell().reason)).toBeNull();
-    const [aside] = deck.sideboard ?? [];
-    if (aside === undefined) throw new Error('the deck lost its sideboard');
-    expect(screen.getAllByText(aside.reason).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Set aside for the mirror').length).toBeGreaterThan(0);
   });
 
   it('remembers each pane’s choice across a remount, so a reload does not undo it', () => {
@@ -525,7 +760,11 @@ describe('when there is no deck', () => {
   it('tells you the command instead of showing an empty page', () => {
     render(h(DeckRoute, { state: { status: 'absent' } }));
     expect(screen.getByText('No deck staged')).toBeTruthy();
-    expect(screen.getByText(/npm run lab/)).toBeTruthy();
+    // Two commands, since the launcher stopped falling back to the committed
+    // fixture: the one that builds a deck, and the one that opens that fixture
+    // by name. `npm run lab` is in both, so this asks for all of them.
+    expect(screen.getByText(/packages\/decklab\/src\/cli\.ts/)).toBeTruthy();
+    expect(screen.getAllByText(/npm run lab/).length).toBeGreaterThan(0);
   });
 
   it('shows the field that failed when the document is not a deck', () => {

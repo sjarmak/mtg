@@ -4,8 +4,9 @@
  */
 import { existsSync, writeFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { LlmConfigError, LlmTransportError } from '../src/errors';
+import { FixtureMissingError, LlmConfigError, LlmTransportError } from '../src/errors';
 import { createFixtureTransport, fixturePath, keyForRequest, readFixture } from '../src/providers/fixture';
+import { buildAttemptPrompt } from '../src/prompt';
 import type { RawRequest } from '../src/types';
 import { makeTempDir, removeTempDir, scriptedTransport } from './helpers';
 
@@ -55,6 +56,250 @@ describe('createFixtureTransport', () => {
 
     const replayed = await createFixtureTransport({ dir, record: false, env: {} }).send(REQUEST);
     expect(replayed).toEqual(recorded);
+  });
+
+  it('reports every replayed request key in call order', async () => {
+    const delegate = scriptedTransport([{ text: '{"ok":true}' }]);
+    await createFixtureTransport({ dir, record: true, delegate, env: {} }).send(REQUEST);
+
+    const keys: string[] = [];
+    const replay = createFixtureTransport({
+      dir,
+      record: false,
+      env: {},
+      onCall: (key) => keys.push(key),
+    });
+    await replay.send(REQUEST);
+    await replay.send(REQUEST);
+
+    expect(keys).toStrictEqual([keyForRequest(REQUEST), keyForRequest(REQUEST)]);
+  });
+
+  it('reuses an older recording for a strictly additive answer-schema widening', async () => {
+    const oldRequest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: { type: 'object', properties: { choice: { enum: ['old'] } } },
+    };
+    const widenedRequest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: { type: 'object', properties: { choice: { enum: ['old', 'new'] } } },
+    };
+    await createFixtureTransport({
+      dir,
+      record: true,
+      delegate: scriptedTransport([{ text: '{"choice":"old"}', structured: { choice: 'old' } }]),
+      env: {},
+    }).send(oldRequest);
+
+    const served: string[] = [];
+    const replayed = await createFixtureTransport({
+      dir,
+      record: false,
+      env: {},
+      onCall: (key) => served.push(key),
+    }).send(widenedRequest);
+
+    expect(replayed.structured).toStrictEqual({ choice: 'old' });
+    expect(served).toStrictEqual([keyForRequest(oldRequest)]);
+    expect(existsSync(fixturePath(dir, keyForRequest(widenedRequest)))).toBe(false);
+  });
+
+  it('reuses an older recording when the wider contract adds an optional property', async () => {
+    const oldRequest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: {
+        type: 'object',
+        properties: { cost: { type: 'object', properties: {}, additionalProperties: false } },
+        additionalProperties: false,
+      },
+    };
+    const widenedRequest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: {
+        type: 'object',
+        properties: {
+          cost: {
+            type: 'object',
+            properties: { exileSpell: { type: 'boolean', const: true } },
+            additionalProperties: false,
+          },
+        },
+        additionalProperties: false,
+      },
+    };
+    await createFixtureTransport({
+      dir,
+      record: true,
+      delegate: scriptedTransport([{ text: '{"cost":{}}', structured: { cost: {} } }]),
+      env: {},
+    }).send(oldRequest);
+
+    const replayed = await createFixtureTransport({ dir, record: false, env: {} }).send(widenedRequest);
+
+    expect(replayed.structured).toStrictEqual({ cost: {} });
+  });
+
+  it('does not treat a property added to an open object schema as a widening', async () => {
+    const oldRequest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: { type: 'object', properties: { cost: { type: 'object', properties: {} } } },
+    };
+    const narrowedRequest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: {
+        type: 'object',
+        properties: {
+          cost: {
+            type: 'object',
+            properties: { exileSpell: { type: 'boolean', const: true } },
+          },
+        },
+      },
+    };
+    await createFixtureTransport({
+      dir,
+      record: true,
+      delegate: scriptedTransport([{ text: '{"cost":{}}', structured: { cost: {} } }]),
+      env: {},
+    }).send(oldRequest);
+
+    await expect(
+      createFixtureTransport({ dir, record: false, env: {} }).send(narrowedRequest),
+    ).rejects.toBeInstanceOf(FixtureMissingError);
+  });
+
+  it('reuses an older completion recording when its embedded output contract widens additively', async () => {
+    const oldSchema = { type: 'object', properties: { choice: { enum: ['old'] } } };
+    const widenedSchema = { type: 'object', properties: { choice: { enum: ['old', 'new'] } } };
+    const oldRequest: RawRequest = {
+      ...REQUEST,
+      prompt: buildAttemptPrompt({ prompt: 'choose one', jsonSchema: oldSchema, previous: [] }),
+      jsonSchema: oldSchema,
+    };
+    const widenedRequest: RawRequest = {
+      ...REQUEST,
+      prompt: buildAttemptPrompt({ prompt: 'choose one', jsonSchema: widenedSchema, previous: [] }),
+      jsonSchema: widenedSchema,
+    };
+    await createFixtureTransport({
+      dir,
+      record: true,
+      delegate: scriptedTransport([{ text: '{"choice":"old"}', structured: { choice: 'old' } }]),
+      env: {},
+    }).send(oldRequest);
+
+    const replayed = await createFixtureTransport({ dir, record: false, env: {} }).send(widenedRequest);
+
+    expect(replayed.structured).toStrictEqual({ choice: 'old' });
+    expect(existsSync(fixturePath(dir, keyForRequest(widenedRequest)))).toBe(false);
+  });
+
+  it('does not reuse an embedded-contract recording for a different task', async () => {
+    const oldSchema = { type: 'object', properties: { choice: { enum: ['old'] } } };
+    const widenedSchema = { type: 'object', properties: { choice: { enum: ['old', 'new'] } } };
+    const oldRequest: RawRequest = {
+      ...REQUEST,
+      prompt: buildAttemptPrompt({ prompt: 'choose one', jsonSchema: oldSchema, previous: [] }),
+      jsonSchema: oldSchema,
+    };
+    const differentTask: RawRequest = {
+      ...REQUEST,
+      prompt: buildAttemptPrompt({
+        prompt: 'choose something else',
+        jsonSchema: widenedSchema,
+        previous: [],
+      }),
+      jsonSchema: widenedSchema,
+    };
+    await createFixtureTransport({
+      dir,
+      record: true,
+      delegate: scriptedTransport([{ text: '{"choice":"old"}', structured: { choice: 'old' } }]),
+      env: {},
+    }).send(oldRequest);
+
+    await expect(
+      createFixtureTransport({ dir, record: false, env: {} }).send(differentTask),
+    ).rejects.toBeInstanceOf(FixtureMissingError);
+  });
+
+  it('does not reuse a recording when the requested schema narrows the old contract', async () => {
+    const oldRequest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: { type: 'object', properties: { choice: { enum: ['old', 'new'] } } },
+    };
+    const narrowedRequest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: { type: 'object', properties: { choice: { enum: ['old'] } } },
+    };
+    await createFixtureTransport({
+      dir,
+      record: true,
+      delegate: scriptedTransport([{ text: '{"choice":"old"}', structured: { choice: 'old' } }]),
+      env: {},
+    }).send(oldRequest);
+
+    await expect(
+      createFixtureTransport({ dir, record: false, env: {} }).send(narrowedRequest),
+    ).rejects.toBeInstanceOf(FixtureMissingError);
+  });
+
+  it('does not reuse an answer that fails its own recorded schema', async () => {
+    const oldRequest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: { type: 'object', properties: { choice: { enum: ['old'] } } },
+    };
+    const widenedRequest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: { type: 'object', properties: { choice: { enum: ['old', 'new'] } } },
+    };
+    await createFixtureTransport({
+      dir,
+      record: true,
+      delegate: scriptedTransport([{ text: '{"choice":"invalid"}', structured: { choice: 'invalid' } }]),
+      env: {},
+    }).send(oldRequest);
+
+    await expect(
+      createFixtureTransport({ dir, record: false, env: {} }).send(widenedRequest),
+    ).rejects.toBeInstanceOf(FixtureMissingError);
+  });
+
+  it('prefers the widest compatible recording in a chain of additive schemas', async () => {
+    const oldest: RawRequest = {
+      ...REQUEST,
+      jsonSchema: { type: 'object', properties: { choice: { enum: ['old'] } } },
+    };
+    const newer: RawRequest = {
+      ...REQUEST,
+      jsonSchema: { type: 'object', properties: { choice: { enum: ['old', 'new'] } } },
+    };
+    const requested: RawRequest = {
+      ...REQUEST,
+      jsonSchema: { type: 'object', properties: { choice: { enum: ['old', 'new', 'next'] } } },
+    };
+    for (const [request, choice] of [
+      [oldest, 'old'],
+      [newer, 'new'],
+    ] as const) {
+      await createFixtureTransport({
+        dir,
+        record: true,
+        delegate: scriptedTransport([{ text: JSON.stringify({ choice }), structured: { choice } }]),
+        env: {},
+      }).send(request);
+    }
+
+    const served: string[] = [];
+    const replayed = await createFixtureTransport({
+      dir,
+      record: false,
+      env: {},
+      onCall: (key) => served.push(key),
+    }).send(requested);
+
+    expect(replayed.structured).toStrictEqual({ choice: 'new' });
+    expect(served).toStrictEqual([keyForRequest(newer)]);
   });
 
   it('reads record mode and the fixture directory from the environment', async () => {

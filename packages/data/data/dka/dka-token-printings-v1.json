@@ -1,0 +1,518 @@
+{
+  "schemaVersion": 1,
+  "sets": [
+    {
+      "code": "TALA",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atala+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "8e4841d3c9d7840329943155a621a6f3679e6cfc18744947ef9b20d8a8db6368",
+      "fetchedAt": "2026-09-19T16:50:09.935Z"
+    },
+    {
+      "code": "TCON",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atcon+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "f5813071af2179d40bf734ebf7677885f1c746acca4fd6284bddbb9fad70254c",
+      "fetchedAt": "2026-09-19T16:50:10.085Z"
+    },
+    {
+      "code": "TDKA",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atdka+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "e87f397ecbbd9979686fe83f55525b352936a994489f2319aa361e3a226703df",
+      "fetchedAt": "2026-09-19T16:50:10.258Z"
+    },
+    {
+      "code": "TISD",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atisd+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "1c8480f06db1362e3270e4c1a83df3a98957988ec2bdb618f0977d348c484569",
+      "fetchedAt": "2026-09-19T16:50:10.302Z"
+    },
+    {
+      "code": "TLRW",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atlrw+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "d03c83e9218150b6dd082de35abf0de0e40318cff00949ef8ff4c68f0b250355",
+      "fetchedAt": "2026-09-19T16:50:10.393Z"
+    },
+    {
+      "code": "TSHM",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atshm+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "33b3cecad04f126c792145e9671e6fc312119334481bfaca2d9a996684e5ec76",
+      "fetchedAt": "2026-09-19T16:50:10.678Z"
+    },
+    {
+      "code": "TUGL",
+      "sourceUrl": "https://api.scryfall.com/cards/search?q=set%3Atugl+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+      "sourceSha256": "f0cecfe784aa5e6da84d565d943c36f85ff3aa759c56f406f3463cd037ea8414",
+      "fetchedAt": "2026-09-19T16:50:10.717Z"
+    }
+  ],
+  "engine": { "name": "forge", "version": "2.0.14" },
+  "tokens": [
+    {
+      "physicalId": "tala-token:0008:39a4b6d1-c5f5-4a2d-a00c-97f6395c941b",
+      "position": 8,
+      "setCode": "TALA",
+      "name": "Ooze",
+      "observedNames": ["Ooze Token"],
+      "oracleId": "bb3da6d2-aed7-4057-b94b-6882fb45cc89",
+      "scryfallId": "39a4b6d1-c5f5-4a2d-a00c-97f6395c941b",
+      "typeLine": "Token Creature — Ooze",
+      "power": "*",
+      "toughness": "*",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Ooze",
+          "manaCost": null,
+          "typeLine": "Token Creature — Ooze",
+          "oracleText": "",
+          "power": "*",
+          "toughness": "*",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "39a4b6d1-c5f5-4a2d-a00c-97f6395c941b",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/3/9/39a4b6d1-c5f5-4a2d-a00c-97f6395c941b.jpg?1783942525"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tcon-token:0001:d902520e-b4ed-4805-9f64-096acf7c5f31",
+      "position": 1,
+      "setCode": "TCON",
+      "name": "Angel",
+      "observedNames": ["Angel Token"],
+      "oracleId": "40c64f08-ab2f-4933-8e0e-d1a1c729008f",
+      "scryfallId": "d902520e-b4ed-4805-9f64-096acf7c5f31",
+      "typeLine": "Token Creature — Angel",
+      "power": "4",
+      "toughness": "4",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Angel",
+          "manaCost": null,
+          "typeLine": "Token Creature — Angel",
+          "oracleText": "Flying",
+          "power": "4",
+          "toughness": "4",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "d902520e-b4ed-4805-9f64-096acf7c5f31",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/d/9/d902520e-b4ed-4805-9f64-096acf7c5f31.jpg?1783942460"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tdka-token:0001:bd5cd362-34f9-445f-85e1-9f6694f0f90a",
+      "position": 1,
+      "setCode": "TDKA",
+      "name": "Human",
+      "observedNames": ["Human Token"],
+      "oracleId": "30272edf-097c-4918-84d2-9fa6c42dbe0a",
+      "scryfallId": "bd5cd362-34f9-445f-85e1-9f6694f0f90a",
+      "typeLine": "Token Creature — Human",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Human",
+          "manaCost": null,
+          "typeLine": "Token Creature — Human",
+          "oracleText": "",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "bd5cd362-34f9-445f-85e1-9f6694f0f90a",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/b/d/bd5cd362-34f9-445f-85e1-9f6694f0f90a.jpg?1783940786"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tdka-token:0002:0d6abdaa-7be5-48a1-acc9-b3cba4c10619",
+      "position": 2,
+      "setCode": "TDKA",
+      "name": "Vampire",
+      "observedNames": ["Vampire Token"],
+      "oracleId": "2496fe9a-9fd4-4c52-b5ca-39d6333eb333",
+      "scryfallId": "0d6abdaa-7be5-48a1-acc9-b3cba4c10619",
+      "typeLine": "Token Creature — Vampire",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["B"],
+      "faces": [
+        {
+          "name": "Vampire",
+          "manaCost": null,
+          "typeLine": "Token Creature — Vampire",
+          "oracleText": "Lifelink",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["B"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "0d6abdaa-7be5-48a1-acc9-b3cba4c10619",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/0/d/0d6abdaa-7be5-48a1-acc9-b3cba4c10619.jpg?1783940786"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tisd-token:0003:e2020f53-d012-4d26-be13-87ed0f196c53",
+      "position": 3,
+      "setCode": "TISD",
+      "name": "Homunculus",
+      "observedNames": ["Homunculus Token"],
+      "oracleId": "d33fc3ad-79f7-41e1-a873-97c9f9a960b0",
+      "scryfallId": "e2020f53-d012-4d26-be13-87ed0f196c53",
+      "typeLine": "Token Creature — Homunculus",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["U"],
+      "faces": [
+        {
+          "name": "Homunculus",
+          "manaCost": null,
+          "typeLine": "Token Creature — Homunculus",
+          "oracleText": "",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["U"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "e2020f53-d012-4d26-be13-87ed0f196c53",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/e/2/e2020f53-d012-4d26-be13-87ed0f196c53.jpg?1783940883"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tisd-token:0004:771ae1f8-70b3-40da-8352-421a36c7abb5",
+      "position": 4,
+      "setCode": "TISD",
+      "name": "Demon",
+      "observedNames": ["Demon Token"],
+      "oracleId": "0045c5fa-3229-4050-b139-5712fa24b308",
+      "scryfallId": "771ae1f8-70b3-40da-8352-421a36c7abb5",
+      "typeLine": "Token Creature — Demon",
+      "power": "5",
+      "toughness": "5",
+      "loyalty": null,
+      "colors": ["B"],
+      "faces": [
+        {
+          "name": "Demon",
+          "manaCost": null,
+          "typeLine": "Token Creature — Demon",
+          "oracleText": "Flying",
+          "power": "5",
+          "toughness": "5",
+          "loyalty": null,
+          "colors": ["B"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "771ae1f8-70b3-40da-8352-421a36c7abb5",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/7/7/771ae1f8-70b3-40da-8352-421a36c7abb5.jpg?1783940883"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tisd-token:0005:5f68c2ab-5131-4620-920f-7ba99522ccf0",
+      "position": 5,
+      "setCode": "TISD",
+      "name": "Vampire",
+      "observedNames": ["Vampire Token"],
+      "oracleId": "13a3ac6f-6558-4fb2-99f4-cf7a83c298ad",
+      "scryfallId": "5f68c2ab-5131-4620-920f-7ba99522ccf0",
+      "typeLine": "Token Creature — Vampire",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["B"],
+      "faces": [
+        {
+          "name": "Vampire",
+          "manaCost": null,
+          "typeLine": "Token Creature — Vampire",
+          "oracleText": "Flying",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["B"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "5f68c2ab-5131-4620-920f-7ba99522ccf0",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/f/5f68c2ab-5131-4620-920f-7ba99522ccf0.jpg?1783940882"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tisd-token:0006:7a49607c-427a-474c-ad77-60cd05844b3c",
+      "position": 6,
+      "setCode": "TISD",
+      "name": "Wolf",
+      "observedNames": ["Wolf Token"],
+      "oracleId": "1aca703e-7083-4bab-a8ac-cb024a8404a1",
+      "scryfallId": "7a49607c-427a-474c-ad77-60cd05844b3c",
+      "typeLine": "Token Creature — Wolf",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["B"],
+      "faces": [
+        {
+          "name": "Wolf",
+          "manaCost": null,
+          "typeLine": "Token Creature — Wolf",
+          "oracleText": "Deathtouch",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["B"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "7a49607c-427a-474c-ad77-60cd05844b3c",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/7/a/7a49607c-427a-474c-ad77-60cd05844b3c.jpg?1783940882"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tlrw-token:0010:02a80dc2-0811-4df0-95f1-dd80ce9e24de",
+      "position": 10,
+      "setCode": "TLRW",
+      "name": "Wolf",
+      "observedNames": ["Wolf Token"],
+      "oracleId": "b2224843-8274-4872-a7ca-2adf69cc066b",
+      "scryfallId": "02a80dc2-0811-4df0-95f1-dd80ce9e24de",
+      "typeLine": "Token Creature — Wolf",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Wolf",
+          "manaCost": null,
+          "typeLine": "Token Creature — Wolf",
+          "oracleText": "",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "02a80dc2-0811-4df0-95f1-dd80ce9e24de",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/0/2/02a80dc2-0811-4df0-95f1-dd80ce9e24de.jpg?1783942837"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tshm-token:0002:cba50f25-ad8c-4244-8dc1-f8656f4c8c0b",
+      "position": 2,
+      "setCode": "TSHM",
+      "name": "Spirit",
+      "observedNames": ["Spirit Token"],
+      "oracleId": "dc4e2134-f0c2-49aa-9ea3-ebf83af1445c",
+      "scryfallId": "cba50f25-ad8c-4244-8dc1-f8656f4c8c0b",
+      "typeLine": "Token Creature — Spirit",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": ["W"],
+      "faces": [
+        {
+          "name": "Spirit",
+          "manaCost": null,
+          "typeLine": "Token Creature — Spirit",
+          "oracleText": "Flying",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "cba50f25-ad8c-4244-8dc1-f8656f4c8c0b",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/c/b/cba50f25-ad8c-4244-8dc1-f8656f4c8c0b.jpg?1783942700"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tshm-token:0006:7df0de51-8d05-475a-832e-de8a0f60849e",
+      "position": 6,
+      "setCode": "TSHM",
+      "name": "Spider",
+      "observedNames": ["Spider Token"],
+      "oracleId": "bd386399-69f0-4653-96a1-fd05b8fd148c",
+      "scryfallId": "7df0de51-8d05-475a-832e-de8a0f60849e",
+      "typeLine": "Token Creature — Spider",
+      "power": "1",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["G"],
+      "faces": [
+        {
+          "name": "Spider",
+          "manaCost": null,
+          "typeLine": "Token Creature — Spider",
+          "oracleText": "Reach",
+          "power": "1",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "7df0de51-8d05-475a-832e-de8a0f60849e",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/7/d/7df0de51-8d05-475a-832e-de8a0f60849e.jpg?1783942699"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "tugl-token:0091:8e7b5995-ee8b-40d1-b157-8df96c02cc5b",
+      "position": 91,
+      "setCode": "TUGL",
+      "name": "Zombie",
+      "observedNames": ["Zombie Token"],
+      "oracleId": "ddc8c973-c31e-463f-be45-f3fa7d632362",
+      "scryfallId": "8e7b5995-ee8b-40d1-b157-8df96c02cc5b",
+      "typeLine": "Token Creature — Zombie",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": ["B"],
+      "faces": [
+        {
+          "name": "Zombie",
+          "manaCost": null,
+          "typeLine": "Token Creature — Zombie",
+          "oracleText": "",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": ["B"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "8e7b5995-ee8b-40d1-b157-8df96c02cc5b",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "art_crop": "https://cards.scryfall.io/art_crop/front/8/e/8e7b5995-ee8b-40d1-b157-8df96c02cc5b.jpg?1783946415"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

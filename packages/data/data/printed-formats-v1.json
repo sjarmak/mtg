@@ -1,0 +1,898 @@
+{
+  "schemaVersion": 1,
+  "formats": [
+    {
+      "id": "akh-hou",
+      "formatFile": "akh-hou-limited-format-v1.json",
+      "constructedFormatFile": "akh-hou-constructed-format-v1.json",
+      "displayMetadataFile": "akh-hou-display-metadata-v1.json",
+      "tokenPrintingsFile": "akh-hou-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v66",
+      "catalogs": [
+        {
+          "code": "AKH",
+          "name": "Amonkhet",
+          "file": "akh-printed-catalog-v1.json"
+        },
+        {
+          "code": "HOU",
+          "name": "Hour of Devastation",
+          "file": "hou-printed-catalog-v1.json"
+        },
+        {
+          "code": "MP2",
+          "name": "Amonkhet Invocations",
+          "file": "mp2-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "isd",
+      "formatFile": "isd-limited-format-v1.json",
+      "constructedFormatFile": "isd-constructed-format-v1.json",
+      "displayMetadataFile": "isd-display-metadata-v1.json",
+      "tokenPrintingsFile": "isd-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v39",
+      "catalogs": [
+        {
+          "code": "ISD",
+          "name": "Innistrad",
+          "file": "isd-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "scd",
+      "formatFile": "scd-constructed-format-v1.json",
+      "admissionDirectory": "play-admission-v31",
+      "displayMetadataFile": "scd-display-metadata-v1.json",
+      "tokenPrintingsFile": "scd-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "unavailable",
+        "sealed": "unavailable",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed; the command-zone contracts are witnessed in whole games on the installed Forge."
+        }
+      },
+      "catalogs": [
+        {
+          "code": "SCD",
+          "name": "Starter Commander Decks 2022",
+          "file": "scd-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "som",
+      "formatFile": "som-limited-format-v1.json",
+      "constructedFormatFile": "som-constructed-format-v1.json",
+      "displayMetadataFile": "som-display-metadata-v1.json",
+      "tokenPrintingsFile": "som-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v25",
+      "catalogs": [
+        {
+          "code": "SOM",
+          "name": "Scars of Mirrodin",
+          "file": "som-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "mbs",
+      "formatFile": "mbs-limited-format-v1.json",
+      "constructedFormatFile": "mbs-constructed-format-v1.json",
+      "displayMetadataFile": "mbs-display-metadata-v1.json",
+      "tokenPrintingsFile": "mbs-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v24",
+      "catalogs": [
+        {
+          "code": "MBS",
+          "name": "Mirrodin Besieged",
+          "file": "mbs-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "roe",
+      "formatFile": "roe-limited-format-v1.json",
+      "constructedFormatFile": "roe-constructed-format-v1.json",
+      "displayMetadataFile": "roe-display-metadata-v1.json",
+      "tokenPrintingsFile": "roe-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v24",
+      "catalogs": [
+        {
+          "code": "ROE",
+          "name": "Rise of the Eldrazi",
+          "file": "roe-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "m12",
+      "formatFile": "m12-limited-format-v1.json",
+      "constructedFormatFile": "m12-constructed-format-v1.json",
+      "displayMetadataFile": "m12-display-metadata-v1.json",
+      "tokenPrintingsFile": "m12-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v23",
+      "catalogs": [
+        {
+          "code": "M12",
+          "name": "Magic 2012",
+          "file": "m12-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "dka",
+      "formatFile": "dka-limited-format-v1.json",
+      "constructedFormatFile": "dka-constructed-format-v1.json",
+      "displayMetadataFile": "dka-display-metadata-v1.json",
+      "tokenPrintingsFile": "dka-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v23",
+      "catalogs": [
+        {
+          "code": "DKA",
+          "name": "Dark Ascension",
+          "file": "dka-printed-catalog-v1.json"
+        },
+        {
+          "code": "ISD",
+          "name": "Innistrad",
+          "file": "isd-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "avr",
+      "formatFile": "avr-limited-format-v1.json",
+      "constructedFormatFile": "avr-constructed-format-v1.json",
+      "displayMetadataFile": "avr-display-metadata-v1.json",
+      "tokenPrintingsFile": "avr-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v23",
+      "catalogs": [
+        {
+          "code": "AVR",
+          "name": "Avacyn Restored",
+          "file": "avr-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "gtc",
+      "formatFile": "gtc-limited-format-v1.json",
+      "constructedFormatFile": "gtc-constructed-format-v1.json",
+      "displayMetadataFile": "gtc-display-metadata-v1.json",
+      "tokenPrintingsFile": "gtc-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v23",
+      "catalogs": [
+        {
+          "code": "GTC",
+          "name": "Gatecrash",
+          "file": "gtc-printed-catalog-v1.json"
+        },
+        {
+          "code": "RTR",
+          "name": "Return to Ravnica",
+          "file": "rtr-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "nph",
+      "formatFile": "nph-limited-format-v1.json",
+      "constructedFormatFile": "nph-constructed-format-v1.json",
+      "displayMetadataFile": "nph-display-metadata-v1.json",
+      "tokenPrintingsFile": "nph-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v22",
+      "catalogs": [
+        {
+          "code": "NPH",
+          "name": "New Phyrexia",
+          "file": "nph-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "m15",
+      "formatFile": "m15-limited-format-v1.json",
+      "constructedFormatFile": "m15-constructed-format-v1.json",
+      "displayMetadataFile": "m15-display-metadata-v1.json",
+      "tokenPrintingsFile": "m15-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v23",
+      "catalogs": [
+        {
+          "code": "M15",
+          "name": "Magic 2015",
+          "file": "m15-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "m14",
+      "formatFile": "m14-limited-format-v1.json",
+      "constructedFormatFile": "m14-constructed-format-v1.json",
+      "displayMetadataFile": "m14-display-metadata-v1.json",
+      "tokenPrintingsFile": "m14-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v23",
+      "catalogs": [
+        {
+          "code": "M14",
+          "name": "Magic 2014",
+          "file": "m14-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "ths",
+      "formatFile": "ths-limited-format-v1.json",
+      "constructedFormatFile": "ths-constructed-format-v1.json",
+      "displayMetadataFile": "ths-display-metadata-v1.json",
+      "tokenPrintingsFile": "ths-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v23",
+      "catalogs": [
+        {
+          "code": "THS",
+          "name": "Theros",
+          "file": "ths-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "bng",
+      "formatFile": "bng-limited-format-v1.json",
+      "constructedFormatFile": "bng-constructed-format-v1.json",
+      "displayMetadataFile": "bng-display-metadata-v1.json",
+      "tokenPrintingsFile": "bng-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v22",
+      "catalogs": [
+        {
+          "code": "BNG",
+          "name": "Born of the Gods",
+          "file": "bng-printed-catalog-v1.json"
+        },
+        {
+          "code": "THS",
+          "name": "Theros",
+          "file": "ths-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "jou",
+      "formatFile": "jou-limited-format-v1.json",
+      "constructedFormatFile": "jou-constructed-format-v1.json",
+      "displayMetadataFile": "jou-display-metadata-v1.json",
+      "tokenPrintingsFile": "jou-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v22",
+      "catalogs": [
+        {
+          "code": "BNG",
+          "name": "Born of the Gods",
+          "file": "bng-printed-catalog-v1.json"
+        },
+        {
+          "code": "JOU",
+          "name": "Journey into Nyx",
+          "file": "jou-printed-catalog-v1.json"
+        },
+        {
+          "code": "THS",
+          "name": "Theros",
+          "file": "ths-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "dgm",
+      "formatFile": "dgm-limited-format-v1.json",
+      "constructedFormatFile": "dgm-constructed-format-v1.json",
+      "displayMetadataFile": "dgm-display-metadata-v1.json",
+      "tokenPrintingsFile": "dgm-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v22",
+      "catalogs": [
+        {
+          "code": "DGM",
+          "name": "Dragon's Maze",
+          "file": "dgm-printed-catalog-v1.json"
+        },
+        {
+          "code": "GTC",
+          "name": "Gatecrash",
+          "file": "gtc-printed-catalog-v1.json"
+        },
+        {
+          "code": "RTR",
+          "name": "Return to Ravnica",
+          "file": "rtr-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "ktk",
+      "formatFile": "ktk-limited-format-v1.json",
+      "constructedFormatFile": "ktk-constructed-format-v1.json",
+      "displayMetadataFile": "ktk-display-metadata-v1.json",
+      "tokenPrintingsFile": "ktk-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v22",
+      "catalogs": [
+        {
+          "code": "KTK",
+          "name": "Khans of Tarkir",
+          "file": "ktk-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "ori",
+      "formatFile": "ori-limited-format-v1.json",
+      "constructedFormatFile": "ori-constructed-format-v1.json",
+      "displayMetadataFile": "ori-display-metadata-v1.json",
+      "tokenPrintingsFile": "ori-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v22",
+      "catalogs": [
+        {
+          "code": "ORI",
+          "name": "Magic Origins",
+          "file": "ori-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "xln",
+      "formatFile": "xln-limited-format-v1.json",
+      "constructedFormatFile": "xln-constructed-format-v1.json",
+      "displayMetadataFile": "xln-display-metadata-v1.json",
+      "tokenPrintingsFile": "xln-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v22",
+      "catalogs": [
+        {
+          "code": "XLN",
+          "name": "Ixalan",
+          "file": "xln-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "kld-aer",
+      "formatFile": "kld-aer-limited-format-v1.json",
+      "constructedFormatFile": "kld-aer-constructed-format-v1.json",
+      "displayMetadataFile": "kld-aer-display-metadata-v1.json",
+      "tokenPrintingsFile": "kld-aer-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v17",
+      "catalogs": [
+        {
+          "code": "AER",
+          "name": "Aether Revolt",
+          "file": "aer-printed-catalog-v1.json"
+        },
+        {
+          "code": "KLD",
+          "name": "Kaladesh",
+          "file": "kld-printed-catalog-v1.json"
+        },
+        {
+          "code": "MPS",
+          "name": "Kaladesh Inventions",
+          "file": "mps-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "rtr",
+      "formatFile": "rtr-limited-format-v1.json",
+      "constructedFormatFile": "rtr-constructed-format-v1.json",
+      "displayMetadataFile": "rtr-display-metadata-v1.json",
+      "tokenPrintingsFile": "rtr-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v13",
+      "catalogs": [
+        {
+          "code": "RTR",
+          "name": "Return to Ravnica",
+          "file": "rtr-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "m11",
+      "formatFile": "m11-limited-format-v1.json",
+      "constructedFormatFile": "m11-constructed-format-v1.json",
+      "displayMetadataFile": "m11-display-metadata-v1.json",
+      "tokenPrintingsFile": "m11-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v13",
+      "catalogs": [
+        {
+          "code": "M11",
+          "name": "Magic 2011",
+          "file": "m11-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "m13",
+      "formatFile": "m13-limited-format-v1.json",
+      "constructedFormatFile": "m13-constructed-format-v1.json",
+      "displayMetadataFile": "m13-display-metadata-v1.json",
+      "tokenPrintingsFile": "m13-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v13",
+      "catalogs": [
+        {
+          "code": "M13",
+          "name": "Magic 2013",
+          "file": "m13-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "momir-basic",
+      "formatFile": "momir-basic-constructed-format-v1.json",
+      "presentationCatalog": "momir-oldest-creatures",
+      "availability": {
+        "browse": "available",
+        "draft": "unavailable",
+        "sealed": "unavailable",
+        "play": {
+          "status": "supported",
+          "reason": "Verified real-Forge match admission is installed with an explicit global creature pool policy."
+        }
+      },
+      "admissionDirectory": "play-admission-v12",
+      "catalogs": [
+        {
+          "code": "M11",
+          "name": "Magic 2011",
+          "file": "m11-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "m10",
+      "formatFile": "m10-limited-format-v1.json",
+      "constructedFormatFile": "m10-constructed-format-v1.json",
+      "displayMetadataFile": "m10-display-metadata-v1.json",
+      "tokenPrintingsFile": "m10-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v13",
+      "catalogs": [
+        {
+          "code": "M10",
+          "name": "Magic 2010",
+          "file": "m10-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "zen",
+      "formatFile": "zen-limited-format-v1.json",
+      "constructedFormatFile": "zen-constructed-format-v1.json",
+      "displayMetadataFile": "zen-display-metadata-v1.json",
+      "tokenPrintingsFile": "zen-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v13",
+      "catalogs": [
+        {
+          "code": "ZEN",
+          "name": "Zendikar",
+          "file": "zen-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "wwk",
+      "formatFile": "wwk-limited-format-v1.json",
+      "constructedFormatFile": "wwk-constructed-format-v1.json",
+      "displayMetadataFile": "wwk-display-metadata-v1.json",
+      "tokenPrintingsFile": "wwk-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v9",
+      "catalogs": [
+        {
+          "code": "WWK",
+          "name": "Worldwake",
+          "file": "wwk-printed-catalog-v1.json"
+        },
+        {
+          "code": "ZEN",
+          "name": "Zendikar",
+          "file": "zen-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "rav",
+      "formatFile": "rav-limited-format-v1.json",
+      "constructedFormatFile": "rav-constructed-format-v1.json",
+      "displayMetadataFile": "rav-display-metadata-v1.json",
+      "tokenPrintingsFile": "rav-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v13",
+      "catalogs": [
+        {
+          "code": "RAV",
+          "name": "Ravnica: City of Guilds",
+          "file": "rav-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "gpt",
+      "formatFile": "gpt-limited-format-v1.json",
+      "constructedFormatFile": "gpt-constructed-format-v1.json",
+      "displayMetadataFile": "gpt-display-metadata-v1.json",
+      "tokenPrintingsFile": "gpt-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v8",
+      "catalogs": [
+        {
+          "code": "GPT",
+          "name": "Guildpact",
+          "file": "gpt-printed-catalog-v1.json"
+        },
+        {
+          "code": "RAV",
+          "name": "Ravnica: City of Guilds",
+          "file": "rav-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "lrw",
+      "formatFile": "lrw-limited-format-v1.json",
+      "constructedFormatFile": "lrw-constructed-format-v1.json",
+      "displayMetadataFile": "lrw-display-metadata-v1.json",
+      "tokenPrintingsFile": "lrw-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v12",
+      "catalogs": [
+        {
+          "code": "LRW",
+          "name": "Lorwyn",
+          "file": "lrw-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "dis",
+      "formatFile": "dis-limited-format-v1.json",
+      "constructedFormatFile": "dis-constructed-format-v1.json",
+      "displayMetadataFile": "dis-display-metadata-v1.json",
+      "tokenPrintingsFile": "dis-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "available",
+        "sealed": "available",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed."
+        }
+      },
+      "admissionDirectory": "play-admission-v6",
+      "catalogs": [
+        {
+          "code": "DIS",
+          "name": "Dissension",
+          "file": "dis-printed-catalog-v1.json"
+        },
+        {
+          "code": "GPT",
+          "name": "Guildpact",
+          "file": "gpt-printed-catalog-v1.json"
+        },
+        {
+          "code": "RAV",
+          "name": "Ravnica: City of Guilds",
+          "file": "rav-printed-catalog-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "commander-precons",
+      "formatFile": "commander-precons-constructed-format-v1.json",
+      "admissionDirectory": "play-admission-v2",
+      "displayMetadataFile": "commander-precons-display-metadata-v1.json",
+      "tokenPrintingsFile": "commander-precons-token-printings-v1.json",
+      "availability": {
+        "browse": "available",
+        "draft": "unavailable",
+        "sealed": "unavailable",
+        "play": {
+          "status": "supported",
+          "reason": "Verified full-card and match interaction admission is installed for all eleven decks; the command-zone contracts are witnessed in whole games on the installed Forge."
+        }
+      },
+      "catalogs": [
+        {
+          "code": "SCD",
+          "name": "Starter Commander Decks 2022",
+          "file": "scd-printed-catalog-v1.json"
+        },
+        {
+          "code": "C17",
+          "name": "Commander 2017",
+          "file": "c17-printed-catalog-v1.json"
+        },
+        {
+          "code": "ALA",
+          "name": "Shards of Alara",
+          "file": "ala-printed-catalog-v1.json"
+        },
+        {
+          "code": "C13",
+          "name": "Commander 2013",
+          "file": "c13-printed-catalog-v1.json"
+        },
+        {
+          "code": "CMA",
+          "name": "Commander Anthology",
+          "file": "cma-printed-catalog-v1.json"
+        },
+        {
+          "code": "C16",
+          "name": "Commander 2016",
+          "file": "c16-printed-catalog-v1.json"
+        },
+        {
+          "code": "CMM",
+          "name": "Commander Masters",
+          "file": "cmm-printed-catalog-v1.json"
+        }
+      ]
+    }
+  ]
+}

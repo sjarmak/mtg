@@ -26,16 +26,23 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createFixtureProvider } from '@mtg/llm';
+import { createFixtureProvider, readRunManifest } from '@mtg/llm';
 import { parseBrief } from '../brief';
 import type { SetBrief } from '../brief';
 import { generateSet } from '../generate';
+import { generationSemanticsFor } from '../generation-semantics';
 import type { RevisionRecord } from '../report';
 import type { Entry } from '../validate/index';
 
 const PACKAGE_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const TIDEGLASS_BRIEF_PATH = join(PACKAGE_ROOT, 'briefs', 'tideglass-reach.json');
 export const TIDEGLASS_FIXTURE_DIR = join(PACKAGE_ROOT, 'fixtures', 'llm');
+export const TIDEGLASS_MANIFEST_PATH = join(
+  PACKAGE_ROOT,
+  'fixtures',
+  'runs',
+  'tideglass-reach-2026-08-09T22-30-10Z.json',
+);
 
 export interface EntryPool {
   readonly brief: SetBrief;
@@ -52,7 +59,12 @@ export interface EntryPool {
  */
 export async function loadTideglassEntryPool(): Promise<EntryPool> {
   const brief = parseBrief(JSON.parse(readFileSync(TIDEGLASS_BRIEF_PATH, 'utf8')) as unknown);
+  const manifest = readRunManifest(TIDEGLASS_MANIFEST_PATH);
   const provider = createFixtureProvider({ dir: TIDEGLASS_FIXTURE_DIR, record: false });
-  const result = await generateSet({ provider, brief });
+  const result = await generateSet({
+    provider,
+    brief,
+    semanticsVersion: generationSemanticsFor(manifest),
+  });
   return { brief, entries: result.validation.entries, revisions: result.report.critique.revisions };
 }

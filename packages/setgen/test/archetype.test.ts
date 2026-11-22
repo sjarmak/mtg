@@ -522,36 +522,466 @@ describe('what the card pass can see on a permanent', () => {
     // told where to go — without asserting a thing about the vocabulary that
     // the vocabulary is free to change.
     //
-    // The third bucket is asked twice, because a kind reaches a creature's own
-    // body two ways. `fight` reads the body without naming it and says so
+    // The source-position bucket is asked three ways. `fight` reads a creature's
+    // body without naming it and says so
     // through `SOURCE_BODY_EFFECT_KINDS`; `sacrificeSelf` (`mtg-nhyv.30`) says
     // it through its target row, whose every entry is a retained referent
     // (CR 115.6a), so the validator refuses it on a spell and there is no
-    // sorcery for the narrowing to mis-read as a blank. Either answer puts the
-    // kind on a permanent, which is the shape the inert question is never
-    // asked of.
+    // sorcery for the narrowing to mis-read as a blank. `flipCoin` is likewise
+    // confined to activated abilities. Every answer puts the kind on a
+    // permanent, which is the shape the inert question is never asked of.
     const bodyOnly = (kind: AnyEffectKind): boolean => {
       const targets = legalTargetsFor(kind);
       return targets.length > 0 && targets.every(isSourceBodyOnlyTarget);
     };
+    const abilityPositionOnly = (kind: AnyEffectKind): boolean =>
+      isSourceBodyEffect(kind) ||
+      kind === 'returnSourceFromGraveyard' ||
+      kind === 'returnDepartedSourceToOwnerHand' ||
+      kind === 'putDepartedSourceOnTopOfOwnerLibrary' ||
+      kind === 'shuffleSourceIntoOwnerLibrary' ||
+      kind === 'returnSourceAuraAttached' ||
+      kind === 'putSourceAndTargetOnOwnersLibrariesThenShuffle' ||
+      kind === 'doubleSourceCounters' ||
+      kind === 'copyNextInstantOrSorceryThisTurn' ||
+      kind === 'targetPlayerGainsControlOfSelfPermanent' ||
+      kind === 'animateLandWhileSourceOnBattlefield' ||
+      kind === 'playRandomHandCardWithoutPayingManaCost' ||
+      kind === 'createTokenCopyOfSelf' ||
+      kind === 'flipCoin';
     const live = UNPRICED_EFFECT_KINDS.filter(
-      (kind) => !BATTLEFIELD_INERT_EFFECTS.includes(kind) && !isSourceBodyEffect(kind) && !bodyOnly(kind),
+      (kind) => !BATTLEFIELD_INERT_EFFECTS.includes(kind) && !abilityPositionOnly(kind) && !bodyOnly(kind),
     );
     expect(
       live,
       'a live unpriced kind is narrowed out of `subjects` and must not be narrowed out of `inert`; ' +
         'the two tests below are what pin that, so add one for the new kind',
     ).toStrictEqual([
+      'populate',
+      'createEmblem',
       'putOnLibrary',
       'searchLibrary',
+      'chooseBlockersThisCombat',
       'chooseFromGraveyard',
       'untapPermanent',
+      'untapPermanents',
+      'skipNextUntap',
       'grantKeywordUntilEndOfTurn',
       'cantBeBlockedThisTurn',
+      'cantBlockThisTurn',
+      'blocksThisTurnIfAble',
       'attacksYouThisTurnIfAble',
       'sacrificePermanent',
       'setBasePtUntilEndOfTurn',
+      'setColorsUntilEndOfTurn',
+      'attacksThisTurnIfAble',
+      'exileNonbasicGraveyardAndMatchingLibrary',
+      'nameNonlandCardAndExileMatchingOpponentZones',
+      'revealUntilCreatureCards',
+      'gainControlUntilEndOfTurn',
+      'changeSpellTargets',
+      'copySpell',
+      'preventNextDamageToYouAndRetaliate',
+      'gainControl',
+      'addSubtype',
+      'regeneratePermanent',
+      'loseGame',
+      'winGame',
+      'destroyAttachedPermanents',
+      'exchangeControl',
+      'chooseFromBattlefield',
+      'chooseFromRevealedHand',
+      'petrifyCreature',
+      'castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts',
+      'detainPermanent',
     ]);
+  });
+
+  it('reads a named opponent-zone exile as live even though no plan can name it', () => {
+    const spell = parseCard({
+      id: 'tst-named-opponent-zone-exile',
+      name: 'Named Opponent Zone Exile',
+      kind: 'sorcery',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 208 },
+      colors: ['B', 'R'],
+      manaCost: { generic: 2, B: 1, R: 1 },
+      effects: [
+        {
+          kind: 'nameNonlandCardAndExileMatchingOpponentZones',
+          target: { kind: 'targetOpponent' },
+        },
+      ],
+    });
+
+    const contribution = cardContribution(slot(), spell);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads Populate as live even though no plan can name it', () => {
+    const spell = parseCard({
+      id: 'tst-populate',
+      name: 'Populate',
+      kind: 'sorcery',
+      rarity: 'common',
+      set: { ...SET, collectorNumber: 207 },
+      colors: ['G'],
+      manaCost: { generic: 2, G: 1 },
+      effects: [{ kind: 'populate' }],
+    });
+
+    const contribution = cardContribution(slot(), spell);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads an emblem as live even though no plan can name it', () => {
+    const decree = parseCard({
+      id: 'tst-emblem-decree',
+      name: 'Liliana of the Dark Realms',
+      kind: 'sorcery',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 206 },
+      colors: ['B'],
+      manaCost: { generic: 4, B: 2 },
+      effects: [
+        {
+          kind: 'createEmblem',
+          emblem: {
+            name: 'Liliana of the Dark Realms Emblem',
+            grantsManaAbility: {
+              filter: { cardTypes: ['land'], subtypes: ['Swamp'] },
+              produces: ['B'],
+              amount: 4,
+            },
+          },
+        },
+      ],
+    });
+    const contribution = cardContribution(slot(), decree);
+
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads casting exiled copies as live even though no plan can name it', () => {
+    const recast = parseCard({
+      id: 'tst-recast-exiled-copies',
+      name: 'Spelltwine',
+      kind: 'sorcery',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 207 },
+      colors: ['U'],
+      manaCost: { generic: 5, U: 1 },
+      effects: [{ kind: 'castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts' }],
+    });
+    const contribution = cardContribution(slot(), recast);
+
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads a battlefield choice as live even though no plan can name it', () => {
+    const choice = parseCard({
+      id: 'tst-battlefield-choice',
+      name: 'Battlefield Choice',
+      kind: 'sorcery',
+      rarity: 'uncommon',
+      set: { ...SET, collectorNumber: 205 },
+      colors: ['G'],
+      manaCost: { generic: 2, G: 1 },
+      effects: [
+        {
+          kind: 'chooseFromBattlefield',
+          filter: { cardTypes: ['creature'] },
+          destination: 'hand',
+        },
+      ],
+    });
+    const contribution = cardContribution(slot(), choice);
+
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads attached-permanent destruction as live even though no plan can name it', () => {
+    const slag = parseCard({
+      id: 'tst-turn-to-slag-contribution',
+      name: 'Turn to Slag Contribution',
+      kind: 'sorcery',
+      rarity: 'common',
+      set: { ...SET, collectorNumber: 204 },
+      colors: ['R'],
+      manaCost: { generic: 3, R: 2 },
+      effects: [
+        { kind: 'dealDamage', amount: 5, target: { kind: 'targetCreature' } },
+        {
+          kind: 'destroyAttachedPermanents',
+          target: { kind: 'thatCreature' },
+          filter: { subtypes: ['Equipment'] },
+        },
+      ],
+    });
+    const contribution = cardContribution(slot(), slag);
+
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual(['dealDamage']);
+  });
+
+  it('reads a targeted game loss as live even though no plan can name it', () => {
+    const door = parseCard({
+      id: 'tst-door-to-nothingness',
+      name: 'Door to Nothingness',
+      kind: 'instant',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 203 },
+      colors: ['B'],
+      manaCost: { generic: 9, B: 1 },
+      effects: [{ kind: 'loseGame', target: { kind: 'targetPlayer' } }],
+    });
+    const contribution = cardContribution(slot(), door);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads an untargeted game win as live even though no plan can name it', () => {
+    const battle = parseCard({
+      id: 'tst-battle-of-wits',
+      name: 'Battle of Wits',
+      kind: 'enchantment',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 204 },
+      colors: ['U'],
+      manaCost: { generic: 3, U: 2 },
+      abilities: [
+        {
+          kind: 'triggered',
+          condition: 'beginningOfYourUpkeep',
+          interveningIf: { kind: 'controllerLibraryAtLeast', atLeast: 200 },
+          effects: [{ kind: 'winGame' }],
+        },
+      ],
+    });
+    const contribution = cardContribution(slot(), battle);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('classifies a retained-trigger free cast as live and ability-position-only', () => {
+    const evocation = parseCard({
+      id: 'tst-random-hand-free-cast',
+      name: 'Random Hand Free Cast',
+      kind: 'enchantment',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 73 },
+      colors: ['R'],
+      manaCost: { generic: 5, R: 1 },
+      abilities: [
+        {
+          kind: 'triggered',
+          condition: 'beginningOfEachPlayersUpkeep',
+          effects: [
+            {
+              kind: 'playRandomHandCardWithoutPayingManaCost',
+              target: { kind: 'triggeringPlayer' },
+            },
+          ],
+        },
+      ],
+    });
+    const contribution = cardContribution(slot(), evocation);
+
+    expect(BATTLEFIELD_INERT_EFFECTS).not.toContain('playRandomHandCardWithoutPayingManaCost');
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('classifies source counter doubling as live and ability-position-only', () => {
+    const doubler = parseCard({
+      id: 'tst-source-counter-doubler-contribution',
+      name: 'Source Counter Doubler Contribution',
+      kind: 'creature',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 74 },
+      colors: ['G'],
+      manaCost: { G: 2 },
+      power: 1,
+      toughness: 1,
+      abilities: [
+        {
+          kind: 'triggered',
+          condition: 'beginningOfYourUpkeep',
+          effects: [{ kind: 'doubleSourceCounters', counter: 'plusOnePlusOne' }],
+        },
+      ],
+    });
+    const contribution = cardContribution(slot(), doubler);
+
+    expect(BATTLEFIELD_INERT_EFFECTS).not.toContain('doubleSourceCounters');
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('classifies the targeted Archon shield as live but outside planned subjects', () => {
+    const archon = parseCard({
+      id: 'tst-vengeful-archon-contribution',
+      name: 'Vengeful Archon Contribution',
+      kind: 'creature',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 72 },
+      colors: ['W'],
+      manaCost: { generic: 4, W: 3 },
+      power: 7,
+      toughness: 7,
+      abilities: [
+        {
+          kind: 'activated',
+          cost: { mana: { hasX: true } },
+          effects: [
+            {
+              kind: 'preventNextDamageToYouAndRetaliate',
+              amount: { kind: 'chosenX' },
+              target: { kind: 'targetPlayerOrPlaneswalker' },
+            },
+          ],
+        },
+      ],
+    });
+    const contribution = cardContribution(slot(), archon);
+
+    expect(BATTLEFIELD_INERT_EFFECTS).not.toContain('preventNextDamageToYouAndRetaliate');
+    expect(contribution.inert).toBe(false);
+    expect(contribution.removal).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads a target-changing spell as live even though no plan can name it', () => {
+    const redirect = parseCard({
+      id: 'tst-redirect',
+      name: 'Redirect',
+      kind: 'instant',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 71 },
+      colors: ['U'],
+      manaCost: { U: 2 },
+      effects: [{ kind: 'changeSpellTargets' }],
+    });
+    const contribution = cardContribution(slot(), redirect);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads a spell copy as live even though no plan can name it', () => {
+    const reverberate = parseCard({
+      id: 'tst-reverberate',
+      name: 'Reverberate',
+      kind: 'instant',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 155 },
+      colors: ['R'],
+      manaCost: { R: 2 },
+      effects: [{ kind: 'copySpell', spellFilter: { cardTypes: ['instant', 'sorcery'] } }],
+    });
+    const contribution = cardContribution(slot(), reverberate);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('does not call a spell inert when its control exchange is narrowed out of planned subjects', () => {
+    const exchange = parseCard({
+      id: 'tst-exchange-control',
+      name: 'Control Exchange',
+      kind: 'sorcery',
+      rarity: 'uncommon',
+      set: { ...SET, collectorNumber: 156 },
+      colors: ['U'],
+      manaCost: { generic: 4, U: 1 },
+      effects: [
+        {
+          kind: 'exchangeControl',
+          target: { kind: 'targetCreature', count: 2, minimum: 2 },
+        },
+        { kind: 'drawCards', count: 1, target: { kind: 'noTarget' } },
+      ],
+    });
+    const contribution = cardContribution(slot(), exchange);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual(['drawCards']);
+  });
+
+  it('calls a one-sided damage shield inert because resolving it changes no permanent', () => {
+    const passage = parseCard({
+      id: 'tst-safe-passage',
+      name: 'Safe Passage',
+      kind: 'instant',
+      rarity: 'common',
+      set: { ...SET, collectorNumber: 32 },
+      colors: ['W'],
+      manaCost: { generic: 2, W: 1 },
+      effects: [{ kind: 'preventAllDamageToYouAndCreaturesYouControl' }],
+    });
+    const contribution = cardContribution(slot(), passage);
+    expect(contribution.inert).toBe(true);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('calls a controller-only combat shield inert because resolving it changes no permanent', () => {
+    const deliverance = parseCard({
+      id: 'tst-druids-deliverance',
+      name: "Druid's Deliverance",
+      kind: 'instant',
+      rarity: 'common',
+      set: { ...SET, collectorNumber: 33 },
+      colors: ['G'],
+      manaCost: { generic: 1, G: 1 },
+      effects: [{ kind: 'preventCombatDamageToYou' }],
+    });
+    const contribution = cardContribution(slot(), deliverance);
+    expect(BATTLEFIELD_INERT_EFFECTS).toContain('preventCombatDamageToYou');
+    expect(contribution.inert).toBe(true);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('calls a turn-scoped casting prohibition inert because it changes no permanent', () => {
+    const silence = parseCard({
+      id: 'tst-silence',
+      name: 'Silence',
+      kind: 'instant',
+      rarity: 'uncommon',
+      set: { ...SET, collectorNumber: 33 },
+      colors: ['W'],
+      manaCost: { W: 1 },
+      effects: [
+        {
+          kind: 'cantCastSpellsThisTurn',
+          players: 'eachOpponent',
+        },
+      ],
+    });
+    const contribution = cardContribution(slot(), silence);
+    expect(contribution.inert).toBe(true);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('calls a hand-and-graveyard reset inert because it never changes the battlefield', () => {
+    const reversal = parseCard({
+      id: 'tst-time-reversal',
+      name: 'Time Reversal',
+      kind: 'sorcery',
+      rarity: 'mythic',
+      set: { ...SET, collectorNumber: 20 },
+      colors: ['U'],
+      manaCost: { generic: 3, U: 2 },
+      effects: [
+        { kind: 'shuffleHandsAndGraveyardsIntoLibraries' },
+        { kind: 'drawCards', count: 7, players: 'eachPlayer', target: { kind: 'noTarget' } },
+        { kind: 'exileThisSpell' },
+      ],
+    });
+    const contribution = cardContribution(slot(), reversal);
+    expect(contribution.inert).toBe(true);
+    expect(contribution.subjects).toStrictEqual(['drawCards']);
   });
 
   it('reads the inert question off every printed effect, not only the priced ones', () => {
@@ -638,6 +1068,61 @@ describe('what the card pass can see on a permanent', () => {
     expect(contribution.subjects).toStrictEqual([]);
   });
 
+  it('reads a grouped untap as live even though no plan can name it', () => {
+    const rewind = parseCard({
+      id: 'tst-rewind',
+      name: 'Rewind',
+      kind: 'instant',
+      rarity: 'uncommon',
+      set: { ...SET, collectorNumber: 35 },
+      colors: ['U'],
+      manaCost: { generic: 2, U: 2 },
+      effects: [{ kind: 'untapPermanents', upTo: 4, filter: { cardTypes: ['land'] } }],
+    });
+    const contribution = cardContribution(slot(), rewind);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads a revealed-hand choice as live even though no plan can name it', () => {
+    const theft = parseCard({
+      id: 'tst-revealed-hand-theft',
+      name: 'Borrowed Incantation',
+      kind: 'sorcery',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 36 },
+      colors: ['R'],
+      manaCost: { generic: 4, R: 1 },
+      effects: [
+        {
+          kind: 'chooseFromRevealedHand',
+          target: { kind: 'targetOpponent' },
+          filter: { cardTypes: ['instant', 'sorcery'] },
+          outcome: { kind: 'mayCastWithoutPayingManaCost' },
+        },
+      ],
+    });
+    const contribution = cardContribution(slot(), theft);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads an untap debt as live even though no plan can name it', () => {
+    const hold = parseCard({
+      id: 'tst-untap-hold',
+      name: 'Hold Fast',
+      kind: 'instant',
+      rarity: 'common',
+      set: { ...SET, collectorNumber: 34 },
+      colors: ['U'],
+      manaCost: { generic: 1, U: 1 },
+      effects: [{ kind: 'skipNextUntap', target: { kind: 'targetCreature' } }],
+    });
+    const contribution = cardContribution(slot(), hold);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
   it('reads a keyword grant as live even though no plan can name it', () => {
     // The fifth, pinned on the same rule. `grantKeywordUntilEndOfTurn` is
     // unpriced, so `plannedSubjectsOf` deletes it and `subjects` is empty; a
@@ -659,6 +1144,86 @@ describe('what the card pass can see on a permanent', () => {
       ],
     });
     const contribution = cardContribution(slot(), gust);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads temporary control as live even though no plan can name it', () => {
+    const theft = parseCard({
+      id: 'tst-borrowed-force',
+      name: 'Borrowed Force',
+      kind: 'sorcery',
+      rarity: 'common',
+      set: { ...SET, collectorNumber: 31 },
+      colors: ['R'],
+      manaCost: { generic: 2, R: 1 },
+      effects: [{ kind: 'gainControlUntilEndOfTurn', target: { kind: 'targetCreature' } }],
+    });
+    const contribution = cardContribution(slot(), theft);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads lasting control as live even though no plan can name it', () => {
+    const theft = parseCard({
+      id: 'tst-lasting-control',
+      name: 'Lasting Persuasion',
+      kind: 'sorcery',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 35 },
+      colors: ['U'],
+      manaCost: { generic: 3, U: 2 },
+      effects: [{ kind: 'gainControl', target: { kind: 'targetCreature' } }],
+    });
+    const contribution = cardContribution(slot(), theft);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads a lasting subtype addition as live even though no plan can name it', () => {
+    const initiation = parseCard({
+      id: 'tst-lasting-subtype',
+      name: 'Lasting Initiation',
+      kind: 'instant',
+      rarity: 'uncommon',
+      set: { ...SET, collectorNumber: 36 },
+      colors: ['B'],
+      manaCost: { generic: 1, B: 1 },
+      effects: [{ kind: 'addSubtype', subtype: 'Vampire', target: { kind: 'targetCreature' } }],
+    });
+    const contribution = cardContribution(slot(), initiation);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('classifies an Aura graveyard handoff as source-position-only', () => {
+    const aura = parseCard({
+      id: 'tst-returning-aura',
+      name: 'Returning Affliction',
+      kind: 'enchantment',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 37 },
+      colors: ['B'],
+      manaCost: { generic: 2, B: 2 },
+      subtypes: ['Aura'],
+      aura: { enchant: 'creature', modifications: [] },
+      abilities: [
+        {
+          kind: 'triggered',
+          condition: 'enchantedCreatureDies',
+          targetChooser: 'triggeringPlayer',
+          effects: [
+            {
+              kind: 'returnSourceAuraAttached',
+              target: { kind: 'targetCreatureYouDontControl' },
+            },
+          ],
+        },
+      ],
+    });
+    const contribution = cardContribution(slot(), aura);
+
+    expect(BATTLEFIELD_INERT_EFFECTS).not.toContain('returnSourceAuraAttached');
     expect(contribution.inert).toBe(false);
     expect(contribution.subjects).toStrictEqual([]);
   });
@@ -754,6 +1319,38 @@ describe('what the card pass can see on a permanent', () => {
     expect(contribution.subjects).toStrictEqual([]);
   });
 
+  it('reads a temporary color change as live even though no plan can name it', () => {
+    const repaint = parseCard({
+      id: 'tst-repaint',
+      name: 'Repaint',
+      kind: 'instant',
+      rarity: 'common',
+      set: { ...SET, collectorNumber: 16 },
+      colors: ['R'],
+      manaCost: { R: 1 },
+      effects: [{ kind: 'setColorsUntilEndOfTurn', colors: ['R'], target: { kind: 'targetCreature' } }],
+    });
+    const contribution = cardContribution(slot(), repaint);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('reads a defender-neutral attack requirement as live even though no plan can name it', () => {
+    const incite = parseCard({
+      id: 'tst-incite',
+      name: 'Incite',
+      kind: 'instant',
+      rarity: 'common',
+      set: { ...SET, collectorNumber: 17 },
+      colors: ['R'],
+      manaCost: { R: 1 },
+      effects: [{ kind: 'attacksThisTurnIfAble', target: { kind: 'targetCreature' } }],
+    });
+    const contribution = cardContribution(slot(), incite);
+    expect(contribution.inert).toBe(false);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
   it('calls a spell inert when every kind it prints is, unpriced or not', () => {
     // The other side of the same reading, so neither test can pass by making
     // `inert` constant. A shuffle and a reveal are both unpriced and both
@@ -770,68 +1367,6 @@ describe('what the card pass can see on a permanent', () => {
       effects: [{ kind: 'revealTopCards', count: 3 }, { kind: 'shuffleLibrary' }],
     });
     expect(cardContribution(slot(), look).inert).toBe(true);
-  });
-
-  it('reads a fight off the trigger it is printed in, and calls the body live', () => {
-    // The narrowing's remaining reach, stated on the kind that reaches it: a
-    // fight contributes no *planned* subject, because a plan is built out of a
-    // brief's mechanics and a mechanic names a priced kind. That is the
-    // narrowing doing its job rather than deleting an answer - the card is a
-    // creature, so `inert` never consults the list at all.
-    const bramble = parseCard({
-      id: 'tst-grasping-bramble',
-      name: 'Grasping Bramble',
-      kind: 'creature',
-      rarity: 'common',
-      set: { ...SET, collectorNumber: 7 },
-      colors: ['G'],
-      manaCost: { generic: 2, G: 1 },
-      power: 3,
-      toughness: 3,
-      abilities: [
-        {
-          kind: 'triggered',
-          condition: 'selfEnters',
-          effects: [{ kind: 'fight', target: { kind: 'targetCreatureYouDontControl' } }],
-        },
-      ],
-    });
-    const contribution = cardContribution(slot(), bramble);
-
-    expect(contribution.inert).toBe(false);
-    expect(contribution.creature).toBe(true);
-    expect(contribution.subjects).toStrictEqual([]);
-  });
-
-  it('reads a fight off the trigger it is printed in, and calls the body live', () => {
-    // The narrowing's remaining reach, stated on the kind that reaches it: a
-    // fight contributes no *planned* subject, because a plan is built out of a
-    // brief's mechanics and a mechanic names a priced kind. That is the
-    // narrowing doing its job rather than deleting an answer - the card is a
-    // creature, so `inert` never consults the list at all.
-    const bramble = parseCard({
-      id: 'tst-grasping-bramble',
-      name: 'Grasping Bramble',
-      kind: 'creature',
-      rarity: 'common',
-      set: { ...SET, collectorNumber: 7 },
-      colors: ['G'],
-      manaCost: { generic: 2, G: 1 },
-      power: 3,
-      toughness: 3,
-      abilities: [
-        {
-          kind: 'triggered',
-          condition: 'selfEnters',
-          effects: [{ kind: 'fight', target: { kind: 'targetCreatureYouDontControl' } }],
-        },
-      ],
-    });
-    const contribution = cardContribution(slot(), bramble);
-
-    expect(contribution.inert).toBe(false);
-    expect(contribution.creature).toBe(true);
-    expect(contribution.subjects).toStrictEqual([]);
   });
 
   it('reads a fight off the trigger it is printed in, and calls the body live', () => {
@@ -883,6 +1418,33 @@ describe('what the card pass can see on a permanent', () => {
       effects: [{ kind: 'scry', count: 2 }],
     });
     expect(cardContribution(slot(), survey).inert).toBe(true);
+  });
+
+  it('classifies a random hand reveal as information rather than battlefield presence', () => {
+    expect(BATTLEFIELD_INERT_EFFECTS).toContain('revealRandomCardFromHand');
+  });
+
+  it('classifies a top-card reveal and draw as hidden-zone movement', () => {
+    const tutelage = parseCard({
+      id: 'tst-dark-tutelage-effect',
+      name: 'Dark Tutelage',
+      kind: 'sorcery',
+      rarity: 'rare',
+      set: { ...SET, collectorNumber: 72 },
+      colors: ['B'],
+      manaCost: { generic: 2, B: 1 },
+      effects: [{ kind: 'revealTopCardToHand' }],
+    });
+
+    const contribution = cardContribution(slot(), tutelage);
+    expect(contribution.inert).toBe(true);
+    expect(contribution.subjects).toStrictEqual([]);
+  });
+
+  it('classifies bounded top-library decisions as hidden-zone movement', () => {
+    expect(BATTLEFIELD_INERT_EFFECTS).toEqual(
+      expect.arrayContaining(['reorderTopLibrary', 'selectFromTopLibrary', 'separateTopLibraryIntoPiles']),
+    );
   });
 
   it('reads a signpost’s payoff out of the ability it is printed in', () => {

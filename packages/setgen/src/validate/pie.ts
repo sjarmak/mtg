@@ -13,7 +13,7 @@
  * is a deliberate deviation that should cost something from the per-set budget
  * rather than being free.
  */
-import type { Ability, Card, EffectKind, StaticModification } from '@mtg/dsl';
+import type { Ability, Card, Effect, EffectKind, StaticModification } from '@mtg/dsl';
 import { hasAbilityEffects, isAuraCard, isStaticAuraModification } from '@mtg/dsl';
 import type { ColorPieSubject, PieVerdict } from '@mtg/design-data';
 import { bestVerdict, classifyForColors, isColorPieSubject } from '@mtg/design-data';
@@ -50,19 +50,41 @@ import type { Slot } from '../slot';
 export const COLORLESS_ALLOWED_EFFECTS: readonly EffectKind[] = ['destroyPermanent', 'createToken'];
 
 export interface PieRuling {
-  readonly subject: ColorPieSubject;
+  readonly subject: string;
   readonly verdict: PieVerdict;
 }
 
 /** A subject's name plus the kind of clause that put it on the table. */
+type SubjectPolicy = 'ordinary' | 'strictGrant' | 'plusOneCounterEntry';
+
 interface SubjectSource {
   readonly name: string;
   /** True when the clause that put this subject on the table is an equip clause. */
   readonly viaEquip: boolean;
+  readonly policy: SubjectPolicy;
 }
 
 function modificationSubjects(modification: StaticModification, viaEquip: boolean): SubjectSource[] {
-  return modification.kind === 'grantKeyword' ? [{ name: modification.keyword, viaEquip }] : [];
+  return modification.kind === 'grantKeyword'
+    ? [{ name: modification.keyword, viaEquip, policy: 'ordinary' }]
+    : [];
+}
+
+function effectSubjects(effect: Effect, plusOneCounterEntry = false): SubjectSource[] {
+  if (effect.kind === 'grantKeywordUntilEndOfTurn') {
+    return [effect.keyword, ...(effect.additionalKeywords ?? [])].map((keyword) => ({
+      name: keyword,
+      viaEquip: false,
+      policy: 'strictGrant',
+    }));
+  }
+  return [
+    {
+      name: effect.kind,
+      viaEquip: false,
+      policy: plusOneCounterEntry ? 'plusOneCounterEntry' : 'ordinary',
+    },
+  ];
 }
 
 /**
@@ -87,7 +109,17 @@ function modificationSubjects(modification: StaticModification, viaEquip: boolea
  */
 function abilitySubjects(ability: Ability): SubjectSource[] {
   const effects: SubjectSource[] = hasAbilityEffects(ability)
-    ? ability.effects.map((effect) => ({ name: effect.kind, viaEquip: false }))
+    ? ability.effects.flatMap((effect) =>
+        effectSubjects(
+          effect,
+          ability.kind === 'triggered' &&
+            ability.condition === 'anotherControlledCreatureEnters' &&
+            effect.kind === 'putCounters' &&
+            effect.counter === 'plusOnePlusOne' &&
+            effect.target.kind === 'targetCreatureYouControl' &&
+            effect.scope === undefined,
+        ),
+      )
     : [];
   if (ability.kind === 'static') {
     return [...effects, ...modificationSubjects(ability.modification, false)];
@@ -129,6 +161,7 @@ export interface CardSubject {
   readonly subject: ColorPieSubject;
   /** True when this subject reached the table through an equip clause. */
   readonly viaEquip: boolean;
+  readonly policy: SubjectPolicy;
 }
 
 /**
@@ -149,13 +182,21 @@ export interface CardSubject {
  */
 export function cardSubjects(card: Card): CardSubject[] {
   const sources: SubjectSource[] = [
-    ...card.keywords.map((keyword) => ({ name: keyword, viaEquip: false })),
-    ...cardOwnEffects(card).map((effect) => ({ name: effect.kind, viaEquip: false })),
+    ...card.keywords.map((keyword) => ({ name: keyword, viaEquip: false, policy: 'ordinary' as const })),
+    ...cardOwnEffects(card).flatMap((effect) => effectSubjects(effect)),
     ...card.abilities.flatMap(abilitySubjects),
     ...auraSubjects(card),
   ];
   return sources.flatMap((source) =>
-    isColorPieSubject(source.name) ? [{ subject: source.name, viaEquip: source.viaEquip }] : [],
+    isColorPieSubject(source.name)
+      ? [
+          {
+            subject: source.name,
+            viaEquip: source.viaEquip,
+            policy: source.policy,
+          },
+        ]
+      : [],
   );
 }
 
@@ -189,13 +230,76 @@ function colorlessVerdict(subject: ColorPieSubject, viaEquip: boolean): PieVerdi
 }
 
 export function rulingsFor(card: Card): PieRuling[] {
-  return cardSubjects(card).map((item) => ({
-    subject: item.subject,
-    verdict:
-      card.colors.length === 0
-        ? colorlessVerdict(item.subject, item.viaEquip)
-        : bestVerdict(classifyForColors(item.subject, card.colors)),
-  }));
+  const ordinary = cardSubjects(card).map((item) => {
+    const inherited = (() => {
+      if (card.colors.length === 0) return colorlessVerdict(item.subject, item.viaEquip);
+      if (item.policy === 'plusOneCounterEntry') {
+        return card.colors.some((color) => color === 'W' || color === 'B' || color === 'G') ? 'pass' : 'warn';
+      }
+      return bestVerdict(classifyForColors(item.subject, card.colors));
+    })();
+    return {
+      subject: item.subject,
+      verdict: item.policy === 'strictGrant' && inherited === 'warn' ? 'fail' : inherited,
+    };
+  });
+  const effects = [
+    ...cardOwnEffects(card),
+    ...card.abilities.flatMap((ability) => (hasAbilityEffects(ability) ? ability.effects : [])),
+  ];
+  const capabilities = effects.flatMap((effect): PieRuling[] => {
+    if (
+      effect.kind === 'chooseFromGraveyard' &&
+      effect.whose === 'you' &&
+      effect.destination === 'hand' &&
+      effect.control === undefined &&
+      effect.alsoBecomes === undefined
+    ) {
+      const types = effect.filter.cardTypes;
+      const creature = types?.length === 1 && types[0] === 'creature';
+      const instantOrSorcery = types?.length === 2 && types[0] === 'instant' && types[1] === 'sorcery';
+      if (creature || instantOrSorcery) {
+        const legal = creature
+          ? card.colors.some((color) => color === 'W' || color === 'B' || color === 'G')
+          : card.colors.some((color) => color === 'U' || color === 'R' || color === 'G');
+        return [
+          {
+            subject: `chooseFromYourGraveyardToHand(${creature ? 'creature' : 'instantOrSorcery'})`,
+            verdict: card.colors.length > 0 && legal ? 'pass' : 'fail',
+          },
+        ];
+      }
+    }
+    if (effect.kind === 'untapPermanent' && effect.target.kind === 'targetCreatureYouControl') {
+      return [
+        {
+          subject: 'untapPermanent(targetCreatureYouControl)',
+          verdict:
+            card.colors.length > 0 &&
+            card.colors.some((color) => color === 'W' || color === 'U' || color === 'G')
+              ? 'pass'
+              : 'fail',
+        },
+      ];
+    }
+    if (
+      effect.kind !== 'fight' ||
+      effect.fighter !== undefined ||
+      effect.target.kind !== 'targetCreatureYouDontControl'
+    ) {
+      return [];
+    }
+    return [
+      {
+        subject: 'fight',
+        verdict:
+          card.colors.length > 0 && card.colors.some((color) => color === 'R' || color === 'G')
+            ? 'pass'
+            : 'fail',
+      },
+    ];
+  });
+  return [...ordinary, ...capabilities];
 }
 
 /** Off-pie subjects are card-level errors, blamed on the slot that printed them. */
@@ -215,7 +319,7 @@ export function checkCardPie(slot: Slot, card: Card): SetFinding[] {
 
 export interface TertiaryUsage {
   readonly slotId: string;
-  readonly subject: ColorPieSubject;
+  readonly subject: string;
 }
 
 export function tertiaryUsage(slot: Slot, card: Card): TertiaryUsage[] {

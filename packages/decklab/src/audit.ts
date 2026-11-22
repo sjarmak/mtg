@@ -16,6 +16,7 @@
 import type { DataStore } from '@mtg/data';
 import { EXCLUDED_LAYOUTS, normalizeName } from './candidates';
 import type { DeckCriteria } from './criteria';
+import { FormatlessStoreBuildError } from './pool';
 
 export interface DeckEntry {
   readonly name: string;
@@ -75,6 +76,13 @@ export function auditDeck(
   entries: readonly DeckEntry[],
   criteria: DeckCriteria,
 ): DeckAudit {
+  // Every question this function asks is a question about the store: is the name
+  // a real card, is it legal, what does it cost in dollars. A deck built over a
+  // staged set answers none of them — its cards were never printed — so auditing
+  // one here would report every card as invented. Refused by name rather than
+  // run against the wrong world.
+  if (criteria.format === undefined) throw new FormatlessStoreBuildError();
+  const format = criteria.format;
   // Non-deck layouts are excluded, and this is load-bearing rather than tidy.
   // The store holds a `token` row named exactly "Ornithopter" and an
   // `art_series` row named "Delver of Secrets // Delver of Secrets", both
@@ -117,7 +125,7 @@ export function auditDeck(
 
   for (const entry of entries) {
     totalCards += entry.count;
-    const row = resolveRow(entry.name, criteria.format, lookup, byNormalized);
+    const row = resolveRow(entry.name, format, lookup, byNormalized);
 
     if (row === undefined) {
       violations.push({
@@ -222,6 +230,6 @@ function resolveRow(
 function copyLimitFor(row: AuditRow, criteria: DeckCriteria): number {
   if (row.type_line.startsWith('Basic Land')) return criteria.size;
   if ((row.oracle_text ?? '').includes('any number of cards named')) return criteria.size;
-  if (SINGLETON_FORMATS.has(criteria.format)) return 1;
+  if (criteria.format !== undefined && SINGLETON_FORMATS.has(criteria.format)) return 1;
   return criteria.maxCopies;
 }

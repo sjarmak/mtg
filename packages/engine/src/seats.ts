@@ -88,7 +88,7 @@
  *     has no per-seat knowledge log to tell which. `@mtg/kernel` conceals both
  *     libraries including the viewer's own; a foreign backend is not held to
  *     that here.
- *  3. **Zones the projection does not carry at all**, exile among them. Nothing
+ *  3. **Zones the projection does not carry at all**, such as command. Nothing
  *     the suite searches for can be derived from a zone it cannot see.
  *
  * # The capability flag is the pre-open declaration and nothing else

@@ -72,7 +72,9 @@ describe('a mass stat change charged per Swamp', () => {
   const script = mustTranspile(mutilate(perSwamp(-1), perSwamp(-1)));
 
   it('writes the sweep with the SVar in both magnitude slots, sign and all', () => {
-    expect(script).toContain('A:SP$ PumpAll | ValidCards$ Creature | NumAtt$ -Y | NumDef$ -Y');
+    expect(script).toContain(
+      'A:SP$ PumpAll | ValidCards$ Creature | NumAtt$ -Y | NumDef$ -Y | IsCurse$ True',
+    );
   });
 
   it('binds the SVar to the Swamps its controller has, the line Forge ships for this card', () => {
@@ -138,7 +140,13 @@ describe('the tallies Forge cannot name', () => {
     expect(result.rejections.map((r) => r.message).join(' ')).toContain('countWithCounter');
   });
 
-  it('refuses a rate charged per two card types, which Forge spells as an OR this file does not write', () => {
+  /**
+   * The rate rides the same `Valid` spec a count does, so `mtg-0k2g` widened
+   * both at once: `Count$Valid Warrior.YouCtrl,Equipment.YouCtrl/Twice` is
+   * shipped, which is what says the `/Times.` suffix binds to the whole list
+   * and not to its last member.
+   */
+  it('charges a rate per member of a two-card-type list', () => {
     const result = transpileCard(
       pumpPerTally('Wide Tide', {
         kind: 'countMatching',
@@ -146,9 +154,9 @@ describe('the tallies Forge cannot name', () => {
       }),
     );
 
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.rejections.map((r) => r.code)).toEqual(['UNMAPPED_RATE_AMOUNT']);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.script.text.split('\n')).toContain('SVar:Y:Count$Valid Creature.YouCtrl,Artifact.YouCtrl');
   });
 
   it('points at the pump rather than at the card, so the note names the clause', () => {

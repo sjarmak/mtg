@@ -30,8 +30,10 @@
  * fails to typecheck rather than failing a run-time check somewhere downstream.
  *
  * There is deliberately no converter. A reduced set that happens to have dropped
- * nothing is still a reduced set; the way to hold a complete one is to call the
- * strict builder and have it succeed.
+ * nothing is still this type; the way to hold a complete one is to call the
+ * strict builder and have it succeed. The set *document's* label is a separate
+ * question and is measured, not inherited from the type: it reads `dropped`
+ * (`reducedReferenceSetDocument`, `mtg-uzacz`).
  *
  * # What a drop is, and what it is not
  *

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "momir-basic",
+  "name": "Momir Basic",
+  "sources": [
+    {
+      "code": "M11",
+      "catalogFormat": "m11-printed-v1",
+      "catalogSha256": "ea0c6153e664b1c21aed2054a7bd0af617700997d3836f7977be809d5eec5dfe",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/M11.json",
+        "sha256": "e211decab4921f15aba522f3b3931b8cc2dac95d9fb69eb65da38bcb1f7b4aa9",
+        "version": "5.3.0+20260927"
+      }
+    }
+  ],
+  "rules": { "variant": "momir", "startingLife": 24 },
+  "decks": [
+    {
+      "id": "momir-basic",
+      "name": "Momir Basic",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m11-printed-v1:0230:67a2ff8c-ac4a-425e-afd0-a9010bf87c1c",
+          "name": "Plains",
+          "count": 12
+        },
+        {
+          "physicalId": "m11-printed-v1:0234:7f8d3740-40e9-40d4-833e-8f191a43ed14",
+          "name": "Island",
+          "count": 12
+        },
+        {
+          "physicalId": "m11-printed-v1:0238:a7fd3031-8284-4098-a5e6-2fdfc4362752",
+          "name": "Swamp",
+          "count": 12
+        },
+        {
+          "physicalId": "m11-printed-v1:0242:dd9b48f1-7c3a-4b1f-9a00-7b75eb6ea831",
+          "name": "Mountain",
+          "count": 12
+        },
+        {
+          "physicalId": "m11-printed-v1:0246:e36b8794-c117-4d3d-bcde-39a3ae436f1e",
+          "name": "Forest",
+          "count": 12
+        }
+      ]
+    }
+  ],
+  "contentSha256": "4b444700c5239901d101982996e7570f7fa3f52670514cb83a21340702b13c08"
+}

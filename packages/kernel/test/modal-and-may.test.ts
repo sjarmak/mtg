@@ -491,7 +491,10 @@ describe('a recorded game containing a mode and a may decision replays byte for 
       const decision = session.pending;
       if (decision === null) return { session, modesCast, maysAsked };
       if (decision.kind === 'may') maysAsked += 1;
-      const index = decision.kind === 'mulligan' ? 0 : decision.options.length - 1;
+      const index =
+        decision.kind === 'mulligan'
+          ? 0
+          : decision.options.findLastIndex((option) => option.type !== 'concede');
       const chosen = decision.options[index];
       if (chosen?.type === 'castSpell' && chosen.mode !== undefined) modesCast += 1;
       session = choose(session, index);

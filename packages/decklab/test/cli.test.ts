@@ -11,13 +11,87 @@
  * These run with no store and no provider, which is the assertion: a rejected
  * flag must not reach `openStore`, let alone `resolveProvider`.
  */
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import { main } from '../src/cli';
+import { deckCriteriaInputFromArgs, loadPrintedFormatCatalogs, main } from '../src/cli';
 import { defaultMaxSpendUsd } from '../src/select';
 
 const REQUIRED = ['--prompt', 'aggressive red burn', '--format', 'modern'] as const;
 
 describe('decklab flag validation', () => {
+  it('loads every catalog registered for a multi-set printed format', () => {
+    const loaded = loadPrintedFormatCatalogs('jou');
+    expect(loaded.map((entry) => entry.code)).toEqual(['BNG', 'JOU', 'THS']);
+  });
+
+  it('requires an explicit model-spend ceiling for a printed format build', async () => {
+    await expect(
+      main([
+        '--printed-format',
+        'ktk',
+        '--prompt',
+        'curve out with efficient Abzan creatures',
+        '--archetype',
+        'Abzan Midrange',
+        '--colors',
+        'W,B,G',
+        '--output',
+        'out/ktk-abzan.json',
+      ]),
+    ).rejects.toThrow(/--max-usd is required/);
+  });
+
+  it('refuses a printed format build that is not exactly 60 cards', async () => {
+    await expect(
+      main([
+        '--printed-format',
+        'ktk',
+        '--prompt',
+        'curve out with efficient Abzan creatures',
+        '--archetype',
+        'Abzan Midrange',
+        '--colors',
+        'W,B,G',
+        '--size',
+        '40',
+        '--max-usd',
+        '15',
+        '--output',
+        'out/ktk-abzan.json',
+      ]),
+    ).rejects.toThrow(/must contain 60 cards/);
+  });
+
+  it('loads a declared opponent population into the build criteria', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'decklab-opponents-'));
+    const path = join(directory, 'field.json');
+    try {
+      writeFileSync(
+        path,
+        JSON.stringify({
+          id: 'modern-field',
+          members: [
+            { id: 'energy', share: 0.65, strategy: 'build a wide board' },
+            { id: 'combo', share: 0.35, strategy: 'race with a combo' },
+          ],
+        }),
+      );
+      expect(deckCriteriaInputFromArgs([...REQUIRED, '--opponents', path])).toMatchObject({
+        opponentPopulation: {
+          id: 'modern-field',
+          members: [
+            { id: 'energy', share: 0.65 },
+            { id: 'combo', share: 0.35 },
+          ],
+        },
+      });
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
   it('refuses a spend bound that is not a positive number of dollars', async () => {
     await expect(main([...REQUIRED, '--max-spend-usd', '0'])).rejects.toThrow(
       /--max-spend-usd must be a positive number of dollars, got 0/,

@@ -33,6 +33,15 @@ const PIP_KIND: Readonly<Record<ManaSymbol, Exclude<ColorIdentity, 'm'>>> = {
   C: 'c',
 };
 
+/**
+ * One counter a player holds, named by kind: `energy`, `poison`, `experience`.
+ * The name is the backend's own word and is drawn as written, never switched on.
+ */
+export interface PlayerCounter {
+  readonly name: string;
+  readonly amount: number;
+}
+
 export interface PlayerStatusProps {
   /**
    * The seat's label. It is drawn as written and said as *theirs* in the strip's
@@ -53,6 +62,13 @@ export interface PlayerStatusProps {
   /** Life at or below which the number turns negative-toned. Default 5. */
   readonly lowLifeAt?: number;
   readonly mana?: ManaPoolView | null;
+  /**
+   * The counters this player holds. Absent or empty draws nothing: nineteen of
+   * the twenty-one printed formats have no Energy and no poison, and a
+   * permanent empty row on every pod would be a cost every set pays to serve
+   * two. Each arrangement lists what it is handed and never adds a zero.
+   */
+  readonly counters?: readonly PlayerCounter[];
   /**
    * Which drawing the floating pips are painted with. A pool drawn from one set
    * beside a cost line drawn from another is the disagreement `mtg-bc2.45.5`
@@ -135,6 +151,7 @@ export function PlayerStatus(props: PlayerStatusProps): ReactElement {
       count('hand', props.handCount),
       count('library', props.libraryCount),
       count('graveyard', props.graveyardCount),
+      ...(props.counters ?? []).map((counter) => count(counter.name, counter.amount)),
     ),
   );
 }

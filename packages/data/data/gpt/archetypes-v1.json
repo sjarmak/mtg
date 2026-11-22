@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "formatId": "gpt",
+  "archetypes": [
+    {
+      "id": "gruul-bloodthirst",
+      "name": "Gruul Bloodthirst",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Gruul Guildmage",
+        "physicalId": "gpt-printed-v1:0146:cb5a61f8-aab1-48d7-aebb-cf500ac5cb0e"
+      },
+      "plan": "Deal combat damage early, then cast bloodthirst creatures with counters and use Gruul Guildmage to turn excess mana into pressure."
+    },
+    {
+      "id": "izzet-replicate",
+      "name": "Izzet Replicate",
+      "colors": ["U", "R"],
+      "signpost": {
+        "name": "Izzet Guildmage",
+        "physicalId": "gpt-printed-v1:0147:ecce6ade-8741-4567-8ed3-3e03becc6f1b"
+      },
+      "plan": "Control the board with cheap spells, then spend spare mana on replicate and Izzet Guildmage copies for repeated value."
+    },
+    {
+      "id": "orzhov-haunt",
+      "name": "Orzhov Haunt",
+      "colors": ["W", "B"],
+      "signpost": {
+        "name": "Orzhov Guildmage",
+        "physicalId": "gpt-printed-v1:0149:8e2ae5b4-2caf-4992-b2c2-64f00e9e567a"
+      },
+      "plan": "Trade creatures for value, attach haunt cards to likely casualties, and use Orzhov Guildmage to win a long attrition game."
+    }
+  ]
+}

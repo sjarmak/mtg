@@ -2,21 +2,23 @@
 
 Forge lives here as a **downloaded artifact**, never as source.
 
-Forge is GPL-3.0. This lab drives it as a subprocess and nothing else: no vendored source, no
-linking, no copied card scripts. `tools/forge/dist/`, `*.tar.bz2` and `*.jar` are gitignored, so
-nothing under this directory except this file is ever committed.
+Forge is GPL-3.0. This lab drives it as a subprocess and nothing else: no vendored source and no
+linking. Card script lines quoted as play-admission evidence stay GPL-3.0, and the exported
+`LICENSE` lists where they are. `tools/forge/dist/`, `*.tar.bz2` and `*.jar` are gitignored, so
+nothing under this directory except this file and `install.sh` is ever committed.
 
 ## Install
 
 ```bash
-cd tools/forge
-curl -L -o forge-installer-2.0.14.tar.bz2 \
-  https://github.com/Card-Forge/forge/releases/download/forge-2.0.14/forge-installer-2.0.14.tar.bz2
-mkdir -p dist && tar -xjf forge-installer-2.0.14.tar.bz2 -C dist
+npm run forge:install
 ```
 
-Requires Java 21 (a JRE is enough). `@mtg/forge-export` finds the distribution at
-`tools/forge/dist` by default; `FORGE_HOME` overrides it.
+`install.sh` downloads the Forge 2.0.14 release from GitHub, checks its SHA-256, unpacks it into
+`tools/forge/dist`, and reports anything else a match needs: `java` and `javac` 21 or newer, `unzip`,
+and on Linux `xvfb-run`. Running it again on an installed tree only repeats those checks.
+`@mtg/forge-export` finds the distribution at `tools/forge/dist` by default; `FORGE_HOME` overrides
+it. `npm run play` compiles the bridge (`packages/forge-export/bridge/ForgeBridge.java`) itself at
+launch, which is why `javac` and not only `java` is required.
 
 ## An X server is required
 

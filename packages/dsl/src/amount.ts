@@ -47,6 +47,24 @@ import { BasicLandTypeSchema, CardKindSchema } from './vocabulary';
 export const ExiledThisResolutionSchema = z.strictObject({ kind: z.literal('exiledThisResolution') });
 
 /**
+ * How many permanents this resolution moved from the battlefield to exile.
+ *
+ * This is deliberately not `exiledThisResolution`: that amount prints
+ * "cards exiled this way" and excludes tokens, while Mass Polymorph's "that
+ * many" counts every creature the first clause exiled, tokens included. The
+ * origin constraint also keeps a graveyard card exiled earlier in the same
+ * resolution out of a count whose noun was permanents.
+ */
+export const PermanentsExiledThisResolutionSchema = z.strictObject({
+  kind: z.literal('permanentsExiledThisResolution'),
+});
+
+/** Cards this resolution actually moved from its controller's graveyard into a library. */
+export const CardsShuffledFromGraveyardThisResolutionSchema = z.strictObject({
+  kind: z.literal('cardsShuffledFromGraveyardThisResolution'),
+});
+
+/**
  * The X chosen for the object on the stack whose effects are resolving.
  *
  * Two announcements produce that number and the printed sentence cannot tell
@@ -86,35 +104,47 @@ export const CardsInGraveyardSchema = z.strictObject({
   whose: z.enum(['you', 'each']),
 });
 
+/** The resolving object's controller's life total, read when the amount is used. */
+export const ControllerLifeTotalAmountSchema = z.strictObject({
+  kind: z.literal('controllerLifeTotal'),
+});
+
 /**
- * "The number of permanents you control matching a stated shape" — CR 107.3h's
- * family of dynamic characteristics: "gets -1/-1 until end of turn for each
- * Zombie you control" reads its magnitude off the board at the moment the
+ * The characteristic predicate inside a battlefield count — CR 107.3h's
+ * family of dynamic characteristics. "Gets -1/-1 until end of turn for each
+ * Zombie you control" and "for each creature on the battlefield named X"
+ * select different domains and apply the same predicate at the moment the
  * effect applies, the same timing `evaluateAmount` already gives
  * `exiledThisResolution`, just over a different span.
  *
- * Two constraint fields, both optional and both meaning "no constraint" when
+ * Four constraint fields, all optional and all meaning "no constraint" when
  * absent — this package's own convention (`TargetSpecSchema`'s `distinct`,
  * `card.ts`'s own `subtypes`) rather than the kernel's `T[] | null`, because
  * `CountFilterSchema` is DSL-authored data and should read like every other
  * DSL shape. `packages/kernel/src/effects.ts` is the one place `undefined`
- * becomes `null` on the way to an `ObjectFilter`. `cardTypes` and `subtypes`
- * are the two constraints in use; a color, keyword or "other than this
- * permanent" constraint is not here because no card has asked for one, and
- * `kernel/src/continuous.ts`'s `ObjectFilter` — which this compiles to — has
- * room to grow the day one does.
+ * becomes `null` on the way to an `ObjectFilter`. `names` compares the current
+ * layer-derived name. That differs deliberately
+ * from `CardFilterSchema.names`, which searches hidden zones by printed name:
+ * a battlefield count participates in CR 613 and therefore sees a copy effect
+ * that changed the object's copiable name before the count is evaluated.
+ * `keywordAbilities` is deliberately narrower than the card's full structured
+ * keyword-ability vocabulary. Doorkeeper asks one exact question — whether a
+ * creature has defender — and admitting parameterized abilities here would
+ * require their parameters in both the printed phrase and Forge restriction.
+ * The one-member list preserves the same list-shaped filter contract while
+ * making duplicate or unsupported predicates structurally impossible.
  *
- * Always "you control": CR 107.3h's dynamic counters read the battlefield
- * relative to whoever controls the counting object, and `STATIC_SCOPES`
- * (`vocabulary.ts`) already decided this DSL never reaches an opponent's side,
- * so this filter inherits that boundary rather than re-litigating it — which
- * is why there is no `controller` field here at all. The kernel supplies the
- * caster as the controller itself, the same way `objectsInEffectScope`
- * already does for `EffectScope`.
+ * Which side is deliberately not a filter property. `CountMatchingSchema`
+ * supplies "you control" or "on the battlefield", while its opponent-only
+ * sibling is a separate computed amount. That keeps this record a predicate
+ * over characteristics and lets every reader apply it to the domain its own
+ * count selected.
  */
 export const CountFilterSchema = z.strictObject({
   cardTypes: z.array(CardKindSchema).optional(),
   subtypes: z.array(z.string()).optional(),
+  names: z.array(z.string().min(1)).min(1).optional(),
+  keywordAbilities: z.array(z.literal('defender')).length(1).optional(),
 });
 export type CountFilter = z.infer<typeof CountFilterSchema>;
 
@@ -122,24 +152,23 @@ export type CountFilter = z.infer<typeof CountFilterSchema>;
 export const CountMatchingSchema = z.strictObject({
   kind: z.literal('countMatching'),
   filter: CountFilterSchema,
+  /** Absent is the historical "you control" reading; `each` opens the whole battlefield. */
+  whose: z.enum(['you', 'each']).optional(),
+  /** "Other": exclude the resolving ability or static effect's source object. */
+  excludeSource: z.boolean().optional(),
 });
+export type CountMatching = z.infer<typeof CountMatchingSchema>;
 
 /**
  * "The number of `filter` your opponents control" — `countMatching` read
  * across the table.
  *
- * A separate member rather than a `controller` field on `CountFilterSchema`,
- * and the difference is not cosmetic. That filter's docblock argues at length
- * that it is *always* "you control", because `STATIC_SCOPES` already decided
- * this DSL does not reach an opponent's side and a filter with a side field
- * would re-open that decision everywhere the filter is used — inside a static
- * ability's `countOf`, inside a scoped sweeper, inside the Forge board-count
- * SVar. A `ComputedAmount` is the one context where naming the other side is
- * both printable ("equal to the number of creatures your opponents control")
- * and harmless, because an amount is read once, at the moment the effect
- * applies, and constrains nothing else about the card. So the axis lives on
- * the amount, where exactly one reader has to know about it, rather than on
- * the filter, where six do.
+ * A separate member rather than another `whose` value on `countMatching`, and
+ * the difference is the clock. A one-shot amount is handed a resolved caster
+ * and can call `opponentOf`; a continuous tally would need "opponent of the
+ * source's current controller" inside the layer walk, which `ObjectFilter`
+ * cannot express. Keeping the opponent-only reading out of
+ * `PermanentTallySchema` makes that unsupported combination unconstructable.
  *
  * Plural "opponents" in the printed phrase, singular in the kernel: this is a
  * two-player engine, and `opponentOf` is total. The wording is Magic's own and
@@ -306,6 +335,142 @@ export const DamageDealtThisResolutionSchema = z.strictObject({
 });
 
 /**
+ * How much life an earlier life-loss instruction in this resolution actually
+ * made players lose — "the life lost this way", the second half of Blood
+ * Tithe.
+ *
+ * This reads the emitted result rather than the earlier instruction's printed
+ * amount. That distinction keeps the two clauses linked if the life-loss
+ * machinery ever gains a replacement and also makes the amount additive for a
+ * multiplayer sweep. Damage is excluded: it changes a life total, but Forge's
+ * `AFLifeLost` protocol and Blood Tithe both bind this phrase to `LoseLife`,
+ * not to every negative life change in the resolution.
+ */
+export const LifeLostThisResolutionSchema = z.strictObject({
+  kind: z.literal('lifeLostThisResolution'),
+});
+
+/**
+ * The toughness of the one creature an earlier effect in this resolution
+ * targeted — Condemn's "its toughness".
+ *
+ * This is deliberately not a live battlefield count. The earlier instruction
+ * may move the creature before this amount is read, so the kernel snapshots
+ * the layer-derived value while it plans resolution, at the same CR 608.2b
+ * point where it rechecks the target. The list validator requires exactly one
+ * earlier creature chooser; the card therefore carries neither an object id
+ * nor an effect index that could drift away from its printed antecedent.
+ */
+export const ThatCreatureToughnessSchema = z.strictObject({
+  kind: z.literal('thatCreatureToughness'),
+});
+
+/**
+ * The power of the creature retained by the event that created this trigger.
+ *
+ * This amount is engine-only because it has no meaning on a spell, activation,
+ * state trigger, or trigger condition that retains no creature. The ability
+ * validator enforces that placement; the kernel reads the same battlefield
+ * incarnation live when it remains and departure LKI otherwise.
+ */
+export const TriggeringCreaturePowerSchema = z.strictObject({
+  kind: z.literal('triggeringCreaturePower'),
+});
+
+/**
+ * The toughness of the creature retained by the event that created this trigger.
+ *
+ * The live-or-LKI and generator-boundary contract is identical to
+ * `TriggeringCreaturePowerSchema`; this sibling exists because power and
+ * toughness can diverge independently before the trigger resolves.
+ */
+export const TriggeringCreatureToughnessSchema = z.strictObject({
+  kind: z.literal('triggeringCreatureToughness'),
+});
+
+/** The final post-replacement damage amount retained by this trigger event. */
+export const TriggeringDamageAmountSchema = z.strictObject({
+  kind: z.literal('triggeringDamageAmount'),
+});
+
+/** Number of this cast spell's colors shared with its source object's retained entry choice. */
+export const TriggeringSpellChosenColorCountSchema = z.strictObject({
+  kind: z.literal('triggeringSpellChosenColorCount'),
+});
+
+/**
+ * The layer-derived power of the permanent sacrificed as this spell's
+ * additional cost.
+ *
+ * This is last-known information fixed while the cost is paid, not a live
+ * battlefield read: the permanent is already in its owner's graveyard before
+ * the spell reaches the stack. The spell-cost seam retains the number on the
+ * stack object, and effect application is the only reader. Keeping the amount
+ * hand-authored prevents the generator from producing a value whose required
+ * payment it cannot describe.
+ */
+export const PaidSacrificePowerSchema = z.strictObject({
+  kind: z.literal('paidSacrificePower'),
+});
+
+/** Layer-derived toughness of the sole permanent sacrificed as a spell or ability cost. */
+export const PaidSacrificeToughnessSchema = z.strictObject({
+  kind: z.literal('paidSacrificeToughness'),
+});
+
+/** Mana value of the sole card discarded as this activated ability's cost. */
+export const PaidDiscardManaValueSchema = z.strictObject({
+  kind: z.literal('paidDiscardManaValue'),
+});
+
+/**
+ * The layer-derived power of the one permanent sacrificed by an earlier
+ * instruction in this resolution.
+ *
+ * Unlike `paidSacrificePower`, this value is chosen while the spell or ability
+ * is resolving. The kernel snapshots it immediately before the zone move, so
+ * later instructions can read last-known information after the permanent (or
+ * token) has left the battlefield. List validation requires exactly one
+ * earlier one-permanent sacrifice, leaving the amount with one unambiguous
+ * antecedent. It remains hand-authored, outside the shared model vocabulary.
+ */
+export const SacrificedPermanentPowerThisResolutionSchema = z.strictObject({
+  kind: z.literal('sacrificedPermanentPowerThisResolution'),
+});
+
+/**
+ * Half the chosen player's library size, rounded down at resolution.
+ *
+ * The player is deliberately not stored in the amount. It is the player in
+ * the enclosing effect's target slot, so retaining a second selector here
+ * would admit two disagreeing answers to one printed "their". Validation
+ * limits the amount to a player-targeted mill effect, and the kernel reads the
+ * live library after CR 608.2b has rechecked that target.
+ */
+export const HalfTargetLibraryRoundedDownSchema = z.strictObject({
+  kind: z.literal('halfTargetLibraryRoundedDown'),
+});
+
+/**
+ * The mana value of the one card an earlier instruction revealed from the top
+ * of this controller's library and moved to their hand.
+ *
+ * This is a resolution-scoped referent rather than a live zone query. The card
+ * is no longer in the library when a later instruction reads the amount, and a
+ * second card may now occupy the top. The kernel therefore reads the reveal
+ * event emitted by the earlier instruction and follows that physical card's
+ * stable object id across the CR 400.7 zone change. Validation requires one
+ * earlier `revealTopCardToHand` writer, so there is no authored id or effect
+ * index that can drift from the printed "its".
+ *
+ * Hand-authored only by containment: `ModelEffectSchema` still supplies plain
+ * integers to the shared effect factories and never imports this member.
+ */
+export const RevealedCardManaValueThisResolutionSchema = z.strictObject({
+  kind: z.literal('revealedCardManaValueThisResolution'),
+});
+
+/**
  * The CR 613 reading's vocabulary: the members that name a standing fact about
  * the battlefield, so asking them again at an arbitrary later moment is a
  * well-formed question.
@@ -371,8 +536,9 @@ export type PermanentTally = z.infer<typeof PermanentTallySchema>;
  * The computed half, as its own union so the readers can switch on `kind` and
  * stay exhaustive.
  *
- * `exiledThisResolution` and `damageDealtThisResolution` count a
- * resolution-scoped span of the event log; `chosenX` reads the announcement
+ * The two exile counts, `damageDealtThisResolution`, and
+ * `lifeLostThisResolution` count a resolution-scoped span of the event log;
+ * `chosenX` reads the announcement
  * that put the object on the stack, whether that was a cast or an activation;
  * every other member reads the board (a zone off the
  * battlefield, and the battlefield itself), as a tally or, for
@@ -385,16 +551,43 @@ export type PermanentTally = z.infer<typeof PermanentTallySchema>;
  * and is the half of the reading the header's argument pairs
  * against CR 613.
  */
+function computedAmountOptions() {
+  return [
+    ExiledThisResolutionSchema,
+    PermanentsExiledThisResolutionSchema,
+    CardsInGraveyardSchema,
+    ControllerLifeTotalAmountSchema,
+    CountMatchingSchema,
+    ChosenXSchema,
+    CountMatchingOpponentSchema,
+    CountWithCounterSchema,
+    LandsWithSubtypeSchema,
+    GreatestPowerAmongSchema,
+    DamageDealtThisResolutionSchema,
+    LifeLostThisResolutionSchema,
+    ThatCreatureToughnessSchema,
+    HalfTargetLibraryRoundedDownSchema,
+  ] as const;
+}
+
+/** The frozen amount vocabulary shared with generator-facing effect factories. */
+export const SharedComputedAmountSchema = z.discriminatedUnion('kind', computedAmountOptions());
+
+export const SharedAmountSchema = z.union([z.int(), SharedComputedAmountSchema]);
+
+/** Executable card vocabulary, isolated from the frozen generator schemas. */
 export const ComputedAmountSchema = z.discriminatedUnion('kind', [
-  ExiledThisResolutionSchema,
-  CardsInGraveyardSchema,
-  CountMatchingSchema,
-  ChosenXSchema,
-  CountMatchingOpponentSchema,
-  CountWithCounterSchema,
-  LandsWithSubtypeSchema,
-  GreatestPowerAmongSchema,
-  DamageDealtThisResolutionSchema,
+  ...computedAmountOptions(),
+  CardsShuffledFromGraveyardThisResolutionSchema,
+  PaidSacrificePowerSchema,
+  PaidSacrificeToughnessSchema,
+  PaidDiscardManaValueSchema,
+  SacrificedPermanentPowerThisResolutionSchema,
+  RevealedCardManaValueThisResolutionSchema,
+  TriggeringCreaturePowerSchema,
+  TriggeringCreatureToughnessSchema,
+  TriggeringDamageAmountSchema,
+  TriggeringSpellChosenColorCountSchema,
 ]);
 
 export const AmountSchema = z.union([z.int(), ComputedAmountSchema]);
@@ -426,16 +619,15 @@ export type Amount = z.infer<typeof AmountSchema>;
  * ## Why the multiplicand is a `PermanentTally` and not a `ComputedAmount`
  *
  * A rate is charged per *thing on the battlefield*, and `PermanentTally` is
- * already the name of that group. The three members `ComputedAmount` has that
- * this one does not are the three that name no such thing: two count a span of
- * one resolution, one reads the cast. "For each card exiled this way" is not a
- * printed frame, and a rate over `chosenX` is a second spelling of a number the
- * caster already chose.
+ * already the name of that group. Resolution spans, retained targets, cast
+ * choices, hidden-zone lengths, and opponent-only readings name no such group.
+ * "For each card exiled this way" is not a printed frame, and a rate over
+ * `chosenX` is a second spelling of a number the caster already chose.
  *
- * The two board-reading members `PermanentTally` excludes are excluded for
- * reasons that belong to the layer walk rather than to this reading, so the day
- * a card prints "for each card in your graveyard" the answer is a member on
- * that union with its CR 613 arm argued, not a second tally vocabulary here.
+ * Board-reading members `PermanentTally` excludes are excluded for reasons
+ * that belong to the layer walk rather than to this reading, so the day a card
+ * prints "for each card in your graveyard" the answer is a member on that
+ * union with its CR 613 arm argued, not a second tally vocabulary here.
  *
  * ## Where it may be printed
  *

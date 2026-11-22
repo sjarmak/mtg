@@ -13,6 +13,16 @@
  * which is the same reason `BASIC_FOR_COLOR` below is read off the DSL's
  * vocabulary rather than listed again.
  *
+ * # One row, not a panel
+ *
+ * The playtester's UI pass: "replace the large mana base panel with a compact
+ * control: `Lands 24  W 5 U 5 B 5 R 5 G 4`". A bordered box with a title, a
+ * note and a sentence of explanation was three lines of chrome around five
+ * numbers, on a screen whose subject is the cards beside it. What survives is
+ * the five counts, their two buttons each, and the one word that says whose
+ * count is on screen; the shared mana glyph carries the color at a glance and
+ * its accessible label names the basic land outright.
+ *
  * Distinct from `./ManaBasePanel`, which reports a finished artifact's mana base
  * and edits nothing.
  */
@@ -20,7 +30,10 @@ import { createElement } from 'react';
 import type { ReactElement } from 'react';
 import type { BasicLandType, Color } from '@mtg/dsl';
 import { BASIC_LAND_COLOR, BASIC_LAND_TYPES, COLORS } from '@mtg/dsl';
-import type { ManualDeck } from '@mtg/deckbuild';
+import { symbolElement } from '../../card/SymbolText';
+import { DEFAULT_SYMBOL_SET } from '../../card/symbols';
+import type { SymbolSet } from '../../card/symbols';
+import { withArticle } from './article';
 
 export const MANA_BASE_LABEL = 'Mana base';
 
@@ -29,11 +42,11 @@ export const SUGGEST_BASICS_LABEL = 'Suggest a mana base';
 
 /** Accessible names for the per-color controls, so a test can click one by name. */
 export function addBasicLabel(type: BasicLandType): string {
-  return `Add a ${type}`;
+  return `Add ${withArticle(type)}`;
 }
 
 export function cutBasicLabel(type: BasicLandType): string {
-  return `Cut a ${type}`;
+  return `Cut ${withArticle(type)}`;
 }
 
 const BASIC_FOR_COLOR: Readonly<Record<Color, BasicLandType>> = Object.fromEntries(
@@ -41,34 +54,37 @@ const BASIC_FOR_COLOR: Readonly<Record<Color, BasicLandType>> = Object.fromEntri
 ) as Record<Color, BasicLandType>;
 
 export interface BasicsPanelProps {
-  readonly deck: ManualDeck;
+  readonly deck: {
+    readonly lands: { readonly length: number };
+    readonly manaBase: { readonly landsByColor: Readonly<Record<Color, number>> };
+  };
   /** True when the counts on screen are the person's rather than the suggestion. */
   readonly chosen: boolean;
   /** Adds (+1) or cuts (-1) one basic of a color. */
   readonly onAdjustBasics: (color: Color, delta: number) => void;
   /** Hands the deck back to the mana base the picks apportion. */
   readonly onSuggestBasics: () => void;
-}
-
-function plural(count: number, noun: string): string {
-  return count === 1 ? `1 ${noun}` : `${String(count)} ${noun}s`;
+  /** The same staged/offline symbol selection used by card faces. */
+  readonly symbols?: SymbolSet;
 }
 
 function basicControl(
   color: Color,
   count: number,
   onAdjust: (color: Color, delta: number) => void,
+  symbols: SymbolSet,
 ): ReactElement {
   const type = BASIC_FOR_COLOR[color];
+  const glyph = symbolElement(`basic-${color}`, color, symbols);
+  if (glyph === null) throw new Error(`BasicsPanel: symbol registry has no {${color}}`);
   return createElement(
     'span',
-    { key: color, className: 'mtg-fact' },
-    createElement('span', { className: 'mtg-fact__label' }, type),
+    { key: color, className: 'mtg-manabar__color', 'data-color': color },
     createElement(
       'button',
       {
         type: 'button',
-        className: 'mtg-btn',
+        className: 'mtg-manabar__step',
         'aria-label': cutBasicLabel(type),
         disabled: count === 0,
         onClick: (): void => {
@@ -77,12 +93,13 @@ function basicControl(
       },
       '-',
     ),
-    createElement('span', { className: 'mtg-fact__value' }, String(count)),
+    createElement('span', { className: 'mtg-manabar__pip', role: 'img', 'aria-label': type }, glyph),
+    createElement('span', { className: 'mtg-manabar__count' }, String(count)),
     createElement(
       'button',
       {
         type: 'button',
-        className: 'mtg-btn',
+        className: 'mtg-manabar__step',
         'aria-label': addBasicLabel(type),
         onClick: (): void => {
           onAdjust(color, 1);
@@ -95,42 +112,35 @@ function basicControl(
 
 export function BasicsPanel(props: BasicsPanelProps): ReactElement {
   const { chosen, deck } = props;
+  const symbols = props.symbols ?? DEFAULT_SYMBOL_SET;
   return createElement(
     'div',
-    { className: 'mtg-panel' },
+    { className: 'mtg-manabar', role: 'group', 'aria-label': MANA_BASE_LABEL },
+    // The word and the number are one box rather than two siblings: on a phone
+    // `../../styles/deck-mobile.ts` gives them a row of their own so the five
+    // color groups below can line up in columns, and a wrap that can fall
+    // between "Lands" and "24" is a row that reads as a stray number.
     createElement(
-      'div',
-      { className: 'mtg-panel__head' },
-      createElement('span', { className: 'mtg-panel__title' }, MANA_BASE_LABEL),
-      createElement(
-        'span',
-        { className: 'mtg-panel__note' },
-        `${plural(deck.lands.length, 'land')} · ${chosen ? 'your count' : 'apportioned from your picks'}`,
-      ),
+      'span',
+      { className: 'mtg-manabar__lands' },
+      createElement('span', { className: 'mtg-manabar__label' }, 'Lands'),
+      createElement('span', { className: 'mtg-manabar__total' }, String(deck.lands.length)),
     ),
+    ...COLORS.map((color) =>
+      basicControl(color, deck.manaBase.landsByColor[color], props.onAdjustBasics, symbols),
+    ),
+    createElement('span', { className: 'mtg-manabar__note' }, chosen ? 'your count' : 'suggested'),
+    createElement('span', { className: 'mtg-toolbar__spacer' }),
     createElement(
-      'div',
-      { className: 'mtg-panel__body' },
-      createElement(
-        'p',
-        { className: 'mtg-prompt__explain' },
-        chosen
-          ? 'Your own count stands until you ask for the suggestion back.'
-          : 'Add or cut a basic and your count stands from then on.',
-      ),
-      createElement(
-        'div',
-        { className: 'mtg-toolbar', role: 'group', 'aria-label': MANA_BASE_LABEL },
-        ...COLORS.map((color) =>
-          basicControl(color, deck.manaBase.landsByColor[color], props.onAdjustBasics),
-        ),
-        createElement('span', { className: 'mtg-toolbar__spacer' }),
-        createElement(
-          'button',
-          { type: 'button', className: 'mtg-btn', disabled: !chosen, onClick: props.onSuggestBasics },
-          SUGGEST_BASICS_LABEL,
-        ),
-      ),
+      'button',
+      {
+        type: 'button',
+        className: 'mtg-btn',
+        disabled: !chosen,
+        'aria-label': SUGGEST_BASICS_LABEL,
+        onClick: props.onSuggestBasics,
+      },
+      'Suggest',
     ),
   );
 }

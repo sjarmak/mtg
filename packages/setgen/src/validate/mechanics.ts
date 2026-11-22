@@ -42,7 +42,6 @@
  * how a brief buys a set that does not contain it.
  */
 import type {
-  Ability,
   AbilityKind,
   AnyEffectKind,
   AuraModificationKind,
@@ -50,12 +49,12 @@ import type {
   CounterKind,
   Effect,
   Keyword,
+  PrintedAbility,
   StaticModificationKind,
-  TokenAbility,
   TokenSpec,
   TriggerCondition,
 } from '@mtg/dsl';
-import { hasAbilityEffects, tokenAbilities } from '@mtg/dsl';
+import { printedCardSurface, tokenAbilities } from '@mtg/dsl';
 import type { DesiredMechanic } from '../brief';
 import type { SetFinding } from './findings';
 import { finding } from './findings';
@@ -76,17 +75,9 @@ export function cardOwnEffects(card: Card): readonly Effect[] {
   return card.modes === undefined ? card.effects : card.modes.flatMap((mode) => mode.effects);
 }
 
-/** Every effect a card prints, on the card itself or inside one of its abilities. */
-function printedEffects(card: Card): readonly Effect[] {
-  const fromAbilities = card.abilities.flatMap((ability: Ability) =>
-    hasAbilityEffects(ability) ? [...ability.effects] : [],
-  );
-  return [...cardOwnEffects(card), ...fromAbilities];
-}
-
 /** Every token this card can put into play. */
 function tokensCreatedBy(card: Card): readonly TokenSpec[] {
-  return printedEffects(card).flatMap((effect) => (effect.kind === 'createToken' ? [effect.token] : []));
+  return printedCardSurface(card).tokens;
 }
 
 /**
@@ -98,8 +89,6 @@ function tokensCreatedBy(card: Card): readonly TokenSpec[] {
  * word — so the readers below take the union and switch on `kind`, which both
  * halves share.
  */
-type PrintedAbility = Ability | TokenAbility;
-
 /**
  * What a printed continuous clause may change, over both places one is printed.
  *
@@ -112,14 +101,7 @@ type PrintedAbility = Ability | TokenAbility;
 export type PrintedModificationKind = StaticModificationKind | AuraModificationKind;
 
 function printedAbilities(card: Card): readonly PrintedAbility[] {
-  return [...card.abilities, ...tokensCreatedBy(card).flatMap((token) => tokenAbilities(token))];
-}
-
-/** `hasAbilityEffects` over the union: the static member is the one without effects. */
-function hasPrintedEffects(
-  ability: PrintedAbility,
-): ability is Extract<PrintedAbility, { effects: unknown }> {
-  return 'effects' in ability;
+  return printedCardSurface(card).abilities;
 }
 
 /**
@@ -135,7 +117,7 @@ function hasPrintedEffects(
  * used by every reader.
  */
 export function printedEffectKinds(card: Card): readonly AnyEffectKind[] {
-  return [...printedEffectKindsOnCard(card), ...tokenEffectKinds(card)];
+  return printedCardSurface(card).effects.map((effect) => effect.kind);
 }
 
 /**
@@ -155,16 +137,7 @@ export function printedEffectKinds(card: Card): readonly AnyEffectKind[] {
  * transcription of the other.
  */
 export function printedEffectKindsOnCard(card: Card): readonly AnyEffectKind[] {
-  return printedEffects(card).map((effect) => effect.kind);
-}
-
-/** The effect kinds printed on the lines of the tokens this card creates. */
-function tokenEffectKinds(card: Card): readonly AnyEffectKind[] {
-  return tokensCreatedBy(card).flatMap((token) =>
-    tokenAbilities(token).flatMap((ability) =>
-      hasPrintedEffects(ability) ? ability.effects.map((effect) => effect.kind) : [],
-    ),
-  );
+  return printedCardSurface(card).cardEffects.map((effect) => effect.kind);
 }
 
 /**
@@ -229,7 +202,7 @@ export function printedModificationKindsOnCard(card: Card): readonly PrintedModi
 
 /** The modification kinds printed on the lines of the tokens this card creates. */
 function tokenModificationKinds(card: Card): readonly PrintedModificationKind[] {
-  return tokensCreatedBy(card).flatMap((token) => tokenAbilities(token).flatMap(modificationKindsOf));
+  return printedCardSurface(card).tokenAbilities.flatMap(modificationKindsOf);
 }
 
 /** What one printed ability changes: its static modification, its equip clause's, or neither. */
@@ -261,12 +234,10 @@ export function printedAbilityKinds(card: Card): readonly AbilityKind[] {
  * what lets a set call its parts whatever its world calls them.
  */
 export function partCountersCreatedBy(card: Card): readonly CounterKind[] {
-  return tokensCreatedBy(card).flatMap((token) =>
-    tokenAbilities(token).flatMap((ability) =>
-      ability.kind === 'activated'
-        ? ability.effects.flatMap((effect) => (effect.kind === 'putCounters' ? [effect.counter] : []))
-        : [],
-    ),
+  return printedCardSurface(card).tokenAbilities.flatMap((ability) =>
+    ability.kind === 'activated'
+      ? ability.effects.flatMap((effect) => (effect.kind === 'putCounters' ? [effect.counter] : []))
+      : [],
   );
 }
 

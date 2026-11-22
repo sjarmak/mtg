@@ -124,9 +124,15 @@ describe('the two legality tables, which must agree about these kinds', () => {
   it('lists each referent on the effect row that hand-authors it', () => {
     expect([...FORGE_EFFECTS.dealDamage.targets]).toContain('thatCreaturesController');
     expect([...legalTargetsFor('dealDamage')]).toContain('thatCreaturesController');
+    expect([...FORGE_EFFECTS.discardCards.targets]).toContain('thatCreaturesController');
+    expect([...legalTargetsFor('discardCards')]).toContain('thatCreaturesController');
     expect([...FORGE_EFFECTS.tapPermanent.targets]).toContain('thatCreature');
     expect([...legalTargetsFor('tapPermanent')]).toContain('thatCreature');
+    expect([...FORGE_EFFECTS.putCounters.targets]).toContain('thatCreature');
+    expect([...legalTargetsFor('putCounters')]).toContain('thatCreature');
     expect([...FORGE_EFFECTS.loseLife.targets]).toContain('thatPlayer');
     expect([...legalTargetsFor('loseLife')]).toContain('thatPlayer');
+    expect([...FORGE_EFFECTS.loseLife.targets]).toContain('thatCreaturesController');
+    expect([...legalTargetsFor('loseLife')]).toContain('thatCreaturesController');
   });
 });

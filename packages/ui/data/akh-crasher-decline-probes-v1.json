@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "crasher-decline-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0117:dd5db68c-24d5-44ce-9809-e446f26fac5d"],
+      "decisionFamilies": ["haste-same-turn-attack", "optional-exert-decline-and-normal-untap"],
+      "assertions": ["Crasher local casts and attacks with haste without exerting, then untaps normally"],
+      "testFile": "packages/forge-export/test/observed-akh-crasher-decline.integration.test.ts"
+    },
+    {
+      "id": "crasher-decline-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0117:dd5db68c-24d5-44ce-9809-e446f26fac5d"],
+      "decisionFamilies": ["haste-same-turn-attack", "optional-exert-decline-and-normal-untap"],
+      "assertions": ["Crasher engine casts and attacks with haste without exerting, then untaps normally"],
+      "testFile": "packages/forge-export/test/observed-akh-crasher-decline.integration.test.ts"
+    }
+  ]
+}

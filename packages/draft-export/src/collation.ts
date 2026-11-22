@@ -9,16 +9,19 @@
  * `openSealedPool` opens the same set's packs from, so a drafted pack and a
  * sealed pack hold the same mix.
  *
- * Basic lands sit in the Common sheet, because that is their DSL rarity and
- * `openSealedPool` already puts them in the common slot. They rate 0 (the deck
- * builder scores every land 0), so bots take them last. A dedicated land slot
- * is a change to the recipe, not to this file.
+ * Basic lands are in no sheet. Their DSL rarity is `common`, so they used to
+ * sit in the Common sheet and be dealt by the nine common slots at their share
+ * of it: the reduced M11 prints twenty of them among 121 commons and one pack
+ * in six came out with three or more (`mtg-h77m`). `boosterPool` drops them,
+ * here and in `openSealedPool`, so the two still deal the same mix and the deck
+ * builder still supplies the mana base. A set that wants its basics drafted
+ * needs a land slot, which is a change to the recipe, not to this file.
  *
  * Two ways a legal-looking file fails to draft, both invisible in the text:
  * a sheet no layout draws from, and a slot asking for more distinct cards than
  * its sheet holds. `collationReport` names both.
  */
-import { boosterSlotRarityWeights, type BoosterRecipe } from '@mtg/deckbuild';
+import { boosterPool, boosterSlotRarityWeights, type BoosterRecipe } from '@mtg/deckbuild';
 import type { Card, Rarity } from '@mtg/dsl';
 import { RARITIES } from '@mtg/dsl';
 
@@ -48,14 +51,16 @@ export function sheetName(rarity: Rarity): string {
 }
 
 /**
- * Partitions a set into one sheet per rarity, each in collector-number order.
- * A rarity the set does not print gets no sheet at all rather than an empty one.
+ * Partitions a set's booster pool into one sheet per rarity, each in
+ * collector-number order. A rarity the set does not print gets no sheet at all
+ * rather than an empty one, and a basic land gets no sheet either.
  */
 export function buildSheets(cards: readonly Card[]): readonly DraftmancerSheet[] {
+  const pool = boosterPool(cards);
   return RARITIES.map((rarity) => ({
     name: sheetName(rarity),
     rarity,
-    cards: cards
+    cards: pool
       .filter((card) => card.rarity === rarity)
       .sort((a, b) => a.set.collectorNumber - b.set.collectorNumber),
   })).filter((sheet) => sheet.cards.length > 0);

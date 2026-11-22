@@ -405,3 +405,259 @@ describe('the ask flyout clears the hand and the step bar at every viewport', ()
 function round(value: number): number {
   return Math.round(value * 10) / 10;
 }
+
+/**
+ * The same fixture, with the table choosing a target.
+ *
+ * `data-aiming` is `../../src/board/Board.ts`'s own attribute for that state and
+ * it is written from a prop, so a statically rendered page is never in it. The
+ * script flips exactly the attribute the live board flips, and the sheet reads
+ * nothing else about the state.
+ */
+const AIM_SCRIPT = `${SHUT_SCRIPT}<script>(function(){
+  var mat = document.querySelector('.mtg-board');
+  if (mat !== null) mat.setAttribute('data-aiming', 'true');
+})();</script>`;
+
+/**
+ * One expression again, and it moves the attribute between two hit tests of the
+ * same point. Nothing else about the page changes between them, so the pair is a
+ * measurement of the rule rather than of the layout.
+ */
+const AIM_MEASURE = `(() => {
+  const round = (value) => Math.round(value * 10) / 10;
+  const name = (element) => {
+    if (element === null || element === undefined) return null;
+    const cls = typeof element.className === 'string' && element.className !== ''
+      ? '.' + element.className.split(' ').join('.')
+      : '';
+    return element.tagName.toLowerCase() + cls;
+  };
+  const mat = document.querySelector('.mtg-board');
+  const flyout = document.querySelector('.mtg-board__lanes > .mtg-ask-flyout');
+  const band = document.querySelector(".mtg-board__side[data-seat='opponent']");
+  const viewport = [window.innerWidth, window.innerHeight];
+  const empty = {
+    ok: false, why: null, viewport: viewport, covered: 0, point: null,
+    aimingHit: null, restingHit: null, reachesPermanent: false,
+    restingInFlyout: false, moves: 0, moveReachable: false,
+  };
+  if (mat === null || flyout === null || band === null) {
+    const missing = mat === null ? 'mat' : (flyout === null ? 'flyout' : "opponent's band");
+    return { ...empty, why: 'the aiming fixture drew no ' + missing };
+  }
+  mat.setAttribute('data-aiming', 'true');
+
+  // A point has to be inside the box, over a permanent, and clear of every
+  // control in the box: the area directly under a move is the one part of the
+  // strip the fix deliberately leaves unreachable.
+  const box = flyout.getBoundingClientRect();
+  const controls = [...flyout.querySelectorAll('button, input, select, textarea, a[href]')]
+    .map((element) => element.getBoundingClientRect());
+  const clear = (x, y) => controls.every((c) => x < c.left - 1 || x > c.right + 1 || y < c.top - 1 || y > c.bottom + 1);
+  const under = [...band.querySelectorAll('.mtg-slot')].filter((slot) => {
+    const b = slot.getBoundingClientRect();
+    return b.left < box.right && b.right > box.left && b.top < box.bottom && b.bottom > box.top;
+  });
+  let picked = null;
+  for (const slot of under) {
+    const b = slot.getBoundingClientRect();
+    const left = Math.max(b.left, box.left);
+    const right = Math.min(b.right, box.right);
+    const top = Math.max(b.top, box.top);
+    const bottom = Math.min(b.bottom, box.bottom);
+    if (right - left < 6 || bottom - top < 6) continue;
+    for (let ix = 1; ix <= 5 && picked === null; ix += 1) {
+      for (let iy = 1; iy <= 5 && picked === null; iy += 1) {
+        const x = left + ((right - left) * ix) / 6;
+        const y = top + ((bottom - top) * iy) / 6;
+        if (clear(x, y)) picked = { slot: slot, x: x, y: y };
+      }
+    }
+    if (picked !== null) break;
+  }
+
+  const moves = [...flyout.querySelectorAll('button.mtg-choice')];
+  const move = moves.length > 0 ? moves[0] : null;
+  let moveReachable = false;
+  if (move !== null) {
+    const m = move.getBoundingClientRect();
+    const hit = document.elementFromPoint(m.left + m.width / 2, m.top + m.height / 2);
+    moveReachable = hit !== null && (hit === move || move.contains(hit));
+  }
+  if (picked === null) {
+    return { ...empty, ok: true, covered: under.length, moves: moves.length, moveReachable: moveReachable };
+  }
+
+  const aiming = document.elementFromPoint(picked.x, picked.y);
+  mat.setAttribute('data-aiming', 'false');
+  const resting = document.elementFromPoint(picked.x, picked.y);
+  mat.setAttribute('data-aiming', 'true');
+  return {
+    ok: true,
+    why: null,
+    viewport: viewport,
+    covered: under.length,
+    point: { x: round(picked.x), y: round(picked.y) },
+    aimingHit: name(aiming),
+    restingHit: name(resting),
+    reachesPermanent: aiming !== null && picked.slot.contains(aiming),
+    restingInFlyout: resting !== null && flyout.contains(resting),
+    moves: moves.length,
+    moveReachable: moveReachable,
+  };
+})()`;
+
+interface AimReading {
+  readonly ok: boolean;
+  readonly why: string | null;
+  readonly viewport: readonly number[];
+  readonly covered: number;
+  readonly point: { readonly x: number; readonly y: number } | null;
+  readonly aimingHit: string | null;
+  readonly restingHit: string | null;
+  readonly reachesPermanent: boolean;
+  readonly restingInFlyout: boolean;
+  readonly moves: number;
+  readonly moveReachable: boolean;
+}
+
+/**
+ * The box hands its presses back to the board while a target is being picked.
+ *
+ * `mtg-whyp`. The flyout covers the top-left three or four permanents of the
+ * opponent's band, and while it was opaque a player who aims by pointing at the
+ * creature she means could not reach those cards at all. The fix is one pair of
+ * rules in `src/styles/board/ask-flyout.ts`: inside
+ * `.mtg-board[data-aiming='true']` the box takes `pointer-events: none` and its
+ * own controls take `pointer-events: auto`.
+ *
+ * That is a hit test and nothing else, so it is measured rather than asserted
+ * over markup. The reading picks a point that is inside the box's rectangle,
+ * over an opponent permanent, and clear of every control in the box, and asks
+ * the document what is at it.
+ *
+ * # The control is in the same reading
+ *
+ * The same point is hit-tested twice: once with the mat aiming, where it must
+ * answer with the permanent, and once with the mat at rest, where it must answer
+ * with something inside the flyout. The second half is what makes the first
+ * half mean anything -- a point that answered with the permanent in both states
+ * would be a point the box never covered, and the assertion would be measuring
+ * an empty strip. It also proves the rule is doing the work: the geometry is
+ * identical in the two readings and only the attribute moved.
+ *
+ * And the box's own list still has to work, so a move inside it is hit-tested
+ * while aiming too. `pointer-events: none` with nothing to put it back would
+ * pass every assertion about the board and take away the only other way to
+ * answer the question.
+ *
+ * # Proved able to fail
+ *
+ * Run against `src/styles/board/ask-flyout.ts` with each of the two rules
+ * deleted in turn and then put back. Both readings still pass the geometry test
+ * above, which is the point of measuring this separately:
+ *
+ *  - Without `pointer-events: none` on the box, the press over the permanent
+ *    answers with the panel: `aim-4 at 1024x768: a press inside the box over a
+ *    permanent answered with p.mtg-prompt__explain`.
+ *  - Without `pointer-events: auto` on the controls, the board comes back and
+ *    the list goes: `aim-4 at 1024x768: a move in the flyout cannot be pressed
+ *    while aiming`.
+ */
+describe('the ask flyout lets a press through to the board while aiming', () => {
+  browserIt(
+    'answers with the permanent under the box, and with the box at rest',
+    async () => {
+      const directory = await mkdtemp(join(tmpdir(), 'mtg-ask-aim-'));
+      const positions: { readonly label: string; readonly file: string }[] = [];
+      for (const perSide of CROWDINGS) {
+        const label = `aim-${String(perSide)}`;
+        const file = join(directory, `${label}.html`);
+        await writeFile(file, page(board(perSide), label, AIM_SCRIPT), 'utf8');
+        positions.push({ label, file });
+      }
+
+      let chrome: Awaited<ReturnType<typeof launchChrome>> | null = null;
+      let bodyError: unknown;
+      try {
+        chrome = await launchChrome(join(directory, 'chrome'));
+        for (const position of positions) {
+          for (const [width, height] of VIEWPORTS) {
+            const where = `${position.label} at ${String(width)}x${String(height)}`;
+            const result = (await measurePage(
+              chrome.client,
+              position.file,
+              width,
+              height,
+              AIM_MEASURE,
+              position.label,
+            )) as unknown as AimReading;
+            console.log(
+              `${where}: ${String(result.covered)} covered permanent(s), point ${String(result.point?.x ?? null)},${String(result.point?.y ?? null)} → aiming ${String(result.aimingHit)}, at rest ${String(result.restingHit)}`,
+            );
+
+            expect(result.ok, `${where}: ${String(result.why)}`).toBe(true);
+            expect(result.viewport, `${where}: viewport`).toEqual([width, height]);
+
+            // The box has to be over the band for any of this to be a question.
+            expect(
+              result.covered,
+              `${where}: the flyout covers no permanent in the opponent's band`,
+            ).toBeGreaterThan(0);
+            expect(
+              result.point,
+              `${where}: no point inside the box was clear of its controls`,
+            ).not.toBeNull();
+
+            // The bead, as one hit test: the press lands on the creature.
+            expect(
+              result.reachesPermanent,
+              `${where}: a press inside the box over a permanent answered with ${String(result.aimingHit)}`,
+            ).toBe(true);
+
+            // And the same point with the mat at rest answers with the box,
+            // which is what says the point was covered at all.
+            expect(
+              result.restingInFlyout,
+              `${where}: the same point at rest answered with ${String(result.restingHit)} rather than the flyout`,
+            ).toBe(true);
+
+            // The other way to answer is still there.
+            expect(result.moves, `${where}: the flyout enumerated no moves at all`).toBeGreaterThan(0);
+            expect(
+              result.moveReachable,
+              `${where}: a move in the flyout cannot be pressed while aiming`,
+            ).toBe(true);
+          }
+        }
+      } catch (error: unknown) {
+        bodyError = error;
+      }
+
+      const cleanupErrors: Error[] = [];
+      if (chrome !== null) {
+        try {
+          await shutdownChrome(chrome);
+        } catch (error) {
+          cleanupErrors.push(error instanceof Error ? error : new Error(String(error)));
+        }
+      }
+      try {
+        await rm(directory, { recursive: true, force: true });
+      } catch (error) {
+        cleanupErrors.push(new Error(`could not remove Chrome fixture ${directory}: ${reason(error)}`));
+      }
+      if (bodyError !== undefined) {
+        cleanupErrors.unshift(bodyError instanceof Error ? bodyError : new Error(String(bodyError)));
+      }
+      if (cleanupErrors.length > 0) {
+        throw new AggregateError(
+          cleanupErrors,
+          `ask flyout aim Chrome run or cleanup failed: ${cleanupErrors.map((error) => error.message).join('; ')}`,
+        );
+      }
+    },
+    120_000,
+  );
+});

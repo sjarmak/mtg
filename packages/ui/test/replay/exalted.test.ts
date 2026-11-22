@@ -74,6 +74,7 @@ const snapshot = SnapshotSchema.parse({
       source: 'o2',
       copiedFrom: null,
       chosenX: null,
+      mode: null,
       triggerContext: {
         kind: 'controlledCreatureAttacksAlone',
         triggeringCreature: 'o1',

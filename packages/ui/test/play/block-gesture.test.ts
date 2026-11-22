@@ -45,6 +45,7 @@ import { LEGAL_MOVES_LABEL, PlayView } from '../../src/routes/play/PlayView';
 import { CLEAR_BLOCKS_LABEL, NO_BLOCK_CONFIRM_REASON } from '../../src/routes/play/combat';
 import { blockGesture, declarationWords, NO_BLOCK_GESTURE } from '../../src/routes/play/declare';
 import type { SeatNames } from '../../src/routes/play/position';
+import { buildPrompt } from '../../src/routes/play/prompt';
 
 afterEach(cleanup);
 
@@ -66,6 +67,52 @@ function creature(name: string, keywords: readonly Keyword[] = []): Card {
     power: 2,
     toughness: 3,
     ...(keywords.length === 0 ? {} : { keywords }),
+  });
+}
+
+function blockAuthorityCreature(): Card {
+  minted += 1;
+  return parseCard({
+    kind: 'creature',
+    id: `blkg-authority-${String(minted)}`,
+    name: 'Block Authority Captain',
+    rarity: 'rare',
+    set: { code: 'BKG', collectorNumber: (minted % 900) + 1 },
+    manaCost: { generic: 4 },
+    colors: [],
+    power: 3,
+    toughness: 4,
+    abilities: [
+      {
+        kind: 'triggered',
+        condition: 'selfAndThreeOthersAttack',
+        effects: [{ kind: 'chooseBlockersThisCombat' }],
+      },
+    ],
+  });
+}
+
+/** A Palace Guard-shaped creature whose one roster row may hold several answers. */
+function unlimitedBlocker(name: string): Card {
+  minted += 1;
+  return parseCard({
+    kind: 'creature',
+    id: `blkg-${String(minted)}`,
+    name,
+    rarity: 'common',
+    set: { code: 'BKG', collectorNumber: (minted % 900) + 1 },
+    manaCost: { generic: 3 },
+    colors: [],
+    power: 1,
+    toughness: 4,
+    abilities: [
+      {
+        kind: 'static',
+        scope: 'self',
+        subtype: null,
+        modification: { kind: 'canBlockAnyNumber' },
+      },
+    ],
   });
 }
 
@@ -178,6 +225,7 @@ function answersHoldTheRing(ask: string): boolean {
 }
 
 const MY_ROW = '.mtg-board__side[data-seat="you"] .mtg-board__spells';
+const OPPONENT_ROW = '.mtg-board__side[data-seat="opponent"] .mtg-board__spells';
 const BAND = '.mtg-combat__entry';
 
 /** One attribute off a node this file was handed rather than found; no DOM lib. */
@@ -226,10 +274,40 @@ function keyOf(state: GameState, name: string): string {
   return found;
 }
 
-function draw(state: GameState, onChoose = vi.fn(), cap = DEFAULT_ENUMERATION_CAP): ReturnType<typeof vi.fn> {
-  render(h(PlayView, { session: sessionOn(state, cap), viewer: 1, names: SEATS, onChoose }));
+function draw(
+  state: GameState,
+  onChoose = vi.fn(),
+  cap = DEFAULT_ENUMERATION_CAP,
+  viewer: 0 | 1 = 1,
+): ReturnType<typeof vi.fn> {
+  render(h(PlayView, { session: sessionOn(state, cap), viewer, names: SEATS, onChoose }));
   return onChoose;
 }
+
+describe('attacking-player block authority', () => {
+  it('wires the defending row as blockers and names the defending seat in the prompt', () => {
+    const state = blockingState(
+      [
+        blockAuthorityCreature(),
+        creature('Authority Wing One'),
+        creature('Authority Wing Two'),
+        creature('Authority Wing Three'),
+      ],
+      [creature('Authority Guard')],
+    );
+    const decision = decisionOn(state);
+    if (decision.kind !== 'declareBlockers') throw new Error('the board is not declaring blockers');
+    expect(decision.player).toBe(0);
+    expect(buildPrompt(state, decision, SEATS).explain).toContain('damage to you');
+
+    draw(state, vi.fn(), DEFAULT_ENUMERATION_CAP, 0);
+    const guard = face(OPPONENT_ROW, 'Authority Guard');
+    expect(lit(guard)).toBe(true);
+    click(guard);
+    expect(guard.getAttribute('data-selected')).toBe('true');
+    expect(lit(face(BAND, 'Block Authority Captain'))).toBe(true);
+  });
+});
 
 describe('the gesture the board offered before this lane', () => {
   it('no longer answers a press with the enumeration hanging off the card', () => {
@@ -315,6 +393,26 @@ describe('the gesture the board offered before this lane', () => {
     // is the entire record, so a replay cannot tell this from a player who
     // pressed nothing until the confirm.
     expect(onChoose).not.toHaveBeenCalled();
+  });
+
+  it('keeps every attacker named by one unlimited blocker in the combat seam', () => {
+    const state = blockingState(
+      [creature('North Raider'), creature('South Raider')],
+      [unlimitedBlocker('Wide Guard')],
+    );
+    draw(state);
+    const north = keyOf(state, 'North Raider');
+    const south = keyOf(state, 'South Raider');
+
+    click(face(MY_ROW, 'Wide Guard'));
+    click(face(BAND, 'North Raider'));
+    click(face(BAND, 'Wide Guard'));
+    click(face(BAND, 'South Raider'));
+
+    expect(strip()).toEqual(['North Raider', `Wide Guard>${north},${south}`, 'South Raider']);
+    expect(
+      screen.getByLabelText("Assigned to block Bot's North Raider, Bot's South Raider; not declared yet."),
+    ).toBeTruthy();
   });
 
   it('says what a staged block is to a reader who cannot see where the card went', () => {

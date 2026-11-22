@@ -5,8 +5,8 @@
  * with a consumer outside this package: `@mtg/setgen` puts its JSON Schema in
  * front of the model. The claim it has to keep is the project's load-bearing
  * invariant in miniature — everything the generator can propose is something
- * the engine can run — so these tests check the containment in both directions
- * rather than checking that the schema parses.
+ * the engine can run — so these tests check model-to-engine containment and
+ * explicitly name the engine-only shape rather than merely checking parsing.
  */
 import { describe, expect, it } from 'vitest';
 import {
@@ -30,10 +30,17 @@ describe('ModelAbilitySchema', () => {
     expect(modelAbilitiesAreEngineAbilities).toBe(true);
   });
 
-  it('reads its kinds off its own schema, so the list cannot drift', () => {
+  it('reads its kinds off its own schema and remains a strict subset of engine kinds', () => {
     expect(MODEL_ABILITY_KINDS).toStrictEqual(ModelAbilitySchema.options.map((o) => o.shape.kind.value));
     for (const kind of MODEL_ABILITY_KINDS) expect(ABILITY_KINDS).toContain(kind);
-    for (const kind of ABILITY_KINDS) expect(isModelAbilityKind(kind)).toBe(true);
+    expect(ABILITY_KINDS.filter(isModelAbilityKind)).toStrictEqual(MODEL_ABILITY_KINDS);
+    expect(ABILITY_KINDS.filter((kind) => !isModelAbilityKind(kind))).toStrictEqual([
+      'staticPlayerRule',
+      'staticGameRule',
+      'stateTriggered',
+      'staticBundle',
+      'staticActivationRule',
+    ]);
   });
 
   it('accepts each of the three kinds, and the engine accepts what it accepted', () => {

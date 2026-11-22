@@ -41,6 +41,21 @@ function redSpell(index: number, manaValue: number): Card {
   } satisfies CardInput);
 }
 
+/** A colorless zero-drop worth a slot: Ornithopter's shape, a body better. */
+function freeCreature(): Card {
+  return parseCard({
+    kind: 'creature',
+    id: 'rc-free',
+    name: 'Free Creature',
+    rarity: 'common',
+    set: { code: 'TST', collectorNumber: 900 },
+    manaCost: { generic: 0 },
+    colors: [],
+    power: 4,
+    toughness: 4,
+  } satisfies CardInput);
+}
+
 function select(pool: readonly Card[], overrides: Parameters<typeof resolveConfig>[0] = {}) {
   const config = resolveConfig(overrides);
   const evaluated = evaluatePool(pool, config.weights);
@@ -116,6 +131,33 @@ describe('selectSpells', () => {
     const pool = Array.from({ length: 60 }, (_unused, index) => redCreature(index, 3));
     const { selection } = select(pool, { targetCurve: custom });
     expect(selection.achievedCurve[3]).toBe(23);
+  });
+
+  /**
+   * `mtg-odaj`. Every stated curve here has `targetCurve[0] === 0`, written
+   * when a zero-cost card could not exist, and `fillCurve` skips a bucket it is
+   * asked for nothing from. So a free spell was excluded from curve fill
+   * whatever it scored, and reached a deck only if the pool left slots for
+   * `fillOverflow`. This pool fills every bucket, so there are no such slots.
+   */
+  it('lets a free spell compete for the cheapest slot the curve does ask for', () => {
+    const filled = CURVE_BUCKETS.flatMap((bucket) =>
+      Array.from({ length: 10 }, (_unused, index) => redCreature(bucket * 100 + index, Math.max(1, bucket))),
+    );
+    const { config, selection } = select([...filled, freeCreature()]);
+    expect(selection.spells).toHaveLength(spellCount(config));
+    expect(selection.achievedCurve[0]).toBe(1);
+    expect(selection.achievedCurve[1]).toBe(config.targetCurve[1] - 1);
+  });
+
+  it('fills bucket 0 normally when a curve states a zero-drop target', () => {
+    const custom = { 0: 1, 1: 2, 2: 7, 3: 6, 4: 4, 5: 2, 6: 1 } as const;
+    const filled = CURVE_BUCKETS.flatMap((bucket) =>
+      Array.from({ length: 10 }, (_unused, index) => redCreature(bucket * 100 + index, Math.max(1, bucket))),
+    );
+    const { selection } = select([...filled, freeCreature()], { targetCurve: custom });
+    expect(selection.achievedCurve[0]).toBe(1);
+    expect(selection.achievedCurve[1]).toBe(2);
   });
 
   it('is deterministic for a fixed pool', () => {

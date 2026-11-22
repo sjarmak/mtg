@@ -95,15 +95,8 @@ export interface CounterDeclaration {
   readonly modifications: readonly (StaticModificationOf<'statBonus'> | GrantKeywordModification)[];
 }
 
-/**
- * Every counter kind, in printing order.
- *
- * Written here rather than derived from the table below, for the reason the
- * header gives: a name that depends on what a declaration contains is a name
- * that depends on the whole ability vocabulary, and one amount counting
- * counters closes that loop.
- */
-export const COUNTER_KINDS = [
+/** Counter kinds the set generator may put on a part token's Fuse ability. */
+export const MODEL_COUNTER_KINDS = [
   'plusOnePlusOne',
   'minusOneMinusOne',
   'horn',
@@ -116,7 +109,38 @@ export const COUNTER_KINDS = [
   'trisigil',
 ] as const;
 
+/**
+ * Markers with meaning supplied only by a hand-authored linked ability.
+ *
+ * `phylactery` is an engine marker for a hand-authored linked state trigger,
+ * not a standalone mechanic the generator knows how to finish. Keeping it out
+ * of the model schema preserves the generator's answer schema and prevents a
+ * generated part from minting a marker whose only meaning lives on another
+ * card.
+ */
+const ENGINE_ONLY_COUNTER_KINDS = [
+  'phylactery',
+  'defense',
+  'pressure',
+  'petrification',
+  'charge',
+  'filibuster',
+] as const;
+
+/**
+ * Every counter kind, in printing order.
+ *
+ * Written here rather than derived from the table below, for the reason the
+ * header gives: a name that depends on what a declaration contains is a name
+ * that depends on the whole ability vocabulary, and one amount counting
+ * counters closes that loop. The two source tuples make model containment an
+ * explicit partition without repeating any counter name.
+ */
+export const COUNTER_KINDS = [...MODEL_COUNTER_KINDS, ...ENGINE_ONLY_COUNTER_KINDS] as const;
+
 export type CounterKind = (typeof COUNTER_KINDS)[number];
+
+export type ModelCounterKind = (typeof MODEL_COUNTER_KINDS)[number];
 
 /**
  * The one place a counter kind's meaning is written down.
@@ -214,6 +238,30 @@ const DECLARATIONS = {
     printName: 'Trisigil',
     modifications: [],
   },
+  phylactery: {
+    printName: 'phylactery',
+    modifications: [],
+  },
+  defense: {
+    printName: 'defense',
+    modifications: [],
+  },
+  pressure: {
+    printName: 'pressure',
+    modifications: [],
+  },
+  petrification: {
+    printName: 'petrification',
+    modifications: [],
+  },
+  charge: {
+    printName: 'charge',
+    modifications: [],
+  },
+  filibuster: {
+    printName: 'filibuster',
+    modifications: [],
+  },
 } as const satisfies Readonly<Record<CounterKind, CounterDeclaration>>;
 
 export const COUNTER_DECLARATIONS: Readonly<Record<CounterKind, CounterDeclaration>> = DECLARATIONS;
@@ -243,10 +291,13 @@ export const COUNTER_DECLARATIONS: Readonly<Record<CounterKind, CounterDeclarati
  */
 const LEGACY_COUNTER_KIND_ALIASES: RetiredNames = retiredNames('COUNTER_KINDS');
 
-export const CounterKindSchema = z.preprocess((value) => {
+function normalizeCounterKind(value: unknown): unknown {
   if (typeof value !== 'string') return value;
   return LEGACY_COUNTER_KIND_ALIASES[value] ?? value;
-}, z.enum(COUNTER_KINDS));
+}
+
+export const ModelCounterKindSchema = z.preprocess(normalizeCounterKind, z.enum(MODEL_COUNTER_KINDS));
+export const CounterKindSchema = z.preprocess(normalizeCounterKind, z.enum(COUNTER_KINDS));
 
 export interface StatBonus {
   readonly power: number;

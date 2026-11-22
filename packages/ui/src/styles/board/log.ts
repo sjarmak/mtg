@@ -75,7 +75,7 @@
  * is load-bearing: a flex item defaults to `min-height: auto`, which refuses to
  * shrink below its content, and without it the scroller never engages.
  */
-import { cssNumber } from '../number';
+import { cssNumber, MICRO_LABEL } from '../number';
 import { PLAY } from './geometry';
 
 /**
@@ -138,7 +138,7 @@ export const LOG_CSS = `
 .mtg-log__turn-title {
   display: flex; align-items: baseline; gap: var(--mtg-space-2);
   margin: 0; padding-bottom: 1px;
-  font-size: var(--mtg-text-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  ${MICRO_LABEL}
   color: var(--mtg-ink-muted); border-bottom: 1px solid var(--mtg-line);
 }
 .mtg-log__turn-owner { color: var(--mtg-ink-faint); font-weight: 400; }
@@ -152,6 +152,40 @@ export const LOG_CSS = `
   font-size: var(--mtg-text-xs); color: var(--mtg-ink-faint);
 }
 .mtg-log__text { font-size: var(--mtg-text-sm); min-width: 0; }
+/* A line that names an object is a button, and it has to not look like one.
+   mtg-47o. The control's whole job is to be the sentence: a reader is scanning a
+   history, and a column of five hundred bordered, centered, chrome-gray buttons
+   is not a history any more. So the reset takes back everything the user agent
+   gives a button - its box, its font, its color, its centering - and the only
+   thing that says it is pressable is the cursor and what happens on hover.
+
+   The affordance is deliberately quiet on hover and loud when latched, because
+   the two states mean different things to the reader. Hover is a preview: the
+   sentence is under the pointer and the board is showing what it names, and the
+   line marks itself just enough to say which sentence the board is answering.
+   Latched is a decision the reader made, and it survives the pointer leaving, so
+   it needs to be findable again in a scrolled column without the pointer on it.
+
+   Two channels on the latched state, for ./slot.ts's reason about the board end
+   of this: the wash alone is a luminance step a screen at half brightness throws
+   away, so the rule that carries it is the rail on the inline edge - a solid bar
+   of accent against no bar at all, which is a shape rather than a shade. The
+   line does not move when it latches: the whole column would shift under a
+   reader's eye for a fact they can already see. */
+.mtg-log__point {
+  appearance: none; background: none; border: 0; border-radius: var(--mtg-radius-sm);
+  margin: 0; padding: 0 var(--mtg-space-1);
+  font: inherit; font-size: var(--mtg-text-sm); color: inherit; text-align: left;
+  cursor: pointer;
+  /* The rail lives here rather than on a pseudo-element so that latching cannot
+     change the line's width and reflow the column: a transparent border is the
+     same box as a colored one. */
+  border-inline-start: 2px solid transparent;
+}
+.mtg-log__point:hover { background: var(--mtg-accent-soft); }
+.mtg-log__point[aria-pressed='true'] {
+  background: var(--mtg-accent-soft); border-inline-start-color: var(--mtg-accent);
+}
 /* The tiers a reader turned on read as the second and third things on the list
    they share, so the game is still findable inside them. One step of ink each,
    in the order ../../log/group.ts puts them in: the rules' own bookkeeping is

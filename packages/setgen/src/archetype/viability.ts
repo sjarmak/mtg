@@ -37,15 +37,27 @@
  * that always returns something returns a lie on a set that holds nothing that
  * qualifies.
  *
- * The floors that *fail* a set stay on the raw pool on purpose, and it is not a
- * half-measure. `reserveAnswers` buys exactly `floors.removal` answer roles for
- * the pool that has to hold them, so an error floor read off the deck would
- * demand answers the color pie lets no slot in blue or green print — a finding
- * the retry loop could never clear, which is the trap `pairs.ts` records the
- * signposts falling into once already. And an error names slots, so its text is
- * the correction the model is handed on retry: every recorded fixture of a run
- * that tripped `ARCHETYPE_INERT_GLUT` is keyed on that sentence, and rewording
- * it re-keys them.
+ * The *removal* floor that fails a set stays on the raw pool on purpose, and it
+ * is not a half-measure. `reserveAnswers` buys exactly `floors.removal` answer
+ * roles for the pool that has to hold them, so an error floor read off the deck
+ * would demand answers the color pie lets no slot in blue or green print — a
+ * finding the retry loop could never clear, which is the trap `pairs.ts` records
+ * the signposts falling into once already.
+ *
+ * The inert budget does not inherit that argument, and `mtg-gud1` is what
+ * happens when it is assumed to. Nothing reserves inert roles: they are what is
+ * left when a slot's effects all resolve and leave, so there is no allocation
+ * for a deck-unit reading to contradict and no floor the retry loop cannot
+ * reach. Read against the raw pool it failed the 371-card flagship over four
+ * commons that rank in the bottom thirty of a 114-card pool and appear in no
+ * built deck for any pair — an error about cards nobody plays, which the
+ * `inertBudget` docblock measures. So that one reads through `inDeck` too.
+ *
+ * What does not move is its sentence. An error names slots, so its text is the
+ * correction the model is handed on retry, and every recorded fixture of a run
+ * that tripped `ARCHETYPE_INERT_GLUT` is keyed on that prompt. The comparison
+ * changed units; the message still counts pool cards, because pool cards are
+ * what the model can rewrite.
  */
 import type { CurveBucket, CurveHistogram } from '@mtg/deckbuild';
 import {
@@ -60,6 +72,11 @@ import type { SkeletonLiteProfile } from '@mtg/design-data';
 import type { ArchetypePlan } from './pairs';
 import type { Contribution } from './contribution';
 import { exclusiveTo, playableIn } from './contribution';
+import {
+  CURRENT_GENERATION_SEMANTICS_VERSION,
+  LEGACY_GENERATION_SEMANTICS_VERSION,
+} from '../generation-semantics';
+import type { GenerationSemanticsVersion } from '../generation-semantics';
 
 export interface ArchetypeFloors {
   /** Playables a pair needs to fill a deck at all: `deckSize - landCount`. */
@@ -125,7 +142,37 @@ export interface ArchetypeFloors {
   readonly removal: number;
   /** Canon's "under this is a weakness" number, reported as a warning. */
   readonly removalCanon: number;
-  /** Playables that cannot touch the battlefield, per pair. */
+  /**
+   * Playables that cannot touch the battlefield, in the units `inDeck`
+   * projects: cards in a `playables`-spell deck, not cards in the pool.
+   *
+   * It was 2 held against the raw pool, and at 253 cards that unit mismatch was
+   * the whole of the finding it produced. The flagship's WU pool is 114 cards
+   * feeding a 23-spell deck; its four inert commons rank 85th, 96th, 107th and
+   * 112th of 114 against a marginal included card at 2.15, so none of them is in
+   * any deck the builder assembles for any pair. An A/B over 10,035 games x 3
+   * seeds replacing two of them with combat tricks moved every pair by exactly
+   * +0.000 -- an exact result rather than a statistical one, because the decks
+   * came out identical card for card -- against a 0.020 noise floor. The error
+   * was describing a pool holding four cards nobody plays.
+   *
+   * The number itself does not move, only the unit it is read in, and the
+   * evidence it was derived from reads the same either way. `mtg-bc2.36`'s TGR
+   * spent 5 of blue's 17 skeleton cards on roles that resolve and leave, which
+   * is 5 inert in a blue pair's 39-card pool, and 5 in 39 projects to 3 in a
+   * 23-spell deck: over budget, which is the verdict that bead's two dead pairs
+   * (UR 30.7%, WU 39.9%) earned. Both sets in this tree read at or under it --
+   * the committed prototype 0 to 1 across all ten pairs, the 371-card flagship 0
+   * to 2, worst at UB and UG -- so the pairs that sweep fair clear it and the
+   * pair that did not play trips it.
+   *
+   * The margin is one card, and saying so is the honest form of the claim: 5 in
+   * 39 projects to 2.95 and rounds up. A pool one inert card poorer than the
+   * only unplayable archetype on record clears this floor. Same shape as the
+   * creature floor above and the same caveat -- it is derived from the thinnest
+   * thing measured, so a reader who later measures a set that plays fine at 3
+   * should expect to move it.
+   */
   readonly inertBudget: number;
   /** Signpost uncommons reserved to the pair (N&B #16 prints two; the slice can afford one). */
   readonly signposts: number;
@@ -230,6 +277,8 @@ export interface PairViability {
   /** Answers a `floors.playables`-spell deck drafted from this pool would hold. */
   readonly answersInDeck: number;
   readonly inert: number;
+  /** The same count read as the deck the pool deals, which is what the budget is in. */
+  readonly inertInDeck: number;
   readonly inertSlotIds: readonly string[];
   /**
    * Cards that advertise this pair and no other: a signpost the report can name
@@ -332,6 +381,7 @@ export function assessPair(
   contributions: readonly Contribution[],
   plan: ArchetypePlan,
   floors: ArchetypeFloors = DEFAULT_ARCHETYPE_FLOORS,
+  semanticsVersion: GenerationSemanticsVersion = CURRENT_GENERATION_SEMANTICS_VERSION,
 ): PairViability {
   const playables = contributions.filter((item) => playableIn(item, plan.colors));
   const own = playables.filter((item) => exclusiveTo(item, plan.colors));
@@ -340,6 +390,7 @@ export function assessPair(
   const inert = playables.filter((item) => item.inert);
   const answersInDeck = inDeck(removal.length, playables.length, floors.playables);
   const creaturesInDeck = inDeck(creatures.length, playables.length, floors.playables);
+  const inertInDeck = inDeck(inert.length, playables.length, floors.playables);
 
   // Two different questions, and the flagship answered the second one with the
   // first. `reserved` is what the allocator pointed at this pair; `signposts` is
@@ -411,16 +462,25 @@ export function assessPair(
       ),
     );
   }
-  // Held against the raw pool, and the message it carries is fixed. Both are
-  // load-bearing: `ARCHETYPE_INERT_GLUT` is an error that names slots, so its
-  // text is the correction the retry loop hands the model, and every recorded
-  // fixture of a run that ever tripped it is keyed on that prompt.
-  if (inert.length > floors.inertBudget) {
+  // Current generation reads through `inDeck` like the answer floors, and the
+  // message it carries is unchanged down to the byte. Both halves are
+  // deliberate. The budget is a number about a deck, so the comparison belongs
+  // in deck units; the sentence is the correction the retry loop hands the
+  // model, and what the model has to act on is the pool cards it can rewrite,
+  // not a projection. Recorded v1 runs retain the earlier raw-pool comparison:
+  // retry selection is part of their request sequence, and changing it asks for
+  // a different fixture rather than replaying the one the manifest records.
+  const inertForBudget =
+    semanticsVersion === LEGACY_GENERATION_SEMANTICS_VERSION ? inert.length : inertInDeck;
+  if (inertForBudget > floors.inertBudget) {
     shortfalls.push(
       shortfall(
         'inert',
         floors.inertBudget,
-        inert.length,
+        // Current findings use the projection, so `wanted` and `found` share a
+        // unit. Legacy replay preserves the raw value that selected its retry.
+        // The detail below stays on the pool for the reason above.
+        inertForBudget,
         `${inert.length} playables resolve without touching the battlefield (${inert
           .map((item) => item.slotId)
           .join(', ')}); DSL v0 gives this archetype nothing to convert them into`,
@@ -480,6 +540,7 @@ export function assessPair(
     removal: removal.length,
     answersInDeck,
     inert: inert.length,
+    inertInDeck,
     inertSlotIds: inert.map((item) => item.slotId),
     signpostSlotIds: signposts.map((item) => item.slotId),
     reservedSignpostSlotIds: reserved.map((item) => item.slotId),
@@ -493,12 +554,13 @@ export function assessArchetypes(
   contributions: readonly Contribution[],
   plans: readonly ArchetypePlan[],
   floors: ArchetypeFloors = DEFAULT_ARCHETYPE_FLOORS,
+  semanticsVersion: GenerationSemanticsVersion = CURRENT_GENERATION_SEMANTICS_VERSION,
 ): readonly PairViability[] {
-  return plans.map((plan) => assessPair(contributions, plan, floors));
+  return plans.map((plan) => assessPair(contributions, plan, floors, semanticsVersion));
 }
 
 export function formatViability(report: PairViability): string {
   const shortfalls =
     report.shortfalls.length === 0 ? 'ok' : report.shortfalls.map((item) => item.detail).join('; ');
-  return `${report.pair}: ${report.playables} playables (${report.own} of its own), ${report.creatures} creatures (${report.creaturesInDeck} per deck), ${report.removal} removal (${report.answersInDeck} per deck), ${report.inert} inert — ${shortfalls}`;
+  return `${report.pair}: ${report.playables} playables (${report.own} of its own), ${report.creatures} creatures (${report.creaturesInDeck} per deck), ${report.removal} removal (${report.answersInDeck} per deck), ${report.inert} inert (${report.inertInDeck} per deck) — ${shortfalls}`;
 }

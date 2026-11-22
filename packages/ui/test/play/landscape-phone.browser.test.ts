@@ -54,9 +54,9 @@ import { describe, expect } from 'vitest';
 import { Shell } from '../../src/app/Shell';
 import { PlayView } from '../../src/routes/play/PlayView';
 import { SHORT_TABLE_SPELLS_MIN_REM } from '../../src/styles/board/fit';
-import { COMBAT_HAND_FACE_MAX_REM } from '../../src/styles/board/hand';
+import { COMBAT_HAND_FACE_MAX_REM, CROWDED_HAND_FACE_MAX_REM } from '../../src/styles/board/hand';
 import { PLAY_ASK_SHUT_REM } from '../../src/styles/board/rail';
-import { TOUCH_TARGET_PX } from '../../src/styles/touch';
+import { TOUCH_TARGET_PX, WCAG_TARGET_PX } from '../../src/styles/touch';
 import { uiStyleSheet } from '../../src/styles/index';
 import { browserIt, launchChrome, measurePage, reason, shutdownChrome } from '../support/chrome';
 
@@ -129,7 +129,7 @@ function board(spells = 4): GameSession {
  *
  * Two elements, and they are the two `mtg-my14` measured on the route rather
  * than on a reproduction of it. `packages/slice/test/ui-phone-scroll.browser.test.ts`
- * plays a real hotseat game through Vite at this size and reads a 57px shell bar
+ * plays a real game against the bot through Vite at this size and reads a 57px shell bar
  * and a 44px dealer strip above a 273px mat, and it now asserts exactly that
  * list, so this reproduction has something to be wrong against.
  *
@@ -143,6 +143,14 @@ function board(spells = 4): GameSession {
  * The heading stays, and stays rendered rather than removed: the landscape tier
  * hides it with the recipe `../../src/styles/base.ts` uses for a live region, so
  * a rig that dropped the element could not tell that rule from a broken one.
+ *
+ * That is why the switch stays too, and why `mtg-lv2h` left this file alone
+ * while it took the same markup out of three rigs beside it. Everywhere else
+ * this furniture was a reproduction of a route arrangement that no longer
+ * exists, and it made every measurement in those files pessimistic by the height
+ * of a band; here it is the *subject*. Claim 6 below asserts each of these
+ * elements is rendered and then measures it at zero, which is a claim about the
+ * landscape tier's rules and cannot be made about markup the page does not have.
  */
 function routeFurniture(): ReactElement {
   return h(
@@ -170,7 +178,7 @@ function page(game: GameSession): string {
       // The third band, and the one she named. A reduced reference set draws it
       // (`src/lab/reduced-notice.ts`); the flagship does not, so the rig states
       // the worse of the two cases.
-      notice: 'Reduced build: 162 of 249 positions kept.',
+      notice: 'Partial set: 162 of 249 cards.',
       children: h(
         'div',
         { className: 'mtg-play-route' },
@@ -206,24 +214,42 @@ const MEASURE = `(() => {
   const faces = (seat) => [...document.querySelectorAll(
     "[data-seat='" + seat + "'] .mtg-board__spells .mtg-slot[data-slot='play'] > .mtg-card"
   )].map((face) => round(face.getBoundingClientRect().width));
+  const represented = (seat) => {
+    const row = document.querySelector("[data-seat='" + seat + "'] .mtg-board__spells");
+    return row === null ? 0 : [...row.children].reduce((total, place) => total + Number(
+      place.querySelector(':scope > .mtg-permanent-pile__toggle')?.getAttribute('data-pile-count') ?? 1
+    ), 0);
+  };
   // The mana base, read against the lane it belongs to rather than against the
   // window: the page can fit and the band still be past the bottom of its own
   // scrolling body, which is exactly the shape the 2026-08-22 report had.
+  //
+  // \`beside\` and \`below\` are signed gaps to the row of permanents in the same
+  // well, and they are how the arrangement itself is read rather than inferred:
+  // positive \`beside\` is a band that starts after the row ends, positive
+  // \`below\` is a band stacked under it.
   const bandOf = (seat) => {
     const side = document.querySelector(".mtg-board__side[data-seat='" + seat + "']");
     const body = side === null ? null : side.querySelector(".mtg-zone__body[data-layout='board']");
     const band = side === null ? null : side.querySelector('.mtg-lands');
-    if (body === null || band === null) return null;
+    const row = side === null ? null : side.querySelector('.mtg-board__spells');
+    if (body === null || band === null || row === null) return null;
     const box = band.getBoundingClientRect();
+    const rowBox = row.getBoundingClientRect();
     return {
       belowBody: round(box.bottom - body.getBoundingClientRect().bottom),
       belowFold: round(Math.max(0, box.bottom - fold)),
       tiles: band.children.length,
-      position: getComputedStyle(band).position,
+      beside: round(box.left - rowBox.right),
+      below: round(box.top - rowBox.bottom),
+      clipped: round(box.width - band.clientWidth === 0 ? band.scrollWidth - band.clientWidth : 0),
+      rowWidth: round(rowBox.width),
+      width: round(box.width),
     };
   };
   const hand = document.querySelector(".mtg-board__side[data-seat='you'] .mtg-zone[data-tone='rail']");
   const rail = document.querySelector('.mtg-board__rail');
+  const bar = document.querySelector('.mtg-phasebar');
   const steps = document.querySelector('.mtg-phasebar__steps');
   const nodes = [...document.querySelectorAll('.mtg-phasebar__node')].map((node) =>
     round(node.getBoundingClientRect().height),
@@ -243,6 +269,7 @@ const MEASURE = `(() => {
     coarse: window.matchMedia('(pointer: coarse)').matches,
     handCap: mat === null ? null : getComputedStyle(mat).getPropertyValue('--hand-face-cap').trim(),
     railWidth: rail === null ? null : round(rail.getBoundingClientRect().width),
+    barHeight: bar === null ? null : round(bar.getBoundingClientRect().height),
     stepsHeight: steps === null ? null : round(steps.getBoundingClientRect().height),
     nodeCount: nodes.length,
     tallestNode: nodes.length === 0 ? null : Math.max(...nodes),
@@ -250,6 +277,7 @@ const MEASURE = `(() => {
     nearRow: rowHeight('you'),
     farRow: rowHeight('opponent'),
     faceCount: [near.length, far.length],
+    represented: [represented('you'), represented('opponent')],
     faceDeficit: paired === 0 ? null : round(deficit),
     matHeight: mat === null ? null : round(mat.getBoundingClientRect().height),
     askWidth: (() => {
@@ -283,7 +311,14 @@ interface Band {
   readonly belowBody: number;
   readonly belowFold: number;
   readonly tiles: number;
-  readonly position: string;
+  /** Signed gap to the row of permanents: positive is a band that starts after it. */
+  readonly beside: number;
+  /** Signed gap under that row: positive is a band stacked below it. */
+  readonly below: number;
+  /** How much of the band's own content its box cuts off rather than scrolls to. */
+  readonly clipped: number;
+  readonly rowWidth: number;
+  readonly width: number;
 }
 
 interface Reading {
@@ -291,6 +326,7 @@ interface Reading {
   readonly coarse: boolean;
   readonly handCap: string | null;
   readonly railWidth: number | null;
+  readonly barHeight: number | null;
   readonly stepsHeight: number | null;
   readonly nodeCount: number;
   readonly tallestNode: number | null;
@@ -298,6 +334,7 @@ interface Reading {
   readonly nearRow: number | null;
   readonly farRow: number | null;
   readonly faceCount: readonly number[];
+  readonly represented: readonly number[];
   readonly faceDeficit: number | null;
   readonly matHeight: number | null;
   readonly askWidth: number | null;
@@ -328,6 +365,19 @@ const LANDSCAPE = [
 const TALL_CONTROL = [844, 900] as const;
 
 /** Rounding slack, the same half pixel the other board rigs compare on. */
+/**
+ * How much of the step bar's 44px this lane is required to give the board back.
+ *
+ * Stated as a floor on the saving rather than as the height itself, because the
+ * height is type and the saving is the decision: the node is three lines, and
+ * what changed is that its middle line and the turn badge beside it stand at
+ * WCAG 2.5.8's 24px instead of Apple's 44. Measured at 844x390, the bar went
+ * from 44 to 30.6 and both battlefield rows took the difference — the far row
+ * 74.6 to 79.0, the near one 101.2 to 110.1. Eight is well inside that and
+ * leaves the type free to move.
+ */
+const STEP_BAR_SAVING_PX = 8;
+
 const SLACK_PX = 0.5;
 
 describe('a phone held sideways draws a table that fits on it', () => {
@@ -392,10 +442,15 @@ describe('a phone held sideways draws a table that fits on it', () => {
             `${where}: the viewer's own face is narrower than the opponent's`,
           ).toBeLessThanOrEqual(SLACK_PX);
 
-          // 4. The step bar is one row of controls, and they are still controls:
+          // 4. The step bar is one row of controls, they are still controls,
+          //    and the row costs the board less than a finger's height.
           //    `nowrap` alone would have bought the row by ellipsizing all
-          //    thirteen labels, and shrinking the node would have bought it off
-          //    the touch floor. Both were refused, so both are asserted.
+          //    thirteen labels, which is refused. What is spent instead is the
+          //    difference between Apple's 44 and WCAG 2.5.8's 24, on this
+          //    surface only (`mtg-aqxi.8`): the playtester asked for a thinner bar
+          //    from a phone, and 44 was the whole of its height — the content
+          //    asks for about 31. The tall control below proves the trade is
+          //    height-gated.
           expect(reading.nodeCount, `${where}: the step bar drew no nodes`).toBeGreaterThan(0);
           expect(
             reading.stepsHeight ?? 0,
@@ -403,8 +458,12 @@ describe('a phone held sideways draws a table that fits on it', () => {
           ).toBeLessThanOrEqual((reading.tallestNode ?? 0) + SLACK_PX);
           expect(
             reading.shortestNode ?? 0,
-            `${where}: a step control is under the touch floor`,
-          ).toBeGreaterThanOrEqual(TOUCH_TARGET_PX - SLACK_PX);
+            `${where}: a step control is under the conformance floor`,
+          ).toBeGreaterThanOrEqual(WCAG_TARGET_PX - SLACK_PX);
+          expect(
+            reading.barHeight ?? 0,
+            `${where}: the step bar is not materially thinner than a touch target`,
+          ).toBeLessThanOrEqual(TOUCH_TARGET_PX - STEP_BAR_SAVING_PX);
 
           // 5. Both shut columns are strips the width of what is left in them:
           //    one control in the rail, and the life totals and the priority row
@@ -443,15 +502,22 @@ describe('a phone held sideways draws a table that fits on it', () => {
 
           // 7. And the mana base is on the screen, which is a claim about the
           //    lane rather than about the window: claim 1 held the whole time
-          //    the band was invisible. The battlefield body is a scroller
-          //    holding a row of cards and the band under it, and until
+          //    the band was invisible. The battlefield body used to be a
+          //    scroller holding a row of cards and the band under it, and until
           //    `../../src/styles/board/fit.ts`'s short-table floor the row could
           //    not shrink and the band was last, so the body's deficit came
-          //    entirely out of the lands. Measured before the fix at 932x430
-          //    with two spells and four lands a side: a 116px body holding 128px
-          //    of content and the band 8.25px past its own bottom edge, 23.41 at
+          //    entirely out of the lands. Measured then at 932x430 with two
+          //    spells and four lands a side: a 116px body holding 128px of
+          //    content and the band 8.25px past its own bottom edge, 23.41 at
           //    932x400, 28.47 at 844x390. the playtester, 2026-08-22: "I'm still not
           //    seeing lands once I play them".
+          //
+          //    Since `mtg-aqxi.6` the two are side by side on a short table
+          //    rather than stacked, and that is asserted rather than inferred:
+          //    a band that happens to fit under a sparse row is not a band the
+          //    height axis has stopped deciding. The well is 738px wide and the
+          //    permanents were spanning 290 of it, so the axis this phone has
+          //    spare is the one the mana base now spends.
           for (const [seat, band] of [
             ['near', reading.nearBand],
             ['far', reading.farBand],
@@ -463,12 +529,18 @@ describe('a phone held sideways draws a table that fits on it', () => {
               `${where}: the ${seat} mana base hangs below the lane that owns it`,
             ).toBeLessThanOrEqual(SLACK_PX);
             expect(band?.belowFold ?? 0, `${where}: the ${seat} mana base runs under the fold`).toBe(0);
-            // Both halves of the fix, read off the page rather than inferred
-            // from the pixels above, so a lane that happens to fit does not pass
-            // for a lane that is pinned.
-            expect(band?.position, `${where}: the ${seat} mana base is not pinned to its lane`).toBe(
-              'sticky',
-            );
+            expect(
+              band?.beside ?? -1,
+              `${where}: the ${seat} mana base is stacked under the permanents instead of beside them`,
+            ).toBeGreaterThanOrEqual(-SLACK_PX);
+            expect(
+              band?.below ?? 0,
+              `${where}: the ${seat} mana base still costs the well a second row`,
+            ).toBeLessThan(0);
+            // And it is drawn whole. A `max-width` that cuts a flex line does
+            // not hand it a scrollbar, so a cap set too low loses a land
+            // silently rather than scrolling to it.
+            expect(band?.clipped ?? 0, `${where}: the ${seat} mana base has a tile cut off`).toBe(0);
           }
           expect(reading.spellsFloor, `${where}: the battlefield row keeps the desktop floor`).toBe(
             `${String(SHORT_TABLE_SPELLS_MIN_REM * 16)}px`,
@@ -488,9 +560,9 @@ describe('a phone held sideways draws a table that fits on it', () => {
         console.log(
           `${String(LANDSCAPE[0][0])}x${String(LANDSCAPE[0][1])} crowded: cap ${String(busy.handCap)}, rows ${String(busy.nearRow)}/${String(busy.farRow)}, hand below fold ${String(busy.handBelowFold)}`,
         );
-        expect(busy.faceCount[0], 'the crowded board drew fewer than eight permanents').toBe(8);
+        expect(busy.represented[0], 'the crowded board represents fewer than eight permanents').toBe(8);
         expect(busy.handCap, 'a crowded landscape board widens the hand face again').toBe(
-          `${String(COMBAT_HAND_FACE_MAX_REM)}rem`,
+          `${String(CROWDED_HAND_FACE_MAX_REM)}rem`,
         );
         expect(busy.handBelowFold, 'the crowded board runs the hand row under the fold').toBe(0);
         expect(
@@ -504,7 +576,17 @@ describe('a phone held sideways draws a table that fits on it', () => {
         console.log(
           `${String(TALL_CONTROL[0])}x${String(TALL_CONTROL[1])} control: cap ${String(tall.handCap)}`,
         );
-        expect(tall.nearBand?.position, 'a tall window pins the mana base to its lane').toBe('static');
+        // The control reads the same arrangement the other way round: with room
+        // under it the band goes back below the permanents, which is what makes
+        // the rule above a height tier rather than an unconditional one.
+        expect(
+          tall.nearBand?.below ?? -1,
+          'a tall window puts the mana base back under the permanents',
+        ).toBeGreaterThanOrEqual(-SLACK_PX);
+        expect(
+          tall.shortestNode ?? 0,
+          'a tall window keeps the step bar at the full touch floor',
+        ).toBeGreaterThanOrEqual(TOUCH_TARGET_PX - SLACK_PX);
         expect(tall.spellsFloor, 'a tall window takes the short-table battlefield floor').not.toBe(
           `${String(SHORT_TABLE_SPELLS_MIN_REM * 16)}px`,
         );

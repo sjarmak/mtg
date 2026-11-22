@@ -5,15 +5,18 @@
  * This is the only provider tests and CI may use — runs are hermetic (no
  * network) and free (no spend). With `FIXTURE_RECORD=1` it delegates to a live
  * transport and writes what came back; otherwise a missing key is a hard error
- * naming the key and how to record it, never a silent live call.
+ * unless an older request differs only by additive answer-schema vocabulary
+ * and its answer validates under both contracts. There is never a silent live
+ * call.
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { z } from 'zod';
 import type { BudgetGuard } from '../budget';
 import { FixtureMissingError, LlmConfigError, LlmTransportError } from '../errors';
 import { createProvider } from '../core';
-import { fixtureKey } from '../schema';
+import { extractJsonValue } from '../json';
+import { fixtureKey, isStrictlyAdditiveSchemaWidening } from '../schema';
 import type { CostCheck, JsonSchema, LlmProvider, LlmTransport, RawRequest, RawResponse } from '../types';
 
 export const DEFAULT_FIXTURE_DIR = 'fixtures/llm';
@@ -79,6 +82,8 @@ export interface FixtureTransportOptions {
   /** Label stored in fixtures written without a delegate model. */
   readonly model?: string;
   readonly env?: Readonly<Record<string, string | undefined>>;
+  /** Observes the stable key for every fixture served, including repeats. */
+  readonly onCall?: (key: string) => void;
 }
 
 export interface FixtureProviderOptions extends FixtureTransportOptions {
@@ -89,6 +94,81 @@ export interface FixtureProviderOptions extends FixtureTransportOptions {
 
 export function fixturePath(dir: string, key: string): string {
   return join(dir, `${key}.json`);
+}
+
+function recordedValue(fixture: RecordedFixture): unknown | undefined {
+  if (fixture.response.structured !== undefined) return fixture.response.structured;
+  const extracted = extractJsonValue(fixture.response.text);
+  return extracted.ok ? extracted.value : undefined;
+}
+
+const OUTPUT_CONTRACT_PREFIX =
+  '<output_contract>\nReturn a single JSON value that validates against this JSON Schema:\n';
+const OUTPUT_CONTRACT_SUFFIX =
+  '\nReturn only that JSON value. No prose, no explanation, no markdown fences.\n</output_contract>';
+
+/**
+ * The task-and-retry portion of a completion prompt, with its generated schema
+ * block replaced by one stable marker.
+ *
+ * `runCompletion` embeds the JSON Schema in the prompt it hands this transport.
+ * Comparing that whole prompt made the additive-schema fallback below
+ * unreachable for real completion requests: the schema widening necessarily
+ * changed both `request.schema` and `request.prompt`. Match only the exact
+ * wrapper `buildAttemptPrompt` emits, and leave arbitrary prompts byte-sensitive.
+ */
+function promptWithoutGeneratedContract(prompt: string): string | null {
+  const start = prompt.indexOf(OUTPUT_CONTRACT_PREFIX);
+  if (start < 0 || prompt.indexOf(OUTPUT_CONTRACT_PREFIX, start + 1) >= 0) return null;
+  const contentStart = start + OUTPUT_CONTRACT_PREFIX.length;
+  const end = prompt.indexOf(OUTPUT_CONTRACT_SUFFIX, contentStart);
+  if (end < 0 || prompt.indexOf(OUTPUT_CONTRACT_SUFFIX, end + 1) >= 0) return null;
+  return `${prompt.slice(0, contentStart)}<schema>${prompt.slice(end)}`;
+}
+
+function sameFixturePrompt(recorded: string, requested: string): boolean {
+  if (recorded === requested) return true;
+  const recordedTask = promptWithoutGeneratedContract(recorded);
+  return recordedTask !== null && recordedTask === promptWithoutGeneratedContract(requested);
+}
+
+function compatibleFixture(dir: string, request: RawRequest): RecordedFixture | null {
+  if (!existsSync(dir)) return null;
+  const candidates = readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && /^[0-9a-f]{32}\.json$/.test(entry.name))
+    .map((entry) => readFixture(join(dir, entry.name)))
+    .filter(
+      (fixture) =>
+        fixture.request.system === request.system &&
+        sameFixturePrompt(fixture.request.prompt, request.prompt) &&
+        isStrictlyAdditiveSchemaWidening(fixture.request.schema, request.jsonSchema),
+    )
+    .filter((fixture) => {
+      const value = recordedValue(fixture);
+      if (value === undefined) return false;
+      try {
+        return (
+          z.fromJSONSchema(fixture.request.schema).safeParse(value).success &&
+          z.fromJSONSchema(request.jsonSchema).safeParse(value).success
+        );
+      } catch {
+        return false;
+      }
+    });
+  const maximal = candidates.filter((candidate) =>
+    candidates.every(
+      (other) =>
+        other.key === candidate.key ||
+        !isStrictlyAdditiveSchemaWidening(candidate.request.schema, other.request.schema),
+    ),
+  );
+  if (maximal.length > 1) {
+    throw new LlmTransportError(
+      'fixture',
+      `multiple incomparable older fixtures match this additive schema widening: ${maximal.map(({ key }) => key).join(', ')}`,
+    );
+  }
+  return maximal[0] ?? null;
 }
 
 export function createFixtureTransport(options: FixtureTransportOptions = {}): LlmTransport {
@@ -125,11 +205,15 @@ export function createFixtureTransport(options: FixtureTransportOptions = {}): L
         const live = resolveDelegate();
         const response = await live.send(request);
         writeFixture(path, buildFixture(key, live.name, request, response));
+        options.onCall?.(key);
         return response;
       }
 
-      if (!existsSync(path)) throw new FixtureMissingError(key, path);
-      return toRawResponse(readFixture(path));
+      const fixture = existsSync(path) ? readFixture(path) : compatibleFixture(dir, request);
+      if (fixture === null) throw new FixtureMissingError(key, path);
+      const response = toRawResponse(fixture);
+      options.onCall?.(fixture.key);
+      return response;
     },
   };
 }

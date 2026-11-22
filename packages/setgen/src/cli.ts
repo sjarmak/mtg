@@ -16,7 +16,9 @@ import { fileURLToPath } from 'node:url';
 import {
   createBudgetGuard,
   createFixtureProvider,
+  listRunManifests,
   manifestId,
+  readRunManifest,
   runManifestPath,
   writeRunManifest,
 } from '@mtg/llm';
@@ -29,6 +31,12 @@ import { derivePins } from './pins';
 import type { PinDerivation } from './pins';
 import { createResumableRecorder } from './record';
 import { generateSet } from './generate';
+import {
+  CURRENT_GENERATION_SEMANTICS_VERSION,
+  generationSemanticsFor,
+  SETGEN_GENERATOR_NAME,
+} from './generation-semantics';
+import type { GenerationSemanticsVersion } from './generation-semantics';
 import { writeSetOutput } from './emit';
 import { formatReport } from './report';
 
@@ -67,6 +75,10 @@ export function buildRunManifest(
     recordedAt,
     calls: keys.length,
     keys: [first, ...rest],
+    generator: {
+      name: SETGEN_GENERATOR_NAME,
+      semanticsVersion: CURRENT_GENERATION_SEMANTICS_VERSION,
+    },
   };
 }
 
@@ -74,6 +86,7 @@ interface CliOptions {
   readonly briefPath: string;
   readonly outDir?: string;
   readonly fixtureDir: string;
+  readonly runManifestPath?: string;
   readonly record: boolean;
   readonly maxUsd?: number;
   readonly critique: boolean;
@@ -116,7 +129,7 @@ export function parseArgs(argv: readonly string[]): CliOptions {
   const briefPath = values.get('brief');
   if (briefPath === undefined) {
     throw new Error(
-      'usage: cli.ts --brief <brief.json> [--out <dir>] [--fixtures <dir>] [--record] [--no-critique] [--no-flavor] [--max-usd <n>] [--target-size <n>] [--pins]',
+      'usage: cli.ts --brief <brief.json> [--out <dir>] [--fixtures <dir>] [--run-manifest <path>] [--record] [--no-critique] [--no-flavor] [--max-usd <n>] [--target-size <n>] [--pins]',
     );
   }
   const targetSizeRaw = values.get('target-size');
@@ -130,10 +143,12 @@ export function parseArgs(argv: readonly string[]): CliOptions {
     throw new Error(`--max-usd must be a positive number, got ${maxUsdRaw}`);
   }
   const out = values.get('out');
+  const runManifest = values.get('run-manifest');
   return {
     briefPath: absolute(briefPath),
     ...(out === undefined ? {} : { outDir: absolute(out) }),
     fixtureDir: absolute(values.get('fixtures') ?? DEFAULT_FIXTURE_DIR),
+    ...(runManifest === undefined ? {} : { runManifestPath: absolute(runManifest) }),
     record: flags.has('record'),
     critique: !flags.has('no-critique'),
     flavor: !flags.has('no-flavor'),
@@ -141,6 +156,29 @@ export function parseArgs(argv: readonly string[]): CliOptions {
     ...(targetSize === undefined ? {} : { targetSize }),
     pinsOnly: flags.has('pins'),
   };
+}
+
+/** The semantics belonging to a replay, resolved without naming any particular run. */
+export function replaySemanticsFor(options: CliOptions): GenerationSemanticsVersion | undefined {
+  if (options.record) return undefined;
+  if (options.runManifestPath !== undefined) {
+    return generationSemanticsFor(readRunManifest(options.runManifestPath));
+  }
+  // A size override is a new generation configuration, even when the brief file
+  // is the same. Applying an old manifest's control flow to it would be a guess.
+  if (options.targetSize !== undefined || options.fixtureDir !== DEFAULT_FIXTURE_DIR) return undefined;
+
+  const brief = relative(REPO_ROOT, options.briefPath);
+  const matches = listRunManifests(RUN_MANIFEST_DIR).filter((manifest) => manifest.brief === brief);
+  if (matches.length === 0) return undefined;
+  if (matches.length > 1) {
+    throw new Error(
+      `${matches.length} run manifests were recorded for ${brief}; pass --run-manifest with the exact run to replay`,
+    );
+  }
+  const manifest = matches[0];
+  if (manifest === undefined) return undefined;
+  return generationSemanticsFor(manifest);
 }
 
 /** The brief the run will actually build, at the size the command asked for. */
@@ -220,12 +258,14 @@ export async function main(argv: readonly string[]): Promise<number> {
   }
   const served: string[] = [];
   const provider = buildProvider(options, served);
+  const replaySemantics = replaySemanticsFor(options);
 
   const result = await generateSet({
     provider,
     brief,
     critique: options.critique,
     flavor: options.flavor,
+    ...(replaySemantics === undefined ? {} : { semanticsVersion: replaySemantics }),
   });
   const outDir = options.outDir ?? join(PACKAGE_ROOT, 'out', brief.setCode);
   const paths = writeSetOutput(outDir, result);

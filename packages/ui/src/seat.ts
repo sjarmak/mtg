@@ -4,11 +4,12 @@
  * # The rule
  *
  * **The label decides, not a flag.** `routes/play/deal.ts` calls the near seat
- * `You` when one person is playing a bot and names *both* seats outright when
- * two people share a screen, so which seat is the second person is a fact about
- * the label rather than something a call site has to be told. Reading it off the
- * label is what keeps every sentence right on a hotseat table, where neither
- * seat is `You` and a viewer-relative pronoun has two answers.
+ * `You` when one person is playing a bot, and a two-human table (the test
+ * fixture) names *both* seats outright, so which seat is the second person is a
+ * fact about the label rather than something a call site has to be told.
+ * Reading it off the label is what keeps every sentence right on a two-human
+ * table, where neither seat is `You` and a viewer-relative pronoun has two
+ * answers.
  *
  * # Why the whole vocabulary is here rather than spread over the callers
  *
@@ -74,12 +75,30 @@ export function seatVerb(label: string, third: string, second: string): string {
  * call.
  */
 export function seatPossessive(label: string): string {
-  return isSecondPerson(label) ? 'your' : `${label}'s`;
+  return isSecondPerson(label) ? 'your' : possessiveOf(label);
 }
 
 /** The same possessive opening a sentence, where only the pronoun shifts. */
 export function seatPossessiveLeading(label: string): string {
-  return isSecondPerson(label) ? 'Your' : `${label}'s`;
+  return isSecondPerson(label) ? 'Your' : possessiveOf(label);
+}
+
+/**
+ * A name in the possessive, which is not always the name plus `'s`.
+ *
+ * A seat is usually a person and sometimes a deck, and the decks are named like
+ * places: the replay viewer's rail read `THE SKY ISLANDS'S GRAVEYARD`, because
+ * the rule was the name and two characters. A plural-form name takes the bare
+ * apostrophe (Chicago 7.20 — `the United States' role`), which is the reading
+ * `The Sky Islands' graveyard` wants and the one a reader would write.
+ *
+ * The test is the final `s` rather than plurality, because nothing here can tell
+ * a plural from a singular that ends the same way. That is the trade the
+ * convention makes, and it costs a singular name ending in `s` an `s` it might
+ * have kept.
+ */
+function possessiveOf(label: string): string {
+  return label.endsWith('s') || label.endsWith('S') ? `${label}'` : `${label}'s`;
 }
 
 /**

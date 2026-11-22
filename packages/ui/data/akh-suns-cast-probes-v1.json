@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "suns-cast-payment-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0149:f11cd406-c6ae-4018-ae45-4e5577aa82ae"],
+      "decisionFamilies": ["suns-casting-three-mana-including-two-red"],
+      "assertions": [
+        "Sweltering Suns casting requires two red sources: 'MMM'",
+        "Sweltering Suns casting requires two red sources: 'MMP'",
+        "Sweltering Suns casting requires two red sources: 'PPP'",
+        "Sweltering Suns casting requires two red sources: 'MPP'"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-suns-cast.integration.test.ts"
+    },
+    {
+      "id": "suns-cast-payment-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0149:f11cd406-c6ae-4018-ae45-4e5577aa82ae"],
+      "decisionFamilies": ["suns-casting-three-mana-including-two-red"],
+      "assertions": [
+        "Forge pays three distinct lands including two Mountains to cast Sweltering Suns without drawing"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-suns-cast-bot.integration.test.ts"
+    }
+  ]
+}

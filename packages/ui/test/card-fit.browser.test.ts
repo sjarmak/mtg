@@ -120,7 +120,7 @@ function pageHtml(step: number | null): string {
       onSelectMode: () => undefined,
       children: h(CardsRoute, {
         cards: FACES,
-        route: { mode: 'cards', params: {} },
+        route: { mode: 'cards', sub: 'gallery', params: {} },
         onSetParams: () => undefined,
       }),
     }),
@@ -167,6 +167,7 @@ const MEASURE = `(() => {
     const last = rects[rects.length - 1];
     faces.push({
       id: card.getAttribute('data-card-id'),
+      largeArt: card.getAttribute('data-large-art') === 'true',
       published: published === null ? -1 : Number(published),
       blocks: rects.length,
       lineHeight: round(parseFloat(getComputedStyle(box).lineHeight)),
@@ -185,6 +186,7 @@ const MEASURE = `(() => {
 
 interface FaceReading {
   readonly id: string | null;
+  readonly largeArt: boolean;
   readonly published: number;
   readonly blocks: number;
   readonly lineHeight: number;
@@ -231,7 +233,10 @@ describe('the rules box a browser draws', () => {
       const rungsMeasured = new Set<number>();
       let multiBlock = 0;
       let flavored = 0;
-      const geometry = new Set<string>();
+      const geometry = new Map<string, Set<string>>([
+        ['ordinary', new Set<string>()],
+        ['large-art land', new Set<string>()],
+      ]);
       try {
         chrome = await launchChrome(join(directory, 'chrome'));
         for (const [width, height] of VIEWPORTS) {
@@ -264,7 +269,8 @@ describe('the rules box a browser draws', () => {
               expect(face.blocks, `${where}: the box drew a block count the composition did not`).toBe(
                 textBoxBlocks(card).length,
               );
-              geometry.add(`${String(face.clientWidth)}x${String(face.clientHeight)}`);
+              const geometryClass = face.largeArt ? 'large-art land' : 'ordinary';
+              geometry.get(geometryClass)?.add(`${String(face.clientWidth)}x${String(face.clientHeight)}`);
               blocksDrawn += face.blocks;
               if (face.blocks === 0) continue;
               if (face.blocks > 1) multiBlock += 1;
@@ -337,8 +343,15 @@ describe('the rules box a browser draws', () => {
         );
       }
 
-      // One box, or the arithmetic is not about the box that was drawn.
-      expect([...geometry], 'full faces drew rules boxes of more than one size').toHaveLength(1);
+      // One box per declared art geometry, or the arithmetic is not about the
+      // box that was drawn. Mana-only lands deliberately trade rules height
+      // for the larger illustration the card publishes in data-large-art;
+      // every face inside either class must still agree exactly.
+      for (const [geometryClass, sizes] of geometry) {
+        expect([...sizes], `${geometryClass} full faces drew rules boxes of more than one size`).toHaveLength(
+          1,
+        );
+      }
       expect(blocksDrawn, 'the run drew almost no rules text').toBeGreaterThanOrEqual(MIN_BLOCKS);
       // Every rung and both paragraph margins, so a green run cannot be a run
       // in which nothing shrank and every box held one line. The rungs are a

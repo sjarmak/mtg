@@ -36,6 +36,7 @@ import type { ReactElement, ReactNode } from 'react';
 import type { Choice, ObjectId } from '@mtg/kernel';
 import { choiceLabel, submitButton } from './choice-button';
 import { declarationWords } from './declare';
+import { assignedKeys } from './declare';
 import type { Assignment, DeclarationPlan, DeclarationStage, DeclarationSubject } from './declare';
 
 /** The accessible name of the group holding the creatures being declared. */
@@ -52,10 +53,12 @@ export const DECLARE_BACK_LABEL = 'Back to the creatures';
 /** What one row says it is doing, which is also the row's accessible name. */
 function subjectStatus(plan: DeclarationPlan, subject: DeclarationSubject, assignment: Assignment): string {
   const words = declarationWords(plan.kind);
-  const held = assignment.get(subject.oid);
-  if (held === undefined) return words.idle;
-  const against = subject.candidates.find((candidate) => candidate.key === held);
-  return words.busy(against?.label ?? held);
+  const held = assignedKeys(assignment, subject.oid);
+  if (held.length === 0) return words.idle;
+  const labels = held.map(
+    (key) => subject.candidates.find((candidate) => candidate.key === key)?.label ?? key,
+  );
+  return words.busy(labels.join(', '));
 }
 
 /**
@@ -179,7 +182,7 @@ function rosterBody(input: DeclarePanelInput): ReactNode {
 function questionBody(input: DeclarePanelInput, subject: DeclarationSubject): ReactNode {
   const { plan, assignment, answerFocus, onPick, onBack } = input;
   const words = declarationWords(plan.kind);
-  const held = assignment.get(subject.oid);
+  const held = assignedKeys(assignment, subject.oid);
   return createElement(
     Fragment,
     null,
@@ -194,7 +197,7 @@ function questionBody(input: DeclarePanelInput, subject: DeclarationSubject): Re
             key: candidate.key,
             type: 'button',
             className: 'mtg-choice mtg-declare__answer',
-            'data-declared': held === candidate.key ? 'true' : 'false',
+            'data-declared': held.includes(candidate.key) ? 'true' : 'false',
             // The first answer takes the ring for `cast-panel.ts`'s reason: a
             // panel that opens behind the keyboard is a panel the keyboard has
             // to go looking for. Not when the card itself opened the question,
@@ -212,7 +215,7 @@ function questionBody(input: DeclarePanelInput, subject: DeclarationSubject): Re
         {
           type: 'button',
           className: 'mtg-choice mtg-declare__answer',
-          'data-declared': held === undefined ? 'true' : 'false',
+          'data-declared': held.length === 0 ? 'true' : 'false',
           onClick: () => {
             onPick(subject.oid, null);
           },

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "rtr",
+  "name": "Return to Ravnica",
+  "sourceCodes": ["RTR"],
+  "products": [{ "id": "rtr-draft", "setCode": "RTR", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["rtr-draft", "rtr-draft", "rtr-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["rtr-draft", "rtr-draft", "rtr-draft", "rtr-draft", "rtr-draft", "rtr-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

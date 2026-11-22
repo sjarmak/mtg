@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "gpt",
+  "formatSha256": "dbc94b30eb979a46f3a686117918a07de3f48788a385e70ec39c28d09d25b9a3",
+  "sourceSha256": "c733061de3a3ed97d7519b619c935dca7aeb6d2bc948cb290dbb22bd0f1c0ae6",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "c733061de3a3ed97d7519b619c935dca7aeb6d2bc948cb290dbb22bd0f1c0ae6",
+    "recipe.json": "8c9cd40e7b1b6639a181fa70dd2a8a8028bc885b643bfb66bded7a5171bf373b",
+    "gpt-printed-catalog-v1.json": "a41cde94a86313212c533736d9772f70b7dae48ad5d6962789cf0933c98895f8",
+    "rav-printed-catalog-v1.json": "a035fef5c38f83420bb57bb274a417ee975a8f0d6e7c7b62f6fd2de3423c1fe9",
+    "gpt-limited-format-v1.json": "36013ce42172997b97fb94596f60566f473223fe30535c771efd53cf0e4d5e27"
+  },
+  "catalogs": [
+    {
+      "code": "GPT",
+      "cards": 167,
+      "contentSha256": "c814483c64a356b30bcf6d1d988dd0ffff2badb45033895a23dd4663484f5ac5"
+    },
+    {
+      "code": "RAV",
+      "cards": 306,
+      "contentSha256": "def1de60dabbe5293fac93ebc2dd943f6f78387a37feb089e5a524fda5ce1394"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1916.1342789999999,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 456,
+    "printings": 473
+  }
+}

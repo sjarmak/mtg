@@ -14,10 +14,34 @@
 import type { Card } from '@mtg/dsl';
 import { BASIC_LANDS, exampleCard } from '@mtg/dsl';
 import type { DeckList, GameState } from '../src/index';
-import { createGame, deepCopy, fork, pendingDecision, playGame, reduce, simpleAgent } from '../src/index';
+import {
+  agentView,
+  createGame,
+  deepCopy,
+  fork,
+  pendingDecision,
+  playGame,
+  reduce,
+  settleAgentAction,
+  simpleAgent,
+} from '../src/index';
 
-const MOUNTAIN = BASIC_LANDS[3];
-if (MOUNTAIN === undefined) throw new Error('missing Mountain fixture');
+/**
+ * The guard has to *produce* the card rather than narrow a `const` beside it.
+ * `deck()` below is a hoisted function declaration, so nothing in the type
+ * system stops it being called above a top-level `if (x === undefined) throw`,
+ * and TypeScript correctly refuses to carry that narrowing inside it — the
+ * same guard in an arrow assigned to a `const` is accepted. The file went four
+ * packages' worth of refactors without anyone seeing that, because `bench/`
+ * was outside the tsconfig project until `mtg-lr6r` put it in.
+ */
+function mountainFixture(): Card {
+  const card = BASIC_LANDS[3];
+  if (card === undefined) throw new Error('missing Mountain fixture');
+  return card;
+}
+
+const MOUNTAIN = mountainFixture();
 
 function deck(): DeckList {
   const cards: Card[] = [
@@ -37,7 +61,12 @@ function midGameState(decisions: number): GameState {
     const decision = pendingDecision(state);
     if (decision === null) break;
     const agent = agents[decision.player];
-    state = reduce(state, agent.decide({ state, player: decision.player, decision })).state;
+    const action = agent.decide(
+      agentView(state, decision.player, decision, `fork-bench:${String(index)}`, (candidate) =>
+        settleAgentAction(state, candidate),
+      ),
+    );
+    state = reduce(state, action).state;
   }
   return state;
 }

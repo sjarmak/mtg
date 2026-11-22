@@ -1,0 +1,521 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "ths",
+  "name": "Theros",
+  "sources": [
+    {
+      "code": "THS",
+      "catalogFormat": "ths-printed-v1",
+      "catalogSha256": "0b5518a3ac6050318d7efb96cf6c13d907f9ed6d0c08674505cc0054af09a82d",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/THS.json",
+        "sha256": "ce27f9e1b51a4d938ae959d7c0a505d4b6163f6ecd84374583bf5adf4ef2d5b2",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-black-lifegain",
+      "name": "White-Black Lifegain",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ths-printed-v1:0028:95a36e06-39f3-47d0-b6a9-43728afceb4a",
+          "name": "Scholar of Athreos",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0089:b06078ce-f534-4e16-9a70-d51620a33eb2",
+          "name": "Gray Merchant of Asphodel",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0019:4c69995b-ef31-4635-8d5a-b31f73993364",
+          "name": "Hopeful Eidolon",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0025:77e85180-f3c9-4b03-9c25-223599b937ad",
+          "name": "Ordeal of Heliod",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0110:9e5ec47c-47a2-4eda-b81a-4a07f04e5989",
+          "name": "Whip of Erebos",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0101:dbbdbf1a-2d15-4291-aa19-614f854d8cb3",
+          "name": "Read the Bones",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0090:596822f6-dbd4-4cc8-aa50-9331ff42544e",
+          "name": "Hero's Downfall",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0092:1439ed8d-ae11-4159-9420-5d98c6cc93b3",
+          "name": "Insatiable Harpy",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0202:018a9c98-1cb4-4c53-a765-c15808c4ab44",
+          "name": "Sentry of the Underworld",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0009:fd5b1633-c41d-42b1-af1b-4a872077ffbd",
+          "name": "Elspeth, Sun's Champion",
+          "count": 1
+        },
+        {
+          "physicalId": "ths-printed-v1:0227:0f14b6b3-5f40-4328-a3be-28fe32dd7cb1",
+          "name": "Temple of Silence",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0230:18013a78-d156-42bf-89b7-72e7070872c0",
+          "name": "Plains",
+          "count": 13
+        },
+        {
+          "physicalId": "ths-printed-v1:0238:8b153bb8-f9d9-44dc-ae19-d0eb2ea26ba1",
+          "name": "Swamp",
+          "count": 15
+        }
+      ]
+    },
+    {
+      "id": "white-blue-heroic",
+      "name": "White-Blue Heroic",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ths-printed-v1:0013:251015ed-9408-4941-894a-158551ed2613",
+          "name": "Favored Hoplite",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0189:4c929a57-2c23-4bbf-b265-666630a4fde8",
+          "name": "Battlewise Hoplite",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0036:e04751f2-b571-49fa-94b6-ec589d314ee6",
+          "name": "Wingsteed Rider",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0012:642d9a5c-5697-4747-adce-5a71bcf1c086",
+          "name": "Fabled Hero",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0016:abafabb3-b2e7-4d78-b4b7-d8f701d3ee8b",
+          "name": "Gods Willing",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0058:fa764244-c5d5-4f27-9c56-866566a1404a",
+          "name": "Ordeal of Thassa",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0039:ba104245-0483-407f-971b-ad6d8efd9733",
+          "name": "Aqueous Form",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0230:18013a78-d156-42bf-89b7-72e7070872c0",
+          "name": "Plains",
+          "count": 19
+        },
+        {
+          "physicalId": "ths-printed-v1:0234:d851b88b-6ce6-4889-83c2-e191307bcee6",
+          "name": "Island",
+          "count": 17
+        }
+      ]
+    },
+    {
+      "id": "blue-red-spells",
+      "name": "Blue-Red Spells",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ths-printed-v1:0045:8d6bb19c-3610-4609-b23c-21d4d80e4582",
+          "name": "Crackling Triton",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0204:0a19670c-5afa-4e22-b3ff-258faca19556",
+          "name": "Spellheart Chimera",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0059:f9342aba-e3aa-4210-ad72-e609c7c027b8",
+          "name": "Prescient Chimera",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0123:b84b90b6-71e2-429e-9853-50bcbd6538db",
+          "name": "Flamespeaker Adept",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0127:bbb03f2e-2b92-4aa1-afae-301ed5d151d3",
+          "name": "Lightning Strike",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0128:8b0686b0-27a2-46bc-bc04-717f368d9a78",
+          "name": "Magma Jet",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0073:3992ae67-ad0b-40be-a97d-d7fb36754918",
+          "name": "Voyage's End",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0050:9fe8228b-ff9c-4a2a-a0e3-12f6d388a3c2",
+          "name": "Griptide",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0145:3db6ee53-c5e6-4344-9f35-084cd8cc9cd3",
+          "name": "Titan's Strength",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0229:fff118a5-765b-4ba1-8f12-ce6f24b2459b",
+          "name": "Unknown Shores",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0234:d851b88b-6ce6-4889-83c2-e191307bcee6",
+          "name": "Island",
+          "count": 11
+        },
+        {
+          "physicalId": "ths-printed-v1:0242:e78801a7-af8c-4f1d-b29e-7a36676b6818",
+          "name": "Mountain",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "black-green-graveyard",
+      "name": "Black-Green Graveyard",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ths-printed-v1:0095:4a8cff2f-ba52-4d22-83e8-13c56368f1df",
+          "name": "Loathsome Catoblepas",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0155:e101ae5f-c3ea-4788-b27f-d9452234eaef",
+          "name": "Commune with the Gods",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0103:1067cf71-a270-4b1b-aa06-0ec0e732ed16",
+          "name": "Returned Centaur",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0098:2527a490-6c56-41ba-949c-c78905a128ba",
+          "name": "Nighthowler",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0163:c4010889-1d7a-4db3-a27c-c39baa024765",
+          "name": "Nemesis of Mortals",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0177:66733fcb-fddc-4c15-bc51-c2cd42ac5a70",
+          "name": "Sedge Scorpion",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0078:853a89c6-63f9-4b12-8a5b-2c382e22b226",
+          "name": "Baleful Eidolon",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0090:596822f6-dbd4-4cc8-aa50-9331ff42544e",
+          "name": "Hero's Downfall",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0197:f3dcd1ce-717c-431a-9895-f7701d276743",
+          "name": "Pharika's Mender",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0238:8b153bb8-f9d9-44dc-ae19-d0eb2ea26ba1",
+          "name": "Swamp",
+          "count": 18
+        },
+        {
+          "physicalId": "ths-printed-v1:0246:ddfd1469-94b9-4964-ada6-4fb43b0b9282",
+          "name": "Forest",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ths-printed-v1:0104:93613e23-b363-4bcb-8f63-8f1d25f7f174",
+          "name": "Returned Phalanx",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0057:f347eb88-7d1d-4ed5-b841-2bf81f00d5f0",
+          "name": "Omenspeaker",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0107:65b7275a-5305-42e6-b5c3-8b88568b4e28",
+          "name": "Thoughtseize",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0090:596822f6-dbd4-4cc8-aa50-9331ff42544e",
+          "name": "Hero's Downfall",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0101:dbbdbf1a-2d15-4291-aa19-614f854d8cb3",
+          "name": "Read the Bones",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0047:992e8119-f933-4e54-bb04-e1cc78f7e87b",
+          "name": "Dissolve",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0089:b06078ce-f534-4e16-9a70-d51620a33eb2",
+          "name": "Gray Merchant of Asphodel",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0059:f9342aba-e3aa-4210-ad72-e609c7c027b8",
+          "name": "Prescient Chimera",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0225:686559d7-8ac1-496b-a5a6-1467bf8fc7c5",
+          "name": "Temple of Deceit",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0234:d851b88b-6ce6-4889-83c2-e191307bcee6",
+          "name": "Island",
+          "count": 15
+        },
+        {
+          "physicalId": "ths-printed-v1:0238:8b153bb8-f9d9-44dc-ae19-d0eb2ea26ba1",
+          "name": "Swamp",
+          "count": 15
+        }
+      ]
+    },
+    {
+      "id": "black-red-minotaurs",
+      "name": "Black-Red Minotaurs",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ths-printed-v1:0117:b29fc64e-297e-4e10-8f4e-289dc1c3ebfd",
+          "name": "Deathbellow Raider",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0138:ffaa31fd-5ba5-49d4-90b6-fafb9f1a8b3a",
+          "name": "Rageblood Shaman",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0195:78791fc6-054f-45eb-b8b0-28f2512d72b6",
+          "name": "Kragma Warcaller",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0130:6854c913-d4bd-42f7-901c-f3c25be5c4b2",
+          "name": "Minotaur Skullcleaver",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0097:9dfd36c5-a484-4973-873c-b6a433da8e7a",
+          "name": "Mogis's Marauder",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0127:bbb03f2e-2b92-4aa1-afae-301ed5d151d3",
+          "name": "Lightning Strike",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0128:8b0686b0-27a2-46bc-bc04-717f368d9a78",
+          "name": "Magma Jet",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0238:8b153bb8-f9d9-44dc-ae19-d0eb2ea26ba1",
+          "name": "Swamp",
+          "count": 14
+        },
+        {
+          "physicalId": "ths-printed-v1:0242:e78801a7-af8c-4f1d-b29e-7a36676b6818",
+          "name": "Mountain",
+          "count": 22
+        }
+      ]
+    },
+    {
+      "id": "red-white-heroic",
+      "name": "Red-White Heroic",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ths-printed-v1:0134:013ec9f5-8bf3-4067-a942-d535d011af82",
+          "name": "Priest of Iroas",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0013:251015ed-9408-4941-894a-158551ed2613",
+          "name": "Favored Hoplite",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0111:a47c50d9-11ec-486b-a5ce-5a6b70858f30",
+          "name": "Akroan Crusader",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0026:0c6c2458-edb7-4822-866b-ca1b2ea7a8e8",
+          "name": "Phalanx Leader",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0012:642d9a5c-5697-4747-adce-5a71bcf1c086",
+          "name": "Fabled Hero",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0145:3db6ee53-c5e6-4344-9f35-084cd8cc9cd3",
+          "name": "Titan's Strength",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0016:abafabb3-b2e7-4d78-b4b7-d8f701d3ee8b",
+          "name": "Gods Willing",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0127:bbb03f2e-2b92-4aa1-afae-301ed5d151d3",
+          "name": "Lightning Strike",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0228:4f53049c-2491-4d20-aa19-00eb5c55b438",
+          "name": "Temple of Triumph",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0230:18013a78-d156-42bf-89b7-72e7070872c0",
+          "name": "Plains",
+          "count": 16
+        },
+        {
+          "physicalId": "ths-printed-v1:0242:e78801a7-af8c-4f1d-b29e-7a36676b6818",
+          "name": "Mountain",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "green-blue-monstrosity",
+      "name": "Green-Blue Monstrosity",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ths-printed-v1:0148:cc08576f-1d48-4db4-9bb9-e039f75c98b8",
+          "name": "Agent of Horizons",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0180:d40b65c1-b24d-492d-81b9-d8474ebdc08c",
+          "name": "Sylvan Caryatid",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0182:155ae6c0-5085-45f1-ba9f-508d501fee2c",
+          "name": "Voyaging Satyr",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0181:799d08a6-d978-4731-98ad-38acd57f3196",
+          "name": "Time to Feed",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0164:2d922596-4c2d-47fd-8c28-0e62972effbf",
+          "name": "Nessian Asp",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0150:dfbd7c65-ebe5-47a6-8d2f-9a8c63a30a7b",
+          "name": "Arbor Colossus",
+          "count": 3
+        },
+        {
+          "physicalId": "ths-printed-v1:0172:4979cc1b-9c1a-47e4-ae37-7c41798eb89a",
+          "name": "Polukranos, World Eater",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0063:4585565b-c743-4264-a647-4480ff5a3bbf",
+          "name": "Shipbreaker Kraken",
+          "count": 1
+        },
+        {
+          "physicalId": "ths-printed-v1:0226:2f66945b-3e64-498a-9478-5f96a61d4ec7",
+          "name": "Temple of Mystery",
+          "count": 4
+        },
+        {
+          "physicalId": "ths-printed-v1:0223:834b27a0-dfd7-4f96-8cde-cacac4b24acc",
+          "name": "Nykthos, Shrine to Nyx",
+          "count": 2
+        },
+        {
+          "physicalId": "ths-printed-v1:0234:d851b88b-6ce6-4889-83c2-e191307bcee6",
+          "name": "Island",
+          "count": 7
+        },
+        {
+          "physicalId": "ths-printed-v1:0246:ddfd1469-94b9-4964-ada6-4fb43b0b9282",
+          "name": "Forest",
+          "count": 23
+        }
+      ]
+    }
+  ],
+  "contentSha256": "2d2ed5c12a2748857de68fa6cdc170a770e272c7c51782fcb8ef366b821b6da6"
+}

@@ -161,15 +161,26 @@ export function gamesPerMatchup(): number {
  * `src/seed-noise.ts`, which is the number `withinNoise` already abstains on, so
  * there is exactly one copy of it.
  *
- * What survives here is the method, which does not go stale. `balance.spread` is
- * a max minus a min over ten win rates, so it inherits the noise of both ends and
- * gains nothing back: it is the noisiest statistic in the report, noisier than
- * any single pair. **Two single-seed spread readings have to differ by about two
- * seed deviations before the difference is anything but dice**, and several
- * deltas argued in `baseline.ts` are smaller than that. The remedy is not a
- * wider bound — the bound is 30% and everything passes it — but reading a
- * one-seed spread as a direction rather than a quantity, and running the
- * variance tool before an attribution rests on one.
+ * What survives here is the method, which does not go stale. **Two single-seed
+ * spread readings have to differ by about two seed deviations before the
+ * difference is anything but dice**, and several deltas argued in `baseline.ts`
+ * are smaller than that. The remedy is not a wider bound — the bound is 30% and
+ * everything passes it — but reading a one-seed spread as a direction rather
+ * than a quantity, and running the variance tool before an attribution rests on
+ * one.
+ *
+ * This paragraph used to argue from the shape of the statistic that
+ * `balance.spread` is the noisiest thing in the report, noisier than any single
+ * pair, because a max minus a min inherits the noise of both ends. The 24-seed
+ * run on 2026-08-27 says otherwise: on Tideglass Reach the spread moved 1.17pp
+ * and its worst pair 1.30pp, and on the flagship's 79-card build the two are
+ * 1.40pp and 1.39pp, a dead heat. The argument assumed the ten rates move independently and
+ * they do not — every pair plays every other, so a seed that favors aggression
+ * lifts several rates at once and a difference of two of them cancels most of
+ * what it lifted. The conclusion above is unaffected, which is why it kept its
+ * place and the derivation lost its: two deviations is two deviations whichever
+ * statistic is the larger. `src/seed-noise.ts` carries both numbers and they
+ * round to the same step.
  */
 export async function runRoundRobin(
   decks: readonly DeckList[],

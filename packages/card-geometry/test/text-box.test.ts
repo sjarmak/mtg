@@ -54,6 +54,102 @@ function keywordedCreature(): Card {
 }
 
 describe('remindedBlocks finds the keyword row by matching, not position', () => {
+  it('derives the Overload reminder from the structured alternate casting profile', () => {
+    const card = parseCard({
+      id: 'rtr-downsize-overload-reminder',
+      name: 'Downsize',
+      kind: 'instant',
+      rarity: 'common',
+      set: { code: 'RTR', collectorNumber: 38 },
+      colors: ['U'],
+      manaCost: { U: 1 },
+      effects: [
+        {
+          kind: 'pumpUntilEndOfTurn',
+          power: -4,
+          toughness: 0,
+          target: { kind: 'targetCreatureYouDontControl' },
+        },
+      ],
+      overload: {
+        cost: { generic: 2, U: 1 },
+        effects: [
+          {
+            kind: 'pumpUntilEndOfTurn',
+            power: -4,
+            toughness: 0,
+            scope: 'permanentsYouDontControl',
+            scopeFilter: { cardTypes: ['creature'] },
+            target: { kind: 'noTarget' },
+          },
+        ],
+      },
+    } satisfies CardInput);
+
+    expect(remindedBlocks(card).at(-1)).toEqual({
+      kind: 'reminder',
+      roman: 'Overload {2}{U}',
+      text: 'Overload {2}{U} (You may cast this spell for its overload cost. If you do, change "target" in its text to "each.")',
+    });
+  });
+
+  it('marks a dual-typed land mana row as the source reminder paragraph', () => {
+    const card = parseCard({
+      id: 'rtr-blood-crypt-text-box',
+      name: 'Blood Crypt',
+      kind: 'land',
+      rarity: 'rare',
+      set: { code: 'RTR', collectorNumber: 238 },
+      subtypes: ['Swamp', 'Mountain'],
+      producesMana: ['B', 'R'],
+      entryReplacement: { kind: 'payLifeOrEntersTapped', life: 2 },
+      printedEntryReference: 'thisLand',
+      printedManaAbilityFirst: true,
+    });
+
+    expect(remindedBlocks(card)).toEqual([
+      {
+        kind: 'reminder',
+        text: '({T}: Add {B} or {R}.)',
+        roman: '{T}: Add {B} or {R}.',
+      },
+      {
+        kind: 'rules',
+        text: "As this land enters, you may pay 2 life. If you don't, it enters tapped.",
+      },
+    ]);
+  });
+
+  it('keeps Populate rules roman and its derived reminder italic on the same row', () => {
+    const card = parseCard({
+      id: 'rtr-rootborn-defenses-reminder',
+      name: 'Rootborn Defenses',
+      kind: 'instant',
+      rarity: 'common',
+      set: { code: 'RTR', collectorNumber: 19 },
+      colors: ['W'],
+      manaCost: { generic: 2, W: 1 },
+      effects: [
+        { kind: 'populate' },
+        {
+          kind: 'grantKeywordUntilEndOfTurn',
+          keyword: 'indestructible',
+          target: { kind: 'noTarget' },
+          scope: 'permanentsYouControl',
+          scopeFilter: { cardTypes: ['creature'] },
+        },
+      ],
+    } satisfies CardInput);
+
+    expect(remindedBlocks(card)).toEqual([
+      {
+        kind: 'reminder',
+        roman: 'Populate. Creatures you control gain indestructible until end of turn.',
+        text: "Populate. Creatures you control gain indestructible until end of turn. (To populate, create a token that's a copy of a creature token you control.)",
+      },
+    ]);
+  });
+
   /**
    * The baseline: a creature has nothing printed ahead of its keywords, so
    * the keyword row is still `blocks[0]` — this is the shape every fixture
@@ -67,24 +163,72 @@ describe('remindedBlocks finds the keyword row by matching, not position', () =>
     expect(blocks[1]?.text).toBe("Vigilance (Attacking doesn't cause this creature to tap.)");
   });
 
+  it('keeps a mixed intrinsic and flat source group in source order', () => {
+    const blocks = remindedBlocks(
+      parseCard({
+        id: 'rtr-hover-barrier',
+        name: 'Fog Bank',
+        kind: 'creature',
+        rarity: 'uncommon',
+        set: { code: 'RTR', collectorNumber: 40 },
+        colors: ['U'],
+        manaCost: { generic: 2, U: 1 },
+        power: 0,
+        toughness: 6,
+        subtypes: ['Illusion', 'Wall'],
+        keywords: ['flying'],
+        keywordAbilities: [{ kind: 'defender' }],
+        keywordLineGroups: [[{ kind: 'defender' }, 'flying']],
+      } satisfies CardInput),
+    );
+    expect(blocks).toEqual([
+      {
+        kind: 'reminder',
+        roman: 'Defender',
+        text: "Defender (This creature can't attack.)",
+      },
+      { kind: 'rules', text: 'Flying' },
+    ]);
+  });
+
+  it('keeps two reminded entries from one source group in source order', () => {
+    const blocks = remindedBlocks(
+      parseCard({
+        id: 'test-reminded-source-group',
+        name: 'Fog Bank',
+        kind: 'creature',
+        rarity: 'common',
+        set: { code: 'TST', collectorNumber: 4 },
+        colors: ['W'],
+        manaCost: { generic: 2, W: 1 },
+        power: 2,
+        toughness: 2,
+        subtypes: ['Cat'],
+        keywords: ['lifelink', 'vigilance'],
+        keywordLineGroups: [['lifelink', 'vigilance']],
+      } satisfies CardInput),
+    );
+    expect(blocks.map((block) => block.roman)).toEqual(['Lifelink', 'Vigilance']);
+  });
+
   /**
    * The regression: `Enchant creature` prints first, so the keyword row is
-   * `blocks[1]` in the source rows, but every reminder block it expands into
-   * still has to land after the Aura's own row and before the trailing
-   * `KeywordAbility` line — none of them silently dropped, none of them
-   * reordered ahead of `Enchant creature`.
+   * `blocks[2]` in the source rows because Defender uses its source-faithful
+   * leading position. Every reminder block still has to remain after the
+   * Aura's own row — none silently dropped or reordered ahead of `Enchant
+   * creature`.
    */
   it('keeps the Enchant creature row ahead of the keyword reminders on an Aura', () => {
     const blocks = remindedBlocks(auraWithKeywords());
     expect(blocks[0]).toEqual({ kind: 'rules', text: 'Enchant creature' });
-    expect(blocks[1]).toEqual({ kind: 'rules', text: 'Flying' });
-    expect(blocks[2]?.kind).toBe('reminder');
-    expect(blocks[2]?.text).toBe("Vigilance (Attacking doesn't cause this creature to tap.)");
-    // The trailing `KeywordAbility` line (Defender) and the Aura's own
-    // modification clause still print, through the same `abilityLineBlock`
-    // path every row after the keyword row already used.
+    expect(blocks[1]?.text).toBe("Defender (This creature can't attack.)");
+    expect(blocks[2]).toEqual({ kind: 'rules', text: 'Flying' });
+    expect(blocks[3]?.kind).toBe('reminder');
+    expect(blocks[3]?.text).toBe("Vigilance (Attacking doesn't cause this creature to tap.)");
+    // The leading `KeywordAbility` line and the Aura's own modification clause
+    // still print through the same `abilityLineBlock` path around the matched
+    // keyword row.
     const texts = blocks.map((block) => block.text);
-    expect(texts).toContain("Defender (This creature can't attack.)");
     expect(texts.some((text) => text.includes('gets +1/+1'))).toBe(true);
   });
 

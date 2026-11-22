@@ -90,7 +90,18 @@ describe('the served table', () => {
     const base = await start(table());
     const response = await fetch(`${base}/api/health`);
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ ok: true, protocol: NETPLAY_PROTOCOL, table: 'served' });
+    // `deals` and `rooms` are both false: this server was handed a table and no
+    // way to make another, which is every launcher that predates the Play page's
+    // button. A page reads the two separately, because a lab can deal a table
+    // without knowing what a room is.
+    expect(await response.json()).toEqual({
+      ok: true,
+      protocol: NETPLAY_PROTOCOL,
+      deals: false,
+      rooms: false,
+      drafts: false,
+      records: false,
+    });
   });
 
   it('answers nothing to a link nobody was given', async () => {
@@ -189,9 +200,9 @@ describe('two clients, one game', () => {
       expect(seen.pending).toBeNull();
       expect(seen.awaiting).toBe(owed);
 
-      const options = owing.held.pending?.options.length ?? 0;
-      expect(options).toBeGreaterThan(0);
-      const outcome = await owing.choose(options - 1);
+      const options = owing.held.pending?.options ?? [];
+      expect(options.length).toBeGreaterThan(0);
+      const outcome = await owing.choose(options.findLastIndex((option) => option.type !== 'concede'));
       expect(outcome.status).toBe(200);
       moves += 1;
       await players[owed === 0 ? 1 : 0].read();

@@ -22,19 +22,27 @@
  *
  * ## What is spellable, and what is refused
  *
- * `CountFilter` ORs within a list and ANDs across the two (`matchesFilter`'s
+ * `CountFilter` ORs within a list and ANDs across its axes (`matchesFilter`'s
  * `anyOf`), so `{cardTypes: ['creature','artifact']}` means creature *or*
- * artifact. Forge spells an OR as a comma-separated list of whole specs, which
- * is a shape this transpiler does not write and which nothing has asked it to:
- * every `countMatching` in the tree names at most one card type and at most one
- * subtype. So one of each is spelled and anything wider is refused by name.
- * A refusal costs a card; a guess costs a card that transpiles clean and counts
- * a different number in Forge than it counts in the kernel, which is the one
- * failure this transpiler exists to prevent.
+ * artifact and `{cardTypes: ['creature'], subtypes: ['Monster']}` means both at
+ * once. Forge spells the OR as a comma-separated list of whole specs and the
+ * AND as a `+` between qualifiers, so a filter with several members on several
+ * axes is the cross product: `Count$Valid Wolf.YouCtrl,Werewolf.YouCtrl` and
+ * `Count$Valid Artifact.YouCtrl,Enchantment.YouCtrl` are shipped, and 159 lines
+ * in 2.0.15's scripts write a comma in this position.
  *
- * A card type that is not a permanent is refused for the same reason and a
- * blunter one: the count is of the battlefield, and an instant is never on it.
- * The kernel would count zero and so would Forge, so the two agree — but a card
+ * The two readings of a comma differ on exactly the card the flagship prints,
+ * so the Java rather than the corpus settles it: `CardLists.getValidCardCount`
+ * splits the spec on commas and hands the array to a per-card predicate, and
+ * `GameObject.isValid(String[])` returns on the first member that matches. Each
+ * card is therefore tested once and counted once however many members it
+ * satisfies — a sum over members would count Silver Brigand Warchief's own
+ * body twice, because it is a Brigand Monster and its trigger counts
+ * Brigands and Monsters.
+ *
+ * A card type that is not a permanent is still refused, and for a blunter
+ * reason: the count is of the battlefield, and an instant is never on it. The
+ * kernel would count zero and so would Forge, so the two agree — but a card
  * that always counts zero is a design mistake, not a translation, and this is
  * where it is cheapest to see.
  *
@@ -57,7 +65,16 @@
  * `UNMAPPED_COMPUTED_AMOUNT`), so a card carrying one leaves the export with a
  * reason attached rather than a silent zero.
  */
-import type { CardKind, CountFilter, Effect, PermanentTally, PumpAmount, RatePer } from '@mtg/dsl';
+import type {
+  CardKind,
+  CountFilter,
+  CountMatching,
+  Effect,
+  PermanentTally,
+  PumpAmount,
+  RatePer,
+  StaticModification,
+} from '@mtg/dsl';
 import { isLiteralAmount, isRateAmount } from '@mtg/dsl';
 import type { ComputedAmounts } from './remember';
 
@@ -80,28 +97,72 @@ const FORGE_PERMANENT_TYPES: Partial<Readonly<Record<CardKind, string>>> = {
 };
 
 /**
+ * One member of a `Valid` list: one card type, one subtype and one name, ANDed.
+ *
+ * The type token is the card type when the member has one and the subtype when
+ * it does not, because Forge's grammar takes a creature type in the same
+ * position a card type sits in — `conditionParams` already writes
+ * `<subtype>.YouCtrl` for exactly that reason. A member with neither counts
+ * every permanent you control, which is `Permanent.YouCtrl`.
+ */
+function boardCountMember(
+  cardType: CardKind | undefined,
+  subtype: string | undefined,
+  name: string | undefined,
+  keywordAbilities: readonly string[],
+  options: Pick<CountMatching, 'whose' | 'excludeSource'>,
+): string | null {
+  let base: string;
+  const qualifiers: string[] = [];
+  if (cardType === undefined) {
+    base = subtype === undefined ? 'Permanent' : subtype;
+  } else {
+    const type = FORGE_PERMANENT_TYPES[cardType];
+    if (type === undefined) return null;
+    base = type;
+    if (subtype !== undefined) qualifiers.push(subtype);
+  }
+  if (name !== undefined) qualifiers.push(`named${name}`);
+  if (keywordAbilities.includes('defender')) qualifiers.push('withDefender');
+  if (options.excludeSource === true) qualifiers.push('Other');
+  if (options.whose !== 'each') qualifiers.push('YouCtrl');
+  return qualifiers.length === 0 ? base : `${base}.${qualifiers.join('+')}`;
+}
+
+/**
  * The `Valid` spec for one filter, or `null` when this transpiler will not
  * write it.
  *
- * The type token is the card type when the filter names one and the subtype
- * when it does not, because Forge's grammar takes a creature type in the same
- * position a card type sits in — `conditionParams` already writes
- * `<subtype>.YouCtrl` for exactly that reason. A filter that names neither
- * counts every permanent you control, which is `Permanent.YouCtrl`.
+ * An axis that names nothing contributes one `undefined` rather than no
+ * members, so the empty filter still spells `Permanent.YouCtrl` and a filter
+ * that names three subtypes and no card type spells three members instead of
+ * none. The list is the cross product because the axes AND and their members
+ * OR; the file header argues why a comma is that OR and not a sum.
  */
-export function boardCountValid(filter: CountFilter): string | null {
-  const cardTypes = filter.cardTypes ?? [];
-  const subtypes = filter.subtypes ?? [];
-  if (cardTypes.length > 1 || subtypes.length > 1) return null;
+export function boardCountValid(
+  filter: CountFilter,
+  options: Pick<CountMatching, 'whose' | 'excludeSource'> = {},
+): string | null {
+  const names = filter.names ?? [];
+  const keywordAbilities = filter.keywordAbilities ?? [];
+  if (names.some((name) => /[,\n|]/u.test(name))) return null;
+  const cardTypes: readonly (CardKind | undefined)[] =
+    filter.cardTypes === undefined || filter.cardTypes.length === 0 ? [undefined] : filter.cardTypes;
+  const subtypes: readonly (string | undefined)[] =
+    filter.subtypes === undefined || filter.subtypes.length === 0 ? [undefined] : filter.subtypes;
+  const named: readonly (string | undefined)[] = names.length === 0 ? [undefined] : names;
 
-  const [cardType] = cardTypes;
-  const [subtype] = subtypes;
-  if (cardType === undefined) {
-    return subtype === undefined ? 'Permanent.YouCtrl' : `${subtype}.YouCtrl`;
+  const members: string[] = [];
+  for (const cardType of cardTypes) {
+    for (const subtype of subtypes) {
+      for (const name of named) {
+        const member = boardCountMember(cardType, subtype, name, keywordAbilities, options);
+        if (member === null) return null;
+        if (!members.includes(member)) members.push(member);
+      }
+    }
   }
-  const type = FORGE_PERMANENT_TYPES[cardType];
-  if (type === undefined) return null;
-  return subtype === undefined ? `${type}.YouCtrl` : `${type}.${subtype}+YouCtrl`;
+  return members.join(',');
 }
 
 /**
@@ -123,12 +184,81 @@ export function boardCountValid(filter: CountFilter): string | null {
 function permanentTallyValid(tally: PermanentTally): string | null {
   switch (tally.kind) {
     case 'countMatching':
-      return boardCountValid(tally.filter);
+      if ('zone' in tally && tally.zone === 'controllerGraveyard') {
+        return 'Graveyard Creature.YouOwn';
+      }
+      return boardCountValid(tally.filter, tally);
     case 'landsWithSubtype':
       return tally.whose === 'each' ? tally.subtype : `${tally.subtype}.YouCtrl`;
     case 'countWithCounter':
       return null;
   }
+}
+
+type StatBonusPer = Extract<StaticModification, { readonly kind: 'statBonusPer' }>;
+
+/** Forge values and declarations for one live layer-7c rate. */
+interface StatBonusPerValues {
+  readonly power: string | undefined;
+  readonly toughness: string | undefined;
+  readonly supportingLines: readonly string[];
+}
+
+function signedSvar(rate: number, name: string): string | undefined {
+  if (rate === 0) return undefined;
+  return rate < 0 ? `-${name}` : name;
+}
+
+function scaledTallyValid(tally: PermanentTally, rate: number): string | null {
+  const valid = permanentTallyValid(tally);
+  if (valid === null) return null;
+  const magnitude = Math.abs(rate);
+  return magnitude <= 1 ? valid : `${valid}/Times.${String(magnitude)}`;
+}
+
+/**
+ * Compiles a live static P/T rate to collision-safe Forge SVar references.
+ *
+ * Equal nonzero magnitudes share one declaration, matching Timberpack Wolf,
+ * Quag Sickness and Ancestral Mask upstream. Different magnitudes get one
+ * declaration per P/T axis so neither rate is flattened into the other.
+ */
+export function statBonusPerValues(modification: StatBonusPer, prefix: string): StatBonusPerValues | null {
+  const nonzero = [modification.power, modification.toughness].filter((rate) => rate !== 0);
+  if (nonzero.length === 0) {
+    return { power: undefined, toughness: undefined, supportingLines: [] };
+  }
+
+  const sameMagnitude = new Set(nonzero.map((rate) => Math.abs(rate))).size === 1;
+  if (sameMagnitude) {
+    const name = `${prefix}Count`;
+    const valid = scaledTallyValid(modification.each, nonzero[0] ?? 0);
+    if (valid === null) return null;
+    return {
+      power: signedSvar(modification.power, name),
+      toughness: signedSvar(modification.toughness, name),
+      supportingLines: [`SVar:${name}:Count$Valid ${valid}`],
+    };
+  }
+
+  const parts = [
+    ['Power', modification.power] as const,
+    ['Toughness', modification.toughness] as const,
+  ].filter((part) => part[1] !== 0);
+  const values = new Map<string, string>();
+  const supportingLines: string[] = [];
+  for (const [axis, rate] of parts) {
+    const valid = scaledTallyValid(modification.each, rate);
+    if (valid === null) return null;
+    const name = `${prefix}${axis}`;
+    values.set(axis, signedSvar(rate, name) ?? name);
+    supportingLines.push(`SVar:${name}:Count$Valid ${valid}`);
+  }
+  return {
+    power: values.get('Power'),
+    toughness: values.get('Toughness'),
+    supportingLines,
+  };
 }
 
 /**
@@ -175,7 +305,10 @@ function specsIn(effects: readonly Effect[]): readonly (string | null)[] {
       if (rate.rate !== 0) found.push(rateValid(rate));
       return;
     }
-    if (record.kind === 'countMatching') found.push(boardCountValid(record.filter as CountFilter));
+    if (record.kind === 'countMatching') {
+      const count = value as CountMatching;
+      found.push(boardCountValid(count.filter, count));
+    }
     for (const item of Object.values(value)) walk(item);
   };
   walk(effects);
@@ -199,6 +332,13 @@ function soleValid(effects: readonly Effect[]): string | null {
 
 /** The `SVar:` line a chain that reads a board count carries, if it does. */
 export function boardCountSvarLines(effects: readonly Effect[]): readonly string[] {
+  if (
+    effects.length === 1 &&
+    effects[0]?.kind === 'addMana' &&
+    effects[0].distribution === 'anyCombinationOfColors'
+  ) {
+    return [];
+  }
   const valid = soleValid(effects);
   return valid === null ? [] : [`SVar:${BOARD_COUNT_SVAR}:Count$Valid ${valid}`];
 }

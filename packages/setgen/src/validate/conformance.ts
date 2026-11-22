@@ -7,11 +7,19 @@
  * slot — and each of those is a targeted regeneration, not a set-wide failure.
  */
 import type { Card, Violation } from '@mtg/dsl';
-import { cardManaValue, formatViolations, isPricedEffectKind, sortColors } from '@mtg/dsl';
+import {
+  cardManaValue,
+  formatViolations,
+  isModelAbilityKind,
+  isPricedEffectKind,
+  printedEffects,
+  sortColors,
+} from '@mtg/dsl';
 import type { SetFinding } from './findings';
 import { finding } from './findings';
-import { cardOwnEffects, partCountersCreatedBy, subtypesCreatedBy } from './mechanics';
+import { partCountersCreatedBy, printedEffectKindsOnCard, subtypesCreatedBy } from './mechanics';
 import type { Slot } from '../slot';
+import type { FillCapability } from '../capabilities';
 
 export function checkCardViolations(slot: Slot, violations: readonly Violation[]): SetFinding[] {
   if (violations.length === 0) return [];
@@ -28,6 +36,7 @@ export function checkSlotConformance(slot: Slot, card: Card): SetFinding[] {
     ...checkColor(slot, card),
     ...checkManaValue(slot, card),
     ...checkEffectKinds(slot, card),
+    ...checkCapabilities(slot, card),
     ...checkAbilityKinds(slot, card),
     ...checkAuraModifications(slot, card),
     ...checkTriggerConditions(slot, card),
@@ -35,6 +44,111 @@ export function checkSlotConformance(slot: Slot, card: Card): SetFinding[] {
     ...checkSacrificeCost(slot, card),
     ...checkSupply(slot, card),
   ];
+}
+
+function capabilityFailure(slot: Slot, card: Card, contract: string): SetFinding[] {
+  return [
+    finding(
+      'SLOT_EFFECT_NOT_ALLOWED',
+      'error',
+      `${slot.id} was allocated the ${contract} capability bundle; "${card.name}" does not print that exact contract`,
+      [slot.id],
+    ),
+  ];
+}
+
+/** Parameter-sensitive bundles are read back as bundles, never as global tuples. */
+function checkCapabilities(slot: Slot, card: Card): SetFinding[] {
+  const capabilities = slot.capabilities ?? [];
+  const effects = printedEffects(card);
+  const failures: SetFinding[] = [];
+  const capabilityForEffect = (effect: (typeof effects)[number]): FillCapability | undefined => {
+    if (effect.kind === 'grantKeywordUntilEndOfTurn') return 'controlledCreatureKeywordGrant';
+    if (effect.kind === 'fight') return 'fightOpposingCreature';
+    if (effect.kind === 'untapPermanent') return 'untapControlledCreature';
+    if (effect.kind === 'chooseFromGraveyard') return 'ownGraveyardToHand';
+    if (effect.kind === 'returnToHand' && effect.target.kind === 'targetArtifactOrEnchantment')
+      return 'artifactOrEnchantmentBounce';
+    return undefined;
+  };
+  for (const effect of effects) {
+    const required = capabilityForEffect(effect);
+    if (required !== undefined && !capabilities.includes(required)) {
+      failures.push(...capabilityFailure(slot, card, required));
+    }
+  }
+  if (
+    card.abilities.some(
+      (ability) => ability.kind === 'triggered' && ability.condition === 'anotherControlledCreatureEnters',
+    ) &&
+    !capabilities.includes('controlledCreatureCounterOnEntry')
+  ) {
+    failures.push(...capabilityFailure(slot, card, 'controlledCreatureCounterOnEntry'));
+  }
+  for (const capability of capabilities) {
+    let matches = false;
+    switch (capability) {
+      case 'controlledCreatureKeywordGrant':
+        matches = effects.some(
+          (effect) =>
+            effect.kind === 'grantKeywordUntilEndOfTurn' &&
+            effect.target?.kind === 'targetCreatureYouControl' &&
+            effect.keyword !== undefined,
+        );
+        break;
+      case 'controlledCreatureCounterOnEntry':
+        matches = card.abilities.some(
+          (ability) =>
+            ability.kind === 'triggered' &&
+            ability.condition === 'anotherControlledCreatureEnters' &&
+            ability.effects.length === 1 &&
+            ability.effects[0]?.kind === 'putCounters' &&
+            ability.effects[0].counter === 'plusOnePlusOne' &&
+            ability.effects[0].target.kind === 'targetCreatureYouControl',
+        );
+        break;
+      case 'fightOpposingCreature':
+        matches = effects.some(
+          (effect) => effect.kind === 'fight' && effect.target.kind === 'targetCreatureYouDontControl',
+        );
+        break;
+      case 'untapControlledCreature':
+        matches = effects.some(
+          (effect) => effect.kind === 'untapPermanent' && effect.target.kind === 'targetCreatureYouControl',
+        );
+        break;
+      case 'artifactOrEnchantmentBounce':
+        matches = effects.some(
+          (effect) => effect.kind === 'returnToHand' && effect.target.kind === 'targetArtifactOrEnchantment',
+        );
+        break;
+      case 'ownGraveyardToHand':
+        matches = effects.some((effect) => {
+          if (
+            effect.kind !== 'chooseFromGraveyard' ||
+            effect.whose !== 'you' ||
+            effect.destination !== 'hand'
+          )
+            return false;
+          const types = effect.filter?.cardTypes ?? [];
+          return slot.role === 'returnOwnCreatureCard'
+            ? types.length === 1 && types[0] === 'creature'
+            : slot.role === 'returnOwnInstantOrSorceryCard'
+              ? types.length === 2 && types[0] === 'instant' && types[1] === 'sorcery'
+              : true;
+        });
+        break;
+      case 'abilities':
+      case 'equipment':
+      case 'setMechanics':
+      case 'spellPermanents':
+      case 'zoneReach':
+        matches = true;
+        break;
+    }
+    if (!matches) failures.push(...capabilityFailure(slot, card, capability));
+  }
+  return failures;
 }
 
 /**
@@ -167,17 +281,26 @@ function checkEffectKinds(slot: Slot, card: Card): SetFinding[] {
   // finding: a slot that asked for removal and got an exile is still a card the
   // slot did not ask for.
   //
-  // `cardOwnEffects` reads `card.effects` or every mode's effects (CR 700.2),
-  // whichever the card actually populates: a modal card's `card.effects` is
-  // empty by construction, and reading it alone would let any mode print
-  // whatever it liked past this slot's allowlist with `illegal` never seeing
-  // it — the slot's menu enforced against a card that never showed it what
-  // the card actually does.
-  const illegal = cardOwnEffects(card).filter(
-    (effect) => !isPricedEffectKind(effect.kind) || !slot.effectKinds.includes(effect.kind),
+  // `printedEffectKindsOnCard` reads the card's own effects, every mode's
+  // effects (CR 700.2), and the effects of every ability printed on it. All
+  // three matter and each was a hole on its own: a modal card's `card.effects`
+  // is empty by construction, and a permanent's is empty by construction too
+  // (`assemble.ts` writes `effects: []` on every creature and artifact, because
+  // a permanent's effects are printed inside its abilities). Reading
+  // `card.effects` alone let any mode, and any ability, print whatever it liked
+  // past this slot's allowlist with `illegal` never seeing it — the slot's menu
+  // enforced against a card that never showed it what the card actually does.
+  //
+  // The tokens the card creates are left out, which is what
+  // `printedEffectKindsOnCard` is for. A token's printed line is the token's
+  // and not the slot's menu: a slot that asked for `createToken` asked for one
+  // token-maker, not for every verb the minted body goes on to print, and
+  // `checkAbilityKinds` stops at the card for the same reason (`mtg-bc2.26.10`).
+  const illegal = printedEffectKindsOnCard(card).filter(
+    (kind) => !isPricedEffectKind(kind) || !slot.effectKinds.includes(kind),
   );
   if (illegal.length === 0) return [];
-  const kinds = [...new Set(illegal.map((effect) => effect.kind))].join(', ');
+  const kinds = [...new Set(illegal)].join(', ');
   return [
     finding(
       'SLOT_EFFECT_NOT_ALLOWED',
@@ -222,7 +345,9 @@ function checkAbilityKinds(slot: Slot, card: Card): SetFinding[] {
       ),
     ];
   }
-  const illegal = card.abilities.filter((ability) => !slot.abilityKinds.includes(ability.kind));
+  const illegal = card.abilities.filter(
+    (ability) => !isModelAbilityKind(ability.kind) || !slot.abilityKinds.includes(ability.kind),
+  );
   if (illegal.length === 0) return [];
   const kinds = [...new Set(illegal.map((ability) => ability.kind))].join(', ');
   return [

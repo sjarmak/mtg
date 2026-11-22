@@ -32,10 +32,14 @@ describe('the played table at phone widths', () => {
     expect(PHONE).toContain('overflow: visible');
   });
 
+  // The shell scope is `TABLE` rather than `PLAY` since `mtg-dcxg.1`: a board
+  // reflowed into one column and a page that scrolls its own main region are
+  // answers to a 390px screen, not to whether anybody is taking a turn, and the
+  // replay viewer kept the desktop tracks for as long as they were `PLAY`'s.
   it('keeps the route register inside the phone and scrolls it locally when needed', () => {
     expect(PHONE).toMatch(/\.mtg-modes[^}]*max-width: 100%[^}]*overflow-x: auto/);
     expect(PHONE).toMatch(
-      /\.mtg-shell:is\(\[data-mtg-mode='play'\], \[data-mtg-mode='draft'\]\)[^}]*overflow: hidden/,
+      /\.mtg-shell:is\(\[data-mtg-mode='play'\], \[data-mtg-mode='analysis'\]:where\(\[data-mtg-sub='replay'\]\)\)[^}]*overflow: hidden/,
     );
     expect(PHONE).toMatch(/\.mtg-shell__main[^}]*position: relative[^}]*overflow-y: auto/);
     expect(PHONE).toMatch(/\.mtg-panel__body[^}]*overflow-y: visible/);

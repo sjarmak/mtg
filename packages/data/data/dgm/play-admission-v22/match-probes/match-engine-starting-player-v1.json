@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-play-probe-receipt",
+  "subject": {
+    "formatId": "dgm",
+    "formatSha256": "4a201837bf67cf9245b9ec9fde6bca673ebc51ab80b574e38e455a4d210b4bad",
+    "catalogs": {
+      "DGM": "edafb6d66d5329df195c8d3c2f71fed2487c94d6dbdfb8efbd0b6244fe759063",
+      "GTC": "515aaffb14562be9f9fad0bb0a71686af871966f83258a0c343c028456deeccb",
+      "RTR": "b26f72507bfb6b98db9e565a8af04769d04db8b4cdc327e3b037bd294958a845"
+    },
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "bridgeSha256": "552129e5a061b1d5e39d20b071313ed8516e59d003ecc13f733bdc8efa498de8",
+    "adapterSha256": "f8cdee5bbe0f10787f68b94ef2b797cb12dbb98065af82b2d853e5f965966534",
+    "protocolVersion": 2
+  },
+  "result": {
+    "id": "match-engine-starting-player-v1",
+    "scope": "match",
+    "controller": "engine",
+    "cardIds": [],
+    "decisionFamilies": [
+      "starting-player"
+    ],
+    "status": "passed",
+    "assertions": [
+      "DGM engine-controlled starting choice reaches its first turn without a local starting move"
+    ]
+  }
+}

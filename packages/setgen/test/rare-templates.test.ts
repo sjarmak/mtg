@@ -178,6 +178,37 @@ describe('the template a card is built on', () => {
     ]);
     expect(templates.size).toBe(3);
   });
+
+  it('preserves structured global-rule spelling while sharing modification identity', () => {
+    const globalRule = parseCard({
+      kind: 'creature',
+      id: 'fix-global-rule',
+      name: 'Stormtide Leviathan',
+      rarity: 'rare',
+      set: { code: 'FIX', collectorNumber: 3 },
+      colors: ['U'],
+      manaCost: { generic: 5, U: 3 },
+      power: 8,
+      toughness: 8,
+      abilities: [
+        {
+          kind: 'static',
+          scope: 'allCreatures',
+          subtype: null,
+          modification: {
+            kind: 'cantAttackWithoutAnyOf',
+            anyOf: [
+              { kind: 'keyword', keyword: 'flying' },
+              { kind: 'landwalk', landType: 'Island' },
+            ],
+          },
+        },
+      ],
+    });
+    expect(designTemplate(globalRule)).toContain(
+      'cantAttackWithoutAnyOf:[{"kind":"keyword","keyword":"flying"},{"kind":"landwalk","landType":"Island"}]',
+    );
+  });
 });
 
 describe('the tier that may not print one card twice', () => {

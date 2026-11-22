@@ -42,10 +42,11 @@
  */
 import type { ObjectId, PlayerId } from './ids';
 import { opponentOf } from './ids';
+import { beginOpeningHandActions } from './opening-hand';
 import type { GameState } from './state';
 import type { Trace } from './trace';
 import { emit, playerOf, updatePlayer, withState } from './trace';
-import { beginTurn, withTurn } from './turn';
+import { withTurn } from './turn';
 import { drawCards, moveObject, shuffleLibrary } from './zones';
 
 /** Turn order: the starting player, then the other seat. */
@@ -91,7 +92,7 @@ export function canMulligan(state: GameState, player: PlayerId): boolean {
  */
 export function askMulligan(trace: Trace): Trace {
   const next = nextMulliganPlayer(trace.state);
-  if (next === null) return beginTurn(trace, trace.state.config.startingPlayer);
+  if (next === null) return beginOpeningHandActions(trace);
   return withState(
     trace,
     withTurn(trace.state, { priority: null, awaiting: 'mulligan', awaitingPlayer: next }),

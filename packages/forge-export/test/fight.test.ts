@@ -72,9 +72,12 @@ describe('the fight row', () => {
     expect(FORGE_VALID_TARGETS.targetCreatureYouDontControl).toBe('Creature.YouDontCtrl');
   });
 
-  it('is confined to the one target kind the DSL admits it under', () => {
+  it('is confined to the two source-body target kinds the DSL admits it under', () => {
     expect(FORGE_EFFECTS.fight.api).toBe('Fight');
-    expect(FORGE_EFFECTS.fight.targets).toEqual(['targetCreatureYouDontControl']);
+    expect(FORGE_EFFECTS.fight.targets).toEqual([
+      'targetCreatureYouDontControl',
+      'targetCreatureDefendingPlayerControls',
+    ]);
     // A fight makes no token and asks nothing of the deck, so the two fields
     // that would otherwise add a `[Tokens]` entry or a `DeckHas$` hint stay
     // empty rather than carrying a value nothing reads.

@@ -28,6 +28,8 @@
  * labeled `.mtg-swatch` chip beside a row's name, where the text carries the
  * identity and the color merely agrees with it.
  */
+import { PHONE_MAX_REM } from '../../styles/mobile';
+import { TOUCH_TARGET_PX } from '../../styles/touch';
 
 const CHART = `
 .mtg-chart { display: flex; flex-direction: column; gap: var(--mtg-space-2); }
@@ -162,6 +164,23 @@ const LAYOUT = `
 .mtg-matchup[data-tone='negative'] .mtg-matchup__rate { color: var(--mtg-negative); }
 .mtg-matchup[data-tone='healthy'] .mtg-matchup__rate { color: var(--mtg-positive); }
 .mtg-matchup--diagonal { text-align: center; color: var(--mtg-ink-faint); }
+/* The run's seed and the command that wrote it, folded shut under the stats.
+   Term and value on one line each, monospaced because both are strings a
+   person copies rather than reads. */
+.mtg-rundetails { font-size: var(--mtg-text-xs); margin-top: calc(var(--mtg-space-4) * -1); }
+.mtg-rundetails > summary {
+  cursor: pointer; color: var(--mtg-ink-muted);
+  padding: var(--mtg-space-1) 0;
+}
+.mtg-rundetails[open] > summary { color: var(--mtg-ink); }
+.mtg-rundetails__list {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--mtg-space-1) var(--mtg-space-3);
+  margin: var(--mtg-space-1) 0 0;
+  color: var(--mtg-ink-muted);
+}
+.mtg-rundetails__list dt { color: var(--mtg-ink-faint); }
+.mtg-rundetails__list dd { margin: 0; font-family: var(--mtg-font-mono); overflow-wrap: anywhere; }
 `;
 
 /*
@@ -215,5 +234,62 @@ const FAIRNESS = `
 .mtg-finding__note { font-size: var(--mtg-text-xs); color: var(--mtg-ink-muted); }
 `;
 
-/** The whole route sheet, in cascade order: chart chrome, plot marks, figures, layout. */
-export const ANALYSIS_CSS = `${CHART}${PLOT}${FIGURES}${LAYOUT}${FAIRNESS}`;
+/*
+ * The phone, and the two things this route spends a screen on before it says
+ * anything.
+ *
+ * `mtg-dcxg.8`, 2026-08-23. Measured in chrome-headless-shell at 390x844,
+ * mobile and coarse, over `test/analysis/fixtures/run-a.json`: the nine section
+ * chips wrapped to four ragged rows, each 26.8px tall against the surface's
+ * 44px touch floor, and the gate census — the answer the tab exists to give —
+ * started 391.8px down an 844px screen. Half the screen was navigation to
+ * evidence nobody had seen yet.
+ *
+ * The strip becomes one row that scrolls sideways rather than four that wrap.
+ * That is the trade a ten-item strip has on a 390px screen: wrapping spends
+ * vertical space that the answer needs, and a horizontal strip spends only what
+ * is off-screen to the right, which is where the later sections were
+ * going to be read from anyway. `scroll-snap` and a visible partial chip at the
+ * edge are what say it scrolls; `overflow-x: auto` on a scoped block cannot
+ * make the document scroll sideways because the strip's own width is bounded by
+ * its column.
+ *
+ * The 44px floor is a `pointer: coarse` query rather than a width one, for the
+ * reason `styles/touch.ts` states: a chip is thumb-sized because of the input
+ * device, not because of the window. `styles/touch.ts` never named
+ * `.mtg-subnav__item` — this route is the only one that draws it.
+ */
+const PHONE = `
+@media (pointer: coarse) {
+  .mtg-subnav__item {
+    display: inline-flex; align-items: center;
+    min-height: ${String(TOUCH_TARGET_PX)}px;
+  }
+}
+@media (max-width: ${String(PHONE_MAX_REM)}rem) {
+  .mtg-subnav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .mtg-subnav::-webkit-scrollbar { width: 0; height: 0; }
+  .mtg-subnav__item { flex: none; scroll-snap-align: start; white-space: nowrap; }
+  /* The page's own rhythm tightens with it: five sections of the widest space
+     token between the title and the first statistic is a desk's spacing read
+     down a column that has none to spare. */
+  .mtg-analysis { gap: var(--mtg-space-3); }
+  .mtg-analysis > .mtg-page-head { gap: var(--mtg-space-1) var(--mtg-space-3); }
+  .mtg-analysis > .mtg-page-head > .mtg-page-title { font-size: var(--mtg-text-md); }
+  .mtg-rundetails { margin-top: 0; }
+}
+`;
+
+/**
+ * The whole route sheet, in cascade order: chart chrome, plot marks, figures,
+ * layout, the verdict block, and last the phone's answers to them — last
+ * because every rule in `PHONE` ties on specificity with the rule it
+ * re-answers and wins on order alone.
+ */
+export const ANALYSIS_CSS = `${CHART}${PLOT}${FIGURES}${LAYOUT}${FAIRNESS}${PHONE}`;

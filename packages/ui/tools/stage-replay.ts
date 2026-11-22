@@ -1,5 +1,5 @@
 /**
- * The event log the Replay tab reads, recorded on the way to opening the lab.
+ * The event log Analysis's Replay section reads, recorded on the way to opening the lab.
  *
  * `stage-art.ts` copies rasters and `stage-symbols.ts` fetches symbols; this
  * one has nothing to fetch, because the producer is in this repository. Three
@@ -27,7 +27,7 @@
  * What the fixture decks cost was the tab itself. They are built from the DSL
  * example cards, whose ids begin `slc-`, and no art manifest on this machine
  * carries one: the launcher scored manifests by how many of the set's ids they
- * covered, staged the winner, and then handed the Replay tab a game whose every
+ * covered, staged the winner, and then handed the Replay section a game whose every
  * face resolved to nothing. A recorded game and the live board showed the same
  * permanents, one painted and one hatched.
  *
@@ -225,7 +225,7 @@ export function stageEventLog(path: string, deal?: LabDeal): StagedEventLog {
 /** What the launcher prints about the staged log. */
 export function describeEventLog(staged: StagedEventLog): string {
   const head =
-    `Recorded ${String(staged.games)} bot games for the Replay tab from ${staged.source} ` +
+    `Recorded ${String(staged.games)} bot games for the Replay section from ${staged.source} ` +
     `(${String(staged.steps)} decisions, ${String(Math.round(staged.bytes / 1024))} KB).`;
   return [head, ...staged.lines.map((line) => `  - ${line}`)].join('\n');
 }

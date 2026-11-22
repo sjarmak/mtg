@@ -28,6 +28,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { BROWSER_TESTS } from '../../../vitest.config';
 import { browserIt, browserMode, browserPresent, chromePath, missingBrowserMessage } from './support/chrome';
+import { launchChrome } from './support/chrome-driver';
 
 const WORKSPACE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
@@ -91,7 +92,7 @@ async function projectsByName(): Promise<ReadonlyMap<string, ProjectShape>> {
 describe('the browser project runs every browser rig and only those', () => {
   it('gives the browser project the glob, and takes the same one out of unit', async () => {
     const projects = await projectsByName();
-    expect([...projects.keys()]).toEqual(['unit', 'browser', 'balance']);
+    expect([...projects.keys()]).toEqual(['unit', 'browser', 'balance', 'calibration']);
     expect(projects.get('browser')?.include).toEqual([BROWSER_TESTS]);
     expect(projects.get('unit')?.exclude).toContain(BROWSER_TESTS);
     // Both halves matter: without the exclude the rigs run twice, once under
@@ -165,5 +166,33 @@ describe('a run that requires a browser cannot be told nothing', () => {
     expect(said).toContain(chromePath);
     expect(said).toContain('MTG_CHROME_HEADLESS_SHELL');
     expect(said).toContain('npx playwright install chromium-headless-shell');
+  });
+});
+
+/**
+ * The third way a rig fails quietly: it measures nothing and leaves a directory
+ * behind.
+ *
+ * `mtg-tfot`, 2026-08-23. Chrome has no concept of a bad profile path — every
+ * string is a directory it will create — so a rig that lost its temp directory
+ * spawned a browser against `./undefined/` and wrote a profile into the repo
+ * root, where it sat untracked until somebody read a `git status`. The rig's
+ * own `finally` deleted the path it thought it had.
+ *
+ * These run on a machine with no browser, which is the point: every case is
+ * refused before `spawn`, so none of them reaches the binary.
+ */
+describe('the harness refuses a profile directory the caller did not have', () => {
+  it('refuses the string an interpolated undefined becomes, and says what would happen', async () => {
+    // `as unknown as string` is the shape of the bug: the call sites are typed,
+    // and the value that arrived was undefined anyway.
+    await expect(launchChrome(undefined as unknown as string)).rejects.toThrow(/profile directory/u);
+    await expect(launchChrome('')).rejects.toThrow(/profile directory/u);
+    await expect(launchChrome('   ')).rejects.toThrow(/profile directory/u);
+  });
+
+  it('refuses a relative path, which is measured from whichever runner spawned the process', async () => {
+    await expect(launchChrome('undefined')).rejects.toThrow(/absolute/u);
+    await expect(launchChrome('tmp/profile')).rejects.toThrow(/absolute/u);
   });
 });

@@ -1,83 +1,35 @@
 /**
- * The contract for a staged art manifest, and the only place it is validated.
+ * How the page reads a staged art manifest, and what it does with a bad one.
  *
- * the art pipeline writes this shape beside the rasters it generates; `npm run play`
- * stages both and this page reads it. As with the deck artifact, the two sides
- * are deliberately not linked by an import: the art pipeline runs headless and reaches
- * image backends and the filesystem, and it already depends on `@mtg/card-render`
- * which depends on this package, so an import in the other direction would be a
- * cycle. So the producer owns the writing and this file owns the reading.
- *
- * That makes three declarations of one schema — here, the art pipeline's own manifest module
- * and `@mtg/card-render/src/art.ts` — which is a cost paid deliberately and
- * guarded rather than assumed: the art pipeline's manifest test builds a
- * manifest with the real builder and parses it with both readers, so the copies
- * cannot drift apart without a red test.
+ * the art pipeline writes the document beside the rasters it generates; `npm run play`
+ * stages both and this page reads it. The two sides still cannot share an
+ * import — the art pipeline runs headless, reaches image backends and the filesystem,
+ * and carries `better-sqlite3` through `@mtg/data`, so a browser bundle may
+ * never name it — but they no longer restate the shape at each other. The
+ * document is declared once in `@mtg/render-spec/src/art-manifest.ts`, which
+ * every reader can import because it reaches nothing heavier than `@mtg/dsl`
+ * (`mtg-sn68`). What is left here is the *reading*: a result instead of a
+ * throw, one sentence when the file is wrong, and the resolver that picks which
+ * illustration a given object gets.
  *
  * A card with no entry is not an error. It renders the pending frame, which is
  * the governance rule the art slot exists for: an unfinished surface announces
  * itself, so a set half-way through its art run is self-describing.
  */
-import { z } from 'zod';
 import type { Card as DslCard } from '@mtg/dsl';
+import {
+  ART_MANIFEST_VERSION,
+  ART_MANIFEST_VERSION_SINGLE,
+  ArtManifestSchema,
+  ArtManifestV1Schema,
+  migrateArtManifestV1,
+  type ArtManifest,
+  type ArtManifestEntry,
+} from '@mtg/render-spec';
 import type { CardArt } from '../card/ArtSlot';
 
-/**
- * Must equal `ART_MANIFEST_VERSION` in the art pipeline's own manifest module. Bump them
- * together; a stale manifest then fails with a version message rather than
- * resolving to nothing and looking like a set whose art was never run.
- */
-export const ART_MANIFEST_VERSION = 2;
-
-const EntrySchema = z.object({
-  /** A URL, a `data:` URI, or a path relative to the manifest. */
-  href: z.string().min(1),
-  /** Describes the illustration, not the card; the card name is already text. */
-  alt: z.string().min(1),
-});
-
-const ArtManifestSchema = z.object({
-  formatVersion: z.literal(ART_MANIFEST_VERSION),
-  /**
-   * Card id to its illustrations, best-known first. Ids are DSL card ids, so the
-   * join is exact; the list is non-empty because a card with no art has no entry.
-   */
-  art: z.record(z.string(), z.array(EntrySchema).min(1)),
-});
-
-/**
- * Must equal `ART_MANIFEST_VERSION_SINGLE` in the art pipeline's own manifest module.
- *
- * The format this one replaced: one illustration per card rather than a list of
- * them. Read only, and read at all only because three run directories on disk
- * still hold it — `out/art/xmp`, `xmp-v2` and `xmp-v3` are every format-1
- * manifest this project ever wrote, and the paid renders beside them are not
- * reproducible for free.
- */
-export const ART_MANIFEST_VERSION_SINGLE = 1;
-
-const ArtManifestV1Schema = z.object({
-  formatVersion: z.literal(ART_MANIFEST_VERSION_SINGLE),
-  art: z.record(z.string(), EntrySchema),
-});
-
-export type ArtManifest = z.infer<typeof ArtManifestSchema>;
-export type ArtManifestEntry = z.infer<typeof EntrySchema>;
-
-/**
- * A format-1 document as format 2: one illustration each, which is what it said.
- *
- * Keys sorted, matching `buildArtManifest`, so a migrated manifest and a freshly
- * built one of the same content are the same bytes.
- */
-function migrated(value: z.infer<typeof ArtManifestV1Schema>): ArtManifest {
-  const art: Record<string, ArtManifestEntry[]> = {};
-  for (const cardId of Object.keys(value.art).sort()) {
-    const entry = value.art[cardId];
-    if (entry !== undefined) art[cardId] = [entry];
-  }
-  return { formatVersion: ART_MANIFEST_VERSION, art };
-}
+export { ART_MANIFEST_VERSION, ART_MANIFEST_VERSION_SINGLE };
+export type { ArtManifest, ArtManifestEntry };
 
 /** The document's own `formatVersion`, when it names one as a number. */
 function formatVersionOf(value: unknown): number | undefined {
@@ -146,7 +98,7 @@ export function readArtManifest(value: unknown, source: string): ArtManifestResu
  */
 export function readMigratedArtManifest(value: unknown, source: string): ArtManifestResult {
   const older = ArtManifestV1Schema.safeParse(value);
-  if (older.success) return { ok: true, manifest: migrated(older.data) };
+  if (older.success) return { ok: true, manifest: migrateArtManifestV1(older.data) };
 
   const version = formatVersionOf(value);
   if (version !== undefined && version < ART_MANIFEST_VERSION) {

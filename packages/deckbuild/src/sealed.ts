@@ -16,6 +16,8 @@
  * frequently contain the same common three times.
  */
 import type { Card, Rarity } from '@mtg/dsl';
+import { isBasicLand } from '@mtg/dsl';
+import type { PoolProvenance } from './provenance';
 import { nextInt, seedRng } from './rng';
 import type { Rng } from './rng';
 
@@ -50,7 +52,8 @@ export type BoosterRecipe = readonly BoosterSlot[];
  * split from, and its reasoning applies here for the same reason: what a player
  * sees per pack is the honest weighting for a pool that is drafted and played
  * rather than collected. Basic lands are not a slot because the deck builder
- * supplies the mana base.
+ * supplies the mana base, and `boosterPool` is what makes that true of a set
+ * that prints its own basics rather than only of one that does not.
  *
  * This is the pack for a set that prints no rares, which is what both committed
  * fixtures do today. It is no longer the pack for every set: see
@@ -108,6 +111,26 @@ export const SLICE_BOOSTER_WITH_MYTHIC: BoosterRecipe = [...SLICE_BOOSTER, { rar
  *
  * A caller with its own opinion still passes `recipe` and is never overridden.
  */
+/**
+ * The cards a pack may deal: the set minus its basic lands.
+ *
+ * `SLICE_BOOSTER` states the rule as its own reason for having no land slot —
+ * the deck builder supplies the mana base — but a basic land carries DSL rarity
+ * `common`, so a set that *prints* its basics put twenty Plains, Islands,
+ * Swamps, Mountains and Forests into the common slot's pool and dealt them at
+ * that share. Over the reduced M11, twenty of 121 commons were basics and one
+ * pack in six came out with three or more of them (`mtg-h77m`). A generated set
+ * never showed it because it prints no basics at all: `@mtg/deckbuild` mints
+ * them at build time.
+ *
+ * One derivation for both surfaces. `@mtg/draft-export`'s `buildSheets` reads
+ * this too, so a drafted pack and a sealed pack hold the same mix, which is the
+ * claim that file's docblock already makes.
+ */
+export function boosterPool(set: readonly Card[]): readonly Card[] {
+  return set.filter((card) => !isBasicLand(card));
+}
+
 export function boosterRecipeFor(set: readonly Card[]): BoosterRecipe {
   const hasRare = set.some((card) => card.rarity === 'rare');
   const hasMythic = set.some((card) => card.rarity === 'mythic');
@@ -129,12 +152,22 @@ export interface SealedOptions {
   readonly recipe?: BoosterRecipe;
 }
 
-export interface SealedPool {
+export interface SealedPool<CardType = Card> {
   readonly seed: string;
   /** Every pack in the order it was opened. */
-  readonly boosters: readonly (readonly Card[])[];
+  readonly boosters: readonly (readonly CardType[])[];
   /** Every card from every pack, flattened. Duplicates are real. */
-  readonly cards: readonly Card[];
+  readonly cards: readonly CardType[];
+  /**
+   * Which slot each card came off, aligned with `boosters` card for card.
+   *
+   * The flattening into `cards` is what loses it, and a pool dealt off a
+   * printing's sheets is where that costs something: two copies of one card, one
+   * off the foil sheet, arrive as two identical entries. `provenance.ts` argues
+   * the shape, including why the sealed arm answers a foil question by having no
+   * foil slot rather than by reporting `false`.
+   */
+  readonly provenance: PoolProvenance;
 }
 
 export class SealedPoolError extends Error {
@@ -232,8 +265,21 @@ function assertPoolFits(pool: readonly Card[], recipe: BoosterRecipe): void {
   }
 }
 
-function openOne(pool: readonly Card[], recipe: BoosterRecipe, rng: Rng): readonly [readonly Card[], Rng] {
+/**
+ * One pack, with the slot every card came off beside it.
+ *
+ * The slot's label is the slot's own `rarity` rather than the drawn card's,
+ * which differ on a source-weighted slot: M11's rare slot deals a mythic one
+ * time in three and it is still the rare slot. Provenance is about where a card
+ * was dealt from, and `card.rarity` already answers what it is.
+ */
+function openOne(
+  pool: readonly Card[],
+  recipe: BoosterRecipe,
+  rng: Rng,
+): readonly [readonly Card[], readonly Rarity[], Rng] {
   const cards: Card[] = [];
+  const slots: Rarity[] = [];
   let current = rng;
   for (const slot of recipe) {
     const weights = checkedWeights(slot);
@@ -244,8 +290,9 @@ function openOne(pool: readonly Card[], recipe: BoosterRecipe, rng: Rng): readon
         : drawDistinctWeighted(candidates, weights, slot.count, current);
     current = advanced;
     cards.push(...drawn);
+    slots.push(...drawn.map(() => slot.rarity));
   }
-  return [cards, current];
+  return [cards, slots, current];
 }
 
 /** Opens `boosters` packs from a set. Deterministic in the seed. */
@@ -255,17 +302,20 @@ export function openSealedPool(set: readonly Card[], options: SealedOptions = {}
   if (!Number.isInteger(count) || count <= 0) {
     throw new SealedPoolError(`booster count must be a positive integer, got ${String(count)}`);
   }
-  assertPoolFits(set, recipe);
+  const pool = boosterPool(set);
+  assertPoolFits(pool, recipe);
 
   const seed = options.seed ?? 'sealed/v0';
   let rng = seedRng(seed);
   const boosters: (readonly Card[])[] = [];
+  const slots: (readonly Rarity[])[] = [];
   for (let pack = 0; pack < count; pack += 1) {
-    const [opened, advanced] = openOne(set, recipe, rng);
+    const [opened, dealtOff, advanced] = openOne(pool, recipe, rng);
     rng = advanced;
     boosters.push(opened);
+    slots.push(dealtOff);
   }
-  return { seed, boosters, cards: boosters.flat() };
+  return { seed, boosters, cards: boosters.flat(), provenance: { kind: 'rarities', slots } };
 }
 
 /**

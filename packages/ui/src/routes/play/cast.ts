@@ -38,8 +38,10 @@
  * settled once per card, and a cost with an X in it is not settled until the
  * value is announced. Such a card is refused a staged cast outright (see
  * `castPlansFor`) and read as the flat menu instead, where `prompt.ts` gives
- * every announced value a line of its own. Alternative and additional costs
- * (CR 601.2f) have no word in `@mtg/dsl` at all and so no stage to build.
+ * every announced value a line of its own. Alternative costs, Overload, and
+ * additional costs (CR 601.2f) are typed, but their selected payments are
+ * enumerated dimensions; like X, they stay in the flat menu where one line
+ * selects one exact action.
  *
  * `CAST_CHOICE_STAGES` is that paragraph as a total mapped type over the cast
  * action's own choices, so a fourth thing a cast announces cannot be added to
@@ -111,6 +113,20 @@ export const CAST_CHOICE_STAGES: { readonly [K in CastChoice]: CastStep | null }
   // refuses an X cost, and the flat menu selects the exact enumerated action
   // by index instead, where there is no matcher to fool.
   multiTargets: null,
+  // Alternative prices and Overload offer distinct casting routes. The flat
+  // menu names that exact discriminant; staging one without a question would
+  // silently choose a route on the player's behalf.
+  castingCost: null,
+  // Paired with the plural target choice and selected only from the flat menu.
+  damageAllocations: null,
+  // A paid permanent is another enumerated dimension. The staged matcher does
+  // not ask for it, so these casts stay in the flat menu where the exact action
+  // index preserves the choice.
+  sacrifices: null,
+  // A card discarded as an additional cost is an enumerated payment choice,
+  // just like a sacrificed permanent. The panel asks no discard question, so
+  // it must leave these actions to the exact-index flat menu.
+  discards: null,
 };
 
 /**
@@ -261,7 +277,7 @@ const MODE_ASK = 'Choose one —';
  * `null` slot — an effect that needs no target — gets a name of its own rather
  * than colliding with a permanent whose id happens to be empty.
  */
-function targetKey(target: Target | null): string {
+export function targetKey(target: Target | null): string {
   if (target === null) return 'none';
   return target.kind === 'player' ? `player:${String(target.player)}` : `${target.kind}:${target.oid}`;
 }
@@ -309,9 +325,13 @@ export function castPlansFor(state: GameState, decision: Decision): ReadonlyMap<
     const card = object.card;
     if (card.kind === 'land') continue;
     if (card.manaCost.hasX) continue;
+    if (enumerated.some(({ action }) => action.castingCost !== undefined)) continue;
     // `mtg-kg44`'s counted slot: see `CAST_CHOICE_STAGES.multiTargets`'s
     // comment for why this card is left to the flat menu instead of staged.
     if (enumerated.some(({ action }) => action.multiTargets !== undefined)) continue;
+    if (enumerated.some(({ action }) => action.sacrifices !== undefined || action.discards !== undefined)) {
+      continue;
+    }
     const payment = planPayment(state, decision.player, card.manaCost, oid);
     if (payment === null) continue;
     plans.set(oid, {

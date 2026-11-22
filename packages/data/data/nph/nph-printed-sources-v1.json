@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-19T07:52:03.495Z",
+  "sources": [
+    {
+      "code": "NPH",
+      "mtgjson": {
+        "file": "NPH-d49915c6f0ec7f6204b5726c085d87f0ec5f9c960f3f92bffab3e617b937e4a9.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/NPH.json",
+        "sha256": "d49915c6f0ec7f6204b5726c085d87f0ec5f9c960f3f92bffab3e617b937e4a9",
+        "meta": {
+          "date": "2026-09-17",
+          "version": "5.3.0+20260917"
+        }
+      },
+      "scryfall": {
+        "file": "NPH-2e520b91dd2fee7ee31afbf4fe42e5a52cc3ca01ae989893ea582b5475139294.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Anph+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "2e520b91dd2fee7ee31afbf4fe42e5a52cc3ca01ae989893ea582b5475139294",
+        "cards": 175
+      }
+    }
+  ]
+}

@@ -45,6 +45,16 @@
  * in either direction and silent for a marginal pair. `STRUCTURAL_GATES` below
  * records which gate that is and why it is one rather than two.
  *
+ * The nested run brings no pool of its own. It is one file, so `--pool=threads`
+ * with `singleThread` runs it in the parent's own thread pool of one: measured
+ * on this box, a child vitest on a single file peaks at 9 direct child
+ * processes under the default forks pool and 2 under this one, and three runs
+ * per arm put the wall clock at 66.9-78.6 s without it and 70.1-88.9 s with it,
+ * which is one range on a box carrying other lanes rather than a cost. That is
+ * `mtg-434`: this file used to double the process population of every
+ * `npm test` to prove one wiring fact, while the gate it runs brings a sim
+ * worker pool of its own on top.
+ *
  * Cost: one nested vitest run of the gate file alone at 30 games per matchup,
  * 1,350 games per subject over three subjects — the two declared sets plus the
  * broken one. Measured on this hardware across four runs at two subjects: 5.1 s
@@ -90,19 +100,34 @@ interface ChildRun {
 
 /** Runs the gate file in its own process with the given set handed to it. */
 function runGate(setPath: string): ChildRun {
-  const child = spawnSync(process.execPath, [VITEST_BIN, 'run', '--project', 'balance', GATE_FILE], {
-    cwd: ROOT,
-    encoding: 'utf8',
-    timeout: CHILD_BUDGET_MS,
-    env: {
-      ...process.env,
-      [SET_ENV_VAR]: setPath,
-      MTG_BALANCE_GAMES: GAMES_PER_MATCHUP,
-      // Color codes would land inside the strings the assertions below read.
-      NO_COLOR: '1',
-      FORCE_COLOR: '0',
+  const child = spawnSync(
+    process.execPath,
+    [
+      VITEST_BIN,
+      'run',
+      '--project',
+      'balance',
+      GATE_FILE,
+      // One file needs no pool, and the default one is not free (`mtg-434`, and
+      // the header has the measurements). Nothing about the proof depends on
+      // where the file runs.
+      '--pool=threads',
+      '--poolOptions.threads.singleThread',
+    ],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+      timeout: CHILD_BUDGET_MS,
+      env: {
+        ...process.env,
+        [SET_ENV_VAR]: setPath,
+        MTG_BALANCE_GAMES: GAMES_PER_MATCHUP,
+        // Color codes would land inside the strings the assertions below read.
+        NO_COLOR: '1',
+        FORCE_COLOR: '0',
+      },
     },
-  });
+  );
   if (child.error !== undefined) throw child.error;
   return { status: child.status, output: `${child.stdout}\n${child.stderr}` };
 }

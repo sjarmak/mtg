@@ -180,6 +180,7 @@ const MEASURE = `(() => {
           parseFloat(style.borderBottomWidth),
           parseFloat(style.borderLeftWidth),
         ],
+        clip: style.backgroundClip,
         pad: [
           parseFloat(style.paddingTop),
           parseFloat(style.paddingRight),
@@ -204,6 +205,7 @@ interface FaceReading {
   readonly size: string;
   readonly width: number;
   readonly border: readonly number[];
+  readonly clip: string;
   readonly pad: readonly number[];
   readonly inBand: boolean;
   readonly inZoom: boolean;
@@ -261,16 +263,21 @@ describe('the identity frame is a share of the card it is drawn round', () => {
             if (face.width < MIN_FACE_PX) continue;
             const at = `${where}: ${face.name} (${face.size}, ${String(face.width)}px wide)`;
             const wanted = face.width * FRAME_BAND_SHARE;
-            for (const side of face.border) {
-              expect(side, `${at} frame band`).toBeGreaterThan(wanted - TOLERANCE_PX);
-              expect(side, `${at} frame band`).toBeLessThan(wanted + TOLERANCE_PX);
+            // The band is border plus padding since mtg-d4g divided it: the
+            // border is the black card edge and the padding under it carries
+            // the identity. What this rig asserts is the sum, because that is
+            // the inset every region on the card is laid out from.
+            for (let side = 0; side < 4; side += 1) {
+              const band = (face.border[side] ?? 0) + (face.pad[side] ?? 0);
+              expect(band, `${at} frame band`).toBeGreaterThan(wanted - TOLERANCE_PX);
+              expect(band, `${at} frame band`).toBeLessThan(wanted + TOLERANCE_PX);
             }
             // One band and not two: the ground used to show as a second ring of
             // its own color just inside the border, which is what the hover zoom
-            // read as a double border.
-            for (const side of face.pad) {
-              expect(side, `${at} second ring inside the frame`).toBe(0);
-            }
+            // read as a double border. The padding ring that replaced it is the
+            // identity's own color, painted by a background clipped to the
+            // padding box, so `--frame` still starts where the content does.
+            expect(face.clip, `${at} second ring inside the frame`).toBe('content-box, padding-box');
           }
         }
       } catch (error) {

@@ -55,6 +55,7 @@ export function summarizeGames(games: readonly ReplayGame[]): ReplaySummary {
   const reasons: Record<EndReason, number> = {
     lifeZero: 0,
     emptyLibrary: 0,
+    spellOrAbility: 0,
     concede: 0,
     turnLimit: 0,
   };

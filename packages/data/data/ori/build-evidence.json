@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "ori",
+  "formatSha256": "9c345483629ef4cbd011afdcaab83f12b2a2416d4ac8c092ab322436acc39fed",
+  "sourceSha256": "9102c27d22b3c81acee8ae9ee297ebb43bc7dd57d504354b3a89dcf02472959e",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "9102c27d22b3c81acee8ae9ee297ebb43bc7dd57d504354b3a89dcf02472959e",
+    "recipe.json": "1c51ff28631404cc01f49af84a3061f1635e20b2877a3550b65aaf2dd3bffb91",
+    "ori-printed-catalog-v1.json": "9de0baf9817216758c3e11607ac0e786d3ce0b2c387fcb5a70e9a4a87f7ef3d2",
+    "ori-limited-format-v1.json": "828a2d8511fdbe3401326df99c46270135d3d2cabddec3cc52a863e9570aede0"
+  },
+  "catalogs": [
+    {
+      "code": "ORI",
+      "cards": 288,
+      "contentSha256": "3bdeb0af2b8d62beb626bbe266e24bf7e474d3bce3627bf896914cb9c34355c2"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1635.406583,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 273,
+    "printings": 288
+  }
+}

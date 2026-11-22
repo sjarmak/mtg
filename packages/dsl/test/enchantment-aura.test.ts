@@ -1,6 +1,14 @@
 /** Strict, hand-authored Enchantment and Aura card shapes. */
 import { describe, expect, it } from 'vitest';
-import { parseCard, renderOracleText, renderTypeLine, safeParseCard, serializeCard } from '@mtg/dsl';
+import {
+  MODEL_TARGET_KINDS,
+  TARGET_KINDS,
+  parseCard,
+  renderOracleText,
+  renderTypeLine,
+  safeParseCard,
+  serializeCard,
+} from '@mtg/dsl';
 
 const HOLY_STRENGTH = {
   kind: 'enchantment',
@@ -17,7 +25,92 @@ const HOLY_STRENGTH = {
   },
 } as const;
 
+const SHIVS_EMBRACE = {
+  kind: 'enchantment',
+  id: 'm11-shivs-embrace',
+  name: "Shiv's Embrace",
+  rarity: 'uncommon',
+  set: { code: 'M11', collectorNumber: 156 },
+  manaCost: { generic: 2, R: 2 },
+  colors: ['R'],
+  subtypes: ['Aura'],
+  aura: {
+    enchant: 'creature',
+    modifications: [
+      { kind: 'statBonus', power: 2, toughness: 2 },
+      { kind: 'grantKeyword', keyword: 'flying' },
+    ],
+  },
+  abilities: [
+    {
+      kind: 'activated',
+      cost: { mana: { R: 1 }, tapSelf: false },
+      effects: [
+        {
+          kind: 'pumpUntilEndOfTurn',
+          power: 1,
+          toughness: 0,
+          target: { kind: 'enchantedCreature' },
+        },
+      ],
+    },
+  ],
+} as const;
+
 describe('Enchantment cards', () => {
+  it("keeps Shiv's Embrace's attachment referent hand-authored and renders its exact text", () => {
+    expect([...TARGET_KINDS] as readonly string[]).toContain('enchantedCreature');
+    expect([...MODEL_TARGET_KINDS] as readonly string[]).not.toContain('enchantedCreature');
+
+    const shiv = parseCard(SHIVS_EMBRACE);
+    expect(renderOracleText(shiv)).toBe(
+      'Enchant creature\nEnchanted creature gets +2/+2 and has flying.\n{R}: Enchanted creature gets +1/+0 until end of turn.',
+    );
+    expect(serializeCard(parseCard(JSON.parse(serializeCard(shiv)) as unknown))).toBe(serializeCard(shiv));
+  });
+
+  it('refuses an enchanted-creature referent anywhere but an ability on a creature Aura', () => {
+    const effect = {
+      kind: 'pumpUntilEndOfTurn',
+      power: 1,
+      toughness: 0,
+      target: { kind: 'enchantedCreature' },
+    } as const;
+    const blanket = safeParseCard({
+      ...HOLY_STRENGTH,
+      id: 'tst-blanket-pump',
+      name: 'Blanket Pump',
+      subtypes: [],
+      aura: undefined,
+      abilities: [
+        {
+          kind: 'activated',
+          cost: { mana: { R: 1 }, tapSelf: false },
+          effects: [effect],
+        },
+      ],
+    });
+    expect(blanket.ok).toBe(false);
+    if (!blanket.ok) {
+      expect(blanket.violations.map(({ code }) => code)).toContain('ABILITY_ILLEGAL_ON_CARD_TYPE');
+    }
+
+    const spell = safeParseCard({
+      kind: 'sorcery',
+      id: 'tst-spell-pump',
+      name: 'Spell Pump',
+      rarity: 'common',
+      set: { code: 'TST', collectorNumber: 1 },
+      manaCost: { R: 1 },
+      colors: ['R'],
+      effects: [effect],
+    });
+    expect(spell.ok).toBe(false);
+    if (!spell.ok) {
+      expect(spell.violations.map(({ code }) => code)).toContain('ILLEGAL_TARGET_FOR_EFFECT');
+    }
+  });
+
   it('keeps blanket Enchantments distinct from Auras', () => {
     const fervor = parseCard({
       kind: 'enchantment',
@@ -311,6 +404,7 @@ describe('Enchantment cards', () => {
             { kind: 'statBonus', power: 1, toughness: 0 },
             { kind: 'grantKeyword', keyword: 'flying' },
             { kind: 'cantAttack' },
+            { kind: 'cantBlock' },
           ],
         },
       },

@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest';
 import type { BoosterRecipe } from '@mtg/deckbuild';
 import { boosterSize, SLICE_BOOSTER } from '@mtg/deckbuild';
-import { EXAMPLE_SET, RARITIES } from '@mtg/dsl';
+import { EXAMPLE_SET, isBasicLand, RARITIES } from '@mtg/dsl';
 import {
   buildLayouts,
   buildSheets,
@@ -19,15 +19,28 @@ import {
   sheetName,
 } from '@mtg/draft-export';
 
+const POOL = EXAMPLE_SET.filter((card) => !isBasicLand(card));
 const SHEETS = buildSheets(EXAMPLE_SET);
 const LAYOUTS = buildLayouts(SLICE_BOOSTER);
 
 describe('sheets', () => {
-  it('partitions the set by rarity: every card in exactly one sheet', () => {
+  it('partitions the booster pool by rarity: every card in exactly one sheet', () => {
     const ids = SHEETS.flatMap((sheet) => sheet.cards.map((card) => card.id));
-    expect(ids).toHaveLength(EXAMPLE_SET.length);
-    expect(new Set(ids).size).toBe(EXAMPLE_SET.length);
-    expect([...ids].sort()).toEqual([...EXAMPLE_SET.map((card) => card.id)].sort());
+    expect(ids).toHaveLength(POOL.length);
+    expect(new Set(ids).size).toBe(POOL.length);
+    expect([...ids].sort()).toEqual([...POOL.map((card) => card.id)].sort());
+  });
+
+  /**
+   * `mtg-h77m`: a basic land carries DSL rarity `common`, so twenty of the
+   * reduced M11's 121 commons were basics and the nine common slots dealt them
+   * at that share — one pack in six came out with three or more. The pool the
+   * sheets are cut from is `boosterPool`, the same one `openSealedPool` opens.
+   */
+  it('puts no basic land in any sheet', () => {
+    expect(EXAMPLE_SET.filter((card) => isBasicLand(card))).toHaveLength(5);
+    expect(SHEETS.flatMap((sheet) => sheet.cards).filter((card) => isBasicLand(card))).toEqual([]);
+    expect(SHEETS.length).toBeGreaterThan(0);
   });
 
   it('puts a card only in the sheet named for its rarity', () => {
@@ -105,7 +118,7 @@ describe('collation report', () => {
     };
     expect(collationReport(SHEETS, layouts)).toEqual({
       unreachableSheets: ['Rare'],
-      shortSlots: [{ sheet: 'Common', need: 200, have: 18 }],
+      shortSlots: [{ sheet: 'Common', need: 200, have: 13 }],
     });
   });
 

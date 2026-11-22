@@ -10,8 +10,14 @@ import type {
   ActivatedAbility,
   ActivationCost,
   AttachingAbility,
+  LoyaltyCost,
   SacrificeOther,
+  SacrificeMatching,
   StaticAbility,
+  StaticGameRuleAbility,
+  StaticPlayerRuleAbility,
+  StaticBundleAbility,
+  StateTriggeredAbility,
   StaticModificationOf,
   TriggeredAbility,
 } from './abilities';
@@ -19,21 +25,52 @@ import {
   flurryRushRank,
   gloomRank,
   isAttachingAbility,
+  isCounterTriggeringSpellOrAbilityAbility,
+  isControlledCreatureCombatDamageCountersAbility,
+  isCombatDamageRetaliationAbility,
+  isJaceArchitectAttackDebuffAbility,
+  isJaceArchitectPilesAbility,
+  isJaceArchitectSearchAndCastAbility,
+  isSourceLinkedMatchingPlayCompletionAbility,
+  isSourceLinkedTopFiveExileAbility,
+  isGuildFeudAbility,
+  isDamageTargetAndCreaturesWithSameNameAbility,
   isExaltedAbility,
+  isEnchantedLandBecomesTappedMillAbility,
+  isOptionalDrawThenDiscardAbility,
+  isOptionalDiscardThenDrawAbility,
   isRegenerationAbility,
+  isReturnAnotherCreatureOrSacrificeSelfAbility,
+  isSacrificeSelfUnlessControllerPaysAbility,
+  isControlledSubtypeAttacksTokenAbility,
+  isScavengeAbility,
+  isVariableLoyaltyCost,
 } from './abilities';
 import type { AttachModification, CombatModification, LayeredStaticModification } from './abilities';
+import type { StaticBundleModification } from './ability-shape';
 import type { ReplacementStaticModification } from './static-modification-class';
 import { isCombatStaticModification, isLayeredStaticModification } from './static-modification-class';
 import type { Amount, ComputedAmount, CountFilter, PermanentTally, PumpAmount } from './amount';
 import type { Condition } from './condition';
 import { isLiteralAmount, isRateAmount } from './amount';
-import type { AuraModification, Card, KeywordAbility, ProtectionQuality } from './card';
+import type {
+  Aura,
+  AuraModification,
+  Card,
+  CastingRestriction,
+  EntryCharacteristicMode,
+  KeywordAbility,
+  ProtectionQuality,
+  SpellAlternativeCost,
+  TargetingRestriction,
+} from './card';
 import {
   isArtifact,
   isAuraCard,
   isCastable,
+  isSpellCard,
   isStaticAuraModification,
+  openingHandActionOf,
   printedEntryReplacement,
   printedPowerToughness,
 } from './card';
@@ -41,27 +78,42 @@ import type { CounterKind } from './counters';
 import { counterName, counterPhrase, counterReminderText } from './counters';
 import { describeCostReduction } from './cost-reduction';
 import { canonicalJson } from './canonical-json';
-import type { CardFilter, Effect, GraveyardArrivalGrant, TokenSpec } from './effects';
-import { hasTarget, isCreatureTokenSpec, tokenAbilities } from './effects';
+import type { CardFilter, Effect, GraveyardArrivalGrant, SearchDestination, TokenSpec } from './effects';
+import { hasTarget, isCreatureTokenSpec, referentSourceIndex, tokenAbilities } from './effects';
 import type { Modes } from './modal';
 import { tokenCard, tokenReferenceName } from './token';
 import type { TargetFilter, TargetSpec } from './targets';
 import {
   cardTypeFilterFitsTargetKind,
+  isGraveyardCardTargetKind,
   requiresDistinctTarget,
   targetCountOf,
+  targetMinimumOf,
   targetFilterOf,
+  targetFilterIsEmpty,
   targetRestrictionOf,
+  targetsAnyNumber,
 } from './targets';
 import { formatManaCost, manaValue } from './mana';
-import type { Color, EffectScope, Keyword, ManaColor, PlayerScope, TargetCombatRole } from './vocabulary';
+import { formatOverloadCost, spellEffectsFor } from './overload';
+import type {
+  CardKind,
+  Color,
+  EffectScope,
+  Keyword,
+  ManaColor,
+  PlayerScope,
+  TargetCombatRole,
+} from './vocabulary';
 import {
   assertNever,
   COLOR_WORDS,
   COLORS,
   GRANTABLE_KEYWORD_PRINT_NAMES,
   KEYWORD_PRINT_NAMES,
+  PERMANENT_CARD_KINDS,
   PT_COUNT_PRINT_TEXT,
+  isSpaceScope,
   sortKeywords,
   TRIGGER_PRINT_TEMPLATES,
 } from './vocabulary';
@@ -119,6 +171,8 @@ export function typeLineParts(card: Card): TypeLineParts {
       };
     case 'planeswalker':
       return { supertypes, types: ['Planeswalker'], subtypes: card.subtypes };
+    case 'battle':
+      return { supertypes, types: ['Battle'], subtypes: card.subtypes };
     case 'enchantment':
       return { supertypes, types: ['Enchantment'], subtypes: card.subtypes };
     default:
@@ -188,6 +242,8 @@ function restrictionPhrases(target: TargetSpec): { readonly before: string; read
       return { before: 'untapped ', after: '' };
     case 'maxPower':
       return { before: '', after: ` with power ${String(restriction.power)} or less` };
+    case 'maxToughness':
+      return { before: '', after: ` with toughness ${String(restriction.toughness)} or less` };
     case 'minPower':
       return { before: '', after: ` with power ${String(restriction.power)} or greater` };
     case 'withKeyword':
@@ -199,6 +255,8 @@ function restrictionPhrases(target: TargetSpec): { readonly before: string; read
     // a gloom counter" reads as a creature accompanied by one.
     case 'withCounter':
       return { before: '', after: ` with ${counterPhrase(restriction.counter, 1)} on it` };
+    case 'playerLostLifeThisTurn':
+      return { before: '', after: ' who lost life this turn' };
     default:
       return assertNever(restriction, 'restrictionPhrases');
   }
@@ -237,9 +295,27 @@ function filterAdjectives(filter: TargetFilter | null, nounFromFilter = false): 
     ...(filter.excludeColors ?? []).map((color) => `non${COLOR_WORDS[color]}`),
   ];
   if (excluded.length > 0) words.push(excluded.join(', '));
+  if (filter.monocolored === true) words.push('monocolored');
   if (filter.colors !== undefined) words.push(joinWithOr(filter.colors.map((color) => COLOR_WORDS[color])));
   if (!nounFromFilter && filter.subtypes !== undefined) words.push(joinWithOr([...filter.subtypes]));
   return words.length === 0 ? '' : `${words.join(' ')} `;
+}
+
+/** A mana-value bound is a trailing noun clause, never an adjective. */
+function targetFilterBound(filter: TargetFilter | null): string {
+  const manaValue =
+    filter?.maxManaValue === undefined ? '' : ` with mana value ${filter.maxManaValue} or less`;
+  const damage = filter?.dealtDamageThisTurn === true ? ' that dealt damage this turn' : '';
+  return `${manaValue}${damage}`;
+}
+
+/** Does this list name the complete, current permanent-card type family? */
+function isPermanentCardTypeList(types: readonly CardKind[] | undefined): boolean {
+  return (
+    types !== undefined &&
+    types.length === PERMANENT_CARD_KINDS.length &&
+    PERMANENT_CARD_KINDS.every((kind) => types.includes(kind))
+  );
 }
 
 /** CR 506.4's two statuses, and the one printed selector that names both. */
@@ -263,42 +339,84 @@ function conjunctiveCardTypeNoun(types: readonly string[], plural: boolean): str
   return [...types.slice(0, -1), plural ? englishPlural(head) : head].join(' ');
 }
 
+/** A stack spell's filter, printed as adjectives and types before the noun. */
+function spellFilterWords(filter: TargetFilter | null): string {
+  const conjunction = filter?.allCardTypes;
+  const types = filter?.cardTypes;
+  const kinds =
+    conjunction !== undefined
+      ? `${conjunctiveCardTypeNoun(conjunction, false)} `
+      : types === undefined
+        ? ''
+        : `${joinWithOr([...types])} `;
+  return `${filterAdjectives(filter)}${kinds}`;
+}
+
 function targetPhrase(target: TargetSpec, back = false): string {
   const count = targetCountOf(target);
   if (count !== null) return countedTargetPhrase(target, count);
   const { before, after } = restrictionPhrases(target);
-  const phrase = targetNounPhrase(target, back);
+  let phrase = targetNounPhrase(target, back);
   // "that player" and "that creature" are back-references to a choice already
   // made and printed; the restriction was printed with it and saying it twice
   // would read as a second condition rather than the same one.
   if (!phrase.startsWith('target') && !phrase.startsWith('another target')) return phrase;
+  // Street Spasm's source-attested English binds "without flying" to the
+  // creature noun before the controller clause. Forge uses the same ordering
+  // in its selector (`Creature.withoutFlying+YouDontCtrl`); leaving the generic
+  // restriction suffix after the whole target phrase changes the printed card.
+  const restriction = targetRestrictionOf(target);
+  const sourceOrderedExclusion =
+    target.kind === 'targetCreatureYouDontControl' && restriction?.kind === 'withoutKeyword';
+  if (sourceOrderedExclusion) {
+    phrase = phrase.replace(
+      "creature you don't control",
+      `creature without ${KEYWORD_PRINT_NAMES[restriction.keyword]} you don't control`,
+    );
+  }
   // The restriction's state adjective goes in front of the filter's, so a slot
   // carrying both prints "target tapped attacking creature": both are states,
   // and the one the older field owns keeps the position it has always printed
   // in rather than moving because a second field arrived.
   const adjectives = `${before}${filterAdjectives(targetFilterOf(target), cardTypeFilterFitsTargetKind(target.kind))}`;
-  return `${phrase.replace(/^((?:another )?target )/, `$1${adjectives}`)}${after}`;
+  const bound = isGraveyardCardTargetKind(target.kind) ? '' : targetFilterBound(targetFilterOf(target));
+  return `${phrase.replace(/^((?:another )?target )/, `$1${adjectives}`)}${sourceOrderedExclusion ? '' : after}${bound}`;
 }
 
 /**
  * "Up to two target creatures", with room for the same adjectives a plain
  * slot carries.
  *
- * `checkTargetCount` (`validate/effects.ts`) refuses a count anywhere but
- * `targetCreature`, so this always writes the one noun; it does not switch on
- * `target.kind` the way `targetNounPhrase` does; a second kind reaching this
- * function is a validator bug, not a case to guess at. `distinct` is refused
- * on the same slot by the same check, so `targetNounPhrase`'s "another"
- * branch has nothing to contribute here and this does not call it.
+ * Counted creature slots print their creature noun and counted `anyTarget`
+ * slots print bare “targets,” Magic's current all-target-types template.
+ * `checkTargetCardinality` refuses every other plural kind. `distinct` is
+ * refused on the same slot, so `targetNounPhrase`'s “another” branch has
+ * nothing to contribute here and this does not call it.
  */
 function countedTargetPhrase(target: TargetSpec, count: number): string {
+  const minimum = targetMinimumOf(target);
+  if (minimum > 0) {
+    const choices = Array.from({ length: count - minimum + 1 }, (_, index) => numberWord(minimum + index));
+    return `${joinWithOr(choices)} targets`;
+  }
   const { before, after } = restrictionPhrases(target);
   const adjectives = `${before}${filterAdjectives(targetFilterOf(target))}`;
+  if (count === 1) {
+    const phrase = targetNounPhrase(target, false);
+    return `up to one ${phrase.replace(/^target /, `target ${adjectives}`)}${after}`;
+  }
+  if (target.kind === 'anyTarget') return `up to ${numberWord(count)} targets`;
+  if (target.kind === 'targetCreatureOpponentControls') {
+    return `up to ${numberWord(count)} target creatures your opponents control`;
+  }
+  if (target.kind === 'targetNonlandPermanentOpponentControls') {
+    return `up to ${numberWord(count)} target nonland permanents your opponents control`;
+  }
   return `up to ${numberWord(count)} target ${adjectives}creatures${after}`;
 }
 
 function targetNounPhrase(target: TargetSpec, back: boolean): string {
-  const another = requiresDistinctTarget(target);
+  const another = requiresDistinctTarget(target) || target.excludeSource === true;
   if (back && !another && target.kind === 'targetOpponent') return 'that player';
   switch (target.kind) {
     case 'anyTarget':
@@ -315,6 +433,10 @@ function targetNounPhrase(target: TargetSpec, back: boolean): string {
       return 'you';
     case 'triggeringCreature':
       return 'that creature';
+    case 'triggeringPlayer':
+      return 'that player';
+    case 'chosenPlayer':
+      return 'the chosen player';
     // The ability's own source, spelled the way Prodigal Pyromancer and Fiery
     // Hellhound spell it rather than by the card's own name: `staticSubject`'s
     // `case 'self'` prints the literal `cardName` for a *static* ability's
@@ -335,7 +457,7 @@ function targetNounPhrase(target: TargetSpec, back: boolean): string {
     // the kind at all rather than widening `selfCreature`.
     case 'selfPermanent':
       return 'this permanent';
-    // The three back-references (`mtg-nhyv.75`), each one fixed phrase for the
+    // The back-references (`mtg-nhyv.75`), each one a fixed phrase for the
     // reason the two source-body cases above are fixed phrases: the noun is a
     // property of the kind, decided once here, rather than a parameter every
     // caller of `renderEffect` would have to supply. Three of those callers do
@@ -358,6 +480,12 @@ function targetNounPhrase(target: TargetSpec, back: boolean): string {
     // identifier.
     case 'thatCreaturesController':
       return "that creature's controller";
+    case 'thatPlayerOrPlaneswalkerController':
+      return "that player or that planeswalker's controller";
+    case 'enchantedCreature':
+      return 'enchanted creature';
+    case 'equippedCreature':
+      return 'equipped creature';
     case 'targetCreatureDefendingPlayerControls':
       return another
         ? 'another target creature defending player controls'
@@ -367,11 +495,29 @@ function targetNounPhrase(target: TargetSpec, back: boolean): string {
       // one selector, never "target artifact and/or enchantment", which is the
       // plural form and belongs to a card that takes more than one.
       return another ? 'another target artifact or enchantment' : 'target artifact or enchantment';
+    case 'targetArtifactYouDontControl':
+      return another ? "another target artifact you don't control" : "target artifact you don't control";
     case 'targetCreatureYouDontControl':
       // Foe-Razer Regent's printed wording, and Affectionate Indrik's. The
       // apostrophe is the printed one; nothing downstream reads this string as
       // an identifier.
       return another ? "another target creature you don't control" : "target creature you don't control";
+    case 'targetCreatureOpponentControls':
+      return another
+        ? 'another target creature an opponent controls'
+        : 'target creature an opponent controls';
+    case 'targetNonlandPermanentOpponentControls':
+      return another
+        ? 'another target nonland permanent an opponent controls'
+        : 'target nonland permanent an opponent controls';
+    case 'targetNonlandPermanentYouDontControl':
+      return another
+        ? "another target nonland permanent you don't control"
+        : "target nonland permanent you don't control";
+    case 'targetPermanentYouNeitherOwnNorControl':
+      return another
+        ? 'another target permanent you neither own nor control'
+        : 'target permanent you neither own nor control';
     case 'targetPermanent': {
       // The one kind whose noun the filter replaces. Magic prints "destroy
       // target artifact", never "destroy target artifact permanent", and prints
@@ -402,6 +548,33 @@ function targetNounPhrase(target: TargetSpec, back: boolean): string {
       // phrase for the one selector, the way `targetArtifactOrEnchantment`
       // above is one phrase for its own.
       return another ? 'another target player or planeswalker' : 'target player or planeswalker';
+    case 'targetCardInYourGraveyard':
+    case 'targetCardInAGraveyard':
+    case 'targetCardInOpponentsGraveyard': {
+      const filter = targetFilterOf(target);
+      const conjunction = filter?.allCardTypes;
+      const types = filter?.cardTypes;
+      const subtypes = filter?.subtypes;
+      const kind =
+        subtypes !== undefined
+          ? joinWithOr([...subtypes])
+          : conjunction !== undefined
+            ? conjunctiveCardTypeNoun(conjunction, false)
+            : isPermanentCardTypeList(types)
+              ? 'permanent'
+              : types === undefined
+                ? ''
+                : joinWithOr([...types]);
+      const zone =
+        target.kind === 'targetCardInYourGraveyard'
+          ? 'your graveyard'
+          : target.kind === 'targetCardInOpponentsGraveyard'
+            ? "an opponent's graveyard"
+            : 'a graveyard';
+      const bound = targetFilterBound(filter);
+      const noun = `${kind.length === 0 ? '' : `${kind} `}card${bound} from ${zone}`;
+      return `${another ? 'another target' : 'target'} ${noun}`;
+    }
     default:
       return assertNever(target.kind, 'targetPhrase');
   }
@@ -449,6 +622,9 @@ const EFFECT_SCOPE_PHRASES: Readonly<
   // same deviation `creaturesThatPlayerControls` has printed since it landed.
   permanentsYouControl: (_who, _prior, filter) => `${scopeNoun(filter, true)} you control`,
   permanentsOpponentsControl: (_who, _prior, filter) => `${scopeNoun(filter, true)} your opponents control`,
+  creatureCardsInAllGraveyards: () => 'all creature cards from all graveyards',
+  targetAndPermanentsItsPlayerControls: (_who, _prior, filter) =>
+    `the target and all ${scopeNoun(filter, true)} that player or that permanent's controller controls`,
 };
 
 /**
@@ -496,8 +672,27 @@ function scopeNoun(filter: TargetFilter | undefined, plural: boolean): string {
   return `${adjectives}${joinWithAnd(plural ? nouns.map(englishPlural) : nouns)}${clause}`;
 }
 
+/** The noun for choosing members of a filtered permanent set: alternatives stay "or". */
+function permanentChoiceNoun(filter: TargetFilter | undefined, plural: boolean): string {
+  const nounFromSubtype = filter?.subtypes !== undefined;
+  const adjectives = filterAdjectives(filter ?? null, nounFromSubtype);
+  const clause = keywordClause(filter);
+  const conjunction = filter?.allCardTypes;
+  if (conjunction !== undefined) {
+    return `${adjectives}${conjunctiveCardTypeNoun(conjunction, plural)}${clause}`;
+  }
+  const alternatives = filter?.subtypes ?? filter?.cardTypes;
+  if (alternatives === undefined) return `${adjectives}${plural ? 'permanents' : 'permanent'}${clause}`;
+  // Magic treats Equipment as a mass type: Turn to Slag says "all Equipment",
+  // while ordinary subtypes such as Auras and creatures take their plural.
+  const nouns = plural
+    ? alternatives.map((word) => (word === 'Equipment' ? word : englishPlural(word)))
+    : [...alternatives];
+  return `${adjectives}${joinWithOr(nouns)}${clause}`;
+}
+
 /**
- * "with flying", printed behind the noun rather than in front of it.
+ * Live filter clauses printed behind the noun rather than in front of it.
  *
  * A keyword is the one narrowing in `TargetFilter` that English will not take
  * as an adjective, which is why it is not in `filterAdjectives` beside the
@@ -516,11 +711,22 @@ function scopeNoun(filter: TargetFilter | undefined, plural: boolean): string {
  * `withKeyword` restriction and `restrictionPhrases` prints it, which is the
  * validator's rule (`checkTargetFilter`) read back out as a rendering: one
  * printed sentence, one place that writes it.
+ * `dealtDamageThisTurn` joins this path because its relative clause has the
+ * same trailing position: "each creature that dealt damage this turn."
  */
 function keywordClause(filter: TargetFilter | undefined): string {
   const keywords = filter?.keywords;
-  if (keywords === undefined) return '';
-  return ` with ${joinWithAnd(keywords.map((keyword) => KEYWORD_PRINT_NAMES[keyword]))}`;
+  const excluded = filter?.excludeKeywords;
+  const clauses = [
+    ...(keywords === undefined
+      ? []
+      : [`with ${joinWithAnd(keywords.map((keyword) => KEYWORD_PRINT_NAMES[keyword]))}`]),
+    ...(excluded === undefined
+      ? []
+      : [`without ${joinWithAnd(excluded.map((keyword) => KEYWORD_PRINT_NAMES[keyword]))}`]),
+    ...(filter?.dealtDamageThisTurn === true ? ['that dealt damage this turn'] : []),
+  ];
+  return clauses.length === 0 ? '' : ` ${joinWithAnd(clauses)}`;
 }
 
 /**
@@ -554,6 +760,9 @@ const EFFECT_SCOPE_EACH_PHRASES: Readonly<
   allPermanents: (_who, filter) => `each ${scopeNoun(filter, false)}`,
   permanentsYouControl: (_who, filter) => `each ${scopeNoun(filter, false)} you control`,
   permanentsOpponentsControl: (_who, filter) => `each ${scopeNoun(filter, false)} your opponents control`,
+  creatureCardsInAllGraveyards: () => 'each creature card in all graveyards',
+  targetAndPermanentsItsPlayerControls: (_who, filter) =>
+    `target player or planeswalker and each ${scopeNoun(filter, false)} that player or that planeswalker's controller controls`,
 };
 
 /**
@@ -594,6 +803,16 @@ function countMatchingSingular(filter: CountFilter): string {
   return 'permanent';
 }
 
+/** The identity constraint trails the battlefield/controller phrase in Magic templating. */
+function countMatchingNameClause(filter: CountFilter): string {
+  return filter.names === undefined ? '' : ` named ${joinWithOr([...filter.names])}`;
+}
+
+/** Structured keyword-ability predicates trail the controller phrase in current Oracle. */
+function countMatchingKeywordAbilityClause(filter: CountFilter): string {
+  return filter.keywordAbilities === undefined ? '' : ' with defender';
+}
+
 /**
  * The counter half of `countWithCounter`: "with a horn counter on it".
  *
@@ -618,10 +837,13 @@ function counterClause(counters: readonly CounterKind[], plural: boolean): strin
 /** What a CR 613 rate is charged per, in the words a card prints. */
 function permanentTallyPhrase(tally: PermanentTally): string {
   switch (tally.kind) {
-    case 'countMatching':
-      return `${countMatchingSingular(tally.filter)} you control`;
+    case 'countMatching': {
+      const noun = `${tally.excludeSource === true ? 'other ' : ''}${countMatchingSingular(tally.filter)}`;
+      const domain = tally.whose === 'each' ? 'on the battlefield' : 'you control';
+      return `${noun} ${domain}${countMatchingNameClause(tally.filter)}${countMatchingKeywordAbilityClause(tally.filter)}`;
+    }
     case 'countWithCounter':
-      return `${countMatchingSingular(tally.filter)} you control ${counterClause(tally.counters, false)}`;
+      return `${countMatchingSingular(tally.filter)} you control${countMatchingNameClause(tally.filter)}${countMatchingKeywordAbilityClause(tally.filter)} ${counterClause(tally.counters, false)}`;
     case 'landsWithSubtype':
       return tally.whose === 'each' ? `${tally.subtype} on the battlefield` : `${tally.subtype} you control`;
     default:
@@ -645,14 +867,20 @@ function computedPhrase(amount: ComputedAmount): string {
   switch (amount.kind) {
     case 'exiledThisResolution':
       return 'the number of cards exiled this way';
+    case 'permanentsExiledThisResolution':
+      return 'the number of permanents exiled this way';
+    case 'cardsShuffledFromGraveyardThisResolution':
+      return 'the number of cards shuffled from your graveyard this way';
     case 'cardsInGraveyard':
       return amount.whose === 'each'
         ? 'the number of cards in all graveyards'
         : 'the number of cards in your graveyard';
+    case 'controllerLifeTotal':
+      return 'your life total';
     case 'countMatching':
-      return `the number of ${countMatchingPhrase(amount.filter)} you control`;
+      return `the number of ${amount.excludeSource === true ? 'other ' : ''}${countMatchingPhrase(amount.filter)} ${amount.whose === 'each' ? 'on the battlefield' : 'you control'}${countMatchingNameClause(amount.filter)}${countMatchingKeywordAbilityClause(amount.filter)}`;
     case 'countWithCounter':
-      return `the number of ${countMatchingPhrase(amount.filter)} you control ${counterClause(
+      return `the number of ${countMatchingPhrase(amount.filter)} you control${countMatchingNameClause(amount.filter)}${countMatchingKeywordAbilityClause(amount.filter)} ${counterClause(
         amount.counters,
         true,
       )}`;
@@ -660,7 +888,7 @@ function computedPhrase(amount: ComputedAmount): string {
       // Plural "opponents" in a two-player engine, because it is the wording
       // Magic prints and the wording survives a table with more seats; the
       // kernel's `opponentOf` is what is singular, and that is its business.
-      return `the number of ${countMatchingPhrase(amount.filter)} your opponents control`;
+      return `the number of ${countMatchingPhrase(amount.filter)} your opponents control${countMatchingNameClause(amount.filter)}${countMatchingKeywordAbilityClause(amount.filter)}`;
     case 'landsWithSubtype':
       return amount.whose === 'each'
         ? `the number of ${englishPlural(amount.subtype)} on the battlefield`
@@ -668,9 +896,33 @@ function computedPhrase(amount: ComputedAmount): string {
     case 'chosenX':
       return 'the value chosen for X';
     case 'greatestPowerAmong':
-      return `the greatest power among ${countMatchingPhrase(amount.among)} you control`;
+      return `the greatest power among ${countMatchingPhrase(amount.among)} you control${countMatchingNameClause(amount.among)}${countMatchingKeywordAbilityClause(amount.among)}`;
     case 'damageDealtThisResolution':
       return 'the damage dealt this way';
+    case 'lifeLostThisResolution':
+      return 'the life lost this way';
+    case 'thatCreatureToughness':
+      return "that creature's toughness";
+    case 'triggeringCreaturePower':
+      return "that creature's power";
+    case 'triggeringCreatureToughness':
+      return "that creature's toughness";
+    case 'triggeringDamageAmount':
+      return 'that much';
+    case 'triggeringSpellChosenColorCount':
+      return 'the number of chosen colors that spell is';
+    case 'paidSacrificePower':
+      return "the sacrificed creature's power";
+    case 'paidSacrificeToughness':
+      return "the sacrificed creature's toughness";
+    case 'paidDiscardManaValue':
+      return "the discarded card's mana value";
+    case 'sacrificedPermanentPowerThisResolution':
+      return "that permanent's power";
+    case 'halfTargetLibraryRoundedDown':
+      return "half the targeted player's library, rounded down";
+    case 'revealedCardManaValueThisResolution':
+      return 'its mana value';
     default:
       return assertNever(amount, 'computedPhrase');
   }
@@ -720,6 +972,7 @@ function renderPump(
   toughness: PumpAmount,
   singular = true,
   keyword?: Keyword,
+  durationFirst = false,
 ): string {
   // The keyword rider joins the same sentence rather than starting a second
   // one, which is the whole of what it buys: Magic prints "Target creature gets
@@ -744,7 +997,16 @@ function renderPump(
         'a pump charged against two different tallies reached renderPump; checkPumpParams should have refused it first',
       );
     }
-    return `${subject} ${verb} ${formatPtDelta(power.rate, toughness.rate)}${rider} until end of turn for each ${permanentTallyPhrase(power.each)}.`;
+    const change = `${subject} ${verb} ${formatPtDelta(power.rate, toughness.rate)}`;
+    const tally = `for each ${permanentTallyPhrase(power.each)}`;
+    return durationFirst
+      ? `Until end of turn, ${lowercaseOpening(change)} ${tally}${rider}.`
+      : `${change}${rider} until end of turn ${tally}.`;
+  }
+  if (durationFirst) {
+    throw new Error(
+      'a duration-first pump without a rate reached renderPump; checkPumpPresentation should have refused it first',
+    );
   }
   const letters = ['X', 'Y'] as const;
   const seen: ComputedAmount[] = [];
@@ -785,7 +1047,7 @@ function colorPhrase(colors: readonly Color[]): string {
  * way the printed cards do: Rise from the Grave adds a color and a subtype and
  * says "colors and types", and a grant that only recolors would print a
  * sentence about types it never changed. Empty grants never reach here —
- * `checkGraveyardChoiceParams` refuses a grant with neither list — so the
+ * `checkGraveyardArrivalParams` refuses a grant with neither list — so the
  * absent case is the absent field and nothing else.
  *
  * The colors are adjectives and the subtypes are the noun, which is English and
@@ -807,17 +1069,31 @@ function keywordPhrase(keywords: readonly Keyword[]): string {
   return joinWithAnd(sortKeywords(keywords).map((keyword) => KEYWORD_PRINT_NAMES[keyword]));
 }
 
+function characteristicPowerToughnessSentence(
+  characteristic: NonNullable<Card['characteristicPowerToughness']>,
+  subject: string,
+): string {
+  switch (characteristic.kind) {
+    case 'creaturesYouControl':
+      return `${subject} power and toughness are each equal to the number of creatures you control.`;
+    case 'controllerLifeTotal':
+      return `${subject} power and toughness are each equal to your life total.`;
+    case 'controlledSubtype':
+      return `${subject} power and toughness are each equal to the number of ${englishPlural(characteristic.subtype)} you control.`;
+    default:
+      return assertNever(characteristic, 'characteristicPowerToughnessSentence');
+  }
+}
+
 /**
- * What the token *has*, as the creating card prints it: its keywords, and
- * nothing else.
+ * What the token *has*, as the creating card prints it.
  *
- * A token's printed abilities are deliberately absent. Magic names a token and
- * prints its characteristics compactly; the ability text lives once, on the
- * token itself, and every card that makes one points at it by name. Inlining it
- * instead put a part token's whole Fuse ability inside seventeen flagship set
- * cards and drove four commons and one rare past the 140-character printed cap,
- * the worst at 258 (`mtg-hmb`). Keywords stay — "with flying" is three words and
- * is how Magic prints it too.
+ * Most token abilities are deliberately absent. Magic names those tokens and
+ * leaves their text on the token card; inlining every part token's Fuse ability
+ * drove several flagship set cards past the printed-text cap (`mtg-hmb`). A
+ * hand-authored token may set `quoteAbilities` when the creating card itself
+ * prints the quoted text, as Mitotic Slime does. Keywords remain the compact
+ * "with flying" clause in the ordinary form.
  *
  * The name that replaces the dropped text is `tokenReferenceName`'s, which is
  * `tokenCard`'s: the pointer a creating card prints has to be the name on the
@@ -826,9 +1102,30 @@ function keywordPhrase(keywords: readonly Keyword[]): string {
  * The returned clause closes the sentence it is appended to, punctuation
  * included.
  */
-function tokenHavingClause(token: TokenSpec): string {
-  if (token.keywords.length === 0) return '.';
-  return ` with ${keywordPhrase(token.keywords)}.`;
+function tokenHavingClause(token: TokenSpec, plural: boolean): string {
+  const printedReminder =
+    token.printedKeywordReminder === 'vigilance'
+      ? ` (Attacking doesn't cause ${plural ? 'them' : 'it'} to tap.)`
+      : '';
+  if (token.characteristicPowerToughness !== undefined) {
+    const quoteAllRules = token.quoteAbilities === true;
+    const quoted = [
+      ...(quoteAllRules && token.keywords.length > 0 ? [keywordRowText(token.keywords)] : []),
+      characteristicPowerToughnessSentence(token.characteristicPowerToughness, "This token's"),
+      ...(quoteAllRules ? tokenAbilities(token).map((ability) => renderAbility(ability, 'this token')) : []),
+    ].join(' ');
+    const inlineKeywords =
+      !quoteAllRules && token.keywords.length > 0 ? ` with ${keywordPhrase(token.keywords)}` : '';
+    return `${inlineKeywords}. ${plural ? 'They have' : 'It has'} "${quoted}"${printedReminder}`;
+  }
+  if (token.quoteAbilities === true) {
+    if (token.inlineQuotedAbilities === true) {
+      return ` with "${renderTokenOracleText(token)}"${printedReminder}`;
+    }
+    return `. ${plural ? 'They have' : 'It has'} "${renderTokenOracleText(token)}"${printedReminder}`;
+  }
+  if (token.keywords.length === 0) return `.${printedReminder}`;
+  return ` with ${keywordPhrase(token.keywords)}.${printedReminder}`;
 }
 
 /**
@@ -841,7 +1138,9 @@ function tokenHavingClause(token: TokenSpec): string {
  * reached from the creature half alone.
  */
 function tokenNameClause(token: TokenSpec): string {
-  return tokenAbilities(token).length > 0 ? ` named ${tokenReferenceName(token)}` : '';
+  return tokenAbilities(token).length > 0 && token.quoteAbilities !== true
+    ? ` named ${tokenReferenceName(token)}`
+    : '';
 }
 
 /**
@@ -864,14 +1163,18 @@ function renderNoncreatureTokenClause(count: Amount, token: TokenSpec): string {
     ? `Create ${single ? articleForWord(token.name) : numberWord(count)} ${token.name} ${noun}.`
     : `Create a number of ${token.name} ${noun} ${amountEqualTo(count)}.`;
   const subject = single ? "It's an artifact" : "They're artifacts";
-  return `${sentence} ${subject}${tokenHavingClause(token)}`;
+  return `${sentence} ${subject}${tokenHavingClause(token, !single)}`;
 }
 
 function renderTokenClause(count: Amount, token: TokenSpec): string {
   if (!isCreatureTokenSpec(token)) return renderNoncreatureTokenClause(count, token);
   const plural = !isLiteralAmount(count) || count !== 1;
   const body = [
-    `${token.power}/${token.toughness}`,
+    ...(token.creationPowerToughness !== undefined
+      ? ['X/X']
+      : token.characteristicPowerToughness === undefined
+        ? [`${token.power}/${token.toughness}`]
+        : []),
     colorPhrase(token.colors),
     ...token.subtypes,
     'creature',
@@ -879,10 +1182,23 @@ function renderTokenClause(count: Amount, token: TokenSpec): string {
   ].join(' ');
   const named = `${body}${tokenNameClause(token)}`;
   if (!isLiteralAmount(count)) {
-    return `Create a number of ${named} ${amountEqualTo(count)}${tokenHavingClause(token)}`;
+    if (count.kind === 'controllerLifeTotal') {
+      return `Create X ${named}, where X is your life total${tokenHavingClause(token, true)}`;
+    }
+    if (count.kind === 'paidSacrificeToughness') {
+      return `Create X ${named}, where X is the sacrificed creature's toughness${tokenHavingClause(token, true)}`;
+    }
+    return `Create a number of ${named} ${amountEqualTo(count)}${tokenHavingClause(token, true)}`;
   }
-  const quantity = count === 1 ? articleForNumber(token.power) : numberWord(count);
-  return `Create ${quantity} ${named}${tokenHavingClause(token)}`;
+  const quantity =
+    count === 1
+      ? token.creationPowerToughness !== undefined
+        ? 'an'
+        : token.characteristicPowerToughness === undefined
+          ? articleForNumber(token.power)
+          : articleForWord(body)
+      : numberWord(count);
+  return `Create ${quantity} ${named}${tokenHavingClause(token, plural)}`;
 }
 
 /**
@@ -944,8 +1260,19 @@ function excludedCardTypeWords(filter: CardFilter): readonly string[] {
  * counting permanents on a battlefield and "the number of Zombie creatures" is
  * not how Magic says it; a search clause keeps both ("a Zombie creature card")
  * and always ends in "card", because what it is looking through is a library.
+ *
+ * Exported because a play surface has to print the same restriction this does
+ * (`mtg-7mrf`): the lab's discard prompt told a player to choose one card and
+ * never said the card had to be noncreature and nonland, so two of the four
+ * revealed cards were grayed out for no stated reason. Threading this phrase is
+ * the fix rather than assembling a second one there, for the reason the whole
+ * file exists — a second spelling of a printed clause is a second chance for
+ * the prompt and the card face to disagree.
  */
-function cardFilterPhrase(filter: CardFilter): string {
+export function cardFilterPhrase(filter: CardFilter): string {
+  if (filter.anyOf !== undefined) {
+    return joinWithOr(filter.anyOf.map((alternative) => cardFilterPhrase(alternative)));
+  }
   const lists: readonly (readonly string[])[] = [
     filter.supertypes ?? [],
     excludedCardTypeWords(filter),
@@ -960,7 +1287,16 @@ function cardFilterPhrase(filter: CardFilter): string {
   // 3 or less creature card". It also has to survive the no-type case —
   // "a card with mana value 2 or less" is a printed clause, and returning the
   // bare `'a card'` early would have dropped the whole restriction.
-  const bound = filter.maxManaValue === undefined ? '' : ` with mana value ${filter.maxManaValue} or less`;
+  const bound =
+    filter.manaValue !== undefined
+      ? ` with mana value ${filter.manaValue}`
+      : filter.maxManaValue === undefined
+        ? ''
+        : ` with mana value ${filter.maxManaValue} or less`;
+  const keywords =
+    filter.keywords === undefined
+      ? ''
+      : ` with ${joinWithOr(filter.keywords.map((keyword) => GRANTABLE_KEYWORD_PRINT_NAMES[keyword]))}`;
   // A name is the other trailing clause, and it goes in front of the bound
   // because Magic prints the identity next to the noun it identifies: "a card
   // named Squadron Hawk", "a creature card named Ashnod's Altar with mana value
@@ -968,9 +1304,9 @@ function cardFilterPhrase(filter: CardFilter): string {
   // that matters — a search by name almost never states a type as well, because
   // naming the card has already stated everything the type would.
   const named = filter.names === undefined ? '' : ` named ${joinWithOr([...filter.names])}`;
-  if (spoken.length === 0) return `a card${named}${bound}`;
+  if (spoken.length === 0) return `a card${named}${bound}${keywords}`;
   const noun = `${spoken.join(' ')} card`;
-  return `${articleForWord(noun)} ${noun}${named}${bound}`;
+  return `${articleForWord(noun)} ${noun}${named}${bound}${keywords}`;
 }
 
 /**
@@ -997,10 +1333,24 @@ function searchPluralPhrase(filter: CardFilter, quantity: string): string {
     filter.cardTypes ?? [],
   ];
   const spoken = lists.filter((list) => list.length > 0).map((list) => joinWithOr([...list]));
-  const bound = filter.maxManaValue === undefined ? '' : ` with mana value ${filter.maxManaValue} or less`;
+  const bound =
+    filter.manaValue !== undefined
+      ? ` with mana value ${filter.manaValue}`
+      : filter.maxManaValue === undefined
+        ? ''
+        : ` with mana value ${filter.maxManaValue} or less`;
   const named = filter.names === undefined ? '' : ` named ${joinWithOr([...filter.names])}`;
+  const keywords =
+    filter.keywords === undefined
+      ? ''
+      : ` with ${joinWithOr(filter.keywords.map((keyword) => GRANTABLE_KEYWORD_PRINT_NAMES[keyword]))}`;
   const noun = spoken.length === 0 ? 'cards' : `${spoken.join(' ')} cards`;
-  return `${quantity} ${noun}${named}${bound}`;
+  return `${quantity} ${noun}${named}${bound}${keywords}`;
+}
+
+/** A printed-card filter phrased as the class of spells a timing rule permits. */
+function spellFilterPhrase(filter: CardFilter): string {
+  return searchPluralPhrase(filter, '').trimStart().replace('cards', 'spells');
 }
 
 /**
@@ -1018,36 +1368,108 @@ function searchPluralPhrase(filter: CardFilter, quantity: string): string {
  * library and moved afterwards (`answerSearch`).
  *
  * **"Up to"**, on every count above one, and it is the honest wording rather
- * than a house style. CR 701.19b lets any search fail to find, and this kernel
- * offers the take-nothing answer at every one of a multi-card search's
- * questions — so a card printing "search your library for two Forest cards"
- * (Skyshroud Claim's template, which Magic does print) would be promising
- * something the resolution does not enforce. Ranger's Path and M13's mass-ramp
- * sorcery both print "up to", and the line this renders for each is their
- * printed line word for word. The singular keeps its article: "search your library for a
- * card" is how every one-card searcher in Magic reads, and the failure clause
- * is CR 701.19b's rather than the card's.
+ * than a house style. The kernel offers the take-nothing answer at every one of
+ * a multi-card search's questions, so a card printing "search your library for
+ * two Forest cards" (Skyshroud Claim's template, which Magic does print) would
+ * promise something the resolution does not enforce. Ranger's Path and M13's
+ * mass-ramp sorcery both print "up to", and the line this renders for each is
+ * their printed line word for word. The singular keeps its article: "search
+ * your library for a card" is how every one-card searcher reads, and unlike a
+ * search with a stated quality that unrestricted form is mandatory when the
+ * library is nonempty (CR 701.19b).
  */
 function renderSearch(effect: Extract<Effect, { kind: 'searchLibrary' }>): string {
+  const filterQuotas = effect.filterQuotas;
+  if (filterQuotas !== undefined) {
+    const descendingInstantValues = filterQuotas.map((quota) =>
+      quota.count === 1 &&
+      quota.filter.cardTypes?.length === 1 &&
+      quota.filter.cardTypes[0] === 'instant' &&
+      Object.keys(quota.filter).every((field) => field === 'cardTypes' || field === 'manaValue')
+        ? quota.filter.manaValue
+        : undefined,
+    );
+    if (
+      effect.destination === 'hand' &&
+      effect.reveal === true &&
+      descendingInstantValues.length === 3 &&
+      descendingInstantValues[0] === 3 &&
+      descendingInstantValues[1] === 2 &&
+      descendingInstantValues[2] === 1
+    ) {
+      return 'Search your library for an instant card with mana value 3, reveal it, and put it into your hand. Then repeat this process for instant cards with mana values 2 and 1. Then shuffle.';
+    }
+    const subjects = filterQuotas.flatMap((quota) =>
+      quota.count === 1
+        ? [cardFilterPhrase(quota.filter)]
+        : [searchPluralPhrase(quota.filter, numberWord(quota.count))],
+    );
+    const reveal = effect.reveal === true ? ', reveal those cards' : '';
+    const destination =
+      typeof effect.destination === 'string' && effect.destination === 'hand'
+        ? 'put them into your hand'
+        : null;
+    if (destination === null) {
+      throw new Error('heterogeneous search oracle text currently requires one hand destination');
+    }
+    return `Search your library for ${joinWithAnd(subjects)}${reveal}, ${destination}, then shuffle.`;
+  }
+  const filter = effect.filter;
+  if (filter === undefined) throw new Error('a homogeneous search needs a card filter');
   const count = effect.count ?? 1;
   const single = isLiteralAmount(count) && count === 1;
   const subject = single
-    ? cardFilterPhrase(effect.filter)
-    : searchPluralPhrase(effect.filter, `up to ${isLiteralAmount(count) ? numberWord(count) : 'X'}`);
+    ? cardFilterPhrase(filter)
+    : searchPluralPhrase(filter, `up to ${isLiteralAmount(count) ? numberWord(count) : 'X'}`);
   const where = isLiteralAmount(count) ? '' : `, where X is ${computedPhrase(count)}`;
   const pronoun = single ? 'it' : 'them';
-  const reveal = effect.reveal === true ? `, reveal ${pronoun}` : '';
+  const reveal =
+    effect.reveal === true
+      ? `, reveal ${typeof effect.destination === 'string' ? pronoun : 'those cards'}`
+      : '';
+  if (typeof effect.destination !== 'string' && effect.destination.kind === 'oneToHandRestToGraveyard') {
+    return `Search your library for ${subject}${where} and reveal them. Put one into your hand and the other into your graveyard. Then shuffle.`;
+  }
+  if (effect.destination === 'libraryTop') {
+    return `Search your library for ${subject}${where}${reveal}, then shuffle and put ${single ? 'that card' : 'those cards'} on top.`;
+  }
+  const destinationTail = (destination: SearchDestination) =>
+    destination === 'hand'
+      ? 'into your hand'
+      : destination === 'battlefieldTapped'
+        ? 'onto the battlefield tapped'
+        : destination === 'battlefield'
+          ? 'onto the battlefield'
+          : destination === 'exile'
+            ? 'into exile'
+            : 'on top of your library';
+  const destinationPhrase = (destination: SearchDestination, what: string) =>
+    destination === 'exile' ? `exile ${what}` : `put ${what} ${destinationTail(destination)}`;
   const move =
-    effect.destination === 'hand'
-      ? `put ${pronoun} into your hand`
-      : effect.destination === 'battlefieldTapped'
-        ? `put ${pronoun} onto the battlefield tapped`
-        : `put ${pronoun} onto the battlefield`;
+    effect.destination === 'sourceLinkedExile'
+      ? `exile ${pronoun}`
+      : typeof effect.destination === 'string'
+        ? destinationPhrase(effect.destination, pronoun)
+        : `${destinationPhrase(effect.destination.one, 'one')} and ${
+            isLiteralAmount(count) && count === 2 ? 'the other' : 'the rest'
+          } ${destinationTail(effect.destination.rest)}`;
   return `Search your library for ${subject}${where}${reveal}, ${move}, then shuffle.`;
 }
 
-export function renderEffect(effect: Effect, cardName: string, prior: PriorMention = NOTHING_SAID): string {
-  const who = (target: TargetSpec): string => targetPhrase(target, prior.samePlayerNamed);
+export function renderEffect(
+  effect: Effect,
+  cardName: string,
+  prior: PriorMention = NOTHING_SAID,
+  sourceKind?: CardKind,
+): string {
+  const who = (target: TargetSpec): string =>
+    target.kind === 'selfPermanent' && cardName.startsWith('this ')
+      ? cardName
+      : target.kind === 'selfPermanent' && sourceKind === 'enchantment'
+        ? 'this Aura'
+        : target.kind === 'selfPermanent' && sourceKind === undefined && effect.kind === 'destroyPermanent'
+          ? cardName
+          : targetPhrase(target, prior.samePlayerNamed);
   switch (effect.kind) {
     // "deals 3 damage to X" and "deals damage to X equal to N" are two
     // sentences, not one with a hole: the numeral's slot disappears when the
@@ -1058,32 +1480,113 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // Magic prints "deals 3 damage to each creature target opponent controls"
     // and never "to all creatures".
     case 'dealDamage': {
-      const recipient =
-        effect.scope === undefined
-          ? who(effect.target)
-          : EFFECT_SCOPE_EACH_PHRASES[effect.scope](who(effect.target), effect.scopeFilter);
-      if (!isLiteralAmount(effect.amount) && effect.amount.kind === 'chosenX') {
-        return `${cardName} deals X damage to ${recipient}.`;
+      if (effect.eachScopedPermanentDealsToItsController === true) {
+        const subject =
+          effect.scope === undefined
+            ? 'Each permanent'
+            : capitalize(EFFECT_SCOPE_EACH_PHRASES[effect.scope](who(effect.target), effect.scopeFilter));
+        return isLiteralAmount(effect.amount)
+          ? `${subject} deals ${String(effect.amount)} damage to its controller.`
+          : `${subject} deals damage to its controller ${amountEqualTo(effect.amount)}.`;
       }
-      return isLiteralAmount(effect.amount)
-        ? `${cardName} deals ${effect.amount} damage to ${recipient}.`
-        : `${cardName} deals damage to ${recipient} ${amountEqualTo(effect.amount)}.`;
+      const damageSource = damageSourcePhrase(effect, cardName, sourceKind);
+      const withLinkedDeathReplacement = (text: string): string =>
+        effect.exileDamagedCreatureIfItWouldDieThisTurn === true
+          ? `${text} If a creature dealt damage this way would die this turn, exile it instead.`
+          : text;
+      if (effect.division !== undefined) {
+        const recipients =
+          effect.division.kind === 'each'
+            ? `to each of ${who(effect.target)}`
+            : effect.division.kind === 'evenlyRoundedDown'
+              ? 'divided evenly, rounded down, among any number of targets'
+              : `divided as you choose among ${who(effect.target)}`;
+        const amount = isLiteralAmount(effect.amount) ? String(effect.amount) : 'X';
+        return withLinkedDeathReplacement(`${damageSource} deals ${amount} damage ${recipients}.`);
+      }
+      const primaryPermanentRecipient =
+        effect.scope === undefined
+          ? undefined
+          : EFFECT_SCOPE_EACH_PHRASES[effect.scope](who(effect.target), effect.scopeFilter);
+      const additionalPermanentRecipient =
+        effect.scope === undefined || effect.additionalScopeFilter === undefined
+          ? undefined
+          : EFFECT_SCOPE_EACH_PHRASES[effect.scope](who(effect.target), effect.additionalScopeFilter);
+      const permanentRecipient =
+        primaryPermanentRecipient === undefined
+          ? undefined
+          : additionalPermanentRecipient === undefined
+            ? primaryPermanentRecipient
+            : `${primaryPermanentRecipient} and ${additionalPermanentRecipient}`;
+      const playerRecipient =
+        effect.players === undefined ? undefined : PLAYER_SCOPE_PHRASES[effect.players].toLowerCase();
+      const recipient =
+        permanentRecipient === undefined
+          ? (playerRecipient ??
+            (effect.opponentPlayerOrPlaneswalkerOnly === true
+              ? 'target opponent or planeswalker'
+              : who(effect.target)))
+          : playerRecipient === undefined
+            ? permanentRecipient
+            : `${permanentRecipient} and ${playerRecipient}`;
+      if (!isLiteralAmount(effect.amount) && effect.amount.kind === 'chosenX') {
+        const damage = `${damageSource} deals X damage to ${recipient}.`;
+        return withLinkedDeathReplacement(
+          effect.preventable === false ? `${damage} The damage can't be prevented.` : damage,
+        );
+      }
+      if (effect.scopeAmount !== undefined && primaryPermanentRecipient !== undefined) {
+        const group = `each ${scopeNoun(effect.scopeFilter, false)} that player or that planeswalker's controller controls`;
+        const first = isLiteralAmount(effect.amount) ? String(effect.amount) : 'X';
+        const second = isLiteralAmount(effect.scopeAmount) ? String(effect.scopeAmount) : 'X';
+        const damage = `${damageSource} deals ${first} damage to ${who(effect.target)} and ${second} damage to ${group}.`;
+        return withLinkedDeathReplacement(
+          effect.tapScopeGroup === true ? `${damage} Tap those creatures.` : damage,
+        );
+      }
+      const damage = isLiteralAmount(effect.amount)
+        ? `${damageSource} deals ${effect.amount} damage to ${recipient}.`
+        : effect.amount.kind === 'paidSacrificePower'
+          ? `${damageSource} deals damage ${amountEqualTo(effect.amount)} to ${recipient}.`
+          : `${damageSource} deals damage to ${recipient} ${amountEqualTo(effect.amount)}.`;
+      const withPrevention =
+        effect.preventable === false ? `${damage} The damage can't be prevented.` : damage;
+      return withLinkedDeathReplacement(
+        effect.tapScopeGroup === true ? `${withPrevention} Tap those creatures.` : withPrevention,
+      );
     }
     // The plural group phrase, not the distributive one: destruction is a
     // single action taken on a set (CR 701.7b destroys them simultaneously),
     // and Magic's wording follows — "Destroy all creatures target player
     // controls", never "each creature".
     case 'destroyPermanent':
+      if (effect.controllerLibraryFollowup === 'revealUntilLandToGraveyard') {
+        return `Destroy ${who(effect.target)}. Its controller reveals cards from the top of their library until they reveal a land card, then puts those cards into their graveyard.`;
+      }
       return effect.scope === undefined
         ? `Destroy ${who(effect.target)}.`
         : `Destroy ${EFFECT_SCOPE_PHRASES[effect.scope](who(effect.target), prior, effect.scopeFilter)}.`;
+    case 'destroyAttachedPermanents':
+      return `Destroy all ${permanentChoiceNoun(effect.filter, true)} attached to ${who(effect.target)}.`;
     // Two sentences from one primitive, and Magic prints them differently
     // enough that a shared template would be wrong: the scoped form has no
     // "target creature" in it at all, because the creatures are not targets.
-    case 'exileTarget':
-      return effect.scope === undefined
-        ? `Exile ${who(effect.target)}.`
-        : `Exile ${EFFECT_SCOPE_PHRASES[effect.scope](who(effect.target), prior, undefined)}.`;
+    case 'exileTarget': {
+      if (effect.scope === undefined) {
+        if (effect.creatureBattlefieldOrGraveyard === true) {
+          return 'Exile up to three other target creatures from the battlefield and/or creature cards from graveyards.';
+        }
+        if (effect.sameNameCohort !== undefined) {
+          return `Exile ${who(effect.target)} not named ${effect.sameNameCohort.excludedName} and all other permanents with the same name as that permanent.`;
+        }
+        const exile = `Exile ${who(effect.target)}.`;
+        return effect.returnAtNextEndStep === undefined
+          ? exile
+          : `${exile} At the beginning of the next end step, return it to the battlefield tapped under its owner's control.`;
+      }
+      const group = EFFECT_SCOPE_PHRASES[effect.scope](who(effect.target), prior, effect.scopeFilter);
+      return `Exile ${isSpaceScope(effect.scope) && effect.scope !== 'allPermanents' ? `all ${group}` : group}.`;
+    }
     // Plural again, and for the reason destroy is: one continuous effect over a
     // group, so the subject of "get" is the group. "All creatures target player
     // controls get +3/+3 until end of turn" is the sentence, and `renderPump`
@@ -1099,6 +1602,7 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
         effect.toughness,
         effect.scope === undefined,
         effect.keyword,
+        effect.printedDurationFirst === true,
       );
     case 'drawCards': {
       const cards = isLiteralAmount(effect.count)
@@ -1113,14 +1617,23 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
       // it reaches here, so the only target this arm ever discards is
       // `noTarget`.
       if (effect.players !== undefined) return `${PLAYER_SCOPE_PHRASES[effect.players]} draws ${cards}.`;
+      if (targetsAnyNumber(effect.target)) {
+        return `Any number of target players each draw ${cards}.`;
+      }
       return effect.target.kind === 'noTarget'
         ? `Draw ${cards}.`
         : `${capitalize(who(effect.target))} draws ${cards}.`;
     }
     case 'gainLife': {
-      const life = isLiteralAmount(effect.amount)
-        ? `${effect.amount} life`
-        : `life ${amountEqualTo(effect.amount)}`;
+      const life =
+        effect.amountFrom === 'thatPlayersHandSize'
+          ? "life equal to the number of cards in that player's hand"
+          : isLiteralAmount(effect.amount)
+            ? `${effect.amount} life`
+            : `life ${amountEqualTo(effect.amount)}`;
+      if (targetsAnyNumber(effect.target)) {
+        return `Any number of target players each gain ${life}.`;
+      }
       return effect.target.kind === 'noTarget'
         ? `You gain ${life}.`
         : `${capitalize(who(effect.target))} gains ${life}.`;
@@ -1131,24 +1644,54 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // because the object is a spell that happens to be a creature spell, while
     // "destroy target artifact" drops it because the object is the artifact.
     case 'counterSpell': {
-      const filter = effect.spellFilter ?? null;
-      const conjunction = filter?.allCardTypes;
-      const types = filter?.cardTypes;
-      const kinds =
-        conjunction !== undefined
-          ? `${conjunctiveCardTypeNoun(conjunction, false)} `
-          : types === undefined
-            ? ''
-            : `${joinWithOr([...types])} `;
-      return `Counter target ${filterAdjectives(filter)}${kinds}spell.`;
+      const sentence = `Counter target ${spellFilterWords(effect.spellFilter ?? null)}spell${
+        'spellSelection' in effect && effect.spellSelection === 'targetSpellYouDontControl'
+          ? " you don't control"
+          : ''
+      }.`;
+      const counter =
+        effect.unlessCost === undefined
+          ? sentence
+          : 'kind' in effect.unlessCost
+            ? `${sentence.slice(0, -1)} unless its controller pays {X}.`
+            : withUnlessClause(sentence, { payer: 'targetController', cost: effect.unlessCost });
+      const withDestination =
+        effect.destination === 'exile'
+          ? `${counter} If that spell is countered this way, exile it instead of putting it into its owner's graveyard.`
+          : counter;
+      return effect.dealDamageToControllerEqualToSpellPower === true
+        ? `${withDestination} ${cardName} deals damage equal to that spell's power to its controller.`
+        : withDestination;
     }
+    case 'changeSpellTargets':
+      return `You may choose new targets for target ${spellFilterWords(effect.spellFilter ?? null)}spell.`;
+    case 'copySpell':
+      return `Copy target ${spellFilterWords(effect.spellFilter ?? null)}spell${effect.spellSelection === 'targetSpellYouControl' ? ' you control' : ''}. You may choose new targets for the copy.`;
+    case 'copyNextInstantOrSorceryThisTurn':
+      return 'When you next cast an instant or sorcery spell this turn, copy that spell. You may choose new targets for the copy.';
     // CR 701.16a's action, in Magic's own words. "Their" rather than "his or
     // her": the current templating, and the only pronoun that works when the
     // subject is "target opponent".
     case 'revealHand':
       return `${capitalize(who(effect.target))} reveals their hand.`;
+    case 'revealRandomCardFromHand':
+      return `${capitalize(who(effect.target))} reveals a card at random from their hand.`;
+    case 'playRandomHandCardWithoutPayingManaCost':
+      return `${capitalize(who(effect.target))} reveals a card at random from their hand. If it's a land card, the player puts it onto the battlefield. Otherwise, the player casts it without paying its mana cost if able.`;
     case 'scry':
       return `Scry ${String(effect.count)}.`;
+    case 'populate':
+      return 'Populate.';
+    case 'createTokenCopyOfSelf':
+      return "Create a token that's a copy of this creature.";
+    case 'reorderTopLibrary':
+      return 'Look at the top five cards of your library, then put them back in any order.';
+    case 'selectFromTopLibrary':
+      return effect.grislySalvageProfile === true
+        ? 'Reveal the top five cards of your library. You may put a creature or land card from among them into your hand. Put the rest into your graveyard.'
+        : 'Look at the top three cards of your library. You may reveal an instant or sorcery card from among them and put it into your hand. Put the rest on the bottom of your library in any order.';
+    case 'separateTopLibraryIntoPiles':
+      return 'Reveal the top five cards of your library. An opponent separates those cards into two piles. Put one pile into your hand and the other into your graveyard.';
     case 'createToken':
       return renderTokenClause(effect.count, effect.token);
     // Two sentences when the rider is on, and the second one is the whole
@@ -1160,11 +1703,9 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // untap during their controller's next untap step", Dungeon Geists says
     // "That creature doesn't untap ... during its controller's".
     //
-    // "Creature" rather than "permanent" in both, and it is provable rather
-    // than idiomatic: `UNSCOPED_MAY_NAME_A_PLAYER` is false for this primitive
-    // and `SCOPES_LEGAL_ON` admits only the battlefield member, so an unscoped
-    // tap always names a creature and a scoped one always names creatures a
-    // player controls.
+    // The unscoped hand-authored arm may name a permanent (Frost Titan), in
+    // which case Magic refers back with "It" rather than narrowing the object
+    // to a creature in the second sentence. Scoped taps still name creatures.
     case 'tapPermanent': {
       const tap =
         effect.scope === undefined
@@ -1172,7 +1713,7 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
           : `Tap ${EFFECT_SCOPE_PHRASES[effect.scope](who(effect.target), prior, effect.scopeFilter)}.`;
       if (effect.doesNotUntap !== true) return tap;
       // A counted slot ("up to two target creatures") is unscoped by
-      // construction — `checkTargetCount` refuses `count` on anything but a
+      // construction — `checkTargetCardinality` refuses `count` on anything but a
       // plain `targetCreature` slot, and a scope replaces the slot with a
       // player reference — so this branch only has to beat the singular
       // "That creature" case to the return, and it reads "their" rather than
@@ -1183,18 +1724,39 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
         return `${tap} They don't untap during their next untap step.`;
       }
       return effect.scope === undefined
-        ? `${tap} That creature doesn't untap during its controller's next untap step.`
+        ? effect.target.kind === 'targetPermanent'
+          ? `${tap} It doesn't untap during its controller's next untap step.`
+          : `${tap} That creature doesn't untap during its controller's next untap step.`
         : `${tap} Those creatures don't untap during their controller's next untap step.`;
     }
     case 'returnToHand':
-      return `Return ${who(effect.target)} to its owner's hand.`;
+      return effect.target.kind === 'targetCardInYourGraveyard'
+        ? `Return ${who(effect.target)} to your hand.`
+        : `Return ${who(effect.target)} to its owner's hand.`;
     case 'millCards': {
+      if (
+        !isLiteralAmount(effect.count) &&
+        effect.count.kind === 'cardsShuffledFromGraveyardThisResolution'
+      ) {
+        return `${capitalize(who(effect.target))} mills that many cards.`;
+      }
+      if (!isLiteralAmount(effect.count) && effect.count.kind === 'halfTargetLibraryRoundedDown') {
+        return `${capitalize(who(effect.target))} mills half their library, rounded down.`;
+      }
       const cards = isLiteralAmount(effect.count)
-        ? `${numberWord(effect.count)} ${pluralize('card', effect.count)}`
-        : `a number of cards ${amountEqualTo(effect.count)}`;
-      return effect.target.kind === 'noTarget'
-        ? `You mill ${cards}.`
-        : `${capitalize(who(effect.target))} mills ${cards}.`;
+        ? effect.count === 1
+          ? 'a card'
+          : `${numberWord(effect.count)} ${pluralize('card', effect.count)}`
+        : effect.printedVariable === 'X'
+          ? `X cards, where X is ${computedPhrase(effect.count)}`
+          : `a number of cards ${amountEqualTo(effect.count)}`;
+      const sentence =
+        effect.target.kind === 'noTarget'
+          ? `You mill ${cards}.`
+          : `${capitalize(who(effect.target))} mills ${cards}.`;
+      return effect.printedOneCardReminder === true
+        ? `${sentence} (They put the top card of their library into their graveyard.)`
+        : sentence;
     }
     case 'putCounters': {
       // The reminder is generated from the counter's declaration rather than
@@ -1208,14 +1770,31 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
       // creature you control" (Steel Overseer, M11 214), never "on all".
       const recipient =
         effect.scope === undefined
-          ? who(effect.target)
+          ? effect.timing === 'nextEndStep' && effect.target.kind === 'selfPermanent'
+            ? 'it'
+            : who(effect.target)
           : EFFECT_SCOPE_EACH_PHRASES[effect.scope](who(effect.target), effect.scopeFilter);
-      const sentence = isLiteralAmount(effect.count)
-        ? `Put ${counterPhrase(effect.counter, effect.count)} on ${recipient}.`
-        : `Put a number of ${counterName(effect.counter)} counters on ${recipient} ${amountEqualTo(effect.count)}.`;
+      const timing = effect.timing === 'nextEndStep' ? ' at the beginning of the next end step' : '';
+      const sentence =
+        !isLiteralAmount(effect.count) && effect.count.kind === 'triggeringCreaturePower'
+          ? `Put X ${counterName(effect.counter)} counters on ${recipient}, where X is that creature's power${timing}.`
+          : isLiteralAmount(effect.count)
+            ? `Put ${counterPhrase(effect.counter, effect.count)} on ${recipient}${timing}.`
+            : `Put a number of ${counterName(effect.counter)} counters on ${recipient} ${amountEqualTo(effect.count)}${timing}.`;
+      const condition =
+        effect.recipientCondition === undefined
+          ? ''
+          : ` if it's ${COLOR_WORDS[effect.recipientCondition.color]}`;
+      const conditioned = `${sentence.slice(0, -1)}${condition}.`;
+      const withKeyword =
+        effect.keyword === undefined
+          ? conditioned
+          : `${conditioned} Those creatures gain ${KEYWORD_PRINT_NAMES[effect.keyword]} until end of turn.`;
       const reminder = counterReminderText(effect.counter);
-      return reminder === null ? sentence : `${sentence} ${reminder}`;
+      return reminder === null ? withKeyword : `${withKeyword} ${reminder}`;
     }
+    case 'doubleSourceCounters':
+      return `Double the number of ${counterName(effect.counter)} counters on ${cardName}.`;
     // "under their owner's control" is printed rather than left to the default,
     // and the default is why: an effect that puts a card onto the battlefield
     // gives it to the spell's controller unless the card says otherwise (Rise
@@ -1227,10 +1806,30 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // a hand has no controller to name — the possessive is the whole of where
     // the card goes.
     case 'returnFromGraveyard': {
+      if (effect.fromBattlefieldThisTurn === true) {
+        return 'Return to the battlefield all permanent cards in your graveyard that were put there from the battlefield this turn.';
+      }
+      if (effect.scope === undefined) {
+        const card = who(effect.target);
+        if (effect.destination === 'hand') {
+          return effect.target.kind === 'targetCardInYourGraveyard'
+            ? `Return ${card} to your hand.`
+            : `Return ${card} to its owner's hand.`;
+        }
+        if (effect.control === 'you') {
+          return `Put ${card} onto the battlefield under your control.${grantSentence(effect.alsoBecomes)}`;
+        }
+        if (effect.target.kind === 'targetCardInYourGraveyard') {
+          return `Return ${card} to the battlefield.${grantSentence(effect.alsoBecomes)}`;
+        }
+        return `Return ${card} to the battlefield under its owner's control.${grantSentence(effect.alsoBecomes)}`;
+      }
       const cards = EFFECT_SCOPE_PHRASES[effect.scope](who(effect.target), prior, undefined);
       return effect.destination === 'hand'
         ? `Return ${cards} to their owner's hand.`
-        : `Return ${cards} to the battlefield under their owner's control.`;
+        : effect.control === 'you'
+          ? `Put ${cards} onto the battlefield under your control.`
+          : `Return ${cards} to the battlefield under their owner's control.`;
     }
     // "It" is a literal rather than the card's name, and that is safe only
     // because the validator refuses `fight` anywhere the pronoun would have no
@@ -1239,7 +1838,11 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // the battlefield," in front of it. `mayClause` carries the matching arm,
     // because "you may it fights" is the sentence this reads as otherwise.
     case 'fight':
-      return `It fights ${who(effect.target)}.`;
+      return effect.fighter === undefined
+        ? `It fights ${who(effect.target)}.`
+        : `${capitalize(who(effect.fighter))} fights ${who(effect.target)}. (Each deals damage equal to its power to the other.)`;
+    case 'petrifyCreature':
+      return `Put a petrification counter on ${who(effect.target)}. It gains defender and becomes a colorless artifact in addition to its other types. Its activated abilities can't be activated. (A creature with defender can't attack.)`;
     // Magic's three "Add" lines, and the card's own shape picks which one.
     //
     // A choice of colors prints as a choice — "Add {W} or {U}", which is what
@@ -1252,6 +1855,9 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // is Nykthos's own templating and the only one Magic offers for a
     // production quantity read off the board.
     case 'addMana': {
+      if (effect.distribution === 'anyCombinationOfColors' && !isLiteralAmount(effect.amount)) {
+        return `Add X mana in any combination of colors, where X is ${computedPhrase(effect.amount)}.`;
+      }
       const symbols = effect.produces.map((color) => `{${color}}`);
       if (!isLiteralAmount(effect.amount)) {
         return `Add an amount of ${symbols.join(' or ')} ${amountEqualTo(effect.amount)}.`;
@@ -1267,6 +1873,12 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
       if (symbols.length > 1) return `Add ${symbols.join(' or ')}.`;
       return `Add ${symbols.join('').repeat(effect.amount)}.`;
     }
+    case 'createEmblem': {
+      const grant = effect.emblem.grantsManaAbility;
+      const subtype = grant.filter.subtypes[0];
+      const color = grant.produces[0];
+      return `You get an emblem with "${englishPlural(subtype)} you control have '{T}: Add ${`{${color}}`.repeat(grant.amount)}.'"`;
+    }
     case 'shuffleLibrary':
       return 'Shuffle your library.';
     // "Reveal", not "look at": the difference is who sees, and this primitive
@@ -1275,6 +1887,16 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // effect and would print "Look at".
     case 'revealTopCards':
       return `Reveal the top ${numberWord(effect.count)} ${pluralize('card', effect.count)} of your library.`;
+    case 'revealTopCardToHand':
+      return 'Reveal the top card of your library and put that card into your hand.';
+    case 'revealUntilCreatureCards':
+      return `${
+        !isLiteralAmount(effect.count) && effect.count.kind === 'permanentsExiledThisResolution'
+          ? 'Then reveal cards from the top of your library until you reveal that many creature cards.'
+          : isLiteralAmount(effect.count)
+            ? `Reveal cards from the top of your library until you reveal ${numberWord(effect.count)} creature ${pluralize('card', effect.count)}.`
+            : `Reveal cards from the top of your library until you reveal a number of creature cards ${amountEqualTo(effect.count)}.`
+      } Put all creature cards revealed this way onto the battlefield, then shuffle the rest of the revealed cards into your library.`;
     // "Its owner's library", for `returnToHand`'s reason one arm up: CR 701.19a
     // sends a card to the library it came from, not to the caster's, and a card
     // that behaved one way and printed the other is exactly what this
@@ -1283,6 +1905,8 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
       return effect.position === 'top'
         ? `Put ${who(effect.target)} on top of its owner's library.`
         : `Put ${who(effect.target)} on the bottom of its owner's library.`;
+    case 'putSourceAndTargetOnOwnersLibrariesThenShuffle':
+      return `Put ${selfPermanentPhrase(cardName, sourceKind)} and ${who(effect.target)} on top of their owners' libraries, then those players shuffle their libraries.`;
     // Three sentences from one primitive, because Magic prints all three and
     // none is a substitution into the others: "Exile target player's graveyard"
     // has a possessive where "Exile all graveyards" has a quantifier.
@@ -1293,19 +1917,37 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     case 'shuffleGraveyardIntoLibrary':
       return effect.includeSelf === true
         ? "Shuffle this permanent and your graveyard into their owner's library."
-        : "Shuffle your graveyard into its owner's library.";
+        : effect.printedAllCardsFromYourGraveyard === true
+          ? 'Shuffle all cards from your graveyard into your library.'
+          : "Shuffle your graveyard into its owner's library.";
     case 'exileGraveyard':
-      return effect.whose === 'you'
-        ? 'Exile your graveyard.'
-        : effect.whose === 'opponent'
-          ? "Exile target opponent's graveyard."
-          : 'Exile all graveyards.';
+      return hasTarget(effect)
+        ? "Exile target player's graveyard."
+        : effect.whose === 'you'
+          ? 'Exile your graveyard.'
+          : effect.whose === 'opponent'
+            ? "Exile target opponent's graveyard."
+            : 'Exile all graveyards.';
     // CR 701.19's own template, shuffle clause and all. The shuffle is printed
     // rather than left implicit because the kernel performs it whether or not
     // the search found anything (CR 701.19c), and an unprinted shuffle is a
     // library reordering the player was never told about.
     case 'searchLibrary':
       return renderSearch(effect);
+    case 'moveSourceLinkedExile':
+      return effect.destination === 'hand'
+        ? effect.plural === true
+          ? "Return the exiled cards to their owners' hands."
+          : "Put the exiled card into its owner's hand."
+        : effect.plural === true
+          ? "Return the exiled cards to the battlefield under their owner's control."
+          : "Return the exiled card to the battlefield under its owner's control.";
+    case 'exileNonbasicGraveyardAndMatchingLibrary':
+      return "Exile all cards from target player's graveyard other than basic land cards. For each card exiled this way, search that player's library for all cards with the same name as that card and exile them. Then that player shuffles.";
+    case 'eachPlayerNamesCardThenRevealsTop':
+      return "Each player chooses a card name. Then each player reveals the top card of their library. If the card a player revealed has the name they chose, that player puts it into their hand. If it doesn't, that player puts it on the bottom of their library.";
+    case 'nameNonlandCardAndExileMatchingOpponentZones':
+      return "Choose a nonland card name. Search target opponent's graveyard, hand, and library for any number of cards with that name and exile them. Then that player shuffles.";
     // "A creature card" and not "target creature card", which is the one place
     // this vocabulary's wording departs from the printed cards it was built for.
     // The kernel asks a mid-resolution question here rather than choosing a
@@ -1349,6 +1991,20 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
       const under = control === 'you' ? 'under your control' : "under its owner's control";
       return `Return ${cards} from ${zone} to the battlefield ${under}.${grantSentence(effect.alsoBecomes)}`;
     }
+    case 'chooseFromBattlefield':
+      return `Return a ${permanentChoiceNoun(effect.filter, false)} you control to its owner's hand.`;
+    case 'returnSourceFromGraveyard':
+      return effect.destination === 'hand'
+        ? `Return ${cardName} from your graveyard to your hand.`
+        : `Return ${cardName} from your graveyard to the battlefield tapped.`;
+    case 'returnDepartedSourceToOwnerHand':
+      return `Return ${cardName} to its owner's hand.`;
+    case 'putDepartedSourceOnTopOfOwnerLibrary':
+      return "Put it on top of its owner's library.";
+    case 'shuffleSourceIntoOwnerLibrary':
+      return "Shuffle it into its owner's library.";
+    case 'returnSourceAuraAttached':
+      return `Return this card from its owner's graveyard to the battlefield attached to ${who(effect.target)}.`;
     // CR 701.8's own template. "Cards" is spelled with a number word for one
     // and a numeral for none of them, which is Magic's rule for a count inside
     // rules text, and `pluralize` is what keeps "discards a card" from printing
@@ -1360,11 +2016,20 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // prints nothing. The verb does not move — `PLAYER_SCOPE_PHRASES` is
     // singular precisely so it does not have to.
     case 'discardCards': {
+      const suffix = effect.random === true ? ' at random' : '';
+      const count = effect.countFrom === 'chosenX' ? 'X' : effect.count;
+      if (effect.players === undefined && effect.target.kind === 'noTarget') {
+        if (count === 'all') return 'You discard your hand.';
+        return count === 1
+          ? `You discard a card${suffix}.`
+          : `You discard ${typeof count === 'number' ? numberWord(count) : count} cards${suffix}.`;
+      }
       const subject =
         effect.players === undefined ? capitalize(who(effect.target)) : PLAYER_SCOPE_PHRASES[effect.players];
-      return effect.count === 1
-        ? `${subject} discards a card.`
-        : `${subject} discards ${numberWord(effect.count)} cards.`;
+      if (count === 'all') return `${subject} discards their hand.`;
+      return count === 1
+        ? `${subject} discards a card${suffix}.`
+        : `${subject} discards ${typeof count === 'number' ? numberWord(count) : count} cards${suffix}.`;
     }
     // Three sentences, and Coercion prints all three: the reveal, the choice,
     // and the discard. They are one effect and not three, because anything
@@ -1391,6 +2056,15 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
       const discarded = effect.count === 1 ? 'that card' : 'those cards';
       return `${capitalize(who(effect.target))} reveals their hand. You choose ${noun} from it. That player discards ${discarded}.`;
     }
+    case 'chooseFromRevealedHand': {
+      const subject = capitalize(who(effect.target));
+      if (effect.outcome.kind === 'mayCastWithoutPayingManaCost') {
+        const noun = cardFilterPhrase(effect.filter).replace(' card', ' spell');
+        return `${subject} reveals their hand. You may cast ${noun} from among those cards without paying its mana cost.`;
+      }
+      const noun = cardFilterPhrase(effect.filter);
+      return `${subject} reveals their hand. You choose ${noun} from it. Search that player's graveyard, hand, and library for all cards with the same name as that card and exile them. Then that player shuffles.`;
+    }
     // `gainLife`'s sentence with the other verb, and the `noTarget` slot means
     // the same thing it means there: the controller.
     //
@@ -1412,6 +2086,9 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // nothing, and `checkPlayerSweep` is what keeps that from being a silent
     // drop.
     case 'loseLife': {
+      if (effect.amountFrom === 'triggeringPlayerLifeHalfRoundedUp') {
+        return `${capitalize(who(effect.target))} loses half their life, rounded up.`;
+      }
       const life = isLiteralAmount(effect.amount)
         ? `${effect.amount} life`
         : `life ${amountEqualTo(effect.amount)}`;
@@ -1426,25 +2103,102 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // which is exactly what `setLife` does in the kernel, so the sentence and
     // the behavior say the same thing.
     case 'setLife':
-      return isLiteralAmount(effect.amount)
-        ? `Your life total becomes ${effect.amount}.`
-        : `Your life total becomes a number ${amountEqualTo(effect.amount)}.`;
+      return `${
+        effect.players === undefined
+          ? 'Your life total'
+          : `${PLAYER_SCOPE_PHRASES[effect.players]}'s life total`
+      } becomes ${
+        isLiteralAmount(effect.amount) ? `${effect.amount}.` : `a number ${amountEqualTo(effect.amount)}.`
+      }`;
+    case 'loseGame':
+      return `${capitalize(who(effect.target))} loses the game.`;
+    case 'winGame':
+      return 'You win the game.';
     // Fog's line, unchanged. No count and no recipient, because the effect has
     // neither: it prevents all of it, for everyone, for the turn.
     case 'preventCombatDamage':
       return 'Prevent all combat damage that would be dealt this turn.';
+    case 'preventCombatDamageToYou':
+      return 'Prevent all combat damage that would be dealt to you this turn.';
+    case 'detainPermanent': {
+      const plural = targetCountOf(effect.target) !== null && (effect.target.count ?? 0) > 1;
+      const detained = `Detain ${who(effect.target)}.`;
+      return plural
+        ? `${detained} (Until your next turn, those ${effect.target.kind === 'targetCreatureOpponentControls' ? 'creatures' : 'permanents'} can't attack or block and their activated abilities can't be activated.)`
+        : `${detained} (Until your next turn, that ${effect.target.kind === 'targetCreatureOpponentControls' ? 'creature' : 'permanent'} can't attack or block and its activated abilities can't be activated.)`;
+    }
+    case 'chooseBlockersThisCombat':
+      return 'You choose which creatures block this combat and how those creatures block.';
     // Dawn Charm's first mode, aimed rather than blanket: one named creature,
     // every source of damage rather than only combat. `who` already renders
     // the hand-authored-only `targetCreature` the same way every other
     // targeted effect in this switch does.
     case 'preventAllDamageToTarget':
       return `Until end of turn, prevent all damage to ${who(effect.target)}.`;
+    case 'preventAllDamageToYouAndCreaturesYouControl':
+      return 'Prevent all damage that would be dealt to you and creatures you control this turn.';
+    case 'preventNextDamageToYouAndRetaliate': {
+      const amount =
+        isLiteralAmount(effect.amount) || effect.amount.kind !== 'chosenX'
+          ? isLiteralAmount(effect.amount)
+            ? String(effect.amount)
+            : `an amount ${amountEqualTo(effect.amount)}`
+          : 'X';
+      if (effect.target.kind === 'noTarget') {
+        return `Prevent the next ${amount} damage that would be dealt to you this turn.`;
+      }
+      return `Prevent the next ${amount} damage that would be dealt to you this turn. If damage is prevented this way, ${cardName} deals that much damage to ${who(effect.target)}.`;
+    }
+    case 'cantCastSpellsThisTurn':
+      return "Your opponents can't cast spells this turn.";
+    case 'protectSpellsAndCreaturesFromSpellColorsThisTurn': {
+      const colors = joinWithOr(effect.colors.map((color) => COLOR_WORDS[color]));
+      return `Spells you control can't be countered by ${colors} spells this turn, and creatures you control can't be the targets of ${colors} spells this turn.`;
+    }
+    case 'flipCoin': {
+      const branch = (effects: readonly Effect[] | undefined): string | null => {
+        if (effects === undefined) return null;
+        return joinWithAnd(
+          renderEffectList(effects, cardName).map((sentence) => {
+            const clause = asClause(sentence, cardName);
+            return clause.endsWith('.') ? clause.slice(0, -1) : clause;
+          }),
+        );
+      };
+      const win = branch(effect.winEffects);
+      const loss = branch(effect.loseEffects);
+      return [
+        'Flip a coin.',
+        ...(win === null ? [] : [`If you win the flip, ${win}.`]),
+        ...(loss === null ? [] : [`If you lose the flip, ${loss}.`]),
+      ].join(' ');
+    }
     // One verb and one target, and no rider anywhere: the hold this cannot
     // clear belongs to the untap step rather than to this sentence, so the
     // printed line says nothing about it. `who` carries the filter, which is
     // what turns the widest space into Voltaic Key's "target artifact".
     case 'untapPermanent':
       return `Untap ${who(effect.target)}.`;
+    case 'untapPermanents':
+      return `Untap up to ${numberWord(effect.upTo)} ${permanentChoiceNoun(effect.filter, true)}.`;
+    case 'skipNextUntap':
+      return `${capitalize(who(effect.target))} doesn't untap during its controller's next untap step.`;
+    case 'gainControlUntilEndOfTurn':
+      return `Gain control of ${who(effect.target)} until end of turn.`;
+    case 'gainControl':
+      return `Gain control of ${who(effect.target)}.`;
+    case 'exchangeControl':
+      return effect.exchangeSource === true
+        ? `Exchange control of ${selfPermanentPhrase(cardName, sourceKind)} and ${who(effect.target)}.`
+        : 'Exchange control of two target creatures.';
+    case 'addSubtype': {
+      const subtype = withArticle(effect.subtype);
+      return effect.target.kind === 'thatCreature'
+        ? `It becomes ${subtype} in addition to its other types.`
+        : `${capitalize(who(effect.target))} becomes ${subtype} in addition to its other types.`;
+    }
+    case 'targetPlayerGainsControlOfSelfPermanent':
+      return `${capitalize(who(effect.target))} gains control of ${selfPermanentPhrase(cardName, sourceKind)}.`;
     // The printed order is the subject's, not the verb's, which is why this is
     // the `capitalize(who(...))` form rather than the imperative one above it:
     // Magic says "Target creature gains flying until end of turn", never
@@ -1463,8 +2217,19 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
           ? who(effect.target)
           : EFFECT_SCOPE_PHRASES[effect.scope](who(effect.target), prior, effect.scopeFilter);
       const gains = effect.scope === undefined ? 'gains' : 'gain';
-      return `${capitalize(subject)} ${gains} ${GRANTABLE_KEYWORD_PRINT_NAMES[effect.keyword]} until end of turn.`;
+      const keywords = [effect.keyword, ...(effect.additionalKeywords ?? [])].map(
+        (keyword) => GRANTABLE_KEYWORD_PRINT_NAMES[keyword],
+      );
+      const granted = joinWithAnd(keywords);
+      if (effect.removeKeywordAbility === 'defender') {
+        return `Until end of turn, ${subject} loses defender and ${gains} ${granted}.`;
+      }
+      return `${capitalize(subject)} ${gains} ${granted} until end of turn.`;
     }
+    case 'regeneratePermanent':
+      return effect.scope === undefined
+        ? `Regenerate ${who(effect.target)}.`
+        : `Regenerate ${EFFECT_SCOPE_EACH_PHRASES[effect.scope](who(effect.target), effect.scopeFilter)}.`;
     // The subject's order again, and "this turn" rather than "until end of
     // turn": both phrases name the same duration and Magic picks between them
     // by what the sentence is about. A characteristic a creature *gains* is
@@ -1472,8 +2237,31 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // turn. Goblin Tunneler and Alluring Siren both print the second.
     case 'cantBeBlockedThisTurn':
       return `${capitalize(who(effect.target))} can't be blocked this turn.`;
+    case 'cantBlockThisTurn':
+      return `${capitalize(who(effect.target))} can't block this turn.`;
+    case 'blocksThisTurnIfAble': {
+      const subject =
+        effect.scope === undefined
+          ? capitalize(who(effect.target))
+          : capitalize(EFFECT_SCOPE_EACH_PHRASES[effect.scope](who(effect.target), effect.scopeFilter));
+      return `${subject} blocks this turn if able.`;
+    }
     case 'attacksYouThisTurnIfAble':
       return `${capitalize(who(effect.target))} attacks you this turn if able.`;
+    case 'setColorsUntilEndOfTurn':
+      return `${capitalize(who(effect.target))} becomes ${colorPhrase(effect.colors)} until end of turn.`;
+    case 'attacksThisTurnIfAble':
+      return `${capitalize(who(effect.target))} attacks this turn if able.`;
+    case 'shuffleHandsAndGraveyardsIntoLibraries':
+      return 'Each player shuffles their hand and graveyard into their library.';
+    case 'exileHandsAndGraveyards':
+      return 'Exile all cards from all hands and graveyards.';
+    case 'exileThisSpell':
+      return `Exile ${cardName}.`;
+    case 'castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts':
+      return effect.topXOriginalsProfile === true
+        ? "Exile the top X cards of your library. You may cast instant and sorcery spells with mana value X or less from among them without paying their mana costs. Then put all cards exiled this way that weren't cast into your graveyard."
+        : 'Copy those cards. Cast the copies if able without paying their mana costs.';
     // The imperative form, `untapPermanent`'s shape rather than the subject-
     // first one above it: Magic prints "Sacrifice this creature", never "This
     // creature is sacrificed". `who` renders the noun off the target kind, so
@@ -1484,16 +2272,32 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // 701.17 is a different action from CR 701.7, and `@mtg/kernel`'s
     // `sacrificePermanent` is the sibling of `destroyPermanent` that says so.
     case 'sacrificeSelf':
-      return `Sacrifice ${who(effect.target)}.`;
-    // The subject-first form `drawCards` uses, not the imperative form the
-    // arm above it does: "Sacrifice this creature" is a command aimed at
-    // whoever the ability's controller turns out to be, and "Target player
-    // sacrifices a creature" is a fact stated about a named player, the same
-    // difference `discardCards` prints over `sacrificeSelf`. `who` already
-    // renders both `targetPlayer` and `targetOpponent` correctly; no count and
-    // no filter to read, `sacrificePermanentEffect`'s stated cut.
-    case 'sacrificePermanent':
-      return `${capitalize(who(effect.target))} sacrifices a creature.`;
+      return `Sacrifice ${effect.target.kind === 'selfPermanent' ? cardName : who(effect.target)}.`;
+    // The subject-first form `drawCards` uses, not the imperative form the arm
+    // above it does. The omitted fields retain the original edict's canonical
+    // "a creature"; Destructive Force states all three widenings and prints
+    // "Each player sacrifices five lands" from the same shape.
+    case 'sacrificePermanent': {
+      const count = effect.count ?? 1;
+      const filter = effect.filter ?? { cardTypes: ['creature'] as const };
+      const baseNoun = permanentChoiceNoun(filter, count !== 1);
+      const object =
+        count === 1
+          ? effect.excludeSource === true
+            ? `another ${baseNoun}`
+            : `${articleForWord(baseNoun)} ${baseNoun}`
+          : `${numberWord(count)} ${effect.excludeSource === true ? 'other ' : ''}${baseNoun}`;
+      if (effect.target.kind === 'noTarget' && effect.players === undefined) {
+        return `Sacrifice ${object}.`;
+      }
+      const subject =
+        effect.players === undefined ? capitalize(who(effect.target)) : PLAYER_SCOPE_PHRASES[effect.players];
+      const choice =
+        effect.players !== undefined || effect.target.kind === 'thatPlayerOrPlaneswalkerController'
+          ? ' of their choice'
+          : '';
+      return `${subject} sacrifices ${object}${choice}.`;
+    }
     // Diminish, word for word, and the wording is load-bearing: "has base power
     // and toughness 1/1" is how Magic prints a layer-7b set, and "gets -4/-4"
     // is how it prints the 7c delta that produces the same board on an empty
@@ -1506,9 +2310,47 @@ export function renderEffect(effect: Effect, cardName: string, prior: PriorMenti
     // fact about the creature, not an instruction to a player.
     case 'setBasePtUntilEndOfTurn':
       return `${capitalize(who(effect.target))} has base power and toughness ${effect.power}/${effect.toughness} until end of turn.`;
+    case 'animateLandWhileSourceOnBattlefield': {
+      const body = [colorPhrase(effect.colors), ...effect.subtypes, 'creature'].join(' ');
+      return `${capitalize(who(effect.target))} becomes a ${effect.power}/${effect.toughness} ${body} for as long as ${cardName} remains on the battlefield. It's still a land.`;
+    }
+    case 'animateSourceUntilEndOfTurn': {
+      const body = [colorPhrase(effect.colors), ...effect.subtypes, 'artifact creature'].join(' ');
+      const keywords = effect.keywords.length === 0 ? '' : ` with ${keywordPhrase(effect.keywords)}`;
+      const subject = effect.printedDurationFirst === true ? cardName : capitalize(cardName);
+      const change = `${subject} becomes a ${effect.power}/${effect.toughness} ${body}${keywords}`;
+      return effect.printedDurationFirst === true
+        ? `Until end of turn, ${change}.`
+        : `${change} until end of turn.`;
+    }
     default:
       return assertNever(effect, 'renderEffect');
   }
+}
+
+/** The source-reference noun used when a permanent ability names its source. */
+function selfPermanentPhrase(cardName: string, sourceKind: CardKind | undefined): string {
+  if (sourceKind === undefined || sourceKind === 'instant' || sourceKind === 'sorcery') return cardName;
+  return `this ${sourceKind}`;
+}
+
+/** The subject of a damage instruction, shared with triggered-ability pronoun folding. */
+function damageSourcePhrase(
+  effect: Extract<Effect, { readonly kind: 'dealDamage' }>,
+  cardName: string,
+  sourceKind: CardKind | undefined,
+): string {
+  if (
+    effect.target.kind === 'noTarget' &&
+    effect.scope === undefined &&
+    effect.players === undefined &&
+    sourceKind !== undefined
+  ) {
+    return selfPermanentPhrase(cardName, sourceKind);
+  }
+  return sourceKind === 'planeswalker' && cardName.includes(',')
+    ? (cardName.split(',')[0] ?? cardName)
+    : cardName;
 }
 
 /**
@@ -1523,22 +2365,40 @@ interface StaticSubject {
 }
 
 function staticSubject(ability: StaticAbility, cardName: string): StaticSubject {
-  const qualifier = ability.subtype === null ? '' : `${ability.subtype} `;
+  const colorQualifier = filterAdjectives(ability.filter ?? null);
+  const tappedQualifier = ability.filter?.tapped === true ? 'tapped ' : '';
+  const subtypeQualifier = ability.subtype === null ? '' : `${ability.subtype} `;
+  const qualifier = `${tappedQualifier}${colorQualifier}${subtypeQualifier}`;
+  const creatureNoun = ability.filter?.token === true ? 'creature tokens' : 'creatures';
   switch (ability.scope) {
     case 'self':
-      return { phrase: cardName, singular: true };
+      return {
+        phrase:
+          ability.printedSubjectReference === 'thisCreature'
+            ? 'this creature'
+            : ability.printedSubjectReference === 'cardNameBeforeComma'
+              ? cardName.slice(0, Math.max(0, cardName.indexOf(','))) || cardName
+              : cardName,
+        singular: true,
+      };
     case 'creaturesYouControl':
-      return { phrase: `${qualifier}creatures you control`, singular: false };
+      return { phrase: `${qualifier}${creatureNoun} you control`, singular: false };
     case 'otherCreaturesYouControl':
-      return { phrase: `other ${qualifier}creatures you control`, singular: false };
+      return { phrase: `other ${qualifier}${creatureNoun} you control`, singular: false };
+    case 'allLands':
+      return { phrase: 'all lands', singular: false };
+    case 'landsYouControl':
+      return { phrase: 'lands you control', singular: false };
+    case 'allCreatures':
+      return { phrase: 'creatures', singular: false };
     default:
       return assertNever(ability.scope, 'staticSubject');
   }
 }
 
 /**
- * One modification as its verb and what follows it, with no subject and no full
- * stop: `gets +2/+0`, `has flying`.
+ * One modification as its verb and optional object, with no subject and no full
+ * stop: `gets +2/+0`, `has flying`, `can't be blocked`.
  *
  * P/T uses *get* and keywords use *have*, which are Magic's two verbs for a
  * modification, and the subject decides the number. Split out from the sentence
@@ -1548,12 +2408,12 @@ function staticSubject(ability: StaticAbility, cardName: string): StaticSubject 
  */
 interface ModificationPhrase {
   readonly verb: string;
-  readonly object: string;
+  readonly object?: string;
 }
 
 /**
  * `modificationPhrase`'s domain: every modification kind Magic prints as
- * "{subject} {verb} {object}". `definePt` (CR 613.4a) is not one of these —
+ * "{subject} {verb} {object}" or a complete verb phrase. `definePt` (CR 613.4a) is not one of these —
  * its sentence has no verb shared between the power half and the toughness
  * half ("Tarmogoyf's power is equal to… and its toughness is equal to…"), so
  * `renderStaticAbility` prints it through `definePtSentence` instead and
@@ -1562,13 +2422,15 @@ interface ModificationPhrase {
  * `renderEquipAbility` narrow to this type below rather than widen
  * `modificationPhrase` to a sentence shape it cannot print.
  */
-type VerbObjectModification = Exclude<LayeredStaticModification, { kind: 'definePt' }>;
+type VerbObjectModification = Exclude<
+  LayeredStaticModification,
+  { kind: 'definePt' } | { kind: 'addSubtype' }
+>;
 
-function isVerbObjectModification(
-  modification: LayeredStaticModification,
-): modification is VerbObjectModification {
-  return modification.kind !== 'definePt';
-}
+/** The shared-verb members an Equip clause may print, including its combat rule. */
+type EquipClauseModification =
+  VerbObjectModification | Extract<AttachModification, { kind: 'cantBeBlocked' }>;
+type PrintableBundleModification = EquipClauseModification | StaticBundleModification;
 
 /**
  * `ability.attach.modifications` as `VerbObjectModification`s, for the one
@@ -1579,10 +2441,10 @@ function isVerbObjectModification(
  * absorb.
  */
 function verbObjectModifications(
-  modifications: readonly AttachModification[],
-): readonly VerbObjectModification[] {
+  modifications: readonly (AttachModification | StaticBundleModification)[],
+): readonly PrintableBundleModification[] {
   return modifications.map((modification) => {
-    if (isVerbObjectModification(modification)) return modification;
+    if (modification.kind !== 'definePt') return modification;
     throw new Error(
       'a characteristic-defining P/T (CR 613.4a) reached renderEquipAbility; checkEquipAbility should have refused it first',
     );
@@ -1591,7 +2453,7 @@ function verbObjectModifications(
 
 function modificationPhrase(
   subject: StaticSubject,
-  modification: VerbObjectModification,
+  modification: PrintableBundleModification,
 ): ModificationPhrase {
   switch (modification.kind) {
     case 'statBonus':
@@ -1610,6 +2472,42 @@ function modificationPhrase(
         // clause below neither knows nor cares which half it drew from.
         object: GRANTABLE_KEYWORD_PRINT_NAMES[modification.keyword],
       };
+    case 'grantKeywordAbilities': {
+      const objects: string[] = [];
+      for (const grant of modification.grants) {
+        if (grant.kind === 'keyword') {
+          objects.push(GRANTABLE_KEYWORD_PRINT_NAMES[grant.keyword]);
+          continue;
+        }
+        if (grant.kind === 'landwalk') {
+          objects.push(`${grant.landType.toLowerCase()}walk`);
+          continue;
+        }
+        const quality = protectionQualityPhrase(grant.quality);
+        const previous = objects[objects.length - 1];
+        if (previous?.startsWith('protection from ')) {
+          objects[objects.length - 1] = `${previous} and from ${quality}`;
+        } else {
+          objects.push(`protection from ${quality}`);
+        }
+      }
+      return {
+        verb: subject.singular ? 'has' : 'have',
+        object: joinWithAnd(objects),
+      };
+    }
+    case 'grantTriggeredAbility':
+      return {
+        verb: subject.singular ? 'has' : 'have',
+        object: isExaltedAbility(modification.ability)
+          ? 'exalted'
+          : `"${renderAbility(modification.ability, 'this permanent')}"`,
+      };
+    case 'grantAnyColorManaAbility':
+      return {
+        verb: 'have',
+        object: '"{T}: Add one mana of any color."',
+      };
     case 'statBonusPer':
       // The rate, then the thing it is charged per. Magic prints the whole
       // clause in the same "gets +0/+1 …" frame `statBonus` uses above, which
@@ -1617,8 +2515,19 @@ function modificationPhrase(
       // its own the way `definePt` is.
       return {
         verb: subject.singular ? 'gets' : 'get',
-        object: `${formatPtDelta(modification.power, modification.toughness)} for each ${permanentTallyPhrase(modification.each)}`,
+        object: `${formatPtDelta(modification.power, modification.toughness)} for each ${
+          'zone' in modification.each && modification.each.zone === 'controllerGraveyard'
+            ? 'creature card in your graveyard'
+            : permanentTallyPhrase(modification.each)
+        }`,
       };
+    case 'statBonusPerColor':
+      return {
+        verb: subject.singular ? 'gets' : 'get',
+        object: `${formatPtDelta(modification.power, modification.toughness)} for each of ${subject.singular ? 'its' : 'their'} colors`,
+      };
+    case 'cantBeBlocked':
+      return { verb: "can't be blocked" };
     default:
       return assertNever(modification, 'modificationPhrase');
   }
@@ -1634,24 +2543,28 @@ function modificationPhrase(
  *
  * Adjacent modifications sharing a verb share it in print: two granted keywords
  * read "has deathtouch and trample" rather than "has deathtouch and has
- * trample", which is how Magic templates a keyword pair. Different verbs are
- * joined by the same "and" with the verb repeated, which is how Magic templates
- * "gets +1/+1 and has flying". The list is capped at two (`AttachSchema`), so
- * "and" is the only joiner this needs; a comma-and-serial form would be a third
- * clause the schema does not admit.
+ * trample", which is how Magic templates a keyword pair. A longer run uses the
+ * ordinary serial-list helper, as Sword of Vengeance's four keywords do.
+ * Different verbs are joined by the same "and" with the verb repeated, which
+ * is how Magic templates "gets +1/+1 and has flying".
  */
 function modificationClause(
   subject: StaticSubject,
-  modifications: readonly VerbObjectModification[],
+  modifications: readonly PrintableBundleModification[],
 ): string {
   const groups: { verb: string; objects: string[] }[] = [];
   for (const modification of modifications) {
     const phrase = modificationPhrase(subject, modification);
     const open = groups[groups.length - 1];
-    if (open !== undefined && open.verb === phrase.verb) open.objects.push(phrase.object);
-    else groups.push({ verb: phrase.verb, objects: [phrase.object] });
+    if (open !== undefined && open.verb === phrase.verb) {
+      if (phrase.object !== undefined) open.objects.push(phrase.object);
+    } else {
+      groups.push({ verb: phrase.verb, objects: phrase.object === undefined ? [] : [phrase.object] });
+    }
   }
-  const said = groups.map((group) => `${group.verb} ${group.objects.join(' and ')}`).join(' and ');
+  const said = groups
+    .map((group) => (group.objects.length === 0 ? group.verb : `${group.verb} ${joinWithAnd(group.objects)}`))
+    .join(' and ');
   return `${capitalize(subject.phrase)} ${said}.`;
 }
 
@@ -1703,6 +2616,32 @@ function definePtSentence(cardName: string, modification: StaticModificationOf<'
 export const ENCHANTED_DOES_NOT_UNTAP =
   "Enchanted creature doesn't untap during its controller's untap step.";
 
+/** The untap sentence for the host noun selected by an Aura's enchant clause. */
+type AuraHostNoun = 'creature' | 'permanent' | 'land' | 'nonland permanent';
+
+function enchantedDoesNotUntap(host: AuraHostNoun): string {
+  return `Enchanted ${host} doesn't untap during its controller's untap step.`;
+}
+
+function auraHostNoun(enchant: Aura['enchant']): AuraHostNoun {
+  switch (enchant) {
+    case 'creature':
+      return 'creature';
+    case 'artifactOrCreature':
+      return 'permanent';
+    case 'land':
+      return 'land';
+    case 'nonlandPermanent':
+      return 'nonland permanent';
+    default:
+      return assertNever(enchant, 'auraHostNoun');
+  }
+}
+
+function auraHostKind(host: AuraHostNoun): CardKind | undefined {
+  return host === 'permanent' || host === 'nonland permanent' ? undefined : host;
+}
+
 /**
  * The exact M11/M13 creature-Aura paragraph, in printed modification order.
  *
@@ -1730,15 +2669,24 @@ export const ENCHANTED_DOES_NOT_UNTAP =
  * Tractor Beam all do — so it comes out as its own sentence, after the shared
  * one and before the reminders.
  */
-export function renderAuraModificationClause(modifications: readonly AuraModification[]): string {
-  const subject: StaticSubject = { phrase: 'enchanted creature', singular: true };
+export function renderAuraModificationClause(
+  modifications: readonly AuraModification[],
+  host: AuraHostNoun = 'creature',
+): string {
+  const subject: StaticSubject = { phrase: `enchanted ${host}`, singular: true };
   const reminders: string[] = [];
-  const phrases: ModificationPhrase[] = [];
+  const phrases: { readonly verb: string; readonly object: string }[] = [];
   let control = false;
   let held = false;
+  let activationLocked = false;
+  const granted: string[] = [];
   for (const modification of modifications) {
     if (isStaticAuraModification(modification)) {
-      phrases.push(modificationPhrase(subject, modification));
+      const phrase = modificationPhrase(subject, modification);
+      if (phrase.object === undefined) {
+        throw new Error(`Aura modification ${modification.kind} rendered without an object`);
+      }
+      phrases.push({ verb: phrase.verb, object: phrase.object });
       continue;
     }
     switch (modification.kind) {
@@ -1763,6 +2711,20 @@ export function renderAuraModificationClause(modifications: readonly AuraModific
       case 'doesNotUntap':
         held = true;
         break;
+      case 'cantActivateAbilities':
+        activationLocked = true;
+        break;
+      case 'grantTriggeredAbility':
+        granted.push(
+          `Enchanted ${host} has "${renderAbility(modification.ability, `this ${host}`, auraHostKind(host))}"`,
+        );
+        break;
+      case 'grantActivatedAbility':
+        phrases.push({
+          verb: 'has',
+          object: `"${renderAbility(modification.ability, `this ${host}`, auraHostKind(host))}"`,
+        });
+        break;
       default:
         return assertNever(modification, 'renderAuraModificationClause');
     }
@@ -1775,15 +2737,22 @@ export function renderAuraModificationClause(modifications: readonly AuraModific
   }
   const sentences: string[] = [];
   if (control) sentences.push(`You control ${subject.phrase}.`);
-  if (groups.length > 0) {
+  if (groups.length === 0 && held && activationLocked) {
     sentences.push(
-      `Enchanted creature ${groups
-        .map((group) => `${group.verb} ${group.objects.join(' or ')}`)
-        .join(' and ')}.`,
+      `Enchanted ${host} doesn't untap during its controller's untap step and its activated abilities can't be activated.`,
     );
+    held = false;
+    activationLocked = false;
+  } else if (groups.length > 0) {
+    const clause = `Enchanted ${host} ${groups
+      .map((group) => `${group.verb} ${group.objects.join(' or ')}`)
+      .join(' and ')}${activationLocked ? ", and its activated abilities can't be activated" : ''}`;
+    sentences.push(`${clause}${clause.endsWith('."') ? '' : '.'}`);
+  } else if (activationLocked) {
+    sentences.push(`Enchanted ${host}'s activated abilities can't be activated.`);
   }
-  if (held) sentences.push(ENCHANTED_DOES_NOT_UNTAP);
-  return [...sentences, ...reminders].join(' ');
+  if (held) sentences.push(enchantedDoesNotUntap(host));
+  return [...sentences, ...granted, ...reminders].join(' ');
 }
 
 /**
@@ -1803,8 +2772,8 @@ export function renderAuraModificationClause(modifications: readonly AuraModific
  * (`packages/kernel/src/combat.ts`), `checkStaticCondition`
  * (`packages/dsl/src/validate/abilities.ts`) and `conditionParams`
  * (`packages/forge-export/src/ability-script.ts`): `condition.ts` argues why
- * all five call sites are real `switch`/`assertNever` dispatch now that
- * `ConditionSchema` has a second member, rather than the direct field access
+ * every call site is real `switch`/`assertNever` dispatch now that
+ * `ConditionSchema` has multiple members, rather than the direct field access
  * a single-member union could not be exhaustively checked against.
  *
  * `controlsSubtype`'s floor of one prints the article Magic prints ("as long
@@ -1815,32 +2784,47 @@ export function renderAuraModificationClause(modifications: readonly AuraModific
  * section) — so it always prints the singular counter phrase: "as long as any
  * creature has a gloom counter", never "creatures" or a count.
  */
-function conditionPhrase(condition: Condition): string {
+function conditionClause(condition: Condition): string {
   switch (condition.kind) {
     case 'controlsSubtype': {
       const noun =
         condition.atLeast === 1
           ? withArticle(condition.subtype)
           : `${numberWord(condition.atLeast)} or more ${englishPlural(condition.subtype)}`;
-      return `As long as you control ${noun},`;
+      return `you control ${noun}`;
     }
     case 'anyCreatureHasCounter':
-      return `As long as any creature has ${counterPhrase(condition.counter, 1)},`;
+      return `any creature has ${counterPhrase(condition.counter, 1)}`;
     // "in their graveyard" rather than "in his or her graveyard": the singular
     // they is what current Oracle wording uses, and "an opponent" is the
     // printed subject even at two players, where it names one person.
     case 'opponentGraveyardAtLeast':
-      return `As long as an opponent has ${numberWord(condition.atLeast)} or more cards in their graveyard,`;
-    case 'lifeAtLeast':
-      return `As long as you have ${numberWord(condition.atLeast)} or more life,`;
-    // "has been dealt", the printed passive: Bloodcrazed Goblin's line names
-    // the player damage arrived at and never names what dealt it. The "no" is
-    // the printed "unless" turned around, for the reason `condition.ts` gives.
-    case 'noOpponentDealtDamageThisTurn':
-      return 'As long as no opponent has been dealt damage this turn,';
+      return `an opponent has ${numberWord(condition.atLeast)} or more cards in their graveyard`;
+    case 'opponentUndamagedThisTurn':
+      return "an opponent hasn't been dealt damage this turn";
+    case 'controllerLifeAtLeast':
+      return `you have ${numberWord(condition.atLeast)} or more life`;
+    case 'controllerLifeBelow':
+      return `your life total is less than ${String(condition.fewerThan)}`;
+    case 'controllerLibraryAtLeast':
+      return `you have ${String(condition.atLeast)} or more cards in your library`;
+    case 'controllerTopLibraryHasColor':
+      return `the top card of your library is ${COLOR_WORDS[condition.color]}`;
+    case 'battlefieldCountBelow':
+      return `there are fewer than ${numberWord(condition.fewerThan)} ${countMatchingPhrase(condition.filter)} on the battlefield`;
+    case 'controlsNoneOfSubtypes':
+      return `you control no ${joinWithOr(condition.subtypes.map((subtype) => englishPlural(subtype)))}`;
+    case 'selfCounterCountBelow':
+      return `this permanent has fewer than ${numberWord(condition.fewerThan)} ${counterName(condition.counter)} counters on it`;
+    case 'selfCounterCountAtLeast':
+      return `this permanent has ${numberWord(condition.atLeast)} or more ${counterName(condition.counter)} counters on it`;
     default:
       return assertNever(condition, 'conditionPhrase');
   }
+}
+
+function conditionPhrase(condition: Condition): string {
+  return `As long as ${conditionClause(condition)},`;
 }
 
 /**
@@ -1862,19 +2846,34 @@ function conditionPhrase(condition: Condition): string {
  * rather than "that much", because "twice that much" alone is what a damage
  * doubler says and the two lines are not interchangeable in print.
  */
-function replacementSentence(modification: ReplacementStaticModification): string {
+function replacementSentence(modification: ReplacementStaticModification, sourceReference: string): string {
   switch (modification.kind) {
-    case 'doubleDamage':
-      return 'If a source would deal damage to a permanent or player, it deals double that damage to that permanent or player instead.';
+    case 'doubleDamage': {
+      const filter = modification.sourceFilter;
+      if (filter === undefined) {
+        return 'If a source would deal damage to a permanent or player, it deals double that damage to that permanent or player instead.';
+      }
+      const colors = joinWithOr(filter.colors.map((color) => COLOR_WORDS[color]));
+      const cardTypes = joinWithOr([...filter.cardTypes]);
+      return `If a ${colors} ${cardTypes} spell you control would deal damage, it deals double that damage instead.`;
+    }
     case 'doubleLifeGain':
       return 'If you would gain life, you gain twice that much life instead.';
+    case 'doublePlusOnePlusOneCountersOnCreaturesYouControl':
+      return 'If one or more +1/+1 counters would be put on a creature you control, twice that many +1/+1 counters are put on it instead.';
+    case 'damageCannotReduceControllerLifeBelow':
+      return `As long as you have ${String(modification.minimum)} or more life, damage that would reduce your life total to less than ${String(modification.minimum)} reduces it to ${String(modification.minimum)} instead.`;
+    case 'discardedByOpponentEntersBattlefield':
+      return `If a spell or ability an opponent controls causes you to discard ${sourceReference}, put it onto the battlefield instead of putting it into your graveyard.`;
+    case 'preventDamageToSelfAndRemoveCounters':
+      return `If damage would be dealt to ${sourceReference}, prevent that damage and remove that many ${counterName(modification.counter)} counters from it.`;
     default:
       return assertNever(modification, 'replacementSentence');
   }
 }
 
 /**
- * CR 508/509's seven combat modifications, each its own full sentence rather
+ * CR 508/509's combat modifications, each its own full sentence rather
  * than through `modificationClause`'s shared-verb template.
  *
  * `cantAttack`/`cantBlock`/`cantBeBlocked`/`blockOnlyCreaturesWithKeyword`/
@@ -1909,6 +2908,10 @@ function combatModificationSentence(subject: StaticSubject, modification: Combat
       return `${capitalize(subject.phrase)} ${subject.singular ? 'attacks' : 'attack'} each combat if able.`;
     case 'mustBeBlockedIfAble':
       return `All creatures able to block ${subject.phrase} do so.`;
+    case 'canBlockAnyNumber':
+      return `${capitalize(subject.phrase)} can block any number of creatures.`;
+    case 'canAttackAsThoughNoDefender':
+      return `${capitalize(subject.phrase)} can attack as though it didn't have defender.`;
     case 'blockOnlyCreaturesWithKeyword':
       return `${capitalize(subject.phrase)} can block only creatures with ${
         KEYWORD_PRINT_NAMES[modification.keyword]
@@ -1923,22 +2926,141 @@ function combatModificationSentence(subject: StaticSubject, modification: Combat
       // "creatures", no singular branch, because the modal verb does not
       // conjugate for number any more than the four arms above it do.
       return `${capitalize(subject.phrase)} can't be blocked by ${englishPlural(modification.subtype)}.`;
+    case 'cantAttackWithoutAnyOf': {
+      const admissions = modification.anyOf.map((admission) => {
+        switch (admission.kind) {
+          case 'keyword':
+            return KEYWORD_PRINT_NAMES[admission.keyword];
+          case 'landwalk':
+            return `${admission.landType.toLowerCase()}walk`;
+          default:
+            return assertNever(admission, 'combatModificationSentence admission');
+        }
+      });
+      return `${capitalize(subject.phrase)} without ${joinWithOr(admissions)} can't attack.`;
+    }
+    case 'cantAttackOrBlock':
+      return `${capitalize(subject.phrase)} can't attack or block.`;
+    case 'cantAttackOrBlockAlone':
+      return `${capitalize(subject.phrase)} can't attack or block alone.`;
     default:
       return assertNever(modification, 'combatModificationSentence');
   }
 }
 
+/** CR 615's live prevention sentence, phrased from the containing static scope. */
+function damagePreventionSentence(ability: StaticAbility, subject: StaticSubject): string {
+  const permanent = ability.scope === 'self' ? 'this creature' : subject.phrase;
+  return `Prevent all combat damage that would be dealt to and dealt by ${permanent}.`;
+}
+
 function renderStaticAbility(ability: StaticAbility, cardName: string): string {
   const modification = ability.modification;
+  const subject = staticSubject(ability, cardName);
   const sentence = isLayeredStaticModification(modification)
     ? modification.kind === 'definePt'
       ? definePtSentence(cardName, modification)
-      : modificationClause(staticSubject(ability, cardName), [modification])
+      : modification.kind === 'addSubtype'
+        ? `${capitalize(staticSubject(ability, cardName).phrase)} are ${englishPlural(modification.subtype)} in addition to their other types.`
+        : modification.kind === 'grantAnyColorManaAbility'
+          ? 'Lands you control have "{T}: Add one mana of any color."'
+          : modificationClause(subject, [modification])
     : isCombatStaticModification(modification)
-      ? combatModificationSentence(staticSubject(ability, cardName), modification)
-      : replacementSentence(modification);
+      ? combatModificationSentence(
+          ability.scope === 'self' &&
+            (modification.kind === 'cantBlock' || modification.kind === 'mustBeBlockedIfAble')
+            ? { phrase: 'this creature', singular: true }
+            : subject,
+          modification,
+        )
+      : modification.kind === 'preventCombatDamage'
+        ? damagePreventionSentence(ability, subject)
+        : replacementSentence(
+            modification,
+            ability.printedSourceReference === 'thisCard' ? 'this card' : cardName,
+          );
+  const landwalkReminders =
+    modification.kind === 'grantKeywordAbilities'
+      ? modification.grants.flatMap((grant) =>
+          grant.kind === 'landwalk'
+            ? [
+                `(${subject.singular ? 'It' : 'They'} can't be blocked as long as defending player controls ${withArticle(grant.landType)}.)`,
+              ]
+            : [],
+        )
+      : [];
+  const withLandwalkReminders = (rendered: string): string =>
+    landwalkReminders.length === 0 ? rendered : `${rendered} ${landwalkReminders.join(' ')}`;
+  if (ability.activeDuring === 'turnsOtherThanYours') {
+    const lowered = `${sentence[0]?.toLowerCase() ?? ''}${sentence.slice(1)}`;
+    return withLandwalkReminders(`During turns other than yours, ${lowered}`);
+  }
   const condition = ability.enabledWhile ?? null;
-  if (condition === null) return sentence;
+  if (condition === null) return withLandwalkReminders(sentence);
+  // Bloodcrazed Goblin's source-proven grammar states the permission as an
+  // exception to the restriction. The data still records the condition under
+  // which `cantAttack` is active; this structural pairing is only how Magic
+  // prints that predicate, not a card-name exception.
+  if (
+    condition.kind === 'opponentUndamagedThisTurn' &&
+    modification.kind === 'cantAttack' &&
+    ability.scope === 'self'
+  ) {
+    return withLandwalkReminders(
+      `${cardName} can't attack unless an opponent has been dealt damage this turn.`,
+    );
+  }
+  if (
+    condition.kind === 'battlefieldCountBelow' &&
+    modification.kind === 'cantAttack' &&
+    ability.scope === 'self'
+  ) {
+    return withLandwalkReminders(
+      `${cardName} can't attack unless there are ${numberWord(condition.fewerThan)} or more ${countMatchingPhrase(condition.filter)} on the battlefield.`,
+    );
+  }
+  if (
+    condition.kind === 'controlsNoneOfSubtypes' &&
+    modification.kind === 'cantAttack' &&
+    ability.scope === 'self'
+  ) {
+    const alternatives = condition.subtypes.map((subtype) => withArticle(subtype));
+    return withLandwalkReminders(`${cardName} can't attack unless you control ${joinWithOr(alternatives)}.`);
+  }
+  if (
+    condition.kind === 'selfCounterCountBelow' &&
+    modification.kind === 'cantAttackOrBlock' &&
+    ability.scope === 'self'
+  ) {
+    return withLandwalkReminders(
+      `${cardName} can't attack or block unless it has ${numberWord(condition.fewerThan)} or more ${counterName(condition.counter)} counters on it.`,
+    );
+  }
+  if (
+    condition.kind === 'selfCounterCountAtLeast' &&
+    modification.kind === 'grantKeyword' &&
+    ability.scope === 'self'
+  ) {
+    if (condition.atLeast === 1) {
+      return withLandwalkReminders(
+        `This creature has ${GRANTABLE_KEYWORD_PRINT_NAMES[modification.keyword]} as long as it has ${withArticle(counterName(condition.counter))} counter on it.`,
+      );
+    }
+    return withLandwalkReminders(
+      `${cardName} has ${GRANTABLE_KEYWORD_PRINT_NAMES[modification.keyword]} as long as it has ${numberWord(condition.atLeast)} or more ${counterName(condition.counter)} counters on it.`,
+    );
+  }
+  // Self-scoped keyword conditions put their short board predicate after the
+  // grant in current Oracle: Armory Guard reads "has vigilance as long as",
+  // while lord-style conditions still lead with "As long as" below.
+  if (
+    condition.kind === 'controlsSubtype' &&
+    condition.atLeast === 1 &&
+    (modification.kind === 'grantKeyword' || modification.kind === 'canAttackAsThoughNoDefender') &&
+    ability.scope === 'self'
+  ) {
+    return withLandwalkReminders(`${sentence.slice(0, -1)} as long as ${conditionClause(condition)}.`);
+  }
   // A subtype is a proper noun and keeps its capital wherever the sentence sits.
   // Magic prints "As long as you control three or more Monsters, Monster
   // creatures you control get +1/+1", never "monster creatures" — the same rule
@@ -1951,7 +3073,73 @@ function renderStaticAbility(ability: StaticAbility, cardName: string): string {
   // which is right, and so does the `otherCreaturesYouControl` scope's "Other".
   const opener =
     ability.subtype !== null && sentence.startsWith(ability.subtype) ? ability.subtype : cardName;
-  return `${conditionPhrase(condition)} ${asClause(sentence, opener)}`;
+  return withLandwalkReminders(`${conditionPhrase(condition)} ${asClause(sentence, opener)}`);
+}
+
+/** Printed English for a live static rule whose affected subject is a player. */
+function renderStaticPlayerRule(ability: StaticPlayerRuleAbility): string {
+  switch (ability.rule) {
+    case 'cantAttackWithCreaturesIfCastSpellThisTurn':
+      return "Each opponent who cast a spell this turn can't attack with creatures.";
+    case 'cantCastSpellsIfAttackedWithCreatureThisTurn':
+      return "Each opponent who attacked with a creature this turn can't cast spells.";
+    case 'hasHexproof':
+      return "You have hexproof. (You can't be the target of spells or abilities your opponents control.)";
+    case 'castSpellsAsThoughFlash':
+      return `${
+        ability.spellFilter === undefined
+          ? 'You may cast spells as though they had flash.'
+          : `You may cast ${spellFilterPhrase(ability.spellFilter)} as though they had flash.`
+      }${
+        ability.flashTimingReminder === true ? ' (You may cast them any time you could cast an instant.)' : ''
+      }`;
+    case 'castSpellsFromHandWithoutPayingManaCost':
+      return 'You may cast spells from your hand without paying their mana costs.';
+    case 'cardsToGraveyardAreExiled':
+      return "If a card would be put into an opponent's graveyard from anywhere, exile it instead.";
+    case 'cardsOrTokensToGraveyardAreExiled':
+      return 'If a card or token would be put into a graveyard from anywhere, exile it instead.';
+    case 'instantOrSorceryCardsToGraveyardAreExiled':
+      return 'If an instant or sorcery card would be put into a graveyard from anywhere, exile it instead.';
+    case 'noMaximumHandSize':
+      return 'You have no maximum hand size.';
+    case 'playWithTopLibraryRevealed':
+      return 'Play with the top card of your library revealed.';
+    case 'attackControllerOrPlaneswalkersTaxedByControlledEnchantments':
+      return "Creatures can't attack you or planeswalkers you control unless their controller pays {X} for each of those creatures, where X is the number of enchantments you control.";
+    default:
+      return assertNever(ability.rule, 'renderStaticPlayerRule');
+  }
+}
+
+/** A single printed clause whose fixed modifications resolve in separate layers. */
+function renderStaticBundleAbility(ability: StaticBundleAbility): string {
+  const subtype = ability.subtype === undefined ? '' : `${ability.subtype} `;
+  const phrase =
+    ability.includeSelf === true
+      ? `this creature and other ${subtype}creatures you control`
+      : `other ${subtype}creatures you control`;
+  const sentence = modificationClause(
+    { phrase, singular: false },
+    verbObjectModifications(ability.modifications),
+  );
+  return `${conditionPhrase(ability.enabledWhile)} ${asClause(sentence, phrase)}`;
+}
+
+/** Printed English for a live rule over game results. */
+function renderStaticGameRule(ability: StaticGameRuleAbility): string {
+  switch (ability.rule) {
+    case 'controllerCantLoseAndOpponentsCantWin':
+      return "You can't lose the game and your opponents can't win the game.";
+    case 'playersCantGainLife':
+      return "Players can't gain life.";
+    case 'damageCantBePrevented':
+      return "Damage can't be prevented.";
+    case 'cardsInGraveyardsCantBeTargets':
+      return "Cards in graveyards can't be the targets of spells or abilities.";
+    default:
+      return assertNever(ability.rule, 'renderStaticGameRule');
+  }
 }
 
 /**
@@ -1960,7 +3148,9 @@ function renderStaticAbility(ability: StaticAbility, cardName: string): string {
  * The effect sentences are the same ones a spell prints, which is the point of
  * building an ability over the effect union rather than beside it — but the
  * first of them follows a comma, so `asClause` lowercases it unless it opens
- * with the card's name.
+ * with the card's name. The hand-authored player sweep follows Magic's
+ * source-pronoun construction after its trigger has named the source; ordinary
+ * generated damage retains the historical card-name rendering.
  *
  * An optional trigger (CR 603.3b) puts "you may" in front of that clause and
  * prints nothing else differently — the permission is one word, not a second
@@ -1969,7 +3159,26 @@ function renderStaticAbility(ability: StaticAbility, cardName: string): string {
  * ability, and a "may" that reached one of two printed sentences would describe
  * a card that behaves the other way.
  */
-function renderTriggeredAbility(ability: TriggeredAbility, cardName: string): string {
+function renderTriggeredAbility(ability: TriggeredAbility, cardName: string, sourceKind?: CardKind): string {
+  if (isGuildFeudAbility(ability)) {
+    return 'At the beginning of your upkeep, target opponent reveals the top three cards of their library, may put a creature card from among them onto the battlefield, then puts the rest into their graveyard. You do the same with the top three cards of your library. If two creatures are put onto the battlefield this way, those creatures fight each other.';
+  }
+  if (isSourceLinkedTopFiveExileAbility(ability)) {
+    return 'When this enchantment enters, exile the top five cards of your library.';
+  }
+  if (isSourceLinkedMatchingPlayCompletionAbility(ability)) {
+    return "Whenever you play a card with the same name as one of the exiled cards, you may put one of those cards with that name into its owner's hand. Then if there are no cards exiled with this enchantment, sacrifice it. If you do, take an extra turn after this one.";
+  }
+  if (ability.putCounterThenWinAtThreshold !== undefined) {
+    const { counter, atLeast } = ability.putCounterThenWinAtThreshold;
+    return `At the beginning of your upkeep, put ${withArticle(counterName(counter))} counter on this creature. Then if this creature has ${numberWord(atLeast)} or more ${counterName(counter)} counters on it, you win the game.`;
+  }
+  if (ability.controllerDamageRemovesSourceCounter !== undefined) {
+    return `Whenever a source deals damage to you, remove ${withArticle(counterName(ability.controllerDamageRemovesSourceCounter.counter))} counter from this creature.`;
+  }
+  if (ability.opponentCreatureDiesReturnAtNextEndStep !== undefined) {
+    return "Whenever a creature you don't control dies, return it to the battlefield under your control with an additional +1/+1 counter on it at the beginning of the next end step. That creature is a black Zombie in addition to its other colors and types.";
+  }
   if (isExaltedAbility(ability)) return 'Exalted';
   // The ability word, when the ability is the exact envelope that earns it.
   // `flurryRushRank` returns the printed number rather than a boolean, so the
@@ -1979,11 +3188,270 @@ function renderTriggeredAbility(ability: TriggeredAbility, cardName: string): st
   if (flurryRush !== null) return `Flurry rush ${flurryRush}`;
   const gloom = gloomRank(ability);
   if (gloom !== null) return `Gloom ${gloom}`;
-  const condition = TRIGGER_PRINT_TEMPLATES[ability.condition].replace('{name}', cardName);
-  const [first, ...rest] = renderEffectList(ability.effects, cardName);
+  if (ability.enchantedControllerDrawStepAdditionalDraw === true) {
+    return "At the beginning of the draw step of enchanted creature's controller, that player draws an additional card.";
+  }
+  const conditionTemplate = TRIGGER_PRINT_TEMPLATES[ability.condition];
+  const printedCondition = isSacrificeSelfUnlessControllerPaysAbility(ability)
+    ? 'When this land enters,'
+    : isReturnAnotherCreatureOrSacrificeSelfAbility(ability)
+      ? 'When this creature enters,'
+      : isControlledSubtypeAttacksTokenAbility(ability)
+        ? `Whenever a ${ability.attackingCreatureSubtype} you control attacks,`
+        : ability.enchantedControllerDrawStepAdditionalDraw === true
+          ? "At the beginning of the draw step of enchanted creature's controller,"
+          : ability.condition === 'beginningOfEachPlayersUpkeep' &&
+              ability.sacrificeEnchantedPermanentUnlessControllerPaysManaValue === true
+            ? "At the beginning of the upkeep of enchanted permanent's controller,"
+            : ability.condition === 'beginningOfEachPlayersUpkeep' &&
+                ability.triggeringPlayerIsEnchantedCreatureController === true
+              ? "At the beginning of the upkeep of enchanted creature's controller,"
+              : ability.condition === 'beginningOfEachPlayersUpkeep' &&
+                  ability.triggeringPlayerIsOpponent === true
+                ? "At the beginning of each opponent's upkeep,"
+                : ability.condition === 'controlledLandSubtypeEnters' && ability.landSubtype !== undefined
+                  ? conditionTemplate.replace('{subtype}', ability.landSubtype)
+                  : ability.condition === 'youCastSpell' && ability.castFromGraveyardByAnyPlayer === true
+                    ? 'Whenever a player casts a spell from a graveyard,'
+                    : ability.condition === 'youCastSpell' && ability.spellSharesChosenColors === true
+                      ? "Whenever you cast a spell, if it's at least one of the chosen colors,"
+                      : ability.condition === 'youCastSpell' && ability.spellIsMulticolored === true
+                        ? 'Whenever you cast a multicolored spell,'
+                        : ability.condition === 'youCastSpell' && ability.spellColors !== undefined
+                          ? `Whenever you cast a spell that's ${joinWithOr(ability.spellColors.map((color) => COLOR_WORDS[color]))},`
+                          : ability.condition === 'selfDealsCombatDamageToPlayer' &&
+                              ability.includesNoncombatDamage === true
+                            ? 'Whenever {name} deals damage to a player,'
+                            : ability.condition === 'selfEnters' &&
+                                (ability.printedSourceReference === 'thisCreature' ||
+                                  ability.printedSourceReference === 'thisEnchantment' ||
+                                  ability.printedSourceReference === 'thisAura' ||
+                                  ability.effects[0]?.kind === 'animateLandWhileSourceOnBattlefield')
+                              ? 'When {name} enters,'
+                              : conditionTemplate;
+  const sourceReference =
+    ability.printedSourceReference === 'thisCreature'
+      ? 'this creature'
+      : ability.printedSourceReference === 'thisArtifact'
+        ? 'this artifact'
+        : ability.printedSourceReference === 'thisEnchantment'
+          ? 'this enchantment'
+          : ability.printedSourceReference === 'thisAura'
+            ? 'this Aura'
+            : ability.printedSourceReference === 'cardNameBeforeComma'
+              ? cardName.slice(0, Math.max(0, cardName.indexOf(','))) || cardName
+              : cardName;
+  const eventCondition = printedCondition.replace('{name}', sourceReference);
+  const condition =
+    ability.triggeringPlayerHandAtMost !== undefined
+      ? `${eventCondition} if that player has ${numberWord(ability.triggeringPlayerHandAtMost)} or fewer cards in hand,`
+      : ability.interveningIf === undefined
+        ? eventCondition
+        : ability.interveningIf.kind === 'selfCounterCountBelow' && ability.interveningIf.fewerThan === 1
+          ? `${eventCondition} if ${sourceReference} has no ${counterName(ability.interveningIf.counter)} counters on it,`
+          : `${eventCondition} if ${conditionClause(ability.interveningIf)},`;
+  if (ability.spellSharesChosenColors === true) {
+    return `${condition} you gain 1 life for each of the chosen colors it is.`;
+  }
+  if (ability.opponentMaySacrificeCreatureThenTapAndCounterSelf === true) {
+    return 'At the beginning of each combat, any opponent may sacrifice a creature of their choice. If a player does, tap this creature and put a +1/+1 counter on it.';
+  }
+  const sourcePowerPump = ability.effects[0];
+  if (
+    ability.condition === 'selfAttacks' &&
+    ability.effects.length === 1 &&
+    sourcePowerPump?.kind === 'pumpUntilEndOfTurn' &&
+    !isLiteralAmount(sourcePowerPump.power) &&
+    sourcePowerPump.power.kind === 'triggeringCreaturePower' &&
+    !isLiteralAmount(sourcePowerPump.toughness) &&
+    sourcePowerPump.toughness.kind === 'triggeringCreaturePower' &&
+    sourcePowerPump.scope === 'permanentsYouControl' &&
+    canonicalJson(sourcePowerPump.scopeFilter) === '{"cardTypes":["creature"]}' &&
+    sourcePowerPump.excludeReferent === true &&
+    sourcePowerPump.target.kind === 'noTarget'
+  ) {
+    return `${condition} each other creature you control gets +X/+X until end of turn, where X is this creature's power.`;
+  }
+  if (isOptionalDrawThenDiscardAbility(ability)) {
+    return `${condition} you may draw a card. If you do, discard a card.`;
+  }
+  if (isOptionalDiscardThenDrawAbility(ability)) {
+    return `${condition} you may discard a card. If you do, draw a card.`;
+  }
+  if (ability.optionalControllerPayment !== undefined) {
+    const effect = ability.effects[0];
+    if (effect?.kind !== 'discardCards') throw new Error('paid optional trigger lost its discard payload');
+    return `${condition} you may pay ${formatManaCost(ability.optionalControllerPayment.cost)}. If you do, target player discards a card.`;
+  }
+  const deathGrowth = ability.effects[0];
+  if (
+    ability.condition === 'controlledCreatureDies' &&
+    ability.effects.length === 1 &&
+    deathGrowth?.kind === 'putCounters' &&
+    deathGrowth.counter === 'plusOnePlusOne' &&
+    !isLiteralAmount(deathGrowth.count) &&
+    deathGrowth.count.kind === 'triggeringCreaturePower' &&
+    deathGrowth.target.kind === 'targetCreatureYouControl'
+  ) {
+    return `${condition} put X +1/+1 counters on target creature you control, where X is the power of the creature that died.`;
+  }
+  const returnAura = ability.effects[0];
+  if (
+    ability.condition === 'enchantedCreatureDies' &&
+    ability.targetChooser === 'triggeringPlayer' &&
+    ability.effects.length === 1 &&
+    returnAura?.kind === 'returnSourceAuraAttached'
+  ) {
+    return `${condition} its controller chooses target creature one of their opponents controls. Return this card from its owner's graveyard to the battlefield attached to that creature.`;
+  }
+  if (isCounterTriggeringSpellOrAbilityAbility(ability)) {
+    return `${condition} counter that spell or ability unless its controller pays ${formatManaCost(ability.counterTriggeringSpellOrAbilityUnless.cost)}.`;
+  }
+  if (isSacrificeSelfUnlessControllerPaysAbility(ability)) {
+    return `${condition} sacrifice it unless you pay ${formatManaCost(ability.sacrificeSelfUnlessControllerPays.cost)}.`;
+  }
+  if (ability.sacrificeEnchantedPermanentUnlessControllerPaysManaValue === true) {
+    return `${condition} that player sacrifices it unless they pay {X}, where X is its mana value.`;
+  }
+  if (isEnchantedLandBecomesTappedMillAbility(ability)) {
+    return `${condition} its controller mills three cards.`;
+  }
+  if (isControlledCreatureCombatDamageCountersAbility(ability)) {
+    return `${condition} put that many +1/+1 counters on it.`;
+  }
+  if (isReturnAnotherCreatureOrSacrificeSelfAbility(ability)) {
+    return `${condition} sacrifice it unless you return another creature you control to its owner's hand.`;
+  }
+  const attackEffect = ability.effects[0];
+  if (
+    ability.condition === 'creatureAttacksYouOrPlaneswalkerYouControl' &&
+    ability.effects.length === 1 &&
+    attackEffect?.kind === 'putCounters' &&
+    attackEffect.count === 1 &&
+    attackEffect.target.kind === 'selfCreature'
+  ) {
+    return `${condition} put ${counterPhrase(attackEffect.counter, 1)} on ${cardName}.`;
+  }
+  if (
+    ability.condition === 'creatureAttacksYouOrPlaneswalkerYouControl' &&
+    ability.effects.length === 1 &&
+    attackEffect?.kind === 'loseLife' &&
+    attackEffect.amount === 1 &&
+    attackEffect.target.kind === 'triggeringPlayer'
+  ) {
+    return `${condition} that creature's controller loses 1 life.`;
+  }
+  if (
+    ability.condition === 'selfAttacksAlone' &&
+    ability.effects.length === 1 &&
+    attackEffect?.kind === 'sacrificePermanent' &&
+    attackEffect.target.kind === 'triggeringPlayer' &&
+    (attackEffect.count ?? 1) === 1 &&
+    attackEffect.players === undefined &&
+    attackEffect.filter?.cardTypes?.length === 1 &&
+    attackEffect.filter.cardTypes[0] === 'creature' &&
+    Object.keys(attackEffect.filter).length === 1
+  ) {
+    return `${condition} defending player sacrifices a creature of their choice.`;
+  }
+  const damageEffect = ability.effects[0];
+  if (
+    ability.condition === 'selfIsDealtDamage' &&
+    ability.effects.length === 1 &&
+    damageEffect?.kind === 'dealDamage' &&
+    typeof damageEffect.amount !== 'number' &&
+    damageEffect.amount.kind === 'triggeringDamageAmount' &&
+    damageEffect.target.kind === 'chosenPlayer'
+  ) {
+    return `${condition} it deals that much damage to the chosen player.`;
+  }
+  const millEffect = ability.effects[0];
+  if (
+    ability.condition === 'selfDealsCombatDamageToPlayer' &&
+    ability.effects.length === 1 &&
+    millEffect?.kind === 'millCards' &&
+    typeof millEffect.count !== 'number' &&
+    millEffect.count.kind === 'triggeringDamageAmount' &&
+    millEffect.target.kind === 'triggeringPlayer'
+  ) {
+    return `${condition} that player mills that many cards.`;
+  }
+  // A coin branch follows a clause that already established the source, so
+  // source-dealt damage inside the branch uses Oracle's retained pronoun
+  // ("it deals") rather than repeating the printed source reference. Source-
+  // body targets such as `selfCreature` still render their own exact noun.
+  const effectSourceName =
+    ability.effects[0]?.kind === 'flipCoin'
+      ? 'it'
+      : ability.triggerZone === 'graveyard'
+        ? 'this card'
+        : sourceReference;
+  const [first, ...unlinkedRest] = renderEffectList(ability.effects, effectSourceName, sourceKind);
+  // Current Oracle carries the opponent named by the intervening-if clause
+  // forward with singular "they". Other triggering-player templates still
+  // use "that player" because their event clause, not this predicate, is the
+  // antecedent.
+  const firstWithRetainedPlayerPronoun =
+    ability.triggeringPlayerIsOpponent === true && ability.triggeringPlayerHandAtMost !== undefined
+      ? first?.replace(/^That player loses\b/u, 'They lose')
+      : first;
+  const openingEffect = ability.effects[0];
+  const firstWithSourcePronoun =
+    openingEffect !== undefined &&
+    hasTarget(openingEffect) &&
+    openingEffect.target.kind === 'selfPermanent' &&
+    ability.printedSourceReference !== undefined
+      ? firstWithRetainedPlayerPronoun?.replace(
+          new RegExp(`^Return ${sourceReference.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')}\\b`, 'u'),
+          'Return it',
+        )
+      : firstWithRetainedPlayerPronoun;
+  const firstEffectTarget =
+    openingEffect !== undefined && hasTarget(openingEffect) ? openingEffect.target.kind : null;
+  const rest = unlinkedRest.map((sentence, index) => {
+    const effect = ability.effects[index + 1];
+    const repeatsSelfCreature =
+      firstEffectTarget === 'selfCreature' &&
+      effect !== undefined &&
+      hasTarget(effect) &&
+      effect.target.kind === 'selfCreature';
+    return repeatsSelfCreature
+      ? sentence.replace(/^This creature\b/u, 'It').replace(/\bthis creature\b/gu, 'it')
+      : sentence;
+  });
   const clause = ability.optional === true ? mayClause : asClause;
-  const opening = first === undefined ? '' : clause(first, cardName);
+  const firstEffect = ability.effects[0];
+  const repeatedSource =
+    firstEffect?.kind === 'dealDamage'
+      ? `${damageSourcePhrase(firstEffect, effectSourceName, sourceKind)} `
+      : undefined;
+  const firstWithPronoun =
+    firstWithSourcePronoun !== undefined &&
+    printedCondition.includes('{name}') &&
+    firstEffect?.kind === 'dealDamage' &&
+    (firstEffect.players !== undefined ||
+      firstEffect.target.kind === 'noTarget' ||
+      firstEffect.division !== undefined) &&
+    repeatedSource !== undefined
+      ? `It ${firstWithSourcePronoun.slice(repeatedSource.length)}`
+      : firstWithSourcePronoun;
+  const opening = firstWithPronoun === undefined ? '' : clause(firstWithPronoun, cardName);
   return [`${condition} ${opening}`, ...rest].join(' ');
+}
+
+/** Printed English for a CR 603.8 condition that reads current battlefield state. */
+function renderStateTriggeredAbility(
+  ability: StateTriggeredAbility,
+  cardName: string,
+  sourceKind?: CardKind,
+): string {
+  const condition = ability.condition;
+  const [first, ...rest] = renderEffectList(ability.effects, cardName, sourceKind);
+  const opening = first === undefined ? '' : asClause(first, cardName);
+  return [
+    `When you control no permanents with ${counterName(condition.counter)} counters on them, ${opening}`,
+    ...rest,
+  ].join(' ');
 }
 
 /**
@@ -2020,14 +3488,41 @@ function renderTriggeredAbility(ability: TriggeredAbility, cardName: string): st
  * lose the one symbol that says what the player announces. `formatManaCost`
  * puts the `{X}` first, which is where a card prints it.
  */
-function activationCostText(cost: ActivationCost, cardName: string): string {
+function activationCostText(cost: ActivationCost, cardName: string, activationZone?: 'graveyard'): string {
   const parts: string[] = [];
-  if (manaValue(cost.mana) > 0 || cost.mana.hasX) parts.push(formatManaCost(cost.mana));
+  if (manaValue(cost.mana) > 0 || cost.mana.hasX) parts.push(activationManaCostText(cost));
   if (cost.tapSelf) parts.push('{T}');
+  if (cost.payLife !== undefined) parts.push(`Pay ${String(cost.payLife)} life`);
+  if (cost.tapMatching !== undefined) parts.push(tapMatchingText(cost.tapMatching));
+  if (cost.removeCounter !== undefined) {
+    parts.push(
+      `Remove ${counterPhrase(cost.removeCounter.counter, cost.removeCounter.count)} from ${cardName}`,
+    );
+  }
   if (cost.sacrificeSelf) parts.push(`Sacrifice ${cardName}`);
+  if (cost.exileSelf) {
+    parts.push(activationZone === 'graveyard' ? 'Exile this card from your graveyard' : `Exile ${cardName}`);
+  }
+  if (cost.exileControlledInstantOrSorcerySpell === true) {
+    parts.push('Exile an instant or sorcery spell you control');
+  }
   if (cost.sacrificeOther !== undefined) parts.push(sacrificeOtherText(cost.sacrificeOther));
-  if (cost.discard !== undefined) parts.push(discardCostText(cost.discard));
-  return parts.length === 0 ? formatManaCost(cost.mana) : parts.join(', ');
+  if (cost.sacrificeMatching !== undefined) parts.push(sacrificeMatchingText(cost.sacrificeMatching));
+  if (cost.sacrificeLandSubtypePair !== undefined) {
+    parts.push(`Sacrifice a ${cost.sacrificeLandSubtypePair[0]} and a ${cost.sacrificeLandSubtypePair[1]}`);
+  }
+  if (cost.discard !== undefined) parts.push(discardCostText(cost.discard, cost.discardFilter));
+  if (cost.discardMatching !== undefined) parts.push('Discard two nonland cards with the same name');
+  return parts.length === 0 ? activationManaCostText(cost) : parts.join(', ');
+}
+
+/** Printed mana clause for an activation, preserving an audited source order when present. */
+function activationManaCostText(cost: ActivationCost): string {
+  if (cost.printedManaPips === undefined) return formatManaCost(cost.mana);
+  const x = cost.mana.hasX ? ['{X}'] : [];
+  const generic = cost.mana.generic > 0 ? [`{${String(cost.mana.generic)}}`] : [];
+  const fixed = cost.printedManaPips.map((pip) => `{${pip}}`);
+  return [...x, ...generic, ...fixed].join('');
 }
 
 /**
@@ -2042,6 +3537,27 @@ function sacrificeOtherText(sacrifice: SacrificeOther): string {
   return `Sacrifice ${count} ${pluralize(sacrifice.subtype, sacrifice.count)}`;
 }
 
+/** `Sacrifice a creature`, or the plural form for a wider payment. */
+function sacrificeMatchingText(
+  sacrifice: SacrificeMatching & { readonly excludeSource?: true | undefined },
+): string {
+  const baseNoun = scopeNoun(sacrifice.filter, sacrifice.count !== 1);
+  const noun = sacrifice.nontoken === true ? `nontoken ${baseNoun}` : baseNoun;
+  if (sacrifice.excludeSource === true) {
+    const count = sacrifice.count === 1 ? 'another' : `${numberWord(sacrifice.count)} other`;
+    return `Sacrifice ${count} ${noun}`;
+  }
+  const count = sacrifice.count === 1 ? articleForWord(noun) : numberWord(sacrifice.count);
+  return `Sacrifice ${count} ${noun}`;
+}
+
+/** `Tap five untapped Vampires you control`. */
+function tapMatchingText(tap: NonNullable<ActivationCost['tapMatching']>): string {
+  const noun = permanentChoiceNoun(tap.filter, tap.count !== 1);
+  const count = tap.count === 1 ? articleForWord(noun) : numberWord(tap.count);
+  return `Tap ${count} untapped ${noun} you control`;
+}
+
 /**
  * `Discard a card`, `Discard two cards`.
  *
@@ -2050,8 +3566,10 @@ function sacrificeOtherText(sacrifice: SacrificeOther): string {
  * it is the rule `renderEffect`'s own `discardCards` arm follows, so the cost
  * clause and the effect sentence spell the same quantity the same way.
  */
-function discardCostText(count: number): string {
-  return count === 1 ? 'Discard a card' : `Discard ${numberWord(count)} cards`;
+function discardCostText(count: number, filter: CardFilter | undefined): string {
+  if (filter === undefined) return count === 1 ? 'Discard a card' : `Discard ${numberWord(count)} cards`;
+  if (count === 1) return `Discard ${cardFilterPhrase(filter)}`;
+  return `Discard ${searchPluralPhrase(filter, numberWord(count))}`;
 }
 
 /**
@@ -2062,14 +3580,159 @@ function discardCostText(count: number): string {
  * sentence after it ("{T}: Draw a card."), where a trigger's comma continues
  * one ("When Merfolk Sentry enters the battlefield, you gain 2 life.").
  */
-function renderActivatedAbility(ability: ActivatedAbility, cardName: string): string {
+function renderActivatedAbility(ability: ActivatedAbility, cardName: string, sourceKind?: CardKind): string {
   if (isAttachingAbility(ability)) return renderEquipAbility(ability, cardName);
-  if (isRegenerationAbility(ability)) {
-    return `${activationCostText(ability.cost, cardName)}: Regenerate this creature.`;
+  const sourceReference =
+    ability.printedSourceReference === 'thisCard'
+      ? 'this card'
+      : ability.printedSourceReference === 'thisCreature'
+        ? 'this creature'
+        : ability.printedSourceReference === 'thisArtifact'
+          ? 'this artifact'
+          : ability.printedSourceReference === 'thisEnchantment'
+            ? 'this enchantment'
+            : ability.printedSourceReference === 'thisLand'
+              ? 'this land'
+              : ability.printedSourceReference === 'cardNameBeforeComma'
+                ? cardName.slice(0, Math.max(0, cardName.indexOf(','))) || cardName
+                : cardName;
+  if (isDamageTargetAndCreaturesWithSameNameAbility(ability)) {
+    return `${activationCostText(ability.cost, sourceReference, ability.activationZone)}: ${capitalize(sourceReference)} deals 1 damage to target creature and each other creature with the same name as that creature.`;
   }
-  const body = renderEffectList(ability.effects, cardName).join(' ');
+  if (isRegenerationAbility(ability)) {
+    return withActivationRestrictions(
+      `${activationCostText(ability.cost, sourceReference, ability.activationZone)}: Regenerate this creature.`,
+      ability,
+      cardName,
+    );
+  }
+  if (isScavengeAbility(ability)) {
+    const cost = activationManaCostText(ability.cost);
+    return `Scavenge ${cost} (${cost}, Exile this card from your graveyard: Put a number of +1/+1 counters equal to this card's power on target creature. Scavenge only as a sorcery.)`;
+  }
+  const paidPowerDamage = ability.effects[0];
+  if (
+    ability.effects.length === 1 &&
+    paidPowerDamage?.kind === 'dealDamage' &&
+    typeof paidPowerDamage.amount === 'object' &&
+    paidPowerDamage.amount.kind === 'paidSacrificePower' &&
+    paidPowerDamage.target.kind === 'targetPlayerOrPlaneswalker' &&
+    ability.cost.sacrificeSelf
+  ) {
+    return withActivationRestrictions(
+      `${activationManaCostText(ability.cost)}, Sacrifice this creature: It deals damage equal to its power to target player or planeswalker.`,
+      ability,
+      cardName,
+    );
+  }
+  const renderedBody = capitalize(renderActivatedBody(ability, sourceReference, sourceKind));
+  const body =
+    ability.counterTargetSpellUnless === undefined
+      ? renderedBody
+      : withUnlessClause(renderedBody, {
+          payer: 'targetController',
+          cost: ability.counterTargetSpellUnless.cost,
+        });
   if (ability.loyaltyCost !== undefined) return `[${loyaltyCostText(ability.loyaltyCost)}]: ${body}`;
-  return `${activationCostText(ability.cost, cardName)}: ${body}`;
+  const reminder =
+    ability.cost.exileControlledInstantOrSorcerySpell === true ? " (That spell won't resolve.)" : '';
+  const timingReminder =
+    ability.activateOnlyAsInstantReminder === true ? ' (Activate only as an instant.)' : '';
+  const printed = `${activationCostText(ability.cost, sourceReference, ability.activationZone)}: ${body}${reminder}${timingReminder}`;
+  return withActivationRestrictions(printed, ability, cardName);
+}
+
+/** Appends the independent CR 602 activation restrictions in printed order. */
+function withActivationRestrictions(printed: string, ability: ActivatedAbility, cardName: string): string {
+  let restricted = printed;
+  if (ability.activateOnlyWhileAttacking === true) {
+    restricted = `${restricted} Activate only if ${cardName} is attacking.`;
+  }
+  if (ability.activateOnlyOnceEachTurn === true) {
+    restricted = `${restricted} Activate only once each turn.`;
+  }
+  return ability.activateOnlyAsSorcery === true ? `${restricted} Activate only as a sorcery.` : restricted;
+}
+
+/** The effect sentence after an activated ability's cost or loyalty badge. */
+function renderActivatedBody(ability: ActivatedAbility, cardName: string, sourceKind?: CardKind): string {
+  if (isJaceArchitectAttackDebuffAbility(ability)) {
+    return 'Until your next turn, whenever a creature an opponent controls attacks, it gets -1/-0 until end of turn.';
+  }
+  if (isJaceArchitectPilesAbility(ability)) {
+    return 'Reveal the top three cards of your library. An opponent separates those cards into two piles. Put one pile into your hand and the other on the bottom of your library in any order.';
+  }
+  if (isJaceArchitectSearchAndCastAbility(ability)) {
+    return "For each player, search that player's library for a nonland card and exile it, then that player shuffles. You may cast those cards without paying their mana costs.";
+  }
+  if (isCombatDamageRetaliationAbility(ability)) {
+    const sourceName = cardName.split(' ')[0] ?? cardName;
+    return `Until your next turn, whenever a creature deals combat damage to ${sourceName}, destroy that creature.`;
+  }
+  if (ability.modes !== undefined) {
+    return (
+      renderInlineSignedPumpChoice(ability.modes) ?? renderModesBlock(ability.modes, cardName).join('\n')
+    );
+  }
+  const selfDamage = ability.effects[0];
+  if (
+    ability.effects.length === 1 &&
+    selfDamage?.kind === 'dealDamage' &&
+    typeof selfDamage.amount === 'object' &&
+    selfDamage.amount.kind === 'paidSacrificePower' &&
+    selfDamage.target.kind === 'targetPlayerOrPlaneswalker' &&
+    ability.cost.sacrificeSelf
+  ) {
+    return 'It deals damage equal to its power to target player or planeswalker.';
+  }
+  if (
+    ability.effects.length === 1 &&
+    selfDamage?.kind === 'dealDamage' &&
+    selfDamage.amount === 1 &&
+    selfDamage.target.kind === 'selfPermanent'
+  ) {
+    return `${cardName} deals 1 damage to itself.`;
+  }
+  return renderEffectList(ability.effects, cardName, sourceKind).join(' ');
+}
+
+/**
+ * The non-bulleted signed choice printed by Liliana's reusable effect shape.
+ *
+ * This is recognized from structure rather than card identity: two one-effect
+ * modes, the same creature target and tally, and inverse unit rates. Other
+ * activated modes keep the ordinary CR 700.2 bullet rendering.
+ */
+function renderInlineSignedPumpChoice(modes: Modes): string | null {
+  if (modes.length !== 2) return null;
+  const positive = modes[0]?.effects;
+  const negative = modes[1]?.effects;
+  if (positive?.length !== 1 || negative?.length !== 1) return null;
+  const grow = positive[0];
+  const shrink = negative[0];
+  if (
+    grow?.kind !== 'pumpUntilEndOfTurn' ||
+    shrink?.kind !== 'pumpUntilEndOfTurn' ||
+    grow.scope !== undefined ||
+    shrink.scope !== undefined ||
+    grow.keyword !== undefined ||
+    shrink.keyword !== undefined ||
+    !isRateAmount(grow.power) ||
+    !isRateAmount(grow.toughness) ||
+    !isRateAmount(shrink.power) ||
+    !isRateAmount(shrink.toughness) ||
+    grow.power.rate !== 1 ||
+    grow.toughness.rate !== 1 ||
+    shrink.power.rate !== -1 ||
+    shrink.toughness.rate !== -1 ||
+    canonicalJson(grow.power.each) !== canonicalJson(grow.toughness.each) ||
+    canonicalJson(grow.power.each) !== canonicalJson(shrink.power.each) ||
+    canonicalJson(grow.power.each) !== canonicalJson(shrink.toughness.each) ||
+    canonicalJson(grow.target) !== canonicalJson(shrink.target)
+  ) {
+    return null;
+  }
+  return `${capitalize(targetPhrase(grow.target))} gets +X/+X or -X/-X until end of turn, where X is ${computedPhrase(grow.power.each)}.`;
 }
 
 /**
@@ -2084,45 +3747,46 @@ function renderActivatedAbility(ability: ActivatedAbility, cardName: string): st
  * in brackets for the flat oracle string and `oracleRows` hands it to a face
  * that draws a badge instead, and both read the same glyph from here.
  */
-export function loyaltyCostText(loyaltyCost: number): string {
+export function loyaltyCostText(loyaltyCost: LoyaltyCost): string {
+  if (isVariableLoyaltyCost(loyaltyCost)) return '−X';
   if (loyaltyCost > 0) return `+${String(loyaltyCost)}`;
   if (loyaltyCost < 0) return `−${String(-loyaltyCost)}`;
   return '0';
 }
 
-/**
- * Magic's two printed lines for an Equipment, from the one ability that holds
- * both halves.
- *
- * A real card prints "Equipped creature gets +2/+0." as a static ability and
- * "Equip {2}" as an activated one, and the DSL prints exactly those two lines
- * even though one record carries them, because the card face is the contract
- * and a reader of the card should not be able to tell how the record is shaped
- * (`AttachSchema` argues why it is shaped that way). `renderOracleText` joins
- * abilities with a newline, so a two-line ability lands as two lines of the
- * text box with no special case there.
- *
- * The equip line carries no full stop, which is Magic's own templating for a
- * keyword ability with a cost, and the cost goes through `activationCostText`
- * like any other. `checkEquipAbility` refuses every cost but mana, so the
- * comma-separated form that helper can produce is unreachable from a legal
- * card and the line always reads `Equip {2}`.
- */
-function renderEquipAbility(ability: AttachingAbility, cardName: string): string {
+/** The static clause an Equip ability grants, or the empty string for bare Equip. */
+export function renderEquipModificationClause(modifications: readonly AttachModification[]): string {
+  if (modifications.length === 0) return '';
   const equipped: StaticSubject = { phrase: 'equipped creature', singular: true };
-  const granted = modificationClause(equipped, verbObjectModifications(ability.attach.modifications));
-  return `${granted}\nEquip ${activationCostText(ability.cost, cardName)}`;
+  return modificationClause(equipped, verbObjectModifications(modifications));
+}
+
+function renderEquipAbility(ability: AttachingAbility, cardName: string): string {
+  const cost = `Equip ${activationCostText(ability.cost, cardName)}`;
+  const granted = renderEquipModificationClause(ability.attach.modifications);
+  if (granted.length === 0) return cost;
+  return `${granted}\n${cost}`;
 }
 
 /** One printed line for one CR 113 ability. `cardName` fills CARDNAME slots. */
-export function renderAbility(ability: Ability, cardName: string): string {
+export function renderAbility(ability: Ability, cardName: string, sourceKind?: CardKind): string {
   switch (ability.kind) {
     case 'static':
       return renderStaticAbility(ability, cardName);
     case 'triggered':
-      return renderTriggeredAbility(ability, cardName);
+      return renderTriggeredAbility(ability, cardName, sourceKind);
     case 'activated':
-      return renderActivatedAbility(ability, cardName);
+      return renderActivatedAbility(ability, cardName, sourceKind);
+    case 'staticPlayerRule':
+      return renderStaticPlayerRule(ability);
+    case 'staticGameRule':
+      return renderStaticGameRule(ability);
+    case 'stateTriggered':
+      return renderStateTriggeredAbility(ability, cardName, sourceKind);
+    case 'staticBundle':
+      return renderStaticBundleAbility(ability);
+    case 'staticActivationRule':
+      return "Activated abilities of sources with the chosen name can't be activated unless they're mana abilities.";
     default:
       return assertNever(ability, 'renderAbility');
   }
@@ -2181,15 +3845,217 @@ export function oracleRows(card: Card): readonly OracleRow[] {
 function entryReplacementRows(card: Card): readonly OracleRow[] {
   const replacement = printedEntryReplacement(card);
   if (replacement === undefined) return [];
-  if (replacement.kind === 'entersTapped') return [plainRow(`${card.name} enters tapped.`)];
+  const sourceReference =
+    card.kind === 'land' && card.printedEntryReference === 'thisLand'
+      ? 'This land'
+      : card.kind === 'enchantment' && card.printedEntryReference === 'thisEnchantment'
+        ? 'This enchantment'
+        : card.name;
+  if (replacement.kind === 'entersTapped') return [plainRow(`${sourceReference} enters tapped.`)];
+  if (replacement.kind === 'payLifeOrEntersTapped') {
+    const enteringReference = sourceReference === card.name ? card.name : sourceReference.toLowerCase();
+    return [
+      plainRow(
+        `As ${enteringReference} enters, you may pay ${String(replacement.life)} life. If you don't, it enters tapped.`,
+      ),
+    ];
+  }
+  if (replacement.kind === 'entersWithCounters') {
+    if (typeof replacement.count !== 'number') {
+      if (replacement.count.kind === 'opponentsLifeLostThisTurn') {
+        return [
+          plainRow(
+            `This creature enters with X ${counterName(replacement.counter)} counters on it, where X is the total life lost by your opponents this turn.`,
+          ),
+        ];
+      }
+      return [
+        plainRow(`${sourceReference} enters with X ${counterName(replacement.counter)} counters on it.`),
+      ];
+    }
+    return [
+      plainRow(
+        `${sourceReference} enters with ${counterPhrase(replacement.counter, replacement.count)} on it.`,
+      ),
+    ];
+  }
+  if (replacement.kind === 'entersAsCopyOfCreature') {
+    return [plainRow('You may have this creature enter as a copy of any creature on the battlefield.')];
+  }
+  if (replacement.kind === 'putCounterOnControlledPermanent') {
+    return [
+      plainRow(
+        `As ${card.name} enters, put ${counterPhrase(replacement.counter, replacement.count)} on ${articleForWord(replacement.permanentType)} ${replacement.permanentType} you control.`,
+      ),
+    ];
+  }
+  if (replacement.kind === 'entersAsCharacteristicChoice') {
+    const modeText = (mode: EntryCharacteristicMode): string => {
+      const addedTypes = mode.addSubtypes === undefined ? '' : `${mode.addSubtypes.join(' ')} `;
+      const artifact = isArtifact(card) ? 'artifact ' : '';
+      const keywords =
+        mode.addKeywords === undefined && mode.addKeywordAbilities === undefined
+          ? ''
+          : ` with ${joinWithAnd([
+              ...(mode.addKeywords ?? []).map((keyword) => KEYWORD_PRINT_NAMES[keyword].toLowerCase()),
+              ...(mode.addKeywordAbilities ?? []).flatMap((ability) =>
+                keywordAbilityLines([ability]).map((line) => line.toLowerCase()),
+              ),
+            ])}`;
+      const retainedTypes = mode.addSubtypes === undefined ? '' : ' in addition to its other types';
+      return `a ${String(mode.power)}/${String(mode.toughness)} ${addedTypes}${artifact}creature${keywords}${retainedTypes}`;
+    };
+    const choices = joinWithOr(replacement.modes.map(modeText));
+    const defenderReminder = replacement.modes.some((mode) =>
+      mode.addKeywordAbilities?.some((ability) => ability.kind === 'defender'),
+    )
+      ? " (A creature with defender can't attack.)"
+      : '';
+    return [plainRow(`As this creature enters, it becomes your choice of ${choices}.${defenderReminder}`)];
+  }
+  if (replacement.kind === 'choosePlayer') {
+    return [plainRow(`As ${card.name} enters, choose a player.`)];
+  }
+  if (replacement.kind === 'chooseTwoColors') {
+    return [plainRow('As this artifact enters, choose two colors.')];
+  }
+  if (replacement.kind === 'chooseCardName') {
+    return [plainRow('As this artifact enters, choose a card name.')];
+  }
   const types = replacement.landTypes.map((type) => `${articleForWord(type)} ${type}`);
   return [plainRow(`${card.name} enters tapped unless you control ${types.join(' or ')}.`)];
+}
+
+/** A deck-building permission is printed text, but never an in-game ability. */
+function deckConstructionRows(card: Card): readonly OracleRow[] {
+  const rule = card.deckConstruction;
+  if (rule === undefined) return [];
+  return [plainRow(`A deck can have any number of cards named ${card.name}.`)];
+}
+
+/** A pregame permission prints before every rule the permanent has in play. */
+function openingHandActionRows(card: Card): readonly OracleRow[] {
+  const action = openingHandActionOf(card);
+  if (action === undefined) return [];
+  switch (action.kind) {
+    case 'beginOnBattlefield':
+      return [
+        plainRow(
+          `If ${card.name} is in your opening hand, you may begin the game with it on the battlefield.`,
+        ),
+      ];
+  }
+}
+
+/** A casting rule lives above the spell's own instructions in its text box. */
+const ORDINALS = [
+  'first',
+  'second',
+  'third',
+  'fourth',
+  'fifth',
+  'sixth',
+  'seventh',
+  'eighth',
+  'ninth',
+  'tenth',
+  'eleventh',
+  'twelfth',
+  'thirteenth',
+  'fourteenth',
+  'fifteenth',
+  'sixteenth',
+  'seventeenth',
+  'eighteenth',
+  'nineteenth',
+  'twentieth',
+] as const;
+
+function joinedAlternatives(words: readonly string[]): string {
+  if (words.length === 1) return words[0] ?? '';
+  if (words.length === 2) return `${words[0] ?? ''} or ${words[1] ?? ''}`;
+  return `${words.slice(0, -1).join(', ')}, or ${words.at(-1) ?? ''}`;
+}
+
+/** Exact printed sentence for a card-level turn-history restriction. */
+export function renderCastingRestriction(rule: CastingRestriction, subject: string): string {
+  switch (rule.kind) {
+    case 'prohibitedPlayerTurns':
+      return `You can't cast ${subject} during your ${joinedAlternatives(rule.turns.map((turn) => ORDINALS[turn - 1] ?? `${String(turn)}th`))} turns of the game.`;
+  }
+}
+
+/** The current legendary-name template used by Rakdos's atomic casting bundle. */
+export function renderOpponentLifeLossCastingRestriction(subject: string): string {
+  const printedSubject = subject.split(',')[0] ?? subject;
+  return `You can't cast ${printedSubject} unless an opponent lost life this turn.`;
+}
+
+function castingRuleRows(card: Card): readonly OracleRow[] {
+  const rows: OracleRow[] = [];
+  if (card.kind === 'creature' && card.opponentsLifeLostThisTurnCasting === true) {
+    rows.push(plainRow(renderOpponentLifeLossCastingRestriction(card.name)));
+  }
+  if (isCastable(card) && card.castingRestriction !== undefined) {
+    rows.push(plainRow(renderCastingRestriction(card.castingRestriction, card.name)));
+  }
+  if (card.cannotBeCountered === true) rows.push(plainRow("This spell can't be countered."));
+  if (isSpellCard(card) && card.targetCostIncrease !== undefined) {
+    const amount = card.targetCostIncrease.genericPerTargetBeyondFirst;
+    rows.push(
+      plainRow(`This spell costs {${String(amount)}} more to cast for each target beyond the first.`),
+    );
+  }
+  return rows;
+}
+
+/** A spell's paid non-mana clause, above the instruction it purchases. */
+function additionalCostRows(card: Card): readonly OracleRow[] {
+  if (!isSpellCard(card) || card.additionalCost === undefined) return [];
+  const payment =
+    'sacrificeMatching' in card.additionalCost
+      ? sacrificeMatchingText(card.additionalCost.sacrificeMatching)
+      : 'Discard a card';
+  return [plainRow(`As an additional cost to cast this spell, ${asClause(payment, card.name)}.`)];
+}
+
+/** The exact Oracle sentence for the supported CR 118.9 alternative. */
+export function renderAlternativeCost(cost: SpellAlternativeCost): string {
+  const sacrifice = sacrificeMatchingText(cost.sacrificeMatching);
+  const clause = `${sacrifice[0]?.toLowerCase() ?? ''}${sacrifice.slice(1)}`;
+  return `You may pay ${cost.payLife} life and ${clause} rather than pay this spell's mana cost.`;
+}
+
+/** A castable card's alternative payment, above its keywords and abilities. */
+function alternativeCostRows(card: Card): readonly OracleRow[] {
+  if (!isCastable(card) || card.alternativeCost === undefined) return [];
+  return [plainRow(renderAlternativeCost(card.alternativeCost))];
+}
+
+function targetingRestrictionText(card: Card, restriction: TargetingRestriction): string {
+  const subject = card.kind === 'creature' ? 'This creature' : 'This permanent';
+  switch (restriction.kind) {
+    case 'sourceLacksColor': {
+      const color = COLOR_WORDS[restriction.color];
+      return `${subject} can't be the target of non${color} spells or abilities from non${color} sources.`;
+    }
+    default:
+      return assertNever(restriction.kind, 'targetingRestrictionText');
+  }
+}
+
+function targetingRestrictionRows(card: Card): readonly OracleRow[] {
+  return (card.targetingRestrictions ?? []).map((restriction) =>
+    plainRow(targetingRestrictionText(card, restriction)),
+  );
 }
 
 /** Rows before multi-line abilities are split; see `oracleRows`. */
 function abilityRows(card: Card): readonly OracleRow[] {
   if (card.kind === 'land') {
     const rows: OracleRow[] = [];
+    rows.push(...openingHandActionRows(card));
+    rows.push(...castingRuleRows(card));
     // A land's text box starts with its keyword abilities, the way Darksteel
     // Citadel prints "Indestructible" above its mana ability. This branch used
     // to return before `keywordAbilityLines` was ever reached, which was
@@ -2197,39 +4063,104 @@ function abilityRows(card: Card): readonly OracleRow[] {
     // noncreature; `mtg-rji` let one onto a land, and a dropped line here would
     // have been a card whose printed face disagreed with the kernel running it.
     rows.push(...keywordAbilityLines(card.keywordAbilities ?? []).map(plainRow));
+    rows.push(...targetingRestrictionRows(card));
+    const manaRow =
+      card.producesMana.length === 0
+        ? null
+        : plainRow(
+            isAnyColor(card.producesMana)
+              ? '{T}: Add one mana of any color.'
+              : `{T}: Add ${card.producesMana.map((color) => `{${color}}`).join(' or ')}.`,
+          );
+    if (card.printedManaAbilityFirst === true && manaRow !== null) rows.push(manaRow);
     rows.push(...entryReplacementRows(card));
-    if (card.producesMana.length > 0) {
-      rows.push(plainRow(`{T}: Add ${card.producesMana.map((color) => `{${color}}`).join(' or ')}.`));
+    for (const ability of card.abilities) {
+      if (ability.kind !== 'activated') rows.push(abilityRow(ability, card.name, card.kind));
     }
-    for (const ability of card.abilities) rows.push(abilityRow(ability, card.name));
+    if (card.printedManaAbilityFirst !== true && manaRow !== null) rows.push(manaRow);
+    for (const ability of card.abilities) {
+      if (ability.kind === 'activated') rows.push(abilityRow(ability, card.name, card.kind));
+    }
+    rows.push(...deckConstructionRows(card));
     return rows;
   }
   const rows: OracleRow[] = [];
-  if (isAuraCard(card)) rows.push(plainRow('Enchant creature'));
-  if (card.keywords.length > 0) rows.push(plainRow(keywordRowText(card.keywords)));
-  rows.push(...keywordAbilityLines(card.keywordAbilities ?? []).map(plainRow));
+  rows.push(...openingHandActionRows(card));
+  rows.push(...castingRuleRows(card));
+  rows.push(...alternativeCostRows(card));
+  rows.push(...additionalCostRows(card));
+  if (isAuraCard(card)) {
+    const enchantLine =
+      card.aura.enchant === 'artifactOrCreature'
+        ? 'Enchant artifact or creature'
+        : card.aura.enchant === 'nonlandPermanent'
+          ? 'Enchant nonland permanent'
+          : `Enchant ${card.aura.enchant}`;
+    rows.push(plainRow(enchantLine));
+  }
+  const keywordAbilities = card.keywordAbilities ?? [];
+  if (card.keywordLineGroups !== undefined) {
+    rows.push(...card.keywordLineGroups.map((group) => plainRow(keywordLineGroupText(group))));
+  } else {
+    const flashAbilities = keywordAbilities.filter((ability) => ability.kind === 'flash');
+    const defenderAbilities = keywordAbilities.filter((ability) => ability.kind === 'defender');
+    const otherKeywordAbilities = keywordAbilities.filter(
+      (ability) => ability.kind !== 'flash' && ability.kind !== 'defender',
+    );
+    rows.push(...keywordAbilityLines(flashAbilities).map(plainRow));
+    rows.push(...keywordAbilityLines(defenderAbilities).map(plainRow));
+    if (card.keywords.length > 0) rows.push(plainRow(keywordRowText(card.keywords)));
+    rows.push(...keywordAbilityLines(otherKeywordAbilities).map(plainRow));
+  }
+  rows.push(...targetingRestrictionRows(card));
   // A nonland permanent's entry clause prints where a land's does, under the
   // keyword lines and above everything the permanent does once it is there:
   // "Coldsteel Heart enters tapped." is a fact about the arrival, and the
   // mana ability underneath it is what the arrival was paid for.
   rows.push(...entryReplacementRows(card));
   if (card.kind === 'creature' && card.characteristicPowerToughness !== undefined) {
-    switch (card.characteristicPowerToughness.kind) {
-      case 'creaturesYouControl':
-        rows.push(
-          plainRow(
-            `${card.name}'s power and toughness are each equal to the number of creatures you control.`,
-          ),
-        );
-        break;
-      case 'controllerLifeTotal':
-        rows.push(plainRow(`${card.name}'s power and toughness are each equal to your life total.`));
-        break;
-      default:
-        assertNever(card.characteristicPowerToughness, 'oracleRows characteristic P/T');
-    }
+    rows.push(
+      plainRow(characteristicPowerToughnessSentence(card.characteristicPowerToughness, `${card.name}'s`)),
+    );
   }
-  for (const ability of card.abilities) rows.push(abilityRow(ability, card.name));
+  if (card.kind === 'creature' && card.redirectControllerAndOtherPermanentsDamageToSelf === true) {
+    rows.push(
+      plainRow(
+        'All damage that would be dealt to you and other permanents you control is dealt to this creature instead.',
+      ),
+    );
+  }
+  const trailingAuraAbilities: Ability[] = [];
+  const trailingEquipRows: OracleRow[] = [];
+  for (const ability of card.abilities) {
+    if (
+      card.kind === 'creature' &&
+      card.redirectControllerAndOtherPermanentsDamageToSelf === true &&
+      ability.kind === 'static' &&
+      ability.scope === 'self' &&
+      ability.modification.kind === 'preventCombatDamage'
+    ) {
+      continue;
+    }
+    if (ability.kind === 'activated' && isAttachingAbility(ability)) {
+      const granted = renderEquipModificationClause(ability.attach.modifications);
+      if (granted.length > 0) rows.push(plainRow(granted));
+      trailingEquipRows.push(plainRow(`Equip ${activationCostText(ability.cost, card.name)}`));
+      continue;
+    }
+    if (
+      isAuraCard(card) &&
+      (card.aura.printedModificationsBeforeAbilities === true ||
+        ability.kind === 'activated' ||
+        (ability.kind === 'triggered' &&
+          (ability.condition === 'enchantedCreatureBecomesTarget' ||
+            ability.condition === 'enchantedCreatureDies' ||
+            ability.condition === 'enchantedLandBecomesTapped' ||
+            ability.condition === 'selfPutIntoGraveyardFromBattlefield')))
+    ) {
+      trailingAuraAbilities.push(ability);
+    } else rows.push(abilityRow(ability, card.name, card.kind));
+  }
   // `!== undefined` alongside `!== null`: `CostReductionSchema.nullable().default(null)`
   // promises a parsed `Card` never actually carries `undefined` here, but
   // `withRenderedOracleText` is by design called on a pre-parse literal — it
@@ -2240,13 +4171,36 @@ function abilityRows(card: Card): readonly OracleRow[] {
   if (card.costReduction !== null && card.costReduction !== undefined) {
     rows.push(plainRow(describeCostReduction(card.costReduction)));
   }
-  if (isAuraCard(card)) rows.push(plainRow(renderAuraModificationClause(card.aura.modifications)));
+  if (card.kind === 'creature' && card.opponentsLifeLostThisTurnCasting === true) {
+    rows.push(
+      plainRow(
+        'Creature spells you cast cost {1} less to cast for each 1 life your opponents have lost this turn.',
+      ),
+    );
+  }
+  if (isAuraCard(card) && card.aura.modifications.length > 0) {
+    rows.push(
+      plainRow(renderAuraModificationClause(card.aura.modifications, auraHostNoun(card.aura.enchant))),
+    );
+  }
+  if (isAuraCard(card) && card.aura.enchantedControllerHandSizeBonus === true) {
+    rows.push(plainRow("Enchanted creature gets +1/+1 for each card in its controller's hand."));
+  }
+  if (isAuraCard(card) && card.aura.untapsDuringEachOtherPlayersUntapStep === true) {
+    const host = auraHostNoun(card.aura.enchant);
+    rows.push(plainRow(`Enchanted ${host} has "Untap this ${host} during each other player's untap step."`));
+  }
+  for (const ability of trailingAuraAbilities) rows.push(abilityRow(ability, card.name, card.kind));
+  rows.push(...trailingEquipRows);
   if (card.modes !== undefined) {
     rows.push(...renderModesBlock(card.modes, card.name).map(plainRow));
   } else {
-    const effectText = renderSpellParagraph(card);
-    if (effectText.length > 0) rows.push(plainRow(effectText));
+    rows.push(...renderSpellParagraphs(card).map(plainRow));
   }
+  if ((card.kind === 'instant' || card.kind === 'sorcery') && card.overload !== undefined) {
+    rows.push(plainRow(`Overload ${formatOverloadCost(card.overload)}`));
+  }
+  rows.push(...deckConstructionRows(card));
   return rows;
 }
 
@@ -2258,7 +4212,7 @@ function plainRow(text: string): OracleRow {
  * One ability as a row. A loyalty ability keeps its cost in the badge column;
  * everything else prints its cost inside its own sentence, where Magic puts it.
  */
-function abilityRow(ability: Ability, cardName: string): OracleRow {
+function abilityRow(ability: Ability, cardName: string, sourceKind: CardKind): OracleRow {
   // The guards are `renderActivatedAbility`'s, in its order: an Equipment and a
   // regenerator print their own templates whatever else they carry, and neither
   // is reachable on a planeswalker. Ordering them the same way here is what
@@ -2271,16 +4225,13 @@ function abilityRow(ability: Ability, cardName: string): OracleRow {
   ) {
     return {
       loyaltyCost: loyaltyCostText(ability.loyaltyCost),
-      text: renderEffectList(ability.effects, cardName).join(' '),
+      text: renderActivatedBody(ability, cardName, sourceKind),
     };
   }
-  return plainRow(renderAbility(ability, cardName));
+  return plainRow(renderAbility(ability, cardName, sourceKind));
 }
 
-/**
- * An Equipment's one ability prints two lines; the second is a row of its own
- * and carries no badge, because a cost belongs to the row that states it.
- */
+/** Split multiline abilities into rows; a bare Equip ability remains one row. */
 function splitRow(row: OracleRow): readonly OracleRow[] {
   const [first, ...rest] = row.text.split('\n');
   if (first === undefined) return [row];
@@ -2324,14 +4275,32 @@ export function renderOracleText(card: Card): string {
  * it would not — and `parseCard` compares `oracleText` against this function,
  * which means the omission was enforced rather than merely missed.
  */
-function renderSpellParagraph(card: Card): string {
-  const sentences = renderEffectList(card.effects, card.name);
+function renderSpellParagraphs(card: Card): readonly string[] {
+  const sentences = renderEffectList(
+    isSpellCard(card) ? spellEffectsFor(card, null, 'ordinary') : card.effects,
+    card.name,
+  );
   const [first, ...rest] = sentences;
-  if (first === undefined) return '';
+  if (first === undefined) return [];
   const clause = card.unless;
   const opening = clause === undefined ? first : withUnlessClause(first, clause);
   const offered = card.may === undefined ? opening : capitalize(mayClause(opening, card.name));
-  return [offered, ...rest].join(' ');
+  const rendered = [offered, ...rest];
+  const breaks =
+    card.kind === 'instant' || card.kind === 'sorcery'
+      ? new Set(card.printedEffectParagraphBreaks ?? [])
+      : new Set<number>();
+  const paragraphs: string[] = [];
+  let paragraph: string[] = [];
+  for (const [index, sentence] of rendered.entries()) {
+    if (breaks.has(index) && paragraph.length > 0) {
+      paragraphs.push(paragraph.join(' '));
+      paragraph = [];
+    }
+    paragraph.push(sentence);
+  }
+  if (paragraph.length > 0) paragraphs.push(paragraph.join(' '));
+  return paragraphs;
 }
 
 /**
@@ -2344,22 +4313,283 @@ function renderSpellParagraph(card: Card): string {
  * Every caller that prints more than one effect goes through this, so a card and
  * a triggered ability read the same way.
  */
-export function renderEffectList(effects: readonly Effect[], cardName: string): readonly string[] {
+export function renderEffectList(
+  effects: readonly Effect[],
+  cardName: string,
+  sourceKind?: CardKind,
+): readonly string[] {
   const named = new Set<string>();
   const handsShown = new Set<string>();
-  return effects.map((effect) => {
+  const sentences: string[] = [];
+  for (let index = 0; index < effects.length; index += 1) {
+    const effect = effects[index];
+    if (effect === undefined) continue;
     const key = hasTarget(effect) ? canonicalJson(effect.target) : '';
     const prior: PriorMention = {
       samePlayerNamed: key.length > 0 && named.has(key),
       handShown: key.length > 0 && handsShown.has(key),
     };
-    const sentence = renderEffect(effect, cardName, prior);
+    let sentence = renderEffect(effect, cardName, prior, sourceKind);
+    const referentIndex = referentSourceIndex(effects, index);
+    const previous = effects[index - 1];
+    if (
+      effect.kind === 'pumpUntilEndOfTurn' &&
+      effect.scope === 'creaturesThatPlayerControls' &&
+      effect.excludeReferent === true &&
+      effect.target.kind === 'thatCreaturesController' &&
+      referentIndex !== null &&
+      effects[referentIndex]?.kind === 'destroyPermanent'
+    ) {
+      sentence = renderPump(
+        'Each other creature that player controls',
+        effect.power,
+        effect.toughness,
+        true,
+        effect.keyword,
+      );
+    }
+    if (
+      effect.kind === 'gainLife' &&
+      effect.target.kind === 'thatCreaturesController' &&
+      !isLiteralAmount(effect.amount) &&
+      effect.amount.kind === 'thatCreatureToughness'
+    ) {
+      sentence = 'Its controller gains life equal to its toughness.';
+    }
+    if (
+      effect.kind === 'pumpUntilEndOfTurn' &&
+      effect.target.kind === 'thatCreature' &&
+      effect.keyword === 'haste' &&
+      referentIndex !== null &&
+      effects[referentIndex]?.kind === 'gainControlUntilEndOfTurn' &&
+      previous?.kind === 'untapPermanent' &&
+      previous.target.kind === 'thatCreature'
+    ) {
+      // Traitorous Instinct's final clause retains the one creature the first
+      // effect chose. Its duration leads the sentence and "it" refers through
+      // the intervening untap, while the reusable pump renderer still owns the
+      // P/T and keyword grammar.
+      const retainedPump = renderPump('it', effect.power, effect.toughness, true, effect.keyword);
+      sentence = `Until end of turn, ${retainedPump.replace(' until end of turn.', '.')}`;
+    }
     if (key.length > 0) {
       named.add(key);
       if (effect.kind === 'revealHand') handsShown.add(key);
     }
-    return sentence;
-  });
+
+    // Incite's grammar is a relationship between two independently reusable
+    // effects: the second retains the creature the first targeted, and Magic
+    // joins the two predicates under one subject. Keep the compounding here,
+    // where sibling effects and their referents are visible, rather than in
+    // either primitive or behind a card-name exception.
+    const next = effects[index + 1];
+    const afterNext = effects[index + 2];
+    if (
+      effect.kind === 'gainLife' &&
+      effect.target.kind === 'noTarget' &&
+      !isLiteralAmount(effect.amount) &&
+      effect.amount.kind === 'chosenX' &&
+      next?.kind === 'drawCards' &&
+      next.players === undefined &&
+      next.target.kind === 'noTarget' &&
+      !isLiteralAmount(next.count) &&
+      next.count.kind === 'chosenX'
+    ) {
+      // The same announced X governs both quantities, so Magic prints the
+      // symbol once in each coordinated object rather than expanding either
+      // computed amount into an "equal to" clause.
+      sentence = 'You gain X life and draw X cards.';
+      index += 1;
+    }
+    if (
+      effect.kind === 'drawCards' &&
+      effect.target.kind === 'noTarget' &&
+      effect.players === undefined &&
+      isLiteralAmount(effect.count) &&
+      next?.kind === 'discardCards' &&
+      next.target.kind === 'noTarget' &&
+      next.players === undefined
+    ) {
+      const discard =
+        next.count === 'all'
+          ? 'discard your hand'
+          : next.count === 1
+            ? 'discard a card'
+            : `discard ${numberWord(next.count)} cards`;
+      sentence = `${sentence.slice(0, -1)}, then ${discard}.`;
+      index += 1;
+    }
+    if (
+      effect.kind === 'dealDamage' &&
+      effect.players === 'eachOpponent' &&
+      next?.kind === 'discardCards' &&
+      next.players === 'eachOpponent' &&
+      next.random === true &&
+      next.count !== 'all'
+    ) {
+      sentence = `${sentence} Those players each discard ${numberWord(next.count)} cards at random.`;
+      index += 1;
+    }
+    if (
+      effect.kind === 'destroyPermanent' &&
+      effect.target.kind === 'targetCreature' &&
+      next?.kind === 'discardCards' &&
+      next.target.kind === 'thatCreaturesController' &&
+      next.players === undefined
+    ) {
+      const discard =
+        next.count === 'all'
+          ? 'discards their hand'
+          : next.count === 1
+            ? 'discards a card'
+            : `discards ${numberWord(next.count)} cards`;
+      sentence = `${sentence} Its controller ${discard}.`;
+      index += 1;
+    }
+    if (
+      effect.kind === 'destroyPermanent' &&
+      effect.target.kind === 'targetCreature' &&
+      next?.kind === 'loseLife' &&
+      next.target.kind === 'thatCreaturesController' &&
+      next.players === undefined
+    ) {
+      const life = isLiteralAmount(next.amount)
+        ? `${next.amount} life`
+        : `life ${amountEqualTo(next.amount)}`;
+      sentence = `${sentence} Its controller loses ${life}.`;
+      index += 1;
+    }
+    if (
+      effect.kind === 'exileTarget' &&
+      isGraveyardCardTargetKind(effect.target.kind) &&
+      next?.kind === 'exileTarget' &&
+      isGraveyardCardTargetKind(next.target.kind)
+    ) {
+      const following = renderEffect(next, cardName, prior, sourceKind);
+      sentence = `${sentence.slice(0, -1)} and ${following.slice('Exile '.length)}`;
+      index += 1;
+    }
+    if (
+      effect.kind === 'discardCards' &&
+      effect.count === 7 &&
+      effect.target.kind === 'thatPlayerOrPlaneswalkerController' &&
+      next?.kind === 'sacrificePermanent' &&
+      next.count === 7 &&
+      next.target.kind === 'thatPlayerOrPlaneswalkerController' &&
+      next.filter !== undefined &&
+      targetFilterIsEmpty(next.filter) &&
+      next.players === undefined &&
+      next.excludeSource !== true
+    ) {
+      sentence = `${sentence.slice(0, -1)}, then sacrifices seven permanents of their choice.`;
+      index += 1;
+    }
+    if (
+      effect.kind === 'sacrificePermanent' &&
+      effect.target.kind === 'noTarget' &&
+      effect.players === undefined &&
+      (effect.count ?? 1) === 1 &&
+      effect.filter?.cardTypes?.length === 1 &&
+      effect.filter.cardTypes[0] === 'creature' &&
+      next?.kind === 'gainLife' &&
+      next.target.kind === 'noTarget' &&
+      !isLiteralAmount(next.amount) &&
+      next.amount.kind === 'sacrificedPermanentPowerThisResolution' &&
+      afterNext?.kind === 'drawCards' &&
+      afterNext.target.kind === 'noTarget' &&
+      !isLiteralAmount(afterNext.count) &&
+      afterNext.count.kind === 'sacrificedPermanentPowerThisResolution'
+    ) {
+      sentences.push(sentence);
+      sentences.push("You gain X life and draw X cards, where X is that creature's power.");
+      index += 2;
+      continue;
+    }
+    if (
+      effect.kind === 'shuffleHandsAndGraveyardsIntoLibraries' &&
+      next?.kind === 'drawCards' &&
+      next.players === 'eachPlayer' &&
+      next.target.kind === 'noTarget' &&
+      isLiteralAmount(next.count) &&
+      next.count === 7
+    ) {
+      // Time Reversal's two actions share one subject and Magic joins them with
+      // "then". This is shape-driven rather than name-driven: the atomic reset
+      // followed by the hand-authored seven-card player sweep has one exact
+      // printed form whichever card carries it.
+      sentence = 'Each player shuffles their hand and graveyard into their library, then draws seven cards.';
+      index += 1;
+    }
+    if (
+      effect.kind === 'setColorsUntilEndOfTurn' &&
+      next?.kind === 'attacksThisTurnIfAble' &&
+      next.target.kind === 'thatCreature'
+    ) {
+      sentence = `${sentence.slice(0, -1)} and attacks this turn if able.`;
+      named.add(canonicalJson(next.target));
+      index += 1;
+    }
+    const sameCreature =
+      next !== undefined &&
+      hasTarget(next) &&
+      next.target.kind === 'thatCreature' &&
+      referentSourceIndex(effects, index + 1) === index;
+    if (effect.kind === 'pumpUntilEndOfTurn' && sameCreature) {
+      let compounded = sentence;
+      if (
+        next.kind === 'grantKeywordUntilEndOfTurn' &&
+        next.additionalKeywords === undefined &&
+        next.removeKeywordAbility === undefined
+      ) {
+        compounded = sentence.replace(
+          ' until end of turn',
+          ` and gains ${GRANTABLE_KEYWORD_PRINT_NAMES[next.keyword]} until end of turn`,
+        );
+      } else if (
+        next.kind === 'grantKeywordUntilEndOfTurn' &&
+        next.additionalKeywords !== undefined &&
+        next.removeKeywordAbility === undefined
+      ) {
+        const subjectAndPump = sentence.replace(' until end of turn.', '');
+        const keywords = [next.keyword, ...next.additionalKeywords].map(
+          (keyword) => GRANTABLE_KEYWORD_PRINT_NAMES[keyword],
+        );
+        compounded = `Until end of turn, ${lowercaseOpening(subjectAndPump)} and gains ${joinWithAnd(
+          keywords,
+        )}.`;
+      } else if (next.kind === 'attacksThisTurnIfAble') {
+        compounded = sentence.replace(
+          ' until end of turn',
+          ' until end of turn and attacks this turn if able',
+        );
+      } else if (next.kind === 'cantBeBlockedThisTurn') {
+        compounded = sentence.replace(
+          ' until end of turn',
+          " until end of turn and can't be blocked this turn",
+        );
+      }
+      if (compounded !== sentence) {
+        if (next.kind === 'grantKeywordUntilEndOfTurn' && next.keyword === 'intimidate') {
+          compounded = `${compounded} (It can't be blocked except by artifact creatures and/or creatures that share a color with it.)`;
+        }
+        sentence = compounded;
+        index += 1;
+      }
+    }
+    if (
+      next?.kind === 'populate' &&
+      (effect.kind === 'createToken' || effect.kind === 'exileTarget' || effect.kind === 'destroyPermanent')
+    ) {
+      // RTR prints these three setup actions and Populate as one ordered
+      // sentence. The relationship belongs to the effect list: both effects
+      // stay independently reusable, while their authored adjacency carries
+      // the printed "then" and the same execution order the kernel observes.
+      sentence = `${sentence.slice(0, -1)}, then populate.`;
+      index += 1;
+    }
+    sentences.push(sentence);
+  }
+  return sentences;
 }
 
 /**
@@ -2437,6 +4667,18 @@ function keywordAbilityLines(abilities: readonly KeywordAbility[]): readonly str
       case 'doubleStrike':
         lines.push('Double strike');
         break;
+      case 'shroud':
+        lines.push('Shroud');
+        break;
+      case 'flash':
+        lines.push('Flash');
+        break;
+      case 'intimidate':
+        lines.push('Intimidate');
+        break;
+      case 'unleash':
+        lines.push('Unleash');
+        break;
       default:
         assertNever(ability, 'keywordAbilityLines');
     }
@@ -2445,6 +4687,23 @@ function keywordAbilityLines(abilities: readonly KeywordAbility[]): readonly str
     lines.push(`Protection from ${protection.map(protectionQualityPhrase).join(' and from ')}`);
   }
   return lines;
+}
+
+function lowercaseOpening(value: string): string {
+  return `${value.charAt(0).toLowerCase()}${value.slice(1)}`;
+}
+
+/** One source-authored line group, without changing the rules vocabulary it lays out. */
+export function keywordLineGroupText(
+  group: Readonly<NonNullable<Card['keywordLineGroups']>[number]>,
+): string {
+  const parts = group.map((item) => {
+    if (typeof item === 'string') return KEYWORD_PRINT_NAMES[item];
+    const [line] = keywordAbilityLines([item]);
+    if (line === undefined) throw new Error(`keyword line group cannot render ${JSON.stringify(item)}`);
+    return lowercaseOpening(line);
+  });
+  return capitalize(parts.join(', '));
 }
 
 /** Whole printed card as text: the human-readable rendering used in reports. */
@@ -2462,13 +4721,30 @@ export function renderCard(card: Card): string {
 /**
  * A token's own printed rules text, as one line.
  *
- * The token's card is the source, so the text on the token and the text the
- * creating card quotes are the same string produced by the same renderer.
- * `renderOracleText` separates a keyword line from an ability line with a
- * newline, which a quoted clause inside another card's sentence cannot carry,
- * so the lines are joined with a space here.
+ * Ordinary token text comes from the same card renderer as any other
+ * permanent. A token CDA uses Magic's self-reference “This creature” rather
+ * than the token name that an ordinary card prints; its creator separately
+ * quotes “This token” through `tokenHavingClause`. `renderOracleText`
+ * separates a keyword line from an ability line with a newline, which a quoted
+ * clause inside another card's sentence cannot carry, so the lines are joined
+ * with a space here.
  */
 export function renderTokenOracleText(token: TokenSpec): string {
+  if (token.characteristicPowerToughness !== undefined) {
+    const abilitySubject = token.quoteAbilities === true ? 'this token' : tokenReferenceName(token);
+    return [
+      ...(token.keywords.length > 0 ? [keywordRowText(token.keywords)] : []),
+      characteristicPowerToughnessSentence(token.characteristicPowerToughness, "This creature's"),
+      ...tokenAbilities(token).map((ability) => renderAbility(ability, abilitySubject)),
+    ].join(' ');
+  }
+  if (token.quoteAbilities === true) {
+    const lines = [
+      ...(token.keywords.length > 0 ? [keywordRowText(token.keywords)] : []),
+      ...tokenAbilities(token).map((ability) => renderAbility(ability, 'this token')),
+    ];
+    return lines.join(' ');
+  }
   return renderOracleText(tokenCard(token)).split('\n').join(' ');
 }
 

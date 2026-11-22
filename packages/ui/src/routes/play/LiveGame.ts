@@ -1,60 +1,40 @@
 /**
- * A dealt game, held and drawn, plus the one thing a shared screen needs that a
- * private one does not: a moment where the device changes hands.
+ * A dealt game, held and drawn.
  *
  * Both entry points render this — the route when a caller hands it a ready-made
- * game, the sealed screen for the game it just dealt — so the session, the error
- * line and the handoff live in one place rather than in two that drift.
+ * game, the sealed screen for the game it just dealt — so the session and the
+ * error line live in one place rather than in two that drift.
  *
- * The handoff is the other half of drawing the board from the seat being asked.
- * The board following the question across the table is right; on a shared screen
- * it also means that the instant one player passes priority, the other player's
- * hand is on a screen the first player is still holding. So when the seat being
- * asked changes, the table is replaced by a card naming who the device is for,
- * and it waits to be told they have it. A one-person game never reaches that
- * card: the session only ever stops on that person's seat, so the seat being
- * asked never moves.
+ * The board is drawn from the seat being asked, and in a one-person game that
+ * seat never moves: the session only ever stops on that person's seat. The
+ * card that once covered the table while a shared screen changed hands left
+ * with the shared-screen arm; two human seats survive only as a test fixture.
  */
-import { createElement, useState } from 'react';
+import { createElement, useCallback, useRef, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
-import type { PlayerId } from '@mtg/kernel';
+import type { GameplayReport } from '../../net/gameplay';
 import type { PositionArt } from './position';
+import { OpeningRollBeat } from './OpeningRoll';
+import { openingRollText } from './opening-roll';
 import { PlayView } from './PlayView';
+import { useFeedbackSubject } from '../../feedback/subject';
+import type { FeedbackSubject } from '../../feedback/wire';
+import { useGameplayReport } from './use-gameplay-report';
 import { usePlaySession } from './use-session';
 import type { PlayConfig } from './use-session';
 
 export interface LiveGameProps {
   readonly config: PlayConfig;
   /**
-   * Controls belonging to whatever dealt the game. At the table they join
-   * `PlayView`'s own strip; the handoff card has no strip, so there they are the
-   * row they always were.
+   * Where the finished game is reported, or null for a surface that records
+   * nothing. Required rather than defaulted, so a new surface states which it
+   * is; `../../net/gameplay.ts` builds one from the format it dealt.
    */
+  readonly report: GameplayReport | null;
+  /** Controls belonging to whatever dealt the game; they join `PlayView`'s own strip. */
   readonly toolbar?: ReactNode;
   /** Passed straight through to the table; see `PlayView`. */
   readonly artFor?: PositionArt;
-}
-
-function handoffCard(name: string, onTake: () => void): ReactElement {
-  return createElement(
-    'div',
-    { className: 'mtg-empty' },
-    createElement('span', { className: 'mtg-empty__title' }, `Pass the device to ${name}`),
-    createElement(
-      'span',
-      { className: 'mtg-empty__body' },
-      'The next decision is theirs, and the board will open on their hand. Nothing is shown until they say they are holding it.',
-    ),
-    createElement(
-      'div',
-      { className: 'mtg-toolbar' },
-      createElement(
-        'button',
-        { type: 'button', className: 'mtg-btn', 'data-variant': 'primary', onClick: onTake },
-        `I am ${name}`,
-      ),
-    ),
-  );
 }
 
 export function LiveGame(props: LiveGameProps): ReactElement {
@@ -71,52 +51,92 @@ export function LiveGame(props: LiveGameProps): ReactElement {
     watchBeats,
     setWatchBeats,
     yieldTo,
+    triggerYields,
+    yieldToTrigger,
+    clearTriggerYield,
+    undo,
+    canUndo,
   } = usePlaySession(props.config);
-  // Seeded from the seat on deck at mount rather than from `config.viewer`, so
-  // arriving at a game already in progress hands the device to whoever is next
-  // instead of opening on a card nobody asked for.
-  const [holder, setHolder] = useState<PlayerId>(viewer);
+  // Reported once per finished game, and said on the root so a rig can read
+  // whether the lab kept it without a network of its own.
+  const gameplay = useGameplayReport(session, props.config, props.report);
   const names = props.config.names;
-  // A finished game is not gated: there is no next decision to pass along, and
-  // nothing left on the board that one of the two is not entitled to see. Nor is
-  // a combat beat, and that is not an oversight: `usePlaySession` keeps the
-  // viewer where it was while the game is paused, so a pause never moves the
-  // board to a seat the person holding the device is not sitting in.
-  const handing = session.pending !== null && viewer !== holder;
+  // What a feedback report written over this board says the board was: the
+  // config and the choice list, which is the whole game, read at filing time.
+  const latest = useRef({ session, config: props.config, beat });
+  latest.current = { session, config: props.config, beat };
+  const readSubject = useCallback(
+    (): FeedbackSubject => ({
+      kind: 'kernel-game',
+      config: latest.current.config,
+      choices: latest.current.session.choices,
+      beat: latest.current.beat,
+      finished: latest.current.session.result !== null,
+    }),
+    [],
+  );
+  useFeedbackSubject(readSubject);
+  const [rolled, setRolled] = useState(false);
+  const finishRoll = useCallback((): void => {
+    setRolled(true);
+  }, []);
+  const roll = props.config.openingRoll;
+  const rollBeat = roll !== undefined && (props.config.choices ?? []).length === 0 && !rolled;
+  const rollNote =
+    roll === undefined || session.state.turn.number > 1
+      ? undefined
+      : createElement('p', { className: 'mtg-page-note', role: 'status' }, openingRollText(roll, names));
 
   // Named for the same reason `PlayRoute`'s root is: this wrapper is a link in
   // the chain that carries the viewport's leftover height down to the table.
   return createElement(
     'div',
-    { className: 'mtg-live' },
+    {
+      className: 'mtg-live',
+      ...(gameplay === null ? {} : { 'data-mtg-gameplay': gameplay.status }),
+      ...(gameplay?.status === 'recorded' ? { 'data-mtg-gameplay-id': gameplay.id } : {}),
+      ...(gameplay?.status === 'refused' ? { 'data-mtg-gameplay-reason': gameplay.reason } : {}),
+    },
     error === null ? null : createElement('p', { className: 'mtg-prompt__warning', role: 'alert' }, error),
-    handing ? (props.toolbar ?? null) : null,
-    handing
-      ? handoffCard(names[viewer], (): void => {
-          setHolder(viewer);
-        })
-      : createElement(PlayView, {
-          session,
-          viewer,
-          names,
-          onChoose: choose,
-          onNewGame: restart,
-          beat,
-          onContinue: resume,
-          // The auto-pass controls belong to whoever holds the session, which is
-          // this component: they are settings for the seat being asked, and the
-          // seat being asked is what this file already tracks.
-          autoPass,
-          onAutoPass: setAutoPass,
-          // And the pauses, which belong to the same holder for the same reason
-          // (`mtg-885`). One screen, one person's pacing: this is the component
-          // that owns the session, so it is the one that can change an option on
-          // it without the change reaching anything the game records.
-          beats: watchBeats,
-          onBeats: setWatchBeats,
-          onYield: yieldTo,
-          ...(props.toolbar === undefined ? {} : { toolbar: props.toolbar }),
-          ...(props.artFor === undefined ? {} : { artFor: props.artFor }),
-        }),
+    rollBeat
+      ? createElement(OpeningRollBeat, { roll, names, viewer: props.config.viewer, onDone: finishRoll })
+      : null,
+    createElement(PlayView, {
+      session,
+      viewer,
+      names,
+      onChoose: choose,
+      onNewGame: restart,
+      beat,
+      onContinue: resume,
+      // The auto-pass controls belong to whoever holds the session, which is
+      // this component: they are settings for the seat being asked.
+      autoPass,
+      onAutoPass: setAutoPass,
+      // And the pauses, which belong to the same owner for the same reason
+      // (`mtg-885`). One screen, one person's pacing: this is the component
+      // that owns the session, so it is the one that can change an option on
+      // it without the change reaching anything the game records.
+      beats: watchBeats,
+      onBeats: setWatchBeats,
+      onYield: yieldTo,
+      // The third yield, from the same owner and for the same reason
+      // (`./trigger-yields.ts`, `mtg-bz2.7`). All three of these arrive
+      // together: the prompt's pair sets an answer, the panel's list is the
+      // only way back out of one, and a view given one half would offer a
+      // setting a player could not undo.
+      onTriggerYield: yieldToTrigger,
+      triggerYields,
+      onClearTriggerYield: clearTriggerYield,
+      // The rewind, from the component that owns the session. Its refusal
+      // reaches the alert this file already draws above the table, which is
+      // the whole reason the control presses through where `canUndo` is
+      // false; `./undo.ts` argues it.
+      onUndo: undo,
+      canUndo,
+      ...(props.toolbar === undefined ? {} : { toolbar: props.toolbar }),
+      ...(props.artFor === undefined ? {} : { artFor: props.artFor }),
+      ...(rollNote === undefined ? {} : { status: rollNote }),
+    }),
   );
 }

@@ -1,0 +1,4085 @@
+{
+  "schemaVersion": 1,
+  "classifierVersion": "forge-script-controller-family-v1",
+  "entries": [
+    {
+      "kind": "ability-api",
+      "token": "Activations",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "AddTurn",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "AlternativeCost",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Always",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Animate",
+      "families": ["combat"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes combat decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "AnimateAll",
+      "families": ["combat"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes combat decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Attach",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "AttackersDeclared",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Attacks",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "BecomeMonarch",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "BecomeMonstrous",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "BecomesTarget",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Blocks",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Branch",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CantAttack,CantBlock",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CantAttack,CantBlock,CantBeActivated",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CantBeActivated",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CantBeCast",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CantBlock",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CantBlockBy",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CantDraw",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CantGainLife",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CantPreventDamage",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CantRegenerate",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CastWithFlash",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ChangesZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ChangeTargets",
+      "families": ["targets"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes targets decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ChangeZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ChangeZoneAll",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Charm",
+      "families": ["modes"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes modes decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ChooseCard",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ChooseColor",
+      "families": ["naming-text-numbers"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes naming-text-numbers decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ChooseEvenOdd",
+      "families": ["naming-text-numbers"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes naming-text-numbers decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ChooseType",
+      "families": ["naming-text-numbers"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes naming-text-numbers decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Cleanup",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Clone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Continuous",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ControlPlayer",
+      "families": [
+        "priority",
+        "targets",
+        "modes",
+        "optional-costs",
+        "mana-x",
+        "zone-card-selection",
+        "ordering",
+        "combat",
+        "replacement-trigger-choices",
+        "naming-text-numbers",
+        "piles-votes"
+      ],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes priority, targets, modes, optional-costs, mana-x, zone-card-selection, ordering, combat, replacement-trigger-choices, naming-text-numbers, piles-votes decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CopyPermanent",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "CopySpellAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Counter",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Countered",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Cycled",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "DamageAll",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "DamageDealtOnce",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "DamageDone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "DamageDoneOnce",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "DamageResolve",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "DealDamage",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "DelayedTrigger",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Destroy",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "DestroyAll",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Dig",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Discard",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Draw",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Drawn",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "EachDamage",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Effect",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ExchangeControl",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Explore",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Fight",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "GainControl",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "GainControlVariant",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "GainLife",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "GenericChoice",
+      "families": ["naming-text-numbers"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes naming-text-numbers decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Hand",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ImmediateTrigger",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Investigate",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "LoseLife",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "LosesGame",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Mana",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ManaReflected",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Manifest",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Mill",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "MustAttack",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Mutates",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "NameCard",
+      "families": ["naming-text-numbers"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes naming-text-numbers decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "OptionalAttackCost",
+      "families": ["optional-costs", "combat"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes optional-costs, combat decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "PeekAndReveal",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "PermanentCreature",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Phase",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Play",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Proliferate",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Protection",
+      "families": ["naming-text-numbers"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes naming-text-numbers decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Pump",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "PumpAll",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "PutCounter",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "PutCounterAll",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "RaiseCost",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Random",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "RearrangeTopOfLibrary",
+      "families": ["zone-card-selection", "ordering"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection, ordering decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ReduceCost",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Regenerate",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "RemoveCounter",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "RemoveCounterAll",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Repeat",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "RepeatEach",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "ReplaceEffect",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "RestartGame",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "RevealHand",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "RevealYouChoose",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Sacrifice",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "SacrificeAll",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Sacrificed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Scry",
+      "families": ["zone-card-selection", "ordering"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection, ordering decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "SetLife",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "SetState",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Shuffle",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "SpellCast",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Surveil",
+      "families": ["zone-card-selection", "ordering"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection, ordering decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Tap",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "TapAll",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "TapOrUntap",
+      "families": ["modes"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes modes decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Taps",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "TapsForMana",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "TgtChoose",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Token",
+      "families": ["combat"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes combat decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Transform",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Transformed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "TurnFaceUp",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "TwoPiles",
+      "families": ["zone-card-selection", "piles-votes"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes zone-card-selection, piles-votes decision-family surface."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Unattached",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Untap",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "UntapAll",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed ability-api token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "ability-api",
+      "token": "Vote",
+      "families": ["piles-votes"],
+      "disposition": "mapped",
+      "evidence": "Reviewed ability-api token; it exposes piles-votes decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Annihilator",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Battle cry",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Buyback",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Cascade",
+      "families": ["zone-card-selection", "replacement-trigger-choices"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes zone-card-selection, replacement-trigger-choices decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Chapter",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Class",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Companion",
+      "families": ["pregame-actions"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes pregame-actions decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Convoke",
+      "families": ["mana-x", "zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes mana-x, zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Crew",
+      "families": ["zone-card-selection", "combat"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes zone-card-selection, combat decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Cycling",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Dash",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Deathtouch",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Defender",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Delve",
+      "families": ["mana-x", "zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes mana-x, zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Echo",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Enchant",
+      "families": ["targets"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes targets decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Entwine",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Equip",
+      "families": ["targets"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes targets decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Escalate",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Escape",
+      "families": ["optional-costs", "zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs, zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "etbCounter",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "ETBReplacement",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Eternalize",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Evoke",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Exalted",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Fading",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Fear",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "First Strike",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Flash",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Flashback",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Flying",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Foretell",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Haste",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Hexproof",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Hideaway",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Indestructible",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Kicker",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Landwalk",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Level up",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Lifelink",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Living Weapon",
+      "families": ["combat"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes combat decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "MayFlashSac",
+      "families": ["optional-costs", "zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs, zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Megamorph",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Menace",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Mentor",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Miracle",
+      "families": ["optional-costs", "replacement-trigger-choices"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs, replacement-trigger-choices decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Morph",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Multikicker",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Mutate",
+      "families": ["targets", "optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes targets, optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Ninjutsu",
+      "families": ["optional-costs", "zone-card-selection", "combat"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs, zone-card-selection, combat decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Overload",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Persist",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Protection",
+      "families": ["naming-text-numbers"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes naming-text-numbers decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Prowess",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Reach",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Shadow",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Splice",
+      "families": ["optional-costs", "zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs, zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Split second",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Sunburst",
+      "families": ["mana-x"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes mana-x decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Suspend",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Trample",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "TypeCycling",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Undying",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Unearth",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed keyword token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "keyword",
+      "token": "Vanishing",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "keyword",
+      "token": "Vigilance",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed keyword token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "A",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "AI",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "ALTERNATE",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "AlternateMode",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "Colors",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "DeckHas",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "DeckHints",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "DeckNeeds",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "K",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "Loyalty",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "ManaCost",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "Name",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "Oracle",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "PT",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "R",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "S",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "SVar",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "T",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "Text",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "line-kind",
+      "token": "Types",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed line-kind token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AB",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Abilities",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Ability",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ActivationZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Activator",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ActivatorThisTurnCast",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ActiveZones",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Adapt",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddAllCreatureTypes",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddKeyword",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddKeywords",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddKWs",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddPower",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddSVar",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddSVars",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddToughness",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddTrigger",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddTriggers",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AddTypes",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AdjustLandPlays",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Affected",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AffectedZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AILogic",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AIManaPref",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AINoRecursiveCheck",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AISearchGoal",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AITgts",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AIXMax",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AllCounters",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AllValid",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AlreadyRevealed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Amount",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AtEOT",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Attacking",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "AttackingPlayer",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Boast",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "BranchConditionSVar",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "BranchConditionSVarCompare",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "CanRepeatModes",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Caster",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChangeController",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChangeNum",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChangeSingleTarget",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChangeType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChangeTypeDesc",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChangeValid",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChangeValidDesc",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChangeZoneTable",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "CharacteristicDefining",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "CharmNum",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "CheckSVar",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Choices",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChoiceTitle",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChoiceZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChooseOrder",
+      "families": ["ordering"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes ordering decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Chooser",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ChosenPile",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Choser",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Class:2:1 G:AddTrigger",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Class:2:2 W:AddStaticAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Class:3:3 G:AddStaticAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Class:3:4 W:AddTrigger",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ClearChosenCard",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ClearChosenColor",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ClearImprinted",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ClearRemembered",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "CloneTarget",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Color",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ColorOrType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Colors",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "CombatDamage",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Condition",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ConditionCheckSVar",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ConditionCompare",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ConditionDefined",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ConditionDescription",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ConditionNotPresent",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ConditionPresent",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ConditionSVarCompare",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ConditionZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Controller",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Cost",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "CostDesc",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Count",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "CounterNum",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "CounterType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DamageMap",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DamageSource",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DB",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Defined",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DefinedCards",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DefinedDamagers",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DefinedMagnet",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DefinedPlayer",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DelayedTriggerDefinedPlayer",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Description",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Destination",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DestinationZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DestinationZone2",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DifferentNames",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DigNum",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Discard & Keyword",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DiscardCost",
+      "families": ["optional-costs", "zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes optional-costs, zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DiscardValid",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DiscardValidDesc",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DividedAsYouChoose",
+      "families": ["targets", "naming-text-numbers"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes targets, naming-text-numbers decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DividerOnResolution",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "DrawLimit",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Duration",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "EachBasicType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "EffectOwner",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "EffectZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ETB",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "etbCounter:P1P1:2:CheckSVar",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Event",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ExcludeZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Execute",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ExileFaceDown",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ExileOnMoved",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ExileWithCounters",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "FalseSubAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ForceRevealToController",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ForEachColorPair",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ForgetCounter",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ForgetImprinted",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ForgetOnMoved",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ForgetOtherRemembered",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ForgetOtherTargets",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ForgetPlayed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "GainControl",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Gains",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Hidden",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Image",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Imprint",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Imprinted",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ImprintLast",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ImprintRememberedNoCleanup",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ImprintRevealed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "IsCombat",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "IsCurse",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "IsPresent",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Keyword",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Keywords",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "KW",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "KWChoice",
+      "families": ["naming-text-numbers"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes naming-text-numbers decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Layer",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "LeaveBattlefield",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "LibraryPosition",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "LibraryPosition2",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "LifeAmount",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Look",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "LoseControl",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ManaRestriction",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Mandatory",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MayChooseTarget",
+      "families": ["replacement-trigger-choices"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes replacement-trigger-choices decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MayLookAt",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MayPlay",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MayPlayIgnoreColor",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MayPlayIgnoreType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MayPlayPlayer",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MayPlayWithoutManaCost",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MayShuffle",
+      "families": ["replacement-trigger-choices"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes replacement-trigger-choices decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MinAmount",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MinCharmNum",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MinLimit",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Mode",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Monstrosity",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "MustAttack",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Name",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NextTurn",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NoLooking",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NoPeek",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NoPrevention",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NoRegen",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NoReveal",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Num",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NumAtt",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Number",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NumCards",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NumCopies",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NumDef",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NumDmg",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "NumTurns",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "OneOff",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "OnlySorcerySpeed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Optional",
+      "families": ["replacement-trigger-choices"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes replacement-trigger-choices decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "OptionalDecider",
+      "families": ["replacement-trigger-choices"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes replacement-trigger-choices decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Origin",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "OverwriteColors",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PeekAmount",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PersistentMana",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Phase",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Planeswalker",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PlayerCountOpponents",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PlayerCountPlayers",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PlayerTurn",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Power",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PresentCompare",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PresentZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Prevent",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PrimaryPrompt",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Produced",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PumpDuration",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PumpKeywords",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "PumpZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RandomOrder",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ReduceCost",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ReflectProperty",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberChanged",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberDamaged",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberDiscarded",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Remembered",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberedLKI",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberLKI",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberMilled",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberObjects",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberPeeked",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberPlayed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberRemoved",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberRevealed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberTapped",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberTargets",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RememberTokens",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RemoveAllAbilities",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RemoveCardTypes",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RemoveCreatureTypes",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RemoveKeywords",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RemoveType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Reorder",
+      "families": ["ordering"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes ordering decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RepeatCards",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RepeatCheckSVar",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RepeatPlayers",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RepeatSubAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RepeatSVarCompare",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ReplaceCount",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ReplaceDyingDefined",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ReplaceGraveyard",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ReplacementEffects",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ReplacementResult",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ReplaceWith",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RestRandomOrder",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RestrictFromValid",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RestrictFromZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Reveal",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "RevealOptional",
+      "families": ["replacement-trigger-choices"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes replacement-trigger-choices decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SacCost",
+      "families": ["optional-costs", "zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes optional-costs, zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SacMessage",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Sacrifice & Type",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Sacrificed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SacValid",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ScryNum",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Secondary",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SelectPrompt",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Separator",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SetChosenMode",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SetColor",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SetCreatureTypes",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SetMaxHandSize",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SetPower",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SetToughness",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ShowCardToActivator",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ShowChoice",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Shuffle",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ShuffleNonMandatory",
+      "families": ["replacement-trigger-choices"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes replacement-trigger-choices decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SkipReorder",
+      "families": ["ordering"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes ordering decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SorcerySpeed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SP",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SpellDescription",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Stackable",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "StackDescription",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Static",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "StaticAbilities",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "StaticEffect",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SubAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SVar",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "SVarCompare",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "sVars",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Tapped",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Tapper",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Targeted",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TargetMax",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TargetMin",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TargetsValid",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TargetsWithDefinedController",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TargetsWithDifferentCMC",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TargetType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TgtPrompt",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TgtZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TokenAmount",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TokenAttacking",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TokenOwner",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TokenPower",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TokenScript",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TokenTapped",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TokenToughness",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Toughness",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Transformed",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Trigger",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TriggerCount",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TriggerDescription",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TriggeredCard",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TriggeredCardLKI",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TriggeredSpellAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TriggeredTarget",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Triggers",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TriggerZones",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "TrueSubAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Type",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Types",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Ultimate",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UnchosenPile",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Unimprint",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UnlessCost",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UnlessPayer",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UnlessSwitched",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UnlessType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Untap",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UntapType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UntapUpTo",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UpcomingTurn",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UpTo",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UseAllOriginZones",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "UseImprinted",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Valid",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidActivatingPlayer",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidAttachment",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidAttacker",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidAttackers",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidAttackersAmount",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidBlocker",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidCard",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidCards",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidCause",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidCreature",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidDescription",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidLKI",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidObject",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidPlayer",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidPlayers",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidSA",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidSource",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidSpell",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidStepTurnToController",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidTarget",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidTgts",
+      "families": ["targets"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes targets decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "ValidZone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "VarName",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "VarValue",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "VoteCard",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "VoteMessage",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "VoteSubAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "VoteTiedAbility",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "WerewolfTransformCondition",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "WerewolfUntransformCondition",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "WithCountersAmount",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "WithCountersType",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "WithMayLook",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed parameter-key token; it exposes zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "WithoutManaCost",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "parameter-key",
+      "token": "Zone",
+      "families": [],
+      "disposition": "non-choice",
+      "evidence": "Reviewed parameter-key token; it structures card data or effect execution and does not by itself request a PlayerController choice."
+    },
+    {
+      "kind": "semantic-marker",
+      "token": "alternate-mode",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed semantic-marker token; it exposes optional-costs decision-family surface."
+    },
+    {
+      "kind": "semantic-marker",
+      "token": "card-enters-combat",
+      "families": ["combat"],
+      "disposition": "mapped",
+      "evidence": "Reviewed semantic-marker token; it exposes combat decision-family surface."
+    },
+    {
+      "kind": "semantic-marker",
+      "token": "discard-or-sacrifice-cost",
+      "families": ["optional-costs", "zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed semantic-marker token; it exposes optional-costs, zone-card-selection decision-family surface."
+    },
+    {
+      "kind": "semantic-marker",
+      "token": "optional-copy-replacement",
+      "families": ["zone-card-selection", "replacement-trigger-choices"],
+      "disposition": "mapped",
+      "evidence": "Reviewed semantic-marker token; an optional ETB copy replacement asks for an exact permanent and whether to apply the replacement."
+    },
+    {
+      "kind": "semantic-marker",
+      "token": "optional-trigger-or-replacement",
+      "families": ["replacement-trigger-choices"],
+      "disposition": "mapped",
+      "evidence": "Reviewed semantic-marker token; it exposes replacement-trigger-choices decision-family surface."
+    },
+    {
+      "kind": "semantic-marker",
+      "token": "priority-window",
+      "families": ["priority"],
+      "disposition": "mapped",
+      "evidence": "Reviewed semantic-marker token; it exposes priority decision-family surface."
+    },
+    {
+      "kind": "semantic-marker",
+      "token": "triggered-payment",
+      "families": ["optional-costs"],
+      "disposition": "mapped",
+      "evidence": "Reviewed semantic-marker token; a triggered ability with a nonzero Cost asks whether and how to pay before its effect occurs."
+    },
+    {
+      "kind": "semantic-marker",
+      "token": "variable-payment",
+      "families": ["mana-x"],
+      "disposition": "mapped",
+      "evidence": "Reviewed semantic-marker token; it exposes mana-x decision-family surface."
+    },
+    {
+      "kind": "semantic-marker",
+      "token": "zone-card-choice",
+      "families": ["zone-card-selection"],
+      "disposition": "mapped",
+      "evidence": "Reviewed semantic-marker token; an exact ChangeZone ability without a Defined card product asks the controller to choose cards from its Origin zone."
+    }
+  ]
+}

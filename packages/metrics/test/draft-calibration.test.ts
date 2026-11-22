@@ -13,6 +13,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { SLICE_BOOSTER } from '@mtg/deckbuild';
+import { DEFAULT_NATIVE_DRAFT_BOT_POLICY } from '@mtg/draft-export';
 import type { Card } from '@mtg/dsl';
 import { parseCard } from '@mtg/dsl';
 import {
@@ -81,6 +82,7 @@ describe('the native Draft calibration journey', { timeout: 60_000 }, () => {
       sealedEvidence: false,
     });
     expect(artifact.draft.seats).toHaveLength(8);
+    expect(artifact.draft.botPolicy).toBe(DEFAULT_NATIVE_DRAFT_BOT_POLICY);
     expect(artifact.draft.seats.every((seat) => seat.picks.length === 36)).toBe(true);
     expect(artifact.decks).toHaveLength(8);
     expect(artifact.decks.every((deck) => deck.cards.length === 40)).toBe(true);
@@ -122,13 +124,52 @@ describe('the native Draft calibration journey', { timeout: 60_000 }, () => {
         .flatMap((seat) => seat.picks)
         .filter((pick) => pick.cardId === card.cardId).length;
       expect(card.inclusionCount + card.unusedCount).toBe(picked);
-      expect(card.gamesIncluded).toBeLessThanOrEqual(artifact.games.length);
+      // Per game-seat, not per game: a card both seats drafted is in both
+      // decks of one game and is two observations of it, which is the
+      // `symmetric` flag `runDraftCalibration` records on each sample. The
+      // bound was written as `games.length` while no card in this fixture
+      // happened to be on both sides, and `mtg-x5pv` moved the picks until one
+      // was.
+      expect(card.gamesIncluded).toBeLessThanOrEqual(
+        artifact.games.reduce((seats, game) => seats + game.draftSeats.length, 0),
+      );
       expect(card.uncertainty.state).toBe('underSampled');
       expect(card.uncertainty.winRate).toBeNull();
     }
     expect(artifact.cards).toHaveLength(SET.length);
 
     expect(readDraftCalibrationArtifact(artifact, 'fresh artifact')).toEqual(artifact);
+  });
+
+  it('calibrates a set whose booster opens a weighted rare/mythic slot', async () => {
+    // The input check laid the recipe out without the set's sheets, and a
+    // weighted slot cannot be laid out without them, so a collation the schema
+    // accepts (and the flagship's own committed one) was refused before a pick.
+    const promoted = SET.map((card, index) =>
+      index < 4 ? parseCard({ ...card, rarity: index < 2 ? 'mythic' : 'rare' }) : card,
+    );
+    const recipe = [
+      { rarity: 'common', count: 8 },
+      { rarity: 'uncommon', count: 3 },
+      {
+        rarity: 'rare',
+        count: 1,
+        rarityWeights: [
+          { rarity: 'rare', weight: 2 },
+          { rarity: 'mythic', weight: 1 },
+        ],
+      },
+    ] as const;
+    const artifact = await runDraftCalibration(promoted, {
+      ...OPTIONS,
+      collation: { version: DRAFT_COLLATION_VERSION, recipe },
+      workers: 1,
+    });
+
+    expect(artifact.collation.recipe[2]?.rarityWeights).toStrictEqual([
+      { rarity: 'rare', weight: 2 },
+      { rarity: 'mythic', weight: 1 },
+    ]);
   });
 
   it('pins the default study to all 28 pairings in both seat orders', async () => {

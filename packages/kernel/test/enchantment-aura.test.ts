@@ -86,6 +86,37 @@ const VOLCANIC = aura('Volcanic Strength', [
   { kind: 'statBonus', power: 2, toughness: 2 },
   { kind: 'grantLandwalk', landType: 'Mountain' },
 ]);
+const SHIV = parseCard({
+  kind: 'enchantment',
+  id: 'm11-shivs-embrace',
+  name: "Shiv's Embrace",
+  rarity: 'uncommon',
+  set: { code: 'M11', collectorNumber: 156 },
+  manaCost: { generic: 2, R: 2 },
+  colors: ['R'],
+  subtypes: ['Aura'],
+  aura: {
+    enchant: 'creature',
+    modifications: [
+      { kind: 'statBonus', power: 2, toughness: 2 },
+      { kind: 'grantKeyword', keyword: 'flying' },
+    ],
+  },
+  abilities: [
+    {
+      kind: 'activated',
+      cost: { mana: { R: 1 }, tapSelf: false },
+      effects: [
+        {
+          kind: 'pumpUntilEndOfTurn',
+          power: 1,
+          toughness: 0,
+          target: { kind: 'enchantedCreature' },
+        },
+      ],
+    },
+  ],
+});
 
 const FERVOR = parseCard({
   kind: 'enchantment',
@@ -174,6 +205,60 @@ function passUntilTurn(from: ReduceResult, turn: number): ReduceResult {
 }
 
 describe('Aura spells', () => {
+  it("resolves Shiv's Embrace's activation onto its enchanted creature without choosing a target", () => {
+    const start = scenario({
+      battlefield: [
+        { card: BEAR, controller: 0, summoningSick: false },
+        { card: SQUIRE, controller: 1, summoningSick: false },
+        ...lands(MOUNTAIN, 5).map((card) => ({ card, controller: 0 as const })),
+      ],
+      hands: [[SHIV], []],
+    }).state;
+    const bear = named(start, 'Runeclaw Bear');
+    const entered = castAura(start, SHIV, bear);
+    const shiv = named(entered.state, "Shiv's Embrace");
+    const squire = named(entered.state, 'Opponent Squire');
+    expect(powerOf(entered.state, bear)).toBe(4);
+    expect(hasKeyword(entered.state, bear, 'flying')).toBe(true);
+
+    const offered = legalActions(entered.state).filter(
+      (action): action is Extract<Action, { type: 'activateAbility' }> =>
+        action.type === 'activateAbility' && action.oid === shiv,
+    );
+    expect(offered).toHaveLength(1);
+    expect(offered[0]?.targets).toEqual([null]);
+
+    const activated = reduce(entered.state, offered[0] as Action);
+    const resolved = reduceAll(activated.state, PASSES);
+    expect(powerOf(resolved.state, bear)).toBe(5);
+    expect(toughnessOf(resolved.state, bear)).toBe(4);
+    expect(powerOf(resolved.state, squire)).toBe(1);
+  });
+
+  it("does not retain Shiv's Embrace's old host after the Aura leaves before resolution", () => {
+    const start = scenario({
+      battlefield: [
+        { card: BEAR, controller: 0, summoningSick: false },
+        ...lands(MOUNTAIN, 5).map((card) => ({ card, controller: 0 as const })),
+      ],
+      hands: [[SHIV], []],
+    }).state;
+    const bear = named(start, 'Runeclaw Bear');
+    const entered = castAura(start, SHIV, bear);
+    const shiv = named(entered.state, "Shiv's Embrace");
+    const activation = legalActions(entered.state).find(
+      (action) => action.type === 'activateAbility' && action.oid === shiv,
+    );
+    expect(activation).toBeDefined();
+    if (activation === undefined) return;
+
+    const activated = reduce(entered.state, activation);
+    const removed = moveObject(beginTrace(activated.state), shiv, 'graveyard');
+    const resolved = reduceAll(removed.state, PASSES);
+    expect(powerOf(resolved.state, bear)).toBe(2);
+    expect(eventsOfType(resolved.events, 'continuousEffectAdded')).toHaveLength(0);
+  });
+
   it('offers every creature regardless of controller and rejects noncreature and malformed targets', () => {
     const start = board([HOLY]);
     const bear = named(start, 'Runeclaw Bear');

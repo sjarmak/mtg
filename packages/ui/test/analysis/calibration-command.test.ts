@@ -1,7 +1,7 @@
 /** The process boundary that prepares calibration before changing the playable pair. */
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterAll, describe, expect, it } from 'vitest';
 import { EXAMPLE_CARDS } from '@mtg/dsl';
@@ -12,7 +12,11 @@ import {
   readCalibrationArtifact,
   sha256Text,
 } from '../../src/routes/analysis/calibration-read';
-import { buildCalibration, buildThenStagePlayDocuments } from '../../tools/stage-calibration-command';
+import {
+  buildCalibration,
+  buildThenStagePlayDocuments,
+  stagePlayDocuments,
+} from '../../tools/stage-calibration-command';
 import type { ResolvedSet } from '../../tools/resolve-set';
 
 const TEMP = mkdtempSync(join(tmpdir(), 'mtg-ui-calibration-command-'));
@@ -83,5 +87,114 @@ describe('calibration subprocess staging', () => {
         fingerprint: second.subject.fingerprint,
       }),
     ).toMatchObject({ status: 'stale' });
+  });
+});
+
+/**
+ * Two launchers staging into one `public/`, and a commit that fails halfway.
+ *
+ * Interleaved by hand rather than by two processes: the rename seam lets the
+ * second invocation run to completion *inside* the first one's commit, which is
+ * the interleaving a race would produce and is the same every run.
+ */
+describe('two invocations staging into one directory', () => {
+  const built = (name: string) => ({ json: `{"of":"${name}"}\n`, summary: name });
+
+  it('refuses a second invocation mid-commit, and keeps the pair the first run’s own', () => {
+    const publicDir = join(TEMP, 'public-interleaved');
+    const first = executableSet('First launcher');
+    const second = executableSet('Second launcher');
+    const temps: string[] = [];
+    let refusal: string | null = null;
+
+    stagePlayDocuments(first, built('first'), publicDir, {
+      rename: (from, to) => {
+        temps.push(from);
+        // The whole of the second invocation, between the first one's commit of
+        // the calibration and its commit of the set: the interleaving that used
+        // to leave one run's set beside the other run's calibration.
+        if (basename(to) === 'set.json') {
+          try {
+            stagePlayDocuments(second, built('second'), publicDir, {
+              rename: renameSync,
+              lockAttempts: 0,
+              lockWaitMs: 0,
+            });
+          } catch (cause: unknown) {
+            refusal = cause instanceof Error ? cause.message : String(cause);
+          }
+        }
+        renameSync(from, to);
+      },
+    });
+
+    expect(refusal).toMatch(/another launcher is staging/);
+    expect(refusal).toContain(`pid ${String(process.pid)}`);
+    // Unique staging names as well, so a run that does hold the lock is never
+    // writing over a name another one picked.
+    expect(new Set(temps).size).toBe(temps.length);
+    expect(readFileSync(join(publicDir, 'set.json'), 'utf8')).toBe(first.json);
+    expect(readFileSync(join(publicDir, 'calibration.json'), 'utf8')).toBe('{"of":"first"}\n');
+    expect(readdirSync(publicDir).filter((name) => name.endsWith('.staging'))).toEqual([]);
+  });
+
+  it('releases the lock when the commit throws, so the next launcher is not locked out', () => {
+    const publicDir = join(TEMP, 'public-lock-release');
+    expect(() =>
+      stagePlayDocuments(executableSet('Refused pair'), built('refused'), publicDir, {
+        rename: () => {
+          throw new Error('the disk refused the rename');
+        },
+      }),
+    ).toThrow(/refused the rename/);
+    expect(readdirSync(publicDir)).toEqual([]);
+
+    const set = executableSet('Next launcher');
+    stagePlayDocuments(set, built('next'), publicDir, { lockAttempts: 0, lockWaitMs: 0, rename: renameSync });
+    expect(readFileSync(join(publicDir, 'set.json'), 'utf8')).toBe(set.json);
+  });
+
+  it('removes the calibration it committed when the set rename fails after it', () => {
+    const publicDir = join(TEMP, 'public-second-rename');
+    const set = executableSet('Committed pair');
+    stagePlayDocuments(set, built('old'), publicDir);
+
+    expect(() =>
+      stagePlayDocuments(executableSet('Newer set'), built('new'), publicDir, {
+        rename: (from, to) => {
+          if (basename(to) === 'calibration.json') {
+            renameSync(from, to);
+            return;
+          }
+          throw new Error('the disk refused the second rename');
+        },
+      }),
+    ).toThrow(/refused the second rename/);
+
+    // The new calibration would pair with the old set, which is the one state
+    // worth refusing outright; the set is untouched and no temporary survives.
+    expect(readFileSync(join(publicDir, 'set.json'), 'utf8')).toBe(set.json);
+    expect(readdirSync(publicDir).sort()).toEqual(['set.json']);
+  });
+
+  it('leaves a matched pair alone when the first rename fails', () => {
+    const publicDir = join(TEMP, 'public-first-rename');
+    const set = executableSet('Standing pair');
+    stagePlayDocuments(set, built('standing'), publicDir);
+
+    expect(() =>
+      stagePlayDocuments(executableSet('Newer set'), built('new'), publicDir, {
+        rename: () => {
+          throw new Error('the disk refused the first rename');
+        },
+      }),
+    ).toThrow(/refused the first rename/);
+
+    // Nothing was committed, so the calibration on disk is still the one that
+    // addresses the set beside it - possibly another invocation's, which is the
+    // reason this run may not delete it.
+    expect(readFileSync(join(publicDir, 'calibration.json'), 'utf8')).toBe('{"of":"standing"}\n');
+    expect(readFileSync(join(publicDir, 'set.json'), 'utf8')).toBe(set.json);
+    expect(readdirSync(publicDir).filter((name) => name.endsWith('.staging'))).toEqual([]);
   });
 });

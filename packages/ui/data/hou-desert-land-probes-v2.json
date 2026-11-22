@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "desert-land-local-v2",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0172:7d42aa0c-0408-4b0d-bec5-9861dbcf9ee1"],
+      "decisionFamilies": [
+        "desert-land-enters-tapped",
+        "desert-green-mana-use",
+        "desert-untap-after-mana-use"
+      ],
+      "assertions": [
+        "Desert of the Indomitable enters tapped from hand, produces only G, and untaps after use"
+      ],
+      "testFile": "packages/forge-export/test/observed-hou-desert-land.integration.test.ts"
+    },
+    {
+      "id": "desert-land-engine-v2",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0172:7d42aa0c-0408-4b0d-bec5-9861dbcf9ee1"],
+      "decisionFamilies": [
+        "desert-land-enters-tapped",
+        "desert-green-mana-use",
+        "desert-untap-after-mana-use"
+      ],
+      "assertions": ["Forge plays tapped Deserts, pays for Colossapede, and untaps the paid sources"],
+      "testFile": "packages/forge-export/test/observed-hou-desert-land-bot.integration.test.ts"
+    }
+  ]
+}

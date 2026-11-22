@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "those-who-serve-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0032:b4f27dd9-7ee4-4cdc-8f65-a4349b6aa47f"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["local Those Who Serve pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "those-who-serve-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0032:b4f27dd9-7ee4-4cdc-8f65-a4349b6aa47f"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["engine Those Who Serve pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "ancient-crab-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0040:7c2ca68b-15fb-4691-b549-268df92ca413"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["local Ancient Crab pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "ancient-crab-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0040:7c2ca68b-15fb-4691-b549-268df92ca413"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["engine Ancient Crab pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "dune-beetle-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0089:923cb904-c725-4d57-bc17-7aa87a7cd8e0"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["local Dune Beetle pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "dune-beetle-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0089:923cb904-c725-4d57-bc17-7aa87a7cd8e0"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["engine Dune Beetle pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "hyena-pack-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0139:f9fa8351-567e-4ef4-8346-c58e50c778a6"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["local Hyena Pack pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "hyena-pack-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0139:f9fa8351-567e-4ef4-8346-c58e50c778a6"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["engine Hyena Pack pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "colossapede-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0161:7642bfc5-ace8-419e-b57b-2b881bfe023e"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["local Colossapede pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "colossapede-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0161:7642bfc5-ace8-419e-b57b-2b881bfe023e"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["engine Colossapede pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "dutiful-servants-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0012:7684db4c-6eff-4da1-a410-48d707fb5bf1"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["local Dutiful Servants pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "dutiful-servants-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0012:7684db4c-6eff-4da1-a410-48d707fb5bf1"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["engine Dutiful Servants pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "harrier-naga-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0118:bcdc68c9-f5f3-4c5b-80df-85508cf15f84"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["local Harrier Naga pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "harrier-naga-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0118:bcdc68c9-f5f3-4c5b-80df-85508cf15f84"],
+      "decisionFamilies": ["textless-creature-cast-and-unblocked-attack"],
+      "assertions": ["engine Harrier Naga pays, resolves, waits, and deals its printed combat damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless.integration.test.ts"
+    },
+    {
+      "id": "those-who-serve-local-block-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0032:b4f27dd9-7ee4-4cdc-8f65-a4349b6aa47f"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Local Those Who Serve blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "those-who-serve-engine-block-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0032:b4f27dd9-7ee4-4cdc-8f65-a4349b6aa47f"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Native Those Who Serve blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "ancient-crab-local-block-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0040:7c2ca68b-15fb-4691-b549-268df92ca413"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Local Ancient Crab blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "ancient-crab-engine-block-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0040:7c2ca68b-15fb-4691-b549-268df92ca413"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Native Ancient Crab blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "dune-beetle-local-block-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0089:923cb904-c725-4d57-bc17-7aa87a7cd8e0"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Local Dune Beetle blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "dune-beetle-engine-block-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0089:923cb904-c725-4d57-bc17-7aa87a7cd8e0"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Native Dune Beetle blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "hyena-pack-local-block-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0139:f9fa8351-567e-4ef4-8346-c58e50c778a6"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Local Hyena Pack blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "hyena-pack-engine-block-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0139:f9fa8351-567e-4ef4-8346-c58e50c778a6"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Native Hyena Pack blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "colossapede-local-block-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0161:7642bfc5-ace8-419e-b57b-2b881bfe023e"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Local Colossapede blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "colossapede-engine-block-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0161:7642bfc5-ace8-419e-b57b-2b881bfe023e"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Native Colossapede blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "dutiful-servants-local-block-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0012:7684db4c-6eff-4da1-a410-48d707fb5bf1"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Local Dutiful Servants blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "dutiful-servants-engine-block-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0012:7684db4c-6eff-4da1-a410-48d707fb5bf1"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Native Dutiful Servants blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "harrier-naga-local-block-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["hou-printed-v1:0118:bcdc68c9-f5f3-4c5b-80df-85508cf15f84"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Local Harrier Naga blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    },
+    {
+      "id": "harrier-naga-engine-block-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["hou-printed-v1:0118:bcdc68c9-f5f3-4c5b-80df-85508cf15f84"],
+      "decisionFamilies": ["textless-creature-block-survival-and-cleanup"],
+      "assertions": ["Native Harrier Naga blocks Sacred Cat, survives, and prevents player damage"],
+      "testFile": "packages/forge-export/test/observed-akh-hou-textless-block.integration.test.ts"
+    }
+  ]
+}

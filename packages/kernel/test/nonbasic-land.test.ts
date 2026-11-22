@@ -16,6 +16,7 @@ import {
   validateAction,
 } from '@mtg/kernel';
 import type { GameSession } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { creature, lands, MOUNTAIN, SWAMP } from './cards';
 import { apply, handOidOf, oidOf } from './helpers';
 
@@ -173,7 +174,11 @@ describe('nonbasic land actions', () => {
     let played: GameSession = createSession(setup, seats());
     for (let guard = 0; played.pending !== null && guard < 10_000; guard += 1) {
       const decision = played.pending;
-      const wanted = agent.decide({ state: played.state, player: decision.player, decision });
+      const wanted = agent.decide({
+        state: observeState(played.state, decision.player, 'test/nonbasic-land.test.ts:176'),
+        player: decision.player,
+        decision,
+      });
       const index = decision.options.findIndex((option) => JSON.stringify(option) === JSON.stringify(wanted));
       if (index < 0) throw new Error('nonbasic-land replay agent chose an absent option');
       played = choose(played, index);

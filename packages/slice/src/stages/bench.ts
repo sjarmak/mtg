@@ -14,7 +14,17 @@
  * quotes the simulation number and this one as its ceiling.
  */
 import type { DeckList, GameState } from '@mtg/kernel';
-import { createGame, deepCopy, fork, pendingDecision, playGame, reduce, simpleAgent } from '@mtg/kernel';
+import {
+  agentView,
+  createGame,
+  deepCopy,
+  fork,
+  pendingDecision,
+  playGame,
+  reduce,
+  settleAgentAction,
+  simpleAgent,
+} from '@mtg/kernel';
 import { failStage } from '../errors';
 
 export interface BenchStageResult {
@@ -67,7 +77,12 @@ function midGamePosition(options: BenchStageOptions): GameState {
     const decision = pendingDecision(state);
     if (decision === null) break;
     const agent = agents[decision.player];
-    state = reduce(state, agent.decide({ state, player: decision.player, decision })).state;
+    const action = agent.decide(
+      agentView(state, decision.player, decision, `slice-bench:${String(index)}`, (candidate) =>
+        settleAgentAction(state, candidate),
+      ),
+    );
+    state = reduce(state, action).state;
   }
   return state;
 }

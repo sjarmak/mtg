@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "avr",
+  "name": "Avacyn Restored",
+  "sources": [
+    {
+      "code": "AVR",
+      "catalogFormat": "avr-printed-v1",
+      "catalogSha256": "5949fea49a6113030b16a6c1e8cd055bfe79a044f58fa8bb3ea2d383d72d6525",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/AVR.json",
+        "sha256": "d24e3cb5095e8b828878b901f46026a8b5842ab1d98ad58b2a1e416d7e94e929",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-blink",
+      "name": "White-Blue Blink",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "avr-printed-v1:0067:0d98f0c4-021a-407a-8b0c-5500d804f959",
+          "name": "Mist Raven",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0032:c2ad8639-e586-47f4-baca-2a1af5aa281b",
+          "name": "Restoration Angel",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0012:35b06c8f-5f08-43bd-a548-2a98ba30fd41",
+          "name": "Cloudshift",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0069:1a531b2f-2a9e-4cc9-aea6-9dce239f5511",
+          "name": "Nephalia Smuggler",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0059:b7238136-c8de-4949-9b54-ff75094e0569",
+          "name": "Gryff Vanguard",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0057:f0a44373-0c50-4e14-a7c6-0de66796b81e",
+          "name": "Ghostly Flicker",
+          "count": 3
+        },
+        {
+          "physicalId": "avr-printed-v1:0071:7f41285b-5961-4653-96a0-fb6d27111390",
+          "name": "Peel from Reality",
+          "count": 3
+        },
+        {
+          "physicalId": "avr-printed-v1:0062:5ddd1050-8abd-4dfe-9e52-5b56af358653",
+          "name": "Into the Void",
+          "count": 2
+        },
+        {
+          "physicalId": "avr-printed-v1:0047:fa94262b-f740-48fb-a937-75776864c9ee",
+          "name": "Deadeye Navigator",
+          "count": 2
+        },
+        {
+          "physicalId": "avr-printed-v1:0080:83564e67-2677-4955-a3b9-3b221dbb100b",
+          "name": "Tandem Lookout",
+          "count": 2
+        },
+        {
+          "physicalId": "avr-printed-v1:0226:1381c8f1-a292-4bdf-b20c-a5c2a169ee84",
+          "name": "Cavern of Souls",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0230:f090db87-b7a9-4c88-a211-495b27ae37c9",
+          "name": "Plains",
+          "count": 12
+        },
+        {
+          "physicalId": "avr-printed-v1:0233:25934479-a47e-45b8-bc35-fc4b659b0d68",
+          "name": "Island",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "black-red-sacrifice",
+      "name": "Black-Red Sacrifice",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "avr-printed-v1:0086:2e1fb442-68ff-4249-8e44-87edf6fae211",
+          "name": "Blood Artist",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0089:44a91e62-e946-4101-8cef-d1c147caebf2",
+          "name": "Butcher Ghoul",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0087:97485dbf-2f31-4ed2-a6cd-529ca22c9ac5",
+          "name": "Bloodflow Connoisseur",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0088:387eda28-f35b-48b0-ba59-773d82902327",
+          "name": "Bone Splinters",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0096:785da9a3-09af-45aa-bc04-4ab69cfb2ba4",
+          "name": "Demonlord of Ashmouth",
+          "count": 2
+        },
+        {
+          "physicalId": "avr-printed-v1:0158:ea28bd68-47a8-47c6-be16-75ae622daf0a",
+          "name": "Thatcher Revolt",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0164:dbbefd98-4b17-4cc2-9ef9-8807f594cb16",
+          "name": "Vexing Devil",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0141:0fe68bce-6207-4fd1-9e82-a18fd2d6ddca",
+          "name": "Hound of Griselbrand",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0149:c983e879-d9d2-47cc-9958-506711ca80cd",
+          "name": "Pillar of Flame",
+          "count": 2
+        },
+        {
+          "physicalId": "avr-printed-v1:0226:1381c8f1-a292-4bdf-b20c-a5c2a169ee84",
+          "name": "Cavern of Souls",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0236:339c3f05-444c-4e0a-a556-fc09417ee984",
+          "name": "Swamp",
+          "count": 12
+        },
+        {
+          "physicalId": "avr-printed-v1:0239:f53b7e7e-494b-4346-b18e-0e879bba7cec",
+          "name": "Mountain",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "red-green-soulbond",
+      "name": "Red-Green Soulbond",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "avr-printed-v1:0199:3ee66ef9-10a7-4aab-88f7-84956811cc6c",
+          "name": "Trusted Forcemage",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0144:241cc968-b93e-4fe3-a66d-7776d29aa023",
+          "name": "Lightning Mauler",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0138:73884fd1-5be9-4ad5-8c72-c0fbe27ad4c1",
+          "name": "Hanweir Lancer",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0187:4d3de66c-2283-458f-9d0d-943027520aa2",
+          "name": "Nightshade Peddler",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0175:1d8c794a-7964-41f0-bc9c-27af7cf87aaa",
+          "name": "Druid's Familiar",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0206:8629c598-11c8-4911-acfb-0643e5feffa8",
+          "name": "Wolfir Silverheart",
+          "count": 3
+        },
+        {
+          "physicalId": "avr-printed-v1:0178:78fa2ddc-142b-4562-8812-ecb72e3bae57",
+          "name": "Flowering Lumberknot",
+          "count": 3
+        },
+        {
+          "physicalId": "avr-printed-v1:0192:93cd9be4-1ce4-4a7c-b2a6-98d3fde0a92b",
+          "name": "Sheltering Word",
+          "count": 3
+        },
+        {
+          "physicalId": "avr-printed-v1:0200:46199391-a4f5-4532-b89c-b7691b229bd0",
+          "name": "Ulvenwald Tracker",
+          "count": 3
+        },
+        {
+          "physicalId": "avr-printed-v1:0226:1381c8f1-a292-4bdf-b20c-a5c2a169ee84",
+          "name": "Cavern of Souls",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0239:f53b7e7e-494b-4346-b18e-0e879bba7cec",
+          "name": "Mountain",
+          "count": 11
+        },
+        {
+          "physicalId": "avr-printed-v1:0242:8097c9ce-8fe9-4150-9810-52f6c92c6099",
+          "name": "Forest",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "green-white-humans",
+      "name": "Green-White Humans",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "avr-printed-v1:0022:c6ebec82-9d4a-4e78-b923-37c3a52133e7",
+          "name": "Goldnight Commander",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0011:76cac47a-9e83-4039-8d80-fa9bdadb7527",
+          "name": "Cathedral Sanctifier",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0039:20558f69-9240-49b9-9695-caf75ee2db1b",
+          "name": "Thraben Valiant",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0031:d81d6fe0-c7c2-46a6-811c-f121284937ea",
+          "name": "Nearheath Pilgrim",
+          "count": 3
+        },
+        {
+          "physicalId": "avr-printed-v1:0197:ae80fefb-af78-4f98-8058-71b61e91842f",
+          "name": "Timberland Guide",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0199:3ee66ef9-10a7-4aab-88f7-84956811cc6c",
+          "name": "Trusted Forcemage",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0169:8f067c26-c51d-44d0-a0af-106b5778f06a",
+          "name": "Borderland Ranger",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0032:c2ad8639-e586-47f4-baca-2a1af5aa281b",
+          "name": "Restoration Angel",
+          "count": 3
+        },
+        {
+          "physicalId": "avr-printed-v1:0173:ada93208-5cda-4e2d-b9a7-15345e30b831",
+          "name": "Descendants' Path",
+          "count": 2
+        },
+        {
+          "physicalId": "avr-printed-v1:0226:1381c8f1-a292-4bdf-b20c-a5c2a169ee84",
+          "name": "Cavern of Souls",
+          "count": 4
+        },
+        {
+          "physicalId": "avr-printed-v1:0230:f090db87-b7a9-4c88-a211-495b27ae37c9",
+          "name": "Plains",
+          "count": 13
+        },
+        {
+          "physicalId": "avr-printed-v1:0242:8097c9ce-8fe9-4150-9810-52f6c92c6099",
+          "name": "Forest",
+          "count": 11
+        }
+      ]
+    }
+  ],
+  "contentSha256": "cb7f334d4925f85d71a869b72a6ae57d0e1471111b7f776fb39c74df6317a332"
+}

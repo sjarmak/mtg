@@ -8,11 +8,17 @@
  * agree on every field name, every column spelling, the schema version, and the
  * shape of the parsed types. It also round-trips a parsed game back through the
  * sim's own `replayRow` flattening and compares it to the original line, which
- * proves the reader is a true inverse rather than a plausible one.
+ * proves the reader is a true inverse rather than a plausible one — true, that
+ * is, over every column the reader claims to parse. The per-card GAME-dataset
+ * columns (`deck_`/`sideboard_`/`opening_hand_`/`drawn_`) are the one
+ * deliberate exception: `src/replay/timeline.ts` does not parse them (out of
+ * scope, `mtg-1j00i.3`), so they are stripped from the original line before the
+ * comparison rather than silently missing from `rebuilt`.
  */
 import { describe, expect, it } from 'vitest';
 import type { MutuallyAssignable } from '@mtg/dsl';
 import {
+  CARD_STAT_PREFIXES,
   REPLAY_GAME_COLUMNS,
   REPLAY_TOTAL_FIELDS,
   SIDES as SIM_SIDES,
@@ -27,6 +33,7 @@ import {
   sideColumn as simSideColumn,
   totalColumn as simTotalColumn,
 } from '@mtg/sim';
+import type { ReplayRow } from '@mtg/sim';
 import type { GameMetadata, SideTotals, SideTurnStats, SimExtras, TurnRecord } from '@mtg/sim';
 import {
   GAME_COLUMNS,
@@ -98,8 +105,14 @@ describe('column grammar mirrors @mtg/sim', () => {
   });
 });
 
+/** Drops the per-card GAME-dataset columns the UI reader does not parse. */
+function withoutCardColumns(row: ReplayRow): ReplayRow {
+  const prefixes = CARD_STAT_PREFIXES.map((prefix) => `${prefix}_`);
+  return Object.fromEntries(Object.entries(row).filter(([key]) => !prefixes.some((p) => key.startsWith(p))));
+}
+
 describe('the reader inverts the sim flattening', () => {
-  it('re-flattens each parsed game into the original row', () => {
+  it('re-flattens each parsed game into the original row, minus the columns it does not parse', () => {
     const text = fixtureText();
     const parsed = parseReplayJsonl(text);
     const log = readReplayLog(text);
@@ -110,8 +123,16 @@ describe('the reader inverts the sim flattening', () => {
         extras: game.extras,
         totals: { user: game.totals.user, oppo: game.totals.oppo },
         turns: [...game.turns],
+        // The UI's column mirror does not parse the per-card GAME-dataset
+        // columns (out of scope here, mtg-1j00i.3), so there is nothing to
+        // rebuild them from; `withoutCardColumns` drops the same columns from
+        // the original line before comparing.
+        cards: {},
       });
-      expect(rebuilt).toEqual(parsed.rows[index]);
+      const original = parsed.rows[index];
+      expect(original).toBeDefined();
+      if (original === undefined) continue;
+      expect(rebuilt).toEqual(withoutCardColumns(original));
     }
   });
 });

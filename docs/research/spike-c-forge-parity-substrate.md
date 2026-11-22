@@ -309,19 +309,21 @@ Every measurement above came from these. The scratchpad Forge home exists so tha
 
 ```bash
 # 0. a Forge home that writes nowhere near the artifact directory
+# Start from the repository root and resolve Forge before changing directory.
+FORGE_HOME="$PWD/tools/forge/dist"
 S=/tmp/<scratchpad>
 mkdir -p "$S/forgehome/userdata/decks/constructed"
 cd "$S/forgehome"
-for f in /path/to/mtg/tools/forge/dist/*; do
+for f in "${FORGE_HOME}"/*; do
   b=$(basename "$f")
   case "$b" in forge.profile.properties|userdata) continue;; esac
   ln -sfn "$f" "$b"
 done
 printf 'userDir=%s\ncacheDir=%s\n' "$S/forgehome/userdata" "$S/forgehome/userdata/cache" \
   > forge.profile.properties
-cp -f "/path/to/mtg/tools/forge/dist/res/quest/precons/Abzan Siege.dck" \
+cp -f "${FORGE_HOME}/res/quest/precons/Abzan Siege.dck" \
       userdata/decks/constructed/precon-a.dck
-cp -f "/path/to/mtg/tools/forge/dist/res/quest/precons/Air Forces.dck" \
+cp -f "${FORGE_HOME}/res/quest/precons/Air Forces.dck" \
       userdata/decks/constructed/precon-b.dck
 
 JAR=forge-gui-desktop-2.0.14-jar-with-dependencies.jar
@@ -343,7 +345,7 @@ grep -oE '^[A-Za-z][A-Za-z ]{0,24}:' full-s7-r1.log | sort | uniq -c | sort -rn
 grep -cE '[0-9]+/[0-9]+' full-s7-r1.log                                                        # 0
 
 # 4. §4(a), §5 — read the jar without extracting it
-cd /path/to/mtg/tools/forge/dist
+cd "${FORGE_HOME}"
 unzip -p $JAR forge/view/Main.class        | strings | grep -A2 'Unknown mode'
 unzip -p $JAR forge/view/SimulateMatch.class | strings | grep 'Syntax:'
 unzip -p $JAR forge/game/GameState.class   | strings | grep -iE 'parse|apply|counters'
@@ -351,7 +353,7 @@ unzip -p $JAR forge/game/card/Card.class   | strings | grep -oE 'getNet[A-Za-z]+
 unzip -l $JAR | grep -c '  forge/game/'                                                        # 899
 
 # 5. §5 — the puzzle corpus
-ls /path/to/mtg/tools/forge/dist/res/puzzle/*.pzl | wc -l                             # 371
+ls "${FORGE_HOME}"/res/puzzle/*.pzl | wc -l                             # 371
 ```
 
 Nothing was written under `tools/forge/`, `out/art/` or `out/XMP/`. The `Xvfb :77` process was

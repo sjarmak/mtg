@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "return-noncreature-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0212:a4b32135-7061-4278-a01a-4fcbaadc9706"],
+      "decisionFamilies": ["return-noncreature-graveyard-target"],
+      "assertions": [
+        "Return exiles a selected card from seat 0 and creates one Zombie",
+        "Return exiles a selected card from seat 1 and creates one Zombie"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-return.integration.test.ts"
+    },
+    {
+      "id": "return-noncreature-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0212:a4b32135-7061-4278-a01a-4fcbaadc9706"],
+      "decisionFamilies": ["return-noncreature-graveyard-target"],
+      "assertions": ["Forge casts Return with only noncreature graveyard targets"],
+      "testFile": "packages/forge-export/test/observed-akh-return-noncreature-bot.integration.test.ts"
+    }
+  ]
+}

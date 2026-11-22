@@ -29,20 +29,16 @@
  * the effect vocabulary, and a second copy of that here would be a second
  * answer to one question.
  *
- * **Two absences are deliberate.** There is no `doubleFaced`: `CardSchema` is a
- * discriminated union of seven single-faced kinds with no back, so a
- * double-faced card is not a thing this DSL can express and a shape nothing can
- * ever satisfy would be a permanent red with no fix. And a set's *basics* and
- * the *tokens its cards create* are not read here: neither is a printed card,
- * both are minted at play time, and `setBasics` and `setTokens` are already the
- * one derivation of each — `artSurfaces` composes all three for the art
- * governance check, and a caller wanting the played surfaces should compose
- * them the same way rather than have this file guess.
+ * A set's *basics* and the *tokens its cards create* are deliberately absent:
+ * neither is a printed card, both are minted at play time, and `setBasics` and
+ * `setTokens` are already the one derivation of each — `artSurfaces` composes
+ * all three for the art governance check, and a caller wanting the played
+ * surfaces should compose them the same way rather than have this file guess.
  */
 import { isAttachingAbility, isLoyaltyAbility } from './abilities';
-import type { Card } from './card';
+import { transformedBackFaceOf, type Card } from './card';
 import { manaAbilityOf } from './mana-ability';
-import { printedEffects } from './set-tokens';
+import { printedEffects } from './printed-surface';
 
 /**
  * Every shape a printed card can have, in a fixed order so a report of them
@@ -58,6 +54,8 @@ export const CARD_SHAPES = [
   'land',
   'basicLand',
   'planeswalker',
+  'battle',
+  'doubleFaced',
   'instant',
   'sorcery',
   'modal',
@@ -79,14 +77,14 @@ export const CARD_SHAPES = [
 export type CardShape = (typeof CARD_SHAPES)[number];
 
 /**
- * Whether one card has one shape.
+ * Whether one printed face has one shape.
  *
  * A total switch rather than a predicate table, so a member added to
  * `CARD_SHAPES` fails to compile until it is answered here. The alternative —
  * a record of predicates — makes an unanswered member a silent `false`, which
  * is a shape reported absent from every pool in the repository.
  */
-function cardHasShape(card: Card, shape: CardShape): boolean {
+function faceHasShape(card: Card, shape: CardShape): boolean {
   switch (shape) {
     case 'creature':
       return card.kind === 'creature';
@@ -110,6 +108,10 @@ function cardHasShape(card: Card, shape: CardShape): boolean {
       return card.kind === 'land' && card.basicLandType !== undefined;
     case 'planeswalker':
       return card.kind === 'planeswalker';
+    case 'battle':
+      return card.kind === 'battle';
+    case 'doubleFaced':
+      return card.kind === 'battle' && card.backFace !== undefined;
     case 'instant':
       return card.kind === 'instant';
     case 'sorcery':
@@ -153,21 +155,26 @@ function cardHasShape(card: Card, shape: CardShape): boolean {
   }
 }
 
-/** Every shape this one card has, in `CARD_SHAPES` order. */
+/** Every shape either printed face of this card has, in `CARD_SHAPES` order. */
 export function cardShapes(card: Card): readonly CardShape[] {
-  return CARD_SHAPES.filter((shape) => cardHasShape(card, shape));
+  const backFace = card.kind === 'battle' ? transformedBackFaceOf(card) : null;
+  return CARD_SHAPES.filter(
+    (shape) => faceHasShape(card, shape) || (backFace !== null && faceHasShape(backFace, shape)),
+  );
 }
 
 /** How many of these cards have each shape, including the shapes with none. */
 export function shapeCounts(cards: readonly Card[]): ReadonlyMap<CardShape, number> {
+  const shapesByCard = cards.map((card) => new Set(cardShapes(card)));
   return new Map(
-    CARD_SHAPES.map((shape) => [shape, cards.filter((card) => cardHasShape(card, shape)).length]),
+    CARD_SHAPES.map((shape) => [shape, shapesByCard.filter((shapes) => shapes.has(shape)).length]),
   );
 }
 
 /** The shapes at least one of these cards has, in `CARD_SHAPES` order. */
 export function shapesIn(cards: readonly Card[]): readonly CardShape[] {
-  return CARD_SHAPES.filter((shape) => cards.some((card) => cardHasShape(card, shape)));
+  const present = new Set(cards.flatMap((card) => cardShapes(card)));
+  return CARD_SHAPES.filter((shape) => present.has(shape));
 }
 
 /**

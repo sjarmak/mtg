@@ -48,14 +48,31 @@ export type {
 
 export {
   conditionSupply,
+  counterSourceCount,
   counterSupply,
+  creatureBodies,
+  creatureSupply,
   deckContextOf,
   deckContextWith,
   deckDraws,
+  expectedBestDrawnBody,
+  expectedCounterBearers,
+  formatContextOf,
   subtypeShare,
   subtypeSupply,
 } from './deck-context';
-export type { DeckContext } from './deck-context';
+export type { DeckContext, SubtypeBody } from './deck-context';
+
+export {
+  COLORS_PER_DECK,
+  colorKey,
+  colorSharesOf,
+  formatColorShare,
+  formatIntimidateShare,
+  formatLandwalkShare,
+  formatSubtypeShare,
+} from './format-context';
+export type { FormatContext } from './format-context';
 
 export { priceAgainstDeck, readsTheDeck } from './deck-pricing';
 
@@ -67,6 +84,7 @@ export {
   comparePoolCards,
   DEFAULT_EFFECT_VALUE,
   DEFAULT_TOP_END_REACHABILITY,
+  DEFAULT_REMOVAL_SATURATION,
   EFFECT_PRICING,
   effectMagnitude,
   evaluateCard,
@@ -90,7 +108,13 @@ export type { ColorPair, ColorPairEvaluation, PoolColorCounts } from './color-pa
 export { selectSpells } from './select-spells';
 export type { SpellSelection } from './select-spells';
 
-export { hypergeometricAtLeast, hypergeometricExact, logChoose, minSourcesFor } from './hypergeometric';
+export {
+  hypergeometricAtLeast,
+  hypergeometricExact,
+  hypergeometricWeightedAtLeast,
+  logChoose,
+  minSourcesFor,
+} from './hypergeometric';
 
 export {
   buildChosenManaBase,
@@ -143,6 +167,7 @@ export {
 export type { PreconDeck, PreconFile } from './precon';
 
 export {
+  boosterPool,
   boosterRecipeFor,
   boosterSlotRarityWeights,
   boosterSize,
@@ -158,7 +183,26 @@ export type { BoosterRarityWeight, BoosterRecipe, BoosterSlot, SealedOptions, Se
 
 // The other pack opener: a printing's own sheets, for a caller that has them.
 // `collation.ts` argues why it is a second function rather than an option.
-export { collatedBoosterSize, DEFAULT_COLLATED_BOOSTER_COUNT, openCollatedPool } from './collation';
-export type { CollatedOptions, CollationBooster, CollationSheet, PackCollation } from './collation';
+export {
+  collatedBoosterSize,
+  DEFAULT_COLLATED_BOOSTER_COUNT,
+  openCollatedPool,
+  withoutBasicLandIds,
+  withoutBasicLands,
+} from './collation';
+export { readCollationReduction, readStagedCollation } from './read-collation';
+export type { CollationReduction, StagedCollation } from './read-collation';
+export type {
+  BasicLandRemoval,
+  CollatedOptions,
+  CollationBooster,
+  CollationSheet,
+  PackCollation,
+} from './collation';
+
+// Which slot each dealt card came off, on either opener. `provenance.ts` argues
+// why the answer belongs to the pool rather than to the card.
+export { foilPositions, foilSlots } from './provenance';
+export type { PoolProvenance, SheetSlot } from './provenance';
 
 export { formatDeckReport } from './report';

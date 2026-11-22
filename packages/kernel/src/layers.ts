@@ -48,8 +48,16 @@
  * Neither function names a counter kind. Both walk the declarations, so a part
  * added to `counters.ts` reaches its layers with no edit here.
  */
-import type { CardKind, GrantableKeyword, Keyword, KeywordAbility } from '@mtg/dsl';
-import { isGrantableKeywordAbilityKind, printedCardTypes } from '@mtg/dsl';
+import type {
+  Ability,
+  ActivatedAbility,
+  Card,
+  CardKind,
+  GrantableKeyword,
+  Keyword,
+  KeywordAbility,
+} from '@mtg/dsl';
+import { isGrantableKeywordAbilityKind, printedCardTypes, ZERO_MANA_COST } from '@mtg/dsl';
 import type { CharacteristicMap, Characteristics, LayerContext } from './characteristics';
 import {
   affectedByEffect,
@@ -63,7 +71,9 @@ import type { ContinuousEffect, Layer } from './continuous';
 import { counterKeywords, counterStatDelta, LAYER_ORDER } from './continuous';
 import { orderLayer } from './dependency';
 import type { ObjectId, PlayerId } from './ids';
+import { copiableCardOf, lastKnownCopiableCardOf } from './state';
 import type { GameObject, GameState } from './state';
+import { derivedStaticEffectsForLayer } from './abilities';
 
 /**
  * Deliberately not `zones.getObject`: the layer walk sits *below* zone
@@ -97,6 +107,8 @@ export interface EffectApplication {
 
 export interface LayerDerivation {
   readonly map: CharacteristicMap;
+  /** Current layer-1 copiable card values for each battlefield object. */
+  readonly copiableCards: ReadonlyMap<ObjectId, Card>;
   /** Every effect that applied to at least one permanent, in application order. */
   readonly applications: readonly EffectApplication[];
 }
@@ -134,12 +146,54 @@ function printedMap(state: GameState): CharacteristicMap {
   return new Map(state.battlefield.map((oid) => [oid, printedCharacteristics(objectAt(state, oid))]));
 }
 
+/** Whether the full walk can be skipped without changing any characteristic. */
+function computeCanSkipLayerWalk(state: GameState): boolean {
+  if (state.continuous.length > 0) return false;
+  return !state.battlefield.some((oid) => {
+    const card = copiableCardOf(objectAt(state, oid));
+    return (
+      (card.kind === 'creature' && card.characteristicPowerToughness !== undefined) ||
+      card.abilities.some(
+        (ability) =>
+          ability.kind === 'staticBundle' ||
+          (ability.kind === 'static' &&
+            (ability.modification.kind === 'addSubtype' ||
+              ability.modification.kind === 'grantTriggeredAbility' ||
+              ability.modification.kind === 'grantAnyColorManaAbility')),
+      )
+    );
+  });
+}
+
+const SKIP_LAYER_WALK = new WeakMap<GameState, boolean>();
+
+/**
+ * The fast-path answer for one immutable state.
+ *
+ * Characteristics accessors call this repeatedly while enumerating one
+ * decision. Caching prevents each read from walking the battlefield again;
+ * immutability makes the answer stable for the lifetime of the state object.
+ */
+function canSkipLayerWalk(state: GameState): boolean {
+  const cached = SKIP_LAYER_WALK.get(state);
+  if (cached !== undefined) return cached;
+  const computed = computeCanSkipLayerWalk(state);
+  SKIP_LAYER_WALK.set(state, computed);
+  return computed;
+}
+
 function computeAll(state: GameState): LayerDerivation {
   const battlefield = state.battlefield;
   let map: CharacteristicMap = printedMap(state);
-  const hasIntrinsic = [...map.values()].some((current) => current.powerToughnessDefinition !== null);
-  if (state.continuous.length === 0 && !hasIntrinsic) {
-    return { map: applyCounterStatLayer(state, applyCounterKeywordLayer(state, map)), applications: [] };
+  const copiableCards = new Map(
+    battlefield.map((oid) => [oid, copiableCardOf(objectAt(state, oid))] as const),
+  );
+  if (canSkipLayerWalk(state)) {
+    return {
+      map: applyCounterStatLayer(state, applyCounterKeywordLayer(state, map)),
+      copiableCards,
+      applications: [],
+    };
   }
 
   const applications: EffectApplication[] = [];
@@ -150,16 +204,27 @@ function computeAll(state: GameState): LayerDerivation {
     }
     if (layer === '6') map = applyCounterKeywordLayer(state, map);
     if (layer === '7a') map = applyIntrinsicPowerToughness(state, battlefield, map);
-    const inLayer = state.continuous.filter((effect) => effect.layer === layer);
+    const registered = state.continuous.filter((effect) => effect.layer === layer);
+    let sourceMap = map;
+    if (layer === '6' && registered.length > 0) {
+      for (const effect of orderLayer({ state, battlefield, map: sourceMap }, registered)) {
+        sourceMap = applyEffect({ state, battlefield, map: sourceMap }, effect);
+      }
+    }
+    const inLayer = [...registered, ...derivedStaticEffectsForLayer(state, sourceMap, layer)];
     if (inLayer.length === 0) continue;
     for (const effect of orderLayer({ state, battlefield, map }, inLayer)) {
       const context: LayerContext = { state, battlefield, map };
       const affected = affectedByEffect(context, effect);
       if (affected.length > 0) applications.push({ effect, affected });
       map = applyEffect(context, effect);
+      if (effect.kind === 'copy') {
+        const source = copiableCards.get(effect.copyOf) ?? copiableCardOf(objectAt(state, effect.copyOf));
+        for (const oid of affected) copiableCards.set(oid, source);
+      }
     }
   }
-  return { map, applications };
+  return { map, copiableCards, applications };
 }
 
 const CACHE = new WeakMap<GameState, LayerDerivation>();
@@ -178,6 +243,20 @@ export function derivedCharacteristics(state: GameState): CharacteristicMap {
 }
 
 /**
+ * The card values a copy effect sees right now (CR 707.2 and layer 1).
+ *
+ * A battlefield object can carry both a copy-as-entry snapshot and a newer
+ * continuous copy effect. The layer walk is the single authority that composes
+ * those values. Outside the battlefield the object is its physical card again,
+ * as required for a new zone-change incarnation.
+ */
+export function copiableValuesOf(state: GameState, oid: ObjectId): Card {
+  const object = objectAt(state, oid);
+  if (object.zone !== 'battlefield') return object.card;
+  return deriveLayers(state).copiableCards.get(oid) ?? copiableCardOf(object);
+}
+
+/**
  * The object's current characteristics.
  *
  * Continuous effects apply to permanents on the battlefield (CR 611.2c), so
@@ -186,10 +265,11 @@ export function derivedCharacteristics(state: GameState): CharacteristicMap {
  */
 export function characteristicsOf(state: GameState, oid: ObjectId): Characteristics {
   const object = objectAt(state, oid);
-  if (object.zone !== 'battlefield' && object.card.kind === 'creature') {
+  const card = copiableCardOf(object);
+  if (object.zone !== 'battlefield' && card.kind === 'creature') {
     return evaluateOffBattlefieldPowerToughness(state, object, derivedCharacteristics(state));
   }
-  if (state.continuous.length === 0 && object.card.characteristicPowerToughness === undefined) {
+  if (canSkipLayerWalk(state) && card.characteristicPowerToughness === undefined) {
     return withCounterContribution(object, printedCharacteristics(object));
   }
   return derivedCharacteristics(state).get(oid) ?? printedCharacteristics(object);
@@ -198,6 +278,64 @@ export function characteristicsOf(state: GameState, oid: ObjectId): Characterist
 /** Intrinsic keyword abilities after copy and ability-removal effects. */
 export function keywordAbilitiesOf(state: GameState, oid: ObjectId): readonly KeywordAbility[] {
   return characteristicsOf(state, oid).keywordAbilities;
+}
+
+/** All current non-keyword abilities after copy and layer-6 removal. */
+export function abilitiesOf(state: GameState, oid: ObjectId): readonly Ability[] {
+  const object = objectAt(state, oid);
+  // Off the battlefield no continuous effect applies (CR 611.2c) and the walk's
+  // map holds only battlefield objects, so `characteristicsOf` reports the copiable
+  // card's abilities. On it, a state that skips the walk has no effect that
+  // touches abilities, and the counter contribution never does. Both answer the
+  // same question the derivation would, without building a record per object.
+  const printed =
+    object.zone !== 'battlefield' || canSkipLayerWalk(state)
+      ? copiableCardOf(object).abilities
+      : characteristicsOf(state, oid).abilities;
+  if (object.zone !== 'battlefield' || state.emblems.length === 0) return printed;
+
+  const granted = state.emblems.flatMap((emblem): readonly Ability[] => {
+    const grant = emblem.spec.grantsManaAbility;
+    const [subtype] = grant.filter.subtypes;
+    if (
+      emblem.controller !== controllerOf(state, oid) ||
+      !hasCardType(state, oid, 'land') ||
+      !hasSubtype(state, oid, subtype)
+    ) {
+      return [];
+    }
+    const ability: ActivatedAbility = {
+      kind: 'activated',
+      cost: { mana: ZERO_MANA_COST, tapSelf: true, sacrificeSelf: false },
+      effects: [{ kind: 'addMana', produces: grant.produces, amount: grant.amount }],
+    };
+    return [ability];
+  });
+  return granted.length === 0 ? printed : [...printed, ...granted];
+}
+
+/** Whether a layer-6 effect prohibits activating this permanent's abilities. */
+export function activatedAbilitiesProhibited(state: GameState, oid: ObjectId): boolean {
+  return characteristicsOf(state, oid).activatedAbilitiesProhibited;
+}
+
+/** One current ability slot, using layers on the battlefield and LKI elsewhere. */
+export function currentAbilityAt(state: GameState, oid: ObjectId, index: number): Ability | undefined {
+  const object = state.objects[oid];
+  if (object === undefined) return undefined;
+  return object.zone === 'battlefield'
+    ? abilitiesOf(state, oid)[index]
+    : lastKnownCopiableCardOf(object).abilities[index];
+}
+
+/** The current slot narrowed to an activated ability. */
+export function currentActivatedAbilityAt(
+  state: GameState,
+  oid: ObjectId,
+  index: number,
+): ActivatedAbility | undefined {
+  const ability = currentAbilityAt(state, oid, index);
+  return ability?.kind === 'activated' ? ability : undefined;
 }
 
 export function hasKeywordAbility(state: GameState, oid: ObjectId, kind: KeywordAbility['kind']): boolean {
@@ -235,17 +373,6 @@ function withCounterContribution(object: GameObject, printed: Characteristics): 
  * allocating a characteristics record or a battlefield map. Anything nontrivial
  * falls through to the real walk.
  */
-function noLayerEffects(state: GameState): boolean {
-  return (
-    state.continuous.length === 0 &&
-    !state.battlefield.some(
-      (oid) =>
-        objectAt(state, oid).card.kind === 'creature' &&
-        objectAt(state, oid).card.characteristicPowerToughness !== undefined,
-    )
-  );
-}
-
 /** Effects that currently apply to one object, in CR 613 application order. */
 export function effectsApplyingTo(state: GameState, oid: ObjectId): readonly ContinuousEffect[] {
   return deriveLayers(state)
@@ -266,25 +393,25 @@ function counterDelta(
 const ZERO_DELTA = { power: 0, toughness: 0 } as const;
 
 export function powerOf(state: GameState, oid: ObjectId): number {
-  if (noLayerEffects(state) && objectAt(state, oid).card.characteristicPowerToughness === undefined) {
-    const card = objectAt(state, oid).card;
+  const card = copiableCardOf(objectAt(state, oid));
+  if (canSkipLayerWalk(state) && card.characteristicPowerToughness === undefined) {
     return (card.kind === 'creature' ? card.power : 0) + counterDelta(state, oid).power;
   }
   return characteristicsOf(state, oid).power;
 }
 
 export function toughnessOf(state: GameState, oid: ObjectId): number {
-  if (noLayerEffects(state) && objectAt(state, oid).card.characteristicPowerToughness === undefined) {
-    const card = objectAt(state, oid).card;
+  const card = copiableCardOf(objectAt(state, oid));
+  if (canSkipLayerWalk(state) && card.characteristicPowerToughness === undefined) {
     return (card.kind === 'creature' ? card.toughness : 0) + counterDelta(state, oid).toughness;
   }
   return characteristicsOf(state, oid).toughness;
 }
 
 export function hasKeyword(state: GameState, oid: ObjectId, keyword: Keyword): boolean {
-  if (noLayerEffects(state)) {
+  if (canSkipLayerWalk(state)) {
     const object = objectAt(state, oid);
-    if (object.card.keywords.includes(keyword)) return true;
+    if (copiableCardOf(object).keywords.includes(keyword)) return true;
     // Layer 6 from a counter. Without this the short circuit would answer a
     // different question from the walk it stands in for, which is the one thing
     // a short circuit may never do.
@@ -309,31 +436,40 @@ export function hasGrantableKeyword(state: GameState, oid: ObjectId, keyword: Gr
 }
 
 export function isCreatureObject(state: GameState, oid: ObjectId): boolean {
-  if (noLayerEffects(state)) return objectAt(state, oid).card.kind === 'creature';
+  if (canSkipLayerWalk(state)) return copiableCardOf(objectAt(state, oid)).kind === 'creature';
   return isCreatureCharacteristics(characteristicsOf(state, oid));
 }
 
 /** Does the permanent currently have this card type (layer 4)? */
 export function hasCardType(state: GameState, oid: ObjectId, kind: CardKind): boolean {
-  if (noLayerEffects(state)) {
+  if (canSkipLayerWalk(state)) {
     // The short circuit has to answer the same question the walk does, and an
     // artifact creature is the one card that makes `card.kind` a worse answer
     // than `printedCharacteristics`: its type line reads "Artifact Creature"
     // and its discriminant reads `creature`. Both read `printedCardTypes`, so
     // this branch and the layer walk cannot disagree about a Juggernaut
     // (`mtg-6y4g`).
-    return printedCardTypes(objectAt(state, oid).card).includes(kind);
+    return printedCardTypes(copiableCardOf(objectAt(state, oid))).includes(kind);
   }
   return characteristicsOf(state, oid).cardTypes.includes(kind);
 }
 
 /** Copiable printed starting loyalty, not the counters currently carried. */
 export function startingLoyaltyOf(state: GameState, oid: ObjectId): number | null {
-  if (noLayerEffects(state)) {
-    const card = objectAt(state, oid).card;
+  if (canSkipLayerWalk(state)) {
+    const card = copiableCardOf(objectAt(state, oid));
     return card.kind === 'planeswalker' ? card.startingLoyalty : null;
   }
   return characteristicsOf(state, oid).startingLoyalty;
+}
+
+/** Copiable printed defense, not the counters currently carried. */
+export function startingDefenseOf(state: GameState, oid: ObjectId): number | null {
+  if (canSkipLayerWalk(state)) {
+    const card = copiableCardOf(objectAt(state, oid));
+    return card.kind === 'battle' ? card.defense : null;
+  }
+  return characteristicsOf(state, oid).startingDefense;
 }
 
 /**
@@ -347,8 +483,8 @@ export function startingLoyaltyOf(state: GameState, oid: ObjectId): number | nul
  * with no continuous effects has nothing but the printed line to report.
  */
 export function hasSubtype(state: GameState, oid: ObjectId, subtype: string): boolean {
-  if (noLayerEffects(state)) {
-    const card = objectAt(state, oid).card;
+  if (canSkipLayerWalk(state)) {
+    const card = copiableCardOf(objectAt(state, oid));
     return (
       card.subtypes.includes(subtype) ||
       (card.kind === 'land' && card.basicLandType !== undefined && card.basicLandType === subtype)
@@ -365,7 +501,7 @@ export function hasSubtype(state: GameState, oid: ObjectId, subtype: string): bo
  * `state.continuous` and not a sweep of the codebase.
  */
 export function controllerOf(state: GameState, oid: ObjectId): PlayerId {
-  if (noLayerEffects(state)) return objectAt(state, oid).controller;
+  if (canSkipLayerWalk(state)) return objectAt(state, oid).controller;
   return characteristicsOf(state, oid).controller;
 }
 

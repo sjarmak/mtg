@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { hypergeometricAtLeast, hypergeometricExact, logChoose, minSourcesFor } from '@mtg/deckbuild';
+import {
+  hypergeometricAtLeast,
+  hypergeometricExact,
+  hypergeometricWeightedAtLeast,
+  logChoose,
+  minSourcesFor,
+} from '@mtg/deckbuild';
 
 /**
  * Independent reference implementation: P(zero successes) computed as a plain
@@ -162,5 +168,89 @@ describe('minSourcesFor', () => {
     expect(() => minSourcesFor(-1, 0.9, 7, 60)).toThrow(/successesWanted/);
     expect(() => minSourcesFor(1.5, 0.9, 7, 60)).toThrow(/successesWanted/);
     expect(() => minSourcesFor(2.5, 0.9, 1, 60)).toThrow(/successesWanted/);
+  });
+});
+
+/**
+ * The weighted form, where one card can supply more than one of the thing being
+ * counted (`mtg-x2gb`).
+ *
+ * Every case here is checked against something outside the implementation: the
+ * plain hypergeometric for yields of one, a full enumeration of the subsets for
+ * the mixed cases, and the two ends where the answer is certain.
+ */
+describe('hypergeometricWeightedAtLeast', () => {
+  /** P(sum of the drawn yields >= wanted), by walking every subset of the deck. */
+  function byEnumeration(
+    yields: readonly number[],
+    wanted: number,
+    draws: number,
+    population: number,
+  ): number {
+    const deck = [...yields, ...Array.from({ length: population - yields.length }, () => 0)];
+    let met = 0;
+    let hands = 0;
+    const walk = (index: number, taken: number, total: number): void => {
+      if (taken === draws) {
+        hands += 1;
+        if (total >= wanted) met += 1;
+        return;
+      }
+      if (index === deck.length || deck.length - index < draws - taken) return;
+      walk(index + 1, taken + 1, total + (deck[index] ?? 0));
+      walk(index + 1, taken, total);
+    };
+    walk(0, 0, 0);
+    return met / hands;
+  }
+
+  it('is the plain hypergeometric when every source yields one', () => {
+    for (const [sources, wanted] of [
+      [1, 1],
+      [4, 1],
+      [9, 2],
+      [17, 3],
+      [23, 7],
+    ] as const) {
+      const yields = Array.from({ length: sources }, () => 1);
+      expect(hypergeometricWeightedAtLeast(yields, wanted, 11, 40)).toBeCloseTo(
+        hypergeometricAtLeast(wanted, sources, 11, 40),
+        12,
+      );
+    }
+  });
+
+  it('matches a full enumeration of the hands, mixed yields included', () => {
+    expect(hypergeometricWeightedAtLeast([2, 1, 1], 2, 4, 12)).toBeCloseTo(
+      byEnumeration([2, 1, 1], 2, 4, 12),
+      12,
+    );
+    expect(hypergeometricWeightedAtLeast([3, 2, 1, 1], 4, 5, 14)).toBeCloseTo(
+      byEnumeration([3, 2, 1, 1], 4, 5, 14),
+      12,
+    );
+    expect(hypergeometricWeightedAtLeast([2, 2], 3, 3, 10)).toBeCloseTo(byEnumeration([2, 2], 3, 3, 10), 12);
+  });
+
+  it('meets a two-permanent ask off one card, which is the whole of the defect', () => {
+    // One card that mints two tokens against two cards that mint one each: the
+    // same four permanents in the deck list, and the single card is likelier to
+    // have arrived, because one draw does it.
+    const minter = hypergeometricWeightedAtLeast([2], 2, 11, 40);
+    const pair = hypergeometricWeightedAtLeast([1, 1], 2, 11, 40);
+    expect(minter).toBeGreaterThan(pair);
+    expect(minter).toBeCloseTo(hypergeometricAtLeast(1, 1, 11, 40), 12);
+  });
+
+  it('is certain for an ask of nothing and impossible for one the deck cannot fill', () => {
+    expect(hypergeometricWeightedAtLeast([], 0, 11, 40)).toBe(1);
+    expect(hypergeometricWeightedAtLeast([2, 2], 5, 11, 40)).toBe(0);
+    expect(hypergeometricWeightedAtLeast([], 1, 11, 40)).toBe(0);
+  });
+
+  it('refuses a yield that is not a whole permanent, and a source list longer than the deck', () => {
+    expect(() => hypergeometricWeightedAtLeast([1, 0], 1, 11, 40)).toThrow(/positive integer/);
+    expect(() => hypergeometricWeightedAtLeast([1.5], 1, 11, 40)).toThrow(/positive integer/);
+    expect(() => hypergeometricWeightedAtLeast([1, 1, 1], 1, 2, 2)).toThrow(/exceeds population/);
   });
 });

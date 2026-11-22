@@ -132,9 +132,10 @@ function playedRow(): void {
  * squashed slot keep a width it no longer had the height for, and the height
  * alone would shrink an unsquashed face to 88/63 of what the row settled.
  */
-const TAPPED_FACE_WIDTH = `min(${cssNumber((CARD_TRIM_MM.width / CARD_TRIM_MM.height) * 100)}%, 100cqh)`;
+const TAPPED_FACE_WIDTH = `min(${cssNumber((CARD_TRIM_MM.width / CARD_TRIM_MM.height) * 100)}%, ${cssNumber((CARD_TRIM_MM.width / CARD_TRIM_MM.height) * 100)}cqh)`;
 
-const SPELL_FACE = ".mtg-board__spells > .mtg-slot[data-tapped='true'] > .mtg-card";
+const SPELL_SLOT = '.mtg-board__spells > .mtg-attach > .mtg-slot';
+const SPELL_FACE = `${SPELL_SLOT}[data-tapped='true'] > .mtg-card`;
 
 describe('a tapped permanent on the played table', () => {
   it('takes its size from the width of its slot, which is the axis the row settled', () => {
@@ -146,12 +147,16 @@ describe('a tapped permanent on the played table', () => {
     // the row — hence 63/88 of the slot, which lays the rotated card into the
     // slot's width exactly.
     //
-    // The `100cqh` beside it is `mtg-5f9`: a slot the block-axis cap squashed is
+    // The second term is `mtg-5f9`: a slot the block-axis cap squashed is
     // no longer square, and a face still drawn from its width hangs out of the
     // top of it and has its leading edge cut by the row, which is the rotated
     // `...dgeland Barracuda` in `references/UI_issues/view_issue3.png`. On an
     // unsquashed slot the term is exactly non-binding, so it costs the tall
-    // tables nothing.
+    // tables nothing. It carries the same 63/88 share as the first term and not
+    // `100cqh`, which is `mtg-6hhr`: an upright face in a squashed slot is 63/88
+    // of the slot's height, so a tapped one drawn from the whole height was
+    // wider than its neighbor by 88/63. ../play/tapped-cap.browser.test.ts
+    // measures it, 110 against 78.8 at a 110px cap.
     playedRow();
     const face = styleOf(SPELL_FACE);
     expect(face.getPropertyValue('width')).toBe(TAPPED_FACE_WIDTH);
@@ -160,14 +165,12 @@ describe('a tapped permanent on the played table', () => {
   });
 
   it('makes the slot a size container, or the height term resolves against an ancestor', () => {
-    // `100cqh` without `container-type: size` on the slot is not a smaller
+    // A `cqh` without `container-type: size` on the slot is not a smaller
     // number, it is a different element's height — the nearest ancestor query
     // container, which is the whole row. The width rule and this one are one
     // change and neither is worth anything alone.
     playedRow();
-    expect(
-      styleOf(".mtg-board__spells > .mtg-slot[data-tapped='true']").getPropertyValue('container-type'),
-    ).toBe('size');
+    expect(styleOf(`${SPELL_SLOT}[data-tapped='true']`).getPropertyValue('container-type')).toBe('size');
   });
 
   it('is turned rather than shrunk, so nothing scales it down', () => {
@@ -184,7 +187,7 @@ describe('a tapped permanent on the played table', () => {
     // had, so a tapped permanent is its untapped neighbor turned rather than a
     // smaller copy of it.
     playedRow();
-    const slot = styleOf(".mtg-board__spells > .mtg-slot[data-tapped='true']");
+    const slot = styleOf(`${SPELL_SLOT}[data-tapped='true']`);
     expect(slot.getPropertyValue('aspect-ratio')).toBe('1 / 1');
   });
 
@@ -193,7 +196,7 @@ describe('a tapped permanent on the played table', () => {
     // crowded-row caps settle. This cascade assertion protects the other half:
     // flex layout must not shrink only the tapped slot's wider row-axis box.
     playedRow();
-    const slot = styleOf(".mtg-board__spells > .mtg-slot[data-tapped='true']");
+    const slot = styleOf(`${SPELL_SLOT}[data-tapped='true']`);
     expect(slot.getPropertyValue('flex-shrink')).toBe('0');
     expect(slot.getPropertyValue('aspect-ratio')).toBe('1 / 1');
   });
@@ -223,8 +226,8 @@ describe('a tapped permanent on the played table', () => {
    */
   it('reaches the width floor holding the same card an upright slot does', () => {
     playedRow();
-    const upright = styleOf(".mtg-board__spells > .mtg-slot:not([data-tapped='true'])");
-    const tapped = styleOf(".mtg-board__spells > .mtg-slot[data-tapped='true']");
+    const upright = styleOf(`${SPELL_SLOT}:not([data-tapped='true'])`);
+    const tapped = styleOf(`${SPELL_SLOT}[data-tapped='true']`);
     const px = (style: { readonly getPropertyValue: (name: string) => string }): number =>
       Number(style.getPropertyValue('min-width').replace('px', ''));
     expect(px(upright), 'an upright slot declares no width floor to turn').toBeGreaterThan(0);

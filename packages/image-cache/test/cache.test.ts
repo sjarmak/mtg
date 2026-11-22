@@ -115,4 +115,22 @@ describe('caching an image', () => {
   it('caches beside the card store rather than under a package', () => {
     expect(DEFAULT_IMAGE_CACHE_DIR).toBe('data/images');
   });
+
+  /**
+   * `mtg-21ka`, 2026-08-23. The default above is relative to the repo root,
+   * which is the only place it means anything; a caller that passed it as it
+   * stands made a second 27 MB cache under `packages/ui/` and re-fetched every
+   * file the real one already held. Nothing threw, because two directories are
+   * both valid directories.
+   *
+   * Refused before the download, so a bad directory costs no request.
+   */
+  it('refuses a relative directory, naming the fix, before it fetches anything', async () => {
+    const refuse = (): Promise<never> => Promise.reject(new Error('the cache fetched on a bad directory'));
+    await expect(cacheImage(BOLT, { dir: DEFAULT_IMAGE_CACHE_DIR, download: refuse })).rejects.toThrow(
+      /absolute directory/u,
+    );
+    await expect(cacheImage(BOLT, { dir: 'data/images', download: refuse })).rejects.toThrow(/repo root/u);
+    await expect(cacheImage(BOLT, { dir: '', download: refuse })).rejects.toThrow(/absolute directory/u);
+  });
 });

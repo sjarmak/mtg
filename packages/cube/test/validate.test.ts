@@ -10,6 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { AvailabilityMeasured } from '../src/availability';
+import { DEFAULT_NATIVE_DRAFT_BOT_POLICY } from '@mtg/draft-export';
 import {
   balancedCube,
   fixtureCard,
@@ -17,6 +18,7 @@ import {
   fixtureEntry,
   lopsidedCube,
 } from './support/fixture-cube';
+import type { CubeEntry } from '../src/validate';
 import { measureCube, measuredColors, validateCube } from '../src/validate';
 
 const CRITERIA = fixtureCriteria();
@@ -33,6 +35,7 @@ function measuredAvailability(
 ): AvailabilityMeasured {
   return {
     kind: 'measured',
+    botPolicy: DEFAULT_NATIVE_DRAFT_BOT_POLICY,
     seed: 'test/hand-built',
     drafts: 2,
     seats: 4,
@@ -128,6 +131,113 @@ describe('an unstated criterion', () => {
     expect(result.findings.map((finding) => finding.code)).not.toContain('curve-band');
     expect(result.findings.map((finding) => finding.code)).not.toContain('archetype-support');
     expect(result.measurement.curve).toStrictEqual([{ manaValue: 1, cards: 48 }]);
+  });
+});
+
+/**
+ * mtg-iu4b: bands that do not overlap still do not have to cover anything.
+ *
+ * The fixture curve is stated `MV 1-2` and `MV 4+`, which the band refinement
+ * accepts — the two do not overlap and the open-ended one is last — and which
+ * says nothing at all about a three-drop or about a free spell. The pair below
+ * is the whole check: the same hole is a finding when a card is in it and
+ * silence when nothing is, because failing a cube for a gap its list never
+ * reaches would be failing it for the shape of a list nobody built.
+ */
+describe('a stated curve with a hole in it', () => {
+  const HOLED = fixtureCriteria({
+    curve: [
+      { from: 1, to: 2, minCards: 20, maxCards: 30 },
+      { from: 4, to: null, minCards: 20, maxCards: 30 },
+    ],
+  });
+
+  /**
+   * `balancedCube` with the first `count` of its four-drops restated at
+   * `manaValue`, each keeping its own color.
+   *
+   * Restated rather than added, so the list stays 50 cards in five even colors
+   * and the only thing that moved is the axis under test. The cube deals its
+   * colors in WUBRG order, so a small `count` takes white's.
+   */
+  function restated(count: number, manaValue: number, typeLine?: string): readonly CubeEntry[] {
+    let moved = 0;
+    return balancedCube().map((entry) => {
+      if (moved === count || entry.card.manaValue !== 4) return entry;
+      moved += 1;
+      const color = entry.card.colorIdentity;
+      const pip = `{${color}}`;
+      return fixtureEntry(
+        fixtureCard({
+          name: entry.card.name,
+          manaCost: manaValue === 0 ? '{0}' : manaValue === 1 ? pip : `{${String(manaValue - 1)}}${pip}`,
+          manaValue,
+          colorIdentity: color,
+          ...(typeLine === undefined ? {} : { typeLine }),
+        }),
+        entry.archetypes,
+      );
+    });
+  }
+
+  const uncovered = (entries: readonly CubeEntry[], subject: string) =>
+    validateCube(entries, HOLED).findings.find(
+      (finding) => finding.code === 'curve-uncovered' && finding.subject === subject,
+    );
+
+  it('says nothing about a gap the list never reaches', () => {
+    // Nothing in the balanced cube costs three, so `MV 3` is a hole in the
+    // stated curve that judges nothing and costs nothing.
+    const result = validateCube(balancedCube(), HOLED);
+    expect(result.findings).toStrictEqual([]);
+    expect(result.ok).toBe(true);
+  });
+
+  it('faults an interior gap, naming the cards in it and the bands either side', () => {
+    const result = validateCube(restated(2, 3), HOLED);
+    expect(result.ok, 'a cube judging two of its cards by nothing was reported as clean').toBe(false);
+    expect(uncovered(restated(2, 3), 'MV 3')).toMatchObject({ measured: 2, required: 0 });
+    expect(uncovered(restated(2, 3), 'MV 3')?.detail).toContain('between the stated MV 1-2 and MV 4+');
+    expect(uncovered(restated(2, 3), 'MV 3')?.detail).toContain('W fixture 6, W fixture 7');
+  });
+
+  it('reaches the hole from below, which is where a free spell falls', () => {
+    // The bead's motivating case: bands stated from 1 leave every zero-cost
+    // card unjudged, and a fix that only floored the bottom band would still
+    // leave the interior gap the case above measures.
+    expect(uncovered(restated(1, 0), 'MV 0')).toMatchObject({ measured: 1, required: 0 });
+    expect(uncovered(restated(1, 0), 'MV 0')?.detail).toContain('below the lowest stated band, MV 1-2');
+  });
+
+  it('leaves lands out of it, because the bands were never measured over them', () => {
+    // A land is out of `measurement.curve` entirely, so its zero mana value is
+    // not a hole in a curve stated from one. Every real cube would fail on its
+    // whole land base otherwise.
+    expect(uncovered(restated(1, 0, 'Basic Land — Plains'), 'MV 0')).toBeUndefined();
+  });
+
+  it('counts copies and names each card once', () => {
+    const entries = restated(1, 3).map((entry) =>
+      entry.card.manaValue === 3 ? { ...entry, count: 3 } : entry,
+    );
+    const finding = validateCube(
+      entries,
+      fixtureCriteria({ singleton: false, curve: HOLED.curve }),
+    ).findings.find((one) => one.code === 'curve-uncovered');
+    expect(finding).toMatchObject({ measured: 3 });
+    expect(finding?.detail).toContain('3 cards the cube holds are judged by no band: W fixture 6');
+  });
+
+  it('names eight of them and counts the rest, rather than printing sixty', () => {
+    const finding = uncovered(restated(9, 3), 'MV 3');
+    expect(finding).toMatchObject({ measured: 9 });
+    expect(finding?.detail).toContain('W fixture 6, W fixture 7');
+    expect(finding?.detail).toContain('and 1 more card');
+  });
+
+  it('says nothing when the designer stated no curve', () => {
+    const result = validateCube(restated(2, 3), fixtureCriteria({ curve: [] }));
+    expect(result.findings.map((finding) => finding.code)).not.toContain('curve-uncovered');
   });
 });
 

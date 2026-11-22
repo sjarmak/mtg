@@ -87,7 +87,7 @@ import type { GameEvent, ObjectId, PlayerId, ZoneId } from '@mtg/kernel';
 import { withAbilityNames } from './ability-names';
 import { describeEvent, stepWords } from './narrate';
 import type { LogNames } from './narrate';
-import { namesFor } from './visibility';
+import { namesFor, namesVisibleTo } from './visibility';
 
 /** How much of the stream is drawn. Every level draws the same groups. */
 export type LogDensity = 'story' | 'detail' | 'everything';
@@ -116,6 +116,17 @@ export interface LogLine {
   readonly text: string;
   /** The tier it was drawn at, which is what a lower level would have left out. */
   readonly role: EventRole;
+  /**
+   * The kernel objects this sentence names, in the order it names them.
+   *
+   * `mtg-47o` and `mtg-exe`, which were one question wearing two hats: a log
+   * line points at the object it names rather than printing an identity mark
+   * beside it, so two of one seat's Gloom Hands are told apart by eye. These are
+   * the handles that pointing uses, matched against `../board/CardSlot.ts`'s
+   * `data-permanent-key`. Empty on a line that names no object, and empty on one
+   * whose names this seat may not read.
+   */
+  readonly objects: readonly string[];
 }
 
 export interface LogStep {
@@ -164,7 +175,11 @@ export function eventRole(event: GameEvent): EventRole {
     case 'manaPaid':
     case 'replacementApplied':
     case 'continuousEffectAdded':
+    case 'permanentAnimated':
+    case 'controlEffectAdded':
+    case 'subtypeAdded':
     case 'keywordGranted':
+    case 'keywordAbilityRemoved':
     case 'continuousEffectsExpired':
     case 'combatDamageStep':
     case 'damageCleared':
@@ -177,12 +192,16 @@ export function eventRole(event: GameEvent): EventRole {
     case 'landPlayed':
     case 'spellCast':
     case 'spellCopied':
+    case 'spellTargetsChanged':
     case 'abilityActivated':
     case 'abilityTriggered':
+    case 'delayedZoneChangeScheduled':
+    case 'delayedCounterPlacementScheduled':
     case 'triggerTargetsChosen':
     case 'triggerDeclined':
     case 'triggerRemoved':
     case 'spellCountered':
+    case 'abilityCountered':
     case 'spellFizzled':
     case 'spellDeclined':
     case 'unlessPaid':
@@ -190,10 +209,14 @@ export function eventRole(event: GameEvent): EventRole {
     case 'effectSkipped':
     case 'zoneChanged':
     case 'permanentEntered':
+    case 'emblemCreated':
     case 'tokenCreated':
     case 'damageDealt':
     case 'damagePrevented':
     case 'countersChanged':
+    case 'battleDefeated':
+    case 'freeCastDeclined':
+    case 'counterRemoved':
     case 'lifeChanged':
     case 'permanentDestroyed':
     case 'permanentSacrificed':
@@ -201,11 +224,14 @@ export function eventRole(event: GameEvent): EventRole {
     case 'attackersDeclared':
     case 'blockersDeclared':
     case 'blockerOrderChosen':
+    case 'attackerOrderChosen':
     case 'cardsMilled':
     case 'cardsScried':
+    case 'coinFlipped':
     case 'cardsDiscarded':
     case 'handRevealed':
     case 'libraryTopRevealed':
+    case 'libraryCardsRevealed':
     case 'librarySearched':
     case 'librarySearchRevealed':
     case 'handMulliganed':
@@ -213,6 +239,7 @@ export function eventRole(event: GameEvent): EventRole {
     case 'playerLost':
     case 'gameEnded':
     case 'untapSkipped':
+    case 'delayedSpellCopyScheduled':
       // `untapSkipped` is story where `permanentUntapped` beside it is detail.
       // An untap is visible on the board and the line is a caption for it; a
       // skipped untap changes nothing anyone can see, so at the detail tier the
@@ -277,8 +304,10 @@ function claimedMoves(events: readonly GameEvent[]): Map<string, number> {
       case 'spellFizzled':
       case 'spellCountered':
       case 'spellDeclined':
-      case 'unlessPaid':
         claim(moveKey(event.oid, 'stack', 'graveyard'));
+        break;
+      case 'unlessPaid':
+        if (event.source === undefined) claim(moveKey(event.oid, 'stack', 'graveyard'));
         break;
       default:
         break;
@@ -349,6 +378,12 @@ export interface LogInput {
   readonly density: LogDensity;
 }
 
+/** A finished sentence and the objects it named. See `narrate` below. */
+interface Narrated {
+  readonly text: string;
+  readonly objects: readonly string[];
+}
+
 interface OpenStep {
   readonly key: string;
   readonly title: string;
@@ -375,6 +410,55 @@ interface OpenTurn {
  * the next beginning belong to the step that just ran, and a group closed early
  * would have to invent somewhere else to put them.
  */
+/**
+ * One narrated sentence and the objects it named.
+ *
+ * `mtg-47o` and `mtg-exe`. Pointing needs the ids behind the words, and the
+ * tempting shape is a second exhaustive switch over `GameEvent` beside
+ * `./visibility.ts`'s, reading each member's object fields. That would be two
+ * functions that can disagree about what an event says, which is the one thing
+ * this directory's convention actually protects: `./narrate.ts` is shared with
+ * the replay route for precisely that reason, and a switch written here would
+ * go stale the first time a sentence stopped mentioning a field it still
+ * carries.
+ *
+ * So the ids come out of the narration itself. `LogNames` is the seam every
+ * card name passes through, so a book that records what it is asked for and
+ * forwards to the real one yields exactly the objects the finished sentence
+ * mentions, in the order it mentions them, and covers a forty-ninth kernel
+ * event the day it is added without being edited.
+ *
+ * **A redacted event names nothing.** `namesFor` swaps the whole book per event
+ * rather than per object, so on a line the viewer may not read, every id behind
+ * those words is one this seat is not entitled to; pointing at them would put
+ * back on the board exactly what the sentence took out. `./visibility.ts` stays
+ * the one authority on that, here as everywhere else.
+ *
+ * Deduplicated, because a sentence that names one object twice — a source that
+ * is also its own target — is still one thing to point at, and because the list
+ * is read as a set on the board.
+ */
+function narrate(event: GameEvent, viewer: PlayerId, names: LogNames): Narrated {
+  const book = namesFor(event, viewer, names);
+  if (!namesVisibleTo(event, viewer)) return { text: describeEvent(event, book), objects: [] };
+  const spoken: string[] = [];
+  const keep = (oid: string): void => {
+    if (!spoken.includes(oid)) spoken.push(oid);
+  };
+  const watched: LogNames = {
+    player: (id): string => book.player(id),
+    card: (oid): string => {
+      keep(oid);
+      return book.card(oid);
+    },
+    target: (oid): string => {
+      keep(oid);
+      return book.target(oid);
+    },
+  };
+  return { text: describeEvent(event, watched), objects: spoken };
+}
+
 export function buildLog(input: LogInput): readonly LogTurn[] {
   const { events, viewer, density } = input;
   const names = withAbilityNames(input.names, events);
@@ -413,11 +497,13 @@ export function buildLog(input: LogInput): readonly LogTurn[] {
       };
       turn.steps.push(step);
     }
+    const said = narrate(event, viewer, names);
     step.lines.push({
       key: `event-${String(index)}`,
       index,
-      text: describeEvent(event, namesFor(event, viewer, names)),
+      text: said.text,
       role,
+      objects: said.objects,
     });
   }
 
@@ -474,13 +560,15 @@ export function summarizeLog(input: LogInput): LogSummary {
   const role = roles[newestAt];
   if (newest === undefined || role === undefined) return { count, newest: null };
   const names = withAbilityNames(input.names, events);
+  const said = narrate(newest, viewer, names);
   return {
     count,
     newest: {
       key: `event-${String(newestAt)}`,
       index: newestAt,
-      text: describeEvent(newest, namesFor(newest, viewer, names)),
+      text: said.text,
       role,
+      objects: said.objects,
     },
   };
 }

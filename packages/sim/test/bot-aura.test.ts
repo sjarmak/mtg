@@ -30,6 +30,7 @@ import type { Card } from '@mtg/dsl';
 import { parseCard } from '@mtg/dsl';
 import type { GameState, ObjectId, PlayerId, Target } from '@mtg/kernel';
 import { pendingDecision, scenario, validateAction } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { chooseCast, DEFAULT_GREEDY_CONFIG, scoreTargets } from '@mtg/sim';
 import { creature, PLAINS, SWAMP } from './cards';
 
@@ -147,7 +148,10 @@ function score(state: GameState, aura: Card, oid: ObjectId): number {
 function chosenHost(state: GameState): ObjectId {
   const decision = pendingDecision(state, 512);
   if (decision === null) throw new Error('no decision pending');
-  const action = chooseCast({ state, player: 0, decision }, config);
+  const action = chooseCast(
+    { state: observeState(state, 0, 'test/bot-aura.test.ts:150'), player: 0, decision },
+    config,
+  );
   if (action === null) throw new Error('the bot declined to cast the Aura');
   expect(validateAction(state, action)).toBeNull();
   const target = action.targets[0];

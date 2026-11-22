@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "m11",
+  "name": "Magic 2011",
+  "sourceCodes": ["M11"],
+  "products": [{ "id": "m11-draft", "setCode": "M11", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["m11-draft", "m11-draft", "m11-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["m11-draft", "m11-draft", "m11-draft", "m11-draft", "m11-draft", "m11-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

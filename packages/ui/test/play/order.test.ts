@@ -37,6 +37,7 @@ import {
   DEFAULT_ENUMERATION_CAP,
   driveDeclaration,
   humanSeat,
+  ownedDecision,
   pendingDecision,
   reduce,
   scenario,
@@ -121,7 +122,7 @@ function orderingState(attackers: readonly Card[], blockers: readonly Card[]): G
 }
 
 function sessionOn(state: GameState, cap = DEFAULT_ENUMERATION_CAP): GameSession {
-  const pending = pendingDecision(state, cap);
+  const pending = ownedDecision(state, cap);
   if (pending === null) throw new Error('the board left nobody to ask');
   return {
     seats: [humanSeat(SEATS[0]), humanSeat(SEATS[1])],
@@ -137,7 +138,7 @@ function sessionOn(state: GameState, cap = DEFAULT_ENUMERATION_CAP): GameSession
 }
 
 function decisionOn(state: GameState, cap = DEFAULT_ENUMERATION_CAP): Decision {
-  const decision = pendingDecision(state, cap);
+  const decision = ownedDecision(state, cap);
   if (decision === null) throw new Error('the board left nobody to ask');
   return decision;
 }
@@ -262,13 +263,13 @@ describe('the ordering model', () => {
     const distinct = new Set(onlyGroup(plan).blockers.map((blocker) => blocker.name)).size;
     expect(distinct).toBeLessThan(blockerCount(plan));
     expect(asksInSteps(decision)).toBe(true);
-    expect(decision.options).toHaveLength(distinct);
+    expect(decision.options.filter((option) => option.type === 'orderBlockers')).toHaveLength(distinct);
     expect(decision.complete).toBe(true);
 
     render(h(PlayView, { session: sessionOn(state), viewer: 0, names: SEATS, onChoose: vi.fn() }));
     // Eight rows and no confirm, because nothing is placed yet. Linear in the
     // block where the flat list was factorial in it, which is the whole bead.
-    expect(within(rail()).getAllByRole('button')).toHaveLength(8);
+    expect(within(rail()).getAllByRole('button')).toHaveLength(9);
     expect(within(rail()).queryByRole('note')).not.toBeNull();
     // And they are drawn in the group's own order, which is what makes a row
     // findable on a board where three of them read the same words.
@@ -293,12 +294,13 @@ describe('the ordering model', () => {
     const same = creature('Coil Sentry');
     const state = orderingState([creature('Dune Runner')], [same, same, same]);
     const decision = decisionOn(state);
-    expect(decision.options).toHaveLength(1);
+    expect(decision.options.filter((option) => option.type === 'orderBlockers')).toHaveLength(1);
     expect(decision.complete).toBe(true);
     expect(orderPlan(state, SEATS, decision)).toBeNull();
 
     render(h(PlayView, { session: sessionOn(state), viewer: 0, names: SEATS, onChoose: vi.fn() }));
-    expect(within(rail()).getAllByRole('button')).toHaveLength(1);
+    expect(within(rail()).getAllByRole('button')).toHaveLength(2);
+    expect(within(rail()).getByRole('button', { name: 'Concede' })).not.toBeNull();
   });
 
   it('places a blocker on the first press and takes it back on the second', () => {
@@ -337,7 +339,7 @@ describe('the completeness walk', () => {
     expect(space).toBe(6);
     const decision = decisionOn(state, space);
     if (decision.kind !== 'orderBlockers') throw new Error('the board is not ordering blockers');
-    expect(decision.options).toHaveLength(space);
+    expect(decision.options.filter((option) => option.type === 'orderBlockers')).toHaveLength(space);
     expect(decision.complete).toBe(true);
 
     const group = onlyGroup(planOn(state, space));
@@ -346,7 +348,7 @@ describe('the completeness walk', () => {
 
     const submitted = new Set<number>();
     for (const [index, option] of decision.options.entries()) {
-      if (option.type !== 'orderBlockers') throw new Error('a non-ordering was enumerated');
+      if (option.type !== 'orderBlockers') continue;
       const order = option.orders[0]?.blockers;
       if (order === undefined) throw new Error('an ordering named no attacker');
       const clear = screen.queryByRole('button', { name: ORDER_CLEAR_LABEL });
@@ -383,7 +385,7 @@ describe('the completeness walk', () => {
     // button is Clear, which arrives with the first placement.
     expect(within(rail()).queryByRole('note')).not.toBeNull();
     expect(rows(group)).toHaveLength(3);
-    expect(within(rail()).getAllByRole('button')).toHaveLength(4);
+    expect(within(rail()).getAllByRole('button')).toHaveLength(5);
     expect(accessibleName(rowFor(group, first.oid))).toBe(`${first.name}, damage 1 of 3`);
     expect(onChoose).not.toHaveBeenCalled();
 
@@ -410,7 +412,7 @@ describe('two blockers the position cannot tell apart', () => {
     const state = orderingState([creature('Ridge Courier')], [twin, twin, creature('Odd Picket')]);
     const decision = decisionOn(state);
     if (decision.kind !== 'orderBlockers') throw new Error('the board is not ordering blockers');
-    expect(decision.options).toHaveLength(3);
+    expect(decision.options.filter((option) => option.type === 'orderBlockers')).toHaveLength(3);
 
     const plan = planOn(state);
     const group = onlyGroup(plan);
@@ -466,7 +468,7 @@ describe('a block bigger than the enumeration cap', () => {
     const space = orderSpace([3, 2, 1]);
     expect(space).toBe(60);
     const decision = decisionOn(state, space);
-    expect(decision.options).toHaveLength(space);
+    expect(decision.options.filter((option) => option.type === 'orderBlockers')).toHaveLength(space);
     expect(decision.complete).toBe(true);
   });
 

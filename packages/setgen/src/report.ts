@@ -129,7 +129,7 @@ export interface ArchetypeSummary {
   readonly shortfalls: readonly string[];
 }
 
-export function summariseArchetypes(
+export function summarizeArchetypes(
   plans: readonly ArchetypePlan[],
   reports: readonly PairViability[],
 ): ArchetypeSummary[] {

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "m15",
+  "archetypes": [
+    {
+      "id": "white-blue-tempo",
+      "name": "White-Blue Tempo",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Dauntless River Marshal",
+        "physicalId": "m15-printed-v1:0008:efedfd1e-5073-47e2-9137-5f2bf4e436e3"
+      },
+      "plan": "Build around Dauntless River Marshal: Deploy evasive attackers, tap or bounce opposing blockers, and end the game before the opponent recovers tempo."
+    },
+    {
+      "id": "blue-black-lifegain",
+      "name": "Blue-Black Lifegain",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Jorubai Murk Lurker",
+        "physicalId": "m15-printed-v1:0065:7af346ac-32a6-49a8-986d-834b2c8c0478"
+      },
+      "plan": "Build around Jorubai Murk Lurker: Use lifelink and incidental life gain to stabilize races while efficient interaction creates favorable attacks."
+    },
+    {
+      "id": "black-red-attrition",
+      "name": "Black-Red Attrition",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Nightfire Giant",
+        "physicalId": "m15-printed-v1:0109:11da48a7-903d-43f5-8085-1b3790ed079a"
+      },
+      "plan": "Build around Nightfire Giant: Trade removal and creatures aggressively, then let repeatable late-game damage win the resource exchange."
+    },
+    {
+      "id": "red-green-monsters",
+      "name": "Red-Green Monsters",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Kird Chieftain",
+        "physicalId": "m15-printed-v1:0151:4189a909-2e20-4dc7-894c-21446da5b0cf"
+      },
+      "plan": "Build around Kird Chieftain: Curve mana acceleration into oversized threats, then grant trample or remove blockers to convert size into lethal damage."
+    },
+    {
+      "id": "green-white-convoke",
+      "name": "Green-White Convoke",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Sunblade Elf",
+        "physicalId": "m15-printed-v1:0202:5e9925c5-98d5-4eb9-8aaa-a96b63a5812d"
+      },
+      "plan": "Build around Sunblade Elf: Create a wide board early, tap spare creatures to convoke larger plays, and finish with a team-wide boost."
+    }
+  ]
+}

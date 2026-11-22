@@ -20,8 +20,8 @@ import {
   printedPowerToughness,
   renderTypeLine,
 } from '@mtg/dsl';
-import { faceAttributes, frameTreatment } from '@mtg/ui';
-import type { SymbolSet } from '@mtg/ui';
+import { faceAttributes, frameTreatment } from '@mtg/render-spec';
+import type { SymbolSet } from '@mtg/render-spec';
 import type { ArtResolver, CardArtImage } from './art';
 import { NO_ART, renderArtSlot } from './art';
 import { bleedGround, frameDefs, frameIds, frameLayers, trimMarks } from './frame';
@@ -59,7 +59,7 @@ export interface RenderOptions {
   readonly scope?: string;
   /**
    * Which glyph set the rules box paints its brace tokens with. Defaults to
-   * `@mtg/ui`'s registry default; `original` is the set with no third-party
+   * `@mtg/render-spec`'s registry default; `original` is the set with no third-party
    * artwork in it, which is what a file leaving this machine is published with.
    */
   readonly symbols?: SymbolSet;

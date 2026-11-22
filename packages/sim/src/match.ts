@@ -8,6 +8,7 @@
  * Every field is plain data. That is a hard requirement, not a style choice:
  * the whole spec is `structuredClone`d into each worker.
  */
+import type { Card } from '@mtg/dsl';
 import type { DeckList } from '@mtg/kernel';
 import type { BotSpec } from './bots';
 import type { EnumerationCaps, GameBudget } from './driver';
@@ -19,6 +20,8 @@ export interface MatchSpec {
   /** Seat 0 plays `decks[0]` in every game; only the play/draw seat alternates. */
   readonly decks: readonly [DeckList, DeckList];
   readonly bots: readonly [BotSpec, BotSpec];
+  /** Public format distribution used by rollout policies for hidden-state sampling. */
+  readonly rolloutPool?: readonly Card[] | undefined;
   readonly alternatePlayFirst?: boolean | undefined;
   readonly maximumTurns?: number | undefined;
   readonly budget?: GameBudget | undefined;
@@ -40,6 +43,7 @@ export interface ResolvedMatchSpec {
   readonly games: number;
   readonly decks: readonly [DeckList, DeckList];
   readonly bots: readonly [BotSpec, BotSpec];
+  readonly rolloutPool: readonly Card[] | undefined;
   readonly alternatePlayFirst: boolean;
   readonly maximumTurns: number;
   readonly budget: GameBudget | undefined;
@@ -65,6 +69,7 @@ export function resolveMatchSpec(spec: MatchSpec): ResolvedMatchSpec {
     games: spec.games,
     decks: spec.decks,
     bots: spec.bots,
+    rolloutPool: spec.rolloutPool,
     alternatePlayFirst: spec.alternatePlayFirst ?? true,
     maximumTurns: spec.maximumTurns ?? 40,
     budget: spec.budget,

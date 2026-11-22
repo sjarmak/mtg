@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "rav",
+  "name": "Ravnica: City of Guilds",
+  "sourceCodes": ["RAV"],
+  "products": [{ "id": "rav-draft", "setCode": "RAV", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["rav-draft", "rav-draft", "rav-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["rav-draft", "rav-draft", "rav-draft", "rav-draft", "rav-draft", "rav-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

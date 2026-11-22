@@ -50,6 +50,7 @@ function logOver(events: readonly GameEvent[]): SimGameLog {
     endOfTurnStates: new Map(),
     metadata: buildMetadata(METADATA),
     extras: buildExtras(METADATA, 'lifeZero'),
+    userDeck: FIXTURE_DECK_RW,
   });
 }
 

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-controller-contract-receipt",
+  "id": "modes-v1",
+  "engineRuntime": {
+    "forgeVersion": "2.0.14",
+    "forgeJarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9",
+    "scriptArchiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+    "resourcesSha256": "2db6340b96dda3551d3dde6083a958c86c870cd3418d85451711a025499b6fba",
+    "protocolVersion": 2
+  },
+  "decisionFamilies": [
+    "modes"
+  ],
+  "sourceRegions": [
+    {
+      "path": "packages/forge-export/bridge/ForgeBridge.java",
+      "beginMarker": "        public List<AbilitySub> chooseModeForAbility(",
+      "endMarker": "        private boolean isReviewedUmezawasJitteCharm(",
+      "sha256": "aa06c1cf6c64a86bd7b7f2a95d8b45b423a63800cc870248ff6c0661aa597190"
+    }
+  ],
+  "controllerClaims": [
+    {
+      "controller": "local",
+      "scenarioReceiptIds": [
+        "doomfall-local-mode-v1"
+      ]
+    },
+    {
+      "controller": "engine",
+      "scenarioReceiptIds": [
+        "doomfall-engine-mode-v1"
+      ]
+    }
+  ],
+  "evidence": {
+    "scenarioReceipts": [
+      {
+        "receiptId": "doomfall-engine-mode-v1",
+        "file": {
+          "path": "scenarios/doomfall-engine-mode-v1.json",
+          "sha256": "19b62234ca37244e3737280abe2f71ee51cba6959dc0868a1aa71270c99557ad"
+        }
+      },
+      {
+        "receiptId": "doomfall-local-mode-v1",
+        "file": {
+          "path": "scenarios/doomfall-local-mode-v1.json",
+          "sha256": "b10f1467ab640ce9e7072c3aba54e79c974cd179da7ac24e73acfdf1eb8c2798"
+        }
+      }
+    ]
+  }
+}

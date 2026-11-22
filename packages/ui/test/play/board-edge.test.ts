@@ -38,8 +38,9 @@
  * `../../src/styles/board/hand.ts` sizes every battlefield face as a share of
  * this row's *content* box, and a bare `padding-inline` would have taken 8px
  * off the row and 1.14px off every permanent on the table. What that trades
- * against is `../../src/styles/card.ts`'s `BOARD_RULES_MIN_REM`, which drops
- * the rules box when the face's own content box reaches 4rem — an 80.00px face
+ * against is `../../src/styles/card.ts`'s `BOARD_RULES_PANEL_MAX_REM`, which
+ * moves the rules box out of the column and over the picture when the face's own
+ * content box reaches 4rem — an 80.00px face
  * against the 82.61px one a 1280x800 board draws at four a side, so 2.61px of
  * headroom rather than the fifth of a pixel this bead was filed with. Measured
  * before and after:

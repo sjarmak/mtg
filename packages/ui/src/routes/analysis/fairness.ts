@@ -164,8 +164,6 @@ function readingCard(reading: RunFairnessReading): ReactElement {
 
 export interface FairnessPanelProps {
   readonly fairness: RunFairness;
-  /** The run's own label, so the verdict names what it is a verdict about. */
-  readonly about: string;
   readonly games: number;
   readonly distinctGames: number;
 }
@@ -173,9 +171,12 @@ export interface FairnessPanelProps {
 /**
  * The verdict, its four readings, and every miss with its number.
  *
- * The headline sentence names the run and the evidence behind it in the same
- * breath, because "fair" over four hundred games and "fair" over ten thousand
- * are different claims and the word alone does not separate them.
+ * The headline sentence carries the evidence behind the verdict, because "fair"
+ * over four hundred games and "fair" over ten thousand are different claims and
+ * the word alone does not separate them. It does not name the run: the picker
+ * two rows above does that, and a run label is producer-written text that
+ * usually states its own game count, so naming it here read
+ * "XMP - 2700 games - 2,700 games, 2,700 distinct trajectories."
  */
 export function FairnessPanel(props: FairnessPanelProps): ReactElement {
   const { fairness } = props;
@@ -192,7 +193,7 @@ export function FairnessPanel(props: FairnessPanelProps): ReactElement {
       createElement(
         'span',
         { className: 'mtg-verdict__note' },
-        `${props.about} — ${integer(props.games)} games, ${integer(props.distinctGames)} distinct trajectories.`,
+        `${integer(props.games)} games, ${integer(props.distinctGames)} distinct trajectories.`,
       ),
       fairness.verdict === 'unjudged'
         ? createElement(

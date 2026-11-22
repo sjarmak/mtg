@@ -419,8 +419,15 @@ describe('what the mat does with the height it is given', () => {
    */
   it('drops the lanes zone heads and keeps the rail ones', () => {
     const { play, control } = paint();
-    for (const head of all(play, '.mtg-board__side .mtg-zone__head')) {
-      expect(computed(head, 'display')).toBe('none');
+    // Except on a zone holding nothing, where the head is the only thing left to
+    // read and the sentence beside it needs a subject (`mtg-dcxg.10`,
+    // `../replay/empty-zone-share.browser.test.ts`). The zones that hold cards
+    // are the ones this rule is about, and the cards are the zone.
+    for (const zone of all(play, '.mtg-board__side .mtg-zone')) {
+      const empty = zone.getAttribute('data-empty') === 'true';
+      for (const head of all(zone, '.mtg-zone__head')) {
+        expect(computed(head, 'display')).toBe(empty ? 'flex' : 'none');
+      }
     }
     for (const zone of all(play, '.mtg-board__side .mtg-zone')) {
       expect(zone.getAttribute('aria-label')).not.toBeNull();
@@ -649,11 +656,27 @@ describe('the move list is on the width axis', () => {
     for (const pod of all(play, '.mtg-board__pods > .mtg-pod')) {
       expect(computed(pod, 'flex-grow')).toBe('0');
     }
-    // And the rail's zones still give way to the log rather than the other way round.
-    for (const zone of all(play, '.mtg-board__rail > .mtg-zone')) {
-      expect(computed(zone, 'flex-grow')).toBe('0');
-      expect(computed(zone, 'max-height')).not.toBe('none');
-    }
+    // And the section showing takes the rail. It used to share the column with a
+    // stack and two graveyards and this line swept all of them for `flex-grow:
+    // 0`; `mtg-rgc.7` moved every one of those out, and `mtg-aqxi.2` put what
+    // was left behind a set of tabs — so the log is now inside the rail's body
+    // rather than beside it, and the chain that has to grow is three links long:
+    // the rail takes the column, the body takes the rail, the log takes the
+    // body. A break anywhere along it is a 272px column drawing two log lines,
+    // which is the state the column was in before `mtg-rgc.4` split it.
+    const rail = one(play, '.mtg-board__rail > .mtg-rail--play');
+    expect(computed(rail, 'flex-grow')).toBe('1');
+    const railBody = one(rail, '.mtg-rail__body');
+    expect(computed(railBody, 'flex-grow')).toBe('1');
+    // The shorthand, because `../../src/styles/panel.ts` writes it as one and
+    // jsdom does not expand a shorthand into its axes.
+    expect(computed(railBody, 'overflow')).toBe('auto');
+    expect(computed(one(railBody, '.mtg-log'), 'flex-grow')).toBe('1');
+    expect(computed(one(play, '.mtg-rail__head'), 'flex-grow')).toBe('0');
+    // The tab strip is the one part of the rail that never gives way: a control
+    // that shrinks with the column is a control that stops being pressable, and
+    // these three are how every other section is reached.
+    expect(computed(one(rail, '.mtg-rail__tabs'), 'flex-grow')).toBe('0');
   });
 
   /**
@@ -738,21 +761,24 @@ describe('the rail pays its own way', () => {
    */
   it('floors the block left in the rail and makes it clip its own content', () => {
     const play = paintAltered(12);
-    // One selector and, since `mtg-rgc.7`, one match: the log. The auto-pass
-    // controls used to need a second (`.mtg-stops`) and have moved into the turn
+    // Nothing is placed directly in the rail any more. The auto-pass controls
+    // used to need a second selector (`.mtg-stops`) and have moved into the turn
     // and phase indicator in the toolbar; the stack and the two graveyards left
-    // in the other direction. The count is asserted rather than the class,
-    // because a fourth block arriving here is the thing that would put the
-    // finding back, and it would arrive under a selector this one already
-    // matches.
-    const blocks = all(play, '.mtg-board__rail > .mtg-zone');
-    expect(blocks.length).toBe(1);
-    expect(blocks[0]?.getAttribute('class')).toContain('mtg-log');
-    for (const block of blocks) {
-      expect(computed(block, 'min-height'), 'a rail block can be shrunk to nothing').not.toBe('0px');
-      expect(computed(block, 'overflow'), 'a rail block paints outside itself').toBe('hidden');
-      expect(computed(block, 'max-height'), 'a rail block can push the others out').not.toBe('none');
-    }
+    // in the other direction under `mtg-rgc.7`; and `mtg-aqxi.2` put the log,
+    // which was the last one, inside the tabbed rail. The count is asserted
+    // rather than the class, because a block arriving here is the thing that
+    // would put the finding back, and it would arrive under a selector this one
+    // already matches — the difference now is that the expected count is zero
+    // and the rail is the column's one child.
+    expect([...play.querySelectorAll('.mtg-board__rail > .mtg-zone')].length).toBe(0);
+    // What the column holds instead, and the shape that keeps it from becoming
+    // a sliver: it clips rather than painting over the table, and it is not
+    // capped, because a section showing alone gives way to nobody.
+    const rail = one(play, '.mtg-board__rail > .mtg-rail--play');
+    expect(computed(rail, 'overflow'), 'the rail paints outside itself').toBe('hidden');
+    const log = one(rail, '.mtg-rail__body > .mtg-zone');
+    expect(computed(log, 'overflow'), 'the section paints outside the rail').toBe('hidden');
+    expect(computed(log, 'max-block-size'), 'a section alone in the body is capped').toBe('none');
   });
 
   it('scrolls the rail rather than hiding what will not fit in it', () => {

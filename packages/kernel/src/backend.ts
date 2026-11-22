@@ -15,16 +15,12 @@
  * which is what makes the arm's contract with undo and with the parity harness
  * real rather than nominal.
  *
- * **A move id is the option's index, as a string.** That keeps the record the
- * kernel already keeps — `choices` is a list of integers — while giving the
- * contract the opaque token it wants. The cast is the only place the two
- * spellings meet on the read side, `indexOf`; `moveIdOf` is the write side, and
- * it is checked rather than assumed. `GameSession.choices` is `readonly
- * Choice[]`, `number | Action` (`session.ts`, `mtg-y1t.2`), so the type already
- * promises `wrap` may see an `Action` even though nothing in this file can
- * produce one today (the next paragraph says why): `moveIdOf` throws on one
- * rather than stringifying it into a record `reopen` cannot read back
- * (`mtg-2guj`).
+ * **An enumerated move id is the option index as a string.** A bounded text
+ * input is the one other spelling: `@mtg/engine` encodes the answer with the
+ * descriptor the backend projected, so it remains an opaque `MoveId` and the
+ * neutral contract learns no Magic decision kind. `moveIdOf` writes both and
+ * `applyRecordedMove` reads both. Every other constructed `Action` still throws
+ * at the moment it would create a record `reopen` cannot reproduce (`mtg-2guj`).
  *
  * # Three things this deliberately does not carry across
  *
@@ -34,7 +30,8 @@
  * the neutral contract and a surface that wants it holds a `GameSession`
  * (`@mtg/engine`'s `decision.ts` argues why). One consequence follows and it is
  * a real limit: a declaration the enumeration truncated is unreachable through
- * this backend, because the neutral channel offers only what was enumerated.
+ * this backend. Generic text is not that door: its descriptor names a primitive
+ * input shape, not a member of the kernel action algebra.
  *
  * **Beats.** A beat is pacing for one person at one screen: it asks nothing,
  * records nothing, and `SessionOptions` is where it lives precisely because it
@@ -57,17 +54,20 @@ import type {
   RecordedBackend,
   RecordedSession,
   SeatId,
+  SeatSpec,
   SessionError,
   SessionRecord,
   SessionStatus,
   SubmitResult,
   SessionSpec,
 } from '@mtg/engine';
+import { rulesOf, textSubmission, textValueOf } from '@mtg/engine';
 import { simpleAgent } from './simple-agent';
 import type { PlayerAgent } from './agent';
 import type { Choice, GameSession, Seat } from './session';
-import { botSeat, choose, humanSeat, replaySession } from './session';
+import { botSeat, choose, chooseAction, humanSeat, replaySession } from './session';
 import type { GameSetup } from './setup';
+import { DEFAULT_CONFIG } from './setup';
 import { stateFingerprint } from './fork';
 import {
   localSeatsOf,
@@ -75,6 +75,7 @@ import {
   projectEvent,
   projectState,
   seatProjection,
+  CARD_NAME_TEXT_INPUT,
 } from './backend-projection';
 
 export const KERNEL_BACKEND_ID = 'kernel';
@@ -125,8 +126,22 @@ export function kernelBackend(options: KernelBackendOptions): RecordedBackend {
   const defaultSeed = options.defaultSeed ?? 'kernel-backend';
 
   const start = (table: SessionSpec, moves: readonly MoveId[]): OpenResult<RecordedSession> => {
+    // `open` refuses a table `refusalsFor` rejects before calling this, but
+    // `reopen` hands a stored record straight here, so the two-seat shape is
+    // checked again rather than assumed of an outside record.
+    const twoSeats = twoSeatsOf(table);
+    if (twoSeats === null) {
+      return {
+        ok: false,
+        error: {
+          kind: 'backend-failure',
+          message: `the kernel refuses this table: ${String(table.seats.length)} seats: the kernel plays the standard two-player game only`,
+        },
+      };
+    }
+    const [seatOne, seatTwo] = twoSeats;
     const seed = table.seed ?? defaultSeed;
-    const resolved = options.content.resolve(table.content, [table.seats[0].deck, table.seats[1].deck], seed);
+    const resolved = options.content.resolve(table.content, [seatOne.deck, seatTwo.deck], seed);
     if (!resolved.ok) {
       return {
         ok: false,
@@ -137,40 +152,62 @@ export function kernelBackend(options: KernelBackendOptions): RecordedBackend {
         },
       };
     }
-    const seats = seatsOf(table, agentFor);
-    const indices = moves.map(indexOf);
-    const bad = indices.findIndex((index) => index === null);
-    if (bad !== -1) {
-      return {
-        ok: false,
-        error: {
-          kind: 'unknown-move',
-          message: `move ${String(bad)} of the record is not an option index`,
-          offered: 0,
-        },
-      };
-    }
+    const seats = seatsOf(seatOne, seatTwo, agentFor);
     try {
-      const session = replaySession(resolved.setup, seats, indices as readonly number[]);
+      let session = replaySession(resolved.setup, seats, []);
+      for (const move of moves) session = applyRecordedMove(session, move);
       return { ok: true, session: wrap(resolved.setup, seats, table, seed, session) };
     } catch (cause) {
       return { ok: false, error: replayFailure(cause) };
     }
   };
 
+  /**
+   * Why the kernel will not seat a table, by name.
+   *
+   * The variant is refused here and not only in `supports`, because `open` is
+   * reachable without `supports` and a kernel game dealt from a commander table
+   * would be the standard game wearing the wrong rules: `createGame` reads no
+   * variant, and the one thing `checkBackend` would then find is a command
+   * zone that never appeared.
+   */
+  const refusalsFor = (table: SessionSpec): readonly string[] => {
+    const reasons: string[] = [];
+    if (table.seats.length !== 2) {
+      reasons.push(`${String(table.seats.length)} seats: the kernel plays the standard two-player game only`);
+    }
+    if (table.content.kind !== 'dsl-set') {
+      reasons.push(
+        `content kind "${table.content.kind}": the kernel runs DSL cards, and a printed card is not one`,
+      );
+    }
+    const rules = rulesOf(table);
+    if (rules.variant !== 'standard' || rules.startingLife !== DEFAULT_CONFIG.startingLife) {
+      reasons.push(
+        `rules "${rules.variant}" at ${String(rules.startingLife)} life: the kernel plays the standard two-player game at ${String(DEFAULT_CONFIG.startingLife)} life`,
+      );
+    }
+    return reasons;
+  };
+
   return {
     id: KERNEL_BACKEND_ID,
     determinism: 'recorded',
     capabilities: CAPABILITIES,
-    supports: (table: SessionSpec): Promise<readonly string[]> =>
-      Promise.resolve(
-        table.content.kind === 'dsl-set'
-          ? []
-          : [
-              `content kind "${table.content.kind}": the kernel runs DSL cards, and a printed card is not one`,
-            ],
-      ),
-    open: (table: SessionSpec): Promise<OpenResult<RecordedSession>> => Promise.resolve(start(table, [])),
+    supports: (table: SessionSpec): Promise<readonly string[]> => Promise.resolve(refusalsFor(table)),
+    open: (table: SessionSpec): Promise<OpenResult<RecordedSession>> => {
+      const refusals = refusalsFor(table);
+      if (refusals.length > 0) {
+        return Promise.resolve({
+          ok: false,
+          error: {
+            kind: 'backend-failure',
+            message: `the kernel refuses this table: ${refusals.join('; ')}`,
+          },
+        });
+      }
+      return Promise.resolve(start(table, []));
+    },
     reopen: (record: SessionRecord): Promise<OpenResult<RecordedSession>> => {
       if (record.backend !== KERNEL_BACKEND_ID) {
         return Promise.resolve({
@@ -186,22 +223,45 @@ export function kernelBackend(options: KernelBackendOptions): RecordedBackend {
   };
 }
 
+/**
+ * Narrows a table's seats to the pair the kernel plays, or `null` for a pod.
+ *
+ * `SessionSpec.seats` seats two or more for Commander's sake
+ * (`mtg-bc2.154.6.5.1`); the kernel stays two-player (ADR-0001 §9), so this is
+ * where a table that is not exactly a pair is told apart from one that is.
+ */
+function twoSeatsOf(table: SessionSpec): readonly [SeatSpec, SeatSpec] | null {
+  const [one, two, ...pod] = table.seats;
+  return pod.length === 0 ? [one, two] : null;
+}
+
 function seatsOf(
-  table: SessionSpec,
+  one: SeatSpec,
+  two: SeatSpec,
   agentFor: (seat: SeatId, name: string) => PlayerAgent,
 ): readonly [Seat, Seat] {
-  const one = table.seats[0];
-  const two = table.seats[1];
   return [
     one.controller === 'local' ? humanSeat(one.name) : botSeat(agentFor(0, one.name)),
     two.controller === 'local' ? humanSeat(two.name) : botSeat(agentFor(1, two.name)),
   ];
 }
 
-/** A move id is an option index rendered as a string, and this is the only reader. */
+/** Reads the enumerated form of a move id; text answers use `textValueOf`. */
 function indexOf(move: MoveId): number | null {
   if (!/^\d+$/.test(move)) return null;
   return Number.parseInt(move, 10);
+}
+
+/** Replays either an enumerated index or the generic text answer it encoded. */
+function applyRecordedMove(session: GameSession, move: MoveId): GameSession {
+  const index = indexOf(move);
+  if (index !== null) return choose(session, index);
+  const name = textValueOf(CARD_NAME_TEXT_INPUT, move);
+  const pending = session.pending;
+  if (name === null || pending?.kind !== 'cardName') {
+    throw new Error(`move ${JSON.stringify(move)} is not an answer to the pending decision`);
+  }
+  return chooseAction(session, { type: 'chooseCardName', player: pending.player, name });
 }
 
 /**
@@ -236,6 +296,7 @@ function indexOf(move: MoveId): number | null {
  */
 export function moveIdOf(choice: Choice): MoveId {
   if (typeof choice === 'number') return String(choice);
+  if (choice.type === 'chooseCardName') return textSubmission(CARD_NAME_TEXT_INPUT, choice.name);
   throw new Error(
     `this session cannot be recorded: a "${choice.type}" declaration the option list does not name has no index, and the neutral contract has no move id for a constructed action`,
   );
@@ -300,7 +361,11 @@ function wrap(
         });
       }
       const index = indexOf(move);
-      if (index === null || index < 0 || index >= decision.options.length) {
+      const text = textValueOf(CARD_NAME_TEXT_INPUT, move);
+      if (
+        (index === null || index < 0 || index >= decision.options.length) &&
+        (decision.kind !== 'cardName' || text === null)
+      ) {
         return Promise.resolve({
           ok: false,
           error: {
@@ -311,9 +376,30 @@ function wrap(
         });
       }
       try {
+        let next: GameSession;
+        if (index !== null && index >= 0 && index < decision.options.length) {
+          next = choose(session, index);
+        } else {
+          const pending = session.pending;
+          if (text === null || pending?.kind !== 'cardName') {
+            return Promise.resolve({
+              ok: false,
+              error: {
+                kind: 'unknown-move',
+                message: `"${move}" is not an answer to the pending decision`,
+                offered: decision.options.length,
+              },
+            });
+          }
+          next = chooseAction(session, {
+            type: 'chooseCardName',
+            player: pending.player,
+            name: text,
+          });
+        }
         return Promise.resolve({
           ok: true,
-          session: wrap(setup, seats, table, seed, choose(session, index)),
+          session: wrap(setup, seats, table, seed, next),
         });
       } catch (cause) {
         return Promise.resolve({ ok: false, error: replayFailure(cause) });

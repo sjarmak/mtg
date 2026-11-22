@@ -115,9 +115,9 @@ export function cycleStop(settings: AutoPassSettings, step: Step): AutoPassSetti
  * A mark is a shape, and a shape has no accessible name; these are what go in
  * the node's own name and in the announcement after a press. "Own turn" and
  * "opponent's turn" rather than "yours" and "theirs", for the reason the seat
- * names and the prompt copy stopped saying "you": two people share this screen
- * and the seat a pronoun resolves against changes every time the question
- * crosses the table. A stop set is one-sided relative to whoever is being asked,
+ * names and the prompt copy stopped saying "you": on a two-human table the seat
+ * a pronoun resolves against changes every time the question crosses the
+ * table. A stop set is one-sided relative to whoever is being asked,
  * which is what those two words mean here.
  */
 export const STOP_STATE_WORDS: Readonly<Record<StopState, string>> = {

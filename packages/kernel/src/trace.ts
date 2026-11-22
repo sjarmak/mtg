@@ -12,19 +12,36 @@ import type { GameObject, GameState, PlayerState } from './state';
 export interface Trace {
   readonly state: GameState;
   readonly events: readonly GameEvent[];
+  /**
+   * The immutable state at each event's emission, used only while one reduction
+   * is settling. Optional so test probes that state a raw trace retain their
+   * historical final-state fallback.
+   */
+  readonly eventStates?: readonly GameState[];
 }
 
 export function beginTrace(state: GameState): Trace {
-  return { state, events: [] };
+  return { state, events: [], eventStates: [] };
 }
 
 export function emit(trace: Trace, ...events: readonly GameEvent[]): Trace {
   if (events.length === 0) return trace;
-  return { state: trace.state, events: [...trace.events, ...events] };
+  const priorStates = trace.eventStates ?? trace.events.map(() => trace.state);
+  return {
+    state: trace.state,
+    events: [...trace.events, ...events],
+    eventStates: [...priorStates, ...events.map(() => trace.state)],
+  };
 }
 
 export function withState(trace: Trace, state: GameState): Trace {
-  return state === trace.state ? trace : { state, events: trace.events };
+  return state === trace.state
+    ? trace
+    : {
+        state,
+        events: trace.events,
+        ...(trace.eventStates === undefined ? {} : { eventStates: trace.eventStates }),
+      };
 }
 
 export function mapState(trace: Trace, fn: (state: GameState) => GameState): Trace {

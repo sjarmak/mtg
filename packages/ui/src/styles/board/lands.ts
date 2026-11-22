@@ -62,7 +62,7 @@ import { HOVER_SCALE } from './geometry';
  * every pixel the band takes past the row's slack comes off the face's height
  * with its width unmoved, which is not a smaller card but a squashed one.
  *
- * Read in chrome-headless-shell 151 over `../../tools/card-uniformity.ts` on
+ * Read in chrome-headless-shell 151 over `../../../tools/card-uniformity.ts` on
  * the flagship set, four permanents a side and a seven-land mana base, walking
  * this constant with `BOARD_FACE_MAX_SHARE` left at the 85% it shipped with.
  * The near seat's face, and its trim against the printed 0.716:
@@ -88,6 +88,18 @@ import { HOVER_SCALE } from './geometry';
  * re-walk when it lands.
  */
 const LAND_TILE_HEIGHT_REM = 3.5;
+
+/**
+ * The complete art-tile height when distinct spells wrap.
+ *
+ * The original 3rem left the crowded combat lane 4.1px short at 1024x768 and
+ * 3px short at 1392x766. The mana band cannot donate its scrollbar and the
+ * wrapped spell row cannot donate a card edge, so the crowded tile gives back
+ * those four pixels. Uncrowded rows retain the 3.5rem tile above, and 2.75rem
+ * keeps the entire art window visible rather than letting the lane crop its
+ * foot.
+ */
+const CROWDED_LAND_TILE_HEIGHT_REM = 2.75;
 
 /**
  * And how tall a land tile is on a table too short to give it 3.5rem.
@@ -182,6 +194,19 @@ export const LANDS_CSS = `
   flex: none; width: auto; height: ${cssNumber(LAND_TILE_HEIGHT_REM)}rem;
   min-width: 0; min-height: 0;
   aspect-ratio: ${cssNumber(ART_WINDOW.width)} / ${cssNumber(ART_WINDOW.height)};
+}
+/* A wrapped spell row has exhausted piling and the readable face floor. Return
+   twelve pixels from the roomy mana tile before asking either complete card
+   row to clip; every land remains present in its own rail.
+   The padding drops too, on the same floor: it is not the tile, so giving it
+   back does not touch a single picture, and it returns the crowded lane the
+   few pixels a wrapped spell row was already taking from it
+   (mtg-t08c7, combat-allocation.browser.test.ts). */
+.mtg-zone__body[data-layout='board']:has(> .mtg-board__spells[data-crowded='true']) > .mtg-lands {
+  padding-block: 0;
+}
+.mtg-zone__body[data-layout='board']:has(> .mtg-board__spells[data-crowded='true']) > .mtg-lands > .mtg-slot[data-slot='play'] {
+  height: ${cssNumber(CROWDED_LAND_TILE_HEIGHT_REM)}rem;
 }
 .mtg-slot > .mtg-card[data-size='art'] { width: 100%; height: 100%; max-height: 100%; aspect-ratio: auto; }
 .mtg-slot[data-tapped='true'] > .mtg-card[data-size='art'] {

@@ -24,7 +24,7 @@
  */
 import { effectsFor, manaValue } from '@mtg/dsl';
 import type { Action, AgentView, Decision, ObjectId, Target } from '@mtg/kernel';
-import { spellAwaitingMay, spellAwaitingUnless, triggerOnStack } from '@mtg/kernel';
+import { spellAwaitingMay, stackAwaitingUnless, triggerOnStack } from '@mtg/kernel';
 import type { GreedyBotConfig } from '../config';
 import { scoreEffectTargets } from './target';
 
@@ -43,6 +43,8 @@ function targetValue(
   config: GreedyBotConfig,
   oid: ObjectId,
   targets: readonly (Target | null)[],
+  multiTargets?: Readonly<Record<number, readonly Target[]>>,
+  damageAllocations?: Readonly<Record<number, readonly number[]>>,
 ): number {
   const pending = triggerOnStack(view.state, oid);
   if (pending === null) return 0;
@@ -63,6 +65,8 @@ function targetValue(
     config.race,
     0,
     pending.source,
+    multiTargets,
+    damageAllocations,
   );
 }
 
@@ -82,7 +86,14 @@ export function chooseTriggerTargets(
   let bestValue = Number.NEGATIVE_INFINITY;
   for (const option of decision.options) {
     if (option.type !== 'chooseTriggerTargets') continue;
-    const value = targetValue(view, config, option.oid, option.targets);
+    const value = targetValue(
+      view,
+      config,
+      option.oid,
+      option.targets,
+      option.multiTargets,
+      option.damageAllocations,
+    );
     if (value > bestValue) {
       best = option;
       bestValue = value;
@@ -189,9 +200,9 @@ export function answerUnless(
   config: GreedyBotConfig,
   decision: UnlessDecision,
 ): AnswerUnlessAction {
-  const pending = spellAwaitingUnless(view.state);
+  const pending = stackAwaitingUnless(view.state);
   const denied =
-    pending === null || pending.entry.oid !== decision.oid
+    pending === null || pending.entry.oid !== decision.oid || pending.kind !== 'spell'
       ? 0
       : scoreEffectTargets(
           view.state,

@@ -34,10 +34,36 @@
  *
  * The inclusion reason goes too, and that is the one genuine loss. `./DeckTile.ts`
  * argues that a list which shows the cards but hides why each one is in it "is
- * just a decklist", and it is right. Compact *is* just a decklist. That is what
- * it is for and it is why full stays the default: the argument is the page's
- * whole reason to exist, and a person opts out of it deliberately, per pane, when
- * what they need at that moment is to see forty cards at once.
+ * just a decklist", and it is right. Compact *is* just a decklist.
+ *
+ * # Which one a pane opens in
+ *
+ * Whole cards, for every pane that draws faces, and that reverses the answer
+ * twice: this file said full until `mtg-ljda`, compact after it, and full again
+ * from 2026-09-17. What changed each time is what compact *is*. `mtg-9ubz` made
+ * it the capture's mana-value columns, which is why `mtg-ljda` opened on it;
+ * `mtg-mxkrk` made a compact strip its title bar alone, no picture in it
+ * anywhere, and a deck opened on that is a deck opened on its own decklist.
+ * The playtester, shown it: "set the default when opening the deck view to full
+ * cards not to compact list". The constant that carries this is
+ * `./DeckPane.ts`'s `PANE_CARD_VIEWS`; the paragraphs below are the argument it
+ * reversed.
+ *
+ * The old answer was that the inclusion reason is the page's whole argument and
+ * a person opts out of it deliberately. It was written when the two modes
+ * differed only in density — the same flat run of tiles, drawn large or drawn
+ * small — so the choice really was "the argument, or forty cards at once".
+ * `mtg-9ubz` ended that: compact is now the deck grouped into mana-value columns
+ * with a card count over each, which is the capture's layout, and the page's
+ * default stopped being a density and became a layout.
+ *
+ * The playtester, 2026-08-29: "the deckbuilding UI really needs to match the MTGO one
+ * and the way cards are organized". A default that opens on our own flat run and
+ * puts the capture's layout one press away does not match it; it offers it. So
+ * the columns are what a pane opens in, and full is the deliberate opt-in — for
+ * a pane you are reading card by card, where the reason each one is in the deck
+ * is what you came for. Nothing is lost, because the control is in the pane's
+ * own header bar and the choice is remembered per pane.
  *
  * # Why the preference is kept, and where
  *
@@ -51,8 +77,8 @@
  * the two reasons that file records: the workspace tsconfig has no `lib: dom`,
  * and a page in a private window can *throw* from `setItem` rather than merely
  * declining. A store that cannot be read or written is not an error worth
- * surfacing here — the pane simply draws full, which is the state a first-ever
- * visit is in, so the write's failure report is deliberately dropped.
+ * surfacing here — the pane simply draws the default, which is the state a
+ * first-ever visit is in, so the write's failure report is deliberately dropped.
  *
  * That accessor used to be written out in this file, on the argument that two
  * copies of fifteen lines (the other being `../play/rail-collapse.ts`) is under
@@ -66,20 +92,66 @@ import type { ReactElement } from 'react';
 import { readStored, writeStored } from './local-store';
 
 /**
- * The two densities, and deliberately only two.
+ * The three drawings, and no pane offers all three.
  *
- * MTGO's own View menu offers more than a pair, but every extra rung is a
- * decision the reader has to make before they can read anything, and the ask was
- * for two. A third mode is a bead, not a `| 'medium'` added here quietly.
+ * MTGO's own View menu offers more than a pair, and every extra rung is a
+ * decision the reader has to make before they can read anything, so a mode is
+ * added here only when a pane needs one it does not have. `list` was `mtg-umro`,
+ * the bead this file used to say a third mode would have to be: the deck pane
+ * moved into a third of the workbench and its columns do not fit there.
+ *
+ * What a pane *offers* is narrower than this list and is stated per pane below.
  */
-export const DECK_VIEW_MODES = ['full', 'compact'] as const;
+export const DECK_VIEW_MODES = ['full', 'compact', 'list'] as const;
 export type DeckViewMode = (typeof DECK_VIEW_MODES)[number];
 
 /** What each mode is called on its button. Sentence case, as MTGO draws it. */
 export const DECK_VIEW_LABELS: Readonly<Record<DeckViewMode, string>> = {
   full: 'Full cards',
   compact: 'Compact list',
+  list: 'Decklist',
 };
+
+/**
+ * The two card densities, which is the pair this file was written for.
+ *
+ * What every pane offers except the Constructed builder's deck. `list` is a
+ * deck's drawing and only a deck's -- one row per *distinct* card with the
+ * copies played written down the left edge -- and a pool plays no copies of
+ * anything, so offering it there would be a control that renders a column of
+ * `0`s. The sealed builder's deck pane could take it and does not: that screen
+ * keeps the stacked workbench its columns were argued for (`mtg-8osf`), so it is
+ * not short of the width they need.
+ */
+export const CARD_VIEW_MODES: readonly DeckViewMode[] = ['full', 'compact'];
+
+/**
+ * What a deck pane offers, and the reason it is not all three.
+ *
+ * `mtg-umro`. `compact` and `list` would both be "the deck, small", and they
+ * differ in what they can say: compact is mana-value columns of overlapping
+ * title bars, which needs the width the capture gives it, and list is rows,
+ * which is what a third of a workbench holds. A pane offering both is a pane
+ * asking the reader to discover that one of them is unusable at this width.
+ *
+ * So a deck pane offers two: the list, and whole cards. `full` is unchanged and
+ * still draws the strip columns at face size, which is `mtg-rgc.21`'s answer and
+ * is the card view the playtester asked to be able to switch the deck pane to.
+ */
+export const DECK_VIEW_MODES_OFFERED: readonly DeckViewMode[] = ['list', 'full'];
+
+/**
+ * The mode as a *face* density, for the two components that draw faces.
+ *
+ * `../../card/Card.ts` takes `CardSize` and `./StripColumns.ts` takes
+ * `StripDensity`, and both are the pair this file had before `mtg-umro` added
+ * the decklist. A pane in list mode never reaches either of them -- it renders
+ * `./DeckListRows.ts` instead -- so the narrowing is a total function with an
+ * unreachable arm rather than a fallback that hides a state.
+ */
+export function cardDensity(mode: DeckViewMode): 'full' | 'compact' {
+  return mode === 'full' ? 'full' : 'compact';
+}
 
 /**
  * What the control is called.
@@ -91,8 +163,27 @@ export const DECK_VIEW_LABELS: Readonly<Record<DeckViewMode, string>> = {
  */
 export const DECK_VIEW_LABEL = 'View';
 
-/** The mode a pane draws before anybody has said otherwise. See the docblock. */
-export const DEFAULT_DECK_VIEW_MODE: DeckViewMode = 'full';
+/**
+ * The fallback for a pane that states none, and for a tile drawn without one.
+ *
+ * No longer what a pane of faces opens in: `./DeckPane.ts`'s `PANE_CARD_VIEWS`
+ * states `full` since 2026-09-17, because `mtg-mxkrk` made compact a column of
+ * title bars with no picture in it and opening a deck on that is opening it on
+ * a list. What is left here is the unnarrowed default, which `./DeckTile.ts`
+ * takes when a caller draws a tile without saying, and the "Which one a pane
+ * opens in" section above is the argument that constant now carries.
+ */
+export const DEFAULT_DECK_VIEW_MODE: DeckViewMode = 'compact';
+
+/**
+ * A deck pane's own default, which is the decklist (`mtg-umro`).
+ *
+ * The pool keeps `DEFAULT_DECK_VIEW_MODE`. The two panes of a deck editor are
+ * for two different activities and the captures draw them differently on
+ * purpose: a collection is a grid of whole cards you are reading, and a deck is
+ * a list you are counting.
+ */
+export const DEFAULT_DECK_PANE_VIEW_MODE: DeckViewMode = 'list';
 
 /** Where a pane's preference is kept, namespaced so it cannot collide with a lane's. */
 export function deckViewStoreKey(pane: string): string {
@@ -111,9 +202,16 @@ function isMode(value: string | null): value is DeckViewMode {
  * build that used to spell a mode differently, and in both cases the honest
  * response is the state a first visit is in.
  */
-export function readDeckViewMode(pane: string): DeckViewMode {
+export function readDeckViewMode(
+  pane: string,
+  offered: readonly DeckViewMode[] = DECK_VIEW_MODES,
+  fallback: DeckViewMode = DEFAULT_DECK_VIEW_MODE,
+): DeckViewMode {
   const found = readStored(deckViewStoreKey(pane));
-  return isMode(found) ? found : DEFAULT_DECK_VIEW_MODE;
+  // A stored mode this pane does not offer reads as nothing stored, on the same
+  // argument as a mode that does not exist: a deck pane carrying `compact` from
+  // before `mtg-umro` would otherwise open on a control that is not on it.
+  return isMode(found) && offered.includes(found) ? found : fallback;
 }
 
 function writeDeckViewMode(pane: string, mode: DeckViewMode): void {
@@ -137,8 +235,12 @@ export interface DeckViewState {
  * a pane's identity is fixed by which section it is, and a section that changed
  * its name mid-render would be a different pane with a different preference.
  */
-export function useDeckViewMode(pane: string): DeckViewState {
-  const [mode, setStored] = useState<DeckViewMode>(() => readDeckViewMode(pane));
+export function useDeckViewMode(
+  pane: string,
+  offered: readonly DeckViewMode[] = DECK_VIEW_MODES,
+  fallback: DeckViewMode = DEFAULT_DECK_VIEW_MODE,
+): DeckViewState {
+  const [mode, setStored] = useState<DeckViewMode>(() => readDeckViewMode(pane, offered, fallback));
   const setMode = useCallback(
     (next: DeckViewMode): void => {
       writeDeckViewMode(pane, next);
@@ -153,6 +255,8 @@ export interface DeckViewControlProps {
   /** The pane this switches, named as the reader sees it (`Spells`). */
   readonly pane: string;
   readonly state: DeckViewState;
+  /** The modes this pane has. `DECK_VIEW_MODES` unless narrowed. */
+  readonly offered?: readonly DeckViewMode[];
 }
 
 /**
@@ -181,7 +285,7 @@ export function DeckViewControl(props: DeckViewControlProps): ReactElement {
       role: 'group',
       'aria-label': `${pane}, ${DECK_VIEW_LABEL}`,
     },
-    ...DECK_VIEW_MODES.map((mode) =>
+    ...(props.offered ?? DECK_VIEW_MODES).map((mode) =>
       createElement(
         'button',
         {

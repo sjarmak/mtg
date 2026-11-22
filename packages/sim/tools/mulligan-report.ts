@@ -13,7 +13,7 @@
  */
 import { readFileSync } from 'node:fs';
 import type { Card } from '@mtg/dsl';
-import { parseCard } from '@mtg/dsl';
+import { parseCardsDocumentJson } from '@mtg/dsl';
 import { buildDeckForPair, COLOR_PAIRS, colorPairKey } from '@mtg/deckbuild';
 import type { DeckList } from '@mtg/kernel';
 import type { CensusArm, SeatRecord } from '../src/opening-hand-census';
@@ -44,13 +44,16 @@ function requiredFlag(name: string): string {
 }
 
 function loadPool(path: string): readonly Card[] {
-  const raw: unknown = JSON.parse(readFileSync(path, 'utf8'));
-  if (typeof raw !== 'object' || raw === null || !('cards' in raw)) {
-    throw new Error(`${path} has no "cards" array`);
+  let pool: readonly Card[];
+  try {
+    pool = parseCardsDocumentJson(readFileSync(path, 'utf8'));
+  } catch (cause: unknown) {
+    throw new Error(`${path}: ${cause instanceof Error ? cause.message : String(cause)}`);
   }
-  const cards = (raw as { readonly cards: unknown }).cards;
-  if (!Array.isArray(cards) || cards.length === 0) throw new Error(`${path} has an empty pool`);
-  return cards.map((card) => parseCard(card));
+  // The empty case stays here rather than in the shared reader: an empty card
+  // list is a legal set document and a pool with nothing to build from is not.
+  if (pool.length === 0) throw new Error(`${path} has an empty pool`);
+  return pool;
 }
 
 function decksFor(pool: readonly Card[]): readonly DeckList[] {

@@ -72,6 +72,8 @@ const grantableKeywordAbilitiesAreParameterless: GrantableKeywordAbilitiesArePar
 const EFFECT_IS_TARGETED: Record<AnyEffectKind, boolean> = {
   dealDamage: true,
   destroyPermanent: true,
+  destroyAttachedPermanents: false,
+  exchangeControl: false,
   pumpUntilEndOfTurn: true,
   drawCards: true,
   gainLife: true,
@@ -83,13 +85,25 @@ const EFFECT_IS_TARGETED: Record<AnyEffectKind, boolean> = {
   putCounters: true,
   exileTarget: true,
   revealHand: true,
+  revealRandomCardFromHand: false,
+  playRandomHandCardWithoutPayingManaCost: false,
+  castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts: false,
   scry: false,
+  reorderTopLibrary: false,
+  selectFromTopLibrary: false,
+  separateTopLibraryIntoPiles: false,
   returnFromGraveyard: true,
   fight: true,
+  petrifyCreature: true,
   addMana: false,
+  createEmblem: false,
   shuffleLibrary: false,
   revealTopCards: false,
+  revealTopCardToHand: false,
   putOnLibrary: true,
+  // Its target is hand-authored only, so the generator-facing target row is
+  // empty even though the exact card chooses a creature.
+  putSourceAndTargetOnOwnersLibrariesThenShuffle: false,
   exileGraveyard: false,
   shuffleGraveyardIntoLibrary: false,
   searchLibrary: false,
@@ -97,11 +111,25 @@ const EFFECT_IS_TARGETED: Record<AnyEffectKind, boolean> = {
   chooseDiscard: true,
   loseLife: true,
   setLife: false,
+  loseGame: false,
+  winGame: false,
   preventCombatDamage: false,
+  preventCombatDamageToYou: false,
+  detainPermanent: false,
+  chooseBlockersThisCombat: false,
   chooseFromGraveyard: false,
+  chooseFromBattlefield: false,
+  populate: false,
+  createTokenCopyOfSelf: false,
   preventAllDamageToTarget: true,
   untapPermanent: true,
+  untapPermanents: false,
+  skipNextUntap: true,
   grantKeywordUntilEndOfTurn: true,
+  gainControlUntilEndOfTurn: false,
+  gainControl: false,
+  addSubtype: false,
+  targetPlayerGainsControlOfSelfPermanent: false,
   cantBeBlockedThisTurn: true,
   attacksYouThisTurnIfAble: true,
   // False, and this map is about `LEGAL_TARGETS` rather than about the type:
@@ -118,6 +146,36 @@ const EFFECT_IS_TARGETED: Record<AnyEffectKind, boolean> = {
   // (`EFFECT_RULES.setBasePtUntilEndOfTurn` states `generatableTargets: []`),
   // and the generatable row is what this map reads.
   setBasePtUntilEndOfTurn: false,
+  returnSourceFromGraveyard: false,
+  returnDepartedSourceToOwnerHand: false,
+  putDepartedSourceOnTopOfOwnerLibrary: false,
+  shuffleSourceIntoOwnerLibrary: false,
+  returnSourceAuraAttached: false,
+  regeneratePermanent: false,
+  doubleSourceCounters: false,
+  setColorsUntilEndOfTurn: false,
+  attacksThisTurnIfAble: false,
+  cantBlockThisTurn: true,
+  blocksThisTurnIfAble: true,
+  shuffleHandsAndGraveyardsIntoLibraries: false,
+  exileHandsAndGraveyards: false,
+  exileThisSpell: false,
+  moveSourceLinkedExile: false,
+  exileNonbasicGraveyardAndMatchingLibrary: false,
+  eachPlayerNamesCardThenRevealsTop: false,
+  nameNonlandCardAndExileMatchingOpponentZones: false,
+  revealUntilCreatureCards: false,
+  preventNextDamageToYouAndRetaliate: true,
+  preventAllDamageToYouAndCreaturesYouControl: false,
+  cantCastSpellsThisTurn: false,
+  protectSpellsAndCreaturesFromSpellColorsThisTurn: false,
+  changeSpellTargets: false,
+  copySpell: false,
+  copyNextInstantOrSorceryThisTurn: false,
+  flipCoin: false,
+  animateLandWhileSourceOnBattlefield: false,
+  animateSourceUntilEndOfTurn: false,
+  chooseFromRevealedHand: true,
 };
 
 function describeCard(card: Card): string {
@@ -134,6 +192,8 @@ function describeCard(card: Card): string {
       return `land ${card.basicLandType}`;
     case 'planeswalker':
       return `planeswalker ${String(card.startingLoyalty)}`;
+    case 'battle':
+      return `battle ${String(card.defense)}`;
     case 'enchantment':
       return 'enchantment';
     default:
@@ -210,7 +270,7 @@ describe('vocabulary exhaustiveness', () => {
   });
 
   it('assertNever throws when a variant escapes validation', () => {
-    const rogue = { kind: 'battle' } as unknown as Card;
+    const rogue = { kind: 'contraption' } as unknown as Card;
     expect(() => describeCard(rogue)).toThrow(/unhandled variant/);
   });
 
@@ -222,28 +282,66 @@ describe('vocabulary exhaustiveness', () => {
       { kind: 'drawCards', count: 1, target: { kind: 'noTarget' } },
       { kind: 'gainLife', amount: 1, target: { kind: 'noTarget' } },
       { kind: 'counterSpell' },
+      { kind: 'changeSpellTargets' },
+      { kind: 'copySpell', spellFilter: { cardTypes: ['instant', 'sorcery'] } },
+      { kind: 'copyNextInstantOrSorceryThisTurn' },
       {
         kind: 'createToken',
         count: 1,
         token: { name: 'T', power: 1, toughness: 1, colors: [], subtypes: [], keywords: [] },
       },
+      { kind: 'populate' },
       { kind: 'tapPermanent', target: { kind: 'targetCreature' } },
       { kind: 'returnToHand', target: { kind: 'targetCreature' } },
       { kind: 'millCards', count: 1, target: { kind: 'noTarget' } },
       { kind: 'putCounters', counter: 'plusOnePlusOne', count: 1, target: { kind: 'targetCreature' } },
       { kind: 'exileTarget', target: { kind: 'targetCreature' } },
       { kind: 'revealHand', target: { kind: 'targetOpponent' } },
+      { kind: 'revealRandomCardFromHand', target: { kind: 'triggeringPlayer' } },
+      {
+        kind: 'playRandomHandCardWithoutPayingManaCost',
+        target: { kind: 'triggeringPlayer' },
+      },
+      { kind: 'castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts' },
       { kind: 'scry', count: 1 },
+      { kind: 'reorderTopLibrary', count: 5 },
+      {
+        kind: 'selectFromTopLibrary',
+        count: 3,
+        filter: { cardTypes: ['instant', 'sorcery'] },
+        optional: true,
+        reveal: true,
+        destination: 'hand',
+        rest: 'bottom',
+      },
+      { kind: 'separateTopLibraryIntoPiles', count: 5 },
       {
         kind: 'returnFromGraveyard',
         scope: 'creatureCardsInPlayerGraveyard',
         target: { kind: 'targetPlayer' },
       },
       { kind: 'fight', target: { kind: 'targetCreatureYouDontControl' } },
+      { kind: 'petrifyCreature', target: { kind: 'targetCreature' } },
       { kind: 'addMana', produces: ['G'], amount: 1 },
+      {
+        kind: 'createEmblem',
+        emblem: {
+          name: 'Mana Emblem',
+          grantsManaAbility: {
+            filter: { cardTypes: ['land'], subtypes: ['Swamp'] },
+            produces: ['B'],
+            amount: 4,
+          },
+        },
+      },
       { kind: 'shuffleLibrary' },
       { kind: 'revealTopCards', count: 1 },
+      { kind: 'revealTopCardToHand' },
       { kind: 'putOnLibrary', position: 'top', target: { kind: 'targetCreature' } },
+      {
+        kind: 'putSourceAndTargetOnOwnersLibrariesThenShuffle',
+        target: { kind: 'targetCreature' },
+      },
       { kind: 'exileGraveyard', whose: 'each' },
       { kind: 'shuffleGraveyardIntoLibrary', includeSelf: true },
       { kind: 'searchLibrary', filter: { supertypes: ['basic'] }, destination: 'battlefield' },
@@ -252,20 +350,115 @@ describe('vocabulary exhaustiveness', () => {
       { kind: 'loseLife', amount: 2, target: { kind: 'targetOpponent' } },
       { kind: 'setLife', amount: 10 },
       { kind: 'preventCombatDamage' },
+      { kind: 'preventCombatDamageToYou' },
+      { kind: 'detainPermanent', target: { kind: 'targetCreatureOpponentControls' } },
+      { kind: 'chooseBlockersThisCombat' },
       {
         kind: 'chooseFromGraveyard',
         whose: 'you',
         filter: { cardTypes: ['creature'] },
         destination: 'hand',
       },
+      {
+        kind: 'chooseFromBattlefield',
+        filter: { cardTypes: ['creature'] },
+        destination: 'hand',
+      },
+      {
+        kind: 'chooseFromRevealedHand',
+        target: { kind: 'targetOpponent' },
+        filter: { cardTypes: ['instant', 'sorcery'] },
+        outcome: { kind: 'mayCastWithoutPayingManaCost' },
+      },
       { kind: 'preventAllDamageToTarget', target: { kind: 'targetCreature' } },
       { kind: 'untapPermanent', target: { kind: 'targetPermanent' } },
+      { kind: 'untapPermanents', upTo: 4, filter: { cardTypes: ['land'] } },
+      { kind: 'skipNextUntap', target: { kind: 'targetCreature' } },
       { kind: 'grantKeywordUntilEndOfTurn', keyword: 'flying', target: { kind: 'targetCreature' } },
       { kind: 'cantBeBlockedThisTurn', target: { kind: 'targetCreature' } },
       { kind: 'attacksYouThisTurnIfAble', target: { kind: 'targetCreatureYouDontControl' } },
       { kind: 'sacrificeSelf', target: { kind: 'selfCreature' } },
       { kind: 'sacrificePermanent', target: { kind: 'targetOpponent' } },
       { kind: 'setBasePtUntilEndOfTurn', power: 1, toughness: 1, target: { kind: 'targetCreature' } },
+      {
+        kind: 'animateLandWhileSourceOnBattlefield',
+        power: 4,
+        toughness: 5,
+        colors: ['G'],
+        subtypes: ['Treefolk'],
+        target: { kind: 'targetPermanent', filter: { subtypes: ['Forest'] } },
+      },
+      {
+        kind: 'animateSourceUntilEndOfTurn',
+        power: 2,
+        toughness: 2,
+        colors: ['W', 'U'],
+        subtypes: ['Bird'],
+        keywords: ['flying'],
+        target: { kind: 'selfPermanent' },
+      },
+      { kind: 'returnSourceFromGraveyard', destination: 'hand' },
+      { kind: 'returnDepartedSourceToOwnerHand' },
+      { kind: 'putDepartedSourceOnTopOfOwnerLibrary' },
+      { kind: 'shuffleSourceIntoOwnerLibrary' },
+      { kind: 'returnSourceAuraAttached', target: { kind: 'targetCreatureYouDontControl' } },
+      { kind: 'regeneratePermanent', target: { kind: 'equippedCreature' } },
+      { kind: 'doubleSourceCounters', counter: 'plusOnePlusOne' },
+      {
+        kind: 'destroyAttachedPermanents',
+        target: { kind: 'thatCreature' },
+        filter: { subtypes: ['Equipment'] },
+      },
+      { kind: 'setColorsUntilEndOfTurn', colors: ['R'], target: { kind: 'targetCreature' } },
+      { kind: 'attacksThisTurnIfAble', target: { kind: 'targetCreature' } },
+      { kind: 'cantBlockThisTurn', target: { kind: 'targetCreature' } },
+      { kind: 'blocksThisTurnIfAble', target: { kind: 'targetCreature' } },
+      { kind: 'shuffleHandsAndGraveyardsIntoLibraries' },
+      { kind: 'exileHandsAndGraveyards' },
+      { kind: 'loseGame', target: { kind: 'targetPlayer' } },
+      { kind: 'winGame' },
+      { kind: 'exileThisSpell' },
+      { kind: 'moveSourceLinkedExile', destination: 'hand' },
+      {
+        kind: 'exileNonbasicGraveyardAndMatchingLibrary',
+        target: { kind: 'targetPlayer' },
+      },
+      { kind: 'eachPlayerNamesCardThenRevealsTop' },
+      {
+        kind: 'nameNonlandCardAndExileMatchingOpponentZones',
+        target: { kind: 'targetOpponent' },
+      },
+      { kind: 'revealUntilCreatureCards', count: 1 },
+      {
+        kind: 'preventNextDamageToYouAndRetaliate',
+        amount: { kind: 'chosenX' },
+        target: { kind: 'targetPlayerOrPlaneswalker' },
+      },
+      { kind: 'gainControlUntilEndOfTurn', target: { kind: 'targetCreature' } },
+      { kind: 'gainControl', target: { kind: 'targetCreature' } },
+      { kind: 'addSubtype', subtype: 'Vampire', target: { kind: 'thatCreature' } },
+      {
+        kind: 'targetPlayerGainsControlOfSelfPermanent',
+        target: { kind: 'targetOpponent' },
+      },
+      { kind: 'preventAllDamageToYouAndCreaturesYouControl' },
+      {
+        kind: 'cantCastSpellsThisTurn',
+        players: 'eachOpponent',
+      },
+      {
+        kind: 'protectSpellsAndCreaturesFromSpellColorsThisTurn',
+        colors: ['U', 'B'],
+      },
+      {
+        kind: 'flipCoin',
+        winEffects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }],
+      },
+      {
+        kind: 'exchangeControl',
+        target: { kind: 'targetCreature', count: 2, minimum: 2 },
+      },
+      { kind: 'createTokenCopyOfSelf' },
     ];
     expect(samples.map((e) => e.kind).sort()).toEqual([...ALL_EFFECT_KINDS].sort());
   });
@@ -292,6 +485,35 @@ describe('vocabulary exhaustiveness', () => {
         },
         effects: [{ kind: 'dealDamage', amount: 1, target: { kind: 'anyTarget' } }],
       },
+      {
+        kind: 'staticPlayerRule',
+        players: 'eachOpponent',
+        rule: 'cantAttackWithCreaturesIfCastSpellThisTurn',
+      },
+      {
+        kind: 'staticGameRule',
+        rule: 'controllerCantLoseAndOpponentsCantWin',
+      },
+      {
+        kind: 'staticActivationRule',
+        rule: 'chosenNameNonManaAbilitiesCantActivate',
+      },
+      {
+        kind: 'stateTriggered',
+        condition: { kind: 'controllerControlsNoPermanentWithCounter', counter: 'phylactery' },
+        effects: [{ kind: 'sacrificeSelf', target: { kind: 'selfCreature' } }],
+      },
+      {
+        kind: 'staticBundle',
+        scope: 'otherCreaturesYouControl',
+        subtype: 'Vampire',
+        includeSelf: true,
+        enabledWhile: { kind: 'controllerTopLibraryHasColor', color: 'B' },
+        modifications: [
+          { kind: 'statBonus', power: 2, toughness: 1 },
+          { kind: 'grantKeyword', keyword: 'flying' },
+        ],
+      },
     ];
     expect(samples.map((ability) => ability.kind).sort()).toEqual([...ABILITY_KINDS].sort());
   });
@@ -309,6 +531,21 @@ describe('vocabulary exhaustiveness', () => {
     const samples: StaticModification[] = [
       { kind: 'statBonus', power: 1, toughness: 1 },
       { kind: 'grantKeyword', keyword: 'vigilance' },
+      {
+        kind: 'grantKeywordAbilities',
+        grants: [
+          { kind: 'keyword', keyword: 'flying' },
+          { kind: 'protection', quality: { kind: 'color', color: 'B' } },
+        ],
+      },
+      {
+        kind: 'grantTriggeredAbility',
+        ability: {
+          kind: 'triggered',
+          condition: 'beginningOfYourUpkeep',
+          effects: [{ kind: 'sacrificeSelf', target: { kind: 'selfCreature' } }],
+        },
+      },
       { kind: 'definePt', countOf: 'graveyardCardTypesEach', powerOffset: 0, toughnessOffset: 1 },
       {
         kind: 'statBonusPer',
@@ -316,8 +553,13 @@ describe('vocabulary exhaustiveness', () => {
         toughness: 1,
         each: { kind: 'landsWithSubtype', subtype: 'Mountain', whose: 'you' },
       },
+      { kind: 'statBonusPerColor', power: 1, toughness: 0 },
+      { kind: 'addSubtype', subtype: 'Island' },
+      { kind: 'grantAnyColorManaAbility' },
       { kind: 'doubleDamage' },
       { kind: 'doubleLifeGain' },
+      { kind: 'doublePlusOnePlusOneCountersOnCreaturesYouControl' },
+      { kind: 'discardedByOpponentEntersBattlefield' },
       { kind: 'cantAttack' },
       { kind: 'cantBlock' },
       { kind: 'cantBeBlocked' },
@@ -325,6 +567,17 @@ describe('vocabulary exhaustiveness', () => {
       { kind: 'mustBeBlockedIfAble' },
       { kind: 'blockOnlyCreaturesWithKeyword', keyword: 'flying' },
       { kind: 'cantBeBlockedBySubtype', subtype: 'Wall' },
+      { kind: 'cantAttackOrBlock' },
+      { kind: 'cantAttackOrBlockAlone' },
+      {
+        kind: 'cantAttackWithoutAnyOf',
+        anyOf: [{ kind: 'keyword', keyword: 'flying' }],
+      },
+      { kind: 'canBlockAnyNumber' },
+      { kind: 'canAttackAsThoughNoDefender' },
+      { kind: 'preventDamageToSelfAndRemoveCounters', counter: 'plusOnePlusOne' },
+      { kind: 'preventCombatDamage' },
+      { kind: 'damageCannotReduceControllerLifeBelow', minimum: 7 },
     ];
     expect(samples.map((modification) => modification.kind).sort()).toEqual(
       [...STATIC_MODIFICATION_KINDS].sort(),
@@ -337,8 +590,8 @@ describe('vocabulary exhaustiveness', () => {
    * check), *and* the row it prints carries a reminder. The second half is
    * the guard this bead exists to add — `keywordAbilityKindsCovered` above
    * only proves the tuple and the schema union agree on which kinds exist; a
-   * sixth kind could be added to both and still print with no explanation the
-   * way all five of these once did. One card per kind, built by overriding
+   * eighth kind could be added to both and still print with no explanation the
+   * way the original five once did. One card per kind, built by overriding
    * `exampleCard`'s creature the same way `reminder.test.ts` already does for
    * flat keywords, so the row each assertion reads is the row the real
    * renderer would print rather than a hand-typed string that could drift
@@ -353,6 +606,10 @@ describe('vocabulary exhaustiveness', () => {
       { kind: 'indestructible' },
       { kind: 'protection', quality: { kind: 'color', color: 'W' } },
       { kind: 'doubleStrike' },
+      { kind: 'shroud' },
+      { kind: 'flash' },
+      { kind: 'intimidate' },
+      { kind: 'unleash' },
     ];
     expect(samples.map((ability) => ability.kind).sort()).toEqual([...KEYWORD_ABILITY_KINDS].sort());
 

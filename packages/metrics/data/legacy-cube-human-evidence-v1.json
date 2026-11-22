@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "catalogSha256": "65e32dd53edc2583c555ccf6922406229a2f6056ad21862370365b329bf5367c",
+  "cases": [
+    {
+      "id": "overturf-2021-05-19-first-pack",
+      "split": "tuning",
+      "source": {
+        "author": "Ryan Overturf",
+        "url": "https://articles.starcitygames.com/magic-the-gathering/select/is-elite-spellbinder-a-first-pick-in-legacy-cube/",
+        "published": "2021-05-19",
+        "session": "overturf-spellbinder-2021-05",
+        "origin": "human",
+        "environment": "transfer",
+        "locator": "Opening samplehand image alt text supplies all 15 cards; Prismatic Lens discussion identifies the flexible preference. Actual exploratory pick was Elite Spellbinder, not an asserted universal best pick."
+      },
+      "kind": "pick",
+      "observations": [
+        {
+          "round": 1,
+          "pickNumber": 1,
+          "cards": [
+            "Liliana's Triumph",
+            "Elite Spellbinder",
+            "Embereth Shieldbreaker",
+            "Avalanche Riders",
+            "Sword of Body and Mind",
+            "The Scarab God",
+            "Time Warp",
+            "Elspeth Conquers Death",
+            "Figure of Destiny",
+            "Meloku the Clouded Mirror",
+            "Necromancy",
+            "Brainstorm",
+            "Fyndhorn Elves",
+            "Gray Merchant of Asphodel",
+            "Prismatic Lens"
+          ]
+        }
+      ],
+      "picks": [],
+      "preference": { "mode": "flexible", "acceptable": ["Prismatic Lens"] }
+    }
+  ]
+}

@@ -12,6 +12,23 @@
  * Reading the tree rather than the types is deliberate — an import that only a
  * worker entry point makes would still be an import, and a type-level check
  * would not see it.
+ *
+ * What counts as an importer is the package name *inside quotes*, which is
+ * every way a module specifier is written: `from '@mtg/referee'`, a dynamic
+ * `import(...)`, a `require(...)`, and an entry in a table of specifiers a
+ * loader reads later. It is deliberately not "the name appears anywhere in the
+ * file", which is what this checked until 2026-08-28 and which made the gate a
+ * ban on *writing about* this package: a docblock in `@mtg/slice` that listed
+ * ten package names turned it red, in a package that imports nothing from here
+ * and never will. A gate whose failure mode is prose stops being read as a fact
+ * about the dependency graph. The fourth test below already matched a specifier
+ * rather than a substring; this one now agrees with it.
+ *
+ * The narrowing is real and worth stating: a specifier assembled at run time
+ * from pieces, `'@mtg/' + name`, is no longer caught. Nothing in this workspace
+ * builds a specifier that way, and the two structural assertions below —
+ * neither the sim nor metrics may declare the dependency, and a sweep seat is a
+ * closed union — do not depend on this one to hold.
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -19,6 +36,9 @@ import { describe, expect, it } from 'vitest';
 
 const PACKAGES = new URL('../../', import.meta.url).pathname;
 const SELF = 'referee';
+
+/** `@mtg/referee` as a module specifier: quoted, which prose about it is not. */
+const SPECIFIER = /['"]@mtg\/referee['"]/;
 
 function sourceFiles(pkg: string): readonly string[] {
   const files: string[] = [];
@@ -52,9 +72,7 @@ describe('the referee package', () => {
   it('is imported by no other package', () => {
     const importers = packageNames()
       .filter((pkg) => pkg !== SELF)
-      .flatMap((pkg) =>
-        sourceFiles(pkg).filter((file) => readFileSync(file, 'utf8').includes('@mtg/referee')),
-      );
+      .flatMap((pkg) => sourceFiles(pkg).filter((file) => SPECIFIER.test(readFileSync(file, 'utf8'))));
     expect(importers).toEqual([]);
   });
 
@@ -68,7 +86,10 @@ describe('the referee package', () => {
   it('cannot be named as a seat in the sweep, because a seat is a closed union', () => {
     const bots = readFileSync(join(PACKAGES, 'sim', 'src', 'bots.ts'), 'utf8');
     const kinds = [...bots.matchAll(/kind: '([a-z]+)'/g)].map(([, kind]) => kind);
-    expect([...new Set(kinds)].sort()).toEqual(['greedy', 'random']);
+    // A closed list on purpose: a new bot is meant to fail this and be added
+    // here deliberately, which is what makes it catch a referee seat. `search`,
+    // `learned`, and `rollout` are sim-owned bots rather than referee seats.
+    expect([...new Set(kinds)].sort()).toEqual(['greedy', 'learned', 'random', 'rollout', 'search']);
   });
 
   it('declares only the packages it actually imports', () => {

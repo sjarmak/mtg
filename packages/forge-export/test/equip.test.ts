@@ -20,14 +20,10 @@
  * every weapon in the set as `UNSAFE_SCRIPT_TEXT` — the refusal
  * the set design document records beside the attachment row.
  *
- * Two things here are read off shipped card scripts and not off a game Forge
- * ran, the standing gap this whole package carries (`mtg-17a`). The first is
- * the pair of lines above. The second is narrower and is stated where it is
- * asserted: `AddToughness$ +0`, which this transpiler writes for the zero half
- * of a stat bonus, appears nowhere in the 33,587 shipped scripts. Its two
- * halves each do — a signed magnitude ships as `AddPower$ +2` (Tidal Influence,
- * Vivien Reid) and a zero magnitude ships as `SetPower$ 0` in 19 scripts — and
- * Forge's own idiom is to omit the zero component the way Bonesplitter does.
+ * The pair of lines above is read off shipped card scripts and not off a game
+ * Forge ran, the standing gap this whole package carries (`mtg-17a`). Forge's
+ * own idiom is to omit a zero stat component, as both Bonesplitter and Sword of
+ * Vengeance do.
  */
 import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -89,9 +85,9 @@ describe('a weapon in Forge', () => {
   /**
    * The whole file, because this package's failures are silent by
    * construction: a partial assertion goes green over a script that boots and
-   * plays a different card. Line for line it is Bonesplitter with a bigger
-   * cost, save the signed deltas this transpiler already writes for every
-   * static and the zero half of the bonus, which Bonesplitter omits.
+   * plays a different card. Line for line it is `bonesplitter.txt` with a
+   * bigger cost, the last deviation having been the signed `AddPower$ +2` this
+   * transpiler wrote for every static until `mtg-z9dj`.
    */
   it('writes the equip keyword and the static it carries', () => {
     expect(scriptFor(MOONBLADE, 'moonblade.txt')).toBe(
@@ -100,7 +96,7 @@ describe('a weapon in Forge', () => {
         'ManaCost:2',
         'Types:Artifact Equipment',
         'K:Equip:2',
-        'S:Mode$ Continuous | Affected$ Creature.EquippedBy | AddPower$ +2 | AddToughness$ +0 | Description$ Equipped creature gets +2/+0.',
+        'S:Mode$ Continuous | Affected$ Creature.EquippedBy | AddPower$ 2 | Description$ Equipped creature gets +2/+0.',
         'Oracle:Equipped creature gets +2/+0.\\nEquip {2}',
         '',
       ].join('\n'),
@@ -184,7 +180,7 @@ describe('a weapon in Forge', () => {
     });
     const lines = scriptFor(obliterator, 'lastblow_obliterator.txt').split('\n');
     expect(lines.filter((line) => line.startsWith('S:'))).toEqual([
-      'S:Mode$ Continuous | Affected$ Creature.EquippedBy | AddPower$ +99 | AddToughness$ -3 | AddKeyword$ Deathtouch | Description$ Equipped creature gets +99/-3 and has deathtouch.',
+      'S:Mode$ Continuous | Affected$ Creature.EquippedBy | AddPower$ 99 | AddToughness$ -3 | AddKeyword$ Deathtouch | Description$ Equipped creature gets +99/-3 and has deathtouch.',
     ]);
     expect(lines).toContain('K:Equip:1');
   });
@@ -223,8 +219,8 @@ describe('a weapon in Forge', () => {
       .filter((line) => line.startsWith('S:'));
     expect(statics).toHaveLength(2);
     expect(statics[0]).toContain('Affected$ Creature.YouCtrl');
-    expect(statics[0]).toContain('AddPower$ +1');
+    expect(statics[0]).toContain('AddPower$ 1');
     expect(statics[1]).toContain('Affected$ Creature.EquippedBy');
-    expect(statics[1]).toContain('AddPower$ +3');
+    expect(statics[1]).toContain('AddPower$ 3');
   });
 });

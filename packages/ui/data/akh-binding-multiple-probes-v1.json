@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "binding-mummy-multiple-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0006:fae54072-ae27-4aae-a2b7-71f4551934f6"],
+      "decisionFamilies": ["binding-mummy-simultaneous-optional-triggers"],
+      "assertions": ["two Binding Mummy triggers resolve independently against the same creature"],
+      "testFile": "packages/forge-export/test/observed-akh-binding-multiple.integration.test.ts"
+    },
+    {
+      "id": "binding-mummy-multiple-engine-v1",
+      "scope": "card",
+      "controller": "engine",
+      "cardIds": ["akh-printed-v1:0006:fae54072-ae27-4aae-a2b7-71f4551934f6"],
+      "decisionFamilies": ["binding-mummy-simultaneous-optional-triggers"],
+      "assertions": ["Forge resolves two independent Binding Mummy triggers without exposing bot choices"],
+      "testFile": "packages/forge-export/test/observed-akh-binding-multiple-bot.integration.test.ts"
+    }
+  ]
+}

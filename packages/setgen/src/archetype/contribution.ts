@@ -50,6 +50,7 @@ export const BATTLEFIELD_INERT_EFFECTS: readonly AnyEffectKind[] = [
   // left `revealHand` where it was, and neither move touched this list.
   'scry',
   'revealHand',
+  'revealRandomCardFromHand',
   // A ritual is inert on the same terms and for a reason worth stating: it puts
   // mana in a pool, and a pool is not the battlefield. What the mana then buys
   // is a different card, priced where that card is priced. A mana ability never
@@ -96,11 +97,53 @@ export const BATTLEFIELD_INERT_EFFECTS: readonly AnyEffectKind[] = [
   'loseLife',
   'setLife',
   'preventCombatDamage',
+  'preventCombatDamageToYou',
   // `preventCombatDamage`'s reason exactly, aimed rather than blanket: shielding
   // a creature changes nothing about its controller, power, toughness or tapped
   // status, so the board a targeted prevention leaves behind is the board it
   // found, same as the Fog beside it.
   'preventAllDamageToTarget',
+  // Safe Passage narrows the shield's recipients instead of its damage class,
+  // but resolution still changes no permanent. Live control determines which
+  // creatures the replacement protects; it does not turn the replacement
+  // itself into battlefield presence.
+  'preventAllDamageToYouAndCreaturesYouControl',
+  // Silence changes which declarations an opponent may make for the rest of
+  // the turn, but it creates, removes, and modifies no permanent. Like a
+  // counterspell or Fog, it is strategically live while remaining inert for
+  // this module's narrower question: whether resolution changes the board an
+  // attack step sees.
+  'cantCastSpellsThisTurn',
+  'protectSpellsAndCreaturesFromSpellColorsThisTurn',
+  // Time Reversal's two hand-authored bookends change hidden zones and the
+  // resolving spell's destination, never the battlefield. They stay off the
+  // generator-facing schema, but exhaustive structural readers still need to
+  // classify the full authored vocabulary rather than treating new words as
+  // live by omission.
+  'shuffleHandsAndGraveyardsIntoLibraries',
+  'exileHandsAndGraveyards',
+  'exileThisSpell',
+  // Moving this source's linked card from exile to its owner's hand changes
+  // hidden zones only. The validator confines it to a permanent's death
+  // ability, so `resolvesAndLeaves` never asks the inert question of it, but
+  // this exhaustive partition still names every hand-authored effect kind.
+  'moveSourceLinkedExile',
+  // Conundrum Sphinx can move a top card between a library and its owner's
+  // hand, or to the bottom of that library. Both zones are hidden and neither
+  // branch changes a permanent, so this belongs with the linked exile move
+  // above even though its card-name decision makes the route interactive.
+  'eachPlayerNamesCardThenRevealsTop',
+  // Dark Tutelage's linked instruction reveals a library card and moves that
+  // same card to hand. Like drawing or revealing a hand, it changes hidden
+  // zones without changing the battlefield.
+  'revealTopCardToHand',
+  // Index, Augur of Bolas, and Sphinx of Uthuun only reorder or move cards
+  // among libraries, hands, and graveyards. Their decisions are strategically
+  // live, but an instant or sorcery containing only one of these instructions
+  // still leaves the battlefield unchanged.
+  'reorderTopLibrary',
+  'selectFromTopLibrary',
+  'separateTopLibraryIntoPiles',
 ];
 
 /** Effect primitives that can answer an opposing creature, before magnitudes. */

@@ -140,5 +140,5 @@ it refuses. What is landed instead:
 
 Unmeasured, and named as such: whether the sequenced declaration surface wants a
 "back one blocker" control at all. If it does, netplay needs an answer to the
-stranded block in §2 before it ships, and the hot-seat surface needs the landing
+stranded block in §2 before it ships, and the local table needs the landing
 rule above. Neither is settled here.

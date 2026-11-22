@@ -119,7 +119,12 @@ export function censusGameTriggers(events: readonly GameEvent[], finalState: Gam
       }
       continue;
     }
-    if (event.type === 'abilityTriggered') bump(event.condition, 'fires');
+    if (
+      event.type === 'abilityTriggered' &&
+      TRIGGER_CONDITIONS.some((condition) => condition === event.condition)
+    ) {
+      bump(event.condition as TriggerCondition, 'fires');
+    }
   }
 
   for (const condition of seen) {

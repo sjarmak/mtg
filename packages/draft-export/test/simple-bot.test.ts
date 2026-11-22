@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Card, CardInput } from '@mtg/dsl';
 import { exampleCard, parseCard } from '@mtg/dsl';
-import type { CardRating } from '@mtg/draft-export';
+import type { EvaluatorRating } from '@mtg/draft-export';
 import {
   countPickedColors,
   DraftError,
@@ -43,8 +43,8 @@ const GOLD_INPUT: CardInput = {
 const GOLD = parseCard(GOLD_INPUT);
 
 /** A rating the bot reads, without going through the evaluator. */
-function rated(card: Card, rating: number): CardRating {
-  return { card, score: rating, rating };
+function rated(card: Card, rating: number): EvaluatorRating {
+  return { card, score: rating, rating, source: 'evaluator' };
 }
 
 /** `count` copies of a card, as an already-picked pile. */

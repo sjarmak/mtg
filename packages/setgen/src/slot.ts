@@ -8,7 +8,7 @@
  */
 import type { SliceRarity } from '@mtg/design-data';
 import type {
-  AbilityKind,
+  ModelAbilityKind,
   CardKind,
   Color,
   EffectKind,
@@ -17,6 +17,8 @@ import type {
   ModelTriggerCondition,
 } from '@mtg/dsl';
 import type { RequiredCard } from './brief';
+import type { FillCapability } from './capabilities';
+import type { CapabilityTriggerCondition } from './capabilities';
 
 export interface Slot {
   /** Skeleton slot code, unique in the set: `CW01`, `UA02`. */
@@ -54,7 +56,7 @@ export interface Slot {
    * carrying a kind its slot was not allocated is a targeted regeneration, the
    * same way an off-role effect is.
    */
-  readonly abilityKinds: readonly AbilityKind[];
+  readonly abilityKinds: readonly ModelAbilityKind[];
   /**
    * What an Aura printed here may do to the creature it enchants. Empty on every
    * slot that is not an Aura slot, which is all of them until a brief states one
@@ -80,7 +82,7 @@ export interface Slot {
    * mechanic's line — and a condition with no mechanic attached to it is a
    * constraint the model is given no reason for.
    */
-  readonly triggerConditions: readonly ModelTriggerCondition[];
+  readonly triggerConditions: readonly (ModelTriggerCondition | CapabilityTriggerCondition)[];
   /** Brief mechanics this slot was allocated to support, by name. */
   readonly mechanics: readonly string[];
   /**
@@ -91,6 +93,12 @@ export interface Slot {
   readonly archetypes: readonly string[];
   /** True when the slot is a pair's signpost uncommon. */
   readonly signpost: boolean;
+  /**
+   * Reviewed generator contracts this slot may spend in addition to the frozen
+   * global model vocabulary. Absent and empty are identical, preserving every
+   * slot and prompt recorded before capability routing existed.
+   */
+  readonly capabilities?: readonly FillCapability[];
   /**
    * The brief's required card this slot was reserved for, if any. The printed
    * card carries this name and no other; everything else about it is still the
@@ -163,7 +171,8 @@ export function printsNoText(slot: Slot): boolean {
     slot.keywords.length === 0 &&
     slot.effectKinds.length === 0 &&
     slot.abilityKinds.length === 0 &&
-    slot.auraModifications.length === 0
+    slot.auraModifications.length === 0 &&
+    (slot.capabilities?.length ?? 0) === 0
   );
 }
 

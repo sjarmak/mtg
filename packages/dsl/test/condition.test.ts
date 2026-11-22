@@ -3,23 +3,22 @@
  *
  * `condition.ts` argues the shape; these tests are the three claims that
  * matter for a value that has to survive a worker boundary and drive a
- * kernel evaluator it never imports: it parses the one member the vocabulary
- * has, it round-trips through the serialization boundary the design docblock
+ * kernel evaluator it never imports: it parses representative members of the
+ * vocabulary, round-trips through the serialization boundary the design docblock
  * promises, and it carries no function anywhere in its shape.
  */
 import { describe, expect, it } from 'vitest';
 import {
   AnyCreatureHasCounterConditionSchema,
   ConditionSchema,
+  ControllerLifeAtLeastConditionSchema,
+  ControllerLifeBelowConditionSchema,
   ControlsSubtypeConditionSchema,
-  LifeAtLeastConditionSchema,
-  NoOpponentDealtDamageThisTurnConditionSchema,
   OpponentGraveyardAtLeastConditionSchema,
   renderOracleText,
-  validateCards,
 } from '../src/index';
 import type { CardInput, Condition } from '../src/index';
-import { parseCard, safeParseCard } from '../src/parse';
+import { parseCard } from '../src/parse';
 
 describe('ControlsSubtypeConditionSchema', () => {
   it('parses a threshold over a named subtype', () => {
@@ -96,36 +95,43 @@ describe('OpponentGraveyardAtLeastConditionSchema', () => {
   });
 });
 
-describe('LifeAtLeastConditionSchema', () => {
-  it('parses a life threshold and names no seat, so "you" is read at evaluation time', () => {
-    const parsed = LifeAtLeastConditionSchema.parse({ kind: 'lifeAtLeast', atLeast: 30 });
-    expect(parsed).toEqual({ kind: 'lifeAtLeast', atLeast: 30 });
-    expect(Object.keys(parsed).sort()).toEqual(['atLeast', 'kind']);
+describe('ControllerLifeAtLeastConditionSchema', () => {
+  it('parses a live controller-life floor', () => {
+    const parsed = ControllerLifeAtLeastConditionSchema.parse({
+      kind: 'controllerLifeAtLeast',
+      atLeast: 30,
+    });
+    expect(parsed).toEqual({ kind: 'controllerLifeAtLeast', atLeast: 30 });
   });
 
-  it('refuses a floor of zero, which every life total already satisfies', () => {
-    expect(LifeAtLeastConditionSchema.safeParse({ kind: 'lifeAtLeast', atLeast: 0 }).success).toBe(false);
+  it('refuses a floor of zero, which is unconditional rather than conditional', () => {
+    expect(
+      ControllerLifeAtLeastConditionSchema.safeParse({ kind: 'controllerLifeAtLeast', atLeast: 0 }).success,
+    ).toBe(false);
   });
 
-  it('refuses a fractional life threshold', () => {
-    expect(LifeAtLeastConditionSchema.safeParse({ kind: 'lifeAtLeast', atLeast: 20.5 }).success).toBe(false);
+  it('does not impose an arbitrary ceiling on Magic life totals', () => {
+    expect(
+      ControllerLifeAtLeastConditionSchema.safeParse({
+        kind: 'controllerLifeAtLeast',
+        atLeast: Number.MAX_SAFE_INTEGER,
+      }).success,
+    ).toBe(true);
   });
 });
 
-describe('NoOpponentDealtDamageThisTurnConditionSchema', () => {
-  it('carries nothing but its kind: presence, with no amount and no source', () => {
-    const parsed = NoOpponentDealtDamageThisTurnConditionSchema.parse({
-      kind: 'noOpponentDealtDamageThisTurn',
+describe('ControllerLifeBelowConditionSchema', () => {
+  it('parses a live controller-life ceiling', () => {
+    const parsed = ControllerLifeBelowConditionSchema.parse({
+      kind: 'controllerLifeBelow',
+      fewerThan: 7,
     });
-    expect(Object.keys(parsed)).toEqual(['kind']);
+    expect(parsed).toEqual({ kind: 'controllerLifeBelow', fewerThan: 7 });
   });
 
-  it('refuses an amount, which the printed clause does not name', () => {
+  it('refuses a ceiling of zero, which can never be satisfied', () => {
     expect(
-      NoOpponentDealtDamageThisTurnConditionSchema.safeParse({
-        kind: 'noOpponentDealtDamageThisTurn',
-        atLeast: 1,
-      }).success,
+      ControllerLifeBelowConditionSchema.safeParse({ kind: 'controllerLifeBelow', fewerThan: 0 }).success,
     ).toBe(false);
   });
 });
@@ -135,13 +141,20 @@ describe('ConditionSchema', () => {
     expect(ConditionSchema.safeParse({ kind: 'inGraveyard', subtype: 'Merfolk' }).success).toBe(false);
   });
 
-  it('has exactly the five members this schema has shipped, in declaration order', () => {
+  it('has exactly the eleven members this schema has shipped, in declaration order', () => {
     expect(ConditionSchema.options.map((option) => [...option.shape.kind.values])).toEqual([
       ['controlsSubtype'],
       ['anyCreatureHasCounter'],
       ['opponentGraveyardAtLeast'],
-      ['lifeAtLeast'],
-      ['noOpponentDealtDamageThisTurn'],
+      ['opponentUndamagedThisTurn'],
+      ['controllerLifeAtLeast'],
+      ['controllerLifeBelow'],
+      ['controllerLibraryAtLeast'],
+      ['controllerTopLibraryHasColor'],
+      ['battlefieldCountBelow'],
+      ['controlsNoneOfSubtypes'],
+      ['selfCounterCountBelow'],
+      ['selfCounterCountAtLeast'],
     ]);
   });
 
@@ -251,37 +264,5 @@ describe('a conditional static, printed', () => {
     expect(renderOracleText(card)).toContain(
       'As long as an opponent has ten or more cards in their graveyard, creatures you control get +1/+1.',
     );
-  });
-
-  it("prints a life threshold in Serra Ascendant's own words, in digits", () => {
-    // `numberWord` spells up to ten and prints digits beyond it, which is Magic
-    // style and is what the printed card says: "30 or more life", not "thirty".
-    const card = parseCard(lord({ kind: 'lifeAtLeast', atLeast: 30 }));
-    expect(renderOracleText(card)).toContain(
-      'As long as you have 30 or more life, creatures you control get +1/+1.',
-    );
-  });
-
-  it("prints the turn-scoped damage clause in Bloodcrazed Goblin's own words", () => {
-    const card = parseCard(lord({ kind: 'noOpponentDealtDamageThisTurn' }));
-    expect(renderOracleText(card)).toContain(
-      'As long as no opponent has been dealt damage this turn, creatures you control get +1/+1.',
-    );
-  });
-
-  it('refuses a life threshold above the highest number a card of this shape prints', () => {
-    // `LIMITS.lifeThreshold` tops out at Test of Endurance's 50; the shared
-    // `conditionThreshold` would have refused Serra Ascendant's own 30, which
-    // is why the two are separate entries.
-    expect(validateCards([parseCard(lord({ kind: 'lifeAtLeast', atLeast: 30 }))])).toEqual([]);
-    const tooHigh = safeParseCard(lord({ kind: 'lifeAtLeast', atLeast: 51 }));
-    expect(tooHigh.ok).toBe(false);
-    expect(tooHigh.ok ? [] : tooHigh.violations).toEqual([
-      {
-        code: 'CONDITION_THRESHOLD_OUT_OF_RANGE',
-        path: 'abilities[0].enabledWhile.atLeast',
-        message: 'life threshold must be between 1 and 50, got 51',
-      },
-    ]);
   });
 });

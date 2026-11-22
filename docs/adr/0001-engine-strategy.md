@@ -90,6 +90,16 @@ and object (`prior-art-engines.md` §2). Manabrew calls this the core developmen
 engine rather than a test suite, and that framing is right. It buys us fifteen years of rules
 hardening as a cross-check, mechanic by mechanic.
 
+> **Note, 2026-11-22 (#306): the cited example was abandoned.** On 2026-10-26 Manabrew deprecated
+> the harness this paragraph cites as our model (`ca67bf2a`, README line 3): "Parity is DEPRECATED
+> and NOT FUNCTIONING. Do not run `yarn parity`, the parity harness
+> (`manabrew-rs/crates/parity`), the parity debugger, or `DeterministicController`." Checked against
+> the repository on 2026-11-22, where the line still stands. Our parity method is unchanged, because
+> it never rested on their harness running: its substrate, a seeded Forge game that reruns
+> identically, was measured here by spike C (§8 question 2), and the comparison side is our own
+> bridge, authorized in §11 and tracked as #178. What the deprecation removes is the outside
+> precedent for this discipline, not the evidence for it.
+
 As a **transpile target**. The DSL compiles to Forge card scripts for the slice subset
 (`mtg-bc2.11`), and this is pulled forward into phase 1 rather than deferred. The slice's
 mechanics map onto `SP$ DealDamage` / `Draw` / `Pump` / `Destroy`-class scripts almost
@@ -299,6 +309,28 @@ takes that option away permanently.
    retired: the project is private, nothing ships to anyone, and the flagship set names its
    source outright (the set design document). The rest of the condition stands.
 
+_Amended 2026-11-22: the project is AGPL-3.0-or-later._ Condition 2 stopped describing the tree
+in September 2026. The printed-format admission work quotes Forge card-script lines verbatim as
+evidence of what a Forge release does: every `play-admission-*/script-coverage.json`,
+`forge-syntax-review-v1.json`, `legacy-cube-2021-forge-decisions-v1.json`, and the exact-script
+checks in `packages/data/src/legacy-cube/`. Under an MIT license that was GPL text the project
+could not redistribute. Rewriting it clean-room was estimated at four to six days. the playtester chose
+instead to relicense the project as AGPL-3.0-or-later, the same arrangement Manabrew uses. GPL
+version 3 section 13 permits combining GPL-3.0 work with AGPL-3.0 work, each part keeping its own
+license. So:
+
+- **Condition 2 now reads:** no Forge, Magarena or Cockatrice *source* is vendored. Quoted Forge
+  card-script lines may be kept as evidence, and they stay GPL-3.0. `LICENSE` names where they
+  live. Forge itself is still never checked in or redistributed.
+- **Condition 4's license-header scan** still fails on a copied header. The two unmodified license
+  texts the export publishes (`LICENSE-AGPL-3.0` and `LICENSE-GPL-3.0`) are recorded exemptions in
+  `packages/slice/test/engine-boundary.test.ts`.
+- **Conditions 1, 3 and 5 are unchanged.** Forge stays a separate process. Manabrew and
+  mtgdraftbots stay read-only references by choice: AGPL would now permit copying them, but not
+  copying keeps attribution simple and the design our own.
+- **The public tree's license changes from MIT.** Copies already published under MIT keep those
+  terms.
+
 ---
 
 ## 6. The two kill-tests
@@ -456,6 +488,15 @@ were seen rather than missed.
    Whether the stock `sim` CLI, as opposed to a purpose-built bridge, can be seeded reproducibly is
    unverified. Forge spike A (`mtg-bc2.10`) should probe it. The parity harness depends on the
    answer, and so does the fallback in §6.2.
+
+   > **Answered 2026-08-16 by spike C** (`c89c52d`, `docs/research/spike-c-forge-parity-substrate.md`
+   > §2.2), recorded here 2026-08-28 (`mtg-egv9`). It reproduces. Two `-n 5 -s 1` runs agree on every
+   > winner line; two fully logged `-n 3 -s 7` runs are 1,732 lines each and, with millisecond
+   > durations stripped, differ by the fourteen lines of start-up banner that carry a wall clock —
+   > every phase, mana payment, stack entry, resolution, damage assignment, zone change, mulligan and
+   > replacement effect is identical. `-s 2` disagrees with `-s 1` on three of five winners, so the
+   > seed is doing work. What that buys is a Forge game we can rerun, not a Forge game we can compare
+   > against ours field by field; §11.7 is the half that still binds.
 
 3. **Whether the §6.1 thresholds are the right thresholds.** The 5-minute and 20-minute bands
    assume 10<sup>4</sup> games per set revision is the real workload, which comes from the metrics
@@ -737,6 +778,17 @@ The two most expensive are already in `@mtg/kernel`, were built when kill-test B
 has not yet spent it. That is why incremental DSL growth is cheap here, and it is the asset
 `mtg-bc2.152.7` exists to collect.
 
+> **Corrected 2026-08-28 (`mtg-kh7v`).** The last two sentences stand; the first two are wrong, and
+> re-measuring found the tree further along than the correction that filed this. `continuous.ts`
+> declares eleven continuous-effect kinds and eight are constructed from production code today:
+> `effectForModification` in `abilities.ts` builds layers 4, 6, 7a and 7c, `attach.ts` builds 2 and
+> 6, `effects.ts` builds 2, 4, 5, 6, 7b and 7c. Three are reachable only from tests, and they are
+> the ones the table's last row is about: copy (layer 1), text change (layer 3) and the
+> power/toughness switch (layer 7e). Replacement effects are wired the same way — `damage.ts`
+> assembles them per damage instance for protection and static prevention. So the asset is being
+> spent rather than sitting, and what is unspent is narrower and better named: copy and text
+> change, which is where the 713 and the coverage epic's control cards live.
+
 ### 10.4 The barrier is a semantic oracle, and it is measured
 
 The question mass generation has to answer is not "can a model write 34,000 cards." It is **what
@@ -788,6 +840,16 @@ rules-text-versus-implementation oracle — `VerifyCardDataTest.java`, 3,735 lin
 the resources to test every single card, much less the nearly infinite ways the cards can interact."
 Two mature projects independently concluded a continuous semantic oracle was not worth running.
 Whatever we build has to be cheaper or more discriminating than the thing both of them switched off.
+
+> **Corrected 2026-08-28 (`mtg-kh7v`), against this repo's own measurement in
+> the retained upstream measurements below.** "Its entire CR 613 layers suite is seven test methods"
+> is true of `LayerTests.java` and understates the project by a lot: `cards/continuous/` holds 78
+> files and 281 `@Test` methods, `cards/replacement/` 222, `cards/copy/` 176. Nor are the seven
+> seven: two carry `@Ignore` with comments saying the game is right and the test is wrong, so five
+> execute. The paragraph's point survives in the sharper form the evidence actually supports. The
+> file that tests layer *interaction ordering* is five executing methods, each named after an
+> anecdote — a rules article, a Reddit thread, a forum bug report — no test in it is named after a
+> CR sub-rule or a sublayer, and the word for what it tests appears nowhere in its body.
 
 ### 10.6 What is decided
 
@@ -952,6 +1014,30 @@ of record for kernel-authored content.
 **Not pre-approval of the CI license-grep's literal diff.** §5's condition 4 already requires the
 guard to see a tracked bridge path; the specific exclusion pattern is `mtg-bc2.41` implementation
 work, not an ADR decision.
+
+### 11.7 Two spike C findings that bind this section (recorded 2026-08-28, `mtg-egv9`)
+
+Both are measured in `docs/research/spike-c-forge-parity-substrate.md` and neither was carried here,
+so a reader arriving at §11 through §8 met a question a spike had closed and no trace of the two
+constraints that actually hold.
+
+**The shipped `sim` CLI cannot be the substrate, which is why §11.4 asks for a serializer rather than
+a log reader** (§4 there, three independent reasons, any one fatal). It takes no board in: its whole
+input surface is decks, counts, format, seed, AI profile and quiet. It emits no characteristics out:
+a fully logged three-game run is 1,732 lines of events, and the count of strings in it matching a
+power-and-toughness pattern is zero — no type line, no keyword set, no controller after a control
+change, no timestamp. A kernel that ordered Humility against an anthem wrongly, or missed a 613.8
+dependency reordering, would print a log identical to a correct one until the mis-sized creature
+changed a combat result, and combat is the noisiest channel Forge has. `Replacement Effect:` lines
+are the one partly observable continuous-effect class, at six occurrences in three games and by
+effect name only. Layers are not observable at all.
+
+**The bridge cannot be compiled on this machine as it stands.** The JVM at
+`/usr/lib/jvm/java-21-openjdk-amd64` is a JRE: `java`, `jpackage`, `keytool` and `rmiregistry` are
+there and `javac` is not. §11 authorizes building the bridge and this does not withdraw that; it
+names the first step, which is provisioning a JDK, and keeps `mtg-bc2.41` from being planned as
+though the toolchain were present. Spike A's Xvfb requirement is a separate question and §11.4
+already leaves it open for `forge-game`.
 
 **Not a decision about `mtg-bc2.152.8`'s methodology** beyond confirming it should use this
 substrate rather than invent a second one, per `mtg-bc2.41`'s own description. What counts as a

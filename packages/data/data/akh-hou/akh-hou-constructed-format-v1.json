@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "akh-hou",
+  "name": "Amonkhet / Hour of Devastation",
+  "sources": [
+    {
+      "code": "AKH",
+      "catalogFormat": "akh-printed-v1",
+      "catalogSha256": "fd566c80257ffc11d7901ec7f96fc0fe5a9537f64f5dc68751388686f80e24c8",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/AKH.json",
+        "sha256": "d96b6435d710020ad9975b0a27ab05b3cc4fafea0bc10e8b545e9ae144b8ee72",
+        "version": "5.3.0+20260911"
+      }
+    },
+    {
+      "code": "HOU",
+      "catalogFormat": "hou-printed-v1",
+      "catalogSha256": "8b838178bdcb24d4e8995e6cece4a443b760237effd2469649e871e64ee06a6c",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/HOU.json",
+        "sha256": "b74945f1a8e75d1709a6947de9ef9e5b54c3fee31e96beaab87558f9f23a8849",
+        "version": "5.3.0+20260911"
+      }
+    },
+    {
+      "code": "MP2",
+      "catalogFormat": "mp2-printed-v1",
+      "catalogSha256": "feaccf1784926c2bd9f50ed6bc1de164f7840e66c8e205279dcee96ab7ae4011",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/MP2.json",
+        "sha256": "98454df9eb693639993acb279a3bfcc745f1f2ec979c3be7a987e28fe392fffb",
+        "version": "5.3.0+20260911"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-black-zombies",
+      "name": "White-Black Zombies",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "hou-printed-v1:0147:fe3802f3-feb3-4dcd-a5ba-f493baf3d447",
+          "name": "Unraveling Mummy",
+          "count": 3
+        },
+        {
+          "physicalId": "akh-printed-v1:0088:343fc82d-7d10-4489-8f7e-9995322114e2",
+          "name": "Dread Wanderer",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0087:a1c0b645-de43-46d0-84c1-03f295def217",
+          "name": "Doomed Dissenter",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0208:e9e00112-8c6c-4551-ad68-389e315fe148",
+          "name": "Wayward Servant",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0006:fae54072-ae27-4aae-a2b7-71f4551934f6",
+          "name": "Binding Mummy",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0104:280ae211-f025-4971-83e6-118ca08a1911",
+          "name": "Plague Belcher",
+          "count": 3
+        },
+        {
+          "physicalId": "akh-printed-v1:0099:3941562d-3e39-4746-9a18-d3aa6d3468b0",
+          "name": "Lord of the Accursed",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0212:a4b32135-7061-4278-a01a-4fcbaadc9706",
+          "name": "Never // Return",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0098:5c57b3b8-71f1-479c-b7f7-508fee2b5b0f",
+          "name": "Liliana's Mastery",
+          "count": 2
+        },
+        {
+          "physicalId": "hou-printed-v1:0183:6077f4e9-5717-4048-b798-4f8d535a4170",
+          "name": "Shefet Dunes",
+          "count": 4
+        },
+        {
+          "physicalId": "hou-printed-v1:0179:0b88728b-9b18-40c6-b634-f87f8da83665",
+          "name": "Ifnir Deadlands",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0250:c7191d23-b68f-406b-8c28-8dadbaef6562",
+          "name": "Plains",
+          "count": 11
+        },
+        {
+          "physicalId": "akh-printed-v1:0252:60b7c997-e520-4ff6-8b3b-705c2f12a9d4",
+          "name": "Swamp",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "black-green-1-1-counters",
+      "name": "Black-Green -1/-1 Counters",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "hou-printed-v1:0141:ae054604-0d77-45d0-b17b-55a83fb18e39",
+          "name": "Obelisk Spider",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0199:56fbbcc9-db23-4902-b0f7-cea78a2a36af",
+          "name": "Hapatra, Vizier of Poisons",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0101:97aa6b45-055a-411e-b2db-b373a4d3826d",
+          "name": "Nest of Scarabs",
+          "count": 4
+        },
+        {
+          "physicalId": "hou-printed-v1:0057:1b04934f-87d1-4768-b7b5-5f7249a09771",
+          "name": "Ammit Eternal",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0160:bef38c5a-07fc-477f-a1c0-70cc3ad64f96",
+          "name": "Channeler Initiate",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0165:d30501c5-f6d9-47b3-b12b-8bd1c5ea6a9b",
+          "name": "Exemplar of Strength",
+          "count": 3
+        },
+        {
+          "physicalId": "hou-printed-v1:0059:005a19e2-c334-4b87-bc8b-55f62fc9abd9",
+          "name": "Banewhip Punisher",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0109:58d38abd-116d-4015-91e4-3fc267ad099d",
+          "name": "Splendid Agony",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0212:a4b32135-7061-4278-a01a-4fcbaadc9706",
+          "name": "Never // Return",
+          "count": 1
+        },
+        {
+          "physicalId": "akh-printed-v1:0279:81435771-2f13-4e53-9a5f-4a4e4ad735ac",
+          "name": "Foul Orchard",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0244:a8fcc939-6a31-4fb3-abe7-7663b85868dd",
+          "name": "Grasping Dunes",
+          "count": 3
+        },
+        {
+          "physicalId": "hou-printed-v1:0179:0b88728b-9b18-40c6-b634-f87f8da83665",
+          "name": "Ifnir Deadlands",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0252:60b7c997-e520-4ff6-8b3b-705c2f12a9d4",
+          "name": "Swamp",
+          "count": 11
+        },
+        {
+          "physicalId": "akh-printed-v1:0254:2c2fc9f7-21af-4416-abf5-6fcb4f543680",
+          "name": "Forest",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "red-white-exert",
+      "name": "Red-White Exert",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "hou-printed-v1:0142:713f469e-58c3-4db4-aa7a-77126bda13f2",
+          "name": "Resolute Survivors",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0016:24e23a06-4ed3-4948-aca5-fbdda03f4f2a",
+          "name": "Glory-Bound Initiate",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0017:49307ab6-392e-4b61-ad60-e6ea53da39f7",
+          "name": "Gust Walker",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0117:dd5db68c-24d5-44ce-9809-e446f26fac5d",
+          "name": "Ahn-Crop Crasher",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0200:b1b44194-fed5-491c-a791-80b986dd66d6",
+          "name": "Honored Crop-Captain",
+          "count": 3
+        },
+        {
+          "physicalId": "akh-printed-v1:0125:28b63c3d-2e55-4343-b49a-11fa602ec473",
+          "name": "Combat Celebrant",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0011:ad60ebb9-4acc-41a8-90d9-04d55e414ed1",
+          "name": "Djeru's Resolve",
+          "count": 2
+        },
+        {
+          "physicalId": "hou-printed-v1:0083:84319dfb-eaf7-4b98-8c4f-30f5e779591b",
+          "name": "Abrade",
+          "count": 3
+        },
+        {
+          "physicalId": "akh-printed-v1:0141:988a7993-eb7d-4ae2-8a22-1676f517558b",
+          "name": "Magma Spray",
+          "count": 2
+        },
+        {
+          "physicalId": "hou-printed-v1:0181:af11d41a-0d29-45e9-9d27-a41282b9e292",
+          "name": "Ramunap Ruins",
+          "count": 2
+        },
+        {
+          "physicalId": "hou-printed-v1:0183:6077f4e9-5717-4048-b798-4f8d535a4170",
+          "name": "Shefet Dunes",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0250:c7191d23-b68f-406b-8c28-8dadbaef6562",
+          "name": "Plains",
+          "count": 14
+        },
+        {
+          "physicalId": "akh-printed-v1:0253:d3112990-3919-46b0-b927-14566c689a81",
+          "name": "Mountain",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "id": "green-blue-ramp",
+      "name": "Green-Blue Ramp",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "hou-printed-v1:0143:585ec4c2-aae2-403e-af32-3324122c472a",
+          "name": "River Hoopoe",
+          "count": 4
+        },
+        {
+          "physicalId": "akh-printed-v1:0176:ce9a8551-8788-47ea-b774-477f0f3ff22a",
+          "name": "Naga Vitalist",
+          "count": 4
+        },
+        {
+          "physicalId": "hou-printed-v1:0111:e92c0cf0-df4a-4e50-8396-53713f925b53",
+          "name": "Beneath the Sands",
+          "count": 3
+        },
+        {
+          "physicalId": "akh-printed-v1:0209:dac35181-baae-4c50-b397-a10b234833e5",
+          "name": "Weaver of Currents",
+          "count": 2
+        },
+        {
+          "physicalId": "hou-printed-v1:0120:c5ee374f-31dc-4b2c-beba-431d5b1126d0",
+          "name": "Hour of Promise",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0219:6431d464-1f2b-42c4-ad38-67b7d0984080",
+          "name": "Spring // Mind",
+          "count": 3
+        },
+        {
+          "physicalId": "akh-printed-v1:0204:c79036a1-2239-4d4f-8b58-6cf9ac4863fc",
+          "name": "Nissa, Steward of Elements",
+          "count": 2
+        },
+        {
+          "physicalId": "mp2-printed-v1:0008:da566bc8-6350-481d-99aa-9cea76da2a56",
+          "name": "Consecrated Sphinx",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0168:6411d177-45fd-4193-8414-0f7e7846d2b9",
+          "name": "Greater Sandwurm",
+          "count": 3
+        },
+        {
+          "physicalId": "hou-printed-v1:0135:5dbaf7e3-e2fc-4399-aa83-c13df43008a0",
+          "name": "Sifter Wurm",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0065:f1eccf27-c934-45fb-87ae-67006cd4e0ed",
+          "name": "Pull from Tomorrow",
+          "count": 1
+        },
+        {
+          "physicalId": "akh-printed-v1:0242:6b39e1c7-b175-462e-83ab-dd67abec6bfb",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "hou-printed-v1:0180:203011ef-3737-4fd1-bd23-0e531b5a7c32",
+          "name": "Ipnu Rivulet",
+          "count": 2
+        },
+        {
+          "physicalId": "hou-printed-v1:0177:3bba75d2-3f1b-4828-be11-2da695f7bde7",
+          "name": "Hashep Oasis",
+          "count": 2
+        },
+        {
+          "physicalId": "hou-printed-v1:0172:7d42aa0c-0408-4b0d-bec5-9861dbcf9ee1",
+          "name": "Desert of the Indomitable",
+          "count": 2
+        },
+        {
+          "physicalId": "hou-printed-v1:0173:91b92d87-776c-490f-9ff1-234e47145df8",
+          "name": "Desert of the Mindful",
+          "count": 2
+        },
+        {
+          "physicalId": "akh-printed-v1:0251:bec6fced-62bb-4a99-9ea1-374056b5781b",
+          "name": "Island",
+          "count": 12
+        },
+        {
+          "physicalId": "akh-printed-v1:0254:2c2fc9f7-21af-4416-abf5-6fcb4f543680",
+          "name": "Forest",
+          "count": 8
+        }
+      ]
+    }
+  ],
+  "contentSha256": "3bab937372a416b6995f0f9371683abf04dde3cf27f27e87eebdb12f6a262056"
+}

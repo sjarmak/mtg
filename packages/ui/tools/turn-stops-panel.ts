@@ -54,7 +54,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { exampleCard } from '@mtg/dsl';
 import type { GameState } from '@mtg/kernel';
 import { DEFAULT_AUTO_PASS, pendingDecision, scenario } from '@mtg/kernel';
-import { GameLog } from '../src/log/GameLog';
+import { GameLog, OPEN_BY_DEFAULT } from '../src/log/GameLog';
 import { Shell } from '../src/app/Shell';
 import { boardPosition } from '../src/routes/play/position';
 import type { SeatNames } from '../src/routes/play/position';
@@ -68,7 +68,7 @@ import {
 } from '../src/routes/play/prompt';
 import { promptPanel } from '../src/routes/play/rail';
 import { railToggle } from '../src/routes/play/rail-collapse';
-import { playTable } from '../src/routes/play/table';
+import { playTableHost } from './play-table-host';
 import { NO_STAGING } from '../src/routes/play/combat';
 import { playToolbar, stepBar } from '../src/routes/play/toolbar';
 import { turnStopsPanel } from '../src/routes/play/TurnStops';
@@ -111,13 +111,16 @@ function table(): string {
   const decision = pendingDecision(state);
   if (decision === null) throw new Error('the scenario left nobody to ask');
   const prompt = buildPrompt(state, decision, NAMES);
-  const rendered = playTable({
+  const rendered = playTableHost({
+    // The rig shoots from seat 0, which is the seat `boardPosition` above was
+    // handed; the id only decides which pod an aim at a player would light, and
+    // a rig stages no cast.
+    viewer: 0,
     // A rig owns no session, so nothing is being declared and nothing can be
     // staged (`../src/routes/play/combat.ts`).
     staging: NO_STAGING,
     combat: null,
     position: boardPosition(state, 0, NAMES, null),
-    playable: new Set(state.players[0].hand),
     byObject: choicesByObject(prompt),
     selection: {
       openKey: null,
@@ -168,6 +171,9 @@ function table(): string {
       events: [],
       names: { player: (id) => NAMES[id], card: () => '', target: () => '' },
       viewer: 0,
+      // A measuring rig has no player and therefore no preference: it draws the
+      // shipped default and the toggle goes nowhere.
+      disclosure: { open: OPEN_BY_DEFAULT, toggle: (): void => undefined },
     }),
     // The side panel is collapsible since `mtg-crw`; every page here draws it
     // open, which is the state these rigs have always measured.

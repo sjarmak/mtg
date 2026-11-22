@@ -40,7 +40,7 @@ function Harness(props: { readonly initial: Readonly<Record<string, string>> }):
   const [params, setParams] = useState<Readonly<Record<string, string>>>(props.initial);
   return h(ReplayViewer, {
     state: { status: 'ready', log: LOG },
-    route: { mode: 'replay', params },
+    route: { mode: 'analysis', sub: 'replay', params },
     onSetParams: (next) => {
       setParams((current) => ({ ...current, ...next }));
     },

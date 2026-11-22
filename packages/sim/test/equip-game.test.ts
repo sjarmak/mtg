@@ -108,7 +108,9 @@ describe('an equip ability in a seeded game', () => {
   it('plays every game to a real result', () => {
     expect(OUTCOMES).toHaveLength(GAMES);
     for (const outcome of OUTCOMES) {
-      expect(['lifeZero', 'emptyLibrary', 'concede', 'turnLimit']).toContain(outcome.reason);
+      expect(['lifeZero', 'emptyLibrary', 'spellOrAbility', 'concede', 'turnLimit']).toContain(
+        outcome.reason,
+      );
       expect(outcome.turns).toBeGreaterThan(0);
     }
   });

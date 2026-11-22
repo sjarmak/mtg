@@ -138,6 +138,8 @@ describe('the stack zone', () => {
     expect(textOf(items[1])).toContain(BOLT.name);
     expect(textOf(items[1])).toContain('2.');
     expect(textOf(items[1])).toContain(WAITING);
+    expect(screen.getByRole('button', { name: `View full card for ${GOLEM.name}` })).toBeTruthy();
+    expect(screen.getByRole('button', { name: `View full card for ${BOLT.name}` })).toBeTruthy();
   });
 
   it('carries the rule it enforces as its description, not as printed chrome', () => {
@@ -149,6 +151,58 @@ describe('the stack zone', () => {
     const strip = screen.getByLabelText('Stack') as unknown as ElementLike;
     expect(strip.getAttribute('title')).toBe(STACK_NOTE);
     expect(textOf(strip)).not.toContain(STACK_NOTE);
+  });
+
+  it('draws a chosen mode and a chosen target as two parts, not one string', () => {
+    // `mtg-sujc`. The mode rode at the front of `targetLabel` until this bead,
+    // so a modal spell with a target printed both facts as one run of text: one
+    // element, one shrink, one sentence for a screen reader. They are two
+    // fields and two spans now, and this asserts the row keeps them apart.
+    const { container } = render(
+      h(StackZone, {
+        entries: [
+          {
+            key: 'modal',
+            card: BOLT,
+            controller: 'You',
+            modeLabel: 'You gain 5 life.',
+            targetLabel: '→ Bear token',
+          },
+        ],
+      }),
+    );
+    const found = container as unknown as {
+      querySelector(selector: string): { readonly textContent: string | null } | null;
+    };
+    expect(found.querySelector('.mtg-stack__mode')?.textContent).toBe('You gain 5 life.');
+    expect(found.querySelector('.mtg-stack__target')?.textContent).toBe('→ Bear token');
+  });
+
+  it('draws the mode before the target, so the row names the spell before its aim', () => {
+    render(
+      h(StackZone, {
+        entries: [
+          {
+            key: 'modal',
+            card: BOLT,
+            controller: 'You',
+            modeLabel: 'You gain 5 life.',
+            targetLabel: '→ Bear token',
+          },
+        ],
+      }),
+    );
+    const row = textOf(within(screen.getByLabelText('Stack')).getAllByRole('listitem')[0]);
+    expect(row.indexOf('You gain 5 life.')).toBeLessThan(row.indexOf('→ Bear token'));
+  });
+
+  it('draws neither part when the entry carries neither', () => {
+    const { container } = render(h(StackZone, { entries: [{ key: 'a', card: BOLT, controller: 'You' }] }));
+    const found = container as unknown as {
+      querySelector(selector: string): unknown | null;
+    };
+    expect(found.querySelector('.mtg-stack__mode')).toBeNull();
+    expect(found.querySelector('.mtg-stack__target')).toBeNull();
   });
 
   it('draws nothing at all when the stack is empty', () => {

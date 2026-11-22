@@ -20,6 +20,10 @@
  *    clock, and only as many as survival actually needs, measured with
  *    `damageThroughBestBlocks` rather than counted one-per-attacker.
  *
+ * And one refusal that sits before all four, because it is not a matter of
+ * degree: `attackAccomplishesNothing` holds a creature whose attack has no
+ * upside at all to weigh.
+ *
  * The declaration is constructed rather than picked from `decision.options`:
  * the option list is a capped subset enumeration, and `validateAction` accepts
  * any legal declaration an agent builds itself. Legal includes CR 508.1d, which
@@ -29,12 +33,15 @@
  */
 import type { AttackDeclaration, CombatDefender, GameState, ObjectId, PlayerId } from '@mtg/kernel';
 import {
+  attackDeclarationTriggers,
+  attackCohortRestriction,
   counterCount,
   hasCombatModification,
   hasKeyword,
   NO_COUNTERS,
   opponentOf,
   powerOf,
+  requiredAttackers,
 } from '@mtg/kernel';
 import type { GreedyBotConfig } from '../config';
 import { boardCreatureValue, resolveExchange, untappedCreatures } from '../evaluate';
@@ -97,6 +104,43 @@ export function attackValue(context: AttackContext, attacker: ObjectId, config: 
     if (value < worst) worst = value;
   }
   return worst;
+}
+
+/**
+ * True when this creature's attack cannot produce anything, at any price the
+ * defender pays.
+ *
+ * Reported from a played game: the bot attacked with a 0/4 Kraken Hatchling.
+ * `attackValue` scores an attack as damage dealt plus the exchange the defender
+ * would accept, and a creature with no power is zero on both halves — it deals
+ * nothing through, and no block of it is worth the defender's bar, so the worst
+ * case stays at zero. Zero then clears `acceptableTradeLoss`, because that
+ * tolerance exists to admit a slightly losing *trade* and cannot tell one from
+ * an attack that was never going to do anything. The cost the scoring never
+ * saw is the one paid whatever the defender does: the creature taps, and a wall
+ * that taps is a wall that does not block.
+ *
+ * The carve-out is the reason this is a predicate and not a clamp. An attack
+ * with no damage in it can still be the whole point of the card — "whenever
+ * this attacks" is printed on bodies that are not there to connect — so the
+ * question is put to the kernel's own trigger matcher
+ * (`attackDeclarationTriggers`) rather than to a list of attack-shaped
+ * condition names copied into this package. Anything of ours that would fire is
+ * an upside this evaluator cannot price but must not ignore, so the attack goes
+ * back to `attackValue` to be scored on its merits.
+ *
+ * Not a general "is this attack pointless" test: a 1/1 walking into a 5/5 has
+ * an upside, it is just a small one, and weighing small upsides against their
+ * risks is exactly what the four heuristics below do. This one fires only where
+ * there is no upside to weigh. It does not exempt a lethal swing either, and
+ * does not need to: `chooseAttackers` declares that one before any creature is
+ * filtered, so a body with no power still walks in beside the swing that wins.
+ */
+export function attackAccomplishesNothing(context: AttackContext, attacker: ObjectId): boolean {
+  const { state, me } = context;
+  if (powerOf(state, attacker) > 0) return false;
+  const triggers = attackDeclarationTriggers(state, me, [{ oid: attacker, defender: context.defender }]);
+  return !triggers.some((trigger) => trigger.controller === me);
 }
 
 /**
@@ -198,11 +242,22 @@ export function chooseAttackers(
   defenders: readonly CombatDefender[] = [opponentOf(me)],
 ): readonly AttackDeclaration[] {
   const context = attackContext(state, me, eligible);
+  const legalCohort = (oids: readonly ObjectId[]): readonly ObjectId[] => {
+    if (attackCohortRestriction(state, oids) === null) return oids;
+    const only = oids[0];
+    if (only === undefined || !requiredAttackers(state, eligible, defenders).has(only)) return [];
+    const companion = eligible
+      .filter((oid) => oid !== only)
+      .sort((left, right) => attackValue(context, right, config) - attackValue(context, left, config))[0];
+    if (companion === undefined) return [];
+    return eligible.filter((oid) => oid === only || oid === companion);
+  };
   const declare = (
     oids: readonly ObjectId[],
     forcedDefender?: CombatDefender,
   ): readonly AttackDeclaration[] => {
-    const power = oids.reduce((total, oid) => total + Math.max(0, powerOf(state, oid)), 0);
+    const cohort = legalCohort(oids);
+    const power = cohort.reduce((total, oid) => total + Math.max(0, powerOf(state, oid)), 0);
     const loyalty = (oid: ObjectId): number =>
       counterCount(state.objects[oid]?.counters ?? NO_COUNTERS, 'loyalty');
     const killableWalker = defenders
@@ -212,7 +267,7 @@ export function chooseAttackers(
       )
       .sort((left, right) => loyalty(left.oid) - loyalty(right.oid) || left.oid.localeCompare(right.oid))[0];
     const defender: CombatDefender = forcedDefender ?? killableWalker ?? context.defender;
-    return oids.map((oid) => ({ oid, defender }));
+    return cohort.map((oid) => ({ oid, defender }));
   };
 
   if (config.attack.alwaysSwingForLethal && lethalSwing(context)) {
@@ -222,7 +277,9 @@ export function chooseAttackers(
   const assessment = assessRace(state, me, config.race);
   const tolerance =
     config.attack.acceptableTradeLoss + (assessment.winning ? config.race.racingTradeLoss : 0);
-  const profitable = eligible.filter((oid) => attackValue(context, oid, config) >= -tolerance);
+  const profitable = eligible.filter(
+    (oid) => !attackAccomplishesNothing(context, oid) && attackValue(context, oid, config) >= -tolerance,
+  );
   const chosen = holdBackBlockers(context, profitable, config, assessment);
   return declare(withForcedAttackers(state, eligible, chosen));
 }

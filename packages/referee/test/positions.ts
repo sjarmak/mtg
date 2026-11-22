@@ -7,13 +7,18 @@
 import { BASIC_LANDS, exampleCard, parseCard } from '@mtg/dsl';
 import type { AgentView, GameState, ReduceResult, ScenarioPermanent } from '@mtg/kernel';
 import { opponentOf, pendingDecision, reduce, scenario } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { exampleBlockingPosition } from '@mtg/referee';
 
 /** The view for whoever owes the pending decision. */
 export function viewFor(state: GameState): AgentView {
   const decision = pendingDecision(state);
   if (decision === null) throw new Error('positions: the kernel is not waiting for a decision');
-  return { state, player: decision.player, decision };
+  return {
+    state: observeState(state, decision.player, 'test/positions.ts:16'),
+    player: decision.player,
+    decision,
+  };
 }
 
 /** Player 1 owes blocks against a two-creature attack. */

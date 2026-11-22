@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-19T08:14:46.514Z",
+  "sources": [
+    {
+      "code": "ROE",
+      "mtgjson": {
+        "file": "ROE-346ae5d15a5b9240ae2a64336a3d878adea4dc56099e502e21fb03a129fcafa2.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/ROE.json",
+        "sha256": "346ae5d15a5b9240ae2a64336a3d878adea4dc56099e502e21fb03a129fcafa2",
+        "meta": {
+          "date": "2026-09-17",
+          "version": "5.3.0+20260917"
+        }
+      },
+      "scryfall": {
+        "file": "ROE-2bd59cdf8d99160ded357e42de4707b87652556abb38f05c61eac2e076133dbd.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Aroe+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "2bd59cdf8d99160ded357e42de4707b87652556abb38f05c61eac2e076133dbd",
+        "cards": 248
+      }
+    }
+  ]
+}

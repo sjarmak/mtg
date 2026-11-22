@@ -1,14 +1,15 @@
 /**
- * Sacrifice policy: which of the target's own creatures a resolving
- * `sacrificePermanent` gives up (CR 701.17a).
+ * Sacrifice policy: which of the affected player's own filtered permanents a
+ * resolving `sacrificePermanent` gives up (CR 701.17a).
  *
  * `legend.ts`'s policy inverted rather than duplicated with a new evaluator:
  * both ask the kernel's enumerated options which one this seat would rather be
- * left with, and `boardCreatureValue` is the one function this package prices
- * a creature with everywhere else. A legend rule keeps the best of several
- * duplicates; an edict gives up the worst of several creatures, so the same
- * scan with the comparison flipped is the whole difference — `<` in place of
- * `>`, both breaking ties on enumeration order so the bot stays deterministic
+ * left with. `boardCreatureValue` is the one function this package prices a
+ * creature with everywhere else; noncreatures deliberately tie at zero until
+ * the bot has a general permanent evaluator. A legend rule keeps the best of
+ * several duplicates; a sacrifice gives up the lowest-valued candidate, so the
+ * same scan with the comparison flipped is the whole difference — `<` in place
+ * of `>`, with ties retaining enumeration order so the bot stays deterministic
  * at a seed.
  *
  * This runs whichever seat the sacrifice targets, never the caster: the
@@ -24,10 +25,10 @@ type SacrificePermanentAction = Extract<Action, { type: 'sacrificePermanent' }>;
 type PermanentSacrificeDecision = Extract<Decision, { kind: 'permanentSacrifice' }>;
 
 /**
- * Gives up the least valuable creature, ties going to enumeration order so the
- * bot stays deterministic at a seed.
+ * Gives up the least valuable eligible permanent, ties going to enumeration
+ * order so the bot stays deterministic at a seed.
  */
-export function chooseCreatureToSacrifice(
+export function choosePermanentToSacrifice(
   view: AgentView,
   config: GreedyBotConfig,
   decision: PermanentSacrificeDecision,
@@ -43,7 +44,7 @@ export function chooseCreatureToSacrifice(
     }
   }
   if (worst === null) {
-    throw new Error('sacrifice policy: the kernel asked which creature to sacrifice and offered none');
+    throw new Error('sacrifice policy: the kernel asked which permanent to sacrifice and offered none');
   }
   return worst;
 }

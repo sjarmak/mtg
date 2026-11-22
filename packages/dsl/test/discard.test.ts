@@ -46,13 +46,13 @@ function printed(effects: readonly Effect[], name?: string): string {
 
 describe('the discard effects', () => {
   it('accepts exactly the bounded counts', () => {
-    expect(MAX_DISCARD_COUNT).toBe(4);
+    expect(MAX_DISCARD_COUNT).toBe(7);
     for (const kind of ['discardCards', 'chooseDiscard'] as const) {
       const target = { kind: 'targetOpponent' } as const;
-      for (const count of [1, 2, 3, 4]) {
+      for (const count of [1, 2, 3, 4, 5, 6, 7]) {
         expect(CardEffectSchema.parse({ kind, count, target })).toEqual({ kind, count, target });
       }
-      for (const count of [0, 5, -1, 1.5]) {
+      for (const count of [0, 8, -1, 1.5]) {
         expect(CardEffectSchema.safeParse({ kind, count, target }).success, `${kind} ${String(count)}`).toBe(
           false,
         );
@@ -63,7 +63,18 @@ describe('the discard effects', () => {
   it('is unreachable from the generator schema', () => {
     const target = { kind: 'targetOpponent' } as const;
     expect(ModelEffectSchema.safeParse({ kind: 'discardCards', count: 2, target }).success).toBe(false);
+    expect(ModelEffectSchema.safeParse({ kind: 'discardCards', count: 'all', target }).success).toBe(false);
     expect(ModelEffectSchema.safeParse({ kind: 'chooseDiscard', count: 1, target }).success).toBe(false);
+  });
+
+  it('admits a whole-hand count only on the owner-chosen discard primitive', () => {
+    const target = { kind: 'targetPlayer' } as const;
+    expect(CardEffectSchema.parse({ kind: 'discardCards', count: 'all', target })).toEqual({
+      kind: 'discardCards',
+      count: 'all',
+      target,
+    });
+    expect(CardEffectSchema.safeParse({ kind: 'chooseDiscard', count: 'all', target }).success).toBe(false);
   });
 
   it('refuses a reveal-and-choose aimed at anybody but an opponent', () => {
@@ -82,6 +93,14 @@ describe('the discard effects', () => {
       expect(validateCard(card)).toEqual([]);
     }
   });
+
+  it('allows an untargeted discard from the resolving controller hand', () => {
+    const card = parseCard(
+      sorceryInput([{ kind: 'discardCards', count: 2, target: { kind: 'noTarget' } }], 'Looting'),
+    );
+    expect(validateCard(card)).toEqual([]);
+    expect(ModelEffectSchema.safeParse(card.effects[0]).success).toBe(false);
+  });
 });
 
 describe('what a discard spell prints', () => {
@@ -92,6 +111,24 @@ describe('what a discard spell prints', () => {
     expect(printed([{ kind: 'discardCards', count: 1, target: { kind: 'targetOpponent' } }])).toBe(
       'Target opponent discards a card.',
     );
+    expect(printed([{ kind: 'discardCards', count: 'all', target: { kind: 'targetPlayer' } }])).toBe(
+      'Target player discards their hand.',
+    );
+  });
+
+  it('prints an untargeted controller discard and compounds draw-then-discard exactly', () => {
+    expect(printed([{ kind: 'discardCards', count: 2, target: { kind: 'noTarget' } }], 'Looting')).toBe(
+      'You discard two cards.',
+    );
+    expect(
+      printed(
+        [
+          { kind: 'drawCards', count: 4, target: { kind: 'noTarget' } },
+          { kind: 'discardCards', count: 2, target: { kind: 'noTarget' } },
+        ],
+        'Thoughtflare',
+      ),
+    ).toBe('Draw four cards, then discard two cards.');
   });
 
   it('prints the reveal, the choice and the discard as three sentences', () => {
@@ -160,6 +197,23 @@ describe('a discard paid as an activation cost', () => {
     );
   });
 
+  it('constrains the payment to the printed kind of card and prints that constraint', () => {
+    const cost = {
+      mana: { G: 1 },
+      tapSelf: true,
+      discard: 1,
+      discardFilter: { cardTypes: ['creature'] },
+    };
+    expect(costViolations(cost)).toEqual([]);
+    expect(renderOracleText(parseCard(lens(cost)))).toBe('{G}, {T}, Discard a creature card: Draw a card.');
+  });
+
+  it('refuses a discard filter when there is no discard payment for it to constrain', () => {
+    expect(costViolations({ mana: { generic: 1 }, discardFilter: { cardTypes: ['creature'] } })).toEqual([
+      { code: 'ABILITY_COST_INVALID', path: 'abilities[0].cost.discardFilter' },
+    ]);
+  });
+
   it('is unreachable from the set generator', () => {
     const ability: AbilityInput = {
       kind: 'activated',
@@ -174,6 +228,19 @@ describe('a discard paid as an activation cost', () => {
     expect(parsed.success).toBe(false);
     expect(parsed.error?.issues.map((issue) => issue.message)).toContainEqual(
       expect.stringContaining('discard'),
+    );
+
+    const filtered = ModelAbilitySchema.safeParse({
+      ...ability,
+      cost: {
+        mana: { generic: 1 },
+        discard: 1,
+        discardFilter: { cardTypes: ['creature'] },
+      },
+    });
+    expect(filtered.success).toBe(false);
+    expect(filtered.error?.issues.map((issue) => issue.message)).toContainEqual(
+      expect.stringContaining('discardFilter'),
     );
   });
 });

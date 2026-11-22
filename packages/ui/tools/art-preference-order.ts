@@ -39,7 +39,7 @@
  */
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
-import { basename, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { z } from 'zod';
 import type { ArtManifest, ArtManifestEntry } from '../src/lab/art-manifest';
 
@@ -68,16 +68,40 @@ export interface PreferenceOrdering {
 }
 
 /**
+ * Names a set file is given by an emitter rather than by whoever made the set.
+ *
+ * `stage-set-bundles.ts` keeps the same list for the same reason, and the two
+ * derivations agree on every set in this repository.
+ */
+const GENERIC_SET_FILENAMES: readonly string[] = ['set', 'index'];
+
+/** The directory name as a path segment: lowercase, and letters and digits. */
+function slug(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
  * The preferences file belonging to a set file, by the naming the repository
  * already uses: `…/<stem>.set.json` is curated in
  * `data/art-preferences/<stem>.json`, beside `…/<stem>.regenerate.json` and the
  * card-preferences file of the same stem. A set with no such file is the normal state and is not an
  * error — it means nobody has picked yet, and the collation's order stands.
+ *
+ * `set.json` is not a stem. It is the name every emitter in this repository
+ * writes, so honoring it keys `out/XMP/set.json`, `out/reference/m11/set.json`
+ * and `out/reference/m13/set.json` to one file and hands each of them the
+ * others' picks (`mtg-sb5u`). The directory is what carries a set's identity at
+ * that point — the same rule, and the same reasoning, as `stagedSetStem` in
+ * `stage-set-bundles.ts`.
  */
 export function preferencesPathFor(setPath: string, repoRoot: string): string | null {
-  const stem = basename(setPath)
+  const file = basename(setPath)
     .replace(/\.set\.json$/, '')
     .replace(/\.json$/, '');
+  const stem = GENERIC_SET_FILENAMES.includes(file.toLowerCase()) ? slug(basename(dirname(setPath))) : file;
   if (stem.length === 0) return null;
   const path = resolve(repoRoot, PREFERENCES_DIR, `${stem}.json`);
   return existsSync(path) ? path : null;

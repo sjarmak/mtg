@@ -51,6 +51,11 @@ export function preventionEffectId(counter: number): string {
   return `pv${counter}`;
 }
 
+/** Emblems are command-zone objects with stable ids from the game counter. */
+export function emblemId(counter: number): string {
+  return `em${counter}`;
+}
+
 /**
  * Static-replacement ids are `sr<n>` from the same counter.
  *

@@ -53,11 +53,12 @@
  * and says so rather than inventing the second: a word no card exercises is a
  * word nobody has checked.
  */
-import type { CardKind, Color, Keyword, Supertype } from '@mtg/dsl';
+import type { CardFilter, CardKind, Color, GrantableKeyword, Supertype } from '@mtg/dsl';
 import { cardManaValue } from '@mtg/dsl';
 import { printedCharacteristics, matchesFilter } from './characteristics';
 import { objectFilter } from './continuous';
 import type { ObjectId } from './ids';
+import { copiableCardOf } from './state';
 import type { GameState } from './state';
 
 /**
@@ -120,9 +121,12 @@ export interface PrintedFilter {
   readonly subtypes: readonly string[] | null;
   readonly supertypes: readonly Supertype[] | null;
   readonly colors: readonly Color[] | null;
-  readonly keywords: readonly Keyword[] | null;
+  /** Any listed parameterless keyword, across both printed keyword stores. */
+  readonly keywords: readonly GrantableKeyword[] | null;
   /** CR 201.2's exact printed names, matched on any of them; `null` is no constraint. */
   readonly names: readonly string[] | null;
+  /** CR 202.3's exact mana value; `null` is no equality constraint. */
+  readonly manaValue: number | null;
   /** An inclusive upper bound on CR 202.3's mana value; `null` is no bound. */
   readonly maxManaValue: number | null;
 }
@@ -136,6 +140,7 @@ export const ANY_CARD: PrintedFilter = {
   colors: null,
   keywords: null,
   names: null,
+  manaValue: null,
   maxManaValue: null,
 };
 
@@ -157,7 +162,7 @@ export function selectPrinted(
   members: readonly ObjectId[],
   filter: PrintedFilter,
 ): readonly ObjectId[] {
-  const asObjectFilter = objectFilter(filter);
+  const asObjectFilter = objectFilter({ ...filter, keywords: null });
   return members.filter((oid) => {
     const object = state.objects[oid];
     if (object === undefined) return false;
@@ -166,11 +171,53 @@ export function selectPrinted(
     // has no mana cost at all, and CR 202.3a makes its mana value zero, which
     // is what `cardManaValue` answers for one -- so "with mana value 2 or less"
     // finds a land, exactly as the printed clause does.
-    if (filter.maxManaValue !== null && cardManaValue(object.card) > filter.maxManaValue) return false;
+    const card = copiableCardOf(object);
+    if (
+      filter.keywords !== null &&
+      !filter.keywords.some(
+        (keyword) =>
+          card.keywords.some((printed) => printed === keyword) ||
+          (card.keywordAbilities ?? []).some((ability) => ability.kind === keyword),
+      )
+    ) {
+      return false;
+    }
+    if (filter.manaValue !== null && cardManaValue(card) !== filter.manaValue) return false;
+    if (filter.maxManaValue !== null && cardManaValue(card) > filter.maxManaValue) return false;
     // CR 201.2, checked the same way and for the reason the interface gives:
     // the comparison is on the printed name character for character, which is
     // what "cards named Squadron Hawk" asks for.
-    if (filter.names !== null && !filter.names.includes(object.card.name)) return false;
-    return matchesFilter(asObjectFilter, oid, printedCharacteristics(object));
+    if (filter.names !== null && !filter.names.includes(card.name)) return false;
+    return matchesFilter(asObjectFilter, oid, printedCharacteristics(object), object.token);
   });
+}
+
+/** Converts the DSL's optional card-filter fields to the kernel's total form. */
+export function printedFilterOf(filter: CardFilter): PrintedFilter {
+  return printedFilter({
+    cardTypes: filter.cardTypes ?? null,
+    excludeCardTypes: filter.excludeCardTypes ?? null,
+    subtypes: filter.subtypes ?? null,
+    supertypes: filter.supertypes ?? null,
+    colors: filter.colors ?? null,
+    keywords: filter.keywords ?? null,
+    names: filter.names ?? null,
+    manaValue: filter.manaValue ?? null,
+    maxManaValue: filter.maxManaValue ?? null,
+  });
+}
+
+/** Selects matching printed cards from any already-scoped zone member list. */
+export function selectPrintedByCardFilter(
+  state: GameState,
+  members: readonly ObjectId[],
+  filter: CardFilter,
+): readonly ObjectId[] {
+  const base = selectPrinted(state, members, printedFilterOf(filter));
+  if (filter.anyOf === undefined) return base;
+  return base.filter((oid) =>
+    filter.anyOf?.some(
+      (alternative) => selectPrinted(state, [oid], printedFilterOf(alternative)).length === 1,
+    ),
+  );
 }

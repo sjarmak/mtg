@@ -18,24 +18,36 @@ import { describe, expect, it } from 'vitest';
 import { parseCard, type MutuallyAssignable } from '@mtg/dsl';
 import {
   beginTrace,
+  botSeat,
+  choose,
   createRegenerationShield,
+  createSession,
   destroyPermanent,
   eventsOfType,
+  humanSeat,
   scenario,
   type ActionType,
+  type CastingCostChoice,
+  type Choice,
   type Decision,
   type GameEventType,
+  type GameSetup,
+  type Seat,
   type Step,
 } from '@mtg/kernel';
+import { FIXTURE_DECK_RW, FIXTURE_DECK_UB, greedyBot } from '@mtg/sim';
 import {
   GameRecordSchema,
   type LogAction,
+  type LogCastingCostChoice,
   type LogDecisionKind,
   type LogEventType,
   type LogStep,
 } from '../../src/routes/replay/log-schema';
 import { readEventLog } from '../../src/routes/replay/read-log';
 import {
+  ReplayDivergedError,
+  recordChoices,
   recordGame,
   snapshotOf,
   stepRecord,
@@ -50,6 +62,13 @@ const actionsCovered: MutuallyAssignable<ActionType, LogAction['type']> = true;
 const stepsCovered: MutuallyAssignable<Step, LogStep> = true;
 const decisionsCovered: MutuallyAssignable<Decision['kind'], LogDecisionKind> = true;
 const stackEntryKeysCovered: StackEntryKeysCovered = true;
+/**
+ * The kernel's ways of paying for a spell against the log's own list of them.
+ * `log-schema.ts` may not import the kernel, so this is where the two meet;
+ * `overload` reached `CastingCostChoice` with the Return to Ravnica work while
+ * the log still named three, which this would have caught the day it landed.
+ */
+const castingCostsCovered: MutuallyAssignable<CastingCostChoice, LogCastingCostChoice> = true;
 
 const REPLAY_SRC = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'src', 'routes', 'replay');
 
@@ -77,13 +96,14 @@ describe('the committed fixture', () => {
 
 describe('schema coverage', () => {
   it('mirrors every kernel union the log carries', () => {
-    expect([eventsCovered, actionsCovered, stepsCovered, decisionsCovered, stackEntryKeysCovered]).toEqual([
-      true,
-      true,
-      true,
-      true,
-      true,
-    ]);
+    expect([
+      eventsCovered,
+      actionsCovered,
+      stepsCovered,
+      decisionsCovered,
+      stackEntryKeysCovered,
+      castingCostsCovered,
+    ]).toEqual([true, true, true, true, true, true]);
   });
 
   it('strict-records and reads a real regeneration-shield consumption', () => {
@@ -129,6 +149,62 @@ describe('schema coverage', () => {
     const log = readEventLog(writeEventLog('record.test.ts', [{ game, steps: [step] }]));
     expect(log.games[0]?.steps[0]?.events).toContainEqual(
       expect.objectContaining({ type: 'replacementApplied', event: 'destroy' }),
+    );
+  });
+});
+
+/**
+ * A game a person played against the greedy bot, kept the way the session layer
+ * keeps it: the setup and the list of what the person chose. Always the first
+ * option, which is not a strategy, and ends at the turn cap, which is a result.
+ */
+function playedGame(): {
+  readonly setup: GameSetup;
+  readonly seats: readonly [Seat, Seat];
+  readonly choices: readonly Choice[];
+} {
+  const setup: GameSetup = {
+    seed: 'replay/v0/human-vs-greedy',
+    decks: [FIXTURE_DECK_RW, FIXTURE_DECK_UB],
+    startingPlayer: 0,
+    maximumTurns: 4,
+  };
+  const seats: readonly [Seat, Seat] = [humanSeat('One'), botSeat(greedyBot('greedy-ub'))];
+  let session = createSession(setup, seats);
+  for (let guard = 0; session.result === null; guard += 1) {
+    if (guard > 2000) throw new Error('the played game did not end');
+    session = choose(session, 0);
+  }
+  return { setup, seats, choices: session.choices };
+}
+
+describe('re-recording a played game from its choices', () => {
+  it('reproduces the result, one step per human choice, and the same bytes twice', () => {
+    const played = playedGame();
+    const once = recordChoices({ index: 0, ...played });
+    expect(once.steps.length).toBe(played.choices.length + 1);
+    expect(once.game.result.winner).toBe(null);
+    expect(once.game.seats).toEqual([
+      { bot: 'One', deck: FIXTURE_DECK_RW.name },
+      { bot: 'greedy-ub', deck: FIXTURE_DECK_UB.name },
+    ]);
+    expect(once.game.steps).toBe(once.steps.length);
+    expect(JSON.stringify(recordChoices({ index: 0, ...played }))).toBe(JSON.stringify(once));
+    // The rows are the viewer's rows: the log reads back whole.
+    const log = readEventLog(writeEventLog('record.test.ts', [once]));
+    expect(log.games[0]?.steps.length).toBe(once.steps.length);
+  });
+
+  it('refuses a list that runs on after the game, runs out before it, or names an option never offered', () => {
+    const played = playedGame();
+    expect(() => recordChoices({ index: 0, ...played, choices: [...played.choices, 0] })).toThrow(
+      ReplayDivergedError,
+    );
+    expect(() => recordChoices({ index: 0, ...played, choices: played.choices.slice(0, -1) })).toThrow(
+      /ran out before the game ended/,
+    );
+    expect(() => recordChoices({ index: 0, ...played, choices: [999, ...played.choices.slice(1)] })).toThrow(
+      /choice 0: index 999/,
     );
   });
 });

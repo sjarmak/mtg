@@ -30,9 +30,9 @@
  * box, the rules box takes what the trim leaves, and the text steps down inside
  * it (`../styles/card.ts`, `FACE_TRIM`) — so a wordy card is a card set small.
  * A panel drawn at the face's own width would set it just as small and be no
- * answer at all, which is why the panel is now 20rem against the face's 15.25
- * and its rules box goes back to step 0. `ZOOM_FACE_WIDTH_REM`'s docblock has
- * the arithmetic for why 20 is enough room to do that in.
+ * answer at all, which is why the panel is now 24rem against the face's 15.25
+ * and scales its reading type with that added room. `ZOOM_FACE_WIDTH_REM`'s
+ * docblock has the arithmetic and the 600-card browser census holds its floor.
  *
  * A limit worth stating, unchanged: a `pointer-events: none` panel cannot be
  * scrolled, so nothing here may rely on a scrollbar. It does not — the rules box

@@ -18,7 +18,7 @@ import { renderCopy } from '../src/copy';
 import { AnalysisRoute } from '../src/routes/AnalysisRoute';
 import { DeckRoute } from '../src/routes/DeckRoute';
 import { PlayRoute } from '../src/routes/PlayRoute';
-import { ReplayRoute } from '../src/routes/ReplayRoute';
+import { ReplayViewer } from '../src/routes/replay/ReplayViewer';
 import type { UiRoute } from '../src/app/router';
 
 function markup(node: Parameters<typeof renderToStaticMarkup>[0]): string {
@@ -54,7 +54,7 @@ describe('renderCopy', () => {
 });
 
 describe('the states a clean checkout reaches', () => {
-  const REPLAY_ROUTE: UiRoute = { mode: 'replay', params: {} } as UiRoute;
+  const REPLAY_ROUTE: UiRoute = { mode: 'analysis', sub: 'replay', params: {} } as UiRoute;
 
   const states: readonly (readonly [string, string])[] = [
     ['deck, absent', markup(h(DeckRoute, { state: { status: 'absent' } }))],
@@ -68,7 +68,9 @@ describe('the states a clean checkout reaches', () => {
     ['analysis, no log', markup(h(AnalysisRoute, { state: { status: 'absent' } }))],
     [
       'replay, no log',
-      markup(h(ReplayRoute, { log: null, route: REPLAY_ROUTE, onSetParams: () => undefined })),
+      markup(
+        h(ReplayViewer, { state: { status: 'absent' }, route: REPLAY_ROUTE, onSetParams: () => undefined }),
+      ),
     ],
   ];
 

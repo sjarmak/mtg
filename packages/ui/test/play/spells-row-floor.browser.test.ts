@@ -161,7 +161,7 @@ function combatOpen(): GameSession {
 /**
  * The route furniture the bead measured above the mat, on top of `Shell`'s own
  * header: a page title, the precon/sealed switch, and the collapsed turn badge
- * (`routes/play/BuilderSwitch.ts`, `routes/play/toolbar.ts`'s `playDetails`).
+ * (`routes/play/PlayChooser.ts`, `routes/play/toolbar.ts`'s `playDetails`).
  * `PlayRoute` only draws the switch on the builder screen and the turn badge is
  * folded into `PlayView`'s own strip once a game is dealt, so a live-table
  * capture never carries every one of these three at once through this
@@ -171,6 +171,14 @@ function combatOpen(): GameSession {
  * `role="group"` pair of buttons, an `h1.mtg-page-title`, a `.mtg-badge` turn
  * line) rather than a bare placeholder box, so the harness is squeezing the
  * mat with the shapes production actually draws, sized to what they measure.
+ *
+ * The route draws none of it now (`0b788009` took the last band off, and
+ * `../play/mat-top.browser.test.ts` holds it there), which is why `mtg-lv2h`
+ * removed the same markup from three rigs beside this one. It stays here on the
+ * argument this docblock already makes: the subject is a mat squeezed until the
+ * creature row has to choose between clipping and scrolling, and the furniture
+ * plus the six padding notes under it are how the squeeze is applied. A page
+ * that stopped squeezing would be a page with nothing to measure.
  */
 function routeFurniture(): ReactElement {
   return h(
@@ -277,6 +285,9 @@ const MEASURE = `(() => {
   return {
     viewport: [window.innerWidth, window.innerHeight],
     faces: faces.length,
+    represented: [...spellsRow.children].reduce((total, place) => total + Number(
+      place.querySelector(':scope > .mtg-permanent-pile__toggle')?.getAttribute('data-pile-count') ?? 1
+    ), 0),
     rows,
     worst,
     maxClippedPx: rows.reduce((max, row) => Math.max(max, row.clippedPx), 0),
@@ -296,6 +307,7 @@ interface Row {
 interface Reading {
   readonly viewport: readonly number[];
   readonly faces: number;
+  readonly represented: number;
   readonly rows: readonly Row[];
   readonly worst: Row | null;
   readonly maxClippedPx: number;
@@ -335,10 +347,11 @@ describe('the near seat creature row does not clip a card below its content heig
           console.log(
             `${String(width)}x${String(height)}: faces ${String(result.faces)}, maxClippedPx ${String(result.maxClippedPx)}, worst ${JSON.stringify(result.worst)}`,
           );
+          expect(result.represented, `${String(width)}x${String(height)}: represented creatures`).toBe(2);
           expect(
             result.faces,
-            `${String(width)}x${String(height)}: no near-seat creature faces measured`,
-          ).toBe(2);
+            `${String(width)}x${String(height)}: no creature face measured`,
+          ).toBeGreaterThan(0);
           expect(
             result.maxClippedPx,
             `${String(width)}x${String(height)}: ${JSON.stringify(result.rows)}`,

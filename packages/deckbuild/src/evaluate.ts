@@ -10,20 +10,24 @@
 import type {
   Ability,
   ActivatedAbility,
-  Amount,
   AnyEffectKind,
   Aura,
   AuraModification,
+  BasicLandType,
   Card,
   Color,
+  ComputedAmount,
   Condition,
   Effect,
   EffectScope,
+  GrantableKeyword,
   Keyword,
   KeywordAbility,
   LoyaltyAbility,
   Modes,
   PlaneswalkerCard,
+  PermanentTally,
+  ProtectionQuality,
   PumpAmount,
   SacrificeOther,
   StaticModification,
@@ -39,6 +43,8 @@ import {
   colorsFromCost,
   counterGrantedKeywords,
   counterStatBonus,
+  hasAbilityEffects,
+  hasTarget,
   isAttachingAbility,
   isAuraCard,
   isCreature,
@@ -48,18 +54,42 @@ import {
   isLiteralAmount,
   isLoyaltyAbility,
   isPlaneswalker,
+  isRateAmount,
   isStaticAuraModification,
+  isVariableLoyaltyCost,
   manaValue,
+  printedEntryReplacement,
   sortColors,
   targetFilterIsEmpty,
   tokenAbilities,
+  transformedBackFaceOf,
 } from '@mtg/dsl';
 import type { CardScoreWeights, EffectWeight } from './config';
 import type { CurveBucket } from './curve-bucket';
 import { curveBucket } from './curve-bucket';
 import type { DeckContext, SubtypeBody } from './deck-context';
-import { conditionSupply, counterSupply, subtypeShare, subtypeSupply } from './deck-context';
+import {
+  conditionSupply,
+  counterSupply,
+  creatureBodies,
+  expectedBestDrawnBody,
+  expectedCounterBearers,
+  matchingPermanentBodies,
+  matchingPermanentSupply,
+  subtypeShare,
+  subtypeSupply,
+} from './deck-context';
+import type { FormatContext } from './format-context';
+import {
+  formatColorShare,
+  formatIntimidateShare,
+  formatLandwalkShare,
+  formatSubtypeShare,
+} from './format-context';
 import { hypergeometricAtLeast } from './hypergeometric';
+import { tokenCount } from './token-count';
+
+type SacrificeMatching = NonNullable<ActivatedAbility['cost']['sacrificeMatching']>;
 
 /** One named contribution to a card's score. */
 export interface ScoreComponent {
@@ -190,11 +220,11 @@ function keywordValue(keywords: readonly Keyword[], power: number, weights: Card
  * its object in a second damage step, and a 0-power creature dealing zero
  * twice has dealt zero.
  *
- * The other four are absent and each for its own reason. `defender` is the case
+ * The other five are absent and each for its own reason. `defender` is the case
  * the exclusion list up there settles: `vigilance` is out of it because a
  * 0-power creature "still attacks to pressure a planeswalker even at 0 power,"
  * and defender is the word that takes that attack away, so it costs the same on
- * a 0/6 as on a 6/6. The three survival-shaped abilities read no power at all —
+ * a 0/6 as on a 6/6. The four survival-shaped abilities read no power at all —
  * their whole price is a share of the body's stat value — so flooring them on
  * power would be flooring on a term they do not have, and a 0/6 indestructible
  * wall is the card the floor would be most wrong about.
@@ -209,46 +239,142 @@ const ZERO_AT_ZERO_POWER_ABILITIES: ReadonlySet<KeywordAbility['kind']> = new Se
  *
  * The second keyword vocabulary, priced on `keywordValue`'s terms one function
  * up: a flat part plus a rate read off the body. What is new is the third term,
- * because the six do not all scale on the same thing —
+ * because the seven do not all scale on the same thing —
  * `DEFAULT_KEYWORD_ABILITY_VALUE` argues the split at length and every number
  * it uses.
  *
  * `body` is the thing the survival-shaped abilities keep alive, in `statValue`
  * units: a creature's own stats, a planeswalker's loyalty priced the way the
- * walker arm already prices it, and zero for a permanent with neither, which is
- * a hole the weights docblock names rather than an answer.
+ * walker arm already prices it, and for an artifact or an enchantment the
+ * card's own text value, which `permanentTextBody` sums. Every caller states
+ * it; this function never decides what a permanent's body is.
  *
  * The `protection` narrowing is the one place a price depends on the ability's
  * payload rather than only on its kind. `ProtectionQualitySchema`'s color arm
  * carries the table's rate outright; its subtype arm is narrowed by
  * `staticSubtypeReachFactor`, this file's existing number for how much of a
  * board a named creature type covers.
+ *
+ * Both of those, and `landwalk`'s discount beside them, are what a caller that
+ * stated no set gets. Three of the abilities are live only against what the
+ * *opponent* brought — a landwalk against their basic land types, a protection
+ * against the color or the creature type they play, an intimidate against the
+ * colors their creatures are not — and none of the constants standing in for
+ * those was ever a measurement of it. `context.format` is, when a caller stated
+ * the set the deck is being built for, and the measured arms below read it. The
+ * shape is `subtypeReachFactor`'s: a measured share where there is one, the
+ * shipped constant where there is not, and never a half-measured mixture of the
+ * two.
+ *
+ * `colors` is the priced permanent's own, and it is here for `intimidate`
+ * alone: what that word gets past is decided by what it does *not* share with
+ * the format, so it is the one row whose price depends on the body carrying it
+ * rather than only on the ability and the census.
  */
 function keywordAbilityValue(
   abilities: readonly KeywordAbility[],
   power: number,
+  colors: readonly Color[],
   body: number,
   weights: CardScoreWeights,
+  context: DeckContext | undefined,
 ): number {
+  const format = context?.format ?? null;
   return abilities.reduce((sum, ability) => {
     if (power === 0 && ZERO_AT_ZERO_POWER_ABILITIES.has(ability.kind)) return sum;
+    // The second narrowing, and the second place a price depends on more than
+    // the ability's kind. `defender` is the one row whose value is a curve
+    // rather than a line through this table's three terms, because the same
+    // rules text is also reachable as a `cantAttack` static and both spellings
+    // have to come out of one function; `combatDenialValue` is that function
+    // and this row is the value it is pinned through.
+    if (ability.kind === 'defender') return sum + combatDenialValue(power, weights);
+    if (format !== null) {
+      // The measured arms. Each recomputes the row from the number the row was
+      // derived from rather than scaling the row, because the row is already
+      // that number times the constant being replaced and dividing a weight
+      // back out is a division by a thing a caller may set to zero.
+      if (ability.kind === 'landwalk') {
+        return sum + conditionalEvasionValue(power, formatLandwalkShare(format, ability.landType), weights);
+      }
+      if (ability.kind === 'intimidate') {
+        return sum + conditionalEvasionValue(power, formatIntimidateShare(format, colors), weights);
+      }
+    }
+    // Outside the branch above because it carries both arms itself: a static
+    // that *grants* protection prices the identical word off the identical
+    // function, and a granted protection worth a different number from a
+    // printed one is a card that is worth more enchanted than printed.
+    if (ability.kind === 'protection') {
+      return sum + protectionValue(ability.quality, power, body, weights, format);
+    }
     const weight = weights.keywordAbilityValue[ability.kind];
-    const narrowing =
-      ability.kind === 'protection' && ability.quality.kind === 'subtype'
-        ? weights.staticSubtypeReachFactor
-        : 1;
-    return sum + (weight.flat + weight.perPower * power + weight.bodyShare * body) * narrowing;
+    return sum + weight.flat + weight.perPower * power + weight.bodyShare * body;
   }, 0);
+}
+
+/**
+ * What one protection is worth on a body of `body`, printed or granted.
+ *
+ * The same two arms every measured row here has: the live share where a caller
+ * stated the set, the shipped row where none was stated. It is a function
+ * rather than an expression at each site because `staticModificationValue`
+ * prices a granted protection through it too, and the two must not drift.
+ *
+ * The color quality carries the table's rate outright; the subtype quality is
+ * narrowed by `staticSubtypeReachFactor` on the unmeasured arm, this file's
+ * existing number for how much of a board a named creature type covers. The
+ * measured arm needs no narrowing, because measuring the creature type *is*
+ * the answer that constant was standing in for.
+ */
+function protectionValue(
+  quality: ProtectionQuality,
+  power: number,
+  body: number,
+  weights: CardScoreWeights,
+  format: FormatContext | null,
+): number {
+  if (format !== null) {
+    const live =
+      quality.kind === 'color'
+        ? formatColorShare(format, quality.color)
+        : formatSubtypeShare(format, quality.subtype);
+    return weights.protectionLiveBodyShare * live * body;
+  }
+  const weight = weights.keywordAbilityValue.protection;
+  const narrowing = quality.kind === 'subtype' ? weights.staticSubtypeReachFactor : 1;
+  return (weight.flat + weight.perPower * power + weight.bodyShare * body) * narrowing;
+}
+
+/**
+ * Evasion that is live only some of the time, priced at flying's pair times how
+ * often that is.
+ *
+ * Flying's base and rate are the anchor `DEFAULT_KEYWORD_ABILITY_VALUE`'s
+ * `landwalk` row is already derived from — the row is this expression with
+ * `enabledWhileFactor` in the share's place — so measuring the share means
+ * evaluating the same expression against a census instead of against a guess,
+ * rather than adding a second price for one ability.
+ *
+ * `intimidate` carries the same bound and comes through here too, at a
+ * different reading of the same census: the share of the format's creatures
+ * that can neither block it by color nor block it as an artifact
+ * (`formatIntimidateShare`). One expression, two abilities, two shares —
+ * which is what `DEFAULT_KEYWORD_ABILITY_VALUE` shipped them as before either
+ * share was measured, both rows being flying's pair at `enabledWhileFactor`.
+ */
+function conditionalEvasionValue(power: number, liveShare: number, weights: CardScoreWeights): number {
+  return (weights.keywordBase.flying + weights.keywordPowerScale.flying * power) * liveShare;
 }
 
 /**
  * Total value of a creature body, used for both printed creatures and tokens.
  *
  * `keywordAbilities` is required rather than defaulted, and that is the whole
- * of `mtg-gloz`'s fix at this call site. The six were invisible here for as
+ * of `mtg-gloz`'s fix at this call site. The seven were invisible here for as
  * long as they existed because nothing passed them and nothing had to; a
  * defaulted empty list would have kept every existing caller compiling and kept
- * the same six priced at zero on whichever of them forgot. A `TokenSpec` is the
+ * the same seven priced at zero on whichever of them forgot. A `TokenSpec` is the
  * one caller that legitimately has none — `TokenSpecSchema` carries `keywords`
  * and no `keywordAbilities` field at all, so a token cannot print one — and it
  * says so by passing an empty list at a site the compiler named.
@@ -256,15 +382,17 @@ function keywordAbilityValue(
 export function bodyValue(
   power: number,
   toughness: number,
+  colors: readonly Color[],
   keywords: readonly Keyword[],
   keywordAbilities: readonly KeywordAbility[],
   weights: CardScoreWeights,
+  context: DeckContext | undefined,
 ): number {
   const stats = statValue(power, toughness, weights);
   return (
     stats +
     keywordValue(keywords, power, weights) +
-    keywordAbilityValue(keywordAbilities, power, stats, weights)
+    keywordAbilityValue(keywordAbilities, power, colors, stats, weights, context)
   );
 }
 
@@ -355,49 +483,49 @@ export function bodyEffectValue(body: number, weights: CardScoreWeights): number
  * body's stats, and the sacrifice-cost docblock argues why spending the body
  * does not reverse it.
  */
-function permanentBodyValue(body: SubtypeBody | null, weights: CardScoreWeights): number {
+function permanentBodyValue(
+  body: SubtypeBody | null,
+  weights: CardScoreWeights,
+  context: DeckContext | undefined,
+): number {
   if (body === null) return 0;
   return bodyEffectValue(
-    bodyValue(body.power, body.toughness, body.keywords, body.keywordAbilities, weights),
+    bodyValue(
+      body.power,
+      body.toughness,
+      body.colors,
+      body.keywords,
+      body.keywordAbilities,
+      weights,
+      context,
+    ),
     weights,
   );
 }
 
 function tokenValue(token: TokenSpec, weights: CardScoreWeights): number {
   const creature = isCreatureTokenSpec(token);
+  // No context, and nothing lost by it: a `TokenSpec` has no `keywordAbilities`
+  // field, so the empty list below is the only one it can pass and there is
+  // nothing on a token for a format census to price.
   const body = permanentBodyValue(
     creature
       ? {
           power: token.power,
           toughness: token.toughness,
+          colors: token.colors,
           keywords: token.keywords,
           keywordAbilities: [],
         }
       : null,
     weights,
+    undefined,
   );
   const premium = creature ? weights.creaturePremium : 0;
-  return tokenAbilities(token).reduce((sum, ability) => sum + abilityValue(ability, weights), body + premium);
-}
-
-/**
- * How many tokens one `createToken` makes when the card prints no numeral.
- *
- * One, and deliberately not `assumed`'s three. That guess is this file's answer
- * for a magnitude nobody can read, and three is right when the unknown is how
- * far an effect reaches; it is wrong here, because this magnitude is a count of
- * bodies and every body is credited `creaturePremium` before it is credited
- * anything else, so guessing high hands a card two free premiums it may not have.
- *
- * `nwo.ts`'s `wideBoard` rule reads the same unreadable count the other way and
- * for the same reason: a New World Order budget is spent by the widest board a
- * common could make, so there an unreadable count is wide by assumption and here
- * it is narrow by assumption. Both resolve it against the card. Both are also
- * only ever reached by a hand-authored one, because `ModelEffectSchema` builds
- * `count` over `z.int()` and no generated card can carry a computed amount.
- */
-function tokenCount(count: Amount): number {
-  return isLiteralAmount(count) ? count : 1;
+  return tokenAbilities(token).reduce(
+    (sum, ability) => sum + abilityValue(ability, weights, undefined, token.power),
+    body + premium,
+  );
 }
 
 /**
@@ -413,8 +541,94 @@ function tokenCount(count: Amount): number {
  * replacing it — Mutilate prices as -3/-3 under the standing assumption of
  * three, not as -1/-1.
  */
-function assumed(amount: PumpAmount, weights: CardScoreWeights): number {
-  return amountOrAssume(amount, weights.computedAmountAssumption);
+function assumed(
+  amount: PumpAmount | { readonly kind: 'opponentsLifeLostThisTurn' },
+  weights: CardScoreWeights,
+  context?: DeckContext | undefined,
+): number {
+  if (typeof amount !== 'number' && amount.kind === 'opponentsLifeLostThisTurn') {
+    return weights.computedAmountAssumption;
+  }
+  const measured = measuredAmount(amount, context);
+  return measured ?? amountOrAssume(amount, weights.computedAmountAssumption);
+}
+
+/**
+ * The one board count a deck list can actually take, or `null` for every other
+ * quantity in the union.
+ *
+ * `countWithCounter` is a property of the deck rather than of the game in
+ * progress: how many permanents carry a hide counter is decided by how many of
+ * the deck's cards place one, and `expectedCounterBearers` counts them.
+ *
+ * `countMatching` is the near miss, and it is refused, but no longer because
+ * the census cannot answer it. The deck knows a *supply* — how many Parts the
+ * cards drawn will mint over a game — and "for each Part you control" asks an
+ * *occupancy*, how many are on the battlefield at one moment. The two differ by
+ * whatever is spent, and in the flagship most Parts sacrifice themselves for a
+ * counter, so the supply runs far ahead of the board. Handing the supply figure
+ * over as if it were the occupancy was not a rounding difference: it rewrote
+ * all ten flagship set decks down to their mana bases and put a color pair at
+ * 29.4% against a 40% floor. `countWithCounter` does not have the same gap,
+ * because a counter stays on the permanent it was placed on, so for counters
+ * supply *is* occupancy.
+ *
+ * ## The estimator exists, is measured, and is waiting on a design pass
+ *
+ * `mtg-q94w` wrote the occupancy estimator that closes that gap and measured
+ * what it costs. It lives on the `mtg-q94w-occupancy` branch, argued and
+ * pinned, and it is not wired in here for a reason that is about the set rather
+ * than about the scoring:
+ *
+ * The estimator reads the flagship's Parts at 0.000 to 0.897 against the
+ * standing guess of three, so `xmp-hero-s-armory` — three mana, "creatures you
+ * control get +1/+1 for each Part you control" — leaves all ten decks, which is
+ * the right answer and the whole of the problem. Rebuilding every pair moves 35
+ * of 400 positions. On the pinned 10,035-game sweep `balance.pair.WR` comes off
+ * the floor, 40.4% to 48.3%, and its waiver goes stale; `balance.pair.BR` falls
+ * 39.6% to 35.1% [95% CI 33.0%-37.2%] and stops being a pair sitting on the
+ * bound at all; `balance.pair.WB` drops into the seed noise at 41.5%. Removing
+ * a colorless card ten decks were auto-including exposes each pair's real
+ * twenty-third card, and BR's is worse than the card it replaces.
+ *
+ * So the flat assumption stands here on content grounds, not on measurement
+ * ones, and the content question is `mtg-3e2m`. That is the ordinary reading of
+ * this repo's own rule that a gate which used to pass and now fails is a
+ * regression to fix rather than a waiver to write: the fix is a design pass on
+ * one color pair, and a scoring change is not allowed to buy itself a waiver
+ * list. When BR is off the floor, the branch is one merge.
+ *
+ * Every other member reads a live zone (`cardsInGraveyard`), a span of the
+ * resolution (`damageDealtThisResolution`), an announcement (`chosenX`) or the
+ * other side of the table, and no census of a card list answers any of them, so
+ * they keep the one named guess. `landsWithSubtype` is a second near miss and
+ * stays with them deliberately: how many Swamps a deck plays is `mana-base.ts`'s
+ * decision, and the cards this context counts are the spells, so measuring it
+ * here would answer a Cabal Coffers zero in every deck that plays it.
+ *
+ * `null` rather than the assumption, so the caller with no deck and the count
+ * this module cannot take reach the same fallback through one expression
+ * instead of two that can drift (`mtg-cosl`).
+ */
+function measuredTally(
+  tally: ComputedAmount | PermanentTally,
+  context: DeckContext | undefined,
+): number | null {
+  if (context === undefined) return null;
+  return tally.kind === 'countWithCounter' ? expectedCounterBearers(context, tally.counters) : null;
+}
+
+/** `measuredTally` over a printed amount, rate included, or `null`. */
+function measuredAmount(amount: PumpAmount, context: DeckContext | undefined): number | null {
+  if (isLiteralAmount(amount)) return null;
+  // A rate multiplies the count for `amountOrAssume`'s stated reason, and it
+  // multiplies the measured one for the same one: the printed rate is the half
+  // that is known either way.
+  if (isRateAmount(amount)) {
+    const each = measuredTally(amount.each, context);
+    return each === null ? null : amount.rate * each;
+  }
+  return measuredTally(amount, context);
 }
 
 /** The one effect the union carries for a given kind. */
@@ -441,8 +655,18 @@ export interface EffectPricing<K extends AnyEffectKind = AnyEffectKind> {
   readonly base: number;
   /** Value per unit of `magnitude`. */
   readonly perUnit: number;
-  /** How many units of itself this effect is, on this card. */
-  readonly magnitude: (effect: EffectOf<K>, weights: CardScoreWeights) => number;
+  /**
+   * How many units of itself this effect is, on this card.
+   *
+   * The deck is the third parameter because one printed quantity is a count of
+   * the deck's own permanents (`measuredTally`); every row that does not read
+   * an amount takes the two it always took.
+   */
+  readonly magnitude: (
+    effect: EffectOf<K>,
+    weights: CardScoreWeights,
+    context: DeckContext | undefined,
+  ) => number;
 }
 
 /**
@@ -481,7 +705,7 @@ export const EFFECT_PRICING: EffectPricingTable = {
   dealDamage: {
     base: 0.4,
     perUnit: 0.55,
-    magnitude: (effect, w) => assumed(effect.amount, w) * scopeReach(effect, w),
+    magnitude: (effect, w, deck) => assumed(effect.amount, w, deck) * scopeReach(effect, w),
   },
   // `exileTarget`'s split, for `exileTarget`'s reason: once a row can price a
   // group, the whole price has to sit in `perUnit`, because per-unit is the only
@@ -489,6 +713,7 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // to the last bit — `2.6 + 0.0 * 1` and `0.0 + 2.6 * 1` — so no card that
   // existed before this widening is priced differently by it.
   destroyPermanent: { base: 0.0, perUnit: 2.6, magnitude: (effect, w) => scopeReach(effect, w) },
+  destroyAttachedPermanents: { base: 0.0, perUnit: 2.6, magnitude: () => 1 },
   // Half of a destroy, and the half is the point: a fight answers a creature
   // only when the body it is printed on is big enough, it answers nothing at
   // all if that body is dealt with in response, and it can cost the fighter as
@@ -505,6 +730,7 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // No `scopeReach`: `fight` carries no scope. The DSL prints one fight against
   // one creature, which is CR 701.12's whole shape.
   fight: { base: 1.3, perUnit: 0.0, magnitude: () => 1 },
+  petrifyCreature: { base: 2.6, perUnit: 0.0, magnitude: () => 1 },
   // A buff and a shrink are not the same primitive priced two ways: a buff
   // adds power the attacker gets to swing with and toughness that keeps it
   // alive, so the unit is the sum of both; a shrink that takes toughness away
@@ -518,14 +744,14 @@ export const EFFECT_PRICING: EffectPricingTable = {
   pumpUntilEndOfTurn: {
     base: 0.2,
     perUnit: 0.18,
-    magnitude: (effect, w) => {
-      const toughness = assumed(effect.toughness, w);
+    magnitude: (effect, w, deck) => {
+      const toughness = assumed(effect.toughness, w, deck);
       if (toughness < 0) return -toughness * scopeReach(effect, w);
-      return (assumed(effect.power, w) + toughness) * scopeReach(effect, w);
+      return (assumed(effect.power, w, deck) + toughness) * scopeReach(effect, w);
     },
   },
-  drawCards: { base: 0.15, perUnit: 0.75, magnitude: (effect, w) => assumed(effect.count, w) },
-  gainLife: { base: 0.0, perUnit: 0.1, magnitude: (effect, w) => assumed(effect.amount, w) },
+  drawCards: { base: 0.15, perUnit: 0.75, magnitude: (effect, w, deck) => assumed(effect.count, w, deck) },
+  gainLife: { base: 0.0, perUnit: 0.1, magnitude: (effect, w, deck) => assumed(effect.amount, w, deck) },
   counterSpell: { base: 1.4, perUnit: 0.0, magnitude: () => 1 },
   // A token that enters the battlefield is a body, so `tokenValue` prices it as
   // one and this row multiplies by how many of them the effect makes. Count is
@@ -556,6 +782,10 @@ export const EFFECT_PRICING: EffectPricingTable = {
     perUnit: 1.0,
     magnitude: (effect, w) => tokenCount(effect.count) * tokenValue(effect.token, w),
   },
+  // Populate is state-dependent: the copied token is chosen from the live battlefield.
+  populate: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  // A hand-authored source copy is board-dependent and never independently priced.
+  createTokenCopyOfSelf: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
   // `destroyPermanent`'s split, for its reason; `0.6 + 0.0 * 1` and
   // `0.0 + 0.6 * 1` are the same number.
   //
@@ -568,8 +798,40 @@ export const EFFECT_PRICING: EffectPricingTable = {
     perUnit: 0.6,
     magnitude: (effect, w) => scopeReach(effect, w) * (effect.doesNotUntap === true ? w.heldTapFactor : 1),
   },
+  // A bounce is the middle rung of this stretch of the table, and 1.0 is where
+  // the rungs either side of it put it. Under it: `tapPermanent`'s 0.6, which
+  // denies the same creature one turn and hands it back untapped, and
+  // `setBasePtUntilEndOfTurn`'s 0.8, which is removal against the right body and
+  // wears off at cleanup. Over it: a held tap at 1.2 (`0.6 * heldTapFactor`),
+  // which denies the creature for good and never gives it back at all, then
+  // `fight`'s 1.3 and `counterSpell`'s 1.4. Far over it: `destroyPermanent`'s
+  // 2.6, and the gap is the whole of what a bounce is not — the creature goes to
+  // a hand that can cast it again, so the only thing spent for good is tempo.
+  //
+  // Placed against those neighbors rather than derived from one of them, which
+  // is `cantBeBlockedThisTurn`'s and `attacksYouThisTurnIfAble`'s situation too,
+  // and said outright here because `mtg-zyh7` was filed against a row that
+  // carried no comment at all: a reader could not tell an argued number from a
+  // leftover. The ordering is the part that is checkable, and
+  // `../test/bounce-value.test.ts` checks it, so a retune that swaps two rungs
+  // fails instead of drifting.
+  //
+  // ## The card the bead was filed about (`mtg-zyh7`)
+  //
+  // {U} "return target attacking creature to its owner's hand" (Merfolk's Undertow,
+  // printed, `mtg-85d4`) measured at -0.050 when the bead was written: the row
+  // halved by `restrictedTargetFactor` for the combat filter, less one mana of
+  // `spellManaPenaltyPerMana`. A negative score is under a blank card, and the
+  // reading was that the builder would never play it. `instantSpeedPremium`
+  // landed afterwards (`mtg-x5pv`), the same card now measures 0.200, and over
+  // 400 sealed pools on seed `zyh7/pool` the builder takes it in 15 of the 38
+  // that open it on color, against 19 of 31 for the unconditional bounce beside
+  // it. The test carries both readings against the weights they are derived
+  // from. So the row stands as the intended pricing, and what would move it is a
+  // sweep showing bounce winning or losing games at a rate this ladder does not
+  // predict, not one card sitting low in one pool.
   returnToHand: { base: 1.0, perUnit: 0.0, magnitude: () => 1 },
-  millCards: { base: 0.0, perUnit: 0.02, magnitude: (effect, w) => assumed(effect.count, w) },
+  millCards: { base: 0.0, perUnit: 0.02, magnitude: (effect, w, deck) => assumed(effect.count, w, deck) },
   putCounters: {
     base: 0.3,
     perUnit: 0.5,
@@ -582,7 +844,7 @@ export const EFFECT_PRICING: EffectPricingTable = {
     // instead by the toughness removed, the same unit a burn spell is priced
     // by, so a permanent shrink and a temporary one agree on what a point of
     // toughness taken away is worth.
-    magnitude: (effect, w) => {
+    magnitude: (effect, w, deck) => {
       const bonus = counterStatBonus(effect.counter);
       const keywords = counterGrantedKeywords(effect.counter);
       const perCounter =
@@ -595,7 +857,7 @@ export const EFFECT_PRICING: EffectPricingTable = {
       // is multiplied by. Reading the group a second way here — counting the
       // board, say — would let this package value a sweeper the kernel does not
       // perform.
-      return assumed(effect.count, w) * perCounter * scopeReach(effect, w);
+      return assumed(effect.count, w, deck) * perCounter * scopeReach(effect, w);
     },
   },
   exileTarget: {
@@ -628,6 +890,22 @@ export const EFFECT_PRICING: EffectPricingTable = {
     // claim that seeing six cards is twice seeing three, which nothing measures.
     magnitude: () => 1,
   },
+  revealRandomCardFromHand: {
+    // One random identity is less information than the whole hand, but still
+    // nonzero: it changes what the controller can play around without moving a
+    // card or affecting the board.
+    base: 0.1,
+    perUnit: 0.0,
+    magnitude: () => 1,
+  },
+  // A hand-authored engine instruction rather than an independently priced
+  // generator primitive. Its value depends entirely on the unknown hand card.
+  playRandomHandCardWithoutPayingManaCost: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts: {
+    base: 0.0,
+    perUnit: 0.0,
+    magnitude: () => 1,
+  },
   // Information quality depends on the deck and next draws, neither of which
   // this single-card evaluator holds.
   scry: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
@@ -647,7 +925,7 @@ export const EFFECT_PRICING: EffectPricingTable = {
     // measures.
     base: 0.0,
     perUnit: 2.6,
-    magnitude: (effect, w) => w.effectScopeReach[effect.scope],
+    magnitude: (effect, w) => (effect.scope === undefined ? 1 : w.effectScopeReach[effect.scope]),
   },
   // Mana, priced as the mana it is, by the one number this package already
   // holds for what a point of mana is worth. `spellManaPenaltyPerMana` is what
@@ -674,8 +952,9 @@ export const EFFECT_PRICING: EffectPricingTable = {
   addMana: {
     base: 0.0,
     perUnit: 1.0,
-    magnitude: (effect, w) => assumed(effect.amount, w) * w.spellManaPenaltyPerMana,
+    magnitude: (effect, w, deck) => assumed(effect.amount, w, deck) * w.spellManaPenaltyPerMana,
   },
+  createEmblem: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
   // The library and graveyard vocabulary, priced by what it does to the board:
   // four of the five do nothing to it at all, and the fifth is removal.
   //
@@ -692,6 +971,9 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // seeing your own next three draws. Flat in the count for `revealHand`'s
   // reason: scaling by cards seen would claim three is three times one.
   revealTopCards: { base: 0.3, perUnit: 0.0, magnitude: () => 1 },
+  // One card reaches hand, so price the move exactly like a one-card draw. The
+  // linked life payment is priced by its own following `loseLife` effect.
+  revealTopCardToHand: { base: 0.15, perUnit: 0.75, magnitude: () => 1 },
   // A tuck is removal (CR 701.19a puts the permanent in a hidden zone, off the
   // battlefield), so it is `destroyPermanent`'s 2.6 with `destroyPermanent`'s
   // split. What a tuck is worth *over* a destroy — the card has to be drawn
@@ -702,6 +984,14 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // denies. No `scopeReach`: the effect carries no scope and reaches one
   // permanent.
   putOnLibrary: { base: 0.0, perUnit: 2.6, magnitude: () => 1 },
+  // One opposing body leaves, but the source leaves with it. Half a destroy is
+  // the same conservative exchange price used for fight: useful interaction,
+  // not unconditional one-card removal.
+  putSourceAndTargetOnOwnersLibrariesThenShuffle: {
+    base: 1.3,
+    perUnit: 0.0,
+    magnitude: () => 1,
+  },
   // Graveyard denial against a graveyard this evaluator cannot read. It is the
   // hate card whose whole value is the deck across the table, and a
   // single-card evaluator holds neither deck. Small and nonzero for
@@ -717,6 +1007,29 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // a permanent that shuffles itself away is buying repetition, which is a fact
   // about the games ahead rather than about the card.
   shuffleGraveyardIntoLibrary: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  // A whole-table reset and a resolving spell's destination are both values of
+  // the surrounding game rather than of one card in a deck list. Time
+  // Reversal's draw carries the measurable value; these machinery clauses do
+  // not receive invented bonuses of their own.
+  shuffleHandsAndGraveyardsIntoLibraries: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  exileThisSpell: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  // The card was already priced by the search that put it in exile. Returning
+  // that same card is the delayed half of one linked operation, so pricing it
+  // again would double-count Hoarding Dragon's tutor rather than value a new
+  // card. The link is hand-authored and cannot appear without its writer.
+  moveSourceLinkedExile: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  // Graveyard denial plus a variable hidden-zone purge. Its worth is entirely
+  // matchup-dependent, so it takes the same small flat recognition as the
+  // graveyard-only primitive and invents no per-card magnitude.
+  exileNonbasicGraveyardAndMatchingLibrary: { base: 0.2, perUnit: 0.0, magnitude: () => 1 },
+  // The reveal can become a draw for either seat and depends on a name chosen
+  // from outside this evaluator's one-card view. A fixed price would invent
+  // deck knowledge this package deliberately does not hold.
+  eachPlayerNamesCardThenRevealsTop: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  nameNonlandCardAndExileMatchingOpponentZones: { base: 0.2, perUnit: 0.0, magnitude: () => 1 },
+  // The bodies found depend on the deck around this card, which this
+  // one-card evaluator deliberately does not inspect.
+  revealUntilCreatureCards: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
   // A tutor is worth the card it finds, and which card that is depends on the
   // deck it is in. `@mtg/deckbuild` builds the deck *from* these scores, so a
   // row that read the deck would be circular; the value it wants is the best
@@ -742,10 +1055,14 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // advantage is the one quantity this table already scales linearly
   // (`drawCards`, `millCards`).
   //
-  // Both rows are `magnitude: (effect) => effect.count` and not `assumed`: the
-  // DSL bounds the count at `MAX_DISCARD_COUNT` and prints it as a literal
-  // integer, so there is no computed amount for `assumed` to guess at.
-  discardCards: { base: 0.0, perUnit: 0.55, magnitude: (effect) => effect.count },
+  // A fixed discard scales by its printed count. A whole-hand discard has no
+  // printed magnitude this one-card evaluator can know, so it uses the same
+  // explicit assumption as every other board- or state-dependent amount.
+  discardCards: {
+    base: 0.0,
+    perUnit: 0.55,
+    magnitude: (effect, w) => (effect.count === 'all' ? w.computedAmountAssumption : effect.count),
+  },
   // The same discard with the choice moved across the table, which is strictly
   // better and is priced strictly higher: 0.75, which is `drawCards`' rate
   // exactly, because the discount above was the whole of the gap between a
@@ -763,7 +1080,7 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // life-loss effect kills none — the asymmetry `loseLife`'s own docblock in
   // `@mtg/dsl` names is a reason to price it *below* damage, and this is the
   // number that does. No `scopeReach`: the effect carries no scope.
-  loseLife: { base: 0.0, perUnit: 0.1, magnitude: (effect, w) => assumed(effect.amount, w) },
+  loseLife: { base: 0.0, perUnit: 0.1, magnitude: (effect, w, deck) => assumed(effect.amount, w, deck) },
   // Zero, and `shuffleLibrary`'s reason for a zero rather than a withheld rate.
   // What this effect is worth is `|N - your current life|` and its *sign* flips
   // with which side of N the total is on: the same printed card is a heal at 4
@@ -772,6 +1089,8 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // a number invented here would be a claim about a life total nothing has
   // measured.
   setLife: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  loseGame: { base: 0.0, perUnit: 8.0, magnitude: () => 1 },
+  winGame: { base: 0.0, perUnit: 8.0, magnitude: () => 1 },
   // A Fog: small, nonzero, and flat, for `exileGraveyard`'s reason. What it is
   // worth is the size of the combat step across the table, which is a fact
   // about the opponent's board rather than about this card — but a deck that
@@ -779,6 +1098,11 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // zero. `revealTopCards`' 0.3 rather than a number invented to separate the
   // two, because nothing here can measure the difference.
   preventCombatDamage: { base: 0.3, perUnit: 0.0, magnitude: () => 1 },
+  // Druid's Deliverance protects fewer recipients than Fog, but this
+  // context-free evaluator cannot measure either combat's recipients. Keep the
+  // same small nonzero floor rather than inventing a board-width distinction.
+  preventCombatDamageToYou: { base: 0.3, perUnit: 0.0, magnitude: () => 1 },
+  chooseBlockersThisCombat: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
   // The row above, aimed rather than blanket, and worth more for it: a Fog
   // stops one combat step for the whole table, this stops every source of
   // damage — combat or a burn spell — aimed at one chosen creature, which is
@@ -790,6 +1114,51 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // outright" is worth more than "saves some damage" but is still a number
   // this row cannot pin to a real trade.
   preventAllDamageToTarget: { base: 0.5, perUnit: 0.0, magnitude: () => 1 },
+  // Safe Passage's wider one-sided shield. It remains flat because the value
+  // is the damage events the future turn presents, not a magnitude on the card.
+  preventAllDamageToYouAndCreaturesYouControl: { base: 0.7, perUnit: 0.0, magnitude: () => 1 },
+  // The prevention half is contextual like Safe Passage, while every point
+  // actually prevented becomes a point of ordinary source-attributed damage.
+  // Price the shield once, then use damage's established per-point rate for
+  // the linked retaliation rather than inventing a second damage valuation.
+  preventNextDamageToYouAndRetaliate: {
+    base: 0.7,
+    perUnit: 0.55,
+    magnitude: (effect, w, deck) => assumed(effect.amount, w, deck),
+  },
+  // Silence's value is the unknown future spell it denies. Keep the estimate
+  // flat and small, as with Fog: a deck list has no opposing hand to inspect,
+  // but the effect is not a blank merely because its answer is contextual.
+  cantCastSpellsThisTurn: { base: 0.3, perUnit: 0.0, magnitude: () => 1 },
+  // Autumn's Veil is likewise contextual interaction. The color count is not
+  // a magnitude: two narrow colors do not make twice the future stack or
+  // targeting event available, so the static evaluator keeps one flat value.
+  protectSpellsAndCreaturesFromSpellColorsThisTurn: {
+    base: 0.5,
+    perUnit: 0.0,
+    magnitude: () => 1,
+  },
+  // Both are contextual stack interaction. A static card evaluator has no
+  // target spell or replacement tuple to value, so it records a small flat
+  // interaction value rather than inventing a magnitude from absent state.
+  changeSpellTargets: { base: 0.3, perUnit: 0.0, magnitude: () => 1 },
+  copySpell: { base: 0.5, perUnit: 0.0, magnitude: () => 1 },
+  copyNextInstantOrSorceryThisTurn: { base: 0.5, perUnit: 0.0, magnitude: () => 1 },
+  // One fair deterministic coin has half of each printed branch's value. The
+  // nested union excludes another flip, so this expected-value calculation is
+  // finite and delegates every instruction to its ordinary pricing row.
+  flipCoin: {
+    base: 0.0,
+    perUnit: 1.0,
+    magnitude: (effect, weights, deck) => {
+      const branchValue = (effects: readonly Effect[] | undefined): number =>
+        (effects ?? []).reduce((sum, nested) => {
+          const pricing = weights.effectValue[nested.kind];
+          return sum + pricing.base + pricing.perUnit * effectMagnitude(nested, weights, deck);
+        }, 0);
+      return (branchValue(effect.winEffects) + branchValue(effect.loseEffects)) / 2;
+    },
+  },
   // Recursion, priced as the card it buys back, which is a card this evaluator
   // does hold — unlike `searchLibrary`, whose value is the best card in a deck
   // it cannot read. What it buys back is nonetheless a *spent* card rather than
@@ -804,6 +1173,15 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // temptation is refused here for `searchLibrary`'s stated reason: the size of
   // that gap is the mana value of a card in a graveyard this row is not handed.
   chooseFromGraveyard: { base: 1.0, perUnit: 0.0, magnitude: () => 1 },
+  // A mandatory self-bounce is usually a drawback, but this evaluator prices
+  // effect magnitude rather than controller-relative sign. Keep it flat like
+  // the graveyard choice: the board state determines whether replaying an ETB
+  // is upside or whether the returned creature is pure tempo loss.
+  chooseFromBattlefield: { base: 1.0, perUnit: 0.0, magnitude: () => 1 },
+  // A revealed-hand choice is always linked to a second, outcome-specific
+  // operation. The hand contents decide its true value, so keep one flat card
+  // of value here rather than pretending the filter measures that hidden zone.
+  chooseFromRevealedHand: { base: 1.0, perUnit: 0.0, magnitude: () => 1 },
   // Flat, and low, and the reason is the one `vocabulary.ts` gives for leaving
   // the kind unpriced by the color pie: an untap is worth whatever the board
   // makes it worth. Untapping a mana source is a ritual, untapping a blocker is
@@ -813,6 +1191,12 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // permanent out of a turn it wanted and an untap gives back one this seat
   // spent on purpose, which is the smaller half of the same trade.
   untapPermanent: { base: 0.5, perUnit: 0.0, magnitude: () => 1 },
+  untapPermanents: { base: 0.0, perUnit: 0.5, magnitude: (effect) => effect.upTo },
+  // One future untap denied, without the immediate board swing a tap buys.
+  // Flat because the effect reaches one permanent and carries no magnitude.
+  skipNextUntap: { base: 0.6, perUnit: 0.0, magnitude: () => 1 },
+  // Detain denies combat and every activation for roughly one turn cycle.
+  detainPermanent: { base: 1.2, perUnit: 0.0, magnitude: () => 1 },
   // One keyword on one creature for one turn: a combat trick, which is what
   // the row above `pumpUntilEndOfTurn` prices a small pump as. A flat base and
   // no per-unit term, because there is no unit — the magnitude of a grant is
@@ -854,6 +1238,8 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // no evasion grant does, but it lasts a turn, which is what keeps it under
   // `returnToHand`'s 1.0 for a bounce that is gone for good.
   setBasePtUntilEndOfTurn: { base: 0.8, perUnit: 0.0, magnitude: () => 1 },
+  animateLandWhileSourceOnBattlefield: { base: 1.0, perUnit: 0.0, magnitude: () => 1 },
+  animateSourceUntilEndOfTurn: { base: 1.0, perUnit: 0.0, magnitude: () => 1 },
   // The first negative row in this table, and the sign is the whole entry. Every
   // other primitive here is something a card does to the board on its
   // controller's behalf; this one takes a permanent off that controller's own
@@ -874,6 +1260,57 @@ export const EFFECT_PRICING: EffectPricingTable = {
   // away rather than at it. No `scopeReach`: the effect names one player and
   // no sweep, `sacrificePermanentEffect`'s stated cut in `@mtg/dsl`.
   sacrificePermanent: { base: 1.8, perUnit: 0.0, magnitude: () => 1 },
+  // A fixed source card bought back from its own graveyard. It is below the
+  // chooser-based recursion row because it cannot select the best spent card;
+  // repeatability is priced by the activated-ability cost path around it.
+  returnSourceFromGraveyard: { base: 0.8, perUnit: 0.0, magnitude: () => 1 },
+  returnDepartedSourceToOwnerHand: { base: 0.8, perUnit: 0.0, magnitude: () => 1 },
+  putDepartedSourceOnTopOfOwnerLibrary: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  shuffleSourceIntoOwnerLibrary: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  // Necrotic Plague's return is neither a free creature nor ordinary card
+  // recursion: it restores the Aura as a hostile attachment to the chosen
+  // creature. Price the board swing at the single-creature-answer anchor.
+  returnSourceAuraAttached: { base: 2.6, perUnit: 0.0, magnitude: () => 1 },
+  // A regeneration shield is contextual future protection, priced at the
+  // same flat combat-trick baseline as a temporary keyword grant. The live
+  // permanent it protects is a board fact this card-only evaluator cannot
+  // inspect, so the row deliberately carries no magnitude.
+  regeneratePermanent: { base: 0.8, perUnit: 0.0, magnitude: () => 1 },
+  // Its magnitude is the live source counter count, which this boardless
+  // evaluator does not know. Keep the authored effect neutral rather than
+  // inventing a fixed board state.
+  doubleSourceCounters: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  // A temporary color overwrite is contextual glue rather than standalone
+  // power; Incite's attack requirement carries the card's board value.
+  setColorsUntilEndOfTurn: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  attacksThisTurnIfAble: { base: 0.5, perUnit: 0.0, magnitude: () => 1 },
+  cantBlockThisTurn: { base: 0.5, perUnit: 0.0, magnitude: () => 1 },
+  blocksThisTurnIfAble: { base: 0.5, perUnit: 0.0, magnitude: () => 1 },
+  // Temporary control is board-dependent twice over: the stolen body's value
+  // and the combat it enters both live outside a deck list. Keep the row flat
+  // at a removal-shaped baseline; the simulator prices the actual body.
+  gainControlUntilEndOfTurn: { base: 1.5, perUnit: 0.0, magnitude: () => 1 },
+  // Permanent control is both removal and a body gained, but the body's live
+  // value remains board-dependent. Keep one conservative flat hand-authored
+  // price; the simulator evaluates the actual target.
+  gainControl: { base: 3.4, perUnit: 0.0, magnitude: () => 1 },
+  // A control exchange is the difference between two live permanents. A deck
+  // list has neither body nor controller state, so it stays neutral here and
+  // the simulator prices the actual pair.
+  exchangeControl: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  // A subtype is worth only what another card makes it worth.
+  addSubtype: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  // A source donation is a contextual exchange, not standalone card value:
+  // the recipient gains the permanent, while cards such as Jinxed Idol make
+  // that permanent a liability. The simulator can read the live board; a deck
+  // list cannot choose a generally correct sign.
+  targetPlayerGainsControlOfSelfPermanent: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  reorderTopLibrary: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
+  selectFromTopLibrary: { base: 1.0, perUnit: 0.0, magnitude: () => 1 },
+  separateTopLibraryIntoPiles: { base: 2.0, perUnit: 0.0, magnitude: () => 1 },
+  // A symmetric hidden-zone reset has no stable deck-list value without both
+  // live hands and graveyards; the simulator observes the actual operation.
+  exileHandsAndGraveyards: { base: 0.0, perUnit: 0.0, magnitude: () => 1 },
 };
 
 /**
@@ -894,15 +1331,19 @@ export const DEFAULT_EFFECT_VALUE: Readonly<Record<AnyEffectKind, EffectWeight>>
  * The magnitude an effect is scaled by. Units differ per primitive and are
  * stated on each row of `EFFECT_PRICING`.
  */
-export function effectMagnitude(effect: Effect, weights: CardScoreWeights): number {
+export function effectMagnitude(
+  effect: Effect,
+  weights: CardScoreWeights,
+  context?: DeckContext | undefined,
+): number {
   const pricing: EffectPricingRow = EFFECT_PRICING[effect.kind];
   // The one assertion in this file. `EFFECT_PRICING` is keyed by the same
   // discriminant `effect` carries, so `pricing` is by construction the row for
   // `effect.kind` and its `magnitude` takes exactly this effect; TypeScript
   // cannot correlate the two across an index lookup. Each row's magnitude is
   // still checked against its own effect shape at the definition site.
-  const of = pricing.magnitude as (e: Effect, w: CardScoreWeights) => number;
-  return of(effect, weights);
+  const of = pricing.magnitude as (e: Effect, w: CardScoreWeights, c: DeckContext | undefined) => number;
+  return of(effect, weights, context);
 }
 
 /**
@@ -940,8 +1381,103 @@ function equipModificationCeiling(weights: CardScoreWeights): number {
   return weights.creatureStatBaselinePerMana * weights.formatMedianRounds;
 }
 
-/** What one static modification is worth per permanent it reaches. */
-function staticModificationValue(modification: StaticModification, weights: CardScoreWeights): number {
+/** The flat value of one parameterless static keyword grant. */
+function staticKeywordGrantValue(keyword: GrantableKeyword, weights: CardScoreWeights): number {
+  return isGrantableKeywordAbilityKind(keyword)
+    ? weights.keywordAbilityValue[keyword].flat
+    : weights.keywordBase[keyword];
+}
+
+/**
+ * The body a static grant is expected to land on, in `statValue` units.
+ *
+ * The mean of the creatures the deck can put on the battlefield, because a
+ * static that reaches "creatures you control" reaches whatever is out rather
+ * than the one its controller would have picked. That is the whole difference
+ * between this and `copiedBodyValue`'s maximum further down, and it is the same
+ * argument in the other direction: a clause the player chooses under takes the
+ * best on offer, and a clause that applies to a board takes the board.
+ *
+ * `statValue` rather than `bodyValue`, for the reason the printed arm passes
+ * `stats` and not its own score: what protection keeps alive is the body, and
+ * running the bodies back through `bodyValue` would price the keywords on them
+ * a second time inside a number that is about the stats.
+ *
+ * Zero when the deck makes no creatures, which is a measurement rather than a
+ * missing answer: a grant with nothing to grant to is worth nothing, the same
+ * zero `formatSubtypeShare` returns for a creature type the format never
+ * prints.
+ */
+function grantedBodyValue(context: DeckContext, weights: CardScoreWeights): number {
+  const bodies = creatureBodies(context);
+  if (bodies.length === 0) return 0;
+  const total = bodies.reduce((sum, body) => sum + statValue(body.power, body.toughness, weights), 0);
+  return total / bodies.length;
+}
+
+/**
+ * What a static grant of protection is worth, per permanent it reaches.
+ *
+ * Protection's whole price is a share of the body it keeps alive, and the body
+ * a static reaches is not this card's — which is why this arm read `flat`
+ * alone, and why reading `flat` alone priced it at nothing: the shipped row's
+ * flat term is 0, so a card granting protection to a board was worth exactly
+ * zero for the grant (`mtg-6f2g`).
+ *
+ * A stated deck is what fixes it, because a stated deck has bodies in it. With
+ * none stated the answer stays the number that shipped rather than becoming a
+ * guess at what an unknown board is made of, which is the arm every score taken
+ * before a deck exists is taken under (`color-pair.ts` ranks pairs first).
+ */
+function grantedProtectionValue(
+  quality: ProtectionQuality,
+  weights: CardScoreWeights,
+  context: DeckContext | undefined,
+): number {
+  if (context === undefined) return weights.keywordAbilityValue.protection.flat;
+  return protectionValue(quality, 0, grantedBodyValue(context, weights), weights, context.format);
+}
+
+/**
+ * What a static grant of a landwalk is worth, per permanent it reaches.
+ *
+ * `conditionalEvasionValue` at zero power, which is what the flat row already
+ * was: `landwalk.flat` is flying's base times `enabledWhileFactor`, and the
+ * rate term it leaves out is the one that reads the body carrying the word — a
+ * body a static grant does not have. So the measured arm is that same
+ * expression with the census in the constant's place, exactly as the printed
+ * word's is.
+ *
+ * Both spellings of the grant come here: the bundled `grantKeywordAbilities`
+ * member and the Aura's own `grantLandwalk` clause, which priced it as
+ * `keywordBase.flying * enabledWhileFactor` written out. One number, two
+ * places, and now one derivation.
+ */
+function grantedLandwalkValue(
+  landType: BasicLandType,
+  weights: CardScoreWeights,
+  context: DeckContext | undefined,
+): number {
+  const format = context?.format ?? null;
+  if (format === null) return weights.keywordAbilityValue.landwalk.flat;
+  return conditionalEvasionValue(0, formatLandwalkShare(format, landType), weights);
+}
+
+/**
+ * What one static modification is worth per permanent it reaches.
+ *
+ * `context` is the deck the modification is being priced for, and the two
+ * payload-bearing grants below are what read it: a granted landwalk is live
+ * against the format's basic land types, and a granted protection is a share of
+ * a body this card does not carry. Both are `undefined` for a caller with no
+ * deck yet, and both keep the shipped constant there.
+ */
+function staticModificationValue(
+  modification: StaticModification,
+  weights: CardScoreWeights,
+  context: DeckContext | undefined,
+  hostPower: number | null = null,
+): number {
   switch (modification.kind) {
     case 'statBonus':
       return statValue(modification.power, modification.toughness, weights);
@@ -952,10 +1488,24 @@ function staticModificationValue(modification: StaticModification, weights: Card
       // `flat` alone out of a `KeywordAbilityWeight` whose other two terms are
       // per-power and body-share. Two tables because the config already keeps
       // two (`keywordBase` prices the evergreen nine, `keywordAbilityValue`
-      // prices the six), and a granted name is priced the same as a printed one.
-      return isGrantableKeywordAbilityKind(modification.keyword)
-        ? weights.keywordAbilityValue[modification.keyword].flat
-        : weights.keywordBase[modification.keyword];
+      // prices the seven), and a granted name is priced the same as a printed one.
+      return staticKeywordGrantValue(modification.keyword, weights);
+    // The two payload-bearing members read the deck; the parameterless ones
+    // are a name against a fixed weight and have nothing to read. A granted
+    // `intimidate` is in that third group deliberately: what it gets past is
+    // decided by the colors of the creature carrying it, and a static grant
+    // lands on bodies whose colors this card does not know.
+    case 'grantKeywordAbilities':
+      return modification.grants.reduce(
+        (total, grant) =>
+          total +
+          (grant.kind === 'landwalk'
+            ? grantedLandwalkValue(grant.landType, weights, context)
+            : grant.kind === 'protection'
+              ? grantedProtectionValue(grant.quality, weights, context)
+              : staticKeywordGrantValue(grant.keyword, weights)),
+        0,
+      );
     case 'definePt': {
       // A characteristic-defining P/T (CR 613.4a, e.g. Tarmogoyf) is a live
       // board/graveyard count this evaluator has no state to compute — the same
@@ -966,21 +1516,35 @@ function staticModificationValue(modification: StaticModification, weights: Card
       return statValue(count + modification.powerOffset, count + modification.toughnessOffset, weights);
     }
     case 'statBonusPer': {
-      // A rate times a board count, and the count is the same unknowable this
-      // evaluator already names once: `computedAmountAssumption` is what
-      // `definePt` one case up spends on a live count, and spending it here too
-      // keeps one named guess for one kind of unknown rather than two that can
-      // drift apart. Priced through `statValue` like every other body term, so
-      // an Earth Servant is scored as the +0/+3 it is assumed to be rather than
-      // as the +0/+1 it prints.
+      // A rate times a board count. When the tally is one the deck decides —
+      // how many permanents carry a counter this deck's cards place — the deck
+      // is what answers it (`measuredTally`, `mtg-cosl`); a build-around whose
+      // whole point is counting its own deck's counters priced identically in a
+      // deck full of minters and a deck with none until it did.
       //
-      // Zero would have been the silent regression: this modification is the
-      // whole of what such a card does, so pricing it at nothing would score a
-      // four-mana 4/1-that-grows as a four-mana 4/1 and let the deck builder
-      // pass over every card in the family at once.
-      const count = weights.computedAmountAssumption;
+      // Otherwise the count is the same unknowable this evaluator already names
+      // once: `computedAmountAssumption` is what `definePt` one case up spends
+      // on a live count, and spending it here too keeps one named guess for one
+      // kind of unknown rather than two that can drift apart. Priced through
+      // `statValue` like every other body term, so an Earth Servant is scored
+      // as the +0/+3 it is assumed to be rather than as the +0/+1 it prints.
+      //
+      // Zero would have been the silent regression when the count was a guess:
+      // this modification is the whole of what such a card does, so pricing it
+      // at nothing would score a four-mana 4/1-that-grows as a four-mana 4/1
+      // and let the deck builder pass over every card in the family at once. A
+      // measured zero is the opposite of that — it is the deck saying it places
+      // none of these counters, which is `deck-context.ts`'s "a zero is a
+      // measurement" and is the direction that makes the reading cut both ways.
+      const count = measuredTally(modification.each, context) ?? weights.computedAmountAssumption;
       return statValue(modification.power * count, modification.toughness * count, weights);
     }
+    case 'statBonusPerColor':
+      return statValue(
+        modification.power * weights.computedAmountAssumption,
+        modification.toughness * weights.computedAmountAssumption,
+        weights,
+      );
     // Both doublers price at zero, and for the two halves of one reason: each
     // multiplies a quantity that is not on this card.
     //
@@ -997,23 +1561,73 @@ function staticModificationValue(modification: StaticModification, weights: Card
     // thing `exileGraveyard` says about the graveyard across the table — except
     // that this one is not even nonzero-by-default, because a deck with no life
     // gain in it gets literally nothing.
+    //
+    // Obstinate Baloth's discard replacement is likewise a rider whose value
+    // depends on an opposing deck presenting the matching cause. This evaluator
+    // cannot infer that metagame from the card alone, so it makes the same
+    // conservative zero call while the creature body is priced normally.
     case 'doubleDamage':
     case 'doubleLifeGain':
+    case 'doublePlusOnePlusOneCountersOnCreaturesYouControl':
+    case 'damageCannotReduceControllerLifeBelow':
+    case 'discardedByOpponentEntersBattlefield':
+    case 'preventDamageToSelfAndRemoveCounters':
       return 0;
     // The combat class (`static-modification-class.ts`), reachable only on a
     // static ability's own scope — `STATIC_SCOPES` has no "opponent's
     // creatures" option, so unlike the Aura arm below (`auraModificationValue`,
     // which chooses its host and can name an opponent's), every one of these
     // six always lands on a creature this card's own controller keeps.
+    case 'cantBeBlockedBySubtype': {
+      // Evasion against one named creature type, and how much of a gain that is
+      // depends entirely on how many of the type the opposing deck plays:
+      // Juggernaut's "can't be blocked by Walls" is worth a great deal in a
+      // format full of Walls and nothing at all in one with none. That is the
+      // question `formatSubtypeShare` answers, and the share it answers with is
+      // the share of the format's creatures this word takes out of the blocking
+      // pool — which is the same quantity `formatIntimidateShare` hands the
+      // intimidate row, read off a different census. So it is priced through
+      // the one expression both of those rows use.
+      //
+      // Zero for a caller that stated no set, and that is the measurement
+      // rather than a fallback: the whole value is a fact about the opposing
+      // deck, and unlike landwalk there is no granted spelling of this clause
+      // already paying a constant for the printed one to match.
+      //
+      // `hostPower` falls back the way `combatDenialValue`'s does. A scope
+      // other than `self` lands the clause on bodies this card does not carry,
+      // and the reference power is this file's number for one of them.
+      const format = context?.format ?? null;
+      if (format === null) return 0;
+      return conditionalEvasionValue(
+        hostPower ?? weights.combatDenialReferencePower,
+        formatSubtypeShare(format, modification.subtype),
+        weights,
+      );
+    }
     case 'cantAttack':
+      // The printed word for this clause is `defender`, and `combatDenialValue`
+      // prices both so a wall cannot be worth one thing enchanted and another
+      // thing printed. `hostPower` is what separates them from the row below:
+      // the attack a creature loses is worth what that creature would have hit
+      // for, and a self-scoped static is the one case where this evaluator
+      // knows the body.
+      return combatDenialValue(hostPower, weights);
     case 'cantBlock':
-      // The Aura arm prices these two as a gain: what taking the equivalent
-      // combat role away from an opponent's creature is worth, off the same
-      // `singleCreatureAnswerValue` anchor. A static with no opponent-facing
-      // scope can only place the identical restriction on the caster's own
-      // creature, which is the same loss with the sign flipped rather than a
-      // second number to calibrate.
+      // The Aura arm prices this as a gain: what taking the block away from an
+      // opponent's creature is worth, off the same `singleCreatureAnswerValue`
+      // anchor. A static with no opponent-facing scope can only place the
+      // identical restriction on the caster's own creature, which is the same
+      // loss with the sign flipped rather than a second number to calibrate.
+      //
+      // Flat where `cantAttack` is not, and the asymmetry is the claim rather
+      // than an oversight: what a blocker is worth is its toughness far more
+      // than its power, and `combatDenialReferencePower` measures neither. A
+      // block-denial curve wants the body it keeps alive, which is the term
+      // the survival-shaped keyword abilities read and this clause does not.
       return -weights.auraCombatDenialShare * singleCreatureAnswerValue(weights);
+    case 'cantAttackOrBlock':
+      return -2 * weights.auraCombatDenialShare * singleCreatureAnswerValue(weights);
     case 'cantBeBlocked':
       // Same clause, same anchor as the Aura arm's `cantBeBlocked` — the sign
       // does not flip here, because being unblockable is a gain for whoever's
@@ -1035,18 +1649,20 @@ function staticModificationValue(modification: StaticModification, weights: Card
     // deck faces, which is pool context `activationUses`'s docblock already
     // names this file as unable to read; zero rather than an unowned guess is
     // the same conservative call `doubleDamage` makes for a different unknown.
-    // `cantBeBlockedBySubtype` is that last argument with the sign flipped and
-    // the unknown unchanged: evasion against one creature type is a gain, and
-    // how much of a gain depends entirely on how many of that type the opposing
-    // deck plays. Juggernaut's own "can't be blocked by Walls" is worth a great
-    // deal in a format full of Walls and nothing at all in one with none, and
-    // this function cannot see which it is in. All four are unreachable from a
-    // generated set today for the same containment reason as the two doublers,
-    // so a guess here would price no card this checkout can produce.
+    // All three are unreachable from a generated set today for the same
+    // containment reason as the two doublers, so a guess here would price no
+    // card this checkout can produce.
     case 'attacksEachCombatIfAble':
     case 'mustBeBlockedIfAble':
+    case 'canBlockAnyNumber':
+    case 'canAttackAsThoughNoDefender':
     case 'blockOnlyCreaturesWithKeyword':
-    case 'cantBeBlockedBySubtype':
+    case 'addSubtype':
+    case 'cantAttackWithoutAnyOf':
+    case 'cantAttackOrBlockAlone':
+    case 'preventCombatDamage':
+    case 'grantTriggeredAbility':
+    case 'grantAnyColorManaAbility':
       return 0;
     default:
       return assertNever(modification, 'staticModificationValue');
@@ -1058,9 +1674,9 @@ function staticModificationValue(modification: StaticModification, weights: Card
  *
  * The tap clause is a weight, because "once per turn instead of once per
  * available mana" is an assumption about how many turns the ability gets.
- * `sacrificeSelf` is not: the cost is paid on activation (CR 602.2a) and eats
- * the permanent that carries the ability, so the ability happens once and there
- * is no second time to have an opinion about. It caps the count rather than
+ * `sacrificeSelf` and `exileSelf` are not: either cost is paid on activation
+ * (CR 602.2a) and moves the permanent that carries the ability, so the ability
+ * happens once and there is no second time to have an opinion about. It caps the count rather than
  * replacing it, so a config that expects an activation never to be used still
  * gets nothing — `activationUseCount: 0` means no ability is worth anything,
  * and a structural fact about one cost does not override that.
@@ -1070,26 +1686,24 @@ function staticModificationValue(modification: StaticModification, weights: Card
  * before the tap factor is applied rather than capping the tapped product. Under
  * the old guessed `activationUseCount: 2.5` the two spellings agreed, because
  * 2.5 and 2.5 x 0.6 both exceeded the cap and both came out at 1; under the
- * measured 0.608 they do not, and capping the product would have priced
+ * measured 0.655 they do not, and capping the product would have priced
  * "{T}, Sacrifice this" at a quarter of "Sacrifice this". The stated rule was
  * always this one, and it now has to be written to hold.
  *
  * The cap no longer binds on the flagship, and that is a measurement rather than
- * a bug. `Math.min(1, 0.608)` is 0.608, so a one-shot and a non-tapping
+ * a bug. `Math.min(1, 0.655)` is 0.655, so a one-shot and a non-tapping
  * repeatable ability price identically. The statistic that would separate them
  * is the share of arrivals that activate *at all* — a one-shot gets one use with
- * that probability, a repeatable one gets 0.608 uses spread over a smaller share
+ * that probability, a repeatable one gets 0.655 uses spread over a smaller share
  * activating more than once — and the census counts activations and arrivals but
  * not arrivals-that-activated, so nothing here can tell them apart yet.
  *
- * `cost.sacrificeOther` is the third clause, and it is the one that cannot be a
- * weight at all. How many times a deck can eat a Part is a property of the deck
- * the card is played in, not of the card, so it is answered where every other
- * board question in this file is answered — off a `DeckContext`, through the
- * same `subtypeSupply` an `enabledWhile` condition reads. Handed no deck the
- * factor is 1, which is what this function returned before `mtg-ji87` and what
- * every committed deck was built from; handed one it is the chance the deck has
- * drawn `count` sources of the named subtype by the turn a median game ends.
+ * The two typed sacrifice clauses cannot be weights at all. How many times a
+ * deck can eat a Part or creature is a property of the deck the card is played
+ * in, not of the card, so both are answered off a `DeckContext`. Handed no deck
+ * the factor is 1, which is what this function returned before `mtg-ji87`;
+ * handed one it is the chance the deck has drawn enough sources for the printed
+ * cost by the turn a median game ends.
  *
  * The context-free 1 is a deliberate asymmetry with `staticSubtypeReachFactor`
  * and `enabledWhileFactor`, which each name a measured constant for the
@@ -1100,28 +1714,59 @@ function staticModificationValue(modification: StaticModification, weights: Card
  * the one that builds the deck, gets the real one.
  *
  * The supply factor multiplies rather than caps, which is the opposite of what
- * `sacrificeSelf` does one line up and for the opposite reason: a one-shot's
- * cost is a fact about the ability that bounds it at one use however cheap it
+ * A source-leaving cost does one line up and for the opposite reason: a
+ * one-shot's cost is a fact about the ability that bounds it at one use however cheap it
  * is, while a sacrifice-another cost is a fact about the deck that scales the
- * uses the deck was going to get. There is one honest overlap to state:
- * `activationUseCount` was measured over every activated ability that resolved,
- * outlets that could never pay included, so a share of this discount is already
- * inside the 0.608. What the factor buys is not the level but the difference —
- * the same outlet in a deck that mints sixteen Parts and in a deck that mints
- * none, which the pooled average prices identically and which is the whole
- * question `mtg-ji87` asked.
+ * uses the deck was going to get. What the factor buys is not the level but the
+ * difference — the same outlet in a deck that mints sixteen Parts and in a deck
+ * that mints none, which a pooled average prices identically and which is the
+ * whole question `mtg-ji87` asked.
+ *
+ * The overlap this note used to admit is gone (`mtg-vm54`). `activationUseCount`
+ * was fitted over every activated ability that resolved, outlets that could
+ * never pay included, so a share of this discount sat inside the weight and was
+ * charged again here. It is now fitted over the plain paid abilities alone; the
+ * census partitions the arm and that constant's own note carries the two
+ * numbers. What is left unsettled is the factor's *level* rather than its
+ * placement, and `mtg-n3tn` is where that sits: the measured outlet rate is a
+ * fiftieth of the plain one, which is far below anything `subtypeSupply`
+ * returns, and telling a too-generous supply model apart from a bot that will
+ * not eat its own board needs a per-deck join the census cannot make.
  */
 function activationUses(
   cost: ActivatedAbility['cost'],
   weights: CardScoreWeights,
   context: DeckContext | undefined,
 ): number {
-  const payable = sacrificeSupplyFactor(cost.sacrificeOther, context);
-  if (cost.sacrificeSelf) return Math.min(1, weights.activationUseCount) * payable;
-  const repeatable = cost.tapSelf
-    ? weights.activationUseCount * weights.activationTapFactor
-    : weights.activationUseCount;
-  return repeatable * payable;
+  const payable =
+    sacrificeSupplyFactor(cost.sacrificeOther, context) *
+    matchingSacrificeSupplyFactor(cost.sacrificeMatching, context);
+  return activationRate(cost, weights) * payable;
+}
+
+/**
+ * How often an activated ability is used before the deck is asked what it can
+ * pay for, which is the whole of `activationUses` that a caller without a
+ * `DeckContext` can have.
+ *
+ * Split out for `deck-context.ts`, which multiplies the tokens an ability mints
+ * by how often the ability happens and is itself the walk that builds the
+ * context the supply factors read. The self-eating clamp and the tap discount
+ * are facts about the ability rather than about the deck, so they belong on
+ * this side of the split; the two supply factors are facts about the deck and
+ * stay on the other.
+ */
+export function activationRate(cost: ActivatedAbility['cost'], weights: CardScoreWeights): number {
+  if (cost.sacrificeSelf || cost.exileSelf) return Math.min(1, weights.activationUseCount);
+  return cost.tapSelf ? weights.activationUseCount * weights.activationTapFactor : weights.activationUseCount;
+}
+
+function matchingSacrificeSupplyFactor(
+  sacrifice: SacrificeMatching | undefined,
+  context: DeckContext | undefined,
+): number {
+  if (sacrifice === undefined || context === undefined) return 1;
+  return matchingPermanentSupply(context, sacrifice.filter, sacrifice.count) ?? 1;
 }
 
 /**
@@ -1129,10 +1774,10 @@ function activationUses(
  *
  * `subtypeSupply` with the cost's own `count` as the `atLeast`, which is the
  * same question `controlsSubtype` asks and the same answer: the chance the deck
- * has drawn that many sources of the subtype by the median turn. Counted per
- * *card*, per that module's stated invariant, so a card minting two Parts is
- * one draw and a cost eating two Parts wants two draws — conservative in the
- * one direction, and the direction this file takes wherever it has to pick.
+ * has drawn that many of the subtype by the median turn. Counted per
+ * *permanent* (`mtg-x2gb`), which is what the cost eats — a card minting two
+ * Parts pays a cost eating two Parts off one draw, and used to have to be drawn
+ * twice to do it.
  *
  * No clause, or no deck, is 1: the ability is as payable as it ever was.
  */
@@ -1156,7 +1801,7 @@ function sacrificeSupplyFactor(
  * had to clear the body, its mana and a deck-construction prior before it could
  * be worth anything. The rejected alternative was to charge the premium only
  * when the eaten permanent "could have been kept." `DeckContext` knows a
- * subtype's sources and bodies, and `suppliedBodies` can distinguish a printed
+ * subtype's sources and bodies, and `suppliedPermanents` can distinguish a printed
  * permanent from a token while it records them, but neither fact answers that
  * question: a token can attack, block and survive, while a cast creature can be
  * expendable, and whether either should be kept depends on the battlefield and
@@ -1192,8 +1837,40 @@ function sacrificedValue(
   if (sacrifice === undefined || context === undefined) return 0;
   const bodies = context.subtypeBodies.get(sacrifice.subtype) ?? [];
   if (bodies.length === 0) return 0;
-  const cheapest = Math.min(...bodies.map((body) => permanentBodyValue(body, weights)));
+  const cheapest = Math.min(...bodies.map((body) => permanentBodyValue(body, weights, context)));
   return sacrifice.count * cheapest;
+}
+
+function matchingSacrificedValue(
+  sacrifice: SacrificeMatching | undefined,
+  weights: CardScoreWeights,
+  context: DeckContext | undefined,
+): number {
+  if (sacrifice === undefined || context === undefined) return 0;
+  const bodies = matchingPermanentBodies(context, sacrifice.filter);
+  if (bodies === null || bodies.length === 0) return 0;
+  const cheapest = Math.min(...bodies.map((body) => permanentBodyValue(body, weights, context)));
+  return sacrifice.count * cheapest;
+}
+
+function activatedAbilityValue(
+  ability: ActivatedAbility,
+  effects: number,
+  weights: CardScoreWeights,
+  context: DeckContext | undefined,
+): number {
+  const expectedUses = activationUses(ability.cost, weights, context);
+  const givesAwaySource = ability.effects.some(
+    (effect) => effect.kind === 'targetPlayerGainsControlOfSelfPermanent',
+  );
+  const uses = givesAwaySource ? Math.min(1, expectedUses) : expectedUses;
+  const sacrificed =
+    sacrificedValue(ability.cost.sacrificeOther, weights, context) +
+    matchingSacrificedValue(ability.cost.sacrificeMatching, weights, context);
+  return Math.max(
+    0,
+    uses * (effects - weights.activationCostPerMana * manaValue(ability.cost.mana) - sacrificed),
+  );
 }
 
 /**
@@ -1258,14 +1935,33 @@ export function abilityValue(
   ability: Ability,
   weights: CardScoreWeights,
   context?: DeckContext | undefined,
+  hostPower?: number | null,
 ): number {
   switch (ability.kind) {
     case 'static': {
+      const scopeReach =
+        ability.scope === 'landsYouControl' ||
+        ability.scope === 'allLands' ||
+        ability.scope === 'allCreatures'
+          ? 0
+          : weights.staticScopeReach[ability.scope];
       const reach =
-        weights.staticScopeReach[ability.scope] *
+        scopeReach *
         subtypeReachFactor(ability.subtype, weights, context) *
         enabledWhileFactorFor(ability.enabledWhile ?? null, weights, context);
-      return reach * staticModificationValue(ability.modification, weights);
+      // Only `self` reaches a body this evaluator can see. The other two
+      // scopes name a board it does not count -- that is what
+      // `staticScopeReach` is for -- so they hand the price a null host and get
+      // the reference power, which is the number that shipped.
+      return (
+        reach *
+        staticModificationValue(
+          ability.modification,
+          weights,
+          context,
+          ability.scope === 'self' ? (hostPower ?? null) : null,
+        )
+      );
     }
     case 'triggered': {
       // The same effects a spell is scored on, times how often the condition
@@ -1304,7 +2000,7 @@ export function abilityValue(
         // defect one of its two clauses has, not for what both of them do.
         const ceiling = equipModificationCeiling(weights);
         const modification = ability.attach.modifications.reduce((sum, entry) => {
-          const value = staticModificationValue(entry, weights);
+          const value = staticModificationValue(entry, weights, context);
           const bounded = entry.kind === 'statBonus' ? Math.max(-ceiling, Math.min(ceiling, value)) : value;
           return sum + bounded;
         }, 0);
@@ -1325,22 +2021,36 @@ export function abilityValue(
       // The same effects a spell is scored on, times how often the deck expects
       // to pay for them, less what paying costs. A trigger's condition is what
       // it costs instead of mana; an activation's cost is printed, so it is
-      // subtracted rather than assumed. Both halves of a printed cost are
-      // subtracted: the mana, and the permanent a `sacrificeOther` clause eats.
+      // subtracted rather than assumed: the mana and any typed permanent
+      // payment the activation consumes.
       const effects = ability.effects.reduce((sum, effect) => sum + effectValue(effect, weights, context), 0);
-      const uses = activationUses(ability.cost, weights, context);
-      const sacrificed = sacrificedValue(ability.cost.sacrificeOther, weights, context);
       // Floored at zero because nobody is forced to activate: an ability whose
       // cost is worth more than what it does is simply never used, so it is
       // worth nothing to the card rather than worth less than nothing. Without
       // the floor the arithmetic runs backwards — a cheap repeatable ability
       // scores below the same ability with a tap cost, because multiplying a
       // negative by more uses makes it worse.
-      return Math.max(
-        0,
-        uses * (effects - weights.activationCostPerMana * manaValue(ability.cost.mana) - sacrificed),
-      );
+      return activatedAbilityValue(ability, effects, weights, context);
     }
+    case 'staticPlayerRule':
+      // Its value depends on the opponent choosing the matching sequence this
+      // turn, which this card-only evaluator cannot observe. The body and
+      // flying are still priced; the conditional metagame rider is not guessed.
+      return 0;
+    case 'staticGameRule':
+      // A live game-result permission has no honest value on a card examined
+      // without a board. The body and flying are still priced above.
+      return 0;
+    case 'stateTriggered':
+      // Board-state frequency is unknowable from a card examined in isolation.
+      return 0;
+    case 'staticBundle':
+      // Its value depends on a live library characteristic and affected board.
+      return 0;
+    case 'staticActivationRule':
+      // Naming and suppressing another source is matchup state this card-only
+      // evaluator cannot price honestly.
+      return 0;
     default:
       return assertNever(ability, 'abilityValue');
   }
@@ -1359,6 +2069,72 @@ export function abilityValue(
 function singleCreatureAnswerValue(weights: CardScoreWeights): number {
   const row = weights.effectValue.destroyPermanent;
   return row.base + row.perUnit;
+}
+
+/**
+ * What "this creature cannot attack" costs the player who controls it, at a
+ * given power.
+ *
+ * One function because it is one rules text with two spellings. CR 702.3b's
+ * `defender` is the restriction printed on the card; a `cantAttack` static
+ * scoped to the caster's own creature is the same restriction enchanted onto
+ * it. They carried the same flat -1.3 and `mtg-eetd` is what was wrong with
+ * that: a 0/6 wall paid the full price for an attack it could never profitably
+ * make, and a 5/5 that gains defender paid the same price for the attack that
+ * was its whole point. Fixing either alone would have put two prices on one
+ * rules text, so neither is priced anywhere but here.
+ *
+ * Three numbers, and none of them is new.
+ *
+ *  - **The value at the reference power** is `keywordAbilityValue.defender.flat`,
+ *    which is `-auraCombatDenialShare * singleCreatureAnswerValue` = -1.3 and
+ *    is the price that shipped. The curve passes through it, so this is a
+ *    rotation rather than a re-leveling: the median creature the builder plays
+ *    is worth what it was worth, and the ends move.
+ *  - **The floor at zero power** is `-keywordBase.vigilance`. `ZERO_AT_ZERO_POWER`'s
+ *    docblock already ruled that a 0-power creature attacking is worth
+ *    something rather than nothing, and it excluded `vigilance` from the
+ *    zero-power keyword list for that exact reason, so vigilance's base is the
+ *    one power-independent price this file carries for a combat step. It is a
+ *    bound rather than a measurement, and it bounds from the safe side:
+ *    vigilance's base is what the file pays for *keeping the block* while
+ *    attacking, which cannot exceed what attacking is worth, so a floor set
+ *    there understates the wall's loss instead of inventing it. That is the
+ *    same direction `auraModificationValue` takes when it prices `cantBeBlocked`
+ *    as flying. `mtg-jv0e` is the bead that would replace the argument with an
+ *    attack census: attacks per creature arrival by power, over the same seeded
+ *    sims `activation-census.ts` already reads.
+ *  - **The rate** is whatever carries the floor to the reference value over
+ *    `combatDenialReferencePower` points of power: `(-1.3 + 0.35) / 3` =
+ *    -0.3167 per point. Derived rather than stated, so retuning either endpoint
+ *    moves the line instead of leaving a stale slope behind it.
+ *
+ * A `null` power is an unknown host, not a zero-power one, and it reads the
+ * reference power: an Equipment's clause and a static scoped to
+ * `creaturesYouControl` land on a board this evaluator does not count, so the
+ * only honest answer there is the creature the builder actually plays, which is
+ * the number the curve is pinned through. That makes the unknown-host case
+ * exactly the price that shipped.
+ *
+ * The magnitude is capped at `singleCreatureAnswerValue`, and the cap is this
+ * file's own claim rather than a guard: `cantAttackOrBlock` is priced at both
+ * halves of `auraCombatDenialShare`, which is that anchor exactly, on the
+ * argument that a creature which can neither attack nor block "has been taken
+ * off the board in every way this file measures". Losing one half cannot cost
+ * more than losing both, so the line saturates where the whole answer sits,
+ * at power 7.1. Nothing in the three balance pools prints a defender that
+ * large; the generator can, which is why the cap is here rather than in a note.
+ *
+ * `cantAttackOrBlock` itself stays flat for the same reason it is capped: it is
+ * already pinned to the whole anchor, so there is no room left for power to
+ * move it.
+ */
+function combatDenialValue(power: number | null, weights: CardScoreWeights): number {
+  const reference = weights.combatDenialReferencePower;
+  const atReference = weights.keywordAbilityValue.defender.flat;
+  const floor = -weights.keywordBase.vigilance;
+  const perPower = (atReference - floor) / reference;
+  return Math.max(-singleCreatureAnswerValue(weights), floor + perPower * (power ?? reference));
 }
 
 /**
@@ -1387,24 +2163,40 @@ function singleCreatureAnswerValue(weights: CardScoreWeights): number {
  * blocked by fliers and reach, an unblockable creature by nothing - and
  * understating is the safe direction for an anchor that would otherwise be a
  * free-standing number. `grantLandwalk` is that same evasion behind a condition
- * on the defender's lands, which is what `enabledWhileFactor` already means for
- * a static that is off some of the time, so it is reused rather than given a
- * second name for the same idea.
+ * on the defender's lands, and it goes through `grantedLandwalkValue` with the
+ * bundled grant: what it used to say written out — flying's base times
+ * `enabledWhileFactor` — is that function's own no-format arm, so the clause
+ * reads the format's census when a caller states the set and keeps its number
+ * when nobody does.
  */
-function auraModificationValue(modification: AuraModification, weights: CardScoreWeights): number {
+function auraModificationValue(
+  modification: AuraModification,
+  weights: CardScoreWeights,
+  context: DeckContext | undefined,
+): number {
   if (isStaticAuraModification(modification)) {
-    const value = staticModificationValue(modification, weights);
+    const value = staticModificationValue(modification, weights, context);
     if (modification.kind === 'grantKeyword') return value;
     return Math.min(equipModificationCeiling(weights), Math.abs(value));
   }
   switch (modification.kind) {
     case 'cantAttack':
     case 'cantBlock':
+    case 'cantActivateAbilities':
       return weights.auraCombatDenialShare * singleCreatureAnswerValue(weights);
     case 'cantBeBlocked':
       return weights.keywordBase.flying;
     case 'grantLandwalk':
-      return weights.keywordBase.flying * weights.enabledWhileFactor;
+      return grantedLandwalkValue(modification.landType, weights, context);
+    case 'grantTriggeredAbility':
+      // Aura value is measured from its caster's seat. A granted sacrifice
+      // trigger is a liability for the host and therefore value for the Aura.
+      // The context goes through with it: the same trigger printed on the
+      // creature is priced against the deck and the format, and one granted by
+      // an Aura is the same text arriving by another route.
+      return Math.abs(abilityValue(modification.ability, weights, context));
+    case 'grantActivatedAbility':
+      return Math.abs(abilityValue(modification.ability, weights, context));
     case 'doesNotUntap':
       // Priced at the whole anchor rather than at `auraCombatDenialShare`'s
       // fraction of it, because it is strictly more than the two combat clauses
@@ -1444,9 +2236,9 @@ function auraModificationValue(modification: AuraModification, weights: CardScor
  * already carried by that weight being above 1 rather than by a second weight
  * here being below it.
  */
-function auraValue(aura: Aura, weights: CardScoreWeights): number {
+function auraValue(aura: Aura, weights: CardScoreWeights, context: DeckContext | undefined): number {
   return aura.modifications.reduce(
-    (sum, modification) => sum + auraModificationValue(modification, weights),
+    (sum, modification) => sum + auraModificationValue(modification, weights, context),
     0,
   );
 }
@@ -1469,6 +2261,10 @@ function loyaltyAbilityUses(
   startingLoyalty: number,
   weights: CardScoreWeights,
 ): number {
+  if (isVariableLoyaltyCost(ability.loyaltyCost)) {
+    const assumedPayment = Math.max(1, weights.computedAmountAssumption);
+    return Math.min(weights.planeswalkerActivations, Math.floor(startingLoyalty / assumedPayment));
+  }
   if (ability.loyaltyCost >= 0) return weights.planeswalkerActivations;
   return Math.min(weights.planeswalkerActivations, Math.floor(startingLoyalty / -ability.loyaltyCost));
 }
@@ -1566,6 +2362,19 @@ function loyaltyAbilitiesValue(
  * this file's own "once per target" rule refuses one paragraph up. No
  * committed card combines `excludeColors` with a second field, so that branch
  * has no card to be wrong about yet.
+ *
+ * ## What a supply of zero means here (`mtg-z751`)
+ *
+ * `counterSupply` can come back `0`, and `targetNarrowingFactor` passes it
+ * through rather than floor it at `restrictedTargetFactor`. That is the rule
+ * `deck-context.ts` states for every reading it produces — a zero is a
+ * measurement, an absence is `null` — and it is worth reading beside
+ * `conditionSupply`, which returns `null` where this function has no `null` to
+ * return. The two agree: both answer a measured no with a hard zero, and both
+ * leave the flat weight standing where the deck decides nothing. The
+ * difference is only that this function never asks about the six restriction
+ * kinds a deck does not decide, so its absence is expressed by the branch it
+ * does not take rather than by a value it returns.
  */
 function colorFilterFactor(filter: TargetFilter): number | undefined {
   if (filter.excludeColors !== undefined) {
@@ -1582,7 +2391,7 @@ function targetNarrowingFactor(
   weights: CardScoreWeights,
   context?: DeckContext | undefined,
 ): number {
-  if (!('target' in effect)) return 1;
+  if (!hasTarget(effect)) return 1;
   const { restriction, filter } = effect.target;
   const filtered = filter !== undefined && !targetFilterIsEmpty(filter);
   if (restriction === undefined && !filtered) return 1;
@@ -1627,11 +2436,273 @@ function tolledSpellFactor(card: Card, weights: CardScoreWeights): number {
 }
 
 function effectValue(effect: Effect, weights: CardScoreWeights, context?: DeckContext | undefined): number {
-  return (
+  const value =
     (weights.effectValue[effect.kind].base +
-      weights.effectValue[effect.kind].perUnit * effectMagnitude(effect, weights)) *
-    targetNarrowingFactor(effect, weights, context)
+      weights.effectValue[effect.kind].perUnit * effectMagnitude(effect, weights, context)) *
+    targetNarrowingFactor(effect, weights, context);
+  if (
+    effect.kind === 'dealDamage' &&
+    effect.target.kind === 'noTarget' &&
+    effect.scope === undefined &&
+    effect.players === undefined
+  ) {
+    return -Math.abs(value);
+  }
+  return value;
+}
+
+/**
+ * What the clause a permanent replaces its own entry with is worth
+ * (`mtg-pr8a`).
+ *
+ * Unread until this function existed, so a 2/2 for `{1}{G}` that arrived with
+ * two `+1/+1` counters — a 4/4 for two mana — was the same number to
+ * `buildDeck` as the 2/2, and so was the same 2/2 arriving tapped. The gap is
+ * printed: the reduced M11 and M13 carry eleven nonland cards between them that
+ * replace their own entry, and every one of them scored as if the clause were
+ * flavor text.
+ *
+ * Read through `printedEntryReplacement` rather than off `card.entryReplacement`
+ * so that widening the set of card kinds that may carry the clause stays an edit
+ * to `Card` alone, which is the reason that function exists.
+ *
+ * Each arm is priced by arithmetic already in this file, and the two that are
+ * priced at nothing say so here rather than by omission:
+ *
+ *  - `entersTapped` costs one turn of the denial `tapPermanent` prices, and is
+ *    charged only on a permanent that had something to do with being untapped.
+ *  - `entersWithCounters` is the body it actually has, at `statValue`.
+ *  - `putCounterOnControlledPermanent` is the same counters on another body, so
+ *    it is priced by the same per-counter arithmetic `EFFECT_PRICING.putCounters`
+ *    uses, which is what keeps one rules text from having two prices.
+ *  - `entersAsCharacteristicChoice` is `bestModeValue`'s idea on a body: you
+ *    choose after seeing the board, so the price is the best mode's.
+ *  - `entersAsCopyOfCreature` is the best body the deck can put on the
+ *    battlefield, over the one the clone printed, and `copiedBodyValue` argues
+ *    it (`mtg-8w1r`). It is the sixth site whose price moves with the deck
+ *    around it, so it needs a `DeckContext`; handed none it is nothing, which
+ *    is the same asymmetry the two typed sacrifice clauses take.
+ *  - `choosePlayer` is priced at nothing and is a decision: in a two-player game
+ *    the choice is the opponent, and the clause is a rider on other text that is
+ *    priced where it is printed.
+ */
+function entryReplacementValue(
+  card: Card,
+  weights: CardScoreWeights,
+  context: DeckContext | undefined,
+): number {
+  // A land scores zero whatever it prints, because which lands a deck plays is
+  // `mana-base.ts`'s decision and a card score has no say in it. The sixteen
+  // reference-set lands that enter tapped are that file's gap, filed as
+  // `mtg-h6ut`, not this one's.
+  if (isLand(card)) return 0;
+  const replacement = printedEntryReplacement(card);
+  if (replacement === undefined) return 0;
+  const power = card.kind === 'creature' ? card.power : null;
+  const toughness = card.kind === 'creature' ? card.toughness : null;
+  switch (replacement.kind) {
+    case 'entersTapped': {
+      // Being tapped costs whatever being tapped is worth, which is the one tap
+      // `EFFECT_PRICING.tapPermanent` charges for: no scope, because the clause
+      // reaches this permanent only, and no `heldTapFactor`, because it untaps
+      // on the next untap step like anything else.
+      //
+      // Charged only where there was something to lose. A creature loses a
+      // block on the opponent's next turn — summoning sickness already took the
+      // attack, so the tap takes the half it had left — and a permanent whose
+      // ability costs `{T}` loses that activation. A vanilla artifact or a card
+      // that never taps for anything is untouched by arriving tapped, and
+      // charging it would be pricing a word rather than what the word does.
+      const tap = EFFECT_PRICING.tapPermanent;
+      return tapsForSomething(card) ? -(tap.base + tap.perUnit) : 0;
+    }
+    case 'entersWithCounters': {
+      if (power === null || toughness === null) return 0;
+      // `statValue` is linear in both stats, so what the counters are worth
+      // does not depend on the body they land on and the printed body cancels.
+      //
+      // Not `EFFECT_PRICING.putCounters`'s shrink arm, and the difference is
+      // whose creature it is. That row reads a `minusOneMinusOne` aimed at an
+      // opponent, where taking toughness away is the whole point and is priced
+      // as a positive; these counters land on this card, so a shrink is a
+      // smaller body and `statValue` charging it as one is correct.
+      const bonus = counterStatBonus(replacement.counter);
+      const count = assumed(replacement.count, weights, context);
+      return statValue(bonus.power * count, bonus.toughness * count, weights);
+    }
+    case 'putCounterOnControlledPermanent': {
+      // The same counters on somebody else's body, so the same per-counter
+      // arithmetic `EFFECT_PRICING.putCounters` charges, minus that row's base
+      // and rate: those price a *spell* that places counters, and this clause is
+      // not a spell. The stat half is dropped where the named permanent type has
+      // no body to grow, which is `config.ts`'s own sentence about an artifact
+      // or an enchantment having no body at all.
+      const bonus = counterStatBonus(replacement.counter);
+      const keywords = counterGrantedKeywords(replacement.counter);
+      const stats =
+        replacement.permanentType === 'creature' ? statValue(bonus.power, bonus.toughness, weights) : 0;
+      const granted = keywords.reduce((total, keyword) => total + weights.keywordBase[keyword], 0);
+      return replacement.count * (stats + granted);
+    }
+    case 'entersAsCharacteristicChoice': {
+      // One mode is chosen as the permanent enters, after its controller has
+      // seen the board, so it is worth the best of them for `bestModeValue`'s
+      // reason. Each mode sets base power and toughness outright, so what the
+      // clause is worth is the best mode's body over the printed one, plus the
+      // keywords that mode adds priced where every other keyword is priced.
+      const printed = statValue(power ?? 0, toughness ?? 0, weights);
+      const best = Math.max(
+        ...replacement.modes.map((mode) => {
+          const body = statValue(mode.power, mode.toughness, weights);
+          return (
+            body +
+            keywordValue(mode.addKeywords ?? [], mode.power, weights) +
+            keywordAbilityValue(
+              mode.addKeywordAbilities ?? [],
+              mode.power,
+              card.colors,
+              body,
+              weights,
+              context,
+            )
+          );
+        }),
+      );
+      return best - printed;
+    }
+    case 'entersAsCopyOfCreature':
+      return copiedBodyValue(card, weights, context);
+    case 'choosePlayer':
+    case 'chooseTwoColors':
+    case 'chooseCardName':
+      return 0;
+    case 'payLifeOrEntersTapped':
+      return 0;
+    // Only a land prints this one, and a land returned zero above.
+    case 'entersTappedUnlessControlsLandSubtype':
+      return 0;
+    default:
+      return assertNever(replacement, 'entryReplacementValue');
+  }
+}
+
+/**
+ * What entering as a copy of a creature already on the battlefield is worth
+ * (`mtg-8w1r`).
+ *
+ * The clause was priced at nothing, so both cards in the reduced M11 and M13
+ * that print it scored as the 0/0 they are printed as: a card whose whole text
+ * is that it arrives as the best thing anybody has in play was the worst card
+ * in the pool.
+ *
+ * **The best, not the average**, and it is the mirror of the argument
+ * `sacrificedValue` makes for taking the cheapest. The oracle text is "you may
+ * have this creature enter as a copy of any creature on the battlefield", so
+ * the player chooses, and a player choosing takes the best body on offer. The
+ * `may` is read too: the delta floors at zero, because a clone whose deck holds
+ * nothing better than its printed body simply enters as itself.
+ *
+ * **What is on offer is what the deck can supply.** `expectedBestDrawnBody`
+ * ranks every body the deck puts on the battlefield, printed or minted, which
+ * is the same walk `subtypeBodies` and the sacrifice costs already read. Priced
+ * with `bodyValue`, unconverted, because this arm lands in the creature arm's
+ * own currency next to `statSurplus` and `keywords`, and the printed body is
+ * subtracted at the same `bodyValue` so that the three components the copy
+ * replaces cancel and the mana the clone cost does not.
+ *
+ * **The best of what has been drawn, not of what is in the list.** A clone that
+ * resolves onto an empty board is a 0/0 that dies, and one that resolves onto a
+ * board holding the deck's fourth-best creature copies the fourth-best
+ * creature. `expectedBestDrawnBody` takes the expectation over which of the
+ * deck's creatures have been seen by the turn a median game ends, at the same
+ * hypergeometric every other deck-conditioned price here uses, so a deck that
+ * pads one giant with nine small creatures no longer prices the clone as the
+ * giant (`mtg-v9zo`). It never pays more than the flat
+ * maximum-times-`creatureSupply` it replaces, and collapses back to one
+ * hypergeometric when every body on offer is worth the same, taken at the
+ * number of sources that actually gain anything rather than at every creature
+ * the deck holds.
+ *
+ * One bound this still does not model is the other half of `mtg-v9zo`: the
+ * clause reads "any creature on the battlefield" and so reaches the opponent's
+ * board, which nothing here counts and which points the other way. The clone's
+ * own body is among the ones it ranks, because every field on a `DeckContext`
+ * counts the card being priced; it never wins, since copying yourself is
+ * copying the body the delta already subtracts.
+ *
+ * Handed no deck the answer is nothing rather than a flat weight, for
+ * `activationUses`' reason: there is no measured constant for what an unknown
+ * deck's best body is, and inventing one would move every context-free score in
+ * the repository for a number nobody counted.
+ */
+function copiedBodyValue(card: Card, weights: CardScoreWeights, context: DeckContext | undefined): number {
+  if (context === undefined || !isCreature(card)) return 0;
+  const printed = bodyValue(
+    card.power,
+    card.toughness,
+    card.colors,
+    card.keywords,
+    card.keywordAbilities ?? [],
+    weights,
+    context,
   );
+  return expectedBestDrawnBody(context, (body) =>
+    Math.max(
+      0,
+      bodyValue(
+        body.power,
+        body.toughness,
+        body.colors,
+        body.keywords,
+        body.keywordAbilities,
+        weights,
+        context,
+      ) - printed,
+    ),
+  );
+}
+
+/**
+ * Whether arriving tapped takes anything away from this permanent.
+ *
+ * A creature always qualifies: a tapped creature cannot block, and blocking is
+ * the half of a new creature's first turn that summoning sickness left it.
+ * Anything else qualifies when it prints an ability that costs `{T}`, which is
+ * the only other way this DSL lets a permanent spend being untapped.
+ */
+function tapsForSomething(card: Card): boolean {
+  if (isCreature(card)) return true;
+  return card.abilities.some((ability) => ability.kind === 'activated' && ability.cost.tapSelf === true);
+}
+
+function cardAbilitiesValue(card: Card, weights: CardScoreWeights, context: DeckContext | undefined): number {
+  // What a self-scoped static lands on is this card, so a combat restriction
+  // printed on a 0/6 and one printed on a 5/5 are not the same price
+  // (`combatDenialValue`). Null for every other card kind rather than zero: a
+  // Wall with no power is a body worth nothing in combat, an enchantment has no
+  // body at all, and the second is an unknown host rather than a small one.
+  const hostPower = card.kind === 'creature' ? card.power : null;
+  const liability = -card.abilities.reduce((sum, ability) => {
+    if (ability.kind !== 'triggered' || ability.condition !== 'beginningOfYourUpkeep') return sum;
+    return sum + Math.min(0, abilityValue(ability, weights, context, hostPower));
+  }, 0);
+
+  return card.abilities.reduce((sum, ability) => {
+    if (ability.kind !== 'activated' || isAttachingAbility(ability)) {
+      return sum + abilityValue(ability, weights, context, hostPower);
+    }
+    const effects = ability.effects.reduce((effectSum, effect) => {
+      if (effect.kind !== 'targetPlayerGainsControlOfSelfPermanent') {
+        return effectSum + effectValue(effect, weights, context);
+      }
+      // Donation removes the source's expected controller liability here and
+      // gives that liability to the opponent, so its board swing is twice the
+      // downside. The ordinary activation path still prices whether the deck
+      // can pay and what permanent the payment consumes.
+      return effectSum + 2 * liability;
+    }, 0);
+    return sum + activatedAbilityValue(ability, effects, weights, context);
+  }, 0);
 }
 
 /** One mode's own effect list, priced the same way a fixed effect list is. */
@@ -1658,7 +2729,7 @@ function bestModeValue(modes: Modes, weights: CardScoreWeights, context?: DeckCo
 
 /** True when an effect can be pointed at an opposing creature. */
 function hitsCreatures(effect: Effect): boolean {
-  if (!('target' in effect)) return false;
+  if (!hasTarget(effect)) return false;
   return effect.target.kind === 'anyTarget' || effect.target.kind === 'targetCreature';
 }
 
@@ -1868,7 +2939,7 @@ export function removalPremiumFor(card: Card, weights: CardScoreWeights): number
   }
   const answering = card.abilities.filter(
     (ability) =>
-      ability.kind !== 'static' &&
+      hasAbilityEffects(ability) &&
       ability.effects.some((effect) => isRemovalEffect(effect, weights, sourcePower)),
   );
   if (answering.length === 0) return 0;
@@ -1947,6 +3018,95 @@ function topEndReachability(cardMV: number, weights: CardScoreWeights): number {
 }
 
 /**
+ * How many creatures worth spending an answer on an opponent is expected to
+ * present, by the turn a median game ends.
+ *
+ * The same kind of assumption `staticScopeReach` names in `config.ts` — board
+ * width is not on the card — made once more for the other side of the board,
+ * and derived rather than picked: an opposing 40-card Limited deck sees the
+ * same `TOP_END_OPENING_HAND + TOP_END_ROUNDS_MEASURED - 1` cards this file
+ * already counts, and the ten decks the balance gate builds hold 12 to 18
+ * creatures each, so a fifteen-creature deck presents about five over that
+ * span. It is an upper bound in the same direction `DEFAULT_TOP_END_REACHABILITY`
+ * is: every creature presented is counted as worth an answer, and in a real
+ * game several are not.
+ */
+const REMOVAL_TARGETS_PRESENTED = Math.round(
+  (TOP_END_OPENING_HAND + TOP_END_ROUNDS_MEASURED - 1) * (15 / TOP_END_DECK_SIZE),
+);
+
+/** Answers past this many in one deck are all priced at the last entry. */
+const REMOVAL_SATURATION_ENTRIES = 12;
+
+/**
+ * Default for `CardScoreWeights.removalSaturation`: what the nth answer in a
+ * deck is worth as a fraction of what the first is, indexed by `n - 1`.
+ *
+ * The premium `removalPremiumFor` pays is flat, so a deck holding ten answers
+ * scores ten premiums, and real Limited evaluation is not that shape: an answer
+ * is only paid off by a creature worth answering, and a deck cannot answer more
+ * creatures than the opponent presents. That is the whole model here — the nth
+ * answer earns the premium in the games where it is *both* drawn and needed —
+ * and it is built out of the instrument this file already prices lands with.
+ * `expected(k)` is the number of answers a deck holding `k` of them expects to
+ * spend, `E[min(drawn, presented)]`, summed over the tail probabilities of the
+ * same hypergeometric `topEndReachability` uses; the nth entry is the marginal
+ * that the nth copy adds, normalized so the first answer is worth exactly
+ * `removalPremium` and this table changes nothing about what that weight means.
+ *
+ * The table is deliberately shallow. Both halves of the cap bind late: at
+ * thirteen cards seen, a deck with six answers rarely draws more than two, so
+ * the discount only becomes visible around the eighth answer. That is a finding
+ * rather than a disappointment — measured on the three balance subjects, the
+ * decks that hold enough answers for it to bite are the flagship's, which build
+ * at nine to eleven each.
+ *
+ * What it does not model is the second reason a Limited deck stops wanting
+ * answers: at some count it no longer holds a clock. That is a composition
+ * question, `targetCurve` and the creature floor own it, and pricing it here
+ * too would count it twice.
+ */
+export const DEFAULT_REMOVAL_SATURATION: readonly number[] = (() => {
+  const draws = TOP_END_OPENING_HAND + Math.max(0, TOP_END_ROUNDS_MEASURED - 1); // on the play
+  const expected = (answers: number): number => {
+    let sum = 0;
+    for (let spent = 1; spent <= REMOVAL_TARGETS_PRESENTED; spent += 1) {
+      sum += hypergeometricAtLeast(spent, answers, draws, TOP_END_DECK_SIZE);
+    }
+    return sum;
+  };
+  const first = expected(1);
+  const table: number[] = [];
+  let previous = 0;
+  for (let answers = 1; answers <= REMOVAL_SATURATION_ENTRIES; answers += 1) {
+    const total = expected(answers);
+    // Clamped against 1 and against the entry before it. The marginals are
+    // provably non-increasing and the early ones sit on 1, so what this removes
+    // is floating-point noise a few ulps wide, not a feature of the model: left
+    // in, it lets an entry price an answer above the flat premium or above the
+    // answer before it.
+    const marginal = Math.min(1, (total - previous) / first);
+    table.push(Math.min(marginal, table[table.length - 1] ?? 1));
+    previous = total;
+  }
+  return table;
+})();
+
+/**
+ * The saturation discount the `answers`-th answer in a deck earns: 1 for the
+ * first, the last entry for anything past the table.
+ *
+ * Zero is not an input — a card that is not an answer never reaches this — and
+ * a context always counts the card being priced, so the ordinal a candidate
+ * gets is the deck's answer count with it in.
+ */
+function removalSaturation(answers: number, weights: CardScoreWeights): number {
+  if (answers <= 1) return 1;
+  const index = Math.min(answers - 1, weights.removalSaturation.length - 1);
+  return weights.removalSaturation[index] ?? 1;
+}
+
+/**
  * The reachability discount `evaluateCard` applies to a card of this mana
  * value, exported so a caller pricing a card's effect on *other* cards in a
  * deck can discount it the same way this file discounts the card's own score.
@@ -1977,6 +3137,91 @@ function pushIfNonZero(components: ScoreComponent[], name: string, value: number
  * can actually reach should be judged by what it does, not by a guess about
  * how often it does it.
  */
+/**
+ * What a permanent's printed cost reduction is worth (CR 118.9).
+ *
+ * The clause saves `amount` generic mana on each qualifying spell cast while
+ * the permanent is on the battlefield, so the price is what a mana of cost is
+ * worth (`spellManaPenaltyPerMana`, the row that charges a spell for its own
+ * cost, read here in the other direction) times how many qualifying spells get
+ * cast. `triggerFireCount.youCastSpell` is that count and is measured against
+ * exactly this denominator — casts over the life of a permanent that resolved.
+ * A narrowed `cardType` keeps the share of them `costReductionCastShare`
+ * measured; `null` reaches all of them.
+ *
+ * Nothing here is new: three rows `config.ts` already argues, multiplied.
+ */
+function costReductionValue(card: Card, weights: CardScoreWeights): number {
+  const reduction = card.costReduction;
+  if (reduction === null) return 0;
+  const share =
+    'cardTypes' in reduction
+      ? Math.min(
+          1,
+          reduction.cardTypes.reduce((total, kind) => total + weights.costReductionCastShare[kind], 0),
+        )
+      : reduction.cardType === null
+        ? 1
+        : weights.costReductionCastShare[reduction.cardType];
+  return weights.spellManaPenaltyPerMana * reduction.amount * weights.triggerFireCount.youCastSpell * share;
+}
+
+/**
+ * What CR 601.2c's "you may" hands back when the answer is no.
+ *
+ * The clause asks a named player one yes/no as the spell resolves, before any
+ * of its effects apply (`may.ts`), so what the card prints is an option rather
+ * than a price: saying yes is worth the printed list, saying no is worth zero,
+ * and whoever holds the option takes the branch better for them. `you` declines
+ * a list that is a net loss; `opponent` declines one that is a net gain, which
+ * is every beneficial card in the vocabulary.
+ *
+ * There is no weight here and nothing to tune. Zero is what happens when none
+ * of the effects apply, and which answer comes back is a rule.
+ *
+ * `yes` is the effects *and* the removal premium, because the question is one
+ * answer over the whole printed list: a Murder your opponent may decline
+ * answers nothing, and the premium is priced for answering. The mana penalty
+ * is deliberately outside it — casting is what was paid either way, and a
+ * declined spell is a card and two mana gone.
+ */
+function mayDeclined(card: Card, yes: number): number {
+  if (card.may === undefined) return 0;
+  const taken = card.may === 'you' ? Math.max(0, yes) : Math.min(0, yes);
+  return taken - yes;
+}
+
+/**
+ * The body a survival-shaped keyword ability takes its share of on a permanent
+ * that has neither stats nor loyalty.
+ *
+ * `indestructible`, `hexproof` and `shroud` are each priced as a share of what
+ * an opponent has to spend to answer the permanent. A creature's is its
+ * printed body and a walker's is its loyalty, both quantities the board hands
+ * the evaluator outright. An artifact's and an enchantment's is its text,
+ * because the text is the whole of what destroying it takes away, and until
+ * this function existed the share was a share of nothing and all three words
+ * priced at zero on both kinds.
+ *
+ * Every component but the mana penalty. That one is what was paid rather than
+ * what is standing there: removal refunds no mana, so charging the keyword
+ * against the cost would say an indestructible six-drop keeps less alive than
+ * an indestructible two-drop printing the same text. `vanillaArtifactBaseline`
+ * stays in, and it is the same claim in the other direction — an artifact that
+ * does nothing has nothing worth being indestructible about.
+ *
+ * Clamped at zero, because a permanent whose text is a net liability is one
+ * the opponent is happy to leave alone; a negative share would pay its
+ * controller for printing the word.
+ */
+function permanentTextBody(components: readonly ScoreComponent[]): number {
+  const text = components.reduce(
+    (sum, component) => (component.name === 'manaPenalty' ? sum : sum + component.value),
+    0,
+  );
+  return Math.max(0, text);
+}
+
 export function evaluateCard(
   card: Card,
   weights: CardScoreWeights,
@@ -1984,8 +3229,17 @@ export function evaluateCard(
 ): CardEvaluation {
   const manaValue = cardManaValue(card);
   const components: ScoreComponent[] = [];
-  const removalPremium = removalPremiumFor(card, weights);
-  const removal = removalPremium > 0;
+  // Flat per card, then discounted by where this answer falls in the deck's
+  // order of answers: the tenth is worth less than the first, and only a
+  // context knows which one this is. With no context the discount is 1, which
+  // is the shipped price, and is what the color-pair ranking still sorts on.
+  const removalPremium =
+    removalPremiumFor(card, weights) *
+    (context === undefined ? 1 : removalSaturation(context.removalSources, weights));
+  // Set below, once the printed list has a value for the `may` clause to be an
+  // option over. Zero covers both a card with no clause and one whose chooser
+  // said yes, which are the same thing to every reader of the number.
+  let declined = 0;
 
   switch (card.kind) {
     case 'creature': {
@@ -2000,12 +3254,19 @@ export function evaluateCard(
       pushIfNonZero(
         components,
         'keywordAbilities',
-        keywordAbilityValue(card.keywordAbilities ?? [], card.power, stats, weights),
+        keywordAbilityValue(card.keywordAbilities ?? [], card.power, card.colors, stats, weights, context),
       );
       pushIfNonZero(components, 'creaturePremium', weights.creaturePremium);
       break;
     }
-    case 'instant':
+    case 'instant': {
+      pushIfNonZero(components, 'manaPenalty', -weights.spellManaPenaltyPerMana * manaValue);
+      // The one thing an instant has that the same text printed as a sorcery
+      // does not: the choice of when. `config.ts` derives what that is worth
+      // and says why it is flat rather than a function of the cost.
+      pushIfNonZero(components, 'instantSpeed', weights.instantSpeedPremium);
+      break;
+    }
     case 'sorcery': {
       pushIfNonZero(components, 'manaPenalty', -weights.spellManaPenaltyPerMana * manaValue);
       break;
@@ -2016,7 +3277,7 @@ export function evaluateCard(
       // `abilities`, which is why it needs a line of its own here rather than
       // falling through with the sorceries: an Aura's whole clause is
       // `card.aura`, and the two components below read neither.
-      if (isAuraCard(card)) pushIfNonZero(components, 'aura', auraValue(card.aura, weights));
+      if (isAuraCard(card)) pushIfNonZero(components, 'aura', auraValue(card.aura, weights, context));
       break;
     }
     case 'artifact': {
@@ -2035,17 +3296,40 @@ export function evaluateCard(
       const loyalty = weights.creatureToughnessWeight * card.startingLoyalty;
       pushIfNonZero(components, 'loyalty', loyalty);
       // A walker is the one noncreature permanent this file has a body for, so
-      // it is the one that can price `indestructible` and `hexproof` — the two
-      // of the six `typeline.ts` lets off a creature. The share is taken of the
+      // it is the one that can price `indestructible`, `hexproof` and `shroud`
+      // — the three of the seven `typeline.ts` lets off a creature. The share is taken of the
       // same loyalty the line above prices, for the same reason it prices it:
       // that is the quantity an opponent has to spend to answer the permanent.
       // Power is passed as zero because a walker has none, which is also why
-      // the four combat-shaped kinds are refused on one before they reach here.
+      // the four creature-only kinds are refused on one before they reach here.
       pushIfNonZero(
         components,
         'keywordAbilities',
-        keywordAbilityValue(card.keywordAbilities ?? [], 0, loyalty, weights),
+        keywordAbilityValue(card.keywordAbilities ?? [], 0, card.colors, loyalty, weights, context),
       );
+      break;
+    }
+    case 'battle': {
+      pushIfNonZero(components, 'manaPenalty', -weights.spellManaPenaltyPerMana * manaValue);
+      pushIfNonZero(components, 'defense', weights.creatureToughnessWeight * card.defense);
+      // What defeating it hands over: a free cast of the other side, which is
+      // a whole second card and is priced by evaluating that card rather than
+      // by a number of its own. `battleBackFaceFactor` is the discount for the
+      // two ways that reward is worse than the card in hand, and `config.ts`
+      // derives it from two rows already in the table. The back face carries
+      // `manaCost: {}`, so it takes no mana penalty and no reachability
+      // discount, which is what free means. Same `context`: the free cast
+      // happens in this deck, so its removal is this deck's Nth answer too.
+      // The recursion is one level deep by construction, because
+      // `TransformBackFaceSchema` has no battle arm.
+      const backFace = transformedBackFaceOf(card);
+      if (backFace !== null) {
+        pushIfNonZero(
+          components,
+          'backFace',
+          evaluateCard(backFace, weights, context).score * weights.battleBackFaceFactor,
+        );
+      }
       break;
     }
     case 'land':
@@ -2068,9 +3352,45 @@ export function evaluateCard(
     pushIfNonZero(components, 'effects', effects);
     const abilities = isPlaneswalker(card)
       ? loyaltyAbilitiesValue(card, weights, context)
-      : card.abilities.reduce((sum, ability) => sum + abilityValue(ability, weights, context), 0);
+      : cardAbilitiesValue(card, weights, context);
     pushIfNonZero(components, 'abilities', abilities);
+    pushIfNonZero(components, 'entryReplacement', entryReplacementValue(card, weights, context));
     pushIfNonZero(components, 'removalPremium', removalPremium);
+    declined = mayDeclined(card, effects + removalPremium);
+    pushIfNonZero(components, 'mayDeclined', declined);
+  }
+
+  // Outside the `!isLand` gate above, because a land that cuts the cost of your
+  // spells is a real shape and the DSL prints the clause on any card. Inside
+  // the reachability discount below, because the two conditions are different
+  // ones and both apply: `youCastSpell` counts casts over the life of a
+  // permanent that resolved, and `topEndUnreachable` is about whether it ever
+  // does. A seven-mana lord cuts nothing from a hand that never casts it.
+  pushIfNonZero(components, 'costReduction', costReductionValue(card, weights));
+
+  // The two permanents with neither a stat line nor loyalty, priced here
+  // rather than in the switch above because the body they take a share of is
+  // their own text and the text is what every line since the switch has been
+  // computing. `typeline.ts` lets exactly four keyword abilities off a
+  // creature, and one of them is `flash`, whose row is zero in all three
+  // terms; so what this reaches is `indestructible`, `hexproof` and `shroud`,
+  // on the one card kind pair that could not price them before. A land is left
+  // out on purpose: this function scores every land at what its text is worth
+  // and the mana base is chosen elsewhere, so pricing an indestructible land
+  // here would move a number nothing reads.
+  if (card.kind === 'artifact' || card.kind === 'enchantment') {
+    pushIfNonZero(
+      components,
+      'keywordAbilities',
+      keywordAbilityValue(
+        card.keywordAbilities ?? [],
+        0,
+        card.colors,
+        permanentTextBody(components),
+        weights,
+        context,
+      ),
+    );
   }
 
   const preReachScore = components.reduce((sum, component) => sum + component.value, 0);
@@ -2086,7 +3406,11 @@ export function evaluateCard(
     bucket: curveBucket(manaValue),
     colors: cardColors(card),
     isCreature: isCreature(card),
-    isRemoval: removal,
+    // Priced for answering, and answering is what the chooser declined: a
+    // Murder your opponent may say no to is not one of this deck's answers,
+    // so it must not be counted as one when the next removal spell asks how
+    // saturated the deck already is.
+    isRemoval: removalPremium > 0 && declined === 0,
   };
 }
 

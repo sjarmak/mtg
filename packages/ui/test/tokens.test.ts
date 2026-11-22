@@ -22,6 +22,7 @@ import {
   MAT_LIGHT_TOKENS,
   MAT_TOKEN_CSS,
   ROUTE_SCOPE_ATTRIBUTE,
+  SUB_SCOPE_ATTRIBUTE,
   SCALE_TOKENS,
   SCOPED_PALETTES,
   SCOPED_TOKEN_CSS,
@@ -29,6 +30,8 @@ import {
   nativeDeclarations,
   routeScope,
   scopedPalette,
+  subScope,
+  viewScope,
   viewportScheme,
 } from '../src/styles/tokens';
 import { uiStyleSheet } from '../src/styles/index';
@@ -199,6 +202,21 @@ const INVENTED_DARK = `
   --mtg-table-felt: oklch(0.170 0.010 265);
 `;
 
+describe('the scope a sheet keys on', () => {
+  // The shell stamps the mode and the section as two attributes, and a sheet
+  // about one section keys on both: a mode's scope alone reaches every section
+  // of it, which is how a mat fitted for Replay would fit the explorer too.
+  // The section half sits inside `:where()` so the pair weighs one attribute,
+  // the same as a mode alone; the fitted-board `:is()` list in
+  // styles/board/geometry.ts takes its widest argument's weight, and a heavier
+  // list outweighed the unscoped overrides written to tie with it.
+  it('names the mode, the section, and the pair as one selector', () => {
+    expect(routeScope('play')).toBe(`[${ROUTE_SCOPE_ATTRIBUTE}='play']`);
+    expect(subScope('replay')).toBe(`[${SUB_SCOPE_ATTRIBUTE}='replay']`);
+    expect(viewScope('analysis', 'replay')).toBe(`${routeScope('analysis')}:where(${subScope('replay')})`);
+  });
+});
+
 describe('scoped palettes', () => {
   it('resolves a theme for every viewer preference, the way :root does', () => {
     const css = scopedPalette(routeScope('play'), FIXTURE_LIGHT, FIXTURE_DARK);
@@ -223,6 +241,14 @@ describe('scoped palettes', () => {
     expect(paletteFaults('blank', '', '')).toEqual(['blank: declares no token at all']);
   });
 
+  it('catches a scope declaring a token only in its dark half', () => {
+    // The one branch of paletteFaults that had no fixture, while its three
+    // siblings all did (`mtg-bc2.108`).
+    expect(paletteFaults('dark-only', DRIFTED_DARK, FIXTURE_DARK)).toEqual([
+      'dark-only: --mtg-ink is dark-only',
+    ]);
+  });
+
   it('catches a scope inventing a token the document has no value for', () => {
     expect(paletteFaults('invented', INVENTED_LIGHT, INVENTED_DARK)).toEqual([
       'invented: --mtg-table-felt has no value at :root',
@@ -230,15 +256,28 @@ describe('scoped palettes', () => {
   });
 
   /**
-   * A scope's light block and `:root` have the same specificity, so the sheet's
-   * order is the whole of why a scope wins. It sits immediately after the
-   * document palette and outside it: `packages/card-render/src/palette.ts`
-   * embeds `TOKEN_CSS` verbatim in every standalone SVG, where there is no
-   * shell and no route to scope on.
+   * Order matters for the root rule each scope carries, not for the palette.
+   *
+   * The palette lands on the shell `div` and `:root` lands on `html`, so they
+   * are declarations on different elements and never compete: the div's own
+   * value beats the inherited one at any order (`mtg-bc2.108`, disproved in a
+   * real engine). What does compete is `viewportScheme`'s `:root:has(SCOPE)`,
+   * which ties with `TOKEN_CSS`'s own root guards and wins on order alone.
+   *
+   * Outside `TOKEN_CSS` for an unrelated reason:
+   * `packages/card-render/src/palette.ts` embeds it verbatim in every
+   * standalone SVG, where there is no shell and no route to scope on.
    */
-  it('ships after the document palette and outside it', () => {
-    expect(uiStyleSheet().startsWith(`${TOKEN_CSS}\n${SCOPED_TOKEN_CSS}`)).toBe(true);
+  it('ships the scopes after the document palette and outside it', () => {
+    const sheet = uiStyleSheet();
+    expect(sheet.startsWith(`${TOKEN_CSS}\n${SCOPED_TOKEN_CSS}`)).toBe(true);
     expect(TOKEN_CSS).not.toContain(ROUTE_SCOPE_ATTRIBUTE);
+    // Pinned against a `startsWith` that would degenerate to `TOKEN_CSS + '\n'`
+    // if `SCOPED_PALETTES` were ever empty: the scoped block is real text, and
+    // the root rule whose order is load-bearing is in it and lands after the
+    // guards it beats.
+    expect(SCOPED_TOKEN_CSS.length).toBeGreaterThan(0);
+    expect(sheet.indexOf(':root:has(')).toBeGreaterThan(sheet.indexOf(":root:not([data-theme='light'])"));
   });
 });
 
@@ -395,6 +434,17 @@ describe('what a scope hands the root', () => {
     // A block of nothing but custom properties has nothing for the root: the
     // mat's surfaces reach the table by inheriting, like every other token.
     expect(nativeDeclarations(MAT_LIGHT_TOKENS)).toBe('');
+  });
+
+  it('does not read a comment in the palette as a declaration', () => {
+    // A palette says why a value is what it is, and a sentence with a colon in
+    // it used to reach the root as a rule. The QR pair carries such a comment.
+    const commented = `
+  color-scheme: light;
+  /* Why this pair does not follow the theme: a scanner wants a light field. */
+  --mtg-qr-field: oklch(1 0 0);
+`;
+    expect(nativeDeclarations(commented).trim()).toBe('color-scheme: light;');
   });
 
   it('resolves a theme for every viewer preference, the way :root does', () => {

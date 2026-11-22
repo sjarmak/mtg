@@ -17,6 +17,7 @@ import type { Effect } from '@mtg/dsl';
 import { mana, parseCard } from '@mtg/dsl';
 import type { Action, AgentView, GameState } from '@mtg/kernel';
 import { objectId, scenario } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { DEFAULT_GREEDY_CONFIG } from '@mtg/sim';
 import { bestTargetingPerCard, castTimingAllows } from '../src/policies/cast';
 import { scoreTargets } from '../src/policies/target';
@@ -135,7 +136,7 @@ describe('a modal spell reaching the cast-timing policy (cast.ts)', () => {
     const pumpOption: CastAction = { type: 'castSpell', player: 0, oid, targets: [null], mode: 0 };
     const drawOption: CastAction = { type: 'castSpell', player: 0, oid, targets: [null], mode: 1 };
     const view: AgentView = {
-      state,
+      state: observeState(state, 0, 'test/modal-policies.test.ts:138'),
       player: 0,
       decision: { kind: 'priority', player: 0, complete: false, options: [pumpOption, drawOption] },
     };

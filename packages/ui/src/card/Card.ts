@@ -14,8 +14,9 @@
  * thumbnail.
  */
 import { Fragment, createElement } from 'react';
-import type { ReactElement, ReactNode } from 'react';
-import type { Card as DslCard, CreatureCard, Rarity, SetRef } from '@mtg/dsl';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
+import type { Card as DslCard, CreatureCard, SetRef } from '@mtg/dsl';
+import type { SealRarity } from '@mtg/render-spec';
 import {
   isCastable,
   isCreature,
@@ -30,26 +31,37 @@ import {
   BOARD_REGIONS,
   COMPACT_REGIONS,
   FACE_REGIONS,
+  FOIL_SHEEN_CLASS,
   collectorLine,
   faceAttributes,
+  foilAttributes,
   frameTreatment,
   nameFitStep,
+  nameFitStepOf,
   rulesFitStep,
+  printedRulesFitStepOf,
+  printedRulesTextBlocks,
   setSealPath,
   textBoxBlocks,
   typeFitStep,
+  typeFitStepOf,
+  usesLargeLandArt,
 } from './anatomy';
 import type { FaceRegion } from './anatomy';
 import { typeBands, typeLinePieces } from './type-line';
 import { lineRuns, oracleBlocks } from './text-box';
 import type { TextBlock } from './text-box';
-import { ManaPips, manaCostLabel } from './ManaPips';
+import { ManaPips, manaCostLabel, registryPip } from './ManaPips';
 import { symbolElement, symbolizeLine } from './SymbolText';
 import { DEFAULT_SYMBOL_SET } from './symbols';
+import { setIconHref } from './set-icon';
 import type { SymbolSet } from './symbols';
 import { ArtSlot } from './ArtSlot';
-import type { CardArt } from './ArtSlot';
+import type { CardArt, PrintedFrame } from './ArtSlot';
 import { usePressGestures } from './press';
+import { isMenuKey } from './gesture';
+import type { ClickGestureEvent, GestureEvent, KeyGestureEvent } from './gesture';
+import { manaOutputLabel } from './mana-output';
 
 /**
  * `full` is the readable face; `board` is what a card in play wears; `compact`
@@ -82,40 +94,6 @@ import { usePressGestures } from './press';
  */
 export type CardSize = 'full' | 'compact' | 'board' | 'art';
 
-/**
- * The event members the context gesture reads, declared structurally.
- *
- * The workspace tsconfig has no `lib: dom` (`../mount.ts` writes out why), so
- * these are named here instead of imported. React's own event types satisfy
- * both, which is what makes the handlers below assignable to a button's props.
- */
-interface GestureEvent {
-  preventDefault(): void;
-}
-
-interface KeyGestureEvent extends GestureEvent {
-  readonly key: string;
-  readonly shiftKey: boolean;
-}
-
-/** How many presses this click is part of; 2 is the second half of a double click. */
-interface ClickGestureEvent {
-  readonly detail: number;
-}
-
-/**
- * The keyboard's two ways of asking for a context menu.
- *
- * `ContextMenu` is the dedicated key and `Shift+F10` is the long-standing
- * binding for keyboards without one; both are what a screen-reader user reaches
- * for. Without them the right click would be the only route to a card's menu,
- * and a gesture with no keyboard equivalent is a gesture some players do not
- * have.
- */
-function isMenuKey(event: KeyGestureEvent): boolean {
-  return event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey);
-}
-
 /** The regions each size lays out, in the order it lays them out. */
 const REGIONS_BY_SIZE: Readonly<Record<CardSize, readonly FaceRegion[]>> = {
   full: FACE_REGIONS,
@@ -145,6 +123,12 @@ export interface CardProps {
   readonly card: DslCard;
   /** `null` (or omitted) renders the labeled pending frame. */
   readonly art?: CardArt | null;
+  /**
+   * Defers the illustration's fetch until the window is near the viewport. For
+   * a caller drawing a page of faces at once; off everywhere else, and
+   * `./ArtSlot.ts` says why the default is the strict one.
+   */
+  readonly deferArt?: boolean;
   readonly size?: CardSize;
   readonly selected?: boolean;
   /** Present makes the face a button; absent leaves it inert. */
@@ -171,6 +155,23 @@ export interface CardProps {
    * gesture and forget the keyboard one.
    */
   readonly onMenu?: (card: DslCard) => void;
+  /**
+   * The pointer came to rest on this face, or left it: the card on the way in,
+   * `null` on the way out.
+   *
+   * One callback rather than an enter and a leave, because the two are one fact
+   * with two values and a caller that wired only the first would leave a panel
+   * showing a card nobody is pointing at.
+   *
+   * Focus and blur report the same fact. A keyboard reaches a face by tabbing to
+   * it and never sends a pointer event, so a surface that read only the pointer
+   * would be a surface where the panel is a mouse feature.
+   *
+   * Not a selection: pointing at a card must not be able to take an action, so
+   * every caller of this is a reader (`../routes/draft/DraftPack.ts`'s preview)
+   * and the selection it defers to is `onSelect`'s.
+   */
+  readonly onHover?: (card: DslCard | null) => void;
   /** A line for the foot of an abbreviated face, e.g. a controller on the battlefield. */
   readonly footnote?: string;
   /** The current size of a permanent; absent prints the card's own numbers. */
@@ -182,6 +183,16 @@ export interface CardProps {
    * the set with no third-party artwork in it, the way `render-set.ts` does.
    */
   readonly symbols?: SymbolSet;
+  /**
+   * Whether this copy came off a foil sheet, where the pool it came from can
+   * say.
+   *
+   * Three states, and the omission is the third: absent is a face with no pool
+   * behind it, or a pool that took no measurement, and it draws exactly the face
+   * it drew before this prop existed. `./anatomy.ts`'s `foilAttributes` has the
+   * argument for why this is the card's caller's fact rather than the card's.
+   */
+  readonly foil?: boolean;
 }
 
 /**
@@ -208,16 +219,30 @@ export const SCREEN_SEAL = { box: 20, cx: 10, cy: 10, radius: 9 } as const;
  * words the drawing is made of rather than the half of it that used to be
  * expressible.
  */
-function raritySeal(set: SetRef, rarity: Rarity): ReactElement {
+function raritySeal(set: Pick<SetRef, 'code'>, rarity: SealRarity): ReactElement {
+  const shared = {
+    'data-set': set.code,
+    'data-rarity': rarity,
+    role: 'img',
+    'aria-label': `${set.code} ${rarity}`,
+  };
+  // An official set's own icon when a launcher staged it, painted as a mask
+  // in the rarity's ink; `./set-icon.ts` says why the list is the launcher's
+  // and why the drawn mark below stays the specification's seal.
+  const icon = setIconHref(set.code);
+  if (icon !== null) {
+    return createElement('span', {
+      ...shared,
+      className: 'mtg-card__seal mtg-card__seal--icon',
+      style: { '--mtg-set-icon': `url("${icon}")` } as CSSProperties,
+    });
+  }
   return createElement(
     'svg',
     {
+      ...shared,
       className: 'mtg-card__seal',
       viewBox: `0 0 ${String(SCREEN_SEAL.box)} ${String(SCREEN_SEAL.box)}`,
-      'data-set': set.code,
-      'data-rarity': rarity,
-      role: 'img',
-      'aria-label': `${set.code} ${rarity}`,
     },
     createElement('path', {
       d: setSealPath(set.code, SCREEN_SEAL.cx, SCREEN_SEAL.cy, SCREEN_SEAL.radius),
@@ -361,6 +386,9 @@ export function faceAccessibleName(card: DslCard, stats?: FaceStats): string {
   const fields = [card.name];
   if (isCastable(card)) fields.push(manaCostLabel(card.manaCost));
   fields.push(renderTypeLine(card));
+  if (isLand(card) && card.producesMana.length > 0) {
+    fields.push(`Produces ${manaOutputLabel(card.producesMana)} mana`);
+  }
   if (isCreature(card)) fields.push(sizeText(card, stats));
   if (isPlaneswalker(card)) fields.push(`Loyalty ${String(card.startingLoyalty)}`);
   return `${fields.join('. ')}.`;
@@ -391,6 +419,18 @@ const REMINDER_KEYWORD_CLASS = 'mtg-card__reminder-keyword';
 const GLOSS_CLASS = 'mtg-card__gloss';
 
 /**
+ * How much actionable copy a reminder-heavy draft face can carry before its
+ * conservative imported-text rung must win unchanged.
+ *
+ * Parenthetical reminder text can be most of a card's character count without
+ * being what a drafter is trying to scan. Counting each line's roman run keeps
+ * that explanatory bulk from forcing concise cards such as convoke and suspend
+ * creatures into the same tiny type as genuinely dense cards. The browser's
+ * complete-catalog containment sweep is the boundary on this calibration.
+ */
+const DRAFT_CONCISE_RULES_CHARACTERS = 90;
+
+/**
  * The cost badge at the head of a loyalty ability's row, or nothing.
  *
  * Inside the row rather than beside it, which is what makes the box readable in
@@ -415,7 +455,22 @@ function lineContent(block: TextBlock, symbols: SymbolSet): readonly ReactNode[]
   const painted = symbolizeLine(rest, symbols);
   if (roman.length === 0) return painted;
   if (block.kind !== 'rules') {
-    return [createElement('span', { key: 'roman', className: REMINDER_KEYWORD_CLASS }, roman), ...painted];
+    // Painted, not printed (`mtg-m7hq`). A reminder block's roman run is the
+    // rules text the gloss explains, and that is not always a keyword: where
+    // `@mtg/dsl`'s reminder table keys on a whole rules row -- populate, gloom,
+    // protection -- the run is the row, cost and all. Vitu-Ghazi Guildmage drew
+    // `{2}{G}{W}: Populate.` as eighteen characters beside a sibling ability of
+    // the same shape drawing pips, because this branch handed the run over as a
+    // string. `@mtg/card-render` sends both runs through its own chunker and
+    // never had the bug, so this was the two faces disagreeing.
+    return [
+      createElement(
+        'span',
+        { key: 'roman', className: REMINDER_KEYWORD_CLASS },
+        ...symbolizeLine(roman, symbols),
+      ),
+      ...painted,
+    ];
   }
   // The roman run of a rules line is a whole sentence rather than a keyword, so
   // it goes through `symbolizeLine` as well: `{T}: Put a gloom counter on target
@@ -500,6 +555,62 @@ function textBox(card: DslCard, symbols: SymbolSet, size: CardSize): ReactElemen
   );
 }
 
+/** Exact oracle text from a catalog face, painted by the ordinary rules box. */
+function printedTextBox(
+  frame: PrintedFrame,
+  symbols: SymbolSet,
+  blocks: readonly TextBlock[] = printedRulesTextBlocks(frame.oracleText ?? '', frame.loyalty !== null),
+): ReactElement {
+  const oracleText = frame.oracleText ?? '';
+  const children =
+    oracleText.length === 0
+      ? []
+      : blocks.map((block, index) =>
+          createElement(
+            'span',
+            {
+              key: String(index),
+              className: 'mtg-card__line',
+              'data-block': 'rules',
+              ...(block.loyaltyCost === undefined ? {} : { 'data-loyalty': block.loyaltyCost }),
+            },
+            ...loyaltyBadge(block),
+            ...lineContent(block, symbols),
+          ),
+        );
+  return createElement(
+    'span',
+    {
+      className: 'mtg-card__text',
+      'data-region': 'rules',
+      'data-fit': String(printedRulesFitStepOf(oracleText, frame.loyalty !== null)),
+    },
+    ...children,
+  );
+}
+
+function printedPipKind(token: string): 'w' | 'u' | 'b' | 'r' | 'g' | 'c' | 'm' | 'generic' {
+  const upper = token.toLocaleUpperCase();
+  if (upper === 'W' || upper === 'U' || upper === 'B' || upper === 'R' || upper === 'G') {
+    return upper.toLocaleLowerCase() as 'w' | 'u' | 'b' | 'r' | 'g';
+  }
+  if (upper === 'C') return 'c';
+  return upper.includes('/') ? 'm' : 'generic';
+}
+
+/** An arbitrary real-card mana cost using the same pip registry as DSL cards. */
+function printedManaCost(manaCost: string, symbols: SymbolSet): ReactElement {
+  const pips = [...manaCost.matchAll(/\{([^{}]+)\}/g)].map((match, index) => {
+    const token = match[1] ?? '';
+    return registryPip(`${token}-${String(index)}`, token, printedPipKind(token), symbols, token);
+  });
+  return createElement(
+    'span',
+    { className: 'mtg-cost', role: 'img', 'aria-label': `Mana cost ${manaCost}` },
+    ...pips,
+  );
+}
+
 /**
  * The mana cost, drawn inside the art window's upper-right corner on a board
  * face and on the title row everywhere else.
@@ -519,7 +630,15 @@ function textBox(card: DslCard, symbols: SymbolSet, size: CardSize): ReactElemen
  * `../../test/card-face-detail.test.ts` fails on, because the name above is
  * argued from it.
  */
-function cornerCost(card: DslCard, symbols: SymbolSet): ReactNode {
+function cornerCost(card: DslCard, symbols: SymbolSet, printed?: PrintedFrame): ReactNode {
+  if (printed !== undefined) {
+    if (printed.manaCost === null || printed.manaCost.length === 0) return null;
+    return createElement(
+      'span',
+      { className: 'mtg-card__corner', 'aria-hidden': true },
+      printedManaCost(printed.manaCost, symbols),
+    );
+  }
   if (!isCastable(card)) return null;
   return createElement(
     'span',
@@ -579,7 +698,19 @@ function landPip(card: DslCard, symbols: SymbolSet): ReactNode {
  * creature's element is unchanged down to its class name so no rule, test or
  * printed face that was reading it had to move.
  */
-function statBadge(card: DslCard, stats: FaceStats | undefined): ReactNode {
+function statBadge(card: DslCard, stats: FaceStats | undefined, printed?: PrintedFrame): ReactNode {
+  if (printed !== undefined) {
+    if (printed.power !== null && printed.toughness !== null) {
+      const value =
+        stats === undefined
+          ? `${printed.power}/${printed.toughness}`
+          : `${String(stats.power)}/${String(stats.toughness)}`;
+      return createElement('span', { className: 'mtg-card__pt' }, value);
+    }
+    if (printed.loyalty !== null) {
+      return createElement('span', { className: 'mtg-card__shield' }, printed.loyalty);
+    }
+  }
   if (isCreature(card)) return createElement('span', { className: 'mtg-card__pt' }, sizeText(card, stats));
   if (isPlaneswalker(card)) {
     return createElement('span', { className: 'mtg-card__shield' }, String(card.startingLoyalty));
@@ -608,8 +739,9 @@ function footRow(
   size: CardSize,
   footnote: string | undefined,
   stats: FaceStats | undefined,
+  printed?: PrintedFrame,
 ): ReactNode {
-  const pt = size === 'board' ? null : statBadge(card, stats);
+  const pt = size === 'board' ? null : statBadge(card, stats, printed);
   if (footnote === undefined && pt === null) return null;
   return createElement(
     'span',
@@ -634,8 +766,8 @@ function footRow(
  * text to a screen reader, to a find-in-page, and to the parity suite's reading
  * of what words the card prints.
  */
-function cornerStats(card: DslCard, stats: FaceStats | undefined): ReactNode {
-  const pt = statBadge(card, stats);
+function cornerStats(card: DslCard, stats: FaceStats | undefined, printed?: PrintedFrame): ReactNode {
+  const pt = statBadge(card, stats, printed);
   if (pt === null) return null;
   return createElement('span', { className: 'mtg-card__stats' }, pt);
 }
@@ -645,7 +777,21 @@ export function Card(props: CardProps): ReactElement {
   const { card } = props;
   const size = props.size ?? 'full';
   const art = props.art ?? null;
+  const printed = art?.presentation === 'printed-card';
+  const printedFrame = art?.printedFrame;
+  const visibleOracleText =
+    printedFrame === undefined ? renderOracleText(card) : (printedFrame.oracleText ?? '');
+  const printedBlocks =
+    printedFrame === undefined
+      ? []
+      : printedRulesTextBlocks(visibleOracleText, printedFrame.loyalty !== null);
+  const hasInlineReminder = printedBlocks.some((block) => block.roman !== undefined);
+  const hasConcisePrintedRules =
+    hasInlineReminder &&
+    printedBlocks.reduce((length, block) => length + (block.roman ?? block.text).length, 0) <=
+      DRAFT_CONCISE_RULES_CHARACTERS;
   const onSelect = props.onSelect;
+  const onHover = props.onHover;
   // The touch half of the three gestures (`mtg-yg8`, `./press.ts`). Called
   // unconditionally, because a hook must be, and it arms nothing for a face
   // that passed neither callback — the handlers are spread onto the element
@@ -672,11 +818,27 @@ export function Card(props: CardProps): ReactElement {
   // written into the markup is something jsdom, a proof sheet and the parity
   // suite can all read. It is the card's step and every size takes it — the
   // sheet decides what each face does with it.
+  const faceName = printedFrame?.name ?? card.name;
   const titleBar = createElement(
     'span',
     { className: 'mtg-card__bar', 'data-region': 'title' },
-    createElement('span', { className: 'mtg-card__name', 'data-fit': String(nameFitStep(card)) }, card.name),
-    costOnTitleRow && isCastable(card) ? createElement(ManaPips, { cost: card.manaCost, symbols }) : null,
+    createElement(
+      'span',
+      {
+        className: 'mtg-card__name',
+        'data-fit': String(printedFrame === undefined ? nameFitStep(card) : nameFitStepOf(printedFrame.name)),
+      },
+      faceName,
+    ),
+    costOnTitleRow
+      ? printedFrame === undefined
+        ? isCastable(card)
+          ? createElement(ManaPips, { cost: card.manaCost, symbols })
+          : null
+        : printedFrame.manaCost === null || printedFrame.manaCost.length === 0
+          ? null
+          : printedManaCost(printedFrame.manaCost, symbols)
+      : null,
   );
 
   // A caller's own line for the foot of an abbreviated face: a controller on
@@ -698,16 +860,29 @@ export function Card(props: CardProps): ReactElement {
     { className: 'mtg-card__bar', 'data-region': 'type' },
     createElement(
       'span',
-      { className: 'mtg-card__type', 'data-fit': String(typeFitStep(card)) },
-      pieces.supertypes === ''
-        ? null
-        : createElement('span', { className: 'mtg-card__type-super' }, pieces.supertypes),
-      createElement('span', { className: 'mtg-card__type-kind' }, pieces.types),
-      pieces.subtypes === ''
-        ? null
-        : createElement('span', { className: 'mtg-card__type-sub' }, pieces.subtypes),
+      {
+        className: 'mtg-card__type',
+        'data-fit': String(
+          printedFrame === undefined ? typeFitStep(card) : typeFitStepOf(printedFrame.typeLine),
+        ),
+      },
+      printedFrame === undefined
+        ? [
+            pieces.supertypes === ''
+              ? null
+              : createElement('span', { key: 'super', className: 'mtg-card__type-super' }, pieces.supertypes),
+            createElement('span', { key: 'kind', className: 'mtg-card__type-kind' }, pieces.types),
+            pieces.subtypes === ''
+              ? null
+              : createElement('span', { key: 'sub', className: 'mtg-card__type-sub' }, pieces.subtypes),
+          ]
+        : createElement('span', { className: 'mtg-card__type-kind' }, printedFrame.typeLine),
     ),
-    raritySeal(card.set, card.rarity),
+    printedFrame === undefined
+      ? raritySeal(card.set, card.rarity)
+      : printedFrame.rarity === undefined
+        ? null
+        : raritySeal({ code: printedFrame.setCode ?? card.set.code }, printedFrame.rarity),
   );
 
   // Which regions a face carries, and in what order, is the specification's
@@ -723,22 +898,26 @@ export function Card(props: CardProps): ReactElement {
     art: () =>
       createElement(ArtSlot, {
         art,
-        subject: card.id,
+        subject: printedFrame?.physicalId ?? card.id,
+        ...(props.deferArt === true ? { defer: true } : {}),
         ...(size === 'board'
           ? {
               overlay: createElement(
                 Fragment,
                 null,
-                cornerCost(card, symbols),
-                cornerStats(card, props.stats),
+                cornerCost(card, symbols, printedFrame),
+                cornerStats(card, props.stats, printedFrame),
               ),
             }
           : {}),
         ...(size === 'art' ? { overlay: landPip(card, symbols) } : {}),
       }),
     type: () => typeBar,
-    rules: () => textBox(card, symbols, size),
-    footer: () => footRow(card, size, footnote, props.stats),
+    rules: () =>
+      printedFrame === undefined
+        ? textBox(card, symbols, size)
+        : printedTextBox(printedFrame, symbols, printedBlocks),
+    footer: () => footRow(card, size, footnote, props.stats, printedFrame),
   };
   // The corner badge is what the full face has instead of a footer region, and
   // it is appended rather than laid out: it takes the column no height, which is
@@ -764,9 +943,19 @@ export function Card(props: CardProps): ReactElement {
   // stated reason: the window is `overflow: hidden`, so a badge there is clipped
   // by the picture rather than drawn on the text below it, and it still costs
   // the column no height. `../styles/card.ts` places it.
+  const sheen =
+    props.foil === true
+      ? [createElement('span', { key: 'sheen', className: FOIL_SHEEN_CLASS, 'aria-hidden': true })]
+      : [];
   const body: ReactNode[] = [
     ...REGIONS_BY_SIZE[size].map((region) => regions[region]()),
-    ...(size === 'full' ? [cornerStats(card, props.stats)] : []),
+    ...(size === 'full' ? [cornerStats(card, props.stats, printedFrame)] : []),
+    // Last, so it lies over the regions rather than under them, and only on the
+    // copy the pool named. `../styles/card.ts` paints it and holds the
+    // reduced-motion arm, which is a static tint rather than nothing: a viewer
+    // who asked for less motion asked for less motion, not for less of the
+    // information the treatment carries.
+    ...sheen,
   ];
 
   // The face root publishes the specification's whole vocabulary, not a subset
@@ -787,18 +976,58 @@ export function Card(props: CardProps): ReactElement {
     ...(bands.subtypes === null ? {} : { 'data-type-sub': bands.subtypes }),
     ...(bands.supertypes === null ? {} : { 'data-type-super': bands.supertypes }),
     'data-type-hide': bands.hidden,
+    // Absent where the pool took no measurement, which is every face outside a
+    // dealt pool. `./anatomy.ts` argues why this is not in `faceAttributes`.
+    ...(props.foil === undefined ? {} : foilAttributes(props.foil)),
+    // Four handlers or none, wired here rather than on the button below so an
+    // inert face reports the pointer too: a gallery of faces nobody can press
+    // is still a gallery somebody can point at. `pointerenter`/`pointerleave`
+    // rather than the mouse pair so a pen and a stylus report as well; a touch
+    // sends the pair around its tap, and the panel a tap fills is the one the
+    // selection fills, so the two agree rather than fight.
+    ...(onHover === undefined
+      ? {}
+      : {
+          onPointerEnter: (): void => {
+            onHover(card);
+          },
+          onPointerLeave: (): void => {
+            onHover(null);
+          },
+          onFocus: (): void => {
+            onHover(card);
+          },
+          onBlur: (): void => {
+            onHover(null);
+          },
+        }),
     'data-size': size,
+    'data-land': isLand(card),
+    'data-large-art': usesLargeLandArt(card, visibleOracleText),
+    ...(hasInlineReminder ? { 'data-inline-reminder': 'true' } : {}),
+    ...(hasConcisePrintedRules ? { 'data-concise-rules': 'true' } : {}),
+    ...(printedFrame?.loyalty === null || printedFrame === undefined ? {} : { 'data-loyalty-frame': 'true' }),
+    ...(printed ? { 'data-presentation': 'printed-card' } : {}),
+    ...(printedFrame === undefined
+      ? {}
+      : {
+          'data-physical-id': printedFrame.physicalId,
+          'data-position': String(printedFrame.position),
+          ...(printedFrame.rarity === undefined ? {} : { 'data-rarity': printedFrame.rarity }),
+        }),
     'data-selected': props.selected === true,
     'data-interactive': onSelect !== undefined,
     // The face states its own name rather than leaving one to be concatenated
     // out of its regions and their labels; `faceAccessibleName` is both the
     // decision and the argument for it.
-    'aria-label': faceAccessibleName(card, props.stats),
+    'aria-label': printed
+      ? (art.printedLabel ?? faceAccessibleName(card, props.stats))
+      : faceAccessibleName(card, props.stats),
     // Every size, including `full`, which used to be the exception because it
     // printed both the rules box and the collector line and so owed nothing.
     // It prints the box and no longer prints the line, so it takes the detail
     // text too; `faceDetailText` has the trade that buys.
-    title: faceDetailText(card),
+    title: printed ? (art.printedDetail ?? faceDetailText(card)) : faceDetailText(card),
   };
 
   // The inert face is a `group` rather than a bare `div`, because a name needs

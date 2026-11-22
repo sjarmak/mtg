@@ -595,6 +595,25 @@ describe('an ordering that is the ordering beside it', () => {
     expect(marked.decision.options.length).toBe(2);
   });
 
+  it('keeps sources whose hidden timestamps order derived layer effects separate', () => {
+    const tidecallers = creature('Tidecaller', 2, 2, {
+      abilities: [
+        {
+          kind: 'static',
+          scope: 'allLands',
+          modification: { kind: 'addSubtype', subtype: 'Island' },
+        },
+      ],
+    });
+
+    // Layer-4 statics are derived rather than registered in state, so their
+    // source ids do not appear in `pointedAt`. They still keep their CR 613.7
+    // timestamps: removing the older source can produce a different future
+    // layer order from removing the newer one when another effect sits between
+    // them. Folding the two damage orders would therefore delete a real choice.
+    expect(gangBlocked(copies(2, tidecallers)).decision.options.length).toBe(2);
+  });
+
   it('reads differently on every line of the board that filed this', () => {
     const gang = gangBlocked([
       ...copies(3, RAIDER),

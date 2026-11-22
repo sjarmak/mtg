@@ -22,6 +22,7 @@ import { describe, expect, it } from 'vitest';
 import type { AbilityInput, Effect } from '@mtg/dsl';
 import type { Action, Decision, GameState, ObjectId } from '@mtg/kernel';
 import { pendingDecision, scenario, simpleAgent } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { artifact, creature, FOREST, instant, lands } from './cards';
 import { oidOf } from './helpers';
 
@@ -77,7 +78,11 @@ function board(opposed: boolean, hand: 'removal' | 'empty' = 'removal'): Board {
 }
 
 function decide(where: Board): Action {
-  return simpleAgent('bot').decide({ state: where.state, player: 0, decision: where.decision });
+  return simpleAgent('bot').decide({
+    state: observeState(where.state, 0, 'test/agent-bad-aim.test.ts:80'),
+    player: 0,
+    decision: where.decision,
+  });
 }
 
 /** The permanents this decision offers as the first target of `type`. */

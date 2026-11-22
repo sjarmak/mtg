@@ -1,0 +1,310 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "m14",
+  "name": "Magic 2014",
+  "sources": [
+    {
+      "code": "M14",
+      "catalogFormat": "m14-printed-v1",
+      "catalogSha256": "2a0afe149013233e35f6639d8f42c873fd5fa0f1564888c60c5a39154ea7283d",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/M14.json",
+        "sha256": "987efbbee497415b9d556a70381c1dcc9ca4e7797e53147645644c0fdf3de82e",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-flyers",
+      "name": "White-Blue Flyers",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m14-printed-v1:0042:0cbc279d-952a-4b8d-b6ff-37166daa2dd5",
+          "name": "Air Servant",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0079:2316d281-21a4-460d-9062-f0737249484e",
+          "name": "Warden of Evos Isle",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0078:d4000b46-7843-4c07-8332-a10f207e2cdc",
+          "name": "Wall of Frost",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0032:475f2a7b-9bd5-4ad7-868a-7652d06f3f6c",
+          "name": "Serra Angel",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0063:13dd3172-0b45-4dc8-adc6-9e0ba112e664",
+          "name": "Messenger Drake",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0025:87c7ff88-c23e-4be6-989b-99d055db36df",
+          "name": "Pacifism",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0007:06823bf8-2fca-49e1-ba40-9b61c9ae55b3",
+          "name": "Banisher Priest",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0055:49bd28e3-1612-41b3-88a0-bb5c1ee60ace",
+          "name": "Essence Scatter",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0230:334ca29a-7fb3-426f-922b-5a2b905a5565",
+          "name": "Plains",
+          "count": 18
+        },
+        {
+          "physicalId": "m14-printed-v1:0234:94de0250-53a6-45c8-85a7-a473f271102e",
+          "name": "Island",
+          "count": 18
+        }
+      ]
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m14-printed-v1:0066:e1b242f3-9398-4d65-a2c7-4de56ee58933",
+          "name": "Opportunity",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0052:bfdc821e-0e4b-43ff-86d6-134ac0b4e958",
+          "name": "Divination",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0096:75d96a37-bdbe-46ae-926f-8742699a0b20",
+          "name": "Doom Blade",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0055:49bd28e3-1612-41b3-88a0-bb5c1ee60ace",
+          "name": "Essence Scatter",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0046:bca9c638-f923-4e85-bd3c-c95854b4f0fb",
+          "name": "Claustrophobia",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0078:d4000b46-7843-4c07-8332-a10f207e2cdc",
+          "name": "Wall of Frost",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0113:8a78dbdc-1c5a-4b48-8cd1-64f7b4c29dd6",
+          "name": "Sengir Vampire",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0060:2801a4ad-5d44-4414-af62-458c7f90dad6",
+          "name": "Jace, Memory Adept",
+          "count": 1
+        },
+        {
+          "physicalId": "m14-printed-v1:0234:94de0250-53a6-45c8-85a7-a473f271102e",
+          "name": "Island",
+          "count": 22
+        },
+        {
+          "physicalId": "m14-printed-v1:0238:4510090f-b42d-4df1-af71-64a77dfbc1b2",
+          "name": "Swamp",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "black-red-sacrifice",
+      "name": "Black-Red Sacrifice",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m14-printed-v1:0125:babcfccf-83db-40e7-8a2c-f77358ba3cc0",
+          "name": "Act of Treason",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0087:a3fcbbd1-ee51-42a3-ad11-2fd41728c35d",
+          "name": "Blood Bairn",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0099:56653d9e-0c29-440b-8724-cae746abb1a9",
+          "name": "Gnawing Zombie",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0127:b9e0912d-b4b9-497c-bce7-ed80b79bab32",
+          "name": "Barrage of Expendables",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0084:f3053af2-715c-4549-9003-bf4279029a95",
+          "name": "Altar's Reap",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0118:5b96fed2-0be9-4181-94ae-10f031e2aeb2",
+          "name": "Tenacious Dead",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0098:eaee5261-416c-41e9-9ad7-bf7bd169aa08",
+          "name": "Festering Newt",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0205:9af87c24-a534-462b-968b-dccf6ac63299",
+          "name": "Bubbling Cauldron",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0096:75d96a37-bdbe-46ae-926f-8742699a0b20",
+          "name": "Doom Blade",
+          "count": 1
+        },
+        {
+          "physicalId": "m14-printed-v1:0228:927ed667-c228-4b96-a9f6-7cbadade8134",
+          "name": "Mutavault",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0238:4510090f-b42d-4df1-af71-64a77dfbc1b2",
+          "name": "Swamp",
+          "count": 16
+        },
+        {
+          "physicalId": "m14-printed-v1:0242:6e82bb8b-2a95-4935-a728-6898f64ce39a",
+          "name": "Mountain",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "red-green-creatures",
+      "name": "Red-Green Creatures",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m14-printed-v1:0164:b1320400-5aa8-48d6-be84-197b4559456f",
+          "name": "Advocate of the Beast",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0182:135946fc-fe67-401f-821d-d7145c63f030",
+          "name": "Kalonian Tusker",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0193:d8610ff1-064b-4c75-a8df-d3b076370d1e",
+          "name": "Rumbling Baloth",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0145:b7d5e3dc-f307-4f91-a5ee-e7c5d03d8102",
+          "name": "Marauding Maulhorn",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0155:2fbec2ea-7b60-4c51-9782-52ccdd96c4b7",
+          "name": "Shock",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0133:65d1b479-f6f6-4fec-a5a6-1a74d426fb13",
+          "name": "Chandra's Outrage",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0242:6e82bb8b-2a95-4935-a728-6898f64ce39a",
+          "name": "Mountain",
+          "count": 18
+        },
+        {
+          "physicalId": "m14-printed-v1:0246:5b5277ee-f1e0-4777-9011-d7a23c855919",
+          "name": "Forest",
+          "count": 22
+        }
+      ]
+    },
+    {
+      "id": "green-white-slivers",
+      "name": "Green-White Slivers",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m14-printed-v1:0030:74c28560-e6ac-4be9-a253-22c4613b0d90",
+          "name": "Sentinel Sliver",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0189:a2e37de8-66a1-4afa-aa6f-1151f849dfa8",
+          "name": "Predatory Sliver",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0184:fe45433b-e124-44d7-9463-dada39310148",
+          "name": "Manaweft Sliver",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0038:c15d6329-ffb1-43fd-8558-60c8315f5b91",
+          "name": "Steelform Sliver",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0009:a26bb68b-1830-470a-8cea-91edc7db0c57",
+          "name": "Bonescythe Sliver",
+          "count": 3
+        },
+        {
+          "physicalId": "m14-printed-v1:0185:7745f6a9-400c-4200-9732-86c54247de46",
+          "name": "Megantic Sliver",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0021:e4399e19-d05d-4bb3-9aff-c4133ddd2850",
+          "name": "Hive Stirrings",
+          "count": 2
+        },
+        {
+          "physicalId": "m14-printed-v1:0228:927ed667-c228-4b96-a9f6-7cbadade8134",
+          "name": "Mutavault",
+          "count": 4
+        },
+        {
+          "physicalId": "m14-printed-v1:0230:334ca29a-7fb3-426f-922b-5a2b905a5565",
+          "name": "Plains",
+          "count": 17
+        },
+        {
+          "physicalId": "m14-printed-v1:0246:5b5277ee-f1e0-4777-9011-d7a23c855919",
+          "name": "Forest",
+          "count": 16
+        }
+      ]
+    }
+  ],
+  "contentSha256": "72435aa65fe3ff045122b8808aa1fb55326e314b85f895ab8ff4ad781a65c8b5"
+}

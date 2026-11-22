@@ -12,16 +12,18 @@
  * Mechanic count is capped at 3-6 per Nuts & Bolts #18.
  */
 import { z } from 'zod';
-import type { Color } from '@mtg/dsl';
+import type { Color, EffectKind } from '@mtg/dsl';
 import {
-  AbilityKindSchema,
   CardSchema,
   ColorSchema,
+  COLORS,
   CounterKindSchema,
   EffectKindSchema,
   KeywordSchema,
   ModelTriggerConditionSchema,
+  ModelAbilityKindSchema,
   PERMANENT_CARD_KINDS,
+  RARITIES,
   RaritySchema,
   SET_CODE_PATTERN,
   SUBTYPE_PATTERN,
@@ -41,59 +43,99 @@ import {
   isZoneReachingRole,
   SPELL_ROLE_NAMES,
 } from './roles';
+import {
+  CAPABILITY_EFFECT_KINDS,
+  CAPABILITY_TRIGGER_CONDITIONS,
+  type CapabilityEffectKind,
+} from './capabilities';
 
-export const DesiredMechanicSchema = z.object({
-  /** Short label used in prompts, reports and mechanic-coverage checks. */
-  name: z.string().min(1).max(40),
-  description: z.string().min(1).max(300),
-  /** Slice keywords this mechanic is expressed with; may be empty. */
-  keywords: z.array(KeywordSchema).max(4).default([]),
-  /** Slice effect kinds this mechanic is expressed with; may be empty. */
-  effectKinds: z.array(EffectKindSchema).max(4).default([]),
-  /**
-   * CR 113 ability kinds this mechanic is expressed with; may be empty.
-   *
-   * The third vocabulary a mechanic may name, and the one that makes a mechanic
-   * more than a re-labeling of the nine evergreen keywords (`mtg-bc2.132.3`).
-   * Naming a kind here is what makes the allocator reserve permanent slots for
-   * it, what puts the ability schema in front of the model for those slots, and
-   * what `checkMechanicCoverage` reads the finished set back against.
-   *
-   * `AbilityKindSchema`, not a copy of it: the DSL's own tuple is the whole
-   * vocabulary, so a brief cannot ask for a shape `abilitiesOver` has no member
-   * for. Which effects the ability then uses is `effectKinds`' business and the
-   * model's, exactly as it is for a spell.
-   */
-  abilityKinds: z.array(AbilityKindSchema).max(3).default([]),
-  /**
-   * CR 603 conditions this mechanic's triggers watch for; may be empty.
-   *
-   * The fourth vocabulary, and it exists because it was the one design axis the
-   * brief could only hint at. Every other axis a brief cares about is stated,
-   * reserved, printed on the slot line and read back: keywords, effect kinds,
-   * ability kinds, a required card's name, its equipment, its part counter, its
-   * sacrifice subtype. A trigger's *condition* was none of those. A brief said
-   * `abilityKinds: ["triggered"]` and the condition was then whatever the model
-   * inferred from the mechanic's prose, which is a judgment made on evidence
-   * nobody stated.
-   *
-   * That is `mtg-itf`: the flagship set's two mechanics both describe a
-   * permanent dying, so fifteen of its twenty-one triggered slots are told to
-   * print a mechanic about dying and duly do, and the six that name no mechanic
-   * follow the set's prevailing flavor. `selfEnters` was never absent from the
-   * DSL, the model's schema or the fill prompt's own condition list - it was
-   * unaskable. Naming it here is how a brief asks.
-   *
-   * Empty is the default and the state of every brief in this tree, which is
-   * what keeps the prompt bytes - and so every recorded fixture key - exactly
-   * where they were.
-   */
-  triggerConditions: z.array(ModelTriggerConditionSchema).max(3).default([]),
-  /** Colors the mechanic lives in. Empty means "any color". */
-  colors: z.array(ColorSchema).max(5).default([]),
-});
+const MechanicEffectKindSchema = z.union([EffectKindSchema, z.enum(CAPABILITY_EFFECT_KINDS)]);
+const MechanicTriggerConditionSchema = z.union([
+  ModelTriggerConditionSchema,
+  z.enum(CAPABILITY_TRIGGER_CONDITIONS),
+]);
 
-export type DesiredMechanic = z.infer<typeof DesiredMechanicSchema>;
+export const DesiredMechanicSchema = z
+  .object({
+    /** Short label used in prompts, reports and mechanic-coverage checks. */
+    name: z.string().min(1).max(40),
+    description: z.string().min(1).max(300),
+    /** Slice keywords this mechanic is expressed with; may be empty. */
+    keywords: z.array(KeywordSchema).max(4).default([]),
+    /** Slice effect kinds this mechanic is expressed with; may be empty. */
+    effectKinds: z.array(MechanicEffectKindSchema).max(4).default([]),
+    /**
+     * CR 113 ability kinds this mechanic is expressed with; may be empty.
+     *
+     * The third vocabulary a mechanic may name, and the one that makes a mechanic
+     * more than a re-labeling of the nine evergreen keywords (`mtg-bc2.132.3`).
+     * Naming a kind here is what makes the allocator reserve permanent slots for
+     * it, what puts the ability schema in front of the model for those slots, and
+     * what `checkMechanicCoverage` reads the finished set back against.
+     *
+     * `ModelAbilityKindSchema`, not the engine's wider `AbilityKindSchema`: a
+     * brief cannot reserve a hand-authored-only rule the fill model is never
+     * shown. Which effects the ability then uses is `effectKinds`' business and
+     * the model's, exactly as it is for a spell.
+     */
+    abilityKinds: z.array(ModelAbilityKindSchema).max(3).default([]),
+    /**
+     * CR 603 conditions this mechanic's triggers watch for; may be empty.
+     *
+     * The fourth vocabulary, and it exists because it was the one design axis the
+     * brief could only hint at. Every other axis a brief cares about is stated,
+     * reserved, printed on the slot line and read back: keywords, effect kinds,
+     * ability kinds, a required card's name, its equipment, its part counter, its
+     * sacrifice subtype. A trigger's *condition* was none of those. A brief said
+     * `abilityKinds: ["triggered"]` and the condition was then whatever the model
+     * inferred from the mechanic's prose, which is a judgment made on evidence
+     * nobody stated.
+     *
+     * That is `mtg-itf`: the flagship set's two mechanics both describe a
+     * permanent dying, so fifteen of its twenty-one triggered slots are told to
+     * print a mechanic about dying and duly do, and the six that name no mechanic
+     * follow the set's prevailing flavor. `selfEnters` was never absent from the
+     * DSL, the model's schema or the fill prompt's own condition list - it was
+     * unaskable. Naming it here is how a brief asks.
+     *
+     * Empty is the default and the state of every brief in this tree, which is
+     * what keeps the prompt bytes - and so every recorded fixture key - exactly
+     * where they were.
+     */
+    triggerConditions: z.array(MechanicTriggerConditionSchema).max(3).default([]),
+    /** Colors the mechanic lives in. Empty means "any color". */
+    colors: z.array(ColorSchema).max(5).default([]),
+  })
+  .superRefine((mechanic, context) => {
+    if (
+      mechanic.triggerConditions.includes('anotherControlledCreatureEnters') &&
+      (!mechanic.abilityKinds.includes('triggered') || !mechanic.effectKinds.includes('putCounters'))
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['triggerConditions'],
+        message: 'anotherControlledCreatureEnters is available only with triggered + putCounters',
+      });
+    }
+    for (const kind of mechanic.effectKinds) {
+      if (
+        (CAPABILITY_EFFECT_KINDS as readonly string[]).includes(kind) &&
+        !mechanic.abilityKinds.some((ability) => ability === 'triggered' || ability === 'activated')
+      ) {
+        context.addIssue({
+          code: 'custom',
+          path: ['effectKinds'],
+          message: `${kind} is available only inside a triggered or activated capability bundle`,
+        });
+      }
+    }
+  });
+
+type ParsedDesiredMechanic = z.infer<typeof DesiredMechanicSchema>;
+export type DesiredMechanic = Omit<ParsedDesiredMechanic, 'effectKinds'> & {
+  effectKinds: EffectKind[];
+  capabilityEffectKinds?: CapabilityEffectKind[];
+};
 
 /**
  * The pools a required card may ask for: the five colors, or the colorless one.
@@ -113,6 +155,15 @@ export type DesiredMechanic = z.infer<typeof DesiredMechanicSchema>;
 export const RequiredPoolSchema = z.union([ColorSchema, z.literal('colorless')]);
 
 export type RequiredPool = z.infer<typeof RequiredPoolSchema>;
+
+/**
+ * The same six pools as a list, for a surface that has to offer them.
+ *
+ * Spread from `COLORS` rather than written out, so a schema that gained a sixth
+ * color could not leave a picker offering five. `RequiredPoolSchema` stays the
+ * judge; this is only the enumeration of what it accepts.
+ */
+export const REQUIRED_POOLS = [...COLORS, 'colorless'] as const satisfies readonly RequiredPool[];
 
 /** The slot pool a stated required-card pool names: `null` is the colorless one. */
 export function slotPoolFor(pool: RequiredPool): Color | null {
@@ -149,7 +200,7 @@ const SINGLE_LINE_MESSAGE = 'must be one line: it is printed as one line of the 
  * for one, so a brief that could require a land would commission a card every
  * run fails to deliver.
  */
-const GENERATOR_CARD_KINDS = [
+export const GENERATOR_CARD_KINDS = [
   'creature',
   'instant',
   'sorcery',
@@ -200,6 +251,29 @@ export const RequiredCardSchema = z
      * so it takes the first the day it lands.
      */
     rarity: RaritySchema.optional(),
+    /**
+     * The highest tier the allocator may seat this card at, when the design
+     * intent is higher than the set can afford to spend on it.
+     *
+     * `rarity` above does two jobs that pull apart, which is `mtg-4xvs`: it is
+     * what the designer wants the card printed at, and it is the ceiling
+     * `pins.ts` relaxes down from while cards compete for the tier's seats.
+     * Because the second is a competition, raising a card's stated tier moves
+     * which OTHER cards get seats. The flagship could not say the Trisigil is
+     * its mythic without pushing Last-Blow Obliterator off the 75-card colorless
+     * pool's one uncommon artifact seat, so the file said `common` about its own
+     * marquee card and was wrong on purpose.
+     *
+     * Stating this separates them. `rarity` goes back to meaning only the design
+     * statement and is carried into the report untouched; this caps where the
+     * derivation may seat the card. Omitted means the design statement is also
+     * the ceiling, which is every card in every brief written before this field
+     * existed and is why nothing moved when it landed.
+     *
+     * It may only be stated below `rarity`. Equal is the default said out loud,
+     * and above it is not a ceiling.
+     */
+    seatCeiling: RaritySchema.optional(),
     /**
      * Reserve a slot whose cost window covers this mana value; the reservation
      * then narrows that window onto it, so the printed card costs it exactly.
@@ -370,6 +444,24 @@ export const RequiredCardSchema = z
         'a required card that supplies a named subtype must state a permanent cardKind: the token arrives from a printed ability, and only a permanent carries one',
     },
   )
+  .refine((card) => card.seatCeiling === undefined || card.rarity !== undefined, {
+    // Pointed at the field rather than at the card, so the design panel draws
+    // the refusal under the box that earned it (`mtg-9ri3`).
+    path: ['seatCeiling'],
+    message:
+      'a required card that states a seatCeiling must state the rarity it is a ceiling under: a ceiling with no design statement above it is just a rarity',
+  })
+  .refine(
+    (card) =>
+      card.seatCeiling === undefined ||
+      card.rarity === undefined ||
+      RARITIES.indexOf(card.seatCeiling) < RARITIES.indexOf(card.rarity),
+    {
+      path: ['seatCeiling'],
+      message:
+        'a required card seatCeiling must be below its rarity: equal is the default said out loud, and above it is not a ceiling',
+    },
+  )
   .refine((card) => !(card.equipment && card.sacrificeSubtype !== undefined), {
     message:
       'a required card cannot be both a weapon and a card that eats a named subtype: an equip ability prints no effect, so it has nothing to spend the sacrifice on',
@@ -495,13 +587,22 @@ export const ColorSignatureSchema = z.object({
 
 export type ColorSignature = z.infer<typeof ColorSignatureSchema>;
 
+/**
+ * Nuts & Bolts #18 caps a set's mechanic count at 3-6; the floor here is 1
+ * because a brief may state one mechanic and let the rest of the set derive.
+ * Named rather than inlined so an editor's own refusal and the schema's cannot
+ * disagree about the number.
+ */
+export const MECHANICS_MIN = 1;
+export const MECHANICS_MAX = 6;
+
 export const SetBriefSchema = z
   .object({
     setCode: z.string().regex(SET_CODE_PATTERN, 'set code must be 3-5 uppercase alphanumerics'),
     setName: z.string().min(1).max(60),
     /** Flavor and world premise, handed to the model verbatim. */
     theme: z.string().min(1).max(600),
-    mechanics: z.array(DesiredMechanicSchema).min(1).max(6),
+    mechanics: z.array(DesiredMechanicSchema).min(MECHANICS_MIN).max(MECHANICS_MAX),
     /** Free-form archetype intents, one line each, passed to the model. */
     archetypeNotes: z.array(z.string().min(1).max(200)).max(10).default([]),
     /**
@@ -609,7 +710,20 @@ export const SetBriefSchema = z
      * argued. The one after this should arrive the way this one did, with a
      * census and a named hole.
      *
-     * 124 is that one, and its hole is the first no effect census could have
+     * 125 is the one after it and it arrives differently, which is worth saying
+     * rather than dressing up. It is not a census hole: it is one card the playtester
+     * asked for by name, `Alaric, Hero of Hours`, a mono-white sibling to the
+     * two-color `Vessari, Hero of Hours` at the same rarity and the same mana
+     * value. What the set had no card of is the shape rather than the effect —
+     * `Seraphine, Sealing Light` is white's only planeswalker and she is a control
+     * card, a token a turn and a one-sided wrath, so a white deck that goes wide
+     * had a mythic to build toward and nothing that paid it off. Alaric is that
+     * payoff and nothing else: a team pump on the plus, two bodies on the minus,
+     * and a flying alpha strike at the bottom. The paragraph above asks the next
+     * raise to arrive with a census and a named hole; this one arrives with a
+     * request and a named shape, and the honest thing is to record which it was.
+     *
+     * 124 was the one before, and its hole is the first no effect census could have
      * found, because it is the absence of a *condition* rather than of an
      * effect. `TargetFilter.combat` has been in the DSL, the kernel, the oracle
      * printer and the simulator's cast policy the whole time, and across all
@@ -617,7 +731,7 @@ export const SetBriefSchema = z
      * this set answers every creature at every moment: nothing rewards holding
      * one up for the attack, nothing costs a player who taps out, and the
      * 3/3-for-three the review note asked to make playable trades against
-     * exactly the card the 6/6 does. `docs/research/interaction-levers.md` is
+     * exactly the card the 6/6 does. the original interaction-lever study is
      * the census and `mtg-85d4` carries it. Three commons close it - one exile,
      * one damage, one bounce - each priced about a mana under the unconditional
      * spell it narrows, and each pairing the combat filter with a power
@@ -635,7 +749,7 @@ export const SetBriefSchema = z
      * under the spell it narrows. The pairing is a design choice now rather
      * than a hedge.
      */
-    authoredCards: z.array(CardSchema).max(124).default([]),
+    authoredCards: z.array(CardSchema).max(125).default([]),
     /**
      * Spell roles this set states for a tier of a pool, instead of taking the
      * head of that color's common list. Empty is the ordinary case and allocates
@@ -765,9 +879,8 @@ export const SetBriefSchema = z
         // and the one above it. Exile is white's on the 2021 pie and
         // reanimation is white's and black's; a colorless card that does either
         // is a card every deck plays, which is what the pie table exists to
-        // stop. It is also what keeps `fillSchemaFor` at fourteen tiers rather
-        // than twenty-eight: a role that cannot be colorless cannot share a
-        // batch with a weapon.
+        // stop. It also prevents this colored capability from sharing a batch
+        // with a colorless weapon.
         if (stated.pool === 'colorless' && isZoneReachingRole(role)) {
           ctx.addIssue({
             code: 'custom',
@@ -826,12 +939,34 @@ export const SetBriefSchema = z
     }
   });
 
-export type SetBrief = z.infer<typeof SetBriefSchema>;
+type ParsedSetBrief = z.infer<typeof SetBriefSchema>;
+export type SetBrief = Omit<ParsedSetBrief, 'mechanics'> & {
+  mechanics: DesiredMechanic[];
+};
 export type SetBriefInput = z.input<typeof SetBriefSchema>;
 
 /** Validates a brief from any source (CLI, JSON file, test). Throws on invalid input. */
 export function parseBrief(input: unknown): SetBrief {
-  return SetBriefSchema.parse(input);
+  return normalizeParsedBrief(SetBriefSchema.parse(input));
+}
+
+/** Normalize the boundary-only capability discriminants into their typed bundle lane. */
+export function normalizeParsedBrief(parsed: ParsedSetBrief): SetBrief {
+  return {
+    ...parsed,
+    mechanics: parsed.mechanics.map((mechanic) => {
+      const capabilityEffectKinds = mechanic.effectKinds.filter((kind): kind is CapabilityEffectKind =>
+        (CAPABILITY_EFFECT_KINDS as readonly string[]).includes(kind),
+      );
+      return {
+        ...mechanic,
+        effectKinds: mechanic.effectKinds.filter(
+          (kind): kind is EffectKind => !(CAPABILITY_EFFECT_KINDS as readonly string[]).includes(kind),
+        ),
+        ...(capabilityEffectKinds.length === 0 ? {} : { capabilityEffectKinds }),
+      };
+    }),
+  };
 }
 
 /** The tertiary color-pie allowance for a brief, defaulted from set size. */

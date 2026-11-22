@@ -45,7 +45,7 @@ import {
   stateFingerprint,
   validateAction,
 } from '@mtg/kernel';
-import { creature, FOREST, instant, lands } from './cards';
+import { creature, FOREST, instant, ISLAND, lands } from './cards';
 import { apply, oidOf } from './helpers';
 
 let fixtureCounter = 0;
@@ -114,6 +114,49 @@ function tollBoard(payerLands: number, spell = tolledInstant('Toll of Ruin', DES
     }),
   );
   return { cast, targetOid, spellOid: inHand };
+}
+
+/** Mana Leak over a spell whose controller can pay with exactly `payerLands` untapped sources. */
+function manaLeakBoard(payerLands: number): {
+  readonly cast: ReduceResult;
+  readonly manaLeakOid: string;
+  readonly targetSpellOid: string;
+} {
+  const study = instant('Target Study', [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }], {
+    generic: 1,
+  });
+  const manaLeak = tolledInstant(
+    'Mana Leak',
+    [{ kind: 'counterSpell' }],
+    'targetController',
+    { generic: 3 },
+    { generic: 1, U: 1 },
+  );
+  const start = scenario({
+    battlefield: [
+      ...lands(FOREST, payerLands + 1).map((card) => ({ card, controller: 0 as const })),
+      ...lands(ISLAND, 2).map((card) => ({ card, controller: 1 as const })),
+    ],
+    hands: [[study], [manaLeak]],
+  });
+  const targetSpellOid = start.state.players[0].hand[0];
+  const manaLeakOid = start.state.players[1].hand[0];
+  if (targetSpellOid === undefined || manaLeakOid === undefined)
+    throw new Error('counter board hand is short');
+  const targetCast = apply(start, {
+    type: 'castSpell',
+    player: 0,
+    oid: targetSpellOid,
+    targets: [null],
+  });
+  const passed = apply(targetCast, { type: 'passPriority', player: 0 });
+  const counterCast = apply(passed, {
+    type: 'castSpell',
+    player: 1,
+    oid: manaLeakOid,
+    targets: [{ kind: 'spell', oid: targetSpellOid }],
+  });
+  return { cast: passUntilQuiet(counterCast), manaLeakOid, targetSpellOid };
 }
 
 /** How many of this player's lands are tapped, which is what paying a toll costs. */
@@ -234,6 +277,31 @@ describe('the payer is read off the target, not off the card', () => {
 
     const declined = apply(cast, { type: 'answerUnless', player: 1, oid: inHand, pay: false });
     expect(declined.state.players[1].life).toBe(17);
+  });
+});
+
+describe("Mana Leak reads 'its controller' from the targeted stack entry", () => {
+  it('charges that spell controller and leaves their spell on the stack when they pay {3}', () => {
+    const { cast, manaLeakOid, targetSpellOid } = manaLeakBoard(3);
+    const decision = pendingDecision(cast.state);
+    if (decision?.kind !== 'unless') throw new Error('Mana Leak asked no toll');
+    expect(decision.player).toBe(0);
+
+    const paid = apply(cast, { type: 'answerUnless', player: 0, oid: manaLeakOid, pay: true });
+    expect(paid.state.stack.map((entry) => entry.oid)).toEqual([targetSpellOid]);
+    expect(paid.state.objects[manaLeakOid]?.zone).toBe('graveyard');
+    expect(tappedLands(paid, 0)).toBe(4);
+    expect(eventsOfType(paid.events, 'spellCountered').some((event) => event.oid === targetSpellOid)).toBe(
+      false,
+    );
+  });
+
+  it('counters the targeted spell when its controller cannot pay {3}', () => {
+    const { cast, manaLeakOid, targetSpellOid } = manaLeakBoard(0);
+    expect(pendingDecision(cast.state)?.kind).toBe('priority');
+    expect(cast.state.objects[targetSpellOid]?.zone).toBe('graveyard');
+    expect(cast.state.objects[manaLeakOid]?.zone).toBe('graveyard');
+    expect(eventsOfType(cast.events, 'spellCountered').map((event) => event.oid)).toContain(targetSpellOid);
   });
 });
 
@@ -393,7 +461,7 @@ describe('a recorded game containing a toll decision replays byte for byte', () 
   /** The last option that is not the seat burning a land for nothing. */
   function lastSpendingNothing(options: readonly Action[]): number {
     for (let index = options.length - 1; index >= 0; index -= 1) {
-      if (options[index]?.type !== 'activateManaAbility') return index;
+      if (options[index]?.type !== 'activateManaAbility' && options[index]?.type !== 'concede') return index;
     }
     return options.length - 1;
   }

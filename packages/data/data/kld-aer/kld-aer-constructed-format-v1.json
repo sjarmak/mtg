@@ -1,0 +1,631 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "kld-aer",
+  "name": "Kaladesh / Aether Revolt",
+  "sources": [
+    {
+      "code": "AER",
+      "catalogFormat": "aer-printed-v1",
+      "catalogSha256": "fdfe0274608a88d828b369745fc4342feed20a9d4635e6b4a4b362954d586a3e",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/AER.json",
+        "sha256": "b1d8fbdcac71cc6f1b8e47bfb82dd7d5d70c466b4bfccd2e63e3a81010c08bae",
+        "version": "5.3.0+20260921"
+      }
+    },
+    {
+      "code": "KLD",
+      "catalogFormat": "kld-printed-v1",
+      "catalogSha256": "26a4ddefd9ebe42387b8e84f4448129f1161fdebe15fcd47fdff3b8fca3515cb",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/KLD.json",
+        "sha256": "af41d3fe1624c98d969e1350cf68cf57da998f9c0f56f9209bd282f6b4cf5164",
+        "version": "5.3.0+20260921"
+      }
+    },
+    {
+      "code": "MPS",
+      "catalogFormat": "mps-printed-v1",
+      "catalogSha256": "30478120f37b1f0bd21f9db0fcee6bf0d003dfbf6f672bb15cae2505addfbe7f",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/MPS.json",
+        "sha256": "d11e01c0cec31900891d8da89b0be8c653469d013fd52450e1b29cc82d51894f",
+        "version": "5.3.0+20260921"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-blink",
+      "name": "White-Blue Blink",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "aer-printed-v1:0139:1daaf494-70af-4a8d-836f-f6a9d6c1f080",
+          "name": "Spire Patrol",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0179:3cb12355-abd8-4bf3-aac1-f710ac162585",
+          "name": "Cloudblazer",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0020:44bdbed8-5d21-4bf5-8a32-9623b1139c85",
+          "name": "Felidar Guardian",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0013:49b6c8f3-76b7-4954-8608-023304cdec3e",
+          "name": "Fairgrounds Warden",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0006:b97b0767-4308-4e5d-bc12-6cf8d8724797",
+          "name": "Aviary Mechanic",
+          "count": 3
+        },
+        {
+          "physicalId": "aer-printed-v1:0004:80bb3abd-ebaf-4dc2-97eb-ed4a2b005177",
+          "name": "Aethergeode Miner",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0001:74f92174-f38f-4623-a5f7-f5be7f7dcc9d",
+          "name": "Acrobatic Maneuver",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0035:57300d02-faad-43b2-afa9-023d1c3a0901",
+          "name": "Wispweaver Angel",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0004:f3920f7d-8559-40f8-95be-860c16bf7700",
+          "name": "Angel of Invention",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0029:54dd4948-dc79-4fe5-b4a0-fb257058f9dd",
+          "name": "Skywhaler's Shot",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0038:26fe4768-fe18-4698-885d-86f5ad150125",
+          "name": "Aether Tradewinds",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0245:25ea04d8-5d85-49d3-8d8d-7fe123d0ed6c",
+          "name": "Aether Hub",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0253:32912b82-bbe5-4d70-817d-cd18bfdecacb",
+          "name": "Plains",
+          "count": 13
+        },
+        {
+          "physicalId": "kld-printed-v1:0256:8ca139d8-08a1-45d4-be9d-2ee5c9b3de43",
+          "name": "Island",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "id": "black-red-artifacts",
+      "name": "Black-Red Artifacts",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "aer-printed-v1:0142:51464df6-557f-47e5-838e-2a30145511f0",
+          "name": "Weldfast Engineer",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0202:425bff89-ad15-4d22-bce9-a4a07dbafd87",
+          "name": "Bomat Courier",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0234:216a8e4e-ea7b-41c7-a982-b5751025ff25",
+          "name": "Scrapheap Scrounger",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0179:af2299e0-d31f-4ec4-9497-16e494ee21e6",
+          "name": "Servo Schematic",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0128:63ffac51-62c4-4170-85b3-a43d7cfae7d7",
+          "name": "Reckless Fireweaver",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0126:6a2b2954-0734-4219-b6df-c6cc3dcd8d5a",
+          "name": "Pia Nalaar",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0145:4160bb5f-4b49-4535-94f5-776d7abd1d1a",
+          "name": "Aethersphere Harvester",
+          "count": 2
+        },
+        {
+          "physicalId": "aer-printed-v1:0066:31a69ebe-4229-4067-8414-381b123fe63c",
+          "name": "Herald of Anguish",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0190:16ad8f86-7860-4896-a161-07bf347bbd5b",
+          "name": "Unlicensed Disintegration",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0059:b5e81649-9954-424c-89d1-f87d73b66047",
+          "name": "Fatal Push",
+          "count": 3
+        },
+        {
+          "physicalId": "aer-printed-v1:0100:00365412-41db-427c-9109-8f69c17c326d",
+          "name": "Shock",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0245:25ea04d8-5d85-49d3-8d8d-7fe123d0ed6c",
+          "name": "Aether Hub",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0187:8331724d-6fab-454a-b06c-b06e499fa552",
+          "name": "Spire of Industry",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0250:275471e3-ded1-40ac-91ef-369dce5764d9",
+          "name": "Inventors' Fair",
+          "count": 1
+        },
+        {
+          "physicalId": "kld-printed-v1:0259:4760cdcc-e973-439c-a74a-5cb73b4fa22f",
+          "name": "Swamp",
+          "count": 8
+        },
+        {
+          "physicalId": "kld-printed-v1:0262:29b4a0e0-3d27-414b-80cb-352f16389a83",
+          "name": "Mountain",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "id": "red-green-power",
+      "name": "Red-Green Power",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "aer-printed-v1:0135:135912b3-978b-4a9b-8758-7b138b190232",
+          "name": "Outland Boar",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0164:c4de778a-4419-49a5-9dcf-5d0095c873fa",
+          "name": "Longtusk Cub",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0192:cb038fd3-51b7-4de7-9b38-cbad7c8717c2",
+          "name": "Voltaic Brawler",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0172:9ce9cf30-4baa-4f28-84e8-b9b1168a40e0",
+          "name": "Servant of the Conduit",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0150:4bf38096-05bc-4734-b33c-eb1e8f2986de",
+          "name": "Bristling Hydra",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0123:14050179-84af-46f6-89be-338f8e7131cc",
+          "name": "Lathnu Hellion",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0175:0130b99e-5b2f-4482-b141-752e59b72c31",
+          "name": "Verdurous Gearhulk",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0119:f9be9b5c-eed4-4a5d-962f-3482da5a6f1d",
+          "name": "Harnessed Lightning",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0149:5c026c39-b09c-408a-844f-fb5eb785862a",
+          "name": "Blossoming Defense",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0163:3d0da994-d3e7-41b9-ae8f-6f1a3b779f23",
+          "name": "Larger Than Life",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0245:25ea04d8-5d85-49d3-8d8d-7fe123d0ed6c",
+          "name": "Aether Hub",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0262:29b4a0e0-3d27-414b-80cb-352f16389a83",
+          "name": "Mountain",
+          "count": 11
+        },
+        {
+          "physicalId": "kld-printed-v1:0265:92e67efe-cc8a-4132-9019-26ddfc72a735",
+          "name": "Forest",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "id": "green-white-revolt",
+      "name": "Green-White Revolt",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "aer-printed-v1:0136:90bad312-80e3-45b0-9556-60ce06808a47",
+          "name": "Renegade Rallier",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0120:041cc6b1-61c8-4c34-86fc-d647ce306f59",
+          "name": "Narnam Renegade",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0111:1ad9bf0f-4271-497f-8d67-3c7bf09342dc",
+          "name": "Greenwheel Liberator",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0176:ac063445-d0e2-4015-96dc-97098433f30a",
+          "name": "Renegade Map",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0184:329a8738-3e17-403a-857a-0ba529ce8cd1",
+          "name": "Walking Ballista",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0134:968c7d5a-b037-4ff7-b6d2-df00adf5691b",
+          "name": "Oath of Ajani",
+          "count": 3
+        },
+        {
+          "physicalId": "aer-printed-v1:0023:5990c2f1-94d7-4d2e-b1ad-6406c25b91aa",
+          "name": "Solemn Recruit",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0253:32912b82-bbe5-4d70-817d-cd18bfdecacb",
+          "name": "Plains",
+          "count": 18
+        },
+        {
+          "physicalId": "kld-printed-v1:0265:92e67efe-cc8a-4132-9019-26ddfc72a735",
+          "name": "Forest",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "id": "white-black-revolt",
+      "name": "White-Black Revolt",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "aer-printed-v1:0132:8d2176a5-66f8-4a21-bbe2-969c82ca36bd",
+          "name": "Hidden Stockpile",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0059:b5e81649-9954-424c-89d1-f87d73b66047",
+          "name": "Fatal Push",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0234:216a8e4e-ea7b-41c7-a982-b5751025ff25",
+          "name": "Scrapheap Scrounger",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0075:6e34edfc-77fc-43b5-bad6-1c4c2a76c8c3",
+          "name": "Vengeful Rebel",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0076:c37e2466-57c3-453f-aebe-340995f2eca7",
+          "name": "Yahenni, Undying Partisan",
+          "count": 3
+        },
+        {
+          "physicalId": "aer-printed-v1:0176:ac063445-d0e2-4015-96dc-97098433f30a",
+          "name": "Renegade Map",
+          "count": 3
+        },
+        {
+          "physicalId": "aer-printed-v1:0025:7c6d47b0-4c19-4c19-9e21-54cd87a5e34d",
+          "name": "Sram's Expertise",
+          "count": 2
+        },
+        {
+          "physicalId": "aer-printed-v1:0023:5990c2f1-94d7-4d2e-b1ad-6406c25b91aa",
+          "name": "Solemn Recruit",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0248:c8769e97-aee8-4466-a9d7-0f4245ae4a97",
+          "name": "Concealed Courtyard",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0253:32912b82-bbe5-4d70-817d-cd18bfdecacb",
+          "name": "Plains",
+          "count": 16
+        },
+        {
+          "physicalId": "kld-printed-v1:0259:4760cdcc-e973-439c-a74a-5cb73b4fa22f",
+          "name": "Swamp",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "id": "black-green-counters",
+      "name": "Black-Green Counters",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "aer-printed-v1:0143:107c8aa8-c8f8-4cbf-821b-bd2cb33354f0",
+          "name": "Winding Constrictor",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0184:329a8738-3e17-403a-857a-0ba529ce8cd1",
+          "name": "Walking Ballista",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0164:c4de778a-4419-49a5-9dcf-5d0095c873fa",
+          "name": "Longtusk Cub",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0125:7cff0dc6-5455-4dea-940b-dff7fe88dc5d",
+          "name": "Rishkar, Peema Renegade",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0064:315976db-4cab-4393-8386-ce3b0ae3f490",
+          "name": "Glint-Sleeve Siphoner",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0150:4bf38096-05bc-4734-b33c-eb1e8f2986de",
+          "name": "Bristling Hydra",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0175:0130b99e-5b2f-4482-b141-752e59b72c31",
+          "name": "Verdurous Gearhulk",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0059:b5e81649-9954-424c-89d1-f87d73b66047",
+          "name": "Fatal Push",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0149:5c026c39-b09c-408a-844f-fb5eb785862a",
+          "name": "Blossoming Defense",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0077:daf7bb52-013f-4d8d-b4ea-53d1fa4bb694",
+          "name": "Die Young",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0246:90da33d4-fe9c-42fe-b326-2fe337dc3ecd",
+          "name": "Blooming Marsh",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0245:25ea04d8-5d85-49d3-8d8d-7fe123d0ed6c",
+          "name": "Aether Hub",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0259:4760cdcc-e973-439c-a74a-5cb73b4fa22f",
+          "name": "Swamp",
+          "count": 8
+        },
+        {
+          "physicalId": "kld-printed-v1:0265:92e67efe-cc8a-4132-9019-26ddfc72a735",
+          "name": "Forest",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "id": "red-white-vehicles",
+      "name": "Red-White Vehicles",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "aer-printed-v1:0137:6956a341-10fd-48af-b382-88c2b2934a3e",
+          "name": "Renegade Wheelsmith",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0032:daae3dae-3297-4750-9bca-c8aadaf815ea",
+          "name": "Toolcraft Exemplar",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0122:f737109b-15fb-4b92-9007-99a33ae68628",
+          "name": "Inventor's Apprentice",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0191:3f5be9c1-cb28-42bd-b159-5548124ba8d1",
+          "name": "Veteran Motorist",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0181:592f3a92-787e-4180-9d0b-06c973ce8975",
+          "name": "Depala, Pilot Exemplar",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0126:6a2b2954-0734-4219-b6df-c6cc3dcd8d5a",
+          "name": "Pia Nalaar",
+          "count": 2
+        },
+        {
+          "physicalId": "aer-printed-v1:0156:5e847c44-1849-4251-9075-88ed5c7792a6",
+          "name": "Heart of Kiran",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0217:5fdaca1e-5741-456e-ae98-e2c45fd1731b",
+          "name": "Fleetwheel Cruiser",
+          "count": 2
+        },
+        {
+          "physicalId": "aer-printed-v1:0145:4160bb5f-4b49-4535-94f5-776d7abd1d1a",
+          "name": "Aethersphere Harvester",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0206:b46b3726-4bc8-4e3a-bc6d-402c81663712",
+          "name": "Cultivator's Caravan",
+          "count": 1
+        },
+        {
+          "physicalId": "aer-printed-v1:0100:00365412-41db-427c-9109-8f69c17c326d",
+          "name": "Shock",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0249:160ac412-005f-48ca-a204-10207307c6c2",
+          "name": "Inspiring Vantage",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0187:8331724d-6fab-454a-b06c-b06e499fa552",
+          "name": "Spire of Industry",
+          "count": 2
+        },
+        {
+          "physicalId": "kld-printed-v1:0253:32912b82-bbe5-4d70-817d-cd18bfdecacb",
+          "name": "Plains",
+          "count": 10
+        },
+        {
+          "physicalId": "kld-printed-v1:0262:29b4a0e0-3d27-414b-80cb-352f16389a83",
+          "name": "Mountain",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "id": "green-blue-energy",
+      "name": "Green-Blue Energy",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "aer-printed-v1:0138:618652b4-7ce9-4994-9d16-68d2cc8644ef",
+          "name": "Rogue Refiner",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0148:32b0707d-241e-4ced-9251-b16af4fef2cb",
+          "name": "Attune with Aether",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0172:9ce9cf30-4baa-4f28-84e8-b9b1168a40e0",
+          "name": "Servant of the Conduit",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0164:c4de778a-4419-49a5-9dcf-5d0095c873fa",
+          "name": "Longtusk Cub",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0150:4bf38096-05bc-4734-b33c-eb1e8f2986de",
+          "name": "Bristling Hydra",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0049:19f1673d-c92c-43be-8648-af7fbc790421",
+          "name": "Glimmer of Genius",
+          "count": 4
+        },
+        {
+          "physicalId": "aer-printed-v1:0045:e34be31b-eeb4-40e5-acf7-6cd0ba6d4bcf",
+          "name": "Shielded Aether Thief",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0037:882b5580-ee23-4d65-a2b3-82475d6faf8e",
+          "name": "Aether Theorist",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0183:4554b10e-9c3e-4eb4-b0fe-044e483e872f",
+          "name": "Empyreal Voyager",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0041:6daf453f-54be-4346-831d-a0434aa086fe",
+          "name": "Confiscation Coup",
+          "count": 3
+        },
+        {
+          "physicalId": "kld-printed-v1:0245:25ea04d8-5d85-49d3-8d8d-7fe123d0ed6c",
+          "name": "Aether Hub",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0247:8744471b-a528-47d9-84d0-4526273f55e9",
+          "name": "Botanical Sanctum",
+          "count": 4
+        },
+        {
+          "physicalId": "kld-printed-v1:0256:8ca139d8-08a1-45d4-be9d-2ee5c9b3de43",
+          "name": "Island",
+          "count": 7
+        },
+        {
+          "physicalId": "kld-printed-v1:0265:92e67efe-cc8a-4132-9019-26ddfc72a735",
+          "name": "Forest",
+          "count": 8
+        }
+      ]
+    }
+  ],
+  "contentSha256": "c82e300d843064639f5b180057ad048c0620859bb3d8c8dfe2f784746b08e536"
+}

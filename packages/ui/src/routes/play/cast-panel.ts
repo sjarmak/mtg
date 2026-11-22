@@ -34,6 +34,7 @@ import { createElement, Fragment } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { ManaPips } from '../../card/ManaPips';
 import { choiceButton, choiceLabel } from './choice-button';
+import { targetKey } from './cast';
 import type { CastPick, CastPlan, CastStage, CastStep } from './cast';
 import type { PlayChoice } from './prompt';
 
@@ -107,6 +108,7 @@ function stepList(stage: CastStage): ReactElement {
 
 /** One answer on offer: what the button reads, and what pressing it records. */
 interface CastAnswer {
+  readonly key: string;
   readonly label: string;
   readonly pick: CastPick;
 }
@@ -129,7 +131,7 @@ function askBody(ask: string, answers: readonly CastAnswer[], onPick: (pick: Cas
         createElement(
           'button',
           {
-            key: answer.label,
+            key: answer.key,
             type: 'button',
             className: 'mtg-choice',
             // The first candidate takes the ring for the reason the picker's
@@ -152,6 +154,7 @@ function targetsBody(
   onPick: (pick: CastPick) => void,
 ): ReactNode {
   const answers = stage.candidates.map((candidate): CastAnswer => ({
+    key: targetKey(candidate.target),
     label: candidate.label,
     pick: { kind: 'target', slot: stage.slot, target: candidate.target },
   }));
@@ -160,6 +163,7 @@ function targetsBody(
 
 function modeBody(stage: Extract<CastStage, { kind: 'mode' }>, onPick: (pick: CastPick) => void): ReactNode {
   const answers = stage.choices.map((choice): CastAnswer => ({
+    key: `mode:${String(choice.mode)}`,
     label: choice.label,
     pick: { kind: 'mode', mode: choice.mode },
   }));

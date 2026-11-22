@@ -32,10 +32,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseCards } from '@mtg/dsl';
+import { parseCardsDocumentJson } from '@mtg/dsl';
 import type { Card } from '@mtg/dsl';
-import { SYMBOL_SETS } from '@mtg/ui';
-import type { SymbolSet } from '@mtg/ui';
+import { SYMBOL_SETS } from '@mtg/render-spec';
+import type { SymbolSet } from '@mtg/render-spec';
 import { artRegistry, DEFAULT_BLEED_MM, formatFitReport, parseArtManifest, renderSet } from '../src/index';
 import type { ArtResolver, CardTheme } from '../src/index';
 
@@ -118,16 +118,13 @@ export function parseRenderSetArgs(argv: readonly string[]): RenderSetArgs | str
   return { setPath, outDir, artPath, theme, bleedMm, symbols };
 }
 
+/** The cards a set file holds, in either spelling `@mtg/dsl` accepts, named by path. */
 function readCards(path: string): readonly Card[] {
-  const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'));
-  if (typeof parsed !== 'object' || parsed === null || !('cards' in parsed)) {
-    throw new Error(`${path}: not a set file (no "cards" array)`);
+  try {
+    return parseCardsDocumentJson(readFileSync(path, 'utf8'));
+  } catch (cause: unknown) {
+    throw new Error(`${path}: ${cause instanceof Error ? cause.message : String(cause)}`);
   }
-  const cards: unknown = (parsed as { cards: unknown }).cards;
-  if (!Array.isArray(cards)) {
-    throw new Error(`${path}: "cards" is ${typeof cards}, not an array`);
-  }
-  return parseCards(cards);
 }
 
 export function main(argv: readonly string[]): number {

@@ -25,6 +25,7 @@
  * "the name is absent" go false the moment any copy was legitimately played.
  */
 import { describe, expect, it } from 'vitest';
+import { parseCard } from '@mtg/dsl';
 import type { GameSetup, GameState, ObjectId, PlayerId } from '@mtg/kernel';
 import { humanSeat } from '@mtg/kernel';
 import type { SeatSnapshot, Table } from '@mtg/netplay';
@@ -32,6 +33,44 @@ import { createTable } from '@mtg/netplay';
 import { twoDecks } from './decks';
 
 const SETUP: GameSetup = { seed: 'netplay/hidden/v0', decks: twoDecks(), maximumTurns: 30 };
+
+const FREE_CAST_PROBE = parseCard({
+  kind: 'creature',
+  id: 'net-free-cast-probe',
+  name: 'Ironclad Golem',
+  rarity: 'common',
+  set: { code: 'NET', collectorNumber: 1 },
+  manaCost: { generic: 0 },
+  colors: [],
+  subtypes: ['Wizard'],
+  power: 1,
+  toughness: 1,
+  abilities: [
+    {
+      kind: 'triggered',
+      condition: 'selfEnters',
+      effects: [
+        {
+          kind: 'chooseFromRevealedHand',
+          target: { kind: 'targetOpponent' },
+          filter: { cardTypes: ['instant', 'sorcery'] },
+          outcome: { kind: 'mayCastWithoutPayingManaCost' },
+        },
+      ],
+    },
+  ],
+});
+
+const FREE_CAST_SPELL = parseCard({
+  kind: 'sorcery',
+  id: 'net-free-cast-spell',
+  name: 'Wild Guess',
+  rarity: 'common',
+  set: { code: 'NET', collectorNumber: 2 },
+  manaCost: { generic: 9 },
+  colors: [],
+  effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }],
+});
 
 function table(): Table {
   return createTable({
@@ -43,6 +82,53 @@ function table(): Table {
       { name: 'Two', token: 'token-two' },
     ],
   });
+}
+
+function freeCastTable(): Table {
+  return createTable({
+    id: 'free-cast-hidden-information',
+    setup: {
+      seed: 'netplay/free-cast-hidden/v0',
+      decks: [
+        { name: 'probe', cards: Array.from({ length: 40 }, () => FREE_CAST_PROBE) },
+        { name: 'spell', cards: Array.from({ length: 40 }, () => FREE_CAST_SPELL) },
+      ],
+    },
+    seats: [humanSeat('One'), humanSeat('Two')],
+    seating: [
+      { name: 'One', token: 'token-one' },
+      { name: 'Two', token: 'token-two' },
+    ],
+  });
+}
+
+function reachFreeCast(live: Table): PlayerId {
+  for (let guard = 0; guard < 20; guard += 1) {
+    const owed = live.snapshotFor(0).awaiting;
+    if (owed === null) throw new Error('the free-cast fixture ended before its choice');
+    const snapshot = live.snapshotFor(owed);
+    const decision = snapshot.pending;
+    if (decision === null) throw new Error('the owing seat received no decision');
+    if (decision.kind === 'freeCast') return owed;
+
+    let index = 0;
+    if (decision.kind === 'mulligan') {
+      index = decision.options.findIndex((option) => option.type === 'keepHand');
+    } else if (decision.kind === 'priority') {
+      index = decision.options.findIndex(
+        (option) =>
+          option.type === 'castSpell' && snapshot.state.objects[option.oid]?.card.id === FREE_CAST_PROBE.id,
+      );
+    } else if (decision.kind === 'revealedHandChoice') {
+      index = decision.options.findIndex(
+        (option) => option.type === 'chooseFromRevealedHand' && option.chosen !== null,
+      );
+    }
+    if (index < 0) throw new Error(`the fixture cannot answer ${decision.kind}`);
+    const refusal = live.apply(owed, { kind: 'choose', index, at: snapshot.decisions });
+    if (refusal !== null) throw new Error(refusal.refused);
+  }
+  throw new Error('the free-cast fixture exceeded its decision bound');
 }
 
 /**
@@ -153,6 +239,17 @@ function auditPayload(snapshot: SeatSnapshot, other: SeatSnapshot, at: string): 
 }
 
 describe('what a seat is sent', () => {
+  it('sends pending free-cast details only to the seat that owes the choice', () => {
+    const live = freeCastTable();
+    const chooser = reachFreeCast(live);
+    const other: PlayerId = chooser === 0 ? 1 : 0;
+
+    expect(live.snapshotFor(chooser).state.pendingFreeCast?.card).toEqual(FREE_CAST_SPELL);
+    expect(live.snapshotFor(chooser).pending?.kind).toBe('freeCast');
+    expect(live.snapshotFor(other).state.pendingFreeCast).toBeUndefined();
+    expect(live.snapshotFor(other).pending).toBeNull();
+  });
+
   it('never names a card that seat may not identify, at any point in a whole game', () => {
     const live = table();
     let audited = 0;
@@ -166,12 +263,9 @@ describe('what a seat is sent', () => {
       const owed = first.awaiting;
       if (owed === null) break;
       const owing = owed === 0 ? first : second;
-      const options = owing.pending?.options.length ?? 0;
-      // The last option, which is the largest declaration a subset enumeration
-      // offers: it plays lands, casts creatures and attacks with everything,
-      // so the game reaches a battlefield, a graveyard and a result rather than
-      // two players passing at each other for thirty turns.
-      const refusal = live.apply(owed, { kind: 'choose', index: options - 1, at: owing.decisions });
+      const options = owing.pending?.options ?? [];
+      const index = options.findLastIndex((option) => option.type !== 'concede');
+      const refusal = live.apply(owed, { kind: 'choose', index, at: owing.decisions });
       expect(refusal, `decision ${String(owing.decisions)} was refused`).toBeNull();
     }
     // A game played to a result, not a handful of mulligans. The bound is loose
@@ -225,7 +319,7 @@ describe('what a seat is sent', () => {
       const owing = live.snapshotFor(owed);
       live.apply(owed, {
         kind: 'choose',
-        index: (owing.pending?.options.length ?? 1) - 1,
+        index: owing.pending?.options.findLastIndex((option) => option.type !== 'concede') ?? 0,
         at: owing.decisions,
       });
     }

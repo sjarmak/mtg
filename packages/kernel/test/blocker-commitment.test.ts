@@ -97,9 +97,10 @@ function nextChoice(decision: Decision): number {
     return at;
   }
   if (decision.kind === 'declareAttackers') {
-    return decision.player === 0 ? decision.options.length - 1 : 0;
+    return decision.player === 0 ? decision.options.findLastIndex((option) => option.type !== 'concede') : 0;
   }
-  if (decision.kind !== 'priority') return decision.options.length - 1;
+  if (decision.kind !== 'priority')
+    return decision.options.findLastIndex((option) => option.type !== 'concede');
   for (const type of PREFERRED) {
     const found = decision.options.findIndex((option: Action) => option.type === type);
     if (found >= 0) return found;
@@ -297,7 +298,11 @@ function reachedStepwiseBlock(): StepwiseBlock {
       for (let inner = 0; inner < 60; inner += 1) {
         const asking = current.pending;
         if (asking === null || asking.kind !== 'declareBlockers') break;
-        current = choose(current, asking.options.length > 1 ? 1 : 0);
+        const index = asking.options.findIndex(
+          (option) => option.type === 'declareBlockers' && option.blocks.length > 0,
+        );
+        if (index < 0) throw new Error('the stepwise declaration offered no blocking choice');
+        current = choose(current, index);
         if (interior === null && current.pending?.kind === 'declareBlockers') interior = current;
       }
       if (interior === null) throw new Error('the stepwise declaration had no interior');

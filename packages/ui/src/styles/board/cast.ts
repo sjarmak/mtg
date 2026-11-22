@@ -44,11 +44,13 @@
  * tie should win, and being later is what makes that true without inflating a
  * selector.
  */
+import { MICRO_LABEL } from '../number';
+
 export const CAST_CSS = `
 .mtg-cast__steps {
   display: flex; gap: var(--mtg-space-2); margin: 0; padding: 0; list-style: none;
-  font-size: var(--mtg-text-xs); text-transform: uppercase; letter-spacing: 0.06em;
-  font-weight: 600; color: var(--mtg-ink-faint);
+  ${MICRO_LABEL}
+  color: var(--mtg-ink-faint);
 }
 .mtg-cast__step[aria-current='step'] {
   color: var(--mtg-accent);

@@ -52,6 +52,8 @@ export interface HandProps {
    * the flow entirely (`../styles/board/zone.ts`).
    */
   readonly pickerFor?: (key: string, name: string) => ReactNode;
+  /** The objects the reader is pointing at; see `Battlefield`'s prop of this name. */
+  readonly pointed?: ReadonlySet<string>;
 }
 
 function faceDown(index: number): ReactElement {
@@ -108,6 +110,7 @@ function revealed(props: HandProps, entry: HandCard): ReactElement {
     // two Mountains draws two identical faces, and without this the only handle
     // on either of them is a name they share.
     permanentKey: entry.key,
+    ...(props.pointed?.has(entry.key) === true ? { pointed: true } : {}),
     ...(picker === null ? {} : { picker }),
     ...(onSelect === undefined
       ? {}
@@ -147,6 +150,10 @@ export function Hand(props: HandProps): ReactElement {
     label: props.label,
     items,
     count: props.cards.length + hidden,
+    // Normally the face itself is the row's label. Constrained layouts expose
+    // the zone head and this note so the deliberately small cards are stated
+    // as thumbnails rather than presented as failed full-size faces.
+    note: 'thumbnails',
     tone: 'rail',
     // One row that runs off the edge rather than a grid that reflows: a hand
     // that breaks onto a second row stops reading as a hand. On the played table

@@ -1,0 +1,246 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "xln",
+  "name": "Ixalan",
+  "sources": [
+    {
+      "code": "XLN",
+      "catalogFormat": "xln-printed-v1",
+      "catalogSha256": "6db0ad8e7743508c0d49d4e7365c55ea106f9bbc1e85425ad5c5ad25453605dc",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/XLN.json",
+        "sha256": "a05432ba5637e48c7a959eed1a43db3d8a178c782dcac3055f8826c550122181",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "merfolk",
+      "name": "Merfolk",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "xln-printed-v1:0196:52e96ddf-ac9e-4cc5-8c9a-afee421d99a6",
+          "name": "Kumena's Speaker",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0197:2c6f0d4a-4827-47b6-8af6-803949c195f8",
+          "name": "Merfolk Branchwalker",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0070:2be32ffc-dc1d-4bb2-926f-51d110392b06",
+          "name": "River Sneak",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0214:c4a27502-f6f4-4c12-af0e-eab00d942ada",
+          "name": "Vineshaper Mystic",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0228:7aa682fb-f5b6-41c1-9428-6043b0b76744",
+          "name": "Shapers of Nature",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0059:168cbca9-0124-478b-8dd7-0bd9dc711c6d",
+          "name": "Herald of Secret Streams",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0061:34561f87-09d9-4f23-8a05-907fe1303e70",
+          "name": "Kopala, Warden of Waves",
+          "count": 2
+        },
+        {
+          "physicalId": "xln-printed-v1:0204:e355a98d-093d-4ab2-84f2-f560d08f1fca",
+          "name": "River Heralds' Boon",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0075:02955471-5ffc-4c7b-83fe-a69816415ca1",
+          "name": "Shaper Apprentice",
+          "count": 2
+        },
+        {
+          "physicalId": "xln-printed-v1:0258:ff765732-6fe3-4594-bff5-6ce47a79f45a",
+          "name": "Unclaimed Territory",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0284:740bb19c-0c91-4fc1-9b3c-be84425a3523",
+          "name": "Woodland Stream",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0264:40c840af-9a13-4716-8458-09071239cc26",
+          "name": "Island",
+          "count": 11
+        },
+        {
+          "physicalId": "xln-printed-v1:0276:7eef5e5c-27be-45f2-a9c8-4e0a65c984d4",
+          "name": "Forest",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "id": "vampires",
+      "name": "Vampires",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "xln-printed-v1:0219:f7226de1-0e05-4baf-8c2f-54297fee43c1",
+          "name": "Call to the Feast",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0001:21c950d7-b4f6-4902-8c9a-98f2933f9fa5",
+          "name": "Adanto Vanguard",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0124:1f4b41d7-30fa-43ab-8f8d-c1de68a19add",
+          "name": "Skymarch Bloodletter",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0024:f7294e40-11b3-4d5c-82d0-c8ec6bd3a6c9",
+          "name": "Mavren Fein, Dusk Apostle",
+          "count": 3
+        },
+        {
+          "physicalId": "xln-printed-v1:0120:72150779-0bb6-4d20-a898-cda93a66e7cd",
+          "name": "Sanctum Seeker",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0091:373131be-bd66-49f5-80fa-836ced03fedf",
+          "name": "Bishop of the Bloodstained",
+          "count": 3
+        },
+        {
+          "physicalId": "xln-printed-v1:0129:bd7550dd-dfc5-43cd-a117-1244ee3086a8",
+          "name": "Vraska's Contempt",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0251:60b7a85f-3a30-4ece-9bbb-61f3c4b796b8",
+          "name": "Vanquisher's Banner",
+          "count": 2
+        },
+        {
+          "physicalId": "xln-printed-v1:0231:c1fd4101-d531-43aa-9cb6-79e36a8121d8",
+          "name": "Vona, Butcher of Magan",
+          "count": 2
+        },
+        {
+          "physicalId": "xln-printed-v1:0009:baa524bb-0ce7-4c30-93c3-ae15c3b05e92",
+          "name": "Duskborne Skymarcher",
+          "count": 2
+        },
+        {
+          "physicalId": "xln-printed-v1:0022:05e2a5e6-3aaa-4096-bdd0-fcc1afe5a36c",
+          "name": "Legion's Landing",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0258:ff765732-6fe3-4594-bff5-6ce47a79f45a",
+          "name": "Unclaimed Territory",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0260:51ff6ee0-01f4-432f-916b-ed771904d64c",
+          "name": "Plains",
+          "count": 8
+        },
+        {
+          "physicalId": "xln-printed-v1:0268:db69a637-5770-4eea-9b04-c00e6f90a12a",
+          "name": "Swamp",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "dinosaurs",
+      "name": "Dinosaurs",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "xln-printed-v1:0226:15a79137-9589-4c24-9bea-31041fd3c9ae",
+          "name": "Raging Swordtooth",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0187:51fdf2fc-d948-4c64-a34e-2f90eab83212",
+          "name": "Drover of the Mighty",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0153:c334e6f3-1378-4429-b4f1-fa8ed7ab7123",
+          "name": "Otepec Huntmaster",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0201:9e91efc6-0e6a-4a9e-a486-adf53e53d3f1",
+          "name": "Ranging Raptors",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0203:7c5368c6-87e0-4f83-aaf7-f4af96d2bf30",
+          "name": "Ripjaw Raptor",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0205:cb862587-8821-43c7-ad08-2b7d2b82cc71",
+          "name": "Savage Stomp",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0181:de4b9a07-6631-477a-8c77-3b04f211439d",
+          "name": "Commune with Dinosaurs",
+          "count": 3
+        },
+        {
+          "physicalId": "xln-printed-v1:0227:d6a322c5-aa4c-4a99-a3ca-48c1353104f0",
+          "name": "Regisaur Alpha",
+          "count": 3
+        },
+        {
+          "physicalId": "xln-printed-v1:0179:3bd78731-949c-464a-826a-92f86d784911",
+          "name": "Carnage Tyrant",
+          "count": 2
+        },
+        {
+          "physicalId": "xln-printed-v1:0256:b6f59e19-9ac1-4f86-893e-5b3364122fc6",
+          "name": "Rootbound Crag",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0258:ff765732-6fe3-4594-bff5-6ce47a79f45a",
+          "name": "Unclaimed Territory",
+          "count": 4
+        },
+        {
+          "physicalId": "xln-printed-v1:0272:15c96b83-d0b3-4da9-bb2d-249cc18b55e9",
+          "name": "Mountain",
+          "count": 8
+        },
+        {
+          "physicalId": "xln-printed-v1:0276:7eef5e5c-27be-45f2-a9c8-4e0a65c984d4",
+          "name": "Forest",
+          "count": 12
+        }
+      ]
+    }
+  ],
+  "contentSha256": "cad37252570300a23397b280300b4145ed7245e41a426bc9b355167aa0880033"
+}

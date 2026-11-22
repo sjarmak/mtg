@@ -18,7 +18,6 @@
  */
 import { createElement } from 'react';
 import type { ReactElement } from 'react';
-import type { Action } from '@mtg/kernel';
 import { askFitAttributes } from '../../styles/ask-fit';
 import type { ChoiceText, PlayChoice } from './prompt';
 
@@ -92,7 +91,7 @@ export function unfoldedName(choice: ChoiceText): string {
 export interface SubmitButton {
   /** React's key, and the only thing here that is not drawn. */
   readonly key: string;
-  readonly kind: Action['type'];
+  readonly kind: PlayChoice['kind'];
   readonly text: string;
   readonly detail: string | null;
   /** The whole sentence, put on `aria-label` when the visible text is folded. */

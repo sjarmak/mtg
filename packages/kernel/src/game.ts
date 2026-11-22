@@ -6,6 +6,8 @@
  * harness) can replace it without touching the engine.
  */
 import type { PlayerAgent } from './agent';
+import { settleAgentAction } from './agent-preview';
+import { agentView } from './agent-view';
 import type { GameEvent } from './events';
 import { pendingDecision } from './legal';
 import { reduce } from './reduce';
@@ -45,7 +47,11 @@ export function playOut(
       throw new Error(`playOut: exceeded ${limit} decisions without finishing the game`);
     }
     const agent = agents[decision.player];
-    const action = agent.decide({ state: current, player: decision.player, decision });
+    const action = agent.decide(
+      agentView(current, decision.player, decision, `play-out:${String(decisions)}`, (candidate) =>
+        settleAgentAction(current, candidate),
+      ),
+    );
     if (action.player !== decision.player) {
       throw new Error(
         `agent ${agent.name} answered for player ${action.player} but player ${decision.player} was asked`,

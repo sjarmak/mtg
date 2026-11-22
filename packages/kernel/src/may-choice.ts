@@ -17,7 +17,7 @@ import type { Card, MayChooser } from '@mtg/dsl';
 import type { PlayerId } from './ids';
 import { opponentOf } from './ids';
 import type { GameState, StackEntry } from './state';
-import { tryObject } from './zones';
+import { spellCard } from './stack-spell';
 
 /** A "you may" spell on top of the stack, and who its question is addressed to. */
 export interface SpellOnStack {
@@ -58,7 +58,7 @@ export function mayChooser(may: MayChooser, controller: PlayerId): PlayerId {
 export function spellAwaitingMay(state: GameState): SpellOnStack | null {
   const entry = state.stack[state.stack.length - 1];
   if (entry === undefined || entry.ability !== null) return null;
-  const card = entry.copiedSpell?.card ?? tryObject(state, entry.oid)?.card;
-  if (card === undefined || card.may === undefined) return null;
+  const card = spellCard(state, entry);
+  if (card === null || card.may === undefined) return null;
   return { entry, card, chooser: mayChooser(card.may, entry.controller) };
 }

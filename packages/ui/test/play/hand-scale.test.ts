@@ -62,7 +62,7 @@ import { PlayRoute } from '../../src/routes/PlayRoute';
 import { PlayView } from '../../src/routes/play/PlayView';
 import { dealMirrorGame } from '../../src/routes/play/deal';
 import { uiStyleSheet } from '../../src/styles/index';
-import { SHORT_VIEWPORT_QUERY, TABLE } from '../../src/styles/board/geometry';
+import { playedSlot, SHORT_VIEWPORT_QUERY, TABLE } from '../../src/styles/board/geometry';
 
 afterEach(cleanup);
 
@@ -77,14 +77,35 @@ const SHEET = uiStyleSheet();
  * reads a rule in here as an unconditional one and cannot tell the difference.
  * So the rules in here are found by where they are rather than by what they say.
  */
-const SHORT_VIEWPORT_AT = SHEET.indexOf(`@media ${SHORT_VIEWPORT_QUERY} {`);
-const SHORT_VIEWPORT_END = SHORT_VIEWPORT_AT < 0 ? -1 : SHEET.indexOf('\n}', SHORT_VIEWPORT_AT);
-const SHORT_VIEWPORT = SHORT_VIEWPORT_AT < 0 ? '' : SHEET.slice(SHORT_VIEWPORT_AT, SHORT_VIEWPORT_END);
+/**
+ * Every span of the sheet that tier covers, in order.
+ *
+ * Plural, and that is the whole of the fix it replaces a singular with: the
+ * tier is written wherever the rule it qualifies lives, so `../../src/styles/mobile.ts`
+ * opens one block and `../../src/styles/views.ts` opens another for the Cards bar. A
+ * reader that took the first `indexOf` found whichever file the sheet joined
+ * first, and every rule in the other block read as unconditional — which is
+ * exactly the misreading the paragraph above says this exists to prevent, and
+ * it failed this test on a rule that had not moved.
+ */
+const SHORT_VIEWPORT_SPANS: readonly (readonly [number, number])[] = (() => {
+  const spans: [number, number][] = [];
+  const opener = `@media ${SHORT_VIEWPORT_QUERY} {`;
+  for (let at = SHEET.indexOf(opener); at >= 0; at = SHEET.indexOf(opener, at + 1)) {
+    const end = SHEET.indexOf('\n}', at);
+    if (end < 0) continue;
+    spans.push([at, end]);
+  }
+  return spans;
+})();
+
+/** The declarations of that tier, wherever they were written. */
+const SHORT_VIEWPORT = SHORT_VIEWPORT_SPANS.map(([at, end]) => SHEET.slice(at, end)).join('\n');
 
 /** Whether a match landed inside that tier. */
 function inShortViewport(at: number | undefined): boolean {
-  if (at === undefined || SHORT_VIEWPORT_AT < 0) return false;
-  return at > SHORT_VIEWPORT_AT && at < SHORT_VIEWPORT_END;
+  if (at === undefined) return false;
+  return SHORT_VIEWPORT_SPANS.some(([start, end]) => at > start && at < end);
 }
 
 /** Every declaration block the sheet writes for a selector, joined. */
@@ -119,7 +140,7 @@ interface WindowLike {
 
 /**
  * The window, reached structurally rather than through global types, because the
- * workspace tsconfig has no `lib: dom`. `./fit.ts` declares its own shape for
+ * workspace tsconfig has no `lib: dom`. `../../src/styles/board/fit.ts` declares its own shape for
  * the same reason; this one needs less of it.
  */
 function windowLike(): WindowLike {
@@ -240,7 +261,7 @@ describe('the hand is sized from its row rather than from a share of the column'
    * The gap token is asserted rather than assumed because naming the wrong one
    * is most of `mtg-d6s`. `../../src/styles/board/fit.ts` sets
    * `gap: var(--mtg-space-1)` on a play-route *zone*, where it sits between the
-   * head and the body; the gap between two cards is `./zone.ts`'s
+   * head and the body; the gap between two cards is `../../src/styles/board/zone.ts`'s
    * `.mtg-zone__body`, which nothing on this route overrides, and it is a step
    * wider. Every cap here subtracted the smaller one and came out 3.4px looser
    * than it asked for — 5% at 1024x768.
@@ -300,10 +321,10 @@ describe('the hand is sized from its row rather than from a share of the column'
       Number(boardBasisCap),
       'shrinking the hand also shrinks the battlefield width basis',
     ).toBeGreaterThan(Number(cap));
-    const crowdedHandCap = /:has\([^}]*nth-child\(8\)[^{]*\{\s*--hand-face-cap:\s*([\d.]+)rem/.exec(
-      SHEET,
-    )?.[1];
-    const crowdedBoardCap = /nth-child\(8\)[^{]*\{\s*--board-face-max:\s*([\d.]+)rem/.exec(SHEET)?.[1];
+    const crowdedHandCap =
+      /\[data-crowded='true'\]\):not\([^{]+\)\s*\{\s*--hand-face-cap:\s*([\d.]+)rem/.exec(SHEET)?.[1];
+    const crowdedBoardCap =
+      /\.mtg-board__spells\[data-crowded='true'\]\s*\{\s*--board-face-max:\s*([\d.]+)rem/.exec(SHEET)?.[1];
     expect(
       Number(crowdedBoardCap),
       'a crowded battlefield shrinks below the hand it must visually outrank',
@@ -313,7 +334,7 @@ describe('the hand is sized from its row rather than from a share of the column'
   /**
    * The gap the caps subtract is the one the row actually spends. Read off the
    * element rather than off the sheet, because the row's gap arrives from
-   * `../../src/styles/board/zone.ts` and the cap is written in `./hand.ts`, so a
+   * `../../src/styles/board/zone.ts` and the cap is written in `../../src/styles/board/hand.ts`, so a
    * comparison of two strings in one file would prove they agree with each other
    * rather than with the layout. jsdom resolves neither the percentage nor the
    * ratio, and it does resolve a token to its declared length, which is exactly
@@ -419,10 +440,10 @@ describe('the battlefield grows with the viewport to its own readable ceiling', 
    * board.
    */
   it('caps the board slot on the width and takes its height from the trim', () => {
-    const slot = declarations(`${PLAY_SCOPE} .mtg-board__spells > .mtg-slot:not([data-empty='true'])`);
+    const slot = declarations(`${playedSlot(`${PLAY_SCOPE} .mtg-board__spells`)}:not([data-empty='true'])`);
     expect(slot, 'the board slot states no width').toContain('width: var(--board-face)');
     expect(slot, 'a stated height would be a second opinion about the trim').toContain('height: auto');
-    // The same pair `./slot.ts` and `../card.ts` both record: a box with a
+    // The same pair `../../src/styles/board/slot.ts` and `../../src/styles/card.ts` both record: a box with a
     // preferred aspect ratio takes its content as its automatic minimum size,
     // and a minimum beats a maximum, so `fit.ts`'s height floor has to go back
     // to zero explicitly or a crowded row draws faces taller than the trim.
@@ -461,7 +482,7 @@ describe('the battlefield grows with the viewport to its own readable ceiling', 
    */
   it('reads the face back off the slot it was capped into, at the start edge', () => {
     const face = declarations(
-      `${PLAY_SCOPE} .mtg-board__spells > .mtg-slot:not([data-empty='true']):not([data-tapped='true']) > .mtg-card`,
+      `${playedSlot(`${PLAY_SCOPE} .mtg-board__spells`)}:not([data-empty='true']):not([data-tapped='true']) > .mtg-card`,
     );
     expect(face, 'the face states a width of its own').toContain('width: auto');
     expect(face, 'the face does not take the height the slot was capped to').toContain('height: 100%');
@@ -492,7 +513,7 @@ describe('the battlefield grows with the viewport to its own readable ceiling', 
    * seated declaration of either would be one seat drawing a different card.
    */
   it('sizes both seats from one cap', () => {
-    const slot = declarations(`${PLAY_SCOPE} .mtg-board__spells > .mtg-slot:not([data-empty='true'])`);
+    const slot = declarations(`${playedSlot(`${PLAY_SCOPE} .mtg-board__spells`)}:not([data-empty='true'])`);
     expect(slot, 'the sizing rule names a seat').not.toContain('data-seat');
     const seated = [...SHEET.matchAll(/\n([^\n{]*)\{[^}]*--hand-slot:/g)].map((m) => m[1] ?? '');
     expect(seated, 'the shared basis should be declared once').toHaveLength(1);
@@ -533,26 +554,34 @@ describe('the battlefield grows with the viewport to its own readable ceiling', 
    * A seventh of the row is a proxy and it was wrong by most of a card.
    * Measured over `../../tools/hand-scale.ts` in chrome-headless-shell 151
    * against the flagship set, at 1024x768 the face was 72px at four, eight and
-   * twelve permanents a side, whose 56px content box is under `../card.ts`'s
-   * `BOARD_RULES_MIN_REM`, so no permanent on that table drew rules text at any
-   * board size - inside a row 170.4px tall holding a 100.6px slot. After: 97.7px
+   * twelve permanents a side, whose 56px content box is under `../../src/styles/card.ts`'s
+   * `BOARD_RULES_PANEL_MAX_REM`, so no permanent on that table drew rules text at
+   * any board size - the threshold hid the box outright until `mtg-8kc` made it a
+   * panel - inside a row 170.4px tall holding a 100.6px slot. After: 97.7px
    * at four a side and 84px at eight and twelve, and every face on the table
    * draws its rules box.
+   *
+   * The constrained-table contract now keeps the measured name-legibility
+   * floor absolute. When the row cannot hold another exact place at that floor,
+   * it wraps instead of shrinking or hiding it.
    *
    * jsdom resolves no container query, so what is asserted is the shape and its
    * scope. `test/play/table-allocation.browser.test.ts` measures the boxes.
    */
   it('bounds the face by the row it is in, off combat', () => {
     const bounded = declarations(
-      `${PLAY_SCOPE} .mtg-board:not(:has(.mtg-board__divider[data-combat='true'])) .mtg-board__spells > .mtg-slot:not([data-empty='true'])`,
+      `${playedSlot(`${PLAY_SCOPE} .mtg-board:not(:has(.mtg-board__divider[data-combat='true'])) .mtg-board__spells`)}:not([data-empty='true'])`,
     );
+    const room = /--board-room:\s*([^;]*);/.exec(bounded)?.[1]?.replace(/\s+/g, ' ').trim();
+    const share = /^calc\(([\d.]+)cqh[^)]*\)$/.exec(room ?? '');
+    expect(share, `the row's room is not a share of its own height: ${String(room)}`).not.toBeNull();
     const face = /--board-face:\s*([^;]*);/.exec(bounded)?.[1]?.replace(/\s+/g, ' ').trim();
     expect(face, 'no rule bounds the face by the row').toBeDefined();
-    // min() outside max(), in that order: a face may grow past a seventh of the
-    // row to a complete one and may never grow past what the row can hold. The
-    // other order leaves a slot stated taller than its row, and a row clips.
+    // An absolute legibility floor surrounds the conjunction of the row's
+    // width, height, complete-face preference, and readable ceiling. Crowded
+    // rows wrap when that floor is the limiting term.
     const shape =
-      /^clamp\( ?[\d.]+rem, ?min\( ?calc\(([\d.]+)cqh[^)]*\), ?max\(var\(--hand-slot\), ?([\d.]+)rem\) ?\), ?var\(--board-face-max\) ?\)$/.exec(
+      /^max\( ?([\d.]+)rem, ?min\( ?var\(--board-one-row-fit\), ?var\(--board-room\), ?max\(var\(--hand-slot\), ?([\d.]+)rem\), ?var\(--board-face-max\) ?\) ?\)$/.exec(
         face ?? '',
       );
     expect(shape, `the bounded face is not a min of the row's height: ${String(face)}`).not.toBeNull();
@@ -578,12 +607,15 @@ describe('the battlefield grows with the viewport to its own readable ceiling', 
     // because the bounded version of it beside this one reads the row's height
     // in cqh and a container cannot query itself. The ceiling stays on the row,
     // where the crowded overrides that set it are.
-    const slotRule = declarations(`${PLAY_SCOPE} .mtg-board__spells > .mtg-slot:not([data-empty='true'])`);
+    const slotRule = declarations(
+      `${playedSlot(`${PLAY_SCOPE} .mtg-board__spells`)}:not([data-empty='true'])`,
+    );
     const face = /--board-face:\s*([^;]*);/.exec(slotRule)?.[1]?.replace(/\s+/g, ' ').trim();
     expect(face, 'the battlefield slot states no face width').toBeDefined();
-    const bounded = /^clamp\(\s*([\d.]+)rem,\s*var\(--hand-slot\),\s*var\(--board-face-max\)\s*\)$/.exec(
-      face ?? '',
-    );
+    const bounded =
+      /^max\(\s*([\d.]+)rem,\s*min\(var\(--board-one-row-fit\),\s*var\(--hand-slot\),\s*var\(--board-face-max\)\)\s*\)$/.exec(
+        face ?? '',
+      );
     expect(bounded, `the face width is not an independently bounded curve: ${String(face)}`).not.toBeNull();
     // The floor stays above the measured name-clipping boundary.
     expect(
@@ -596,7 +628,8 @@ describe('the battlefield grows with the viewport to its own readable ceiling', 
       Number(boardCap),
       'the board ceiling is too small to become readable on a wide display',
     ).toBeGreaterThan(8);
-    const crowdedCap = /nth-child\(8\)[^{]*\{\s*--board-face-max:\s*([\d.]+)rem/.exec(SHEET)?.[1];
+    const crowdedCap =
+      /\.mtg-board__spells\[data-crowded='true'\]\s*\{\s*--board-face-max:\s*([\d.]+)rem/.exec(SHEET)?.[1];
     expect(Number(crowdedCap), 'a crowded row has no readable height-safe ceiling').toBeGreaterThanOrEqual(
       Number(bounded?.[1]),
     );
@@ -631,7 +664,7 @@ describe('the battlefield grows with the viewport to its own readable ceiling', 
    *
    * **And a second time, by a viewport that says where (`mtg-l4w0`).** A phone
    * held in landscape is in the combat condition for the whole game rather than
-   * for one step: `./fit.ts`'s equal share of the *free* space needs there to be
+   * for one step: `../../src/styles/board/fit.ts`'s equal share of the *free* space needs there to be
    * free space, and at 844x390 there is none, so the split is a deficit divided
    * against two unequal content bases and the near band's whole shrink lands on
    * its battlefield again. Measured before the tilt: 59.6px yours against 104.8

@@ -39,12 +39,14 @@ import { canonicalJson } from '@mtg/dsl';
 import { describe, expect, it } from 'vitest';
 
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+const GIT_OUTPUT_BUFFER_BYTES = 16 * 1024 * 1024;
 
 /** Every tracked `.json` path, relative to the repository root. */
 function trackedJson(): readonly string[] {
   const listed = execFileSync('git', ['ls-files', '--', '*.json'], {
     cwd: ROOT,
     encoding: 'utf8',
+    maxBuffer: GIT_OUTPUT_BUFFER_BYTES,
   });
   return listed.split('\n').filter((entry) => entry.length > 0);
 }

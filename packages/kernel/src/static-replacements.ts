@@ -8,14 +8,14 @@
  * over. A `StaticModification` used to compile one-to-one to a
  * `ContinuousEffect` (`effectForModification`, `abilities.ts`) and the layer
  * walk was its only consumer, so the union carried exactly the three
- * modifications CR 613 knows how to apply. A doubler is not one of those: CR
- * 614 rewrites an event *before* it happens and never asks what an object is,
- * and there is no layer for it to sit in. So the two replacement members of
- * `STATIC_MODIFICATION_KINDS` compile here instead, into the array the kernel
- * already has for exactly this (`GameState.replacements`), through the same
- * two choke points the other two seams use — `completeArrival` (`zones.ts`)
- * registers, `moveObject` (`zones.ts`) expires — because a printed static
- * exists exactly while its source is on the battlefield (CR 604.3).
+ * modifications CR 613 knows how to apply. A replacement is not one of those:
+ * CR 614 rewrites an event *before* it happens and never asks what an object is,
+ * and there is no layer for it to sit in. So the replacement members of
+ * `STATIC_MODIFICATION_KINDS` compile here instead. Battlefield replacements
+ * register in `GameState.replacements` through `completeArrival`
+ * (`zones.ts`) and expire through `moveObject`; Obstinate Baloth's third member
+ * functions in hand and is compiled only for the proposed discard, then passed
+ * as an ephemeral `additionalEffect` to the same pipeline.
  *
  * ## What was already here
  *
@@ -28,7 +28,8 @@
  * ability, `destruction.ts`), an intrinsic tapped land (`zones.ts`, filtered
  * straight back out) and an ephemeral protection shield that is passed as
  * `additionalEffects` and never persisted (`damage.ts`). This file is that
- * missing arrow, and it is the whole of what the doublers needed.
+ * missing arrow. The hand compiler below is the parallel arrow for a printed
+ * static whose explicit zone is not the battlefield.
  *
  * ## Controller is baked at registration
  *
@@ -41,13 +42,25 @@
  * nothing in a generated set can reach it.
  */
 import type { Ability, Card } from '@mtg/dsl';
-import { assertNever, isCombatStaticModification, isLayeredStaticModification } from '@mtg/dsl';
+import {
+  assertNever,
+  isCombatStaticModification,
+  isDamagePreventionStaticModification,
+  isLayeredStaticModification,
+} from '@mtg/dsl';
 import type { ReplacementStaticModification } from '@mtg/dsl';
 import { staticReplacementId } from './ids';
 import type { ObjectId, PlayerId } from './ids';
 import { controllerOf } from './layers';
 import type { ReplacementEffect } from './replacement-effects';
+import { copiableCardOf } from './state';
 import type { GameState } from './state';
+
+type BattlefieldReplacementStaticModification = Exclude<
+  ReplacementStaticModification,
+  | { readonly kind: 'discardedByOpponentEntersBattlefield' }
+  | { readonly kind: 'damageCannotReduceControllerLifeBelow' }
+>;
 
 export interface StaticReplacementRegistration {
   readonly replacements: readonly ReplacementEffect[];
@@ -58,12 +71,11 @@ export interface StaticReplacementRegistration {
 /**
  * One replacement modification as the effect it registers.
  *
- * `selfReplacement` is `false` for both. CR 614.15 is about an effect that
- * modifies an event its own source is part of — a permanent entering *as*
- * something, a spell that "enters with" — and neither doubler is: Furnace of
- * Rath rewrites damage between two other objects entirely. Claiming it would
- * make these jump the CR 616.1 queue ahead of a prevention shield, which is
- * the ordering the affected player is supposed to choose.
+ * `selfReplacement` is `false` for every member here. CR 614.15 self-
+ * replacements are resolving effects that replace part of their own spell or
+ * ability. These are continuous effects from static abilities, including the
+ * source-bound prevention shield, so the affected player chooses their order
+ * under CR 616.1.
  *
  * `duration` is `whileOnBattlefield`, which is what makes
  * `staticReplacementsRegisteredBy` able to find these again on the way out
@@ -71,11 +83,12 @@ export interface StaticReplacementRegistration {
  * does.
  */
 function replacementFor(
-  modification: ReplacementStaticModification,
+  modification: BattlefieldReplacementStaticModification,
   id: string,
   source: ObjectId,
   controller: PlayerId,
   timestamp: number,
+  sourceBattlefieldIncarnation: number,
 ): ReplacementEffect {
   const common = {
     id,
@@ -87,15 +100,27 @@ function replacementFor(
   } as const;
   switch (modification.kind) {
     case 'doubleDamage':
-      // Furnace of Rath: every field of the trigger is the "any" null, because
-      // the printed card filters nothing — any source, any recipient, combat
-      // or not. `ReplacementTrigger.fromSource` is one `ObjectId`, so the
-      // narrower printings that read "a red instant or sorcery spell you
-      // control" (Fire Servant) or "a creature you control" (Gratuitous
-      // Violence) are not expressible here and are not offered by the DSL.
+      // Furnace of Rath leaves `fromSpellSource` null. Fire Servant compiles
+      // its typed spell filter into the same trigger; matching reads this
+      // replacement's source controller live after any layer-2 control change.
       return {
         ...common,
-        trigger: { kind: 'damage', toPlayer: null, toPermanent: null, fromSource: null, combatOnly: false },
+        trigger: {
+          kind: 'damage',
+          toPlayer: null,
+          toPermanent: null,
+          toController: null,
+          toPermanentCardType: null,
+          fromSource: null,
+          fromSpellSource:
+            modification.sourceFilter === undefined
+              ? null
+              : {
+                  cardTypes: modification.sourceFilter.cardTypes,
+                  colors: modification.sourceFilter.colors,
+                },
+          combatOnly: false,
+        },
         modification: { kind: 'multiplyDamage', factor: 2 },
       };
     case 'doubleLifeGain':
@@ -106,6 +131,38 @@ function replacementFor(
         ...common,
         trigger: { kind: 'lifeGain', player: controller },
         modification: { kind: 'multiplyLifeGain', factor: 2 },
+      };
+    case 'doublePlusOnePlusOneCountersOnCreaturesYouControl':
+      return {
+        ...common,
+        trigger: {
+          kind: 'counterPlacement',
+          controller,
+          counter: 'plusOnePlusOne',
+          creatureOnly: true,
+        },
+        modification: { kind: 'multiplyCounterPlacement', factor: 2 },
+      };
+    case 'preventDamageToSelfAndRemoveCounters':
+      return {
+        ...common,
+        trigger: {
+          kind: 'damage',
+          toPlayer: null,
+          toPermanent: source,
+          toController: null,
+          toPermanentCardType: null,
+          fromSource: null,
+          fromSpellSource: null,
+          combatOnly: false,
+        },
+        modification: { kind: 'preventDamage', amount: 'all' },
+        damageReplacementFollowUp: {
+          kind: 'removeCounters',
+          counter: modification.counter,
+          sourceBattlefieldIncarnation,
+          amountFrom: 'damageEvent',
+        },
       };
     default:
       return assertNever(modification, 'replacementFor');
@@ -121,8 +178,9 @@ function replacementFor(
  *
  * The combat guard was added by `mtg-t3ik` alongside the layered one, and for
  * the identical reason: `STATIC_MODIFICATION_KINDS` grew a third class that is
- * not `ReplacementStaticModification` either, and `replacementFor`'s switch
- * below still covers only the two doublers. Before this guard existed, a
+ * not `ReplacementStaticModification` either. The explicit hand-active guard
+ * then narrows the replacement class to the battlefield-active members before
+ * `replacementFor`. Before the combat guard existed, a
  * combat modification (not `isLayeredStaticModification`, since it isn't
  * layered) would have fallen through to `replacementFor` and hit its
  * `assertNever` default at runtime — this file's `ReplacementStaticModification`
@@ -136,10 +194,24 @@ function replacementsForAbility(
   source: ObjectId,
   controller: PlayerId,
   counter: number,
+  sourceBattlefieldIncarnation: number,
 ): ReplacementEffect | null {
   if (ability.kind !== 'static') return null;
   const modification = ability.modification;
-  if (isLayeredStaticModification(modification) || isCombatStaticModification(modification)) return null;
+  if (
+    isLayeredStaticModification(modification) ||
+    isCombatStaticModification(modification) ||
+    isDamagePreventionStaticModification(modification)
+  )
+    return null;
+  // This replacement functions from the printed card in its owner's hand. It
+  // is compiled event-locally by `handDiscardReplacementsFor` below and must
+  // never be registered by the battlefield arrival path.
+  if (modification.kind === 'discardedByOpponentEntersBattlefield') return null;
+  // This one reads current life, controller and copied abilities for every
+  // proposed damage event, so `damage.ts` compiles it event-locally instead of
+  // freezing a registered record when the permanent enters.
+  if (modification.kind === 'damageCannotReduceControllerLifeBelow') return null;
   return replacementFor(
     modification,
     staticReplacementId(counter),
@@ -150,7 +222,37 @@ function replacementsForAbility(
     // doublers therefore apply oldest-first under `earliestTimestamp`, and the
     // order does not change the product.
     counter,
+    sourceBattlefieldIncarnation,
   );
+}
+
+/**
+ * Intrinsic replacement effects the named card contributes to one proposed
+ * discard while it is still in hand. They are passed to `applyReplacements`
+ * as additional effects and are never written into `GameState.replacements`.
+ */
+export function handDiscardReplacementsFor(
+  card: Card,
+  source: ObjectId,
+  owner: PlayerId,
+): readonly ReplacementEffect[] {
+  return card.abilities.flatMap((ability) => {
+    if (ability.kind !== 'static' || ability.modification.kind !== 'discardedByOpponentEntersBattlefield') {
+      return [];
+    }
+    return [
+      {
+        id: `intrinsic:${source}:opponent-discard`,
+        sourceOid: source,
+        controller: owner,
+        timestamp: -1,
+        duration: 'whileInHand',
+        selfReplacement: true,
+        trigger: { kind: 'discard', oid: source, player: owner, byOpponent: true },
+        modification: { kind: 'putDiscardedOntoBattlefield' },
+      },
+    ];
+  });
 }
 
 /**
@@ -163,12 +265,13 @@ export function staticReplacementsFor(
   source: ObjectId,
   controller: PlayerId,
   nextId: number,
+  sourceBattlefieldIncarnation: number,
 ): StaticReplacementRegistration {
   if (card.abilities.length === 0) return { replacements: [], nextId };
   const replacements: ReplacementEffect[] = [];
   let counter = nextId;
   for (const ability of card.abilities) {
-    const effect = replacementsForAbility(ability, source, controller, counter);
+    const effect = replacementsForAbility(ability, source, controller, counter, sourceBattlefieldIncarnation);
     if (effect === null) continue;
     replacements.push(effect);
     counter += 1;
@@ -189,7 +292,13 @@ export function staticReplacementsFor(
 export function registerStaticReplacements(state: GameState, oid: ObjectId): GameState {
   const object = state.objects[oid];
   if (object === undefined) return state;
-  const registration = staticReplacementsFor(object.card, oid, controllerOf(state, oid), state.nextId);
+  const registration = staticReplacementsFor(
+    copiableCardOf(object),
+    oid,
+    controllerOf(state, oid),
+    state.nextId,
+    object.incarnation ?? 0,
+  );
   if (registration.replacements.length === 0) return state;
   return {
     ...state,

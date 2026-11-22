@@ -43,11 +43,32 @@ import { uiStyleSheet } from '../../src/styles/index';
  */
 const UNCONDITIONAL = uiStyleSheet().replace(/^@media[^\n]*\{\n[\s\S]*?\n\}$/gm, '');
 
+/**
+ * A block's selector with its `:not()` groups taken out.
+ *
+ * A rule that says `:not(:has(.mtg-board__divider[data-combat='true']))` names
+ * the open seam in order to select every board that has **not** got one, which
+ * is the opposite of what this file is looking for. `mtg-7rhk`'s hand seam is
+ * the first rule in the sheet written that way -- the dragged hand height
+ * applies off combat only -- and a marker match over the raw text counted it as
+ * a second height charged to the open band.
+ *
+ * One level of nesting is enough because the only shape that occurs is
+ * `:not(:has(...))`, and a plain `[^)]*` would stop at the `)` inside it.
+ */
+function selectorOutsideNot(block: string): string {
+  const selector = block.split('{')[0] ?? '';
+  return selector.replace(/:not\(([^()]|\([^()]*\))*\)/g, '');
+}
+
 /** Every rule in the sheet that states a height for the open seam. */
 function seamHeightRules(): readonly string[] {
   return UNCONDITIONAL.split('\n}')
     .map((block) => block.trim())
-    .filter((block) => block.includes("data-combat='true']") && /height:\s*\d/.test(block));
+    .filter(
+      (block) =>
+        selectorOutsideNot(block).includes("data-combat='true']") && /(?:^|[;\n]\s*)height:\s*\d/.test(block),
+    );
 }
 
 /** The selector of the one rule that carries a declaration, by a marker in it. */
@@ -91,7 +112,7 @@ describe('the seam charges for cards rather than for the step', () => {
    * the viewer's own row came out smaller than the opponent's at 1440x900 and
    * 1280x800 — 93.5px against 108.2 — which is the inversion `mtg-d6s` spent a
    * bead removing, reached down a different road. Both weights are scoped to a
-   * band with a card in it, so a resting board keeps the even split `./fit.ts`
+   * band with a card in it, so a resting board keeps the even split `../../src/styles/board/fit.ts`
    * argues for on a table with room on it.
    */
   it('tilts the two lanes only while the band holds a card', () => {

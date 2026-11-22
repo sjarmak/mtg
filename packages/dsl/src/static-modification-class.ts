@@ -2,10 +2,9 @@
  * Which of `StaticModificationSchema`'s three machines a record belongs to.
  *
  * `STATIC_MODIFICATION_KINDS` carries three unrelated machines under one
- * union: three members the layer system applies (CR 613 — `statBonus` and
- * `grantKeyword` and `definePt` are layers 7c, 6 and 7a), two the replacement
- * system applies (CR 614 — a doubler rewrites an event before it happens and
- * never touches a characteristic), and six the combat-legality machine
+ * union: six members the layer system applies (CR 613), four the replacement
+ * system applies (CR 614 — an event is rewritten before it happens and never
+ * touches a characteristic), and eleven the combat-legality machine
  * applies (CR 508/509 — a restriction or requirement on which attack- and
  * block-declarations are legal, which is neither a characteristic change nor
  * an event rewrite). Four consumers have to split on that difference and none
@@ -26,13 +25,14 @@
  * question by default, and the default is the layer walk, which would then
  * be handed a record it cannot turn into a continuous effect.
  */
-import type { CombatModification, LayeredStaticModification, StaticModification } from './ability-shape';
+import type { CombatModification, DamagePreventionModification } from './ability-shape';
+import type { LayeredStaticModification, StaticModification } from './abilities';
 import { assertNever } from './vocabulary';
 
-export type StaticModificationClass = 'layered' | 'replacement' | 'combat';
+export type StaticModificationClass = 'layered' | 'replacement' | 'combat' | 'damagePrevention';
 
 /**
- * `StaticModification` narrowed to the two CR 614 replacement kinds, named so
+ * `StaticModification` narrowed to the CR 614 replacement kinds, named so
  * a function that only prints or only registers replacements can say so in
  * its signature. Written as the complement of the other two classes rather
  * than as its own list, because the three must partition `StaticModification`
@@ -41,27 +41,43 @@ export type StaticModificationClass = 'layered' | 'replacement' | 'combat';
  */
 export type ReplacementStaticModification = Exclude<
   StaticModification,
-  LayeredStaticModification | CombatModification
+  LayeredStaticModification | CombatModification | DamagePreventionModification
 >;
 
 export function classifyStaticModification(modification: StaticModification): StaticModificationClass {
   switch (modification.kind) {
     case 'statBonus':
     case 'grantKeyword':
+    case 'grantKeywordAbilities':
+    case 'grantTriggeredAbility':
+    case 'grantAnyColorManaAbility':
     case 'definePt':
     case 'statBonusPer':
+    case 'statBonusPerColor':
+    case 'addSubtype':
       return 'layered';
     case 'doubleDamage':
     case 'doubleLifeGain':
+    case 'doublePlusOnePlusOneCountersOnCreaturesYouControl':
+    case 'damageCannotReduceControllerLifeBelow':
+    case 'discardedByOpponentEntersBattlefield':
+    case 'preventDamageToSelfAndRemoveCounters':
       return 'replacement';
     case 'cantAttack':
     case 'cantBlock':
     case 'cantBeBlocked':
     case 'attacksEachCombatIfAble':
     case 'mustBeBlockedIfAble':
+    case 'canBlockAnyNumber':
+    case 'canAttackAsThoughNoDefender':
     case 'blockOnlyCreaturesWithKeyword':
     case 'cantBeBlockedBySubtype':
+    case 'cantAttackWithoutAnyOf':
+    case 'cantAttackOrBlock':
+    case 'cantAttackOrBlockAlone':
       return 'combat';
+    case 'preventCombatDamage':
+      return 'damagePrevention';
     default:
       return assertNever(modification, 'classifyStaticModification');
   }
@@ -79,4 +95,11 @@ export function isCombatStaticModification(
   modification: StaticModification,
 ): modification is CombatModification {
   return classifyStaticModification(modification) === 'combat';
+}
+
+/** Narrows static event-local CR 615 prevention away from registered CR 614 replacements. */
+export function isDamagePreventionStaticModification(
+  modification: StaticModification,
+): modification is DamagePreventionModification {
+  return classifyStaticModification(modification) === 'damagePrevention';
 }

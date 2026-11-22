@@ -40,7 +40,13 @@
  * engine code enters the replay bundle. `test/log/narrate.test.ts` holds that
  * as its own assertion rather than leaving it to inspection.
  */
-import { assertNever, COLOR_WORDS, formatManaCost, GRANTABLE_KEYWORD_PRINT_NAMES } from '@mtg/dsl';
+import {
+  assertNever,
+  COLOR_WORDS,
+  COUNTER_DECLARATIONS,
+  formatManaCost,
+  GRANTABLE_KEYWORD_PRINT_NAMES,
+} from '@mtg/dsl';
 import type { Action, Decision, GameEvent, GameResult, PlayerId, Step, Target } from '@mtg/kernel';
 import { seatMention, seatOwn, seatPossessive, seatPossessiveLeading, seatVerb } from '../seat';
 
@@ -131,6 +137,7 @@ function manaWord(color: string): string {
 const END_WORDS = {
   lifeZero: 'life reached zero',
   emptyLibrary: 'drew from an empty library',
+  spellOrAbility: 'a spell or ability caused the loss',
   concede: 'conceded',
   turnLimit: 'the turn limit was reached',
 } as const;
@@ -153,21 +160,46 @@ const LIFE_WORDS = {
 const TRIGGER_WORDS = {
   selfEnters: 'entering the battlefield',
   selfAttacks: 'attacking',
+  selfAttacksAlone: 'attacking alone',
+  selfAndThreeOthersAttack: 'attacking with at least three other creatures',
   selfDies: 'dying',
+  selfLeavesBattlefield: 'leaving the battlefield',
+  selfPutIntoGraveyardFromBattlefield: 'being put into a graveyard from the battlefield',
+  selfPutIntoGraveyardFromAnywhere: 'being put into a graveyard from anywhere',
+  enchantedCreatureDies: 'its enchanted creature dying',
+  enchantedLandBecomesTapped: 'its enchanted land becoming tapped',
+  controlledCreatureDealsCombatDamageToPlayer:
+    'a creature its controller controls dealing combat damage to a player',
+  selfBecomesTarget: 'becoming the target of a spell or ability',
+  selfBecomesTargetByOpponent: 'becoming the target of an opposing spell or ability',
   selfDiesNotSacrificed: 'dying without having been sacrificed',
   controlledCreatureAttacksAlone: 'a controlled creature attacking alone',
   selfDealsCombatDamageToCreature: 'dealing combat damage to a creature',
   beginningOfYourUpkeep: "the beginning of its controller's upkeep",
+  beginningOfEachPlayersUpkeep: "the beginning of each player's upkeep",
   beginningOfYourEndStep: "the beginning of its controller's end step",
   beginningOfEndStep: 'the beginning of the end step',
   anotherControlledPermanentEnters: 'another permanent its controller controls entering the battlefield',
+  controlledLandSubtypeEnters: 'a land of the declared type entering under its control',
+  controlledCreatureEnters: 'a creature its controller controls entering',
   anotherControlledCreatureEnters: 'another creature its controller controls entering the battlefield',
+  anotherCreatureEnters: 'another creature entering the battlefield',
+  controlledCreatureDies: 'a creature its controller controlled dying',
   youCastSpell: 'its controller casting a spell',
   youCastInstantOrSorcery: 'its controller casting an instant or sorcery spell',
   selfDealsCombatDamageToPlayer: 'dealing combat damage to a player',
   selfBlocks: 'blocking',
+  enchantedCreatureAttacksOrBlocks: 'its enchanted creature attacking or blocking',
+  enchantedCreatureBecomesTarget: 'its enchanted creature becoming the target of a spell or ability',
+  selfBlocksCreature: 'blocking a creature',
   selfBlocksOrIsBlockedByGreaterPower: 'meeting a creature with greater power in a block',
   youGainLife: 'its controller gaining life',
+  youDrawCard: 'its controller drawing a card',
+  opponentDiscardsCard: 'an opponent discarding a card',
+  selfPlusOnePlusOneCounterRemoved: 'a +1/+1 counter being removed from it',
+  creatureAttacksYouOrPlaneswalkerYouControl:
+    'a creature attacking its controller or a planeswalker they control',
+  selfIsDealtDamage: 'being dealt damage',
   selfEntersOrAttacks: 'entering the battlefield or attacking',
   aPlayerCastsWhiteSpell: 'a player casting a white spell',
   aPlayerCastsBlueSpell: 'a player casting a blue spell',
@@ -177,6 +209,9 @@ const TRIGGER_WORDS = {
   opponentDealtNoncombatDamage: 'an opponent of its controller being dealt noncombat damage',
   anotherControlledCreatureWithPowerThreeOrGreaterEnters:
     'another creature its controller controls with power 3 or greater entering the battlefield',
+  controllerControlsNoPermanentWithCounter:
+    'its controller controlling no permanent with the required counter',
+  siegeDefeated: 'its last defense counter being removed',
 } as const;
 
 /*
@@ -237,10 +272,28 @@ export function describeTarget(target: Target | null, names: LogNames): string {
   return names.target(target.oid);
 }
 
-function targetClause(targets: readonly (Target | null)[], names: LogNames): string {
-  const named = targets.filter((target): target is Target => target !== null);
+function targetClause(
+  targets: readonly (Target | null)[],
+  names: LogNames,
+  multiTargets?: Readonly<Record<number, readonly Target[]>>,
+  damageAllocations?: Readonly<Record<number, readonly number[]>>,
+): string {
+  const named: { target: Target; amount: number | undefined }[] = targets.flatMap((target) =>
+    target === null ? [] : [{ target, amount: undefined }],
+  );
+  for (const [slot, choices] of Object.entries(multiTargets ?? {}).sort(
+    ([left], [right]) => Number(left) - Number(right),
+  )) {
+    const allocations = damageAllocations?.[Number(slot)];
+    named.push(...choices.map((target, index) => ({ target, amount: allocations?.[index] })));
+  }
   if (named.length === 0) return '';
-  return ` targeting ${listPhrase(named.map((target) => describeTarget(target, names)))}`;
+  return ` targeting ${listPhrase(
+    named.map(
+      ({ target, amount }) =>
+        `${describeTarget(target, names)}${amount === undefined ? '' : ` for ${String(amount)}`}`,
+    ),
+  )}`;
 }
 
 function chosenXClause(value: number | null | undefined): string {
@@ -258,7 +311,15 @@ function damageTargetWords(
 export function describeEvent(event: GameEvent, names: LogNames): string {
   switch (event.type) {
     case 'gameStarted':
-      return `${acts(event.startingPlayer, names, 'plays', 'play')} first (seed ${event.seed}).`;
+      // Who goes first, and nothing else. The seed used to close this sentence
+      // in parentheses, and the 2026-08-23 sweep photographed it as event 1 of
+      // a replay: "Wield the Obliterator plays first (seed
+      // lab/v2/XMP/wield-the-obliterator-sky-islands/1)." the playtester's interface
+      // pass puts technical information under *Game details*, and both surfaces
+      // that draw this log already carry the seed there under one label
+      // (`../routes/game-details.ts`). Nothing is lost: the event still carries
+      // it, and it is what `#/play?seed=` takes. `mtg-dcxg.10`.
+      return `${acts(event.startingPlayer, names, 'plays', 'play')} first.`;
     case 'libraryShuffled':
       return `${acts(event.player, names, 'shuffles', 'shuffle')} a ${event.cards}-card library.`;
     case 'cardDrawn':
@@ -294,27 +355,35 @@ export function describeEvent(event: GameEvent, names: LogNames): string {
     case 'manaPaid':
       return `${acts(event.player, names, 'pays', 'pay')} ${formatManaCost(event.cost)}.`;
     case 'spellCast':
-      return `${acts(event.player, names, 'casts', 'cast')} ${names.card(event.oid)}${chosenXClause(event.chosenX)}${targetClause(event.targets, names)}.`;
+      return `${acts(event.player, names, 'casts', 'cast')} ${names.card(event.oid)}${chosenXClause(event.chosenX)}${targetClause(event.targets, names, event.multiTargets, event.damageAllocations)}.`;
     case 'spellCopied':
-      return `${acts(event.player, names, 'copies', 'copy')} ${names.card(event.copiedFrom)}${chosenXClause(event.chosenX)}${targetClause(event.targets, names)}.`;
+      return `${acts(event.player, names, 'copies', 'copy')} ${names.card(event.copiedFrom)}${chosenXClause(event.chosenX)}${targetClause(event.targets, names, event.multiTargets, event.damageAllocations)}.`;
+    case 'spellTargetsChanged':
+      return `${acts(event.player, names, 'changes', 'change')} the targets of ${names.card(event.oid)}${targetClause(event.targets, names)}.`;
     case 'abilityActivated':
       return `${acts(event.player, names, 'activates', 'activate')} ${names.card(event.source)} ability ${event.index + 1}${chosenXClause(event.chosenX)}${targetClause(event.targets, names)}.`;
     case 'abilityTriggered':
       return `${names.card(event.source)}'s ability ${event.index + 1} triggers on ${TRIGGER_WORDS[event.condition]}, under ${whose(event.player, names)} control.`;
     case 'triggerTargetsChosen':
-      return `${names.card(event.source)}'s triggered ability goes on the stack${targetClause(event.targets, names)}.`;
+      return `${names.card(event.source)}'s triggered ability goes on the stack${targetClause(event.targets, names, event.multiTargets, event.damageAllocations)}.`;
     case 'triggerDeclined':
       return `${names.card(event.source)}'s controller declines its triggered ability.`;
     case 'triggerRemoved':
       return `${names.card(event.source)}'s triggered ability is removed from the stack: ${event.why}.`;
     case 'spellCountered':
       return `${names.card(event.oid)} is countered by ${names.card(event.by)}.`;
+    case 'abilityCountered':
+      return `${names.card(event.oid)} is countered by ${names.card(event.by)}.`;
+    case 'freeCastDeclined':
+      return `${acts(event.player, names, 'leaves', 'leave')} ${names.card(event.oid)} in exile.`;
     case 'spellFizzled':
       return `${names.card(event.oid)} fizzles: every target is gone.`;
     case 'spellDeclined':
       return `${acts(event.player, names, 'declines', 'decline')} to resolve ${names.card(event.oid)}.`;
     case 'unlessPaid':
-      return `${acts(event.player, names, 'pays', 'pay')} the cost, and ${names.card(event.oid)} does nothing.`;
+      return event.source === undefined
+        ? `${acts(event.player, names, 'pays', 'pay')} the cost, and ${names.card(event.oid)} does nothing.`
+        : `${acts(event.player, names, 'pays', 'pay')} the cost, and ${names.card(event.source)}'s ability does nothing.`;
     case 'resolutionBegan':
       return `${names.card(event.oid)} resolves.`;
     case 'effectSkipped':
@@ -332,9 +401,15 @@ export function describeEvent(event: GameEvent, names: LogNames): string {
     case 'replacementApplied':
       return `A replacement effect rewrote a ${event.event} event.`;
     case 'countersChanged':
-      return event.loyalty === undefined
-        ? `${names.card(event.oid)} now has ${event.plusOnePlusOne} +1/+1 and ${event.minusOneMinusOne} -1/-1 counters.`
-        : `${names.card(event.oid)} now has ${event.loyalty} loyalty counter${event.loyalty === 1 ? '' : 's'}.`;
+      return event.defense !== undefined
+        ? `${names.card(event.oid)} now has ${event.defense} defense counter${event.defense === 1 ? '' : 's'}.`
+        : event.loyalty === undefined
+          ? `${names.card(event.oid)} now has ${event.plusOnePlusOne} +1/+1 and ${event.minusOneMinusOne} -1/-1 counters.`
+          : `${names.card(event.oid)} now has ${event.loyalty} loyalty counter${event.loyalty === 1 ? '' : 's'}.`;
+    case 'battleDefeated':
+      return `${names.card(event.oid)} is defeated.`;
+    case 'counterRemoved':
+      return `${event.count} ${COUNTER_DECLARATIONS[event.counter].printName} counter${event.count === 1 ? '' : 's'} ${event.count === 1 ? 'is' : 'are'} removed from ${names.card(event.oid)}.`;
     case 'lifeChanged':
       return `${
         event.delta < 0
@@ -351,8 +426,18 @@ export function describeEvent(event: GameEvent, names: LogNames): string {
       return event.layer === '7b'
         ? `${names.card(event.targetOid)} has base power and toughness ${event.power}/${event.toughness} in layer ${event.layer}.`
         : `${names.card(event.targetOid)} gets ${event.power >= 0 ? '+' : ''}${event.power}/${event.toughness >= 0 ? '+' : ''}${event.toughness} in layer ${event.layer}.`;
+    case 'permanentAnimated': {
+      const colors = event.colors.map((color) => COLOR_WORDS[color]).join(' and ');
+      return `${names.card(event.targetOid)} becomes a ${event.power}/${event.toughness} ${colors} ${event.subtypes.join(' ')} creature in addition to its other types for as long as ${names.card(event.sourceOid)} remains on the battlefield.`;
+    }
+    case 'controlEffectAdded':
+      return `${names.player(event.controller)} gains control of ${names.card(event.targetOid)} in layer ${event.layer}.`;
+    case 'subtypeAdded':
+      return `${names.card(event.targetOid)} becomes a ${event.subtype} in addition to its other types in layer ${event.layer}.`;
     case 'keywordGranted':
       return `${names.card(event.targetOid)} gains ${GRANTABLE_KEYWORD_PRINT_NAMES[event.keyword]} in layer ${event.layer}.`;
+    case 'keywordAbilityRemoved':
+      return `${names.card(event.targetOid)} loses defender in layer ${event.layer}.`;
     case 'continuousEffectsExpired':
       return `${event.ids.length} continuous effect${event.ids.length === 1 ? '' : 's'} expire.`;
     case 'permanentDestroyed':
@@ -382,12 +467,16 @@ export function describeEvent(event: GameEvent, names: LogNames): string {
           `${acts(event.player, names, 'blocks', 'block')} ${listPhrase(event.blocks.map((block) => `${names.target(block.attacker)} with ${listPhrase(block.blockers.map((oid) => names.card(oid)))}`))}.`;
     case 'blockerOrderChosen':
       return `${names.card(event.attacker)} assigns damage to ${listPhrase(event.blockers.map((oid) => names.target(oid)))} in that order.`;
+    case 'attackerOrderChosen':
+      return `${names.card(event.blocker)} assigns damage to ${listPhrase(event.attackers.map((oid) => names.target(oid)))} in that order.`;
     case 'combatDamageStep':
       return event.firstStrike ? 'First-strike combat damage is dealt.' : 'Combat damage is dealt.';
     case 'cardsMilled':
       return `${acts(event.player, names, 'mills', 'mill')} ${listPhrase(event.oids.map((oid) => names.card(oid)))}.`;
     case 'cardsScried':
       return `${acts(event.player, names, 'scries', 'scry')} ${event.count}, putting ${event.bottom} on the bottom.`;
+    case 'coinFlipped':
+      return `${acts(event.player, names, event.result === 'win' ? 'wins' : 'loses', event.result === 'win' ? 'win' : 'lose')} the coin flip for ${names.card(event.sourceOid)}.`;
     case 'cardsDiscarded':
       return `${acts(event.player, names, 'discards', 'discard')} ${listPhrase(event.oids.map((oid) => names.card(oid)))}.`;
     case 'handRevealed':
@@ -398,6 +487,10 @@ export function describeEvent(event: GameEvent, names: LogNames): string {
       return `${acts(event.player, names, 'reveals', 'reveal')} ${listPhrase(
         event.oids.map((oid) => names.card(oid)),
       )} off the top of ${ownFor(event.player, names)} library.`;
+    case 'libraryCardsRevealed':
+      return `${acts(event.player, names, 'reveals', 'reveal')} ${listPhrase(
+        event.oids.map((oid) => names.card(oid)),
+      )} from among cards looked at in ${ownFor(event.player, names)} library.`;
     // Named cards where `librarySearched` below has none, and the difference is
     // the card's own clause: this event exists only because the card said
     // "reveal", so printing the names is the effect rather than a leak.
@@ -438,6 +531,14 @@ export function describeEvent(event: GameEvent, names: LogNames): string {
           )} on the bottom of ${ownFor(event.player, names)} library.`;
     case 'damageCleared':
       return `Marked damage wears off at the end of turn ${event.turn}.`;
+    case 'emblemCreated':
+      return `${acts(event.player, names, 'gets', 'get')} ${event.name}.`;
+    case 'delayedZoneChangeScheduled':
+      return `${names.card(event.source)} schedules ${names.card(event.target)} to return tapped under its owner's control at the beginning of turn ${event.dueTurn}'s end step.`;
+    case 'delayedCounterPlacementScheduled':
+      return `${names.card(event.source)} schedules ${event.count} ${COUNTER_DECLARATIONS[event.counter].printName} counter${event.count === 1 ? '' : 's'} for ${names.card(event.target)} at the beginning of turn ${event.dueTurn}'s end step.`;
+    case 'delayedSpellCopyScheduled':
+      return `${names.card(event.source)} schedules a copy of ${ownFor(event.player, names)} next instant or sorcery spell this turn.`;
     case 'playerLost':
       return `${acts(event.player, names, 'loses', 'lose')} the game: ${END_WORDS[event.reason]}.`;
     case 'gameEnded':
@@ -449,6 +550,24 @@ export function describeEvent(event: GameEvent, names: LogNames): string {
   }
 }
 
+/** The announced casting price, shared by complete and staged cast narration. */
+function castingCostWords(
+  castingCost: NonNullable<Extract<Action, { type: 'castSpell' }>['castingCost']>,
+): string {
+  switch (castingCost) {
+    case 'mana':
+      return 'printed mana';
+    case 'alternative':
+      return 'the alternative cost';
+    case 'overload':
+      return 'its overload cost';
+    case 'withoutMana':
+      return 'no mana payment';
+    default:
+      return assertNever(castingCost, 'castingCostWords');
+  }
+}
+
 /** One phrase per action, written as the choice the player or bot made. */
 export function describeAction(action: Action, names: LogNames): string {
   switch (action.type) {
@@ -456,15 +575,23 @@ export function describeAction(action: Action, names: LogNames): string {
       return 'pass priority';
     case 'playLand':
       return `play ${names.card(action.oid)}`;
-    case 'castSpell':
-      return `cast ${names.card(action.oid)}${chosenXClause(action.x)}${targetClause(action.targets, names)}`;
+    case 'castSpell': {
+      const cost = action.castingCost === undefined ? '' : ` using ${castingCostWords(action.castingCost)}`;
+      const paid = action.sacrifices ?? [];
+      const sacrifice =
+        paid.length === 0 ? '' : ` sacrificing ${paid.map((oid) => names.card(oid)).join(', ')}`;
+      const discarded = action.discards ?? [];
+      const discard =
+        discarded.length === 0 ? '' : ` discarding ${listPhrase(discarded.map((oid) => names.card(oid)))}`;
+      return `cast ${names.card(action.oid)}${chosenXClause(action.x)}${cost}${sacrifice}${discard}${targetClause(action.targets, names, action.multiTargets, action.damageAllocations)}`;
+    }
     case 'activateManaAbility':
-      return `tap ${names.card(action.oid)} for ${manaWord(action.color)}`;
+      return `tap ${names.card(action.oid)} for ${action.amount === undefined ? '' : `${String(action.amount)} `}${manaWord(action.color)}`;
     case 'activateAbility':
       // The index rather than the printed line: a viewer holds a card
       // dictionary, not a renderer, and a log that re-derived oracle text
       // would be a second printer that can disagree with the card face.
-      return `activate ${names.card(action.oid)} ability ${action.abilityIndex + 1}${targetClause(action.targets, names)}`;
+      return `activate ${names.card(action.oid)} ability ${action.abilityIndex + 1}${action.mode === undefined ? '' : ` mode ${String(action.mode + 1)}`}${targetClause(action.targets, names, action.multiTargets, action.damageAllocations)}`;
     case 'declareAttackers':
       return action.attackers.length === 0
         ? 'attack with nothing'
@@ -484,6 +611,8 @@ export function describeAction(action: Action, names: LogNames): string {
         : `block ${listPhrase(action.blocks.map((block) => `${names.target(block.attacker)} with ${names.card(block.blocker)}`))}`;
     case 'orderBlockers':
       return `order blockers ${listPhrase(action.orders.map((order) => `${names.card(order.attacker)}: ${listPhrase(order.blockers.map((oid) => names.target(oid)))}`))}`;
+    case 'orderAttackers':
+      return `order attackers ${listPhrase(action.orders.map((order) => `${names.card(order.blocker)}: ${listPhrase(order.attackers.map((oid) => names.target(oid)))}`))}`;
     case 'discard':
     case 'chooseDiscards':
       // One line for two actions, which the arms above never share, and it is
@@ -498,14 +627,20 @@ export function describeAction(action: Action, names: LogNames): string {
       return action.bottom.length === 0
         ? 'keep this hand'
         : `keep this hand, bottoming ${listPhrase(action.bottom.map((oid) => names.card(oid)))}`;
+    case 'chooseOpeningHandAction':
+      return action.oid === null
+        ? 'finish opening-hand actions'
+        : `begin with ${names.card(action.oid)} on the battlefield`;
     case 'chooseTriggerTargets':
-      return `aim ${names.card(action.oid)}${targetClause(action.targets, names)}`;
+      return `aim ${names.card(action.oid)}${targetClause(action.targets, names, action.multiTargets, action.damageAllocations)}`;
     case 'answerOptionalTrigger':
       return action.accept ? `take ${names.card(action.oid)}` : `decline ${names.card(action.oid)}`;
     case 'answerMay':
       return action.accept ? `resolve ${names.card(action.oid)}` : `decline ${names.card(action.oid)}`;
     case 'answerUnless':
       return action.pay ? `pay to stop ${names.card(action.oid)}` : `let ${names.card(action.oid)} resolve`;
+    case 'declineFreeCast':
+      return `leave ${names.card(action.oid)} in exile`;
     case 'keepLegend':
       // Every option under this decision names the same card, so this line is
       // one `optionLabels` always disambiguates by object id. That is right: the
@@ -516,16 +651,89 @@ export function describeAction(action: Action, names: LogNames): string {
     // made it happen — the seat in the subject is the one who chose.
     case 'sacrificePermanent':
       return `sacrifice ${names.card(action.oid)}`;
+    case 'choosePermanentToUntap':
+      return action.oid === null ? 'finish choosing permanents to untap' : `untap ${names.card(action.oid)}`;
     case 'scry':
       return `keep ${String(action.top.length)} on top and put ${String(action.bottom.length)} on the bottom`;
+    case 'orderTopLibrary':
+      return `put ${String(action.cards.length)} cards back in order`;
+    case 'selectFromTopLibrary':
+      return action.chosen === null
+        ? 'take no card and order the rest'
+        : `take ${names.card(action.chosen)} and order the rest`;
+    case 'separateTopLibraryPiles':
+      return `make piles of ${String(action.first.length)} and ${String(action.second.length)}`;
+    case 'chooseTopLibraryPile':
+      return `choose pile ${String(action.pile + 1)}`;
     case 'searchLibrary':
       return action.found === null ? 'find nothing' : `take ${names.card(action.found)}`;
+    case 'chooseSearchDestination':
+      return `assign ${names.card(action.one)} to the one-card destination`;
     // "take nothing", where the search above says "find nothing": failing to
     // find is CR 701.19c's licensed answer to a hidden zone, and a graveyard
     // is public, so declining here is a decision anybody watching could have
     // predicted rather than a fact the searcher alone knows.
     case 'chooseFromGraveyard':
       return action.chosen === null ? 'take nothing' : `take ${names.card(action.chosen)}`;
+    case 'chooseFromRevealedHand':
+      return action.chosen === null
+        ? 'choose no card from the revealed hand'
+        : `choose ${names.card(action.chosen)} from the revealed hand`;
+    case 'chooseFromBattlefield':
+      return `return ${names.card(action.chosen)} to its owner's hand`;
+    case 'choosePopulateToken':
+      return `create a copy of ${names.card(action.token)}`;
+    case 'chooseCardName':
+      return `name ${action.name}`;
+    case 'chooseNamedZoneExile':
+      return action.oid === null ? 'finish choosing named cards' : `exile ${names.card(action.oid)}`;
+    case 'chooseSpellTargets':
+      return `choose targets for ${names.card(action.oid)}${targetClause(action.targets, names, action.multiTargets, action.damageAllocations)}`;
+    case 'beginCastSpell': {
+      const cost = action.castingCost === undefined ? '' : ` using ${castingCostWords(action.castingCost)}`;
+      const paid = action.sacrifices ?? [];
+      const sacrifice =
+        paid.length === 0 ? '' : ` sacrificing ${paid.map((oid) => names.card(oid)).join(', ')}`;
+      const discarded = action.discards ?? [];
+      const discard =
+        discarded.length === 0 ? '' : ` discarding ${listPhrase(discarded.map((oid) => names.card(oid)))}`;
+      return `begin casting ${names.card(action.oid)}${chosenXClause(action.x)}${cost}${sacrifice}${discard}${targetClause(action.targets, names)}`;
+    }
+    case 'choosePluralTarget':
+      return action.target === null
+        ? `finish choosing targets for ${names.card(action.oid)}`
+        : `add a target for ${names.card(action.oid)}${targetClause([action.target], names)}`;
+    case 'allocateDividedDamage':
+      return `assign ${String(action.amount)} damage for ${names.card(action.oid)}`;
+    case 'chooseEntryCopy':
+      return action.copyOf === null
+        ? `have ${names.card(action.oid)} enter normally`
+        : `have ${names.card(action.oid)} enter as a copy of ${names.card(action.copyOf)}`;
+    case 'chooseEntryCounterPermanent':
+      return `put the entry counter on ${names.card(action.permanent)}`;
+    case 'chooseEntryAuraHost':
+      return `have ${names.card(action.oid)} enter attached to ${names.card(action.host)}`;
+    case 'chooseEntryTimestampNext':
+      return `give ${names.card(action.oid)} the next timestamp among simultaneous entrants`;
+    case 'chooseEntryCharacteristics':
+      return `have ${names.card(action.oid)} enter in characteristic mode ${String(action.mode + 1)}`;
+    case 'chooseEntryOptionalCounter':
+      return action.accept
+        ? `have ${names.card(action.oid)} enter with a +1/+1 counter`
+        : `have ${names.card(action.oid)} enter without a counter`;
+    case 'chooseEntryPayLife': {
+      return action.pay
+        ? `pay ${String(action.life)} life as ${names.card(action.oid)} enters`
+        : `have ${names.card(action.oid)} enter tapped without paying ${String(action.life)} life`;
+    }
+    case 'chooseEntryPlayer':
+      return `choose ${names.player(action.chosen)} as ${names.card(action.oid)} enters`;
+    case 'chooseEntryColors':
+      return `choose ${action.colors.join(' and ')} as ${names.card(action.oid)} enters`;
+    case 'chooseManaColor':
+      return `choose {${action.color}} for the resolving mana effect`;
+    case 'allocateDamagePrevention':
+      return `prevent ${String(action.amount)} damage from ${names.card(action.sourceOid)}`;
     case 'concede':
       return 'concede';
     default:
@@ -537,11 +745,31 @@ function actionOid(action: Action): string | null {
   switch (action.type) {
     case 'playLand':
     case 'castSpell':
+    case 'beginCastSpell':
+    case 'choosePluralTarget':
+    case 'allocateDividedDamage':
     case 'activateManaAbility':
     case 'activateAbility':
     case 'keepLegend':
     case 'sacrificePermanent':
+    case 'chooseSpellTargets':
+    case 'chooseEntryCopy':
+    case 'chooseEntryCounterPermanent':
+    case 'chooseEntryAuraHost':
+    case 'chooseEntryTimestampNext':
+    case 'chooseEntryCharacteristics':
+    case 'chooseEntryOptionalCounter':
+    case 'chooseEntryPayLife':
+    case 'chooseEntryPlayer':
       return action.oid;
+    case 'choosePermanentToUntap':
+      return action.oid;
+    case 'chooseOpeningHandAction':
+      return action.oid;
+    case 'chooseFromRevealedHand':
+      return action.chosen;
+    case 'choosePopulateToken':
+      return action.token;
     default:
       return null;
   }
@@ -574,23 +802,39 @@ export function optionLabels(options: readonly Action[], names: LogNames): reado
 export type DecisionKind = Decision['kind'];
 
 const DECISION_QUESTIONS: Readonly<Record<DecisionKind, string>> = {
+  cardName: 'chooses a card name',
+  namedZoneExile: 'chooses matching cards to exile from the named-card search',
   mulligan: 'decides whether to keep their opening hand',
+  openingHandAction: 'chooses which eligible opening-hand cards begin on the battlefield',
   priority: 'holds priority and may act',
+  manaColor: 'chooses which color a resolving mana effect produces',
   declareAttackers: 'declares attackers',
   declareBlockers: 'declares blockers',
   orderBlockers: 'orders blockers for damage assignment',
+  orderAttackers: 'orders attackers for damage assignment',
   discard: 'discards down to hand size',
   triggerTargets: 'chooses targets for a triggered ability',
+  pluralTargets: 'chooses members of a plural target list',
+  damageAllocation: 'divides damage among chosen targets',
   optionalTrigger: 'decides whether to take an optional triggered ability',
   may: 'decides whether to resolve a spell whose effect is optional',
   unless: 'decides whether to pay the cost a spell aimed at them printed',
   legendRule: 'chooses which of their same-named legendary permanents to keep',
   scry: 'orders the cards they looked at while scrying',
+  topLibraryOrder: 'orders the cards they looked at',
+  topLibrarySelect: 'chooses from the cards they looked at',
+  topLibraryPartition: 'separates revealed cards into piles',
+  topLibraryPile: 'chooses one of two piles',
+  freeCast: 'chooses how to cast the revealed card without paying its mana cost',
   searchLibrary: 'chooses which card to take out of their library, or to find nothing',
+  searchDestination: 'chooses which found card goes to the one-card destination',
   // "a graveyard", not "their graveyard": the effect may read either seat's,
   // and a log line that named the wrong one would be read by the seat that
   // just lost the card.
   graveyardChoice: 'chooses which card to take out of a graveyard, or to take none',
+  revealedHandChoice: 'chooses from a revealed hand',
+  battlefieldChoice: 'chooses which controlled permanent a resolving effect returns',
+  populate: 'chooses which controlled creature token to copy with Populate',
   // Deliberately not "discards down to hand size", which is what `discard`
   // above says: this one is a resolving effect's discard and the seat asked is
   // not always the seat losing the cards. One sentence covers both readings by
@@ -599,7 +843,19 @@ const DECISION_QUESTIONS: Readonly<Record<DecisionKind, string>> = {
   // Deliberately "their own creatures", not "a creature": CR 701.17a fixes
   // this choice with the permanent's controller, unlike `handDiscard`, whose
   // asked seat is sometimes choosing about somebody else's hand.
-  permanentSacrifice: 'chooses which of their own creatures a resolving effect sacrifices',
+  permanentSacrifice: 'chooses which of their own permanents a resolving effect sacrifices',
+  permanentUntap: 'chooses which permanents a resolving effect untaps, or stops choosing',
+  entryCopy: 'chooses copied values for an entering permanent',
+  entryCounter: 'chooses a permanent to receive an entry counter',
+  entryAura: 'chooses what a non-targeted Aura enters attached to',
+  entryTimestampOrder: 'orders simultaneous entrants they control by timestamp',
+  entryCharacteristics: 'chooses how a creature enters',
+  entryOptionalCounter: 'chooses whether a permanent enters with a +1/+1 counter',
+  entryPayLife: 'chooses whether to pay life as a permanent enters',
+  entryPlayer: 'chooses a player as a permanent enters',
+  entryColors: 'chooses two colors as a permanent enters',
+  spellTargets: 'chooses new targets for a spell',
+  damagePrevention: 'allocates a finite prevention shield among simultaneous damage sources',
 };
 
 /**

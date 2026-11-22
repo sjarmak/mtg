@@ -67,9 +67,11 @@ describe('containment: hand-authored vocabulary the model cannot name', () => {
     expect(chooseable).not.toContain('grantKeywordUntilEndOfTurn');
   });
 
-  it('lands after the member that was last when it arrived', () => {
+  it('lands after the untap family', () => {
     const kinds: readonly string[] = UNPRICED_EFFECT_KINDS;
-    expect(kinds.indexOf('grantKeywordUntilEndOfTurn')).toBe(kinds.indexOf('untapPermanent') + 1);
+    expect(kinds.indexOf('untapPermanents')).toBe(kinds.indexOf('untapPermanent') + 1);
+    expect(kinds.indexOf('skipNextUntap')).toBe(kinds.indexOf('untapPermanents') + 1);
+    expect(kinds.indexOf('grantKeywordUntilEndOfTurn')).toBe(kinds.indexOf('skipNextUntap') + 1);
   });
 });
 
@@ -117,12 +119,14 @@ describe('the printed sentence', () => {
 });
 
 describe('what a card may aim it at', () => {
-  it('states the four kinds its row names and no more', () => {
+  it('states the four original kinds and both retained creature referents', () => {
     expect(legalTargetsFor('grantKeywordUntilEndOfTurn')).toStrictEqual([
       'targetCreature',
       'targetCreatureYouControl',
       'selfCreature',
       'noTarget',
+      'thatCreature',
+      'equippedCreature',
     ]);
   });
 

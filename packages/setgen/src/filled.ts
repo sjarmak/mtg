@@ -21,7 +21,7 @@
  * and the first evidence would be a live run that costs money. Deleting the
  * distinction is one import away once the prompt teaches it.
  *
- * ## Why there are five batch schemas
+ * ## Why the answer schema is capability-addressed
  *
  * `abilities` is the same argument taken one step further, and it is taken per
  * *batch* rather than once for the package. A fixture key is
@@ -29,74 +29,32 @@
  * uses renames every recorded fixture whether or not the brief wanted the field.
  * The prompt already avoids that: `requiredLines` prints its two lines only on a
  * slot the brief reserved, so a brief that requires nothing builds the bytes it
- * always did. `fillSchemaFor` gives the answer schema the same property. A batch
- * holding no slot the allocator gave an ability kind is shown
- * `FillBatchSchema`, byte-identical to what it was shown before this change; a
- * batch holding one is shown the wider schema, and is also the only batch whose
- * prompt explains what an ability is.
+ * always did. `fillSchemaFor` gives the answer schema the same property. It
+ * gathers the typed capabilities required by the slots and passes them to
+ * `fillSchemaForCapabilities`; that factory composes the card and effect arms
+ * for exactly those flags. A batch with no capability still receives
+ * `FillBatchSchema`, byte-identical to the historical contract.
  *
- * The third tier is CR 702.6b's equip clause, and it exists because the cost of
- * folding it into the second was measured rather than guessed: adding `attach`
- * to `ModelAbilitySchema` strands `fixtures/llm-hearthglass/` on its first
- * batch, and getting that back is a live run of a brief with no weapon in it. So
- * a batch holding a slot the brief marked as equipment is shown
- * `FillBatchWithEquipSchema`; a batch holding an ordinary ability slot is shown
- * `FillBatchWithAbilitiesSchema`, unchanged; a batch holding neither is shown
- * `FillBatchSchema`, unchanged. Two tiers of recorded fixtures replay for free.
+ * This replaces the old named combination tiers. Equipment, set mechanics,
+ * spell permanents, and zone-reaching effects retain their historical schema
+ * bytes, so recorded answers remain usable. New reviewed effect/target/trigger
+ * bundles are independent flags, but each flag contributes an indivisible,
+ * parameter-sensitive schema arm: composing flags cannot widen the global
+ * effect, target, and trigger enums separately.
  *
- * The fourth tier is the flagship set's own two mechanics, which widen the
- * same two members together: a part token that prints Fuse, and an activation
- * cost that eats a named subtype. The fifth is that tier and the equip clause at
- * once, and it is a combination rather than a fourth idea — the weapons and the
- * Chests are both colorless artifacts, so one batch holds both, and a batch is
- * shown one schema. Four tiers of recorded fixtures replay for free.
- *
- * ## The three tiers that add a card type rather than a field
- *
- * `mtg-fv5s` taught the generator two card kinds it never had — an enchantment
- * and a planeswalker — and that is a *member* of the union rather than a field
- * on an existing one. So the same rule applies one level up: a batch holding no
- * enchantment and no walker slot is shown the union it was always shown, and a
- * batch holding one is shown that union with two members appended.
- *
- * Three of them rather than five, and the count is proved rather than assumed.
- * `batchSlots` keys a batch on `(rarity, color)`, and `briefSchema` refuses the
- * enchantment and walker roles in the colorless pool, so the two new members can
- * only ever land in a colored batch. Every weapon is an artifact (CR 301.5) and
- * artifact slots exist only in the colorless pool, so `batchWantsEquip` and
- * `batchWantsSpellPermanents` cannot both be true of one batch —
- * `fillSchemaFor` says that out loud rather than leaving it implied, because a
- * combination nobody built is a combination nobody tested. The other three
- * combinations are all reachable: an Aura slot alone, an Aura or anthem slot
- * beside an ability slot, and either beside a colored creature the brief
- * reserved for one of the set's mechanics.
- *
- * ## The six tiers that widen what a spell may say
- *
- * `mtg-q5yg` priced three effect primitives the generator could not reach —
- * `exileTarget`, `scry`, `returnFromGraveyard` — and the same rule applies a
- * third time, one level down. A spell's `effects` array is typed by
- * `ModelEffectSchema`, and appending three members to *that* would move the
- * `<effect_vocabulary>` bytes of every ability-bearing batch as well
- * (`abilityEffectKinds` reads `MODEL_EFFECT_KINDS`), which is all 172 recorded
- * fixtures at once. So the widening is a second union,
- * `ZoneReachingModelEffectSchema`, and the tiers below are the batches allowed
- * to see it.
- *
- * Six rather than eight, and the two absences are the same structural fact
- * twice. `briefSchema` refuses the three zone-reaching roles in the colorless
- * pool for the reason it refuses the enchantment roles there — the three
- * primitives are colored effects on the 2021 pie, and a colorless card that
- * exiles a creature is the color-pie break the pie table exists to name — so a
- * zone-reaching slot is always a colored slot, and `batchWantsEquip` can never
- * be true of a batch holding one. `fillSchemaFor` throws on the pair rather
- * than resolving it, exactly as it does for the equip-and-permanents pair.
+ * The allocator prevents impossible combinations at their source. For example,
+ * equipment is colorless while spell permanents and colored zone-reaching
+ * roles are refused in that pool. The factory still validates its capability
+ * address so a caller cannot silently manufacture an untested combination.
  */
 import { z } from 'zod';
 import type { ZodType } from 'zod';
 import {
   AttachingMechanicModelAbilitySchema,
   AttachingModelAbilitySchema,
+  ControlledCreatureCounterOnEntryModelAbilitySchema,
+  FightOpposingCreatureModelEffectSchema,
+  KeywordGrantToControlledCreatureModelEffectSchema,
   LoyaltyModelAbilitySchema,
   MechanicModelAbilitySchema,
   ModelAbilitySchema,
@@ -104,12 +62,17 @@ import {
   MODEL_EFFECT_KINDS,
   ModelEffectSchema,
   ModelManaCostSchema,
+  OwnGraveyardCardToHandModelEffectSchema,
+  PartBearingModelEffectSchema,
+  ReturnArtifactOrEnchantmentToHandModelEffectSchema,
   SUBTYPE_PATTERN,
+  UntapControlledCreatureModelEffectSchema,
   ZONE_REACHING_MODEL_EFFECT_KINDS,
   ZoneReachingModelEffectSchema,
 } from '@mtg/dsl';
-import type { AttachingMechanicModelAbility, EffectKind } from '@mtg/dsl';
+import type { Effect, EffectKind, GeneratorModelAbility, GeneratorModelAbilityInput } from '@mtg/dsl';
 import type { Slot } from './slot';
+import { orderedFillCapabilities, PROMOTED_FILL_CAPABILITIES, type FillCapability } from './capabilities';
 
 /**
  * The longest name the model may return, and therefore the longest name a brief
@@ -124,11 +87,11 @@ const subtypesField = z.array(z.string().min(1).max(20)).max(2).default([]);
 const designNoteField = z.string().min(1).max(200);
 
 /**
- * Two is `Card.abilities`' own cap, not a second budget: a third printed line is
- * a rules box rather than a schema (`packages/card-render`). Defaulted rather
- * than required, because a batch is one schema over several slots and only some
- * of them were allocated an ability; which slot must carry one is the prompt's
- * job to say and `checkSlotConformance`'s to check.
+ * Two is the generator-facing design budget, deliberately narrower than the
+ * hand-authored Card schema's independently named higher cap. Defaulted rather than required,
+ * because a batch is one schema over several slots and only some of them were
+ * allocated an ability; which slot must carry one is the prompt's job to say
+ * and `checkSlotConformance`'s to check.
  */
 const abilitiesField = z.array(ModelAbilitySchema).max(2).default([]);
 
@@ -226,10 +189,10 @@ export const FilledCardWithAbilitiesSchema = z.discriminatedUnion('kind', [
 /**
  * The abilities an artifact in a batch holding a weapon may print.
  *
- * Two is still `Card.abilities`' cap and still not a second budget, and a weapon
- * spends both halves of one clause on one entry: `attach` states what being
- * equipped is worth and the same entry's cost states what equipping costs, which
- * is why the renderer prints Magic's two lines from one ability.
+ * Two remains the generator's independent ability budget, and a weapon spends
+ * both halves of one clause on one entry: `attach` states what being equipped is
+ * worth and the same entry's cost states what equipping costs, which is why the
+ * renderer prints Magic's two lines from one ability.
  */
 const attachingAbilitiesField = z.array(AttachingModelAbilitySchema).max(2).default([]);
 
@@ -517,7 +480,7 @@ export const FilledCardWithMechanicsAndSpellPermanentsAndZoneReachSchema = z.dis
  * `filled.abilities` directly does not compile until it says which of them it is
  * holding.
  */
-export type FilledCard =
+type LegacyFilledCard =
   | z.infer<typeof FilledCardSchema>
   | z.infer<typeof FilledCardWithAbilitiesSchema>
   | z.infer<typeof FilledCardWithEquipSchema>
@@ -532,7 +495,23 @@ export type FilledCard =
   | z.infer<typeof FilledCardWithSpellPermanentsAndZoneReachSchema>
   | z.infer<typeof FilledCardWithAbilitiesAndSpellPermanentsAndZoneReachSchema>
   | z.infer<typeof FilledCardWithMechanicsAndSpellPermanentsAndZoneReachSchema>;
-export type FilledCardInput =
+
+type WithCapabilityOutputs<T> = T extends { kind: 'instant' | 'sorcery'; effects: unknown }
+  ? Omit<T, 'effects'> & { readonly effects: readonly Effect[] }
+  : T extends { kind: 'creature' | 'artifact' | 'enchantment' }
+    ? Omit<T, 'abilities'> & { readonly abilities?: readonly GeneratorModelAbility[] }
+    : T;
+
+type WithCapabilityInputs<T> = T extends { kind: 'instant' | 'sorcery'; effects: unknown }
+  ? Omit<T, 'effects'> & { readonly effects: readonly Effect[] }
+  : T extends { kind: 'creature' | 'artifact' | 'enchantment' }
+    ? Omit<T, 'abilities'> & { readonly abilities?: readonly GeneratorModelAbilityInput[] }
+    : T;
+
+/** Every composable schema output remains structurally inside engine effects and abilities. */
+export type FilledCard = WithCapabilityOutputs<LegacyFilledCard>;
+
+type LegacyFilledCardInput =
   | z.input<typeof FilledCardSchema>
   | z.input<typeof FilledCardWithAbilitiesSchema>
   | z.input<typeof FilledCardWithEquipSchema>
@@ -547,6 +526,7 @@ export type FilledCardInput =
   | z.input<typeof FilledCardWithSpellPermanentsAndZoneReachSchema>
   | z.input<typeof FilledCardWithAbilitiesAndSpellPermanentsAndZoneReachSchema>
   | z.input<typeof FilledCardWithMechanicsAndSpellPermanentsAndZoneReachSchema>;
+export type FilledCardInput = WithCapabilityInputs<LegacyFilledCardInput>;
 
 /**
  * A filled card's printed abilities; absent and empty are the same card.
@@ -558,7 +538,7 @@ export type FilledCardInput =
  * a field rather than a cast. `AttachingModelAbilityIsMechanicAbility` in
  * `@mtg/dsl` proves the step this signature depends on.
  */
-export function filledAbilities(filled: FilledCard): readonly AttachingMechanicModelAbility[] {
+export function filledAbilities(filled: FilledCard): readonly GeneratorModelAbility[] {
   return 'abilities' in filled ? filled.abilities : [];
 }
 
@@ -566,73 +546,170 @@ export const FillBatchSchema = z.object({
   cards: z.array(FilledCardSchema).min(1).max(16),
 });
 
-export const FillBatchWithAbilitiesSchema = z.object({
-  cards: z.array(FilledCardWithAbilitiesSchema).min(1).max(16),
-});
+export interface FillBatch {
+  readonly cards: readonly FilledCard[];
+}
 
-export const FillBatchWithEquipSchema = z.object({
-  cards: z.array(FilledCardWithEquipSchema).min(1).max(16),
-});
+const PROMOTED_EFFECT_SCHEMAS: Readonly<Partial<Record<FillCapability, z.ZodType>>> = {
+  controlledCreatureKeywordGrant: KeywordGrantToControlledCreatureModelEffectSchema,
+  fightOpposingCreature: FightOpposingCreatureModelEffectSchema,
+  untapControlledCreature: UntapControlledCreatureModelEffectSchema,
+  artifactOrEnchantmentBounce: ReturnArtifactOrEnchantmentToHandModelEffectSchema,
+  ownGraveyardToHand: OwnGraveyardCardToHandModelEffectSchema,
+};
 
-export const FillBatchWithMechanicsSchema = z.object({
-  cards: z.array(FilledCardWithMechanicsSchema).min(1).max(16),
-});
+function hasCapability(flags: readonly FillCapability[], capability: FillCapability): boolean {
+  return flags.includes(capability);
+}
 
-export const FillBatchWithEquipAndMechanicsSchema = z.object({
-  cards: z.array(FilledCardWithEquipAndMechanicsSchema).min(1).max(16),
-});
+function promotedEffectSchemaFor(flags: readonly FillCapability[], base: ModelEffectUnion): z.ZodType {
+  const additions = flags.flatMap((flag) => {
+    const schema = PROMOTED_EFFECT_SCHEMAS[flag];
+    return schema === undefined ? [] : [schema];
+  });
+  if (additions.length === 0) return base as unknown as z.ZodType;
+  const replacementKinds = new Set(
+    additions.map((schema) => (schema as z.ZodObject).shape.kind.value as string),
+  );
+  const baseOptions = base.options.filter(
+    (option) => !replacementKinds.has(option.shape.kind.value as string),
+  );
+  return z.discriminatedUnion('kind', [...baseOptions, ...(additions as z.ZodObject[])] as [
+    z.ZodObject,
+    ...z.ZodObject[],
+  ]);
+}
 
-export const FillBatchWithSpellPermanentsSchema = z.object({
-  cards: z.array(FilledCardWithSpellPermanentsSchema).min(1).max(16),
-});
+interface ModelAbilityUnion {
+  readonly options: readonly z.ZodObject[];
+}
 
-export const FillBatchWithAbilitiesAndSpellPermanentsSchema = z.object({
-  cards: z.array(FilledCardWithAbilitiesAndSpellPermanentsSchema).min(1).max(16),
-});
+interface ModelEffectUnion {
+  readonly options: readonly z.ZodObject[];
+}
 
-export const FillBatchWithMechanicsAndSpellPermanentsSchema = z.object({
-  cards: z.array(FilledCardWithMechanicsAndSpellPermanentsSchema).min(1).max(16),
-});
+function abilityOption(schema: ModelAbilityUnion, kind: 'activated' | 'triggered') {
+  const option = schema.options.find((candidate) => candidate.shape.kind.value === kind);
+  if (option === undefined) throw new Error(`model ability schema has no ${kind} member`);
+  return option;
+}
 
-export const FillBatchWithZoneReachSchema = z.object({
-  cards: z.array(FilledCardWithZoneReachSchema).min(1).max(16),
-});
+function promotedAbilitySchemaFor(
+  flags: readonly FillCapability[],
+  base: ModelAbilityUnion,
+  effects: z.ZodType,
+): z.ZodType {
+  const baseOptions = base as unknown as ModelAbilityUnion;
+  const hasPromotedEffect = flags.some((flag) => PROMOTED_EFFECT_SCHEMAS[flag] !== undefined);
+  const additions: z.ZodType[] = [];
+  if (hasPromotedEffect) {
+    additions.push(
+      abilityOption(baseOptions, 'triggered').extend({ effects: z.array(effects).min(1).max(2) }),
+      abilityOption(baseOptions, 'activated').extend({
+        effects: z.array(effects).min(1).max(2),
+      }),
+    );
+  }
+  if (hasCapability(flags, 'controlledCreatureCounterOnEntry')) {
+    additions.push(ControlledCreatureCounterOnEntryModelAbilitySchema);
+  }
+  return additions.length === 0
+    ? (base as unknown as z.ZodType)
+    : z.union([base as unknown as z.ZodType, ...additions]);
+}
 
-export const FillBatchWithAbilitiesAndZoneReachSchema = z.object({
-  cards: z.array(FilledCardWithAbilitiesAndZoneReachSchema).min(1).max(16),
-});
+function promotedFilledCardSchemaFor(flags: readonly FillCapability[]): z.ZodType {
+  const spellEffectBase = hasCapability(flags, 'zoneReach')
+    ? ZoneReachingModelEffectSchema
+    : ModelEffectSchema;
+  const spellEffects = promotedEffectSchemaFor(flags, spellEffectBase);
+  const mechanicEffects = promotedEffectSchemaFor(
+    flags,
+    hasCapability(flags, 'setMechanics') ? PartBearingModelEffectSchema : ModelEffectSchema,
+  );
+  const creatureAbilityBase = hasCapability(flags, 'setMechanics')
+    ? MechanicModelAbilitySchema
+    : ModelAbilitySchema;
+  const artifactAbilityBase = hasCapability(flags, 'setMechanics')
+    ? hasCapability(flags, 'equipment')
+      ? AttachingMechanicModelAbilitySchema
+      : MechanicModelAbilitySchema
+    : hasCapability(flags, 'equipment')
+      ? AttachingModelAbilitySchema
+      : ModelAbilitySchema;
+  const creatureAbilities = z
+    .array(promotedAbilitySchemaFor(flags, creatureAbilityBase, mechanicEffects))
+    .max(2)
+    .default([]);
+  const artifactAbilities = z
+    .array(promotedAbilitySchemaFor(flags, artifactAbilityBase, mechanicEffects))
+    .max(2)
+    .default([]);
+  const spell = <K extends 'instant' | 'sorcery'>(kind: K) =>
+    z.object({ ...spellShape(kind), effects: z.array(spellEffects).min(1).max(2) });
+  const carriesAbilityField =
+    hasCapability(flags, 'abilities') ||
+    hasCapability(flags, 'equipment') ||
+    hasCapability(flags, 'setMechanics') ||
+    hasCapability(flags, 'controlledCreatureCounterOnEntry');
+  const members: z.ZodObject[] = [
+    carriesAbilityField ? z.object({ ...creatureShape, abilities: creatureAbilities }) : FilledCreatureSchema,
+    spell('instant'),
+    spell('sorcery'),
+    carriesAbilityField ? z.object({ ...artifactShape, abilities: artifactAbilities }) : FilledArtifactSchema,
+  ];
+  if (hasCapability(flags, 'spellPermanents')) {
+    members.push(
+      hasCapability(flags, 'abilities') || hasCapability(flags, 'setMechanics')
+        ? z.object(enchantmentShape(creatureAbilities))
+        : FilledAuraSchema,
+      FilledPlaneswalkerSchema,
+    );
+  }
+  return z.discriminatedUnion('kind', members as [z.ZodObject, ...z.ZodObject[]]);
+}
 
-export const FillBatchWithMechanicsAndZoneReachSchema = z.object({
-  cards: z.array(FilledCardWithMechanicsAndZoneReachSchema).min(1).max(16),
-});
+const fillSchemaCache = new Map<string, ZodType<FillBatch>>();
 
-export const FillBatchWithSpellPermanentsAndZoneReachSchema = z.object({
-  cards: z.array(FilledCardWithSpellPermanentsAndZoneReachSchema).min(1).max(16),
-});
+/** Builds one answer schema from independent switches, with no named combination tier. */
+export function fillSchemaForCapabilities(capabilities: Iterable<FillCapability>): ZodType<FillBatch> {
+  const flags = orderedFillCapabilities(capabilities);
+  if (flags.length === 0) return FillBatchSchema;
+  const key = flags.join('|');
+  const cached = fillSchemaCache.get(key);
+  if (cached !== undefined) return cached;
+  const promoted = flags.some((flag) => PROMOTED_FILL_CAPABILITIES.includes(flag));
+  const cardSchema = promoted ? promotedFilledCardSchemaFor(flags) : legacyFilledCardSchemaFor(flags);
+  const schema = z.object({ cards: z.array(cardSchema).min(1).max(16) }) as ZodType<FillBatch>;
+  fillSchemaCache.set(key, schema);
+  return schema;
+}
 
-export const FillBatchWithAbilitiesAndSpellPermanentsAndZoneReachSchema = z.object({
-  cards: z.array(FilledCardWithAbilitiesAndSpellPermanentsAndZoneReachSchema).min(1).max(16),
-});
-
-export const FillBatchWithMechanicsAndSpellPermanentsAndZoneReachSchema = z.object({
-  cards: z.array(FilledCardWithMechanicsAndSpellPermanentsAndZoneReachSchema).min(1).max(16),
-});
-
-export type FillBatch =
-  | z.infer<typeof FillBatchSchema>
-  | z.infer<typeof FillBatchWithAbilitiesSchema>
-  | z.infer<typeof FillBatchWithEquipSchema>
-  | z.infer<typeof FillBatchWithMechanicsSchema>
-  | z.infer<typeof FillBatchWithEquipAndMechanicsSchema>
-  | z.infer<typeof FillBatchWithSpellPermanentsSchema>
-  | z.infer<typeof FillBatchWithAbilitiesAndSpellPermanentsSchema>
-  | z.infer<typeof FillBatchWithMechanicsAndSpellPermanentsSchema>
-  | z.infer<typeof FillBatchWithZoneReachSchema>
-  | z.infer<typeof FillBatchWithAbilitiesAndZoneReachSchema>
-  | z.infer<typeof FillBatchWithMechanicsAndZoneReachSchema>
-  | z.infer<typeof FillBatchWithSpellPermanentsAndZoneReachSchema>
-  | z.infer<typeof FillBatchWithAbilitiesAndSpellPermanentsAndZoneReachSchema>
-  | z.infer<typeof FillBatchWithMechanicsAndSpellPermanentsAndZoneReachSchema>;
+function legacyFilledCardSchemaFor(flags: readonly FillCapability[]): z.ZodType {
+  const abilities = hasCapability(flags, 'abilities');
+  const equipment = hasCapability(flags, 'equipment');
+  const mechanics = hasCapability(flags, 'setMechanics');
+  const permanents = hasCapability(flags, 'spellPermanents');
+  const zoneReach = hasCapability(flags, 'zoneReach');
+  if (zoneReach) {
+    if (permanents) {
+      if (mechanics) return FilledCardWithMechanicsAndSpellPermanentsAndZoneReachSchema;
+      return abilities
+        ? FilledCardWithAbilitiesAndSpellPermanentsAndZoneReachSchema
+        : FilledCardWithSpellPermanentsAndZoneReachSchema;
+    }
+    if (mechanics) return FilledCardWithMechanicsAndZoneReachSchema;
+    return abilities ? FilledCardWithAbilitiesAndZoneReachSchema : FilledCardWithZoneReachSchema;
+  }
+  if (permanents) {
+    if (mechanics) return FilledCardWithMechanicsAndSpellPermanentsSchema;
+    return abilities ? FilledCardWithAbilitiesAndSpellPermanentsSchema : FilledCardWithSpellPermanentsSchema;
+  }
+  if (equipment && mechanics) return FilledCardWithEquipAndMechanicsSchema;
+  if (mechanics) return FilledCardWithMechanicsSchema;
+  if (equipment) return FilledCardWithEquipSchema;
+  return abilities ? FilledCardWithAbilitiesSchema : FilledCardSchema;
+}
 
 /** True when the allocator gave some slot in this batch an ability kind to print. */
 export function batchWantsAbilities(slots: readonly Slot[]): boolean {
@@ -727,6 +804,18 @@ export function batchWantsZoneReach(slots: readonly Slot[]): boolean {
   return slots.some((slot) => slot.effectKinds.some((kind) => ZONE_REACHING_ONLY_EFFECT_KINDS.has(kind)));
 }
 
+/** The canonical capability address for a batch, derived once for schema and prompt consumers. */
+export function fillCapabilitiesFor(slots: readonly Slot[]): readonly FillCapability[] {
+  const flags: FillCapability[] = [];
+  if (batchWantsAbilities(slots)) flags.push('abilities');
+  if (batchWantsEquip(slots)) flags.push('equipment');
+  if (batchWantsMechanics(slots)) flags.push('setMechanics');
+  if (batchWantsSpellPermanents(slots)) flags.push('spellPermanents');
+  if (batchWantsZoneReach(slots)) flags.push('zoneReach');
+  for (const capability of slots.flatMap((slot) => slot.capabilities ?? [])) flags.push(capability);
+  return orderedFillCapabilities(flags);
+}
+
 /**
  * The wider arm of `fillSchemaFor`, in the same order and for the same reasons.
  *
@@ -736,21 +825,6 @@ export function batchWantsZoneReach(slots: readonly Slot[]): boolean {
  * deep in a conditional, where a reader has to hold both arms at once to see
  * that they agree.
  */
-function zoneReachingSchemaFor(
-  mechanics: boolean,
-  permanents: boolean,
-  abilities: boolean,
-): ZodType<FillBatch> {
-  if (permanents) {
-    if (mechanics) return FillBatchWithMechanicsAndSpellPermanentsAndZoneReachSchema;
-    return abilities
-      ? FillBatchWithAbilitiesAndSpellPermanentsAndZoneReachSchema
-      : FillBatchWithSpellPermanentsAndZoneReachSchema;
-  }
-  if (mechanics) return FillBatchWithMechanicsAndZoneReachSchema;
-  return abilities ? FillBatchWithAbilitiesAndZoneReachSchema : FillBatchWithZoneReachSchema;
-}
-
 /**
  * The answer schema this batch is shown, widest first.
  *
@@ -784,7 +858,6 @@ function zoneReachingSchemaFor(
  */
 export function fillSchemaFor(slots: readonly Slot[]): ZodType<FillBatch> {
   const equip = batchWantsEquip(slots);
-  const mechanics = batchWantsMechanics(slots);
   const permanents = batchWantsSpellPermanents(slots);
   const zoneReach = batchWantsZoneReach(slots);
   // A batch cannot be both, and the reason is structural rather than a policy
@@ -815,15 +888,5 @@ export function fillSchemaFor(slots: readonly Slot[]): ZodType<FillBatch> {
         'combined tier.',
     );
   }
-  if (zoneReach) return zoneReachingSchemaFor(mechanics, permanents, batchWantsAbilities(slots));
-  if (permanents) {
-    if (mechanics) return FillBatchWithMechanicsAndSpellPermanentsSchema;
-    return batchWantsAbilities(slots)
-      ? FillBatchWithAbilitiesAndSpellPermanentsSchema
-      : FillBatchWithSpellPermanentsSchema;
-  }
-  if (equip && mechanics) return FillBatchWithEquipAndMechanicsSchema;
-  if (mechanics) return FillBatchWithMechanicsSchema;
-  if (equip) return FillBatchWithEquipSchema;
-  return batchWantsAbilities(slots) ? FillBatchWithAbilitiesSchema : FillBatchSchema;
+  return fillSchemaForCapabilities(fillCapabilitiesFor(slots));
 }

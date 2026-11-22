@@ -260,19 +260,20 @@ describe('an equip clause', () => {
   });
 
   /**
-   * The encoding rule, from both ends: there is no absent field and no empty
-   * list, so an equip clause has exactly one spelling and `canonicalJson`
-   * cannot see two shapes where the card has one. A third modification is
-   * refused for the reason a third effect is.
+   * The encoding rule, from both ends: a bare Equip clause carries the one
+   * explicit empty list that says it grants no static modification, while a
+   * sixth modification is refused beyond the smallest ceiling that holds
+   * Sword of Vengeance.
    */
-  it('refuses an empty modification list and a third modification', () => {
+  it('accepts a bare Equip clause and refuses a sixth modification', () => {
     const empty = weapon({
       abilities: [
         { kind: 'activated', cost: { mana: { generic: 1 } }, attach: { modifications: [] }, effects: [] },
       ],
     });
-    expectViolation(empty, 'SCHEMA_INVALID');
-    const three = weapon({
+    expect(validateCard(empty)).toEqual([]);
+    expect(renderOracleText(parseCard(empty as CardInput))).toBe('Equip {1}');
+    const six = weapon({
       abilities: [
         {
           kind: 'activated',
@@ -282,13 +283,16 @@ describe('an equip clause', () => {
               { kind: 'statBonus', power: 2, toughness: 0 },
               { kind: 'grantKeyword', keyword: 'deathtouch' },
               { kind: 'grantKeyword', keyword: 'trample' },
+              { kind: 'grantKeyword', keyword: 'flying' },
+              { kind: 'grantKeyword', keyword: 'vigilance' },
+              { kind: 'grantKeyword', keyword: 'haste' },
             ],
           },
           effects: [],
         },
       ],
     });
-    expectViolation(three, 'SCHEMA_INVALID');
+    expectViolation(six, 'SCHEMA_INVALID');
   });
 
   /**

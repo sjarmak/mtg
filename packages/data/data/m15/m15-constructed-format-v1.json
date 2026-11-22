@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "m15",
+  "name": "Magic 2015",
+  "sources": [
+    {
+      "code": "M15",
+      "catalogFormat": "m15-printed-v1",
+      "catalogSha256": "93f568b56f99d400b97f2720cb61c5895ab429f8fb9cbd4474baae5139cf92e0",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/M15.json",
+        "sha256": "09d6217c0891630fa24821eb167533b1bea236a985b0ccbe1c01b6c09c86a3e2",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "blue-black-lifegain",
+      "name": "Blue-Black Lifegain",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m15-printed-v1:0065:7af346ac-32a6-49a8-986d-834b2c8c0478",
+          "name": "Jorubai Murk Lurker",
+          "count": 4
+        },
+        {
+          "physicalId": "m15-printed-v1:0090:bff5d53c-5698-4d09-b557-89d10ce4fbbf",
+          "name": "Child of Night",
+          "count": 4
+        },
+        {
+          "physicalId": "m15-printed-v1:0095:9228ea53-4aea-45f5-bec5-4a0629ec8825",
+          "name": "Eternal Thirst",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0121:66d46b81-3131-4561-beca-ccf4a0973610",
+          "name": "Wall of Limbs",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0119:2e06e6c8-05c0-4d87-9961-605b888bc794",
+          "name": "Ulcerate",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0098:16b2e842-6c92-47b0-bed4-e0e64485f168",
+          "name": "Flesh to Dust",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0055:619268d2-f7a8-48cd-b17b-197e82474b13",
+          "name": "Frost Lynx",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0254:1c9f55eb-2c9e-4bc7-a67c-ab2eeb127201",
+          "name": "Island",
+          "count": 17
+        },
+        {
+          "physicalId": "m15-printed-v1:0258:719b570c-1773-4a0c-8ea3-e75b1c14c35f",
+          "name": "Swamp",
+          "count": 25
+        }
+      ]
+    },
+    {
+      "id": "black-red-attrition",
+      "name": "Black-Red Attrition",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m15-printed-v1:0109:11da48a7-903d-43f5-8085-1b3790ed079a",
+          "name": "Nightfire Giant",
+          "count": 4
+        },
+        {
+          "physicalId": "m15-printed-v1:0155:a5603e1f-593c-45f0-9e13-fe3492464443",
+          "name": "Lightning Strike",
+          "count": 4
+        },
+        {
+          "physicalId": "m15-printed-v1:0098:16b2e842-6c92-47b0-bed4-e0e64485f168",
+          "name": "Flesh to Dust",
+          "count": 3
+        },
+        {
+          "physicalId": "m15-printed-v1:0119:2e06e6c8-05c0-4d87-9961-605b888bc794",
+          "name": "Ulcerate",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0164:1d94c000-52e0-4215-83af-6351dc43e636",
+          "name": "Stoke the Flames",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0099:98951dea-df48-4f1b-a7cf-f14b2d36300f",
+          "name": "Gravedigger",
+          "count": 3
+        },
+        {
+          "physicalId": "m15-printed-v1:0114:9f9cead6-7806-4c51-abd1-62c3b8f366b5",
+          "name": "Sign in Blood",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0131:12e29b2b-5fe3-4dee-b247-10cd139fe2d0",
+          "name": "Borderland Marauder",
+          "count": 3
+        },
+        {
+          "physicalId": "m15-printed-v1:0118:9f8723f6-96b1-4441-8a57-435fb82d6db4",
+          "name": "Typhoid Rats",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0091:752b7d05-19d7-4765-9bf8-05a7cb539c3f",
+          "name": "Covenant of Blood",
+          "count": 1
+        },
+        {
+          "physicalId": "m15-printed-v1:0089:81ddf81d-1746-41a7-951c-0bd68954505d",
+          "name": "Caustic Tar",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0243:2553b8ae-e5af-40ba-8b3b-d5652919c9bb",
+          "name": "Evolving Wilds",
+          "count": 4
+        },
+        {
+          "physicalId": "m15-printed-v1:0258:719b570c-1773-4a0c-8ea3-e75b1c14c35f",
+          "name": "Swamp",
+          "count": 16
+        },
+        {
+          "physicalId": "m15-printed-v1:0262:fa712fb1-8840-4e26-9211-2653919fed91",
+          "name": "Mountain",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "red-green-monsters",
+      "name": "Red-Green Monsters",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m15-printed-v1:0151:4189a909-2e20-4dc7-894c-21446da5b0cf",
+          "name": "Kird Chieftain",
+          "count": 4
+        },
+        {
+          "physicalId": "m15-printed-v1:0173:deb5ca6a-f91d-443d-ad84-6fe1e80bfb51",
+          "name": "Elvish Mystic",
+          "count": 4
+        },
+        {
+          "physicalId": "m15-printed-v1:0143:74d0c422-4201-4d6f-9df7-659e8b78b541",
+          "name": "Generator Servant",
+          "count": 4
+        },
+        {
+          "physicalId": "m15-printed-v1:0155:a5603e1f-593c-45f0-9e13-fe3492464443",
+          "name": "Lightning Strike",
+          "count": 3
+        },
+        {
+          "physicalId": "m15-printed-v1:0164:1d94c000-52e0-4215-83af-6351dc43e636",
+          "name": "Stoke the Flames",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0200:ad40b8f1-428a-4244-ad8a-4e757aea2b45",
+          "name": "Siege Wurm",
+          "count": 3
+        },
+        {
+          "physicalId": "m15-printed-v1:0284:cd192de8-12b7-4c3f-913c-de9f26fdbb20",
+          "name": "Terra Stomper",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0189:01702401-9dfe-4e52-9d6d-cf594261b009",
+          "name": "Overwhelm",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0262:fa712fb1-8840-4e26-9211-2653919fed91",
+          "name": "Mountain",
+          "count": 16
+        },
+        {
+          "physicalId": "m15-printed-v1:0266:283d6124-1678-46b1-a12a-69644c689e29",
+          "name": "Forest",
+          "count": 20
+        }
+      ]
+    },
+    {
+      "id": "green-white-convoke",
+      "name": "Green-White Convoke",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m15-printed-v1:0202:5e9925c5-98d5-4eb9-8aaa-a96b63a5812d",
+          "name": "Sunblade Elf",
+          "count": 4
+        },
+        {
+          "physicalId": "m15-printed-v1:0026:3a74f052-05f7-4e5e-a765-7882a00d0f6a",
+          "name": "Raise the Alarm",
+          "count": 4
+        },
+        {
+          "physicalId": "m15-printed-v1:0173:deb5ca6a-f91d-443d-ad84-6fe1e80bfb51",
+          "name": "Elvish Mystic",
+          "count": 3
+        },
+        {
+          "physicalId": "m15-printed-v1:0016:ff0c73b7-a242-4fca-ab96-194750c984a7",
+          "name": "Kinsbaile Skirmisher",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0032:36c857a8-7df6-4a50-ae58-4aab76d7d58c",
+          "name": "Seraph of the Masses",
+          "count": 3
+        },
+        {
+          "physicalId": "m15-printed-v1:0222:ed7865a7-8fe2-4b5d-a625-91585d1b7d4a",
+          "name": "Obelisk of Urd",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0009:217c8b3d-4675-49ad-8d86-8a5d6ca9cae5",
+          "name": "Devouring Light",
+          "count": 3
+        },
+        {
+          "physicalId": "m15-printed-v1:0030:6481bf34-192c-4102-8336-4d2d007d9e3c",
+          "name": "Sanctified Charge",
+          "count": 2
+        },
+        {
+          "physicalId": "m15-printed-v1:0189:01702401-9dfe-4e52-9d6d-cf594261b009",
+          "name": "Overwhelm",
+          "count": 3
+        },
+        {
+          "physicalId": "m15-printed-v1:0250:40e211fe-e843-4d05-a97d-b208b616179a",
+          "name": "Plains",
+          "count": 18
+        },
+        {
+          "physicalId": "m15-printed-v1:0266:283d6124-1678-46b1-a12a-69644c689e29",
+          "name": "Forest",
+          "count": 16
+        }
+      ]
+    }
+  ],
+  "contentSha256": "358b4eb69780ff7785f926dad43d2a060986a2efb751c9017f3d0b87ffce2520"
+}

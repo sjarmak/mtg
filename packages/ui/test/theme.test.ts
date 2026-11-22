@@ -59,17 +59,18 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { EXAMPLE_CARDS } from '@mtg/dsl';
 import { Shell } from '../src/app/Shell';
-import { UI_MODES } from '../src/app/router';
-import type { UiMode, UiRoute } from '../src/app/router';
+import { UI_MODES, routeAt } from '../src/app/router';
+import type { RouteAt, UiMode } from '../src/app/router';
 import { readDeckArtifact } from '../src/lab/deck-artifact';
 import type { DeckArtifact } from '../src/lab/deck-artifact';
 import { readReplayLog } from '../src/replay/timeline';
 import { AnalysisRoute } from '../src/routes/AnalysisRoute';
 import { CardsRoute } from '../src/routes/CardsRoute';
+import { DesignRoute } from '../src/routes/design/DesignRoute';
 import { DeckRoute } from '../src/routes/DeckRoute';
 import { DraftRoute } from '../src/routes/DraftRoute';
 import { PlayRoute } from '../src/routes/PlayRoute';
-import { ReplayRoute } from '../src/routes/ReplayRoute';
+import { ReplayViewer } from '../src/routes/replay/ReplayViewer';
 import { dealMirrorGame } from '../src/routes/play/deal';
 import { uiStyleSheet } from '../src/styles/index';
 import {
@@ -80,6 +81,7 @@ import {
   routeScope,
 } from '../src/styles/tokens';
 import { fixtureText } from './support/replay-fixture';
+import { fixtureLog } from './replay/support/log-fixture';
 
 interface StyleLike {
   readonly getPropertyValue: (property: string) => string;
@@ -321,12 +323,8 @@ function committedDeck(): DeckArtifact {
 
 const LOG = readReplayLog(fixtureText());
 
-function at(mode: UiMode): UiRoute {
-  return { mode, params: {} };
-}
-
-function shell(mode: UiMode, child: ReactElement): string {
-  return renderToStaticMarkup(h(Shell, { mode, onSelectMode: () => undefined, children: child }));
+function shell(at: RouteAt, child: ReactElement): string {
+  return renderToStaticMarkup(h(Shell, { ...at, onSelectMode: () => undefined, children: child }));
 }
 
 /**
@@ -335,31 +333,54 @@ function shell(mode: UiMode, child: ReactElement): string {
  * painted are exactly where a missing scope shows up. A `Record<UiMode, ...>`
  * rather than a `Map`, on purpose, because it is the mechanism that makes a new
  * route impossible to forget: adding a mode to `UI_MODES` fails `tsc` here until
- * somebody renders it.
+ * somebody renders it. A mode with several sections renders every section whose
+ * surface paints classes of its own, concatenated, so the scan reaches them all.
  */
 const ROUTE_MARKUP: Readonly<Record<UiMode, () => string>> = {
   play: () =>
     shell(
-      'play',
+      routeAt('play', 'constructed'),
       h(PlayRoute, {
         config: dealMirrorGame(EXAMPLE_CARDS, { youName: 'You', opponentName: 'Bot' }).config,
       }),
-    ),
-  draft: () =>
+    ) +
     shell(
-      'draft',
+      routeAt('play', 'draft'),
       h(DraftRoute, {
         set: { status: 'ready', cards: EXAMPLE_CARDS },
         params: { seed: 'theme/draft' },
         onSetParams: () => undefined,
       }),
     ),
-  deck: () => shell('deck', h(DeckRoute, { state: { status: 'ready', deck: committedDeck() } })),
-  analysis: () => shell('analysis', h(AnalysisRoute, { state: { status: 'ready', log: LOG } })),
-  replay: () =>
-    shell('replay', h(ReplayRoute, { log: LOG, route: at('replay'), onSetParams: () => undefined })),
+  customize: () =>
+    // The designer is rendered for real rather than stubbed, like every other
+    // entry here: it paints its own classes, and a stub would leave them
+    // unscanned by the check this file exists to make.
+    shell(routeAt('customize', 'sets'), h(DesignRoute)) +
+    shell(routeAt('customize', 'decks'), h(DeckRoute, { state: { status: 'ready', deck: committedDeck() } })),
+  analysis: () =>
+    shell(routeAt('analysis', 'explorer'), h(AnalysisRoute, { state: { status: 'ready', log: LOG } })) +
+    // The event viewer, which is what the Replay section mounts. It used to be
+    // `ReplayRoute` over the statistics log, and that route is gone (`mtg-2ayr`):
+    // its per-turn walk lives under Analysis now, and painting a component no tab
+    // renders scans classes nobody can reach.
+    shell(
+      routeAt('analysis', 'replay'),
+      h(ReplayViewer, {
+        state: { status: 'ready', log: fixtureLog() },
+        route: routeAt('analysis', 'replay'),
+        onSetParams: () => undefined,
+      }),
+    ),
   cards: () =>
-    shell('cards', h(CardsRoute, { cards: EXAMPLE_CARDS, route: at('cards'), onSetParams: () => undefined })),
+    shell(
+      routeAt('cards', 'gallery'),
+      h(CardsRoute, {
+        cards: EXAMPLE_CARDS,
+        route: routeAt('cards', 'gallery'),
+        onSetParams: () => undefined,
+      }),
+    ),
 };
 
 /** Every route's shell, rendered once and reused by every paint. */

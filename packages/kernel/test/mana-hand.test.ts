@@ -23,6 +23,7 @@ import {
   simpleAgent,
   stateFingerprint,
 } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { mana } from '@mtg/dsl';
 import { creature, FOREST, lands, SWAMP } from './cards';
 import { apply, handOidOf, oidsOf } from './helpers';
@@ -201,7 +202,11 @@ describe('a played game still replays', () => {
       const decision = current.pending;
       if (decision === null) return current;
       const wanted = JSON.stringify(
-        agent.decide({ state: current.state, player: decision.player, decision }),
+        agent.decide({
+          state: observeState(current.state, decision.player, 'test/mana-hand.test.ts:204'),
+          player: decision.player,
+          decision,
+        }),
       );
       const index = decision.options.findIndex((option) => JSON.stringify(option) === wanted);
       if (index < 0) throw new Error(`the bot chose a move the enumeration does not offer: ${wanted}`);

@@ -30,7 +30,7 @@ export interface AssemblyResult {
   readonly card?: Card;
   readonly violations: readonly Violation[];
   /**
-   * Exact repeats `normaliseEffects` dropped before parsing. Counted even
+   * Exact repeats `normalizeEffects` dropped before parsing. Counted even
    * when the card was then rejected for something else: the number says how
    * often the model proposed a card the DSL would have refused, which is a fact
    * about the generator whether or not that particular card survived.
@@ -68,9 +68,9 @@ export function assembleCard(slot: Slot, filled: FilledCard, setCode: string): A
     };
   }
 
-  const normalised = normaliseEffects(filled);
-  const dropped = normalised.dropped;
-  const input = buildCardInput(slot, filled, setCode, id, normalised.kept);
+  const normalized = normalizeEffects(filled);
+  const dropped = normalized.dropped;
+  const input = buildCardInput(slot, filled, setCode, id, normalized.kept);
   const parsed = CardSchema.safeParse(input);
   if (!parsed.success) {
     return { violations: schemaIssuesToViolations(parsed.error.issues), duplicateEffectsDropped: dropped };
@@ -83,7 +83,7 @@ export function assembleCard(slot: Slot, filled: FilledCard, setCode: string): A
     : { card, violations: [], duplicateEffectsDropped: dropped };
 }
 
-interface NormalisedEffects {
+interface NormalizedEffects {
   readonly kept: readonly Effect[];
   readonly dropped: number;
 }
@@ -113,7 +113,7 @@ interface NormalisedEffects {
  * become a rejection, or reports the multi-target designs again and names the
  * DSL gap they are asking for.
  */
-function normaliseEffects(filled: FilledCard): NormalisedEffects {
+function normalizeEffects(filled: FilledCard): NormalizedEffects {
   if (filled.kind !== 'instant' && filled.kind !== 'sorcery') return { kept: [], dropped: 0 };
   const seen = new Set<string>();
   const kept = filled.effects.filter((effect) => {

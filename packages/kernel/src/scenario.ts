@@ -23,6 +23,7 @@ import type { GameConfig, GameObject, GameState, PlayerState, Step, ZoneId } fro
 import { EMPTY_COMBAT, EMPTY_MANA_POOL } from './state';
 import { beginTrace } from './trace';
 import { DEFAULT_CONFIG } from './setup';
+import { battleProtector } from './siege';
 
 export interface ScenarioPermanent {
   readonly card: Card;
@@ -43,6 +44,10 @@ export interface ScenarioPermanent {
   readonly token?: boolean | undefined;
   /** Current loyalty counters; defaults to printed starting loyalty on a planeswalker. */
   readonly loyalty?: number | undefined;
+  /** Current defense counters; defaults to printed defense on a Battle. */
+  readonly defense?: number | undefined;
+  /** Current Battle protector; defaults to the controller for a non-Siege. */
+  readonly protector?: PlayerId | undefined;
 }
 
 export interface ScenarioSpec {
@@ -54,6 +59,8 @@ export interface ScenarioSpec {
   readonly graveyards?: readonly [readonly Card[], readonly Card[]] | undefined;
   readonly active?: PlayerId | undefined;
   readonly turn?: number | undefined;
+  /** Per-seat turn history; defaults to alternating turns ending at `active`. */
+  readonly turnsBegun?: readonly [number, number] | undefined;
   /** Step to walk to by passing priority; defaults to `precombatMain`. */
   readonly step?: Step | undefined;
   readonly maximumTurns?: number | undefined;
@@ -82,7 +89,8 @@ function addObject(
   zone: ZoneId,
   overrides: Partial<GameObject> = {},
 ): ObjectId {
-  const oid = objectId(builder.counter);
+  const timestamp = builder.counter;
+  const oid = objectId(timestamp);
   builder.counter += 1;
   builder.objects[oid] = {
     oid,
@@ -97,6 +105,7 @@ function addObject(
     deathtouched: false,
     counters: NO_COUNTERS,
     ...overrides,
+    ...(zone === 'battlefield' ? { battlefieldTimestamp: timestamp } : {}),
   };
   return oid;
 }
@@ -142,6 +151,14 @@ function withRegisteredStatics(state: GameState): GameState {
 /** Builds a position and settles it at the requested step. */
 export function scenario(spec: ScenarioSpec = {}): ReduceResult {
   const active = spec.active ?? 0;
+  const turn = spec.turn ?? 2;
+  const inferredActiveTurns = Math.ceil(turn / 2);
+  const inferredOtherTurns = Math.floor(turn / 2);
+  const turnsBegun =
+    spec.turnsBegun ??
+    (active === 0
+      ? ([inferredActiveTurns, inferredOtherTurns] as const)
+      : ([inferredOtherTurns, inferredActiveTurns] as const));
   const config: GameConfig = {
     seed: spec.seed ?? 'scenario',
     startingLife: DEFAULT_CONFIG.startingLife,
@@ -162,14 +179,19 @@ export function scenario(spec: ScenarioSpec = {}): ReduceResult {
         damage: permanent.damage ?? 0,
         token: permanent.token ?? false,
         counters:
-          permanent.loyalty === undefined && permanent.card.kind !== 'planeswalker'
-            ? NO_COUNTERS
-            : setCounterCount(
-                NO_COUNTERS,
-                'loyalty',
-                permanent.loyalty ??
-                  (permanent.card.kind === 'planeswalker' ? permanent.card.startingLoyalty : 0),
-              ),
+          permanent.card.kind === 'battle'
+            ? setCounterCount(NO_COUNTERS, 'defense', permanent.defense ?? permanent.card.defense)
+            : permanent.loyalty === undefined && permanent.card.kind !== 'planeswalker'
+              ? NO_COUNTERS
+              : setCounterCount(
+                  NO_COUNTERS,
+                  'loyalty',
+                  permanent.loyalty ??
+                    (permanent.card.kind === 'planeswalker' ? permanent.card.startingLoyalty : 0),
+                ),
+        ...(permanent.card.kind === 'battle'
+          ? { protector: permanent.protector ?? battleProtector(permanent.card, permanent.controller) }
+          : {}),
       }),
     );
   }
@@ -185,6 +207,7 @@ export function scenario(spec: ScenarioSpec = {}): ReduceResult {
     );
     seats.push({
       id: player,
+      turnsBegun: turnsBegun[player],
       life: spec.life?.[player] ?? config.startingLife,
       library,
       hand,
@@ -211,18 +234,28 @@ export function scenario(spec: ScenarioSpec = {}): ReduceResult {
     battlefield,
     exile: [],
     stack: [],
+    emblems: [],
     continuous: [],
     costModifiers: [],
     turnCombatRules: [],
+    turnPlayerRules: [],
+    detentions: [],
+    damageRetaliations: [],
+    attackDebuffs: [],
     replacements: [],
     turn: {
-      number: spec.turn ?? 2,
+      number: turn,
       active,
       step: 'precombatMain',
       priority: active,
       passes: 0,
       landsPlayed: 0,
-      damagedPlayers: [],
+      lifeLostThisTurn: [0, 0],
+      playersDealtDamageThisTurn: [],
+      damageSourcesThisTurn: [],
+      playersWhoCastSpellThisTurn: [],
+      playersWhoAttackedWithCreatureThisTurn: [],
+      battlefieldToGraveyardThisTurn: [],
       awaiting: null,
       awaitingPlayer: null,
     },

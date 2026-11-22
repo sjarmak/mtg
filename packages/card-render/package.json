@@ -1,7 +1,7 @@
 {
   "name": "@mtg/card-render",
   "version": "0.0.0",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
@@ -10,6 +10,9 @@
   "dependencies": {
     "@mtg/card-geometry": "*",
     "@mtg/dsl": "*",
+    "@mtg/render-spec": "*"
+  },
+  "devDependencies": {
     "@mtg/ui": "*"
   }
 }

@@ -18,8 +18,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { simpleAgent } from '@mtg/kernel';
-import { pendingDecision } from '@mtg/kernel';
+import { agentView, pendingDecision, settleAgentAction, simpleAgent } from '@mtg/kernel';
 import { createBudgetGuard, createClaudeCliTransport, createFixtureProvider } from '@mtg/llm';
 import { compileDownBacklog, createReferee, exampleBlockingPosition, formatBacklog } from '../src/index';
 
@@ -41,7 +40,10 @@ async function main(): Promise<number> {
   });
   const referee = createReferee({ provider, fallback: simpleAgent('fallback') });
 
-  const { action, record } = await referee.rule({ state, player: decision.player, decision });
+  const view = agentView(state, decision.player, decision, 'record-ruling', (candidate) =>
+    settleAgentAction(state, candidate),
+  );
+  const { action, record } = await referee.rule(view);
 
   console.log(`decision      ${record.decision} for player ${String(record.player)}`);
   console.log(

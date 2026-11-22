@@ -56,10 +56,10 @@
  * A designer reading a share near zero cannot tell those two situations apart
  * from the share alone, so the share never travels alone. Every archetype carries the deal
  * beside it — `castable`, how many cards in the cube it can play as spells, and
- * `dealtCastable`, how many of those this pod's own pack hands one seat before
+ * `dealtCastable`, how many of those this pod's own packs hand one seat in expectation before
  * a single pick — and the measurement carries `spellsRequired`, which is what
  * `buildDeck` demands. A low share under a deal well below the requirement is
- * the pod being too shallow for a list this wide; the same share with the deal
+ * evidence that the pod is too shallow for a list this wide; the same share with the deal
  * above the requirement is the list itself. `dealtCastable` is exact rather than
  * simulated: it is `slot.count x castable-in-that-rarity / sheet` summed over
  * the pack's slots and multiplied by the packs a seat opens, read off the very
@@ -115,14 +115,56 @@
  *     So a cube built with `--allow-multiples` is measured but not drafted, and
  *     it is refused here by name: left to reach `runDraft`, it comes back as
  *     "two cards in the set share an id", which is true about the runtime's
- *     internals and says nothing about the flag the designer typed. Minting a
- *     synthetic id per copy would draft *a* list, but not this one (the copies
- *     would be different cards to every bot), so the limit is stated instead
- *     and the choice is open in mtg-bc2.139.
+ *     internals and says nothing about the flag the designer typed.
+ *
+ * ## Why gap 4 stays a refusal rather than a mint
+ *
+ * **Settled 2026-08-27 (`mtg-bc2.139`).** The open choice was to mint a
+ * synthetic id per copy before `runDraft` and map back on the way out. It was
+ * measured rather than argued, and the measurement is why it is not taken.
+ *
+ * Held every input fixed but identity: the fixture list with white doubled as
+ * 34 copies, against the same list with white doubled as 34 *distinct* cards
+ * carrying the same cost, stats, colors and rarity. Two hundred drafts of the
+ * four-seat pod, 800 seat-drafts each. Both read **356 of 800**, the same
+ * integer rather than the same neighborhood, with `castable` 102 and
+ * `dealtCastable` 35.32 on both. So a minted measurement is a correct
+ * measurement of a *different* cube — the one holding twice as many distinct
+ * cards — and a designer reading a share off it could swap every copy for
+ * another card and watch the number not move.
+ *
+ * That identity is structural, not a coincidence of one fixture. `dealtCount`
+ * reads `slot.count x castable-in-that-rarity / sheet`, which counts entries per
+ * rarity and never asks what they are; the bot scores a copy exactly as it
+ * scores its twin, because `evaluateCard` reads the card and the ids differ
+ * nowhere else; and `buildDeck` counts cards. Nothing on the path from list to
+ * share can see that two entries are one card.
+ *
+ * The reason the bead guessed — that copies barely move the number — was
+ * checked and is wrong, in the direction that makes it worse. They move it a
+ * lot: doubling white took `castable` 68 to 102, `dealtCastable` 31.91 to 35.32
+ * and the azorius share 34.4% to 44.5%. The defect is not the size of the
+ * change; it is that the change is about list size and color density, which is
+ * a question `validate.ts` already answers by counting.
+ *
+ * The scarcity a copy count exists to encode is also already gone, by gap 1.
+ * Dealt at the pod its own size — the fixture's 96 cards to four seats of 24,
+ * so a physical cube would deal each card exactly once — the runtime leaves
+ * 35.5% of a singleton list undealt and deals 26.7% of it more than once. The
+ * flagship's 371 cards to eight seats of 45 reads the same shape, 37.6% and
+ * 25.8%. A list that cannot hold a card scarce cannot be told that four copies
+ * make it less so.
  */
 import type { BoosterRecipe } from '@mtg/deckbuild';
 import { buildDeck, resolveConfig, spellCount } from '@mtg/deckbuild';
-import { DEFAULT_PACKS_PER_SEAT, DraftError, draftedPools, runDraft } from '@mtg/draft-export';
+import {
+  DEFAULT_NATIVE_DRAFT_BOT_POLICY,
+  DEFAULT_PACKS_PER_SEAT,
+  DraftError,
+  draftedPools,
+  runDraft,
+} from '@mtg/draft-export';
+import type { NativeDraftBotPolicy } from '@mtg/draft-export';
 import type { Card, Rarity } from '@mtg/dsl';
 import { isLand, RARITIES } from '@mtg/dsl';
 import type { CubeArchetype, CubeCriteria } from './criteria';
@@ -166,15 +208,16 @@ export interface ArchetypeAvailability {
    * its packs, in expectation, before a single pick is made. Read off the
    * recipe the drafts ran rather than simulated, and therefore exact.
    *
-   * The floor `share` is read against: below `spellsRequired` the seat cannot
-   * assemble the archetype from the deal at all, however good the list is, and
-   * a share near zero there is the pod rather than the cube.
+   * The context `share` is read against: below `spellsRequired`, the expected
+   * deal is too shallow to attribute a low share solely to the cube list.
    */
   readonly dealtCastable: number;
 }
 
 export interface AvailabilityMeasured {
   readonly kind: 'measured';
+  /** Policy that produced every drafted pool in this measurement. */
+  readonly botPolicy: NativeDraftBotPolicy;
   readonly seed: string;
   readonly drafts: number;
   readonly seats: number;
@@ -254,7 +297,8 @@ export function measureAvailability(
     return {
       kind: 'unmeasured',
       reason:
-        `the cube holds ${repeated} more than once, and the draft runtime deals a list of distinct cards; ` +
+        `the cube holds ${repeated} more than once, and a copy is indistinguishable to this runtime ` +
+        'from a distinct card with the same stats, so the share would be a true reading of another cube; ' +
         'build this cube singleton, without --allow-multiples, to draft it',
     };
   }
@@ -319,6 +363,7 @@ function tallied(
   const seatDrafts = bounds.drafts * criteria.seats;
   return {
     kind: 'measured',
+    botPolicy: DEFAULT_NATIVE_DRAFT_BOT_POLICY,
     seed: bounds.seed,
     drafts: bounds.drafts,
     seats: criteria.seats,
@@ -415,8 +460,9 @@ function entryFor(byId: ReadonlyMap<string, CubeEntry>, card: Card): CubeEntry {
  * and `undefined` for a list of distinct cards.
  *
  * Both shapes are the same fact about the list and the runtime refuses both, so
- * both are reported the same way. See gap 4 in this file's header for why the
- * refusal is stated here rather than worked around.
+ * both are reported the same way. See gap 4 and the section after it for why
+ * the refusal is stated here rather than worked around, and for the measurement
+ * that settled it.
  */
 function repeatedCard(entries: readonly CubeEntry[]): string | undefined {
   const seen = new Set<string>();

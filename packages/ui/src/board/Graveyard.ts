@@ -44,8 +44,12 @@ function graveyardOrder(cards: readonly GraveyardCard[]): readonly GraveyardCard
 export function Graveyard(props: GraveyardProps): ReactElement {
   return createElement(ZoneBrowser, {
     label: props.label,
+    drawnLabel: 'Graveyard',
     cards: graveyardOrder(props.cards),
-    emptyText: 'graveyard is empty',
+    // The label beside it already says which zone this is — "The Sky Islands'
+    // graveyard" — so the sentence says the state and not the noun again
+    // (`mtg-dcxg.10`).
+    emptyText: 'empty',
     zone: 'graveyard',
     ...(props.seat === undefined ? {} : { seat: props.seat }),
   });

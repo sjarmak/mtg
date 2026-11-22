@@ -23,6 +23,7 @@ import { fixtureLog } from './support/log-fixture';
 import type { ArtResolver } from '../../src/lab/art-manifest';
 import { boardFrame } from '../../src/routes/replay/frame';
 import { namesFor } from '../../src/routes/replay/narrate';
+import { actionSummary } from '../../src/routes/replay/DecisionPanel';
 
 afterEach(() => {
   cleanup();
@@ -45,7 +46,7 @@ function Harness(props: {
   const [params, setParams] = useState<Readonly<Record<string, string>>>(props.initial ?? {});
   return h(ReplayViewer, {
     state: { status: 'ready', log: LOG },
-    route: { mode: 'replay', params },
+    route: { mode: 'analysis', sub: 'replay', params },
     ...(props.artFor === undefined ? {} : { artFor: props.artFor }),
     onSetParams: (next) => {
       setParams((current) => {
@@ -304,12 +305,19 @@ describe('ReplayViewer draws', () => {
  * same split `DeckRoute` makes: a checkout that has never recorded a game wants
  * the command, and a file the reader refused wants the line it refused at.
  */
+/** The whole empty state as one string: `renderCopy` splits it into spans. */
+function emptyBlock(title: unknown): string {
+  const parent = (title as { parentElement: { textContent: string | null } | null }).parentElement;
+  if (parent === null) throw new Error('the empty state drew no block');
+  return parent.textContent ?? '';
+}
+
 describe('ReplayViewer without a game to draw', () => {
   function empty(state: ReplayState, hint?: string): void {
     render(
       h(ReplayViewer, {
         state,
-        route: { mode: 'replay', params: {} },
+        route: { mode: 'analysis', sub: 'replay', params: {} },
         onSetParams: () => undefined,
         ...(hint === undefined ? {} : { sourceHint: hint }),
       }),
@@ -326,6 +334,19 @@ describe('ReplayViewer without a game to draw', () => {
     empty({ status: 'absent' });
     expect(screen.getByText('No replay recorded yet')).toBeTruthy();
     expect(screen.getByText(/npm run play/)).toBeTruthy();
+  });
+
+  it('names both sets when the recording is another set’s, rather than reading as never recorded', () => {
+    // `mtg-ahr5`. The picker moved and the log did not follow it. A checkout
+    // that has never recorded a game and a lab one picker move from its own
+    // recording used to draw the same page, and only one of them has anything
+    // to do about it.
+    empty({ status: 'elsewhere', belongsTo: 'the flagship set', showing: 'Magic 2011' });
+    const said = emptyBlock(screen.getByText('The recorded game is of another set'));
+    expect(said).toContain('the flagship set');
+    expect(said).toContain('Magic 2011');
+    expect(said).toContain('set picker');
+    expect(screen.queryByText('No replay recorded yet')).toBeNull();
   });
 
   it('reads a log that failed the reader back with the line it failed on', () => {
@@ -443,5 +464,54 @@ describe('a replayed board carries the illustrations its game was played with', 
       expectAtStep(180 + taken);
       expect(view.markup()).toBe(frames[taken]);
     }
+  });
+});
+
+/**
+ * The caption's note is the action, and a frame with no action gets no note.
+ *
+ * `actionSummary` answers a null action with an em dash, which is what its own
+ * docblock asks for — a badge-sized phrase, and a badge with no value wants a
+ * placeholder. At the end of a heading the same character reads as a value that
+ * failed to load, so the caption draws no note at all instead. Every setup frame
+ * has a null action, which is the frame the replay *opens* on.
+ *
+ * Counted in the rendered markup rather than queried: the workspace tsconfig
+ * has no `lib: dom`, so `document` is not a name here, and the action's words
+ * appear a second time in the events table below the board, which makes a text
+ * query ambiguous. The transport draws a `mtg-page-note` of its own — the step
+ * cursor — on every frame, so the number to watch is two against one.
+ */
+describe('the caption on a frame nobody acted on', () => {
+  const firstStep = (wanted: 'acted' | 'idle'): number => {
+    const game = fixtureLog().games[0];
+    if (game === undefined) throw new Error('the fixture holds no game');
+    const seq = game.steps.findIndex((step) =>
+      wanted === 'idle' ? step.action === null : step.action !== null,
+    );
+    if (seq < 0) throw new Error(`the fixture holds no ${wanted} frame`);
+    return seq;
+  };
+
+  /** How many page notes the tree drew. One is the transport's step cursor. */
+  const notes = (printed: string): number => printed.split('mtg-page-note').length - 1;
+
+  it('draws no note rather than a dash', () => {
+    const printed = mount({ seq: String(firstStep('idle')) }).markup();
+    expect(notes(printed)).toBe(1);
+    // And the caption itself is still there, so this is a missing note rather
+    // than a missing caption.
+    expect(printed).toContain('mtg-page-title');
+  });
+
+  it('still draws the action on a frame that has one', () => {
+    const seq = firstStep('acted');
+    const game = fixtureLog().games[0];
+    if (game === undefined) throw new Error('the fixture holds no game');
+    const action = game.steps[seq]?.action ?? null;
+    expect(action).not.toBeNull();
+    const printed = mount({ seq: String(seq) }).markup();
+    expect(notes(printed)).toBe(2);
+    expect(printed).toContain(actionSummary(action, namesFor(game, seq)));
   });
 });

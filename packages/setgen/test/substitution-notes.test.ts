@@ -64,6 +64,8 @@ const FIXTURES_ROOT = join(PACKAGE_ROOT, 'fixtures');
 const CLOSES_NOTE: Readonly<Record<AnyEffectKind, readonly string[]>> = {
   dealDamage: [],
   destroyPermanent: [],
+  destroyAttachedPermanents: [],
+  exchangeControl: [],
   pumpUntilEndOfTurn: [],
   drawCards: [],
   gainLife: [],
@@ -75,8 +77,16 @@ const CLOSES_NOTE: Readonly<Record<AnyEffectKind, readonly string[]>> = {
   putCounters: [],
   exileTarget: ['removalExile'],
   scry: [],
+  reorderTopLibrary: [],
+  selectFromTopLibrary: [],
+  separateTopLibraryIntoPiles: [],
   returnFromGraveyard: [],
   revealHand: [],
+  revealRandomCardFromHand: [],
+  playRandomHandCardWithoutPayingManaCost: [],
+  castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts: [],
+  preventCombatDamageToYou: [],
+  detainPermanent: [],
   // Closes nothing, and the two roles it looks like it should close stay in
   // `NOT_AN_EFFECT_PRIMITIVE` with corrected text. A fight reads the power of
   // the body it is printed on, so it is legal only on a creature's own
@@ -84,6 +94,7 @@ const CLOSES_NOTE: Readonly<Record<AnyEffectKind, readonly string[]>> = {
   // spell has no body. The primitive existing does not make an instant fight
   // sayable, which is the distinction this table is for.
   fight: [],
+  petrifyCreature: [],
   // Closes nothing, for `fight`'s reason in a different shape. The
   // `manaAcceleration` note used to say the DSL has no way to produce mana at
   // all, and that sentence is now false — `addMana` is the primitive and
@@ -93,6 +104,7 @@ const CLOSES_NOTE: Readonly<Record<AnyEffectKind, readonly string[]>> = {
   // sentence is in `NOT_AN_EFFECT_PRIMITIVE` below, which is where a note whose
   // gap is not "the primitive is missing" belongs.
   addMana: [],
+  createEmblem: [],
   // The library and graveyard block, and every row is empty on purpose. Two are
   // worth stating: `putOnLibrary` looks like it should close `libraryTopBottom`
   // and cannot, because `mtg-vl7k` already deleted that note when the slot
@@ -105,7 +117,9 @@ const CLOSES_NOTE: Readonly<Record<AnyEffectKind, readonly string[]>> = {
   // role may emit.
   shuffleLibrary: [],
   revealTopCards: [],
+  revealTopCardToHand: [],
   putOnLibrary: [],
+  putSourceAndTargetOnOwnersLibrariesThenShuffle: [],
   exileGraveyard: [],
   shuffleGraveyardIntoLibrary: [],
   searchLibrary: [],
@@ -123,7 +137,10 @@ const CLOSES_NOTE: Readonly<Record<AnyEffectKind, readonly string[]>> = {
   // name one and no `substitution:` note can be paid off by one existing.
   loseLife: [],
   setLife: [],
+  loseGame: [],
+  winGame: [],
   preventCombatDamage: [],
+  chooseBlockersThisCombat: [],
   // Empty for the same reason `searchLibrary`'s row above is empty, and it is
   // worth saying because this one looks closer than it is. Nothing in the note
   // corpus asks for recursion by name, and even if it did, this kind is
@@ -131,6 +148,9 @@ const CLOSES_NOTE: Readonly<Record<AnyEffectKind, readonly string[]>> = {
   // it. A note is paid off by a slot printing the thing, not by the kernel
   // being able to run it.
   chooseFromGraveyard: [],
+  chooseFromBattlefield: [],
+  populate: [],
+  createTokenCopyOfSelf: [],
   // Dawn Charm's first mode, `preventCombatDamage`'s row above with the same
   // three words: hand-authored only, so no role slot can name it and no
   // `substitution:` note can be paid off by one existing. It lands here
@@ -138,7 +158,22 @@ const CLOSES_NOTE: Readonly<Record<AnyEffectKind, readonly string[]>> = {
   // never inserted into, and this kind joined at the very end of the tuple.
   preventAllDamageToTarget: [],
   untapPermanent: [],
+  untapPermanents: [],
+  skipNextUntap: [],
   grantKeywordUntilEndOfTurn: [],
+  gainControlUntilEndOfTurn: [],
+  gainControl: [],
+  addSubtype: [],
+  targetPlayerGainsControlOfSelfPermanent: [],
+  preventAllDamageToYouAndCreaturesYouControl: [],
+  cantCastSpellsThisTurn: [],
+  protectSpellsAndCreaturesFromSpellColorsThisTurn: [],
+  changeSpellTargets: [],
+  copySpell: [],
+  copyNextInstantOrSorceryThisTurn: [],
+  flipCoin: [],
+  animateLandWhileSourceOnBattlefield: [],
+  animateSourceUntilEndOfTurn: [],
   // Both close nothing. The notes in this file name gaps in what a *generated*
   // set can print, and neither of these is generatable: they are hand-authored
   // primitives added for `mtg-nhyv.29`'s M11/M13 reference cards, off
@@ -156,6 +191,27 @@ const CLOSES_NOTE: Readonly<Record<AnyEffectKind, readonly string[]>> = {
   // (`mtg-nhyv.72` shipped it hand-authored-only), so no role's `effectKinds`
   // names it and no substitution note was written against its absence.
   setBasePtUntilEndOfTurn: [],
+  returnSourceFromGraveyard: [],
+  returnDepartedSourceToOwnerHand: [],
+  putDepartedSourceOnTopOfOwnerLibrary: [],
+  shuffleSourceIntoOwnerLibrary: [],
+  returnSourceAuraAttached: [],
+  regeneratePermanent: [],
+  doubleSourceCounters: [],
+  setColorsUntilEndOfTurn: [],
+  attacksThisTurnIfAble: [],
+  cantBlockThisTurn: [],
+  blocksThisTurnIfAble: [],
+  shuffleHandsAndGraveyardsIntoLibraries: [],
+  exileHandsAndGraveyards: [],
+  exileThisSpell: [],
+  moveSourceLinkedExile: [],
+  exileNonbasicGraveyardAndMatchingLibrary: [],
+  eachPlayerNamesCardThenRevealsTop: [],
+  nameNonlandCardAndExileMatchingOpponentZones: [],
+  revealUntilCreatureCards: [],
+  preventNextDamageToYouAndRetaliate: [],
+  chooseFromRevealedHand: [],
 };
 
 /**
@@ -290,10 +346,9 @@ describe('the substitution notes in ROLE_PROFILES', () => {
     // role that could name either would let the generator print a Fog or a
     // Worldfire it has no way to price.
     //
-    // `preventAllDamageToTarget` joins at the very end, after `chooseFromGraveyard`
-    // rather than beside its `preventCombatDamage` sibling, for the same ordering
-    // reason: it is the newest member of `ALL_EFFECT_KINDS`, appended rather than
-    // inserted. It is unpriced for `preventCombatDamage`'s reason sharpened — a
+    // `preventAllDamageToTarget` joined after `chooseFromGraveyard` rather than
+    // beside its `preventCombatDamage` sibling, preserving every older ordinal.
+    // It is unpriced for `preventCombatDamage`'s reason sharpened — a
     // targeted, uncapped prevention answers one specific removal spell or combat
     // step, a fact about the game the model is never shown.
     //
@@ -303,7 +358,11 @@ describe('the substitution notes in ROLE_PROFILES', () => {
     // a Fog on a blocker, and nothing at all on a permanent that was not tapped,
     // and no role would know which it was printing.
     //
-    // `grantKeywordUntilEndOfTurn` is last, and its reason is the pump's
+    // `skipNextUntap` follows the untap action because it is the other half of
+    // that family: the board decides whether one missed untap is worth a card,
+    // so no role can price it without seeing the permanent's state.
+    //
+    // `grantKeywordUntilEndOfTurn` follows it, and its reason is the pump's
     // inverted. Two points of power is a magnitude a pie row can carry; a
     // keyword is not one. Trample is worth nothing on a 1/1 and the game on a
     // 7/7, deathtouch is a removal spell on a creature that must be blocked and
@@ -317,9 +376,24 @@ describe('the substitution notes in ROLE_PROFILES', () => {
     );
     expect(unreachable).toStrictEqual([
       'putCounters',
+      // Populate depends on the creature tokens in the live game state, so it
+      // remains available to hand-authored cards without becoming a generator primitive.
+      'populate',
+      // Pack Rat's self-copy is admitted only inside its closed subtype-count,
+      // exact-cost activation bundle. It is not an independently generatable
+      // effect even though the hand-authored kernel can execute it.
+      'createTokenCopyOfSelf',
       'revealHand',
+      'revealRandomCardFromHand',
+      // Wild Evocation's reveal-and-play instruction is retained-trigger
+      // machinery, not a generator primitive. A role cannot emit either the
+      // each-player upkeep context or the free-cast permission it requires.
+      'playRandomHandCardWithoutPayingManaCost',
       'fight',
       'addMana',
+      // Liliana's emblem is exact hand-authored reference machinery. Keeping
+      // it outside every role is the generator-containment boundary.
+      'createEmblem',
       'shuffleLibrary',
       'revealTopCards',
       'putOnLibrary',
@@ -331,9 +405,14 @@ describe('the substitution notes in ROLE_PROFILES', () => {
       'loseLife',
       'setLife',
       'preventCombatDamage',
+      // Combat-block authority is retained trigger context, not a priced
+      // effect a generator role may place on an arbitrary card.
+      'chooseBlockersThisCombat',
       'chooseFromGraveyard',
       'preventAllDamageToTarget',
       'untapPermanent',
+      'untapPermanents',
+      'skipNextUntap',
       'grantKeywordUntilEndOfTurn',
       // The two `mtg-nhyv.29` added, and they are unpriced for a reason that
       // needs no research at all: neither is a magnitude. "Can't be blocked" is
@@ -342,6 +421,10 @@ describe('the substitution notes in ROLE_PROFILES', () => {
       // seen — `untapPermanent`'s reason two entries up, said about combat
       // instead of about mana.
       'cantBeBlockedThisTurn',
+      // The M13 block-side pair is equally board-valued. Preventing one block
+      // or compelling one legal participant has no stable card-pass price.
+      'cantBlockThisTurn',
+      'blocksThisTurnIfAble',
       'attacksYouThisTurnIfAble',
       // `mtg-nhyv.30`'s, and it is unreachable for a stronger reason than any
       // above: the others are prices no research would settle, and this one is
@@ -358,6 +441,114 @@ describe('the substitution notes in ROLE_PROFILES', () => {
       // `mtg-nhyv.72`'s layer-7b set, unreachable for the identical containment
       // reason: it is hand-authored only, so no role's `effectKinds` names it.
       'setBasePtUntilEndOfTurn',
+      'returnSourceFromGraveyard',
+      'returnDepartedSourceToOwnerHand',
+      'putDepartedSourceOnTopOfOwnerLibrary',
+      'shuffleSourceIntoOwnerLibrary',
+      'setColorsUntilEndOfTurn',
+      'attacksThisTurnIfAble',
+      // Time Reversal's table-reset and spell-destination machinery are
+      // hand-authored only, so no generator role or substitution note names
+      // either one.
+      'shuffleHandsAndGraveyardsIntoLibraries',
+      'exileThisSpell',
+      'moveSourceLinkedExile',
+      // Haunting Echoes' linked public-zone move and hidden-zone search is one
+      // hand-authored operation. The model cannot price the opponent's future
+      // library or safely assemble the remembered-name relationship itself.
+      'exileNonbasicGraveyardAndMatchingLibrary',
+      // Conundrum Sphinx's linked APNAP name-and-reveal operation is likewise
+      // hand-authored only: the model never sees or emits this primitive.
+      'eachPlayerNamesCardThenRevealsTop',
+      // Slaughter Games' name, three-zone selection, and target-opponent
+      // shuffle are one closed hand-authored operation. Exposing the pieces
+      // independently would let a model widen both hidden-zone access and the
+      // color-pie contract.
+      'nameNonlandCardAndExileMatchingOpponentZones',
+      // Mass Polymorph's counted reveal consumes resolution-local state from a
+      // preceding battlefield sweep. It is hand-authored only so the generator
+      // cannot assemble that relationship or price an unknown library prefix.
+      'revealUntilCreatureCards',
+      // Temporary control is hand-authored only. It is priced for deck and bot
+      // evaluation, but no generator role may emit the layer-2 operation.
+      'gainControlUntilEndOfTurn',
+      // Jinxed Idol's persistent source transfer is narrower still: only an
+      // opponent target is admitted, and no model-facing schema can emit it.
+      'targetPlayerGainsControlOfSelfPermanent',
+      // Safe Passage's untargeted one-sided shield is likewise hand-authored:
+      // its value is the future combat or burn event it answers.
+      'preventAllDamageToYouAndCreaturesYouControl',
+      // Silence's timing lock is another hand-authored rule modifier. A role
+      // never sees the opposing hand or priority window that gives it value.
+      'cantCastSpellsThisTurn',
+      // Autumn's Veil's paired rules are also hand-authored only. Their value
+      // depends on the opposing spell's colors and whether it counters or
+      // targets, context the generator neither sees nor prices.
+      'protectSpellsAndCreaturesFromSpellColorsThisTurn',
+      // Coin-flip branching is hand-authored only. The generator neither emits
+      // the random primitive nor prices the effects behind its two outcomes.
+      'changeSpellTargets',
+      'copySpell',
+      'copyNextInstantOrSorceryThisTurn',
+      'flipCoin',
+      // Dark Tutelage's linked reveal-and-move is hand-authored only. A role
+      // cannot emit or price the relationship between the revealed card and
+      // the later life loss that reads its mana value.
+      'revealTopCardToHand',
+      // Vengeful Archon's numeric shield retains both its retaliation target
+      // and the exact prevented amount across later events. That linked state
+      // is intentionally outside every generator-facing effect schema.
+      'preventNextDamageToYouAndRetaliate',
+      'animateLandWhileSourceOnBattlefield',
+      'animateSourceUntilEndOfTurn',
+      // Captivating Vampire's durable control and type layers are exact
+      // hand-authored machinery. Neither is offered to a model role: control
+      // is board-valued and an additive subtype is contextual glue.
+      'gainControl',
+      'addSubtype',
+      // This source-retaining Aura handoff is valid only on the exact
+      // enchanted-creature death envelope. It is hand-authored so a role
+      // cannot assemble the event/source relationship piecemeal.
+      'returnSourceAuraAttached',
+      // The ordinary regeneration shield is retained-attachment machinery for
+      // a hand-authored Equipment activation. No generator role can name it.
+      'regeneratePermanent',
+      'loseGame',
+      'winGame',
+      // Primordial Hydra's counter doubling reads its battlefield source and
+      // is hand-authored only, so no generator role can name or price it.
+      'doubleSourceCounters',
+      // These bounded private-library decisions are exact hand-authored
+      // machinery. Their value and legal shape depend on a complete card
+      // context, so no generator role may assemble them independently.
+      'reorderTopLibrary',
+      'selectFromTopLibrary',
+      'separateTopLibraryIntoPiles',
+      // This live attachment query is retained-referent machinery and remains
+      // outside every generator-facing effect schema.
+      'destroyAttachedPermanents',
+      // Switcheroo's atomic exchange is exact hand-authored control-layer
+      // machinery. Its value depends on both live permanents and both current
+      // controllers, so no generator role may emit it independently.
+      'exchangeControl',
+      // Roaring Primadox's resolution-time choice and Void Stalker's atomic
+      // source-and-target tuck were appended so older vocabulary ordinals
+      // remain stable.
+      'chooseFromBattlefield',
+      'putSourceAndTargetOnOwnersLibrariesThenShuffle',
+      // Worldfire's append-only hand-authored hidden-zone reset.
+      'exileHandsAndGraveyards',
+      'chooseFromRevealedHand',
+      'petrifyCreature',
+      // Spelltwine's resolution-local copy-and-cast chain consumes the cards
+      // exiled by preceding effects. No generator role can assemble that
+      // relationship or emit the hand-authored primitive.
+      'castCopiesOfCardsExiledThisResolutionWithoutPayingManaCosts',
+      // Druid's controller-only combat shield is exact hand-authored state and
+      // remains outside every generator role.
+      'preventCombatDamageToYou',
+      // Detain is exact hand-authored RTR machinery and stays outside every generator role.
+      'detainPermanent',
     ]);
   });
 });

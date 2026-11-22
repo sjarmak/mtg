@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "lrw",
+  "name": "Lorwyn",
+  "sourceCodes": ["LRW"],
+  "products": [{ "id": "lrw-draft", "setCode": "LRW", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["lrw-draft", "lrw-draft", "lrw-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["lrw-draft", "lrw-draft", "lrw-draft", "lrw-draft", "lrw-draft", "lrw-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

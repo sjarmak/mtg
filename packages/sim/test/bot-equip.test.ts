@@ -31,6 +31,7 @@ import {
   toughnessOf,
   validateAction,
 } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import type { GreedyBotConfig } from '@mtg/sim';
 import { chooseActivation, decideGreedy, DEFAULT_GREEDY_CONFIG, greedyConfig } from '@mtg/sim';
 import { creature, FOREST } from './cards';
@@ -213,7 +214,10 @@ function named(state: GameState, name: string): ObjectId {
 function decide(state: GameState, profile: GreedyBotConfig = config): Action {
   const decision = pendingDecision(state, 512);
   if (decision === null) throw new Error('no decision pending');
-  const action = decideGreedy({ state, player: 0, decision }, profile);
+  const action = decideGreedy(
+    { state: observeState(state, 0, 'test/bot-equip.test.ts:216'), player: 0, decision },
+    profile,
+  );
   expect(validateAction(state, action)).toBeNull();
   return action;
 }
@@ -221,7 +225,10 @@ function decide(state: GameState, profile: GreedyBotConfig = config): Action {
 function activationFor(state: GameState, profile: GreedyBotConfig = config): Action | null {
   const decision = pendingDecision(state, 512);
   if (decision === null) throw new Error('no decision pending');
-  return chooseActivation({ state, player: 0, decision }, profile);
+  return chooseActivation(
+    { state: observeState(state, 0, 'test/bot-equip.test.ts:224'), player: 0, decision },
+    profile,
+  );
 }
 
 /** Submits the bot's own choice and lets it resolve. */

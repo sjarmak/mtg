@@ -138,16 +138,39 @@ describe('the graveyard browser opens and closes', () => {
     expect(panel.getAttribute('id')).toBeTruthy();
   });
 
+  it('prints the zone and speaks whose it is', () => {
+    // `mtg-dcxg.10`. The replay names each pile off its owner —
+    // "Wield the Obliterator's graveyard" — and draws it in the seat's own
+    // column, which is 46px wide on a phone and not much more beside a mat: the
+    // 2026-08-23 sweep photographed it clipped to "…GRAVEYAR" on a 1440px desk.
+    // The pod directly above the pile already says whose seat this is, so the
+    // strip prints the zone and the name it is read aloud by keeps the owner and
+    // the count.
+    render(h(Graveyard, { label: "Wield the Obliterator's graveyard", cards: pile(2) }));
+    expect(screen.getByText('Graveyard')).toBeTruthy();
+    expect(toggle("Wield the Obliterator's graveyard, 2 cards")).toBeTruthy();
+  });
+
   it('counts one card as one card', () => {
     render(h(Graveyard, { label: 'Your graveyard', cards: pile(1) }));
     expect(toggle('Your graveyard, 1 card')).toBeTruthy();
   });
 
-  it('offers nothing to open when the zone is empty', () => {
-    render(h(Graveyard, { label: 'Your graveyard', cards: [] }));
+  it('offers nothing to open when the zone is empty, and says so once', () => {
+    // `mtg-dcxg.10`. The sweep photographed "THE SKY ISLANDS' GRAVEYARD  0
+    // graveyard is empty" in a 46px column: the zone named, counted at zero, and
+    // then described, with the word *graveyard* in it twice. The label is the
+    // name and the sentence is the state; the chip counted what the sentence
+    // already said, and the sentence repeated the noun the label had just given.
+    const { container } = render(h(Graveyard, { label: 'Your graveyard', cards: [] }));
     expect(screen.queryAllByRole('button')).toHaveLength(0);
-    expect(screen.getByText('graveyard is empty')).toBeTruthy();
+    expect(screen.getByText('empty')).toBeTruthy();
     expect(screen.getByLabelText('Your graveyard')).toBeTruthy();
+    // Through a cast for the reason `../test/board-marks.test.ts` casts: this
+    // suite typechecks under the workspace's single Node tsconfig, which
+    // carries no `dom` lib.
+    const root = container as unknown as { readonly querySelector: (selector: string) => unknown };
+    expect(root.querySelector('.mtg-zone__count')).toBeNull();
   });
 
   /**

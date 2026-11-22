@@ -34,13 +34,23 @@
  * raw `ZodError` is not a sentence anybody wants on screen.
  */
 import { z } from 'zod';
+import { SET_ORIGINS } from './set-origin';
 
 /**
  * Must match what `tools/stage-set-bundles.ts` stamps. Bump it when a row gains
  * a field the page cannot do without, so a stale index fails with a version
  * message rather than resolving to a picker that is quietly missing a set.
+ *
+ * 2 (`mtg-tewc.1`): every row carries its origin, and the surfaces that choose a
+ * set group by it. An index written before that has no group for its rows to go
+ * in, which is a picker missing every set rather than one — exactly what this
+ * version number is for. The staged directory is gitignored, so the repair is
+ * the launcher somebody already runs.
+ *
+ * 4 (`mtg-tdg4.6`): the obsolete card-presentation switch is gone. Every art
+ * manifest now supplies only an illustration to the one shared card frame.
  */
-export const SET_INDEX_VERSION = 1;
+export const SET_INDEX_VERSION = 4;
 
 /** The directory under `public/` that holds every staged bundle, and the URL prefix. */
 export const STAGED_SETS_DIR = 'sets';
@@ -72,6 +82,12 @@ const RowSchema = z.object({
   cardCount: z.number().int().positive(),
   /** True for a reduced reference build, which the shell already discloses. */
   reduced: z.boolean(),
+  /**
+   * Custom or official, decided by `set-origin.ts` off the document rather than
+   * off this list. It is the first thing a person choosing a set reads, and the
+   * grouping every set-aware surface draws.
+   */
+  origin: z.enum(SET_ORIGINS),
   setUrl: z.string().min(1),
   /** Absent when no manifest covers this set, which is the ordinary state. */
   artUrl: z.string().min(1).optional(),

@@ -26,7 +26,7 @@
  * the same numbers the live board got. One function, two object tables.
  */
 import type { Card } from '@mtg/dsl';
-import { isCreature, renderEffectList } from '@mtg/dsl';
+import { isCreature } from '@mtg/dsl';
 import type { BoardProps, BoardSide } from '../../board/Board';
 import type { BoardPermanent } from '../../board/Battlefield';
 import type { ExileCard } from '../../board/Exile';
@@ -34,6 +34,7 @@ import type { GraveyardCard } from '../../board/Graveyard';
 import type { HandCard } from '../../board/Hand';
 import type { ManaPoolView, PlayerStatusProps } from '../../board/PlayerStatus';
 import type { StackItem } from '../../board/StackZone';
+import { stackModeLabel } from '../../board/stack-mode';
 import type { CardArt } from '../../card/ArtSlot';
 import { copyNumbers } from '../play/art-copies';
 import type { PositionArt } from '../play/position';
@@ -108,7 +109,7 @@ function permanentProps(
   names: ReplayNames,
   artOf: ArtOf,
 ): BoardPermanent | null {
-  const card = cardOf(game, permanent.oid);
+  const card = permanent.copiedCard ?? cardOf(game, permanent.oid);
   if (card === null) return null;
   const { power, toughness, attachedTo } = permanent;
   const attachments = attachmentNames(game, snapshot, permanent.oid, names);
@@ -120,8 +121,15 @@ function permanentProps(
     damage: permanent.damage,
     counters: permanent.plusCounters,
     ...(card.kind === 'planeswalker' ? { loyalty: permanent.loyalty ?? 0 } : {}),
+    ...(card.kind === 'battle'
+      ? {
+          defense: permanent.defense ?? 0,
+          ...(permanent.protector === undefined ? {} : { protector: permanent.protector }),
+        }
+      : {}),
     attacking: permanent.attacking,
     blocking: permanent.blocking,
+    ...(permanent.detained === true ? { detained: true } : {}),
     art: artOf(permanent.oid, card),
     // The recorded pair is already the derived one, so the face prints what the
     // layer system said at that step rather than what the card was printed at.
@@ -202,44 +210,21 @@ function seatSide(
 }
 
 /**
- * The chosen mode's own text (CR 700.2), preferred over its bare index: the
- * DSL never stores a mode's oracle line as a string (`ModeSchema` in
- * `@mtg/dsl`'s `modal.ts` carries only `effects`), but `renderEffectList` is
- * the same renderer a spell's own effect paragraph is built from, over the
- * exact effect list `effectsFor(card, mode)` would resolve — so the chosen
- * mode's sentence is reachable here without a second, narrower text field.
- *
- * `null` when the entry names no mode, which is every ability and every
- * non-modal spell (`StackEntry.mode`'s own doc), or when the card the entry
- * names carries no `modes` at all — a state the kernel's own invariant says
- * should not happen, but a replay viewer over a log the kernel did not
- * enforce it for is exactly the surface that should fail soft, printing the
- * bare index, rather than throw.
- */
-function modeLabel(card: Card, mode: number | null): string | null {
-  if (mode === null) return null;
-  const chosen = card.modes?.[mode];
-  if (chosen === undefined) return `mode ${String(mode)}`;
-  return renderEffectList(chosen.effects, card.name).join(' ');
-}
-
-/**
  * The recorded stack. An entry naming a source is an activated ability, whose
  * own id belongs to no card (CR 113.7a); it is drawn as the permanent it was
  * printed on, exactly as the live table draws it (`../play/position.ts`).
  *
- * A modal spell's chosen mode is folded into `targetLabel` rather than given
- * its own field: `StackItem` (`../../board/StackZone.ts`) has no mode field,
- * and this file's scope does not extend to adding one. `targetLabel` is
- * already the stack zone's one line of "what is this entry about beyond its
- * card face" text, so a chosen mode's sentence joins a chosen target's the
- * same way a card's own oracle text would join a triggered clause on the
- * printed face — filed rather than taken.
+ * A modal spell's chosen mode and its chosen targets are two fields, because
+ * they are two facts: the mode says which spell this is out of the ones the card
+ * offers, and the target says what that spell is pointed at. The mode rode on
+ * `targetLabel` from `mtg-7si0` until `mtg-sujc` gave `StackItem`
+ * (`../../board/StackZone.ts`) a field of its own, which is what lets the row
+ * lay them out separately and a screen reader read them as two sentences.
  */
 function stackItems(game: ReplayGameLog, snapshot: LogSnapshot, names: ReplayNames): readonly StackItem[] {
   const items: StackItem[] = [];
   for (const entry of snapshot.stack) {
-    const card = cardOf(game, entry.card);
+    const card = entry.sourceCard ?? cardOf(game, entry.card);
     if (card === null) continue;
     const targets = entry.targets
       .filter((target) => target !== null)
@@ -250,11 +235,14 @@ function stackItems(game: ReplayGameLog, snapshot: LogSnapshot, names: ReplayNam
       controller: names.player(entry.controller),
       ...(entry.source === null ? {} : { ability: true }),
     };
-    const mode = modeLabel(card, entry.mode);
-    const label = [mode, targets.length === 0 ? null : `→ ${targets.join(', ')}`]
-      .filter((part): part is string => part !== null)
-      .join(' ');
-    items.push(label === '' ? base : { ...base, targetLabel: label });
+    const mode = stackModeLabel(card, entry.mode, entry.abilityIndex);
+    const overload = entry.castingCost === 'overload' ? 'Overloaded' : null;
+    const modeLabel = [overload, mode].filter((part): part is string => part !== null).join(' ');
+    items.push({
+      ...base,
+      ...(modeLabel === '' ? {} : { modeLabel }),
+      ...(targets.length === 0 ? {} : { targetLabel: `→ ${targets.join(', ')}` }),
+    });
   }
   return items;
 }
@@ -305,7 +293,7 @@ export function boardNotes(
 ): readonly BoardNote[] {
   const notes: BoardNote[] = [];
   for (const permanent of snapshot.battlefield) {
-    const card = cardOf(game, permanent.oid);
+    const card = permanent.copiedCard ?? cardOf(game, permanent.oid);
     if (card === null || !isCreature(card)) continue;
     const { power, toughness } = permanent;
     if (power === null || toughness === null) continue;

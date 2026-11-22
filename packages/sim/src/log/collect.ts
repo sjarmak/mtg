@@ -21,9 +21,17 @@
  *    trade land in different columns.
  */
 import { manaValue } from '@mtg/dsl';
-import type { GameEvent, GameState, ObjectId, PlayerId, Step } from '@mtg/kernel';
-import type { GameMetadata, SideTotals, SideTurnStats, SimExtras, SimGameLog, TurnRecord } from './schema';
-import { emptySideTotals, emptySideTurnStats } from './schema';
+import type { DeckList, GameEvent, GameState, ObjectId, PlayerId, Step } from '@mtg/kernel';
+import type {
+  CardGameStats,
+  GameMetadata,
+  SideTotals,
+  SideTurnStats,
+  SimExtras,
+  SimGameLog,
+  TurnRecord,
+} from './schema';
+import { emptyCardGameStats, emptySideTotals, emptySideTurnStats } from './schema';
 
 const DAMAGE_STEPS = new Set<Step>(['firstStrikeDamage', 'combatDamage']);
 
@@ -128,6 +136,42 @@ export interface LogInputs {
   readonly endOfTurnStates: ReadonlyMap<number, GameState>;
   readonly metadata: GameMetadata;
   readonly extras: SimExtras;
+  /** The `user` seat's deck; seeds the `deck` counts on the `cards` map. */
+  readonly userDeck: DeckList;
+}
+
+function initialCardStats(deck: DeckList): Map<string, CardGameStats> {
+  const cards = new Map<string, CardGameStats>();
+  for (const card of deck.cards) {
+    const stats = cards.get(card.name) ?? emptyCardGameStats();
+    cards.set(card.name, { ...stats, deck: stats.deck + 1 });
+  }
+  return cards;
+}
+
+function bumpCard(
+  cards: Map<string, CardGameStats>,
+  finalState: GameState,
+  oid: ObjectId,
+  field: 'opening_hand' | 'drawn',
+): void {
+  const name = finalState.objects[oid]?.card.name;
+  if (name === undefined) return;
+  const stats = cards.get(name) ?? emptyCardGameStats();
+  cards.set(name, { ...stats, [field]: stats[field] + 1 });
+}
+
+function finalizeOpeningHand(
+  cards: Map<string, CardGameStats>,
+  finalState: GameState,
+  pendingHand: readonly ObjectId[],
+  bottomed: readonly ObjectId[],
+): void {
+  const bottomedSet = new Set(bottomed);
+  for (const oid of pendingHand) {
+    if (bottomedSet.has(oid)) continue;
+    bumpCard(cards, finalState, oid, 'opening_hand');
+  }
 }
 
 /** Builds the structured per-turn log for one finished game. */
@@ -135,6 +179,8 @@ export function buildGameLog(inputs: LogInputs): SimGameLog {
   const { events, finalState, endOfTurnStates } = inputs;
   const turns: TurnRecord[] = [];
   const totals: Totals = { user: emptySideTotals(), oppo: emptySideTotals() };
+  const cards = initialCardStats(inputs.userDeck);
+  let pendingHand: ObjectId[] = [];
   let current: TurnAccumulator | null = null;
   let step: Step = 'untap';
 
@@ -154,12 +200,30 @@ export function buildGameLog(inputs: LogInputs): SimGameLog {
       step = event.step;
       continue;
     }
+    if (event.type === 'handMulliganed' && event.player === 0) {
+      pendingHand = [];
+      continue;
+    }
+    if (event.type === 'handKept' && event.player === 0) {
+      finalizeOpeningHand(cards, finalState, pendingHand, event.bottomed);
+      continue;
+    }
+    if (event.type === 'cardDrawn' && event.player === 0) {
+      if (current === null) pendingHand.push(event.oid);
+      else bumpCard(cards, finalState, event.oid, 'drawn');
+    }
     if (current === null) continue;
     applyEvent(current, totals, event, finalState, step);
   }
   close();
 
-  return { metadata: inputs.metadata, extras: inputs.extras, totals, turns };
+  return {
+    metadata: inputs.metadata,
+    extras: inputs.extras,
+    totals,
+    turns,
+    cards: Object.fromEntries(cards),
+  };
 }
 
 function applyEvent(

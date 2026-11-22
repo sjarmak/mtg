@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../../..",
+  "contracts": [
+    {
+      "id": "priority-v1",
+      "decisionFamilies": ["priority"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        List<SpellAbility> choose(Player player) {",
+          "endMarker": "        void recordPriorityMana(SpellAbility ability, boolean played) {"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-profile-receipts-v3/probes/abandoned-sarcophagus-local-controller-profile-v1.json",
+        "out/validation-pilot/akh-hou-controller-profile-receipts-v3/probes/abandoned-sarcophagus-engine-controller-profile-v1.json"
+      ]
+    },
+    {
+      "id": "targets-v1",
+      "decisionFamilies": ["targets"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public boolean chooseTargetsFor(SpellAbility ability) {",
+          "endMarker": "        public Pair<SpellAbilityStackInstance, GameObject> chooseTarget("
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-profile-receipts-v3/probes/ahn-crop-crasher-local-exert-scenario-v1.json",
+        "out/validation-pilot/akh-hou-controller-profile-receipts-v3/probes/ahn-crop-crasher-engine-exert-scenario-v1.json"
+      ]
+    },
+    {
+      "id": "combat-v1",
+      "decisionFamilies": ["combat"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public void declareAttackers(Player attackingPlayer, Combat combat) {",
+          "endMarker": "        public List<Card> exertAttackers(List<Card> attackers) {"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-profile-receipts-v3/probes/ancient-crab-local-controller-profile-v1.json",
+        "out/validation-pilot/akh-hou-controller-profile-receipts-v3/probes/ancient-crab-engine-controller-profile-v1.json"
+      ]
+    },
+    {
+      "id": "optional-costs-v1",
+      "decisionFamilies": ["optional-costs"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public List<OptionalCostValue> chooseOptionalCosts(",
+          "endMarker": "         * Every number this session is asked for, over a range."
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-profile-receipts-v3/probes/gust-walker-local-exert-scenario-v1.json",
+        "out/validation-pilot/akh-hou-controller-profile-receipts-v3/probes/gust-walker-engine-exert-scenario-v1.json"
+      ]
+    },
+    {
+      "id": "replacement-trigger-choices-v1",
+      "decisionFamilies": ["replacement-trigger-choices"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public boolean confirmTrigger(WrappedAbility wrapper) {",
+          "endMarker": "        public boolean willPutCardOnTop(Card card) {"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/binding-mummy-local-replacement-v1.json",
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/binding-mummy-engine-replacement-v1.json"
+      ]
+    },
+    {
+      "id": "zone-card-selection-v1",
+      "decisionFamilies": ["zone-card-selection"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public Card chooseSingleCardForZoneChange(",
+          "endMarker": "        public CardCollection chooseCardsToDiscardFrom("
+        },
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public List<Card> chooseCardsForZoneChange(",
+          "endMarker": "        /** Exact Convoke distributions; Improvise, Waterbend, and all drift remain refused. */"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/shefet-monitor-local-zone-selection-v1.json",
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/shefet-monitor-engine-zone-selection-v1.json"
+      ]
+    },
+    {
+      "id": "modes-v1",
+      "decisionFamilies": ["modes"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public List<AbilitySub> chooseModeForAbility(",
+          "endMarker": "        private boolean isReviewedUmezawasJitteCharm("
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/doomfall-local-mode-v1.json",
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/doomfall-engine-mode-v1.json"
+      ]
+    },
+    {
+      "id": "mana-x-v1",
+      "decisionFamilies": ["mana-x"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public int chooseNumber(SpellAbility ability, String message, int minimum, int maximum) {",
+          "endMarker": "         * How much of a variable cost reduction to apply."
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/hailfire-local-number-v1.json",
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/hailfire-engine-number-v1.json"
+      ]
+    },
+    {
+      "id": "naming-text-numbers-v1",
+      "decisionFamilies": ["naming-text-numbers"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public ICardFace chooseSingleCardFace(\n                SpellAbility ability, String prompt, Predicate<ICardFace> filter, String logic) {",
+          "endMarker": "        public List<OptionalCostValue> chooseOptionalCosts("
+        },
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public int chooseNumber(SpellAbility ability, String message, int minimum, int maximum) {",
+          "endMarker": "         * How much of a variable cost reduction to apply."
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/dispossess-local-name-v1.json",
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/hailfire-local-number-v1.json",
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/hailfire-engine-number-v1.json"
+      ]
+    },
+    {
+      "id": "ordering-v1",
+      "decisionFamilies": ["ordering"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public CardCollectionView orderMoveToZoneList(",
+          "endMarker": "        public List<CostPart> orderCosts(List<CostPart> costs) {"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/naga-oracle-local-order-v1.json",
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/naga-oracle-engine-order-v1.json"
+      ]
+    },
+    {
+      "id": "piles-votes-v1",
+      "decisionFamilies": ["piles-votes"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public boolean chooseCardsPile(",
+          "endMarker": "         * The seventeen questions that ask for several things at once."
+        }
+      ],
+      "scenarioReceipts": [
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/unesh-local-pile-split-v1.json",
+        "out/validation-pilot/akh-hou-controller-scenarios-v4/probes/unesh-engine-pile-split-v1.json"
+      ]
+    }
+  ]
+}

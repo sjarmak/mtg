@@ -57,6 +57,7 @@ import type { UiRoute } from '../../app/router';
 import { Board } from '../../board/Board';
 import { renderCopy } from '../../copy';
 import type { PositionArt } from '../play/position';
+import { GameDetails, GAME_ID_LABEL } from '../game-details';
 import { railToggle, useRailCollapse } from '../play/rail-collapse';
 import { DecisionPanel, actionSummary } from './DecisionPanel';
 import { EventPanel } from './EventPanel';
@@ -78,7 +79,20 @@ export type ReplayState =
   | { readonly status: 'loading' }
   | { readonly status: 'ready'; readonly log: EventLog }
   | { readonly status: 'absent' }
-  | { readonly status: 'failed'; readonly message: string };
+  | { readonly status: 'failed'; readonly message: string }
+  /**
+   * A log is staged and it is another set's, so this tab has nothing of its own
+   * to draw.
+   *
+   * `mtg-ahr5`. An event log belongs to the one game it recorded, and that game
+   * was dealt from the set the launcher opened; the set picker moves what this
+   * tab shows and moves nothing about what was recorded. Replaying the previous
+   * set's decisions over the cards now on screen would be a worse failure than a
+   * blank page, so the log is withheld — but withholding it silently reads as
+   * "nothing was ever recorded", which is false and leaves nothing to act on.
+   * This is the fifth state, and it names both sets.
+   */
+  | { readonly status: 'elsewhere'; readonly belongsTo: string; readonly showing: string };
 
 export interface ReplayViewerProps {
   readonly state: ReplayState;
@@ -229,6 +243,11 @@ export function ReplayViewer(props: ReplayViewerProps): ReactElement {
         return emptyState('Loading the replay', 'Reading the event log.');
       case 'absent':
         return emptyState('No replay recorded yet', hint);
+      case 'elsewhere':
+        return emptyState(
+          'The recorded game is of another set',
+          `This lab recorded a game of ${state.belongsTo}, and this tab is showing ${state.showing}. Choose ${state.belongsTo} in the set picker to watch it, or run \`npm run play\` on ${state.showing} to record a game of its own.`,
+        );
       case 'failed':
         return emptyState('That event log could not be read', state.message);
       case 'ready':
@@ -258,7 +277,15 @@ export function ReplayViewer(props: ReplayViewerProps): ReactElement {
       describeResult(game.result, names),
     ),
     createElement('span', { className: 'mtg-toolbar__spacer' }),
-    createElement('span', { className: 'mtg-page-note' }, `${log.source} · seed ${game.seed}`),
+    // The file the log came from and the name of the game it holds, folded
+    // shut. Both were printed in full beside the transport, which put a
+    // filename and a seed in the chrome of a surface whose subject is a game.
+    createElement(GameDetails, {
+      details: [
+        { term: GAME_ID_LABEL, value: game.seed },
+        { term: 'Recorded in', value: log.source },
+      ],
+    }),
   );
 
   const transport = createElement(Transport, {
@@ -287,10 +314,27 @@ export function ReplayViewer(props: ReplayViewerProps): ReactElement {
     { className: 'mtg-page-head' },
     createElement(
       'span',
-      { className: 'mtg-page-title' },
+      {
+        className: 'mtg-page-title',
+        // Every other page title on this surface is the word over the tab you
+        // pressed to get here, which is why `styles/mobile.ts` stops drawing one
+        // on a table: the tab is on screen saying it already. This one is the
+        // frame you are looking at, and it changes every step. Drawn on a
+        // landscape phone the rule left the caption showing its note alone —
+        // measured at 844x390: a 19px band whose whole ink was the em dash an
+        // opening frame's action summary is.
+        'data-live': true,
+      },
       `Turn ${step.turn} · ${stepWords(step.step)} · ${names.player(step.active)}`,
     ),
-    createElement('span', { className: 'mtg-page-note' }, actionSummary(step.action, names)),
+    // A frame with no action gets no note. `actionSummary` answers with an em
+    // dash, which is right in the Decision panel's badge — a column of badges
+    // wants a placeholder where one row has no value — and wrong here, because
+    // a heading that ends in a dangling dash reads as a value that failed to
+    // load rather than as a step nobody acted on. Every setup frame is one.
+    step.action === null
+      ? null
+      : createElement('span', { className: 'mtg-page-note' }, actionSummary(step.action, names)),
   );
 
   const onTurn = (turn: number): void => {

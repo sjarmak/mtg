@@ -30,36 +30,68 @@
  * docblock made about its ordering, and it is restated below.
  */
 import type { Action } from './actions';
-import { isLoyaltyAbility, resolveX } from '@mtg/dsl';
+import {
+  cardManaValue,
+  effectsForActivatedAbility,
+  hasTarget,
+  isLoyaltyAbility,
+  isMultipleTargetSpec,
+  loyaltyCostChange,
+  resolveX,
+  targetCountOf,
+  type Card,
+  type Effect,
+} from '@mtg/dsl';
+import { stackEntryTargetingController } from './abilities';
 import { IllegalActionError } from './actions';
+import { canonicalCastAction } from './action-identity';
 import {
   eligibleAttackers,
   eligibleBlockers,
   groupBlocks,
+  groupAttackerOrders,
   tapAttackers,
   attackersNeedingOrder,
+  blockersNeedingAttackerOrder,
 } from './combat';
-import { effectiveManaCost } from './cost';
+import { selectedCastingManaCost } from './cost';
+import { countTargetInstances } from './target-count';
+import { nextPluralStage, shouldStagePluralTargets } from './plural-targets';
+import { pendingPluralContext } from './pending-plural-context';
 import { sacrificePermanent } from './destruction';
 import { settledAction } from './damage-order';
+import { answerDamagePrevention } from './damage';
+import { tallyThrough, tapRetainedDamageCohort } from './effects';
 import type { GameEvent } from './events';
 import type { ObjectId, PlayerId } from './ids';
 import { opponentOf } from './ids';
-import { validateAction, validateBlockDeclaration } from './legal';
+import { pendingFreeCastCandidate, validateAction, validateBlockDeclaration } from './legal';
 import { executePayment, planPayment } from './mana';
-import { activateManaSource } from './mana-ability';
+import { attackTaxCost } from './attack-tax';
+import { activateManaSource, continueManaCombination } from './mana-ability';
 import { askMulligan, cardsToBottom, keepHand, takeMulligan } from './mulligan';
+import { answerOpeningHandAction } from './opening-hand';
 import { checkStateBasedActions, endGameWith, keepLegend } from './sba';
-import { collectTriggers, orderTriggers, putTriggersOnStack } from './triggers';
+import { loseLife } from './life';
+import { collectStateTriggers, collectTriggers, orderTriggers, putTriggersOnStack } from './triggers';
 import {
   removeTriggersWithoutTargets,
   triggerAwaitingTargets,
   triggerOnStack,
   withChosenTargets,
 } from './trigger-choice';
-import type { Attack, Block, GameState } from './state';
+import type {
+  Attack,
+  AttackerOrder,
+  Block,
+  CombatState,
+  GameState,
+  PendingPluralTargets,
+  Target,
+} from './state';
 import {
   pushAbility,
+  pushCopiedCardSpell,
   pushSpell,
   resolveAnswered,
   resolveMayAnswered,
@@ -67,19 +99,57 @@ import {
   resolveUnlessAnswered,
 } from './stack';
 import type { Trace } from './trace';
-import { beginTrace, emit, playerOf, withState } from './trace';
+import { beginTrace, emit, withState } from './trace';
 import { advanceStep, finishCleanup, givePriority, withTurn } from './turn';
-import { getObject, moveObject, tapObject } from './zones';
-import { activatedAbilityAt } from './abilities';
-import { addCounters, counterCount } from './continuous';
-import { characteristicsOf } from './layers';
+import { cleanupDiscardCount } from './player-rules';
 import {
+  answerEntryAura,
+  answerEntryCharacteristics,
+  answerEntryOptionalCounter,
+  answerEntryPayLife,
+  answerEntryPlayer,
+  answerEntryCardName,
+  answerEntryColors,
+  answerEntryCopy,
+  answerEntryCounter,
+  answerEntryTimestampNext,
+  getObject,
+  moveObject,
+  tapObject,
+} from './zones';
+import { addCounters, counterCount } from './continuous';
+import { removeCounters } from './counters';
+import {
+  characteristicsOf,
+  copiableValuesOf,
+  currentActivatedAbilityAt,
+  powerOf,
+  toughnessOf,
+} from './layers';
+import {
+  answerCardName,
+  answerNamedZoneExile,
   answerGraveyardChoice,
+  answerBattlefieldChoice,
+  answerPopulate,
   answerHandDiscard,
+  answerManaColor,
+  answerRevealedHandChoice,
   answerPermanentSacrifice,
+  answerPermanentUntap,
   answerScry,
+  answerTopLibraryOrder,
+  answerTopLibrarySelect,
+  continueGuildFeudContest,
+  answerTopLibraryPartition,
+  answerTopLibraryPile,
+  answerSpellTargets,
   answerSearch,
+  answerSearchDestination,
+  applyResolutionEffects,
   discardFromHand,
+  declineFreeCast,
+  finishFreeCast,
 } from './scry';
 
 export interface ReduceResult {
@@ -138,10 +208,34 @@ const MAX_SETTLE_STEPS = 10_000;
 function pausedMidResolution(state: GameState): boolean {
   return (
     state.turn.awaiting === 'scry' ||
+    state.turn.awaiting === 'manaColor' ||
+    state.turn.awaiting === 'topLibraryOrder' ||
+    state.turn.awaiting === 'topLibrarySelect' ||
+    state.turn.awaiting === 'topLibraryPartition' ||
+    state.turn.awaiting === 'topLibraryPile' ||
     state.turn.awaiting === 'searchLibrary' ||
+    state.turn.awaiting === 'searchDestination' ||
     state.turn.awaiting === 'handDiscard' ||
+    state.turn.awaiting === 'revealedHandChoice' ||
     state.turn.awaiting === 'graveyardChoice' ||
-    state.turn.awaiting === 'permanentSacrifice'
+    state.turn.awaiting === 'battlefieldChoice' ||
+    state.turn.awaiting === 'populate' ||
+    state.turn.awaiting === 'permanentSacrifice' ||
+    state.turn.awaiting === 'permanentUntap' ||
+    state.turn.awaiting === 'entryCopy' ||
+    state.turn.awaiting === 'entryCounter' ||
+    state.turn.awaiting === 'entryAura' ||
+    state.turn.awaiting === 'entryTimestampOrder' ||
+    state.turn.awaiting === 'entryCharacteristics' ||
+    state.turn.awaiting === 'entryOptionalCounter' ||
+    state.turn.awaiting === 'entryPayLife' ||
+    state.turn.awaiting === 'entryPlayer' ||
+    state.turn.awaiting === 'entryColors' ||
+    state.turn.awaiting === 'spellTargets' ||
+    state.turn.awaiting === 'freeCast' ||
+    state.turn.awaiting === 'damagePrevention' ||
+    state.turn.awaiting === 'cardName' ||
+    state.turn.awaiting === 'namedZoneExile'
   );
 }
 
@@ -154,6 +248,17 @@ export function settle(trace: Trace): Trace {
     // ability is finished (CR 704.4, 603.3), so this stop outranks every
     // settling pass.
     if (pausedMidResolution(current.state)) return current;
+    // CR 103 pregame actions happen before any player would receive priority.
+    // State-based actions therefore wait, and triggers caused by one action
+    // must survive across reducer calls until the first priority window.
+    if (current.state.turn.awaiting === 'openingHandAction') {
+      const fired = collectTriggers(current, 0);
+      if (fired.length === 0) return current;
+      return withState(current, {
+        ...current.state,
+        deferredTriggers: [...(current.state.deferredTriggers ?? []), ...fired],
+      });
+    }
     current = checkStateBasedActions(current);
     if (current.state.result !== null) return current;
     // CR 704.5j asked its controller a question, and CR 704.3 finishes the
@@ -167,7 +272,11 @@ export function settle(trace: Trace): Trace {
       const { deferredTriggers: _consumed, ...withoutDeferredTriggers } = current.state;
       current = withState(current, withoutDeferredTriggers);
     }
-    const fired = orderTriggers(current.state, [...carried, ...collectTriggers(current, scanned)]);
+    const fired = orderTriggers(current.state, [
+      ...carried,
+      ...collectTriggers(current, scanned),
+      ...collectStateTriggers(current.state),
+    ]);
     scanned = current.events.length;
     if (fired.length > 0) {
       current = putTriggersOnStack(current, fired);
@@ -211,7 +320,7 @@ function askForTriggerTargets(trace: Trace): Trace {
     trace,
     withTurn(trace.state, {
       awaiting: 'triggerTargets',
-      awaitingPlayer: pending.entry.controller,
+      awaitingPlayer: stackEntryTargetingController(trace.state, pending.entry),
     }),
   );
 }
@@ -260,8 +369,38 @@ function onScry(trace: Trace, action: Extract<Action, { type: 'scry' }>): Trace 
   return finishResolution(answerScry(trace, action.top, action.bottom));
 }
 
+/** Resumes the stack object after its controller names the mana it produces. */
+function onChooseManaColor(trace: Trace, action: Extract<Action, { type: 'chooseManaColor' }>): Trace {
+  return finishResolution(answerManaColor(trace, action.player, action.color));
+}
+
+function onTopLibrary(
+  trace: Trace,
+  action: Extract<
+    Action,
+    { type: 'orderTopLibrary' | 'selectFromTopLibrary' | 'separateTopLibraryPiles' | 'chooseTopLibraryPile' }
+  >,
+): Trace {
+  const answered =
+    action.type === 'orderTopLibrary'
+      ? answerTopLibraryOrder(trace, action.cards)
+      : action.type === 'selectFromTopLibrary'
+        ? answerTopLibrarySelect(trace, action.chosen, action.rest)
+        : action.type === 'separateTopLibraryPiles'
+          ? answerTopLibraryPartition(trace, action.first, action.second)
+          : answerTopLibraryPile(trace, action.pile);
+  return action.type === 'separateTopLibraryPiles' ? answered : finishResolution(answered);
+}
+
 function onSearchLibrary(trace: Trace, action: Extract<Action, { type: 'searchLibrary' }>): Trace {
   return finishResolution(answerSearch(trace, action.found));
+}
+
+function onChooseSearchDestination(
+  trace: Trace,
+  action: Extract<Action, { type: 'chooseSearchDestination' }>,
+): Trace {
+  return finishResolution(answerSearchDestination(trace, action.one));
 }
 
 function onChooseFromGraveyard(
@@ -271,8 +410,154 @@ function onChooseFromGraveyard(
   return finishResolution(answerGraveyardChoice(trace, action.chosen));
 }
 
+function onChooseFromBattlefield(
+  trace: Trace,
+  action: Extract<Action, { type: 'chooseFromBattlefield' }>,
+): Trace {
+  return finishResolution(answerBattlefieldChoice(trace, action.chosen));
+}
+
+function onChoosePopulateToken(
+  trace: Trace,
+  action: Extract<Action, { type: 'choosePopulateToken' }>,
+): Trace {
+  return finishResolution(answerPopulate(trace, action.token));
+}
+
 function onSacrificePermanent(trace: Trace, action: Extract<Action, { type: 'sacrificePermanent' }>): Trace {
   return finishResolution(answerPermanentSacrifice(trace, action.oid));
+}
+
+function onChoosePermanentToUntap(
+  trace: Trace,
+  action: Extract<Action, { type: 'choosePermanentToUntap' }>,
+): Trace {
+  return finishResolution(answerPermanentUntap(trace, action.oid));
+}
+
+function onChooseCardName(trace: Trace, action: Extract<Action, { type: 'chooseCardName' }>): Trace {
+  if (trace.state.pendingEntryCardNameChoice !== undefined) {
+    return finishEntryAnswer(trace, answerEntryCardName(trace, action.name));
+  }
+  return finishResolution(answerCardName(trace, action.name));
+}
+
+function onChooseNamedZoneExile(
+  trace: Trace,
+  action: Extract<Action, { type: 'chooseNamedZoneExile' }>,
+): Trace {
+  return finishResolution(answerNamedZoneExile(trace, action.oid));
+}
+
+function onChooseSpellTargets(trace: Trace, action: Extract<Action, { type: 'chooseSpellTargets' }>): Trace {
+  return finishResolution(
+    answerSpellTargets(trace, action.targets, action.multiTargets, action.damageAllocations),
+  );
+}
+
+function onChooseEntryCopy(trace: Trace, action: Extract<Action, { type: 'chooseEntryCopy' }>): Trace {
+  return finishEntryAnswer(trace, answerEntryCopy(trace, action.copyOf));
+}
+
+function onChooseEntryCounterPermanent(
+  trace: Trace,
+  action: Extract<Action, { type: 'chooseEntryCounterPermanent' }>,
+): Trace {
+  return finishEntryAnswer(trace, answerEntryCounter(trace, action.permanent));
+}
+
+function onChooseEntryCharacteristics(
+  trace: Trace,
+  action: Extract<Action, { type: 'chooseEntryCharacteristics' }>,
+): Trace {
+  return finishEntryAnswer(trace, answerEntryCharacteristics(trace, action.mode));
+}
+
+function onChooseEntryOptionalCounter(
+  trace: Trace,
+  action: Extract<Action, { type: 'chooseEntryOptionalCounter' }>,
+): Trace {
+  return finishEntryAnswer(trace, answerEntryOptionalCounter(trace, action.accept));
+}
+
+function onChooseEntryPayLife(trace: Trace, action: Extract<Action, { type: 'chooseEntryPayLife' }>): Trace {
+  return finishEntryAnswer(trace, answerEntryPayLife(trace, action.pay));
+}
+
+function onChooseEntryPlayer(trace: Trace, action: Extract<Action, { type: 'chooseEntryPlayer' }>): Trace {
+  return finishEntryAnswer(trace, answerEntryPlayer(trace, action.chosen));
+}
+
+function onChooseEntryColors(trace: Trace, action: Extract<Action, { type: 'chooseEntryColors' }>): Trace {
+  return finishEntryAnswer(trace, answerEntryColors(trace, action.colors));
+}
+
+function onChooseEntryAuraHost(
+  trace: Trace,
+  action: Extract<Action, { type: 'chooseEntryAuraHost' }>,
+): Trace {
+  return finishEntryAnswer(trace, answerEntryAura(trace, action.host));
+}
+
+function onChooseEntryTimestampNext(
+  trace: Trace,
+  action: Extract<Action, { type: 'chooseEntryTimestampNext' }>,
+): Trace {
+  return finishEntryAnswer(trace, answerEntryTimestampNext(trace, action.oid));
+}
+
+/** Resumes a spell or ability after the last choice in a simultaneous entry batch. */
+function finishEntryAnswer(before: Trace, answered: Trace): Trace {
+  const continuation = before.state.pendingBattlefieldEntryBatch?.resolution;
+  if (answered.state.pendingBattlefieldEntryBatch !== undefined) return answered;
+  const guildFeudPhase = answered.state.pendingTopLibrary?.guildFeud?.phase;
+  if (guildFeudPhase === 'opponentEntry' || guildFeudPhase === 'controllerEntry') {
+    return finishResolution(continueGuildFeudContest(answered));
+  }
+  if (continuation === undefined) return finishResolution(answered);
+  const resumed = applyResolutionEffects(
+    answered,
+    continuation.sourceOid,
+    continuation.controller,
+    continuation.remaining,
+    continuation.x,
+    continuation.objectToGraveyard,
+    tallyThrough(answered, 0, continuation.tally),
+    [...continuation.deferredTriggers, ...collectTriggers(answered, 0)],
+    continuation.sourceCard,
+  );
+  return finishResolution(resumed);
+}
+
+/** Applies one CR 615.7 share and resumes the interrupted rules action when complete. */
+function onAllocateDamagePrevention(
+  trace: Trace,
+  action: Extract<Action, { type: 'allocateDamagePrevention' }>,
+): Trace {
+  const pending = trace.state.pendingDamagePrevention;
+  if (pending === undefined) throw new IllegalActionError(action, 'no damage allocation is pending');
+  const since = trace.events.length;
+  let answered = answerDamagePrevention(trace, action.sourceOid, action.amount);
+  if (answered.state.pendingDamagePrevention !== undefined) return answered;
+  if (pending.postDamageTaps !== undefined) {
+    answered = tapRetainedDamageCohort(answered, pending.postDamageTaps);
+  }
+  const continuation = pending.resolution;
+  if (continuation === undefined) {
+    return pending.resumePriority === null ? answered : givePriority(answered, pending.resumePriority);
+  }
+  const resumed = applyResolutionEffects(
+    answered,
+    continuation.sourceOid,
+    continuation.controller,
+    continuation.remaining,
+    continuation.x,
+    continuation.objectToGraveyard,
+    tallyThrough(answered, since, continuation.tally),
+    [...continuation.deferredTriggers, ...collectTriggers(answered, since)],
+    continuation.sourceCard,
+  );
+  return finishResolution(resumed);
 }
 
 /**
@@ -297,6 +582,13 @@ function onHandDiscard(trace: Trace, action: Extract<Action, { type: 'chooseDisc
   return finishResolution(answerHandDiscard(trace, action.oids));
 }
 
+function onRevealedHandChoice(
+  trace: Trace,
+  action: Extract<Action, { type: 'chooseFromRevealedHand' }>,
+): Trace {
+  return finishResolution(answerRevealedHandChoice(trace, action.chosen));
+}
+
 /**
  * CR 603.3d: the targets a triggered ability was aimed at, written onto its
  * entry.
@@ -312,12 +604,20 @@ function onChooseTriggerTargets(
 ): Trace {
   const pending = triggerOnStack(trace.state, action.oid);
   if (pending === null) throw new IllegalActionError(action, 'that trigger is not on the stack');
-  const aimed = withState(trace, withChosenTargets(trace.state, action.oid, action.targets));
+  if (shouldStagePluralTargets(pending.ability.effects, action.multiTargets, action.damageAllocations)) {
+    return beginTriggerPluralChoice(trace, action);
+  }
+  const aimed = withState(
+    trace,
+    withChosenTargets(trace.state, action.oid, action.targets, action.multiTargets, action.damageAllocations),
+  );
   const emitted = emit(aimed, {
     type: 'triggerTargetsChosen',
     oid: action.oid,
     source: pending.source,
     targets: action.targets,
+    ...(action.multiTargets === undefined ? {} : { multiTargets: action.multiTargets }),
+    ...(action.damageAllocations === undefined ? {} : { damageAllocations: action.damageAllocations }),
   });
   return withState(emitted, withTurn(emitted.state, { awaiting: null, awaitingPlayer: null }));
 }
@@ -385,26 +685,254 @@ function onPlayLand(trace: Trace, player: PlayerId, oid: ObjectId): Trace {
   return retainPriority(withState(moved, state), player);
 }
 
+function awaitPendingPlural(trace: Trace, pending: PendingPluralTargets): Trace {
+  const stage = nextPluralStage(pendingPluralContext(trace.state, pending).effects, pending);
+  if (stage === null) return finishPendingPlural(trace, pending);
+  const awaiting = stage.kind === 'targets' ? 'pluralTargets' : 'damageAllocation';
+  return withState(trace, {
+    ...trace.state,
+    pendingPluralTargets: pending,
+    turn: { ...trace.state.turn, awaiting, awaitingPlayer: pending.player },
+  });
+}
+
+function clearPendingPlural(state: GameState): GameState {
+  const { pendingPluralTargets: _finished, ...rest } = state;
+  return withTurn(rest, { awaiting: null, awaitingPlayer: null });
+}
+
+function completedCastAction(pending: PendingPluralTargets): Extract<Action, { type: 'castSpell' }> {
+  return {
+    type: 'castSpell',
+    player: pending.player,
+    oid: pending.oid,
+    targets: pending.targets,
+    multiTargets: pending.multiTargets,
+    ...(Object.keys(pending.damageAllocations).length === 0
+      ? {}
+      : { damageAllocations: pending.damageAllocations }),
+    ...(pending.x === undefined ? {} : { x: pending.x }),
+    ...(pending.mode === undefined ? {} : { mode: pending.mode }),
+    ...(pending.castingCost === undefined ? {} : { castingCost: pending.castingCost }),
+    ...(pending.sacrifices === undefined ? {} : { sacrifices: pending.sacrifices }),
+    ...(pending.discards === undefined ? {} : { discards: pending.discards }),
+  };
+}
+
+function completedActivationAction(
+  pending: PendingPluralTargets,
+): Extract<Action, { type: 'activateAbility' }> {
+  if (pending.abilityIndex === undefined) throw new Error('pending plural activation has no ability index');
+  return {
+    type: 'activateAbility',
+    player: pending.player,
+    oid: pending.oid,
+    abilityIndex: pending.abilityIndex,
+    targets: pending.targets,
+    multiTargets: pending.multiTargets,
+    ...(Object.keys(pending.damageAllocations).length === 0
+      ? {}
+      : { damageAllocations: pending.damageAllocations }),
+    sacrifices: pending.sacrifices ?? [],
+    ...(pending.taps === undefined ? {} : { taps: pending.taps }),
+    ...(pending.discards === undefined ? {} : { discards: pending.discards }),
+    ...(pending.x === undefined ? {} : { x: pending.x }),
+    ...(pending.mode === undefined ? {} : { mode: pending.mode }),
+  };
+}
+
+function finishPendingPlural(trace: Trace, pending: PendingPluralTargets): Trace {
+  const cleared = withState(trace, clearPendingPlural(trace.state));
+  if (pending.origin === 'cast') return onCastSpell(cleared, completedCastAction(pending));
+  if (pending.origin === 'activation') {
+    return onActivateAbility(cleared, completedActivationAction(pending));
+  }
+  return onChooseTriggerTargets(cleared, {
+    type: 'chooseTriggerTargets',
+    player: pending.player,
+    oid: pending.oid,
+    targets: pending.targets,
+    multiTargets: pending.multiTargets,
+    ...(Object.keys(pending.damageAllocations).length === 0
+      ? {}
+      : { damageAllocations: pending.damageAllocations }),
+  });
+}
+
+function onBeginActivateAbility(trace: Trace, action: Extract<Action, { type: 'activateAbility' }>): Trace {
+  return awaitPendingPlural(trace, {
+    origin: 'activation',
+    player: action.player,
+    oid: action.oid,
+    abilityIndex: action.abilityIndex,
+    targets: action.targets,
+    multiTargets: {},
+    damageAllocations: {},
+    finishedTargetSlots: [],
+    sacrifices: action.sacrifices,
+    ...(action.taps === undefined ? {} : { taps: action.taps }),
+    ...(action.discards === undefined ? {} : { discards: action.discards }),
+    ...(action.x === undefined ? {} : { x: action.x }),
+    ...(action.mode === undefined ? {} : { mode: action.mode }),
+  });
+}
+
+function onBeginCastSpell(trace: Trace, action: Extract<Action, { type: 'beginCastSpell' }>): Trace {
+  return awaitPendingPlural(trace, {
+    origin: 'cast',
+    player: action.player,
+    oid: action.oid,
+    targets: action.targets,
+    multiTargets: {},
+    damageAllocations: {},
+    finishedTargetSlots: [],
+    ...(action.x === undefined ? {} : { x: action.x }),
+    ...(action.mode === undefined ? {} : { mode: action.mode }),
+    ...(action.castingCost === undefined ? {} : { castingCost: action.castingCost }),
+    ...(action.sacrifices === undefined ? {} : { sacrifices: action.sacrifices }),
+    ...(action.discards === undefined ? {} : { discards: action.discards }),
+  });
+}
+
+function beginTriggerPluralChoice(
+  trace: Trace,
+  action: Extract<Action, { type: 'chooseTriggerTargets' }>,
+): Trace {
+  return awaitPendingPlural(trace, {
+    origin: 'trigger',
+    player: action.player,
+    oid: action.oid,
+    targets: action.targets,
+    multiTargets: {},
+    damageAllocations: {},
+    finishedTargetSlots: [],
+  });
+}
+
+function targetSlotFinishes(effect: Effect, members: readonly Target[], target: Target | null): boolean {
+  if (target === null) return true;
+  if (!hasTarget(effect) || !isMultipleTargetSpec(effect.target)) return false;
+  const fixed = targetCountOf(effect.target);
+  return fixed !== null && members.length >= fixed;
+}
+
+function onChoosePluralTarget(trace: Trace, action: Extract<Action, { type: 'choosePluralTarget' }>): Trace {
+  const pending = trace.state.pendingPluralTargets;
+  if (pending === undefined) throw new IllegalActionError(action, 'no plural target choice is pending');
+  const effects = pendingPluralContext(trace.state, pending).effects;
+  const stage = nextPluralStage(effects, pending);
+  if (stage === null || stage.kind !== 'targets') throw new IllegalActionError(action, 'wrong plural stage');
+  const previous = pending.multiTargets[stage.index] ?? [];
+  const members = action.target === null ? previous : [...previous, action.target];
+  const finished = targetSlotFinishes(effects[stage.index]!, members, action.target);
+  return awaitPendingPlural(trace, {
+    ...pending,
+    multiTargets: { ...pending.multiTargets, [stage.index]: members },
+    finishedTargetSlots: finished
+      ? [...pending.finishedTargetSlots, stage.index]
+      : pending.finishedTargetSlots,
+  });
+}
+
+function onAllocateDividedDamage(
+  trace: Trace,
+  action: Extract<Action, { type: 'allocateDividedDamage' }>,
+): Trace {
+  const pending = trace.state.pendingPluralTargets;
+  if (pending === undefined) throw new IllegalActionError(action, 'no damage allocation is pending');
+  const stage = nextPluralStage(pendingPluralContext(trace.state, pending).effects, pending);
+  if (stage === null || stage.kind !== 'allocation')
+    throw new IllegalActionError(action, 'wrong plural stage');
+  const allocations = [...(pending.damageAllocations[stage.index] ?? []), action.amount];
+  return awaitPendingPlural(trace, {
+    ...pending,
+    damageAllocations: { ...pending.damageAllocations, [stage.index]: allocations },
+  });
+}
+
 function onCastSpell(trace: Trace, action: Extract<Action, { type: 'castSpell' }>): Trace {
-  const card = getObject(trace.state, action.oid).card;
+  const physical = getObject(trace.state, action.oid);
+  const candidatePending = action.castingCost === 'withoutMana' ? trace.state.pendingFreeCast : undefined;
+  const freeCandidate =
+    candidatePending?.player === action.player
+      ? pendingFreeCastCandidate(trace.state, candidatePending, action.oid)
+      : null;
+  const pending = freeCandidate === null ? undefined : candidatePending;
+  const card = freeCandidate?.card ?? physical.card;
   if (card.kind === 'land') throw new IllegalActionError(action, 'lands are played, not cast');
+  const castingCost = action.castingCost ?? 'mana';
+  if (castingCost === 'alternative' && card.alternativeCost === undefined) {
+    throw new IllegalActionError(action, 'this spell has no alternative casting cost');
+  }
+  if (
+    castingCost === 'overload' &&
+    ((card.kind !== 'instant' && card.kind !== 'sorcery') || card.overload === undefined)
+  ) {
+    throw new IllegalActionError(action, 'this spell has no overload casting cost');
+  }
   // CR 601.2b then CR 601.2f: X is fixed into the cost before any reduction is
-  // applied to the total, so `effectiveManaCost` does both in that order —
-  // `cost.ts`'s docblock works the counterexample for why the reverse is wrong.
-  const cost = effectiveManaCost(trace.state, action.player, card, action.x);
+  // applied to the total, so the selected-price seam either does both in that
+  // order or replaces the whole mana component with zero for CR 118.9.
+  const targetCount = countTargetInstances(action.targets, action.multiTargets);
+  const cost = selectedCastingManaCost(trace.state, action.player, card, action.x, castingCost, targetCount);
   const plan = planPayment(trace.state, action.player, cost, action.oid);
   if (plan === null) throw new IllegalActionError(action, 'cannot pay the mana cost');
-  const paid = executePayment(trace, action.player, cost, plan);
-  const cast = pushSpell(
-    paid,
-    action.player,
-    action.oid,
-    action.targets,
-    action.mode ?? null,
-    action.x ?? null,
-    action.multiTargets,
-  );
-  return retainPriority(cast, action.player);
+  const manaPaid = executePayment(trace, action.player, cost, plan);
+  const paid =
+    castingCost === 'alternative' && card.alternativeCost !== undefined
+      ? loseLife(manaPaid, action.player, card.alternativeCost.payLife)
+      : manaPaid;
+  const canonical = canonicalCastAction(action);
+  const discards = canonical.discards ?? [];
+  const discarded = discards.length === 0 ? paid : discardFromHand(paid, action.player, discards, null);
+  const sacrifices = canonical.sacrifices ?? [];
+  const onlySacrifice = sacrifices.length === 1 ? sacrifices[0] : undefined;
+  const paidSacrificePower =
+    onlySacrifice === undefined ? undefined : powerOf(discarded.state, onlySacrifice);
+  const paidSacrificeToughness =
+    onlySacrifice === undefined ? undefined : toughnessOf(discarded.state, onlySacrifice);
+  let sacrificed = discarded;
+  for (const oid of sacrifices) sacrificed = sacrificePermanent(sacrificed, oid, action.player);
+  const faced =
+    pending?.card === undefined
+      ? sacrificed
+      : withState(sacrificed, {
+          ...sacrificed.state,
+          objects: {
+            ...sacrificed.state.objects,
+            [action.oid]: { ...getObject(sacrificed.state, action.oid), faceCard: pending.card },
+          },
+        });
+  const cast =
+    freeCandidate?.copy === null || freeCandidate === null
+      ? pushSpell(
+          faced,
+          action.player,
+          action.oid,
+          action.targets,
+          action.mode ?? null,
+          action.x ?? null,
+          action.multiTargets,
+          action.damageAllocations,
+          paidSacrificePower,
+          paidSacrificeToughness,
+          action.castingCost,
+        )
+      : pushCopiedCardSpell(
+          faced,
+          action.player,
+          action.oid,
+          freeCandidate.copy.card,
+          action.targets,
+          action.mode ?? null,
+          action.x ?? null,
+          action.multiTargets,
+          action.damageAllocations,
+          paidSacrificePower,
+          paidSacrificeToughness,
+          action.castingCost,
+        );
+  return pending === undefined ? retainPriority(cast, action.player) : finishFreeCast(cast, action.oid);
 }
 
 /**
@@ -469,25 +997,47 @@ function onCastSpell(trace: Trace, action: Extract<Action, { type: 'castSpell' }
  * X values would stop matching what the reducer charges.
  */
 function onActivateAbility(trace: Trace, action: Extract<Action, { type: 'activateAbility' }>): Trace {
-  const ability = activatedAbilityAt(trace.state, action.oid, action.abilityIndex);
+  const ability = currentActivatedAbilityAt(trace.state, action.oid, action.abilityIndex);
   if (ability === undefined) throw new IllegalActionError(action, 'that ability is not an activated one');
+  const effects = effectsForActivatedAbility(ability, action.mode ?? null);
+  if (shouldStagePluralTargets(effects, action.multiTargets, action.damageAllocations)) {
+    return onBeginActivateAbility(trace, action);
+  }
+  const sourceBattlefieldIncarnation = getObject(trace.state, action.oid).incarnation ?? 0;
   const source = characteristicsOf(trace.state, action.oid);
-  const sourceCharacteristics = { colors: [...source.colors], subtypes: [...source.subtypes] };
+  // The announced stack object retains the ability incarnation the player
+  // actually activated. Layer-6 grants are not printed on the source card, so
+  // retaining only copiable values would make the numeric slot disappear at
+  // resolution. Trigger collection banks its live ability list for the same
+  // reason.
+  const sourceCard: Card = {
+    ...copiableValuesOf(trace.state, action.oid),
+    abilities: [...source.abilities],
+  };
+  const sourceCharacteristics = {
+    colors: [...source.colors],
+    subtypes: [...source.subtypes],
+    keywords: [...source.keywords],
+  };
   const chosenX = action.x ?? null;
   const cost = resolveX(ability.cost.mana, chosenX ?? 0);
-  const plan = planPayment(
-    trace.state,
-    action.player,
-    cost,
-    undefined,
-    ability.cost.tapSelf ? [action.oid] : [],
-  );
+  const plan = planPayment(trace.state, action.player, cost, undefined, [
+    ...(ability.cost.tapSelf ? [action.oid] : []),
+    ...(action.taps ?? []),
+  ]);
   if (plan === null) throw new IllegalActionError(action, 'cannot pay the mana cost');
-  const paid = executePayment(trace, action.player, cost, plan);
+  const manaPaid = executePayment(trace, action.player, cost, plan);
+  const paid =
+    ability.cost.payLife === undefined ? manaPaid : loseLife(manaPaid, action.player, ability.cost.payLife);
   let tapped = ability.cost.tapSelf ? tapObject(paid, action.oid) : paid;
+  // CR 601.2h/602.2b: the whole chosen cohort is a cost, so it is tapped now,
+  // before the ability reaches the stack or either player receives priority.
+  // Canonical order makes two unordered spellings of the same payment emit the
+  // same replay sequence as well as sharing one action identity.
+  for (const oid of [...(action.taps ?? [])].sort()) tapped = tapObject(tapped, oid);
   if (isLoyaltyAbility(ability)) {
     const object = getObject(tapped.state, action.oid);
-    const counters = addCounters(object.counters, 'loyalty', ability.loyaltyCost);
+    const counters = addCounters(object.counters, 'loyalty', loyaltyCostChange(ability.loyaltyCost, chosenX));
     const state: GameState = {
       ...tapped.state,
       objects: {
@@ -507,6 +1057,26 @@ function onActivateAbility(trace: Trace, action: Extract<Action, { type: 'activa
       loyalty: counterCount(counters, 'loyalty'),
     });
   }
+  const removedCounter = ability.cost.removeCounter;
+  if (removedCounter !== undefined) {
+    tapped = removeCounters(tapped, action.oid, removedCounter.counter, removedCounter.count).trace;
+  }
+  if (ability.activateOnlyOnceEachTurn === true) {
+    const object = getObject(tapped.state, action.oid);
+    tapped = withState(tapped, {
+      ...tapped.state,
+      objects: {
+        ...tapped.state.objects,
+        [action.oid]: {
+          ...object,
+          activationLimitedTurns: {
+            ...object.activationLimitedTurns,
+            [action.abilityIndex]: tapped.state.turn.number,
+          },
+        },
+      },
+    });
+  }
   // CR 601.2h pays the discard with the rest of the costs, before anything is
   // put on the stack. It goes after the mana and the tap and before the
   // sacrifices for one reason: a discard is the only cost here that can change
@@ -517,7 +1087,16 @@ function onActivateAbility(trace: Trace, action: Extract<Action, { type: 'activa
   const spent =
     action.discards === undefined || action.discards.length === 0
       ? tapped
-      : discardFromHand(tapped, action.player, action.discards);
+      : discardFromHand(tapped, action.player, action.discards, null);
+  const onlyPaidDiscard = action.discards?.length === 1 ? action.discards[0] : undefined;
+  const paidDiscardManaValue =
+    onlyPaidDiscard === undefined ? undefined : cardManaValue(getObject(tapped.state, onlyPaidDiscard).card);
+  const paidPermanents = [...action.sacrifices, ...(ability.cost.sacrificeSelf ? [action.oid] : [])];
+  const onlyPaidPermanent = paidPermanents.length === 1 ? paidPermanents[0] : undefined;
+  const paidSacrificePower =
+    onlyPaidPermanent === undefined ? undefined : powerOf(spent.state, onlyPaidPermanent);
+  const paidSacrificeToughness =
+    onlyPaidPermanent === undefined ? undefined : toughnessOf(spent.state, onlyPaidPermanent);
   // The named permanents leave before the source does, which keeps the rule
   // above whole: everything that needed the source to still be a permanent has
   // happened by the time it goes. Each is a zone change and nothing more, for
@@ -527,14 +1106,38 @@ function onActivateAbility(trace: Trace, action: Extract<Action, { type: 'activa
     eaten = sacrificePermanent(eaten, sacrificed, action.player);
   }
   const given = ability.cost.sacrificeSelf ? sacrificePermanent(eaten, action.oid, action.player) : eaten;
+  const exiled = ability.cost.exileSelf ? moveObject(given, action.oid, 'exile') : given;
+  const stackPayment =
+    ability.cost.exileControlledInstantOrSorcerySpell === true ? action.targets[0] : undefined;
+  const stackPaid =
+    stackPayment?.kind !== 'spell'
+      ? exiled
+      : exiled.state.objects[stackPayment.oid]?.zone === 'stack'
+        ? moveObject(exiled, stackPayment.oid, 'exile')
+        : withState(exiled, {
+            ...exiled.state,
+            stack: exiled.state.stack.filter((entry) => entry.oid !== stackPayment.oid),
+          });
+  const resolutionTargets =
+    ability.cost.exileControlledInstantOrSorcerySpell === true
+      ? ability.effects.map(() => null)
+      : action.targets;
   const pushed = pushAbility(
-    given,
+    stackPaid,
     action.player,
     action.oid,
     action.abilityIndex,
-    action.targets,
+    action.mode ?? null,
+    resolutionTargets,
     sourceCharacteristics,
     chosenX,
+    sourceBattlefieldIncarnation,
+    sourceCard,
+    action.multiTargets,
+    action.damageAllocations,
+    paidSacrificePower,
+    paidSacrificeToughness,
+    paidDiscardManaValue,
   );
   return retainPriority(pushed, action.player);
 }
@@ -557,24 +1160,73 @@ function onDeclareAttackers(
   attacks: readonly Attack[],
   settled: number,
 ): Trace {
+  const declarationCost = attackTaxCost(trace.state, player, attacks);
   const combat = { ...trace.state.combat, attacks };
   if (settled < eligibleAttackers(trace.state).length) {
     return withState(trace, { ...trace.state, combat: { ...combat, attacksSettled: settled } });
   }
   const { attacksSettled: _answered, ...finished } = combat;
-  const state: GameState = { ...trace.state, combat: finished };
-  const declared = emit(withState(trace, state), { type: 'attackersDeclared', player, attacks });
+  const attackedPlayers = trace.state.turn.playersWhoAttackedWithCreatureThisTurn;
+  const state: GameState = {
+    ...trace.state,
+    combat: finished,
+    turn:
+      attacks.length === 0 || attackedPlayers.includes(player)
+        ? trace.state.turn
+        : {
+            ...trace.state.turn,
+            playersWhoAttackedWithCreatureThisTurn: [...attackedPlayers, player],
+          },
+  };
+  let paid = withState(trace, state);
+  if (declarationCost !== null) {
+    const payment = planPayment(trace.state, player, declarationCost);
+    if (payment === null) throw new Error('onDeclareAttackers: validated attack tax became unpayable');
+    paid = executePayment(paid, player, declarationCost, payment);
+  }
+  const declared = emit(paid, { type: 'attackersDeclared', player, attacks });
   const tapped = tapAttackers(declared, attacks);
   return givePriority(tapped, player);
 }
 
 /** `onDeclareAttackers` for CR 509.1; `blocksSettled` carries the same count. */
-function onDeclareBlockers(trace: Trace, player: PlayerId, blocks: readonly Block[], settled: number): Trace {
-  const inProgress = { ...trace.state.combat, blocks };
-  if (settled < eligibleBlockers(trace.state).length) {
-    return withState(trace, { ...trace.state, combat: { ...inProgress, blocksSettled: settled } });
+function withAttackerOrders(combat: CombatState, blocks: readonly Block[]): CombatState {
+  const { attackerOrders: _oldOrders, attackersOrdered: _oldProgress, ...base } = combat;
+  const attackerOrders = groupAttackerOrders(blocks);
+  return attackerOrders.length === 0 ? { ...base, blocks } : { ...base, blocks, attackerOrders };
+}
+
+function beginAttackerOrder(trace: Trace): Trace {
+  if (blockersNeedingAttackerOrder(trace.state).length === 0) {
+    return givePriority(trace, trace.state.turn.active);
   }
-  const { blocksSettled: _answered, ...combat } = inProgress;
+  return withState(
+    trace,
+    withTurn(trace.state, {
+      priority: null,
+      awaiting: 'attackerOrder',
+      awaitingPlayer: opponentOf(trace.state.turn.active),
+    }),
+  );
+}
+
+function onDeclareBlockers(
+  trace: Trace,
+  player: PlayerId,
+  blocks: readonly Block[],
+  settled: number,
+  attackerChoicesSettled: number | undefined,
+): Trace {
+  const inProgress = withAttackerOrders(trace.state.combat, blocks);
+  if (settled < eligibleBlockers(trace.state).length) {
+    const { blockerAttacksSettled: _oldAttackerProgress, ...base } = inProgress;
+    const combat =
+      attackerChoicesSettled === undefined
+        ? { ...base, blocksSettled: settled }
+        : { ...base, blocksSettled: settled, blockerAttacksSettled: attackerChoicesSettled };
+    return withState(trace, { ...trace.state, combat });
+  }
+  const { blocksSettled: _answered, blockerAttacksSettled: _answeredAttacks, ...combat } = inProgress;
   const state: GameState = { ...trace.state, combat };
   const declared = emit(withState(trace, state), { type: 'blockersDeclared', player, blocks });
   const active = declared.state.turn.active;
@@ -588,7 +1240,7 @@ function onDeclareBlockers(trace: Trace, player: PlayerId, blocks: readonly Bloc
       }),
     );
   }
-  return givePriority(declared, active);
+  return beginAttackerOrder(declared);
 }
 
 /**
@@ -639,6 +1291,35 @@ function onOrderBlockers(trace: Trace, action: Extract<Action, { type: 'orderBlo
       blockers: block.blockers,
     });
   }
+  return beginAttackerOrder(current);
+}
+
+/** CR 509.3's reverse damage order, announced by the defending player. */
+function onOrderAttackers(trace: Trace, action: Extract<Action, { type: 'orderAttackers' }>): Trace {
+  const settled: Record<ObjectId, number> = { ...(trace.state.combat.attackersOrdered ?? {}) };
+  const placed = (trace.state.combat.attackerOrders ?? []).map((block): AttackerOrder => {
+    const order = action.orders.find((entry) => entry.blocker === block.blocker);
+    if (order === undefined) return block;
+    settled[block.blocker] = order.attackers.length;
+    const behind = block.attackers.filter((oid) => !order.attackers.includes(oid));
+    return { blocker: block.blocker, attackers: [...order.attackers, ...behind] };
+  });
+  const combat = { ...trace.state.combat, attackerOrders: placed };
+  const outstanding = placed.some(
+    (block) => block.attackers.length > 1 && (settled[block.blocker] ?? 0) < block.attackers.length,
+  );
+  if (outstanding) {
+    return withState(trace, { ...trace.state, combat: { ...combat, attackersOrdered: settled } });
+  }
+  const { attackersOrdered: _announced, ...finished } = combat;
+  let current = withState(trace, { ...trace.state, combat: finished });
+  for (const block of blockersNeedingAttackerOrder(current.state)) {
+    current = emit(current, {
+      type: 'attackerOrderChosen',
+      blocker: block.blocker,
+      attackers: block.attackers,
+    });
+  }
   return givePriority(current, current.state.turn.active);
 }
 
@@ -672,13 +1353,10 @@ function clearSelection(state: GameState): GameState {
  * commitment floor at the same moment (`undo.ts`).
  */
 function onDiscard(trace: Trace, player: PlayerId, oids: readonly ObjectId[]): Trace {
-  const count = playerOf(trace.state, player).hand.length - trace.state.config.maximumHandSize;
+  const count = cleanupDiscardCount(trace.state, player);
   if (oids.length < count) return holdSelection(trace, oids);
   let current = withState(trace, clearSelection(trace.state));
-  for (const oid of oids) {
-    current = moveObject(current, oid, 'graveyard');
-  }
-  current = emit(current, { type: 'cardsDiscarded', player, oids });
+  current = discardFromHand(current, player, oids, null);
   return finishCleanup(current);
 }
 
@@ -713,16 +1391,34 @@ function applyAction(trace: Trace, action: Action): Trace {
     case 'mulligan':
     case 'keepHand':
       return onOpeningHand(trace, action);
+    case 'chooseOpeningHandAction':
+      return answerOpeningHandAction(trace, action.player, action.oid);
     case 'passPriority':
       return onPass(trace, action.player);
     case 'playLand':
       return onPlayLand(trace, action.player, action.oid);
     case 'castSpell':
       return onCastSpell(trace, action);
+    case 'beginCastSpell':
+      return onBeginCastSpell(trace, action);
+    case 'choosePluralTarget':
+      return onChoosePluralTarget(trace, action);
+    case 'allocateDividedDamage':
+      return onAllocateDividedDamage(trace, action);
     case 'activateManaAbility': {
-      const produced = activateManaSource(trace, action.player, action.oid, action.color);
+      const produced =
+        trace.state.pendingManaCombination === undefined
+          ? activateManaSource(trace, action.player, action.oid, action.color, action.abilityIndex)
+          : continueManaCombination(
+              trace,
+              action.player,
+              action.oid,
+              action.color as Exclude<typeof action.color, 'C'>,
+            );
       return retainPriority(produced, action.player);
     }
+    case 'chooseManaColor':
+      return onChooseManaColor(trace, action);
     case 'activateAbility':
       return onActivateAbility(trace, action);
     case 'chooseTriggerTargets':
@@ -733,18 +1429,61 @@ function applyAction(trace: Trace, action: Action): Trace {
       return onAnswerMay(trace, action);
     case 'answerUnless':
       return onAnswerUnless(trace, action);
+    case 'declineFreeCast':
+      return declineFreeCast(trace);
     case 'keepLegend':
       return onKeepLegend(trace, action);
     case 'scry':
       return onScry(trace, action);
+    case 'orderTopLibrary':
+    case 'selectFromTopLibrary':
+    case 'separateTopLibraryPiles':
+    case 'chooseTopLibraryPile':
+      return onTopLibrary(trace, action);
     case 'searchLibrary':
       return onSearchLibrary(trace, action);
+    case 'chooseSearchDestination':
+      return onChooseSearchDestination(trace, action);
     case 'chooseFromGraveyard':
       return onChooseFromGraveyard(trace, action);
+    case 'chooseFromBattlefield':
+      return onChooseFromBattlefield(trace, action);
+    case 'choosePopulateToken':
+      return onChoosePopulateToken(trace, action);
     case 'sacrificePermanent':
       return onSacrificePermanent(trace, action);
+    case 'choosePermanentToUntap':
+      return onChoosePermanentToUntap(trace, action);
+    case 'chooseCardName':
+      return onChooseCardName(trace, action);
+    case 'chooseNamedZoneExile':
+      return onChooseNamedZoneExile(trace, action);
+    case 'chooseSpellTargets':
+      return onChooseSpellTargets(trace, action);
+    case 'chooseEntryCopy':
+      return onChooseEntryCopy(trace, action);
+    case 'chooseEntryCounterPermanent':
+      return onChooseEntryCounterPermanent(trace, action);
+    case 'chooseEntryCharacteristics':
+      return onChooseEntryCharacteristics(trace, action);
+    case 'chooseEntryOptionalCounter':
+      return onChooseEntryOptionalCounter(trace, action);
+    case 'chooseEntryPayLife':
+      return onChooseEntryPayLife(trace, action);
+    case 'chooseEntryPlayer':
+      return onChooseEntryPlayer(trace, action);
+    case 'chooseEntryColors':
+      return onChooseEntryColors(trace, action);
+    case 'chooseEntryAuraHost':
+      return onChooseEntryAuraHost(trace, action);
+    case 'chooseEntryTimestampNext':
+      return onChooseEntryTimestampNext(trace, action);
+    case 'allocateDamagePrevention':
+      return onAllocateDamagePrevention(trace, action);
     case 'chooseDiscards':
       return onHandDiscard(trace, action);
+    case 'chooseFromRevealedHand':
+      return onRevealedHandChoice(trace, action);
     case 'declareAttackers':
       return onDeclareAttackers(
         trace,
@@ -763,10 +1502,13 @@ function applyAction(trace: Trace, action: Action): Trace {
         action.player,
         groupBlocks(action.blocks),
         action.settled ?? eligibleBlockers(trace.state).length,
+        action.attackerChoicesSettled,
       );
     }
     case 'orderBlockers':
       return onOrderBlockers(trace, action);
+    case 'orderAttackers':
+      return onOrderAttackers(trace, action);
     case 'discard':
       return onDiscard(trace, action.player, action.oids);
     case 'concede':

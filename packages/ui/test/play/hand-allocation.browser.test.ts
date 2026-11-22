@@ -9,7 +9,7 @@
  * 1024x768 a held card was 71.5px against a permanent's 100, and on the face
  * that shipped that day, which carried 4px of border over 4px of padding a side,
  * 71.5px of face left a 55.5px content box, under `styles/card.ts`'s
- * `BOARD_RULES_MIN_REM`. So **not one of the seven cards in hand drew a word of
+ * `BOARD_RULES_PANEL_MAX_REM`. So **not one of the seven cards in hand drew a word of
  * rules text at any board size** while every permanent beside them drew all of
  * it. The hand is the zone a player decides from, and it was the one region on
  * the table that could not be read.
@@ -93,6 +93,8 @@ const LANDS = [
 
 /** An opening hand, because that is the widest the row is ever asked to be. */
 const HAND_SIZE = 7;
+const CROWDED_HAND_FACE_PX = 48;
+const BATTLEFIELD_FACE_FLOOR_PX = 72;
 
 /**
  * How far under the battlefield a held card may be drawn.
@@ -204,12 +206,18 @@ const MEASURE = `(() => {
   const far = document.querySelector(".mtg-board__side[data-seat='opponent']");
   const handRow = document.querySelector(".mtg-zone[data-tone='rail'] > .mtg-zone__body[data-layout='rail']");
   const held = [...document.querySelectorAll(".mtg-zone[data-tone='rail'] .mtg-slot[data-slot='hand'] > .mtg-card")];
-  const played = [...near.querySelectorAll(".mtg-board__spells > .mtg-slot[data-slot='play'] > .mtg-card")];
+  const played = [...near.querySelectorAll(".mtg-board__spells > .mtg-attach > .mtg-slot[data-slot='play'] > .mtg-card")];
   return {
     viewport: [window.innerWidth, window.innerHeight],
     root: parseFloat(getComputedStyle(document.documentElement).fontSize),
     hand: held.map((f) => readFace(f, handRow)),
     board: played.map((f) => readFace(f, near.querySelector('.mtg-board__spells'))),
+    representedBoard: [...near.querySelector('.mtg-board__spells').children].reduce(
+      (total, place) => total + Number(
+        place.querySelector('.mtg-permanent-pile__toggle')?.getAttribute('data-pile-count') ?? 1
+      ),
+      0,
+    ),
     handRow: box(handRow),
     handZone: box(document.querySelector(".mtg-zone[data-tone='rail']")),
     handScrollX: handRow === null ? -1 : round(handRow.scrollWidth - handRow.clientWidth),
@@ -274,19 +282,40 @@ function handLadder(): readonly { readonly rem: number; readonly lines: number }
  *
  * At or under, because `max-width` is inclusive: a 64px content box is hidden
  * and a 65px one draws, which the same sweep confirms.
+ *
+ * The rules region is the one that hides in two steps rather than one
+ * (`mtg-8kc`). Its `display: none` band is taken back from below by the panel
+ * band, so the width under which it draws nothing at all is the panel's floor
+ * and not the hide band's ceiling; reading the hide band alone would report a
+ * face as blank that in fact draws a line of text over its picture.
  */
 function boardRegionMinRem(region: 'rules' | 'type'): number {
   const hidden = new RegExp(
     `@container \\(max-width: ([\\d.]+)rem\\) \\{\\n {2}\\.mtg-card\\[data-size='board'\\] > \\[data-region='${region}'\\] \\{ display: none; \\}`,
   ).exec(uiStyleSheet());
   if (hidden === null) throw new Error(`the sheet hides no board ${region} region`);
-  return Number(hidden[1]);
+  if (region === 'type') return Number(hidden[1]);
+  return boardPanelBand().min;
+}
+
+/**
+ * The band in which the played rules box is a panel over the picture: the width
+ * it starts at, the width it stops at, and the lines it is granted there.
+ */
+function boardPanelBand(): { readonly max: number; readonly min: number; readonly lines: number } {
+  const band = /@container \(max-width: ([\d.]+)rem\) and \(min-width: ([\d.]+)rem\) \{\n([\s\S]*?)\n\}/.exec(
+    uiStyleSheet(),
+  );
+  if (band === null) throw new Error('the sheet declares no board rules panel band');
+  const lines = /-webkit-line-clamp: (\d+)/.exec(band[3] ?? '');
+  if (lines === null) throw new Error('the board rules panel states no line budget');
+  return { max: Number(band[1]), min: Number(band[2]), lines: Number(lines[1]) };
 }
 
 /** And what a *played* face of the same width is granted, out of the same sheet. */
 function playedBudget(rem: number): number {
   const sheet = uiStyleSheet();
-  const hidden = boardRegionMinRem('rules');
+  const panel = boardPanelBand();
   const narrow =
     /@container \(max-width: ([\d.]+)rem\) \{\n {2}\.mtg-card\[data-size='board'\] > \[data-region='rules'\] \{ -webkit-line-clamp: (\d+); \}/.exec(
       sheet,
@@ -296,7 +325,8 @@ function playedBudget(rem: number): number {
       sheet,
     );
   if (narrow === null || wide === null) throw new Error('the sheet states no played budget');
-  if (rem <= hidden) return 0;
+  if (rem < panel.min) return 0;
+  if (rem <= panel.max) return panel.lines;
   if (rem <= Number(narrow[1])) return Number(narrow[2]);
   return Number(wide[1]);
 }
@@ -330,6 +360,25 @@ const MAX_ART_ASPECT = 2.75;
  * Written in rather than drawn from a card, because the point is to exceed the
  * widest band by a margin no set can accidentally close, and because a card name
  * in this file would put one in the public export.
+ *
+ * **What this cannot see, and the rig that can** (`mtg-4xda`). Assigning
+ * `textContent` replaces the region's children with a single text node, so every
+ * reading below is of a region whose *contents* are this file's rather than the
+ * app's. The measurement itself holds up: substituting a `display: flex` child
+ * carrying the same text, which is `mtg-s55u`'s shape exactly, reads 25 line
+ * boxes against a budget of 3 and fails the `lines` assertion at the first
+ * viewport. What the rig cannot do is arrive at that structure, because it threw
+ * the structure away one line above. So a clamp that binds on nothing is caught
+ * here only when the plain-text substitution happens to reproduce it, and
+ * `mtg-s55u` was not that case: a walker's ability rows are flex rows, the clamp
+ * bound on nothing, the rules region took its full content height, and this file
+ * ran green through all of it at every viewport in both zones.
+ * `./loyalty-hand.browser.test.ts` is the rig that covers it, because it renders
+ * the walker and measures the rows the table draws.
+ *
+ * The floor below is what a green run here is worth: it counts the held faces
+ * their budget actually cut, and fails when one was not, so a reading can no
+ * longer be satisfied by a region that had room to grow.
  */
 const OVERRUN = `(() => {
   const line = 'Whenever this permanent deals combat damage to a player, draw a card, then discard a card unless you control another creature with power four or greater. ';
@@ -363,6 +412,8 @@ const OVERRUN = `(() => {
       artH: frame === null ? 0 : round(frame.height),
       artW: frame === null ? 0 : round(frame.width),
       overflow: round(Math.max(0, face.scrollHeight - face.clientHeight)),
+      rulesScroll: rules === null ? 0 : rules.scrollHeight,
+      rulesClient: rules === null ? 0 : rules.clientHeight,
     };
   };
   const near = document.querySelector(".mtg-board__side[data-seat='you']");
@@ -370,7 +421,7 @@ const OVERRUN = `(() => {
     viewport: [window.innerWidth, window.innerHeight],
     root: parseFloat(getComputedStyle(document.documentElement).fontSize),
     hand: [...document.querySelectorAll(".mtg-zone[data-tone='rail'] .mtg-slot[data-slot='hand'] > .mtg-card")].map(read),
-    board: [...near.querySelectorAll(".mtg-board__spells > .mtg-slot[data-slot='play'] > .mtg-card")].map(read),
+    board: [...near.querySelectorAll(".mtg-board__spells > .mtg-attach > .mtg-slot[data-slot='play'] > .mtg-card")].map(read),
   };
 })()`;
 
@@ -383,6 +434,8 @@ interface Overrun {
   readonly artH: number;
   readonly artW: number;
   readonly overflow: number;
+  readonly rulesScroll: number;
+  readonly rulesClient: number;
 }
 
 describe('the hand is a region with a budget rather than a seventh of a row', () => {
@@ -411,15 +464,19 @@ describe('the hand is a region with a budget rather than a seventh of a row', ()
             const hand = result['hand'] as readonly Face[];
             const played = result['board'] as readonly Face[];
             expect(hand, `${where} hand count`).toHaveLength(HAND_SIZE);
-            expect(played, `${where} board count`).toHaveLength(perSide);
+            expect(result['representedBoard'], `${where} represented board count`).toBe(perSide);
 
-            // The finding, as a box: every card in hand is wide enough for its
-            // rules box, and draws one. The width asked for is the content box,
-            // which is the box the query in the sheet is evaluated against.
+            // Sparse hands remain full reading surfaces. At eight represented
+            // permanents the hand is deliberately a 48px thumbnail rail and
+            // yields its text budget to the battlefield.
             for (const face of hand) {
-              expect(face.content, `${where}: held ${face.name} content box`).toBeGreaterThan(rulesMinPx);
-              expect(face.rulesDrawn, `${where}: held ${face.name} rules box`).toBe(true);
-              expect(face.rulesClip, `${where}: held ${face.name} rules text cut`).toBeLessThanOrEqual(1);
+              if (perSide >= 8) {
+                expect(face.w, `${where}: held ${face.name} thumbnail`).toBeCloseTo(CROWDED_HAND_FACE_PX, 1);
+              } else {
+                expect(face.content, `${where}: held ${face.name} content box`).toBeGreaterThan(rulesMinPx);
+                expect(face.rulesDrawn, `${where}: held ${face.name} rules box`).toBe(true);
+                expect(face.rulesClip, `${where}: held ${face.name} rules text cut`).toBeLessThanOrEqual(1);
+              }
             }
 
             // And one size of card across the row: a stated width with no shrink
@@ -428,18 +485,23 @@ describe('the hand is a region with a budget rather than a seventh of a row', ()
             const widths = new Set(hand.map((face) => face.w));
             expect([...widths], `${where}: the hand draws more than one size of card`).toHaveLength(1);
 
-            // The inversion. A held card may be a little smaller than a
-            // permanent — the battlefield is the primary reading surface and
-            // ./hand-scale.ts keeps its ceiling above the hand's — but not the
-            // 0.72 of the defect.
+            // Sparse tables retain parity. Crowded tables intentionally invert
+            // it: the hand is the thumbnail rail and the board keeps its floor.
             const upright = played.filter((face) => !face.tapped);
             expect(upright.length, `${where}: no upright permanent to compare`).toBeGreaterThan(0);
             const handWidth = hand[0]?.w ?? 0;
             const boardWidth = upright[0]?.w ?? 0;
-            expect(
-              handWidth / boardWidth,
-              `${where}: held ${String(handWidth)} against played ${String(boardWidth)}`,
-            ).toBeGreaterThanOrEqual(MIN_HAND_SHARE);
+            if (perSide >= 8) {
+              expect(boardWidth, `${where}: crowded battlefield floor`).toBeGreaterThanOrEqual(
+                BATTLEFIELD_FACE_FLOOR_PX,
+              );
+              expect(handWidth, `${where}: hand must not outrank the battlefield`).toBeLessThan(boardWidth);
+            } else {
+              expect(
+                handWidth / boardWidth,
+                `${where}: held ${String(handWidth)} against played ${String(boardWidth)}`,
+              ).toBeGreaterThanOrEqual(MIN_HAND_SHARE);
+            }
 
             // What the hand took, it took from height the battlefield row was
             // holding and not spending. These two are what say so: the board
@@ -541,6 +603,8 @@ describe('a card in hand is given a longer line budget than a card in play', () 
       const directory = await mkdtemp(join(tmpdir(), 'mtg-hand-budget-'));
       let chrome: Awaited<ReturnType<typeof launchChrome>> | null = null;
       let bodyError: unknown;
+      let clipped = 0;
+      let measured = 0;
       try {
         const file = join(directory, 'board.html');
         await writeFile(file, page(board(4)), 'utf8');
@@ -589,6 +653,15 @@ describe('a card in hand is given a longer line budget than a card in play', () 
             // bind spills the text past the trim, which draws over the card
             // below it rather than being cut.
             expect(face.overflow, `${at}: the face overflowed its own trim`).toBeLessThanOrEqual(1);
+
+            // The floor under every reading above. A budget that binds on
+            // nothing leaves the region its whole content height, and then
+            // `lines` is the text's own line count rather than the budget's:
+            // the assertions read as satisfied because the box was free to
+            // grow. So count the faces that actually got cut, and fail the run
+            // when one did not.
+            measured += 1;
+            if (face.rulesScroll > face.rulesClient + 1) clipped += 1;
           }
 
           // The battlefield is untouched by any of it: the scope is the slot, so
@@ -606,6 +679,10 @@ describe('a card in hand is given a longer line budget than a card in play', () 
         await rm(directory, { recursive: true, force: true });
       }
       if (bodyError !== undefined) throw bodyError;
+      expect(measured, 'no held face was measured at all').toBe(HAND_SIZE * VIEWPORTS.length);
+      expect(clipped, 'a held face was not cut by its budget, so its reading measured a box with room').toBe(
+        measured,
+      );
     },
     120_000,
   );

@@ -13,13 +13,11 @@
  * that record is built (`token.ts`), and this file is the one place the walk
  * lives; a caller gets both without repeating either.
  *
- * No recursion: a token's own abilities cannot create a token, which
- * `TokenEffectSchema` enforces so the schema stays finite and the Forge export
- * can finish declaring a card's tokens.
+ * `printedCardSurface` owns the finite token descent, including the nested tier
+ * used by Mitotic Slime, so every caller receives the same complete list.
  */
 import type { Card } from './card';
-import { hasAbilityEffects } from './abilities';
-import type { Effect } from './effects';
+import { printedCardSurface } from './printed-surface';
 import { tokenCard } from './token';
 import type { Violation } from './violations';
 import { violation } from './violations';
@@ -33,38 +31,15 @@ export interface SetToken {
 }
 
 /**
- * Every effect printed on a card, wherever it is printed — including every
- * mode of a modal spell, not just whichever one a game would choose.
- *
- * `card.modes` walks in full rather than through `effectsFor`: that function
- * resolves *one* chosen mode for a game in progress, but a set-wide token or
- * art-surface walk has no game and no choice to resolve — every mode a card
- * could print is a surface the art pipeline and the kernel's token registry
- * must know about before the card is ever cast, or a token created only
- * inside an unpicked mode would never appear in `setTokens`'s output at all.
- */
-export function printedEffects(card: Card): readonly Effect[] {
-  return [
-    ...card.effects,
-    ...(card.modes ?? []).flatMap((mode) => mode.effects),
-    ...card.abilities.filter(hasAbilityEffects).flatMap((ability) => ability.effects),
-  ];
-}
-
-/**
  * The tokens these cards create, deduplicated by the card a token becomes.
  *
- * Keyed by the token's *name*, not by `tokenCard(...).id`. The two used to be
- * treated as the same key, and they are not: `tokenSlug` lowercases a name and
- * folds every run of characters outside its admitted alphabet to one hyphen, so
- * two DISTINCT names can build one id — `"Trophy-Horn Construct"` and `"Saber
- * Horn Construct"` both slug to `trophy-horn-construct`, and so do a name and its
- * all-caps twin. Keying this dedup by that id merged such a pair into one
- * surface with nothing said about the second name a card had actually printed
- * (`mtg-ry1q`). Keying by name instead means two specs are one surface only
- * when a card repeats a name the set already used, which is what "the same
- * token" means; first appearance wins and sets the order, so two runs over one
- * set agree.
+ * Keyed by both token identity and printed name. Identity alone is not enough:
+ * `tokenSlug` can fold two distinct names onto one default id, and retaining
+ * both entries is what lets `tokenSlugCollisions` report that mistake. Name
+ * alone is not enough either: Mitotic Slime legitimately creates 2/2 and 1/1
+ * tokens both named Ooze, with explicit identities that keep their game cards
+ * and art surfaces separate. The pair preserves both cases while still folding
+ * repeated declarations of the same token. First appearance sets the order.
  *
  * That still leaves the id collision itself unreported: two entries in the list
  * this returns can carry the same `card.id` when their names collide under
@@ -72,31 +47,27 @@ export function printedEffects(card: Card): readonly Effect[] {
  * registry and the Forge token script cannot tell apart. `tokenSlugCollisions`
  * below is the walk that catches it, over this function's own output.
  *
- * Folding two specs under one *name* into one surface is only sound on a list
- * where every card meant the same token by that name, and this walk cannot
- * tell. `validateTokenNames` below is what tells, and `validateSetUniqueness`
- * runs it on every list, so a caller that validated before walking is entitled
- * to the surfaces this returns. The 249-card flagship is the set that proves the
- * entitlement has to be checked rather than assumed: it declares 24 distinct
- * payloads under 22 names, and until the uniqueness pass carried the token walk,
- * this function handed the art pipeline 22 surfaces without a word about the two
- * it had thrown away.
+ * Folding two specs under one pair is sound only when they build the same card;
+ * `validateTokenNames` reports incompatible shapes that share the pair, and
+ * `validateSetUniqueness` runs that pass before consumers rely on the walk.
  */
 export function setTokens(cards: readonly Card[]): readonly SetToken[] {
-  const found = new Map<string, { readonly card: Card; readonly createdBy: string[] }>();
+  const found = new Map<string, SetToken>();
   for (const card of cards) {
-    for (const effect of printedEffects(card)) {
-      if (effect.kind !== 'createToken') continue;
-      const built = tokenCard(effect.token);
-      const seen = found.get(built.name);
+    for (const token of printedCardSurface(card).tokens) {
+      const built = tokenCard(token);
+      const key = `${built.id}\u0000${built.name}`;
+      const seen = found.get(key);
       if (seen === undefined) {
-        found.set(built.name, { card: built, createdBy: [card.id] });
+        found.set(key, { card: built, createdBy: [card.id] });
         continue;
       }
-      if (!seen.createdBy.includes(card.id)) seen.createdBy.push(card.id);
+      if (!seen.createdBy.includes(card.id)) {
+        found.set(key, { card: seen.card, createdBy: [...seen.createdBy, card.id] });
+      }
     }
   }
-  return [...found.values()].map((entry) => ({ card: entry.card, createdBy: [...entry.createdBy] }));
+  return [...found.values()];
 }
 
 /** Just the cards, for callers that do not need to know who makes what. */
@@ -116,7 +87,7 @@ export interface TokenNameShape {
   readonly createdBy: readonly string[];
 }
 
-/** A name two or more cards disagree about the shape of. */
+/** A name-and-identity pair whose declarations disagree about the shape. */
 export interface TokenNameConflict {
   readonly name: string;
   /** Every distinct definition seen for this name, in encounter order. */
@@ -124,46 +95,50 @@ export interface TokenNameConflict {
 }
 
 /**
- * A token name is a key: `tokenCard` derives a token's id from its name alone
- * (`token.ts`), and `setTokens` keeps the first spec it meets under that id
- * and folds every later card creating "the same" token into its `createdBy`
- * list. That folding is only correct when every card meant the same token.
+ * A token identity is a key. By default `tokenCard` derives it from the printed
+ * name; a hand-authored token may state a separate identity when Magic prints
+ * several token definitions under one name. Folding is correct only when every
+ * declaration under one name-and-identity pair means the same token.
  * Two cards can print `createToken` payloads that share a name but disagree on
  * shape — one a 0/1 creature, the other a bodiless artifact; one a 0/1, another
  * a 1/1 — and nothing before this walk noticed: the second definition was
  * discarded silently, one art surface and one Forge script served two
- * different game objects under one label. This walk groups by name and, within
- * a name, by the built `Card` `tokenCard` would emit — so "different" means
- * what the kernel, renderer and art pipeline mean by it, not a shallower
- * reading of the spec — and reports only the names where more than one shape
- * survives.
+ * different game objects under one label. This walk groups by name and built
+ * `Card`, then reports only incompatible shapes that still share an id. Two
+ * same-named shapes with distinct explicit identities are separate, valid
+ * token surfaces.
  */
 export function tokenNameConflicts(cards: readonly Card[]): readonly TokenNameConflict[] {
-  interface MutableShape {
-    readonly card: Card;
-    readonly createdBy: string[];
-  }
-  const byName = new Map<string, MutableShape[]>();
+  const byName = new Map<string, readonly TokenNameShape[]>();
   for (const card of cards) {
-    for (const effect of printedEffects(card)) {
-      if (effect.kind !== 'createToken') continue;
-      const built = tokenCard(effect.token);
+    for (const token of printedCardSurface(card).tokens) {
+      const built = tokenCard(token);
       const shapes = byName.get(built.name) ?? [];
-      if (shapes.length === 0) byName.set(built.name, shapes);
-      const match = shapes.find((shape) => JSON.stringify(shape.card) === JSON.stringify(built));
-      if (match === undefined) {
-        shapes.push({ card: built, createdBy: [card.id] });
-      } else if (!match.createdBy.includes(card.id)) {
-        match.createdBy.push(card.id);
+      const matchIndex = shapes.findIndex((shape) => JSON.stringify(shape.card) === JSON.stringify(built));
+      if (matchIndex === -1) {
+        byName.set(built.name, [...shapes, { card: built, createdBy: [card.id] }]);
+        continue;
+      }
+      const match = shapes[matchIndex];
+      if (match !== undefined && !match.createdBy.includes(card.id)) {
+        byName.set(
+          built.name,
+          shapes.map((shape, index) =>
+            index === matchIndex ? { card: shape.card, createdBy: [...shape.createdBy, card.id] } : shape,
+          ),
+        );
       }
     }
   }
   const conflicts: TokenNameConflict[] = [];
   for (const [name, shapes] of byName) {
-    if (shapes.length > 1) {
+    const incompatible = shapes.filter((shape, index) =>
+      shapes.some((other, otherIndex) => otherIndex !== index && other.card.id === shape.card.id),
+    );
+    if (incompatible.length > 1) {
       conflicts.push({
         name,
-        shapes: shapes.map((shape) => ({ card: shape.card, createdBy: [...shape.createdBy] })),
+        shapes: incompatible.map((shape) => ({ card: shape.card, createdBy: [...shape.createdBy] })),
       });
     }
   }
@@ -179,7 +154,7 @@ export function validateTokenNames(cards: readonly Card[]): Violation[] {
     return violation(
       'DUPLICATE_TOKEN_NAME',
       `tokens["${conflict.name}"]`,
-      `"${conflict.name}" names ${conflict.shapes.length} incompatible tokens: ${parts.join(' vs ')}; one name cannot describe two tokens`,
+      `"${conflict.name}" and one token identity describe ${conflict.shapes.length} incompatible tokens: ${parts.join(' vs ')}; give distinct printed token definitions distinct hand-authored identities`,
     );
   });
 }
@@ -208,11 +183,10 @@ export interface TokenSlugCollision {
  * `setTokens`'s own output by `card.id` is what finds that pair.
  */
 export function tokenSlugCollisions(cards: readonly Card[]): readonly TokenSlugCollision[] {
-  const byId = new Map<string, string[]>();
+  const byId = new Map<string, readonly string[]>();
   for (const token of setTokens(cards)) {
     const names = byId.get(token.card.id) ?? [];
-    if (names.length === 0) byId.set(token.card.id, names);
-    if (!names.includes(token.card.name)) names.push(token.card.name);
+    if (!names.includes(token.card.name)) byId.set(token.card.id, [...names, token.card.name]);
   }
   const collisions: TokenSlugCollision[] = [];
   for (const [slug, names] of byId) {

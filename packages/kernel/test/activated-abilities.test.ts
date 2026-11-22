@@ -31,6 +31,7 @@ import {
   simpleAgent,
   validateAction,
 } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { artifact, creature, instant, MOUNTAIN } from './cards';
 import { apply, oidOf } from './helpers';
 
@@ -920,7 +921,11 @@ describe('the reference agent', () => {
   function chooseFor(state: GameState): Action {
     const decision = pendingDecision(state);
     if (decision === null) throw new Error('no decision pending');
-    return agent.decide({ state, player: decision.player, decision });
+    return agent.decide({
+      state: observeState(state, decision.player, 'test/activated-abilities.test.ts:929'),
+      player: decision.player,
+      decision,
+    });
   }
 
   it('pays for an ability rather than passing with the mana unspent', () => {

@@ -149,8 +149,8 @@ export function manaCostLabel(cost: ManaCost): string {
 export function ManaPips({ cost, symbols }: ManaPipsProps): ReactElement {
   const set = symbols ?? DEFAULT_SYMBOL_SET;
   const pips = costPips(cost).map((spec, index) => {
-    const key = spec.kind === 'color' ? `${spec.color}${String(index)}` : 'generic';
-    const kind = spec.kind === 'color' ? spec.identity : 'generic';
+    const key = `${pipToken(spec)}-${String(index)}`;
+    const kind = spec.kind === 'color' || spec.kind === 'hybrid' ? spec.identity : 'generic';
     return registryPip(key, pipToken(spec), kind, set, drawnFallback(spec));
   });
   return createElement(

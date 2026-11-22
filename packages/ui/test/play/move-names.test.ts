@@ -25,26 +25,28 @@
  */
 import { createElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import type { AbilityInput, Card } from '@mtg/dsl';
+import { cleanup, render, screen, within } from '@testing-library/react';
+import type { AbilityInput, Card, CardInput } from '@mtg/dsl';
 import { effectsFor, exampleCard, parseCard, renderEffect } from '@mtg/dsl';
 import type { Action, Decision, GameSession, GameState, ObjectId, Target } from '@mtg/kernel';
-import { humanSeat, pendingDecision, reduceAll, scenario } from '@mtg/kernel';
+import { humanSeat, pendingDecision, reduce, reduceAll, scenario } from '@mtg/kernel';
 import { GAME_LOG_LABEL } from '../../src/log/GameLog';
 import { seatPossessive } from '../../src/seat';
-import { castPlansFor, castStage } from '../../src/routes/play/cast';
+import { CAST_CHOICE_STAGES, castPlansFor, castStage } from '../../src/routes/play/cast';
 import { LEGAL_MOVES_LABEL, PlayView } from '../../src/routes/play/PlayView';
 import { boardPosition } from '../../src/routes/play/position';
 import { pickerLabel, pickerPanel } from '../../src/routes/play/picker';
 import { buildPrompt } from '../../src/routes/play/prompt';
 import type { PlayChoice } from '../../src/routes/play/prompt';
 import type { SeatNames } from '../../src/routes/play/position';
+import { TWO_HUMAN_NAMES } from '../support/two-human';
 
 afterEach(cleanup);
 
 const NAMES: SeatNames = ['You', 'Bot'];
 
 const MOUNTAIN = exampleCard('slc-mountain');
+const FOREST = exampleCard('slc-forest');
 const RAIDER = exampleCard('slc-emberflow-raider');
 const LASH = exampleCard('slc-lightning-lash');
 const GUARDIAN = exampleCard('slc-thornhide-guardian');
@@ -59,6 +61,52 @@ const GEYSER = parseCard({
   colors: ['R'],
   effects: [{ kind: 'dealDamage', amount: { kind: 'chosenX' }, target: { kind: 'anyTarget' } }],
 });
+const FEAST = parseCard({
+  kind: 'sorcery',
+  id: 'm11-hunters-feast-play-labels',
+  name: "Hunters' Feast",
+  rarity: 'common',
+  set: { code: 'M11', collectorNumber: 182 },
+  manaCost: { generic: 3, G: 1 },
+  colors: ['G'],
+  effects: [
+    {
+      kind: 'gainLife',
+      amount: 6,
+      target: { kind: 'targetPlayer', anyNumber: true },
+    },
+  ],
+});
+const FLING = parseCard({
+  kind: 'instant',
+  id: 'm11-fling-play-labels',
+  name: 'Fling',
+  rarity: 'common',
+  set: { code: 'M11', collectorNumber: 139 },
+  manaCost: { generic: 1, R: 1 },
+  colors: ['R'],
+  additionalCost: {
+    sacrificeMatching: { count: 1, filter: { cardTypes: ['creature'] } },
+  },
+  effects: [
+    {
+      kind: 'dealDamage',
+      amount: { kind: 'paidSacrificePower' },
+      target: { kind: 'anyTarget' },
+    },
+  ],
+} as CardInput);
+const WILD_GUESS = parseCard({
+  kind: 'sorcery',
+  id: 'm13-wild-guess-play-labels',
+  name: 'Wild Guess',
+  rarity: 'common',
+  set: { code: 'M13', collectorNumber: 157 },
+  manaCost: { R: 2 },
+  colors: ['R'],
+  additionalCost: { discard: 1 },
+  effects: [{ kind: 'drawCards', count: 2, target: { kind: 'noTarget' } }],
+} as CardInput);
 
 /** `{1}, {T}: Target creature gets +2/+2 until end of turn.` */
 const PUMP: AbilityInput = {
@@ -215,6 +263,40 @@ const RELIC: Card = parseCard({
   ],
 });
 
+/** A source whose distinct choices are the creatures tapped to pay its cost. */
+const CHOIR_RELIC: Card = parseCard({
+  kind: 'artifact',
+  id: 'slc-choir-relic',
+  name: 'Choir Relic',
+  rarity: 'uncommon',
+  set: { code: 'SLC', collectorNumber: 98 },
+  manaCost: { generic: 1 },
+  abilities: [
+    {
+      kind: 'activated',
+      cost: { mana: {}, tapMatching: { count: 1, filter: { cardTypes: ['creature'] } } },
+      effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }],
+    },
+  ],
+});
+
+/** A source whose ability can be paid by discarding either card in hand. */
+const DISCARD_RELIC: Card = parseCard({
+  kind: 'artifact',
+  id: 'slc-discard-relic',
+  name: 'Discard Relic',
+  rarity: 'uncommon',
+  set: { code: 'SLC', collectorNumber: 99 },
+  manaCost: { generic: 1 },
+  abilities: [
+    {
+      kind: 'activated',
+      cost: { mana: {}, discard: 1 },
+      effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }],
+    },
+  ],
+});
+
 /** A relic and two Beasts to feed it, distinguished only by marked damage. */
 function sacrificeBoard(damage: readonly [number, number]): GameState {
   return scenario({
@@ -224,6 +306,61 @@ function sacrificeBoard(damage: readonly [number, number]): GameState {
       { card: GUARDIAN, controller: 0, summoningSick: false, damage: damage[0] },
       { card: GUARDIAN, controller: 0, summoningSick: false, damage: damage[1] },
     ],
+    active: 0,
+    turn: 4,
+  }).state;
+}
+
+/** A relic and two distinguishable creatures that can pay its cohort tap. */
+function tapPaymentBoard(): GameState {
+  return scenario({
+    seed: 'test/play/move-names/tap-payment',
+    battlefield: [
+      { card: CHOIR_RELIC, controller: 0 },
+      { card: GUARDIAN, controller: 0, summoningSick: true },
+      { card: GUARDIAN, controller: 0, summoningSick: true, damage: 2 },
+    ],
+    active: 0,
+    turn: 4,
+  }).state;
+}
+
+/** A discard-cost activation with two distinct hand payments. */
+function activationDiscardBoard(): GameState {
+  return scenario({
+    seed: 'test/play/move-names/activation-discard',
+    battlefield: [{ card: DISCARD_RELIC, controller: 0 }],
+    hands: [[MOUNTAIN, FOREST], []],
+    active: 0,
+    turn: 4,
+  }).state;
+}
+
+/** Fling with two distinguishable creatures that can pay its additional cost. */
+function flingBoard(): GameState {
+  return scenario({
+    seed: 'test/play/move-names/fling',
+    battlefield: [
+      { card: MOUNTAIN, controller: 0 },
+      { card: MOUNTAIN, controller: 0 },
+      { card: GUARDIAN, controller: 0, summoningSick: false },
+      { card: GUARDIAN, controller: 0, summoningSick: false, damage: 2 },
+    ],
+    hands: [[FLING], []],
+    active: 0,
+    turn: 4,
+  }).state;
+}
+
+/** Wild Guess with two named cards in hand, each a distinct additional payment. */
+function wildGuessBoard(): GameState {
+  return scenario({
+    seed: 'test/play/move-names/wild-guess',
+    battlefield: [
+      { card: MOUNTAIN, controller: 0 },
+      { card: MOUNTAIN, controller: 0 },
+    ],
+    hands: [[WILD_GUESS, MOUNTAIN, FOREST], []],
     active: 0,
     turn: 4,
   }).state;
@@ -355,25 +492,45 @@ function actionFacts(state: GameState, action: Action): string {
     return choice.kind === 'player' ? `player:${String(choice.player)}` : fact(choice.oid);
   };
   const targets = (choices: readonly (Target | null)[]): string => choices.map(target).join(',');
+  const plural = (
+    multi: Readonly<Record<number, readonly Target[]>> | undefined,
+    allocations: Readonly<Record<number, readonly number[]>> | undefined,
+  ): string =>
+    Object.entries(multi ?? {})
+      .map(
+        ([index, members]) =>
+          `${index}:${targets(members)}:${(allocations?.[Number(index)] ?? []).join(',')}`,
+      )
+      .join(';');
   switch (action.type) {
     case 'passPriority':
       return 'passPriority';
     case 'playLand':
       return `playLand|${fact(action.oid)}`;
     case 'castSpell':
-      return `castSpell|${fact(action.oid)}|mode:${String(action.mode)}|x:${String(action.x)}|${targets(action.targets)}`;
+      return `castSpell|${fact(action.oid)}|mode:${String(action.mode)}|x:${String(action.x)}|cost:${String(action.castingCost)}|${targets(action.targets)}|${plural(action.multiTargets, action.damageAllocations)}|sac:${facts(action.sacrifices ?? [])}`;
+    case 'beginCastSpell':
+      return `beginCastSpell|${fact(action.oid)}|mode:${String(action.mode)}|x:${String(action.x)}|cost:${String(action.castingCost)}|${targets(action.targets)}|sac:${facts(action.sacrifices ?? [])}`;
+    case 'choosePluralTarget':
+      return `choosePluralTarget|${fact(action.oid)}|${target(action.target)}`;
+    case 'allocateDividedDamage':
+      return `allocateDividedDamage|${fact(action.oid)}|${String(action.amount)}`;
     case 'activateManaAbility':
       return `activateManaAbility|${fact(action.oid)}|${action.color}`;
+    case 'chooseManaColor':
+      return `chooseManaColor|${action.color}`;
     case 'activateAbility':
-      return `activateAbility|${fact(action.oid)}|ability:${String(action.abilityIndex)}|${targets(action.targets)}|sac:${facts(action.sacrifices)}|discard:${facts(action.discards ?? [])}`;
+      return `activateAbility|${fact(action.oid)}|ability:${String(action.abilityIndex)}|${targets(action.targets)}|tap:${facts(action.taps ?? [])}|sac:${facts(action.sacrifices)}|discard:${facts(action.discards ?? [])}`;
     case 'chooseTriggerTargets':
-      return `chooseTriggerTargets|${String(action.oid)}|${targets(action.targets)}`;
+      return `chooseTriggerTargets|${String(action.oid)}|${targets(action.targets)}|${plural(action.multiTargets, action.damageAllocations)}`;
     case 'answerOptionalTrigger':
       return `answerOptionalTrigger|${String(action.oid)}|${String(action.accept)}`;
     case 'answerMay':
       return `answerMay|${fact(action.oid)}|${String(action.accept)}`;
     case 'answerUnless':
       return `answerUnless|${fact(action.oid)}|${String(action.pay)}`;
+    case 'declineFreeCast':
+      return `declineFreeCast|${fact(action.oid)}`;
     case 'declareAttackers':
       return `declareAttackers|${action.attackers
         .map(
@@ -385,6 +542,8 @@ function actionFacts(state: GameState, action: Action): string {
       return `declareBlockers|${action.blocks.map((block) => `${fact(block.blocker)}<-${fact(block.attacker)}`).join(',')}`;
     case 'orderBlockers':
       return `orderBlockers|${action.orders.map((order) => `${fact(order.attacker)}:${facts(order.blockers)}`).join(',')}`;
+    case 'orderAttackers':
+      return `orderAttackers|${action.orders.map((order) => `${fact(order.blocker)}:${facts(order.attackers)}`).join(',')}`;
     case 'discard':
       return `discard|${facts(action.oids)}`;
     // CR 701.8a, and its own fact rather than a share of `discard` above: the
@@ -395,10 +554,20 @@ function actionFacts(state: GameState, action: Action): string {
       return `chooseDiscards|${facts(action.oids)}`;
     case 'scry':
       return `scry|top:${facts(action.top)}|bottom:${facts(action.bottom)}`;
+    case 'orderTopLibrary':
+      return `orderTopLibrary|${facts(action.cards)}`;
+    case 'selectFromTopLibrary':
+      return `selectFromTopLibrary|${action.chosen === null ? 'null' : fact(action.chosen)}|${facts(action.rest)}`;
+    case 'separateTopLibraryPiles':
+      return `separateTopLibraryPiles|${facts(action.first)}|${facts(action.second)}`;
+    case 'chooseTopLibraryPile':
+      return `chooseTopLibraryPile|${String(action.pile)}`;
     case 'searchLibrary':
       // The fail-to-find is kept literally rather than normalized, because it
       // names no object: `boardFacts` has nothing to read it off.
       return `searchLibrary|${action.found === null ? 'null' : fact(action.found)}`;
+    case 'chooseSearchDestination':
+      return `chooseSearchDestination|${fact(action.one)}`;
     // Its own fact rather than a share of the search above, for the reason
     // `chooseDiscards` keeps one: the two carry one field of the same shape
     // and answer different questions, and a guard that collapsed them would
@@ -406,10 +575,44 @@ function actionFacts(state: GameState, action: Action): string {
     // the same move.
     case 'chooseFromGraveyard':
       return `chooseFromGraveyard|${action.chosen === null ? 'null' : fact(action.chosen)}`;
+    case 'chooseFromRevealedHand':
+      return `chooseFromRevealedHand|${action.chosen === null ? 'null' : fact(action.chosen)}`;
+    case 'chooseFromBattlefield':
+      return `chooseFromBattlefield|${fact(action.chosen)}`;
+    case 'choosePopulateToken':
+      return `choosePopulateToken|${fact(action.token)}`;
+    case 'chooseCardName':
+      return `chooseCardName|${action.name}`;
+    case 'chooseNamedZoneExile':
+      return `chooseNamedZoneExile|${action.oid === null ? 'null' : fact(action.oid)}`;
+    case 'chooseSpellTargets':
+      return `chooseSpellTargets|${String(action.oid)}|${targets(action.targets)}|${plural(action.multiTargets, action.damageAllocations)}`;
+    case 'chooseEntryCopy':
+      return `chooseEntryCopy|${fact(action.oid)}|${action.copyOf === null ? 'normal' : fact(action.copyOf)}`;
+    case 'chooseEntryCounterPermanent':
+      return `chooseEntryCounterPermanent|${fact(action.oid)}|${fact(action.permanent)}`;
+    case 'chooseEntryAuraHost':
+      return `chooseEntryAuraHost|${fact(action.oid)}|${fact(action.host)}`;
+    case 'chooseEntryTimestampNext':
+      return `chooseEntryTimestampNext|${fact(action.oid)}`;
+    case 'chooseEntryCharacteristics':
+      return `chooseEntryCharacteristics|${fact(action.oid)}|${String(action.mode)}`;
+    case 'chooseEntryOptionalCounter':
+      return `chooseEntryOptionalCounter|${fact(action.oid)}|${String(action.accept)}`;
+    case 'chooseEntryPayLife':
+      return `chooseEntryPayLife|${fact(action.oid)}|${String(action.life)}|${String(action.pay)}`;
+    case 'chooseEntryPlayer':
+      return `chooseEntryPlayer|${fact(action.oid)}|${String(action.chosen)}`;
+    case 'chooseEntryColors':
+      return `chooseEntryColors|${fact(action.oid)}|${action.colors.join('')}`;
+    case 'allocateDamagePrevention':
+      return `allocateDamagePrevention|${fact(action.sourceOid)}|${String(action.amount)}`;
     case 'mulligan':
       return 'mulligan';
     case 'keepHand':
       return `keepHand|${facts(action.bottom)}`;
+    case 'chooseOpeningHandAction':
+      return `chooseOpeningHandAction|${action.oid === null ? 'null' : fact(action.oid)}`;
     case 'keepLegend':
       return `keepLegend|${fact(action.oid)}`;
     // CR 701.17a: the same one-field shape `keepLegend` has just above, its
@@ -418,6 +621,8 @@ function actionFacts(state: GameState, action: Action): string {
     // and a legend-rule choice the same move.
     case 'sacrificePermanent':
       return `sacrificePermanent|${fact(action.oid)}`;
+    case 'choosePermanentToUntap':
+      return `choosePermanentToUntap|${action.oid === null ? 'null' : fact(action.oid)}`;
     case 'concede':
       return 'concede';
   }
@@ -441,6 +646,60 @@ describe('the enumeration a player reads', () => {
       'Cast Variable Geyser (X=2) → Bot',
       'Cast Variable Geyser (X=3) → Bot',
     ]);
+  });
+
+  it("names each staged Hunters' Feast target and the empty completion", () => {
+    const state = scenario({
+      seed: 'test/play/move-names/plural-player-targets',
+      battlefield: Array.from({ length: 4 }, () => ({ card: FOREST, controller: 0 as const })),
+      hands: [[FEAST], []],
+      active: 0,
+      turn: 4,
+    }).state;
+    const decision = pendingDecision(state);
+    if (decision?.kind !== 'priority') throw new Error('expected priority');
+    const start = decision.options.find((action) => action.type === 'beginCastSpell');
+    if (start === undefined) throw new Error('expected staged cast start');
+    expect(choicesOf(state).find((choice) => choice.index === decision.options.indexOf(start))?.label).toBe(
+      "Cast Hunters' Feast",
+    );
+    const staged = reduce(state, start);
+    expect(
+      choicesOf(staged.state)
+        .map((choice) => choice.label)
+        .sort(),
+    ).toEqual(['Add Bot', 'Add You', 'Finish choosing targets']);
+  });
+
+  it('prints each divided allocation beside the target that receives it', () => {
+    const state = scenario({
+      battlefield: [{ card: GUARDIAN, controller: 1 }],
+      hands: [[LASH], []],
+    }).state;
+    const spell = state.players[0].hand[0];
+    const target = state.battlefield[0];
+    if (spell === undefined || target === undefined)
+      throw new Error('divided-damage label board is incomplete');
+    const action: Extract<Action, { type: 'castSpell' }> = {
+      type: 'castSpell',
+      player: 0,
+      oid: spell,
+      targets: [null],
+      multiTargets: {
+        0: [
+          { kind: 'permanent', oid: target },
+          { kind: 'player', player: 1 },
+        ],
+      },
+      damageAllocations: { 0: [2, 1] },
+    };
+    const prompt = buildPrompt(
+      state,
+      { kind: 'priority', player: 0, options: [action], complete: true },
+      NAMES,
+    );
+
+    expect(prompt.choices[0]?.label).toBe("Cast Lightning Lash → Bot's Thornhide Guardian (2), Bot (1)");
   });
 
   /**
@@ -508,15 +767,18 @@ describe('the enumeration a player reads', () => {
     expect(raiders).toContain("Bot's Emberflow Raider");
   });
 
-  it('reads the possessive off the seat label, so a hotseat table is not addressed as you', () => {
-    const hotseat: SeatNames = ['Player one', 'Player two'];
-    const aimed = choicesOf(skirmish(), hotseat).map((choice) => choice.label);
+  it('reads the possessive off the seat label, so a two-human table is not addressed as you', () => {
+    const twoHuman: SeatNames = TWO_HUMAN_NAMES;
+    const aimed = choicesOf(skirmish(), twoHuman).map((choice) => choice.label);
     expect(aimed).toContain("Cast Lightning Lash → Player one's Emberflow Raider");
     expect(aimed).toContain("Cast Lightning Lash → Player two's Emberflow Raider");
     // The rule itself is `log/narrate.ts`'s and there is one copy of it. A second
     // copy here is how `You is attacking with 4 creatures.` survived a year.
     expect(seatPossessive('You')).toBe('your');
     expect(seatPossessive('Player one')).toBe("Player one's");
+    // A seat is a deck as often as it is a person, and the flagship's decks are
+    // named like places. The replay rail read `THE SKY ISLANDS'S GRAVEYARD`.
+    expect(seatPossessive('The Sky Islands')).toBe("The Sky Islands'");
   });
 });
 
@@ -687,6 +949,82 @@ describe('an activation names what it sacrifices, not just what it targets', () 
   });
 });
 
+describe('an activation names the permanents tapped for its cohort cost', () => {
+  it('separates payment choices and keeps summoning sickness out of the cost UI', () => {
+    const options = choicesOf(tapPaymentBoard()).filter((choice) => choice.kind === 'activateAbility');
+    expect(options).toHaveLength(2);
+    expect(options.map((choice) => choice.detail)).toEqual([
+      'Choir Relic · Tap Thornhide Guardian (3/5)',
+      'Choir Relic · Tap Thornhide Guardian (3/5 · 2 damage marked)',
+    ]);
+  });
+});
+
+describe('an activation names the card discarded for its cost', () => {
+  it('extends the existing source detail with each payment alternative', () => {
+    const options = choicesOf(activationDiscardBoard()).filter((choice) => choice.kind === 'activateAbility');
+    expect(options.map((choice) => choice.detail)).toEqual([
+      'Discard Relic · Discard Mountain',
+      'Discard Relic · Discard Forest',
+    ]);
+  });
+});
+
+describe('a spell names what it sacrifices, not just what it targets', () => {
+  it('separates two Fling payments that lead to materially different damage', () => {
+    const options = choicesOf(flingBoard()).filter(
+      (choice) => choice.kind === 'castSpell' && choice.label === 'Cast Fling → Bot',
+    );
+    expect(options).toHaveLength(2);
+    expect(new Set(options.map((choice) => choice.label)).size).toBe(1);
+    expect(options.map((choice) => choice.detail)).toEqual([
+      'Sacrifice Thornhide Guardian (3/5)',
+      'Sacrifice Thornhide Guardian (3/5 · 2 damage marked)',
+    ]);
+  });
+});
+
+describe('a spell names what it discards while casting', () => {
+  it('separates the two payments in the flat cast choices', () => {
+    const options = choicesOf(wildGuessBoard()).filter(
+      (choice) => choice.kind === 'castSpell' && choice.label === 'Cast Wild Guess',
+    );
+    expect(options.map((choice) => choice.detail)).toEqual(['Discard Mountain', 'Discard Forest']);
+  });
+
+  it('uses the same payment wording for a cast that is still collecting targets', () => {
+    const state = wildGuessBoard();
+    const spell = state.players[0].hand.find((oid) => state.objects[oid]?.card.name === 'Wild Guess');
+    const mountain = state.players[0].hand.find((oid) => state.objects[oid]?.card.name === 'Mountain');
+    const forest = state.players[0].hand.find((oid) => state.objects[oid]?.card.name === 'Forest');
+    if (spell === undefined || mountain === undefined || forest === undefined) {
+      throw new Error('the Wild Guess fixture is incomplete');
+    }
+    const decision: Decision = {
+      kind: 'priority',
+      player: 0,
+      complete: true,
+      options: [
+        { type: 'beginCastSpell', player: 0, oid: spell, targets: [null], discards: [mountain] },
+        { type: 'beginCastSpell', player: 0, oid: spell, targets: [null], discards: [forest] },
+      ],
+    };
+    expect(buildPrompt(state, decision, NAMES).choices.map((choice) => choice.detail)).toEqual([
+      'Discard Mountain',
+      'Discard Forest',
+    ]);
+  });
+
+  it('keeps discard-bearing casts out of the staged panel', () => {
+    const state = wildGuessBoard();
+    const decision = completeOn(state);
+    const spell = state.players[0].hand.find((oid) => state.objects[oid]?.card.name === 'Wild Guess');
+    if (spell === undefined) throw new Error('the Wild Guess fixture has no spell');
+    expect(CAST_CHOICE_STAGES.discards).toBeNull();
+    expect(castPlansFor(state, decision).has(spell)).toBe(false);
+  });
+});
+
 /** The rail's own phrases for the six things Lightning Lash may be aimed at. */
 function railTargets(state: GameState): readonly string[] {
   const lead = 'Cast Lightning Lash → ';
@@ -737,12 +1075,12 @@ describe('one permanent, one phrase, on every surface that names it', () => {
  * The game log, which is the fourth surface and was the one that never learned
  * the rule (`mtg-h9s`).
  *
- * On a hotseat table, because that is where the possessive is doing the whole of
+ * On a two-human table, because that is where the possessive is doing the whole of
  * the work: with both seats named, `Emberflow Raider` says nothing about which
  * of the two on the table an event was about, and the ask column one span to the
  * left was already saying it.
  */
-const HOTSEAT: SeatNames = ['Player one', 'Player two'];
+const TWO_HUMAN: SeatNames = TWO_HUMAN_NAMES;
 
 /** The skirmish with Lightning Lash resolved on the far seat's Raider. */
 function burned(): GameSession {
@@ -762,7 +1100,7 @@ function burned(): GameSession {
   ]);
   const pending = completeOn(resolved.state);
   return {
-    seats: [humanSeat(HOTSEAT[0]), humanSeat(HOTSEAT[1])],
+    seats: [humanSeat(TWO_HUMAN[0]), humanSeat(TWO_HUMAN[1])],
     state: resolved.state,
     events: resolved.events,
     result: null,
@@ -774,16 +1112,19 @@ function burned(): GameSession {
   };
 }
 
-/** The whole history, as a player reads it: the disclosure open. */
+/**
+ * The whole history, as a player reads it: the disclosure open, which since the
+ * 2026-08-22 interface pass is the state a played table opens in
+ * (`../../src/log/GameLog.ts`'s `OPEN_BY_DEFAULT`).
+ */
 function openLog(session: GameSession, names: SeatNames): string {
   render(createElement(PlayView, { session, viewer: 0 as const, names, onChoose: () => undefined }));
-  fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${GAME_LOG_LABEL},`) }));
   return textOf(screen.getByRole('region', { name: GAME_LOG_LABEL }));
 }
 
 describe('the log points at a permanent the way the rail does', () => {
   it('says whose creature the damage landed on', () => {
-    const log = openLog(burned(), HOTSEAT);
+    const log = openLog(burned(), TWO_HUMAN);
     expect(log).toContain("Lightning Lash deals 3 damage to Player two's Emberflow Raider.");
     // The sentence that shipped, which named neither seat and left two Raiders
     // on the table answering to one phrase.
@@ -799,7 +1140,7 @@ describe('the log points at a permanent the way the rail does', () => {
    * printed name; only what the sentence points at is said as somebody's.
    */
   it('leaves the source of the sentence in its own name', () => {
-    const log = openLog(burned(), HOTSEAT);
+    const log = openLog(burned(), TWO_HUMAN);
     expect(log).toContain('Player one casts Lightning Lash');
     expect(log).not.toContain("casts Player one's Lightning Lash");
     expect(log).not.toContain("Player one's Lightning Lash deals");

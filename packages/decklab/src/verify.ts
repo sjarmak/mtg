@@ -30,7 +30,6 @@ export interface Proposal {
 export type RejectionCode =
   | 'unknown-card'
   | 'not-in-universe'
-  | 'too-many-copies'
   | 'unstated-criterion'
   | 'no-criterion'
   | 'duplicate'
@@ -45,6 +44,24 @@ export interface Rejection {
   readonly detail: string;
 }
 
+export type AdjustmentCode = 'copies-trimmed';
+
+/**
+ * A proposal that was kept and changed, rather than refused.
+ *
+ * A separate channel from `Rejection` because the two say opposite things to
+ * the reader of the next prompt: a rejection means *replace this card* and an
+ * adjustment means *this card is in the deck, at a different number*. Folding
+ * them together tells the model to find a replacement for a card it already
+ * has, which is a round spent to arrive back where it started.
+ */
+export interface Adjustment {
+  readonly name: string;
+  readonly code: AdjustmentCode;
+  /** What was changed and why, phrased for the model and for the report. */
+  readonly detail: string;
+}
+
 /** A proposal that survived every check, bound to its store row. */
 export interface Inclusion {
   readonly card: CandidateCard;
@@ -56,6 +73,8 @@ export interface Inclusion {
 export interface VerifyResult {
   readonly inclusions: readonly Inclusion[];
   readonly rejections: readonly Rejection[];
+  /** Proposals kept with a changed count. Empty from the whole-deck passes. */
+  readonly adjustments: readonly Adjustment[];
 }
 
 /**
@@ -67,6 +86,15 @@ export interface VerifyResult {
 export interface UniverseLookup {
   /** Every real card name in the store, normalized. Used to tell the two apart. */
   readonly knownNames: ReadonlySet<string>;
+  /**
+   * What to call the world a name can fail to be in, for the rejection message.
+   *
+   * Over the store it is the store, and "not a card in the store" is the right
+   * sentence. Over a staged set it is that set, where the same sentence is both
+   * wrong and unhelpful — the card is not in the store either way, and what the
+   * model needs to hear is that it must choose from the pool it was given.
+   */
+  readonly worldName?: string;
 }
 
 export function verifyProposals(
@@ -78,6 +106,7 @@ export function verifyProposals(
   const allowed = criterionIds(criteria);
   const inclusions: Inclusion[] = [];
   const rejections: Rejection[] = [];
+  const adjustments: Adjustment[] = [];
   const seen = new Set<string>();
 
   for (const proposal of proposals) {
@@ -112,7 +141,7 @@ export function verifyProposals(
         code: known ? 'not-in-universe' : 'unknown-card',
         detail: known
           ? `${proposal.name} is a real card but does not satisfy the stated criteria (format legality, color identity, mana value, or budget)`
-          : `${proposal.name} is not a card in the store; propose only cards you are certain exist`,
+          : `${proposal.name} is not a card in ${lookup.worldName ?? 'the store'}; choose only cards from the pool you were given`,
       });
       continue;
     }
@@ -136,38 +165,62 @@ export function verifyProposals(
       continue;
     }
 
+    // Trimmed rather than refused. The count is the cheap half of a proposal
+    // and the card is the expensive one — the model already did the judging —
+    // so a number over the limit costs a number, not the card. Refusing it cost
+    // The playtester's Vessari-v1 57 of 60 cards to a limit the prompt never stated
+    // (`mtg-yp33.6`): the three that survived were the three the model happened to
+    // propose as one-ofs. The limit is still enforced exactly; what changed is
+    // that enforcing it no longer throws away the answer with it.
     const limit = copyLimit(card, criteria);
-    if (proposal.count > limit) {
-      rejections.push({
+    const count = Math.min(proposal.count, limit);
+    if (count < proposal.count) {
+      adjustments.push({
         name: proposal.name,
-        code: 'too-many-copies',
-        detail: `${proposal.name} asked for ${proposal.count} copies; the limit here is ${limit}`,
+        code: 'copies-trimmed',
+        detail: `${proposal.name} asked for ${proposal.count} copies and is in the deck as ${count}; the limit here is ${limit}`,
       });
-      continue;
     }
 
     seen.add(key);
     inclusions.push({
       card,
-      count: proposal.count,
+      count,
       criteria: proposal.criteria,
       reason: proposal.reason,
     });
   }
 
-  return { inclusions, rejections };
+  return { inclusions, rejections, adjustments };
+}
+
+/**
+ * The deck-wide copy limit, with no card in hand.
+ *
+ * `copyLimit` is this plus the one card-level exception, and the prompt needs
+ * the deck-level half: a rule the answer is checked against has to be stated in
+ * the question, and it can only be stated before any card is named. One
+ * function so the sentence in the prompt and the check on the answer cannot
+ * drift apart.
+ */
+export function statedCopyLimit(criteria: DeckCriteria): number {
+  if (criteria.format !== undefined && SINGLETON_FORMATS.has(criteria.format)) return 1;
+  return criteria.maxCopies;
 }
 
 /**
  * Four copies, unless the card says otherwise or the format does. Cards reading
  * "A deck can have any number of cards named ..." are unbounded; singleton
  * formats cap everything at one.
+ *
+ * A deck built over a staged set states no format, so no format caps it: the
+ * limit is whatever `maxCopies` says, which is where a singleton set-backed
+ * deck states itself. Absent is not "commander".
  */
 export function copyLimit(card: CandidateCard, criteria: DeckCriteria): number {
-  if (SINGLETON_FORMATS.has(criteria.format)) return 1;
   const text = card.oracleText ?? '';
   if (text.includes('any number of cards named')) return criteria.size;
-  return criteria.maxCopies;
+  return statedCopyLimit(criteria);
 }
 
 const SINGLETON_FORMATS: ReadonlySet<string> = new Set(['commander', 'brawl', 'oathbreaker', 'duel']);
@@ -199,10 +252,10 @@ const BASIC_LAND_NAMES: ReadonlySet<string> = new Set(
  */
 export function enforceDeckBudget(inclusions: readonly Inclusion[], criteria: DeckCriteria): VerifyResult {
   const max = criteria.budget?.maxDeckUsd;
-  if (max === undefined) return { inclusions, rejections: [] };
+  if (max === undefined) return { inclusions, rejections: [], adjustments: [] };
 
   const total = deckPrice(inclusions);
-  if (total <= max) return { inclusions, rejections: [] };
+  if (total <= max) return { inclusions, rejections: [], adjustments: [] };
 
   const byCost = [...inclusions].sort(
     (a, b) => (b.card.priceUsd ?? 0) * b.count - (a.card.priceUsd ?? 0) * a.count,
@@ -227,6 +280,7 @@ export function enforceDeckBudget(inclusions: readonly Inclusion[], criteria: De
   return {
     inclusions: inclusions.filter((entry) => !cut.has(entry.card.oracleId)),
     rejections,
+    adjustments: [],
   };
 }
 
@@ -250,7 +304,7 @@ export function deckPrice(inclusions: readonly Inclusion[]): number {
  */
 export function enforceLandSlot(inclusions: readonly Inclusion[], criteria: ResolvedCriteria): VerifyResult {
   const total = landCount(inclusions);
-  if (total <= criteria.landCount) return { inclusions, rejections: [] };
+  if (total <= criteria.landCount) return { inclusions, rejections: [], adjustments: [] };
 
   const rejections: Rejection[] = [];
   const cut = new Set<string>();
@@ -268,7 +322,11 @@ export function enforceLandSlot(inclusions: readonly Inclusion[], criteria: Reso
     });
   }
 
-  return { inclusions: inclusions.filter((entry) => !cut.has(entry.card.oracleId)), rejections };
+  return {
+    inclusions: inclusions.filter((entry) => !cut.has(entry.card.oracleId)),
+    rejections,
+    adjustments: [],
+  };
 }
 
 /** Cards counted with multiplicity. */

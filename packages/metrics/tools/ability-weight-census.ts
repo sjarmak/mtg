@@ -87,8 +87,11 @@ import type { ActivationArm, ActivationCensus, TriggerCensus } from '@mtg/sim';
 import {
   ACTIVATION_ARMS,
   activationArm,
+  activationRow,
   firesPerInstance,
   hostsPerInstance,
+  isSacrificeOutlet,
+  outletFactor,
   sumActivationCensus,
   sumTriggerCensus,
   tapFactor,
@@ -129,6 +132,19 @@ function armCounts(cards: readonly Card[]): Readonly<Record<ActivationArm, numbe
     for (const ability of card.abilities) {
       const arm = activationArm(ability);
       if (arm !== null) counts[arm] += 1;
+    }
+  }
+  return counts;
+}
+
+/** The part of `armCounts` whose cost eats another permanent. */
+function outletCounts(cards: readonly Card[]): Readonly<Record<ActivationArm, number>> {
+  const counts = {} as Record<ActivationArm, number>;
+  for (const arm of ACTIVATION_ARMS) counts[arm] = 0;
+  for (const card of cards) {
+    for (const ability of card.abilities) {
+      const arm = activationArm(ability);
+      if (arm !== null && isSacrificeOutlet(ability)) counts[arm] += 1;
     }
   }
   return counts;
@@ -246,6 +262,61 @@ function reportActivationPass(pass: Pass, pool: readonly Card[]): void {
   }
 }
 
+/**
+ * The outlet cross-cut of the table above: how often an ability that eats a
+ * permanent to pay for itself is actually used, against one that does not.
+ *
+ * `mtg-vm54`'s question. `activationUseCount` was fitted over every activated
+ * ability that resolved, outlets included, and `evaluateCard` then multiplies an
+ * outlet's score by `sacrificeSupplyFactor` as well. Those two compose only if
+ * an outlet fires at the pooled rate; a ratio away from 1 means the pooled
+ * weight already carries part of the discount and the supply factor charges for
+ * it twice.
+ *
+ * Printed as a ratio rather than as a verdict, because the verdict depends on a
+ * sample size this instrument states and cannot raise: 13 of the flagship's 29
+ * paid abilities are outlets, and a ratio read off a handful of printed cards is
+ * not on its own a reason to split a weight. What made it one here is the size
+ * of the gap: the outlet arm reads 0.012 uses per arrival against 0.655, so the
+ * two are not the same number under any reading of the noise.
+ */
+function reportOutletPartition(pass: Pass, pool: readonly Card[]): void {
+  const deck = deckCards(pass.decks);
+  const poolCounts = outletCounts(pool);
+  const deckCounts = outletCounts(deck);
+  const poolArms = armCounts(pool);
+  const deckArms = armCounts(deck);
+  const carrying = ACTIVATION_ARMS.filter(
+    (arm) => poolCounts[arm] > 0 || pass.activations.outlets[arm].instances > 0,
+  );
+  if (carrying.length === 0) {
+    console.log(
+      'sacrifice outlets: this pool prints none, so activationUseCount above is measured over ' +
+        'plain abilities alone and sacrificeSupplyFactor is unexercised',
+    );
+    return;
+  }
+  console.log(
+    `${pad('outlet cross-cut of the rows above', 38)}${padStart('pool', 5)}${padStart('deck', 6)}` +
+      `${padStart('arrivals', 10)}${padStart('uses', 9)}${padStart('outlet', 11)}` +
+      `${padStart('other', 11)}${padStart('ratio', 9)}`,
+  );
+  for (const arm of carrying) {
+    const outlet = activationRow(pass.activations, arm, 'outlet');
+    const whole = pass.activations.arms[arm];
+    console.log(
+      pad(`${arm}       sacrificeSupplyFactor`, 38) +
+        padStart(`${String(poolCounts[arm])}/${String(poolArms[arm])}`, 5) +
+        padStart(`${String(deckCounts[arm])}/${String(deckArms[arm])}`, 6) +
+        padStart(`${String(outlet.instances)}/${String(whole.instances)}`, 10) +
+        padStart(`${String(outlet.activations)}/${String(whole.activations)}`, 9) +
+        padStart(show(usesPerInstance(pass.activations, arm, 'outlet')), 11) +
+        padStart(show(usesPerInstance(pass.activations, arm, 'other')), 11) +
+        padStart(show(outletFactor(pass.activations, arm)), 9),
+    );
+  }
+}
+
 function reportPass(pass: Pass, pool: readonly Card[], games: number): void {
   const poolCounts = conditionCounts(pool);
   const deckCounts = conditionCounts(deckCards(pass.decks));
@@ -326,6 +397,7 @@ function reportActivationDerivation(passes: readonly [Pass, Pass, Pass]): void {
       `${padStart('shipped', 9)}${padStart('take', 11)}  source`,
   );
   const paidInstances = shipped.activations.arms.paid.instances;
+  const plainInstances = activationRow(shipped.activations, 'paid', 'other').instances;
   const tappedInstances = shipped.activations.arms.tapped.instances;
   const equipInstances = shipped.activations.arms.equip.instances;
   const rows: readonly {
@@ -337,10 +409,10 @@ function reportActivationDerivation(passes: readonly [Pass, Pass, Pass]): void {
   }[] = [
     {
       name: 'activationUseCount',
-      first: usesPerInstance(shipped.activations, 'paid'),
-      second: usesPerInstance(derived.activations, 'paid'),
+      first: usesPerInstance(shipped.activations, 'paid', 'other'),
+      second: usesPerInstance(derived.activations, 'paid', 'other'),
       current: DEFAULT_SCORE_WEIGHTS.activationUseCount,
-      denominator: paidInstances,
+      denominator: plainInstances,
     },
     {
       name: 'activationTapFactor',
@@ -357,6 +429,11 @@ function reportActivationDerivation(passes: readonly [Pass, Pass, Pass]): void {
       denominator: equipInstances,
     },
   ];
+  console.log(
+    `  activationUseCount excludes the ${String(paidInstances - plainInstances)} outlet arrivals of ` +
+      `${String(paidInstances)} paid ones: sacrificeSupplyFactor prices those, and a pooled fit ` +
+      'applies that discount twice',
+  );
   for (const row of rows) {
     const source =
       row.first !== null
@@ -390,7 +467,10 @@ function weightsFrom(
     const value = measured ?? unmeasured(condition);
     if (value !== null) overrides[condition] = value;
   }
-  const paid = usesPerInstance(pass.activations, 'paid');
+  // The non-outlet partition, for `reportActivationDerivation`'s reason: pass 2
+  // has to install the weight the way the scorer will read it, or it measures a
+  // builder nobody is going to ship.
+  const paid = usesPerInstance(pass.activations, 'paid', 'other');
   const tap = tapFactor(pass.activations);
   const hosts = hostsPerInstance(pass.activations);
   return {
@@ -407,6 +487,7 @@ async function measure(pool: readonly Card[], setLabel: string, games: number): 
   const shipped = await runPass('pass 1: shipped weights', pool, setLabel, games, {});
   reportPass(shipped, pool, games);
   reportActivationPass(shipped, pool);
+  reportOutletPartition(shipped, pool);
 
   const derived = await runPass(
     'pass 2: pass-1 measurements installed in the builder',
@@ -417,6 +498,7 @@ async function measure(pool: readonly Card[], setLabel: string, games: number): 
   );
   reportPass(derived, pool, games);
   reportActivationPass(derived, pool);
+  reportOutletPartition(derived, pool);
 
   // Everything neither pass reached, boosted until the builder plays it.
   const stillDark = (condition: TriggerCondition): number | null =>
@@ -433,6 +515,7 @@ async function measure(pool: readonly Card[], setLabel: string, games: number): 
   );
   reportPass(probe, pool, games);
   reportActivationPass(probe, pool);
+  reportOutletPartition(probe, pool);
   reportDerivation([shipped, derived, probe], pool);
   reportActivationDerivation([shipped, derived, probe]);
 }

@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@mtg/printed-card/node": ["packages/printed-card/src/node/index.ts"],
       "@mtg/sim/bot": ["packages/sim/src/greedy-bot.ts"],
       "@mtg/*": ["packages/*/src/index.ts"]
     }
@@ -11,6 +12,7 @@
     "packages/*/src/**/*.ts",
     "packages/*/test/**/*.ts",
     "packages/*/tools/**/*.ts",
+    "packages/*/bench/**/*.ts",
     "packages/*/*.config.ts"
   ],
   "exclude": ["node_modules", "**/dist", "**/node_modules"]

@@ -1,0 +1,374 @@
+{
+  "schemaVersion": 1,
+  "forge": {
+    "version": "2.0.14",
+    "jarSha256": "3c0a7c385b9207e593fe149255e00d1cd7e556809f138568d07e3828b78e5dd9"
+  },
+  "source": "Rows with basis legacy-cube-ledger are read from legacy-cube-2021-forge-decisions-v1.json controllerSurface.abstractCallbacks by method name (overloads of one name share a row and agree on families). Rows with basis reviewed-here name concrete PlayerController methods the ledger, which lists abstract callbacks only, does not.",
+  "methods": [
+    {
+      "method": "announceRequirements",
+      "disposition": "decision",
+      "families": ["mana-x"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "assignCombatDamage",
+      "disposition": "decision",
+      "families": ["combat"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseBinary",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseCardName",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseCardsForEffect",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseCardsForEffectMultiple",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseCardsForZoneChange",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseCardsPile",
+      "disposition": "decision",
+      "families": ["zone-card-selection", "piles-votes"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseCardsToDiscardFrom",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseCardsToDiscardUnlessType",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseCardsToRevealFromHand",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseColor",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseColorAllowColorless",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseColors",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseCounterType",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseDiceToReroll",
+      "disposition": "outside-legacy-cube-session",
+      "families": [],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseEntitiesForEffect",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseFlipResult",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseKeywordForPump",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseModeForAbility",
+      "disposition": "decision",
+      "families": ["modes"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseNewTargetsFor",
+      "disposition": "decision",
+      "families": ["targets"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseNumber",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "choosePermanentsToDestroy",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "choosePermanentsToSacrifice",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseProtectionType",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseRollSwapValue",
+      "disposition": "outside-legacy-cube-session",
+      "families": [],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseRollToIgnore",
+      "disposition": "outside-legacy-cube-session",
+      "families": [],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseRollToModify",
+      "disposition": "outside-legacy-cube-session",
+      "families": [],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseRollToSwap",
+      "disposition": "outside-legacy-cube-session",
+      "families": [],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseSector",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseSingleCardFace",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseSingleCardForZoneChange",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseSingleCardState",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseSingleEntityForEffect",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseSingleSpellForEffect",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseSomeType",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseSpellAbilitiesForEffect",
+      "disposition": "decision",
+      "families": ["zone-card-selection"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseSprocket",
+      "disposition": "outside-legacy-cube-session",
+      "families": [],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseTarget",
+      "disposition": "decision",
+      "families": ["targets"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "chooseTargetsFor",
+      "disposition": "decision",
+      "families": ["targets"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "confirmAction",
+      "disposition": "decision",
+      "families": ["replacement-trigger-choices"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "confirmBidAction",
+      "disposition": "decision",
+      "families": ["naming-text-numbers"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "confirmStaticApplication",
+      "disposition": "decision",
+      "families": ["replacement-trigger-choices"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "declareBlockers",
+      "disposition": "decision",
+      "families": ["combat"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "endTempShowCards",
+      "disposition": "non-decision",
+      "families": [],
+      "basis": "reviewed-here",
+      "note": "Concrete PlayerController method that ends a temporary card display; it asks the player nothing."
+    },
+    {
+      "method": "getAbilityToPlay",
+      "disposition": "decision",
+      "families": ["priority"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "isAI",
+      "disposition": "non-decision",
+      "families": [],
+      "basis": "reviewed-here",
+      "note": "Concrete PlayerController query that answers whether the controller is the AI; it asks the player nothing."
+    },
+    {
+      "method": "isFullControl",
+      "disposition": "non-decision",
+      "families": [],
+      "basis": "reviewed-here",
+      "note": "Concrete PlayerController query that reads a full-control preference flag; it asks the player nothing."
+    },
+    {
+      "method": "notifyOfValue",
+      "disposition": "non-decision",
+      "families": [],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "orderAndPlaySimultaneousSa",
+      "disposition": "decision",
+      "families": ["ordering"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "orderMoveToZoneList",
+      "disposition": "decision",
+      "families": ["ordering"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "payCostDuringRoll",
+      "disposition": "decision",
+      "families": ["optional-costs"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "payCostToPreventEffect",
+      "disposition": "decision",
+      "families": ["optional-costs"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "playChosenSpellAbility",
+      "disposition": "decision",
+      "families": ["priority"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "playSaFromPlayEffect",
+      "disposition": "decision",
+      "families": ["priority"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "reveal",
+      "disposition": "non-decision",
+      "families": [],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "specifyManaCombo",
+      "disposition": "decision",
+      "families": ["mana-x"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "tempShowCards",
+      "disposition": "non-decision",
+      "families": [],
+      "basis": "reviewed-here",
+      "note": "Concrete PlayerController method that displays cards temporarily; it asks the player nothing."
+    },
+    {
+      "method": "vote",
+      "disposition": "decision",
+      "families": ["piles-votes"],
+      "basis": "legacy-cube-ledger"
+    },
+    {
+      "method": "willPutCardOnTop",
+      "disposition": "decision",
+      "families": ["ordering"],
+      "basis": "legacy-cube-ledger"
+    }
+  ]
+}

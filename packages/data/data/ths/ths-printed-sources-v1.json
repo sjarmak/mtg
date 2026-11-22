@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-19T20:54:56.827Z",
+  "sources": [
+    {
+      "code": "THS",
+      "mtgjson": {
+        "file": "THS-ce27f9e1b51a4d938ae959d7c0a505d4b6163f6ecd84374583bf5adf4ef2d5b2.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/THS.json",
+        "sha256": "ce27f9e1b51a4d938ae959d7c0a505d4b6163f6ecd84374583bf5adf4ef2d5b2",
+        "meta": {
+          "date": "2026-09-19",
+          "version": "5.3.0+20260919"
+        }
+      },
+      "scryfall": {
+        "file": "THS-47ea82de700ca6f3f1b54476c48e706c37bb4df5c55635eb2e0f35963091dbde.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Aths+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "47ea82de700ca6f3f1b54476c48e706c37bb4df5c55635eb2e0f35963091dbde",
+        "cards": 249
+      }
+    }
+  ]
+}

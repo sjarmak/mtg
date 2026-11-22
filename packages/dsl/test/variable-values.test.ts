@@ -10,6 +10,7 @@ import {
   mana,
   ManaCostSchema,
   manaValue,
+  ModelEffectSchema,
   ModelManaCostSchema,
   renderCard,
   renderOracleText,
@@ -95,6 +96,23 @@ describe('X mana and chosen-X amounts', () => {
     expect(validateCard(activated)).toEqual([]);
   });
 
+  it('joins matching chosen-X life gain and card draw under the printed X', () => {
+    const revelation = parseCard(
+      card({
+        id: 'rtr-sphinxs-revelation',
+        name: "Sphinx's Revelation",
+        set: { code: 'RTR', collectorNumber: 200 },
+        manaCost: { W: 2, U: 1, hasX: true },
+        colors: ['W', 'U'],
+        effects: [
+          { kind: 'gainLife', amount: { kind: 'chosenX' }, target: { kind: 'noTarget' } },
+          { kind: 'drawCards', count: { kind: 'chosenX' }, target: { kind: 'noTarget' } },
+        ],
+      }),
+    );
+    expect(renderOracleText(revelation)).toBe('You gain X life and draw X cards.');
+  });
+
   it('prints one X in an activation cost and the same X in the effect it pays for', () => {
     // Scope item 3 of `mtg-nhyv.17`, and the whole reason the oracle line is
     // load-bearing: `manaValue` counts X as nothing, so an activation cost of
@@ -135,6 +153,57 @@ describe('X mana and chosen-X amounts', () => {
     );
     expect(renderOracleText(geyser)).toBe('Volcanic Geyser deals X damage to any target.');
     expect(renderCard(geyser).split('\n')[0]).toBe('Volcanic Geyser {X}{R}{R}');
+  });
+
+  it('authors Primordial Hydra from reusable source-counter capabilities', () => {
+    const hydra = parseCard({
+      kind: 'creature',
+      id: 'm13-primordial-hydra',
+      name: 'Primordial Hydra',
+      rarity: 'mythic',
+      set: { code: 'M13', collectorNumber: 183 },
+      manaCost: { hasX: true, G: 2 },
+      colors: ['G'],
+      subtypes: ['Hydra'],
+      power: 0,
+      toughness: 0,
+      entryReplacement: {
+        kind: 'entersWithCounters',
+        counter: 'plusOnePlusOne',
+        count: { kind: 'chosenX' },
+      },
+      abilities: [
+        {
+          kind: 'triggered',
+          condition: 'beginningOfYourUpkeep',
+          effects: [{ kind: 'doubleSourceCounters', counter: 'plusOnePlusOne' }],
+        },
+        {
+          kind: 'static',
+          scope: 'self',
+          subtype: null,
+          enabledWhile: {
+            kind: 'selfCounterCountAtLeast',
+            counter: 'plusOnePlusOne',
+            atLeast: 10,
+          },
+          modification: { kind: 'grantKeyword', keyword: 'trample' },
+        },
+      ],
+    });
+
+    expect(renderOracleText(hydra)).toBe(
+      [
+        'Primordial Hydra enters with X +1/+1 counters on it.',
+        'At the beginning of your upkeep, double the number of +1/+1 counters on Primordial Hydra.',
+        'Primordial Hydra has trample as long as it has ten or more +1/+1 counters on it.',
+      ].join('\n'),
+    );
+    const upkeep = hydra.abilities[0];
+    expect(upkeep?.kind).toBe('triggered');
+    expect(ModelEffectSchema.safeParse(upkeep?.kind === 'triggered' ? upkeep.effects[0] : null).success).toBe(
+      false,
+    );
   });
 });
 
@@ -180,6 +249,24 @@ describe('characteristic-defining power and toughness', () => {
 });
 
 describe('generator containment', () => {
+  it('refuses source-counter doubling on a spell that has no battlefield source body', () => {
+    const violations = validateCard(
+      card({
+        kind: 'sorcery',
+        manaCost: { G: 1 },
+        colors: ['G'],
+        effects: [{ kind: 'doubleSourceCounters', counter: 'plusOnePlusOne' }],
+      }),
+    );
+
+    expect(violations).toContainEqual(
+      expect.objectContaining({
+        code: 'EFFECT_ILLEGAL_ON_CARD_TYPE',
+        path: 'effects[0]',
+      }),
+    );
+  });
+
   it('keeps the model mana and full fill schemas byte-identical', () => {
     expect(digest(ModelManaCostSchema)).toBe(
       '1fe727a509658a0f25e9a1b3fbe98185d09697f2aac2f4c43c9a943af2929c76',

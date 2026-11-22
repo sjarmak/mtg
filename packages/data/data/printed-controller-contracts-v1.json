@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "contracts": [
+    {
+      "id": "priority-v1",
+      "decisionFamilies": ["priority"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        List<SpellAbility> choose(Player player) {",
+          "endMarker": "        void recordPriorityMana(SpellAbility ability, boolean played) {"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/abandoned-sarcophagus-engine-controller-profile-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/abandoned-sarcophagus-local-controller-profile-v1.json"
+      ]
+    },
+    {
+      "id": "targets-v1",
+      "decisionFamilies": ["targets"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public boolean chooseTargetsFor(SpellAbility ability) {",
+          "endMarker": "        public Pair<SpellAbilityStackInstance, GameObject> chooseTarget("
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/ahn-crop-crasher-engine-exert-scenario-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/ahn-crop-crasher-local-exert-scenario-v1.json"
+      ]
+    },
+    {
+      "id": "combat-v1",
+      "decisionFamilies": ["combat"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public void declareAttackers(Player attackingPlayer, Combat combat) {",
+          "endMarker": "        public List<Card> exertAttackers(List<Card> attackers) {"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/ancient-crab-engine-controller-profile-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/ancient-crab-local-controller-profile-v1.json"
+      ]
+    },
+    {
+      "id": "optional-costs-v1",
+      "decisionFamilies": ["optional-costs"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public List<OptionalCostValue> chooseOptionalCosts(",
+          "endMarker": "         * Every number this session is asked for, over a range."
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/gust-walker-engine-exert-scenario-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/gust-walker-local-exert-scenario-v1.json"
+      ]
+    },
+    {
+      "id": "replacement-trigger-choices-v1",
+      "decisionFamilies": ["replacement-trigger-choices"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public boolean confirmTrigger(WrappedAbility wrapper) {",
+          "endMarker": "        public boolean willPutCardOnTop(Card card) {"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/binding-mummy-engine-replacement-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/binding-mummy-local-replacement-v1.json"
+      ]
+    },
+    {
+      "id": "zone-card-selection-v1",
+      "decisionFamilies": ["zone-card-selection"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public Card chooseSingleCardForZoneChange(",
+          "endMarker": "        public CardCollection chooseCardsToDiscardFrom("
+        },
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public List<Card> chooseCardsForZoneChange(",
+          "endMarker": "        /** Exact Convoke distributions; Improvise, Waterbend, and all drift remain refused. */"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/shefet-monitor-engine-zone-selection-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/shefet-monitor-local-zone-selection-v1.json"
+      ]
+    },
+    {
+      "id": "modes-v1",
+      "decisionFamilies": ["modes"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public List<AbilitySub> chooseModeForAbility(",
+          "endMarker": "        private boolean isReviewedUmezawasJitteCharm("
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/doomfall-engine-mode-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/doomfall-local-mode-v1.json"
+      ]
+    },
+    {
+      "id": "mana-x-v1",
+      "decisionFamilies": ["mana-x"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public int chooseNumber(SpellAbility ability, String message, int minimum, int maximum) {",
+          "endMarker": "         * How much of a variable cost reduction to apply."
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/hailfire-engine-number-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/hailfire-local-number-v1.json"
+      ]
+    },
+    {
+      "id": "naming-text-numbers-v1",
+      "decisionFamilies": ["naming-text-numbers"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public ICardFace chooseSingleCardFace(\n                SpellAbility ability, String prompt, Predicate<ICardFace> filter, String logic) {",
+          "endMarker": "        public List<OptionalCostValue> chooseOptionalCosts("
+        },
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public int chooseNumber(SpellAbility ability, String message, int minimum, int maximum) {",
+          "endMarker": "         * How much of a variable cost reduction to apply."
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/dispossess-local-name-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/hailfire-engine-number-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/hailfire-local-number-v1.json"
+      ]
+    },
+    {
+      "id": "ordering-v1",
+      "decisionFamilies": ["ordering"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public CardCollectionView orderMoveToZoneList(",
+          "endMarker": "        public List<CostPart> orderCosts(List<CostPart> costs) {"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/naga-oracle-engine-order-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/naga-oracle-local-order-v1.json"
+      ]
+    },
+    {
+      "id": "piles-votes-v1",
+      "decisionFamilies": ["piles-votes"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public boolean chooseCardsPile(",
+          "endMarker": "         * The seventeen questions that ask for several things at once."
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/scenarios/unesh-engine-pile-split-v1.json",
+        "out/isd/scenario-probes-v5/scenarios/unesh-local-pile-split-v1.json"
+      ]
+    },
+    {
+      "id": "cost-card-selection-v1",
+      "decisionFamilies": ["cost-card-selection"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        PaymentDecision chooseGraveyardExileCost(",
+          "endMarker": "        PaymentDecision chooseTitanEscapeExileCost("
+        },
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        private static int parsePositiveFixedAmount(String amount) {",
+          "endMarker": "        private boolean isScopedAkhHouSingleSacrificeCost("
+        }
+      ],
+      "scenarioReceipts": [
+        "out/isd/scenario-probes-v5/probes/stitched-drake-local-cost-card-selection-v1.json",
+        "out/isd/scenario-probes-v5/probes/stitched-drake-engine-cost-card-selection-v1.json"
+      ]
+    },
+    {
+      "id": "pregame-actions-v1",
+      "decisionFamilies": ["pregame-actions"],
+      "sourceRegions": [
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        List<SpellAbility> chooseOpeningHandActions(Player player, List<SpellAbility> usable) {",
+          "endMarker": "        static boolean isReviewedPhyrexianManaCost(ManaCost cost) {"
+        },
+        {
+          "path": "packages/forge-export/bridge/ForgeBridge.java",
+          "beginMarker": "        public List<SpellAbility> chooseSaToActivateFromOpeningHand(List<SpellAbility> usable) {",
+          "endMarker": "        public boolean playTrigger(Card host, WrappedAbility wrapper, boolean isMandatory) {"
+        }
+      ],
+      "scenarioReceipts": [
+        "out/nph/pregame-contract-scenarios-v1/probes/chancellor-of-the-dross-engine-pregame-actions-v1.json",
+        "out/nph/pregame-contract-scenarios-v1/probes/chancellor-of-the-dross-local-pregame-actions-v1.json"
+      ]
+    }
+  ]
+}

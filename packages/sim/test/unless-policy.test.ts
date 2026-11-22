@@ -20,6 +20,7 @@ import type { Card, Effect, ManaCostInput } from '@mtg/dsl';
 import { colorsFromCost, mana, parseCard } from '@mtg/dsl';
 import type { AgentView, GameState, ReduceResult } from '@mtg/kernel';
 import { pendingDecision, reduce, scenario } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { DEFAULT_GREEDY_CONFIG } from '@mtg/sim';
 import { answerUnless } from '../src/policies/trigger';
 import { creature, FOREST } from './cards';
@@ -84,7 +85,14 @@ function tollAsked(toll: ManaCostInput, victim: Card): GameState {
 function tollDecision(state: GameState): { readonly view: AgentView; readonly oid: string } {
   const decision = pendingDecision(state);
   if (decision?.kind !== 'unless') throw new Error('the kernel is not asking a toll');
-  return { view: { state, player: decision.player, decision }, oid: decision.oid };
+  return {
+    view: {
+      state: observeState(state, decision.player, 'test/unless-policy.test.ts:87'),
+      player: decision.player,
+      decision,
+    },
+    oid: decision.oid,
+  };
 }
 
 describe('the greedy bot weighs a toll against what it would lose', () => {

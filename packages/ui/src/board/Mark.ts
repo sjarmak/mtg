@@ -26,7 +26,7 @@ export type MarkTone = 'neutral' | 'positive' | 'negative' | 'pending';
  * type, so a member added here without a drawing is a compile error rather than
  * a blank badge.
  */
-export type MarkGlyph = 'hourglass' | 'reticle';
+export type MarkGlyph = 'hourglass' | 'link' | 'lock' | 'reticle';
 
 export interface BoardMark {
   readonly key: string;
@@ -92,6 +92,11 @@ export interface BoardMark {
  */
 const GLYPH_PATHS: Readonly<Record<MarkGlyph, string>> = {
   hourglass: 'M2 1h8v1.4H2z M2 9.6h8V11H2z M3.4 2.4h5.2L6 6z M6 6l2.6 3.6H3.4z',
+  // Two rings side by side, overlapping: the ring's own hole is wound the other
+  // way so the nonzero rule cuts it, as the reticle's does. Reads as "bonded"
+  // at eleven pixels, where a chain link with a waist closes into a blob.
+  link: 'M4 2.2A3.8 3.8 0 1 0 4 9.8A3.8 3.8 0 1 0 4 2.2Z M4 4A2 2 0 1 1 4 8A2 2 0 1 1 4 4Z M8 2.2A3.8 3.8 0 1 0 8 9.8A3.8 3.8 0 1 0 8 2.2Z M8 4A2 2 0 1 1 8 8A2 2 0 1 1 8 4Z',
+  lock: 'M3 5V3.7a3 3 0 0 1 6 0V5h1v6H2V5zm1.4 0h3.2V3.7a1.6 1.6 0 0 0-3.2 0z',
   reticle:
     'M6 0.8A5.2 5.2 0 1 0 6 11.2A5.2 5.2 0 1 0 6 0.8Z M6 2.8A3.2 3.2 0 1 1 6 9.2A3.2 3.2 0 1 1 6 2.8Z M6 4.4A1.6 1.6 0 1 0 6 7.6A1.6 1.6 0 1 0 6 4.4Z',
 };

@@ -99,6 +99,23 @@ export { abilityPool, abilityUsage } from './ability-usage';
 export type { ColorPairRecord, ColorPairReport, MatchupRecord } from './win-rate';
 export { colorPairWinRates, matchupMatrix, winRateSpread } from './win-rate';
 
+export type {
+  CardWinRateRecord,
+  CardHandCounts,
+  CardWinRateAccumulator,
+  WinRateGameRow,
+} from './card-win-rate';
+export {
+  cardWinRatesWhenDrawn,
+  cardWinRatesWhenDrawnFromRows,
+  createCardWinRateAccumulator,
+} from './card-win-rate';
+
+export { simCardRatings } from './sim-card-rating';
+
+export type { ForgeGameplayEvidence, ForgePlayCardRating } from './forge-play-card-rating';
+export { forgeEpisodeWinRateRow, forgePlayCardRatings } from './forge-play-card-rating';
+
 export type { DominanceFinding, DominanceReason, DominanceResult, OutOfBandFinding } from './dominance';
 export { evaluateDominance } from './dominance';
 
@@ -247,6 +264,96 @@ export type {
   SealedCalibrationOptions,
   SealedCollationInput,
 } from './sealed-calibration';
+
+export type {
+  BotStrengthArm,
+  BotStrengthCampaignPlan,
+  BotStrengthComparison,
+  BotStrengthInterval,
+  BotStrengthOpponent,
+  BotStrengthSegment,
+  BotStrengthTrial,
+  BotStrengthTrialSummary,
+} from './bot-strength-comparison';
+export {
+  BotStrengthCampaignPlanSchema,
+  botStrengthEpisodeId,
+  compareBotStrengthCampaign,
+  compareBotStrengthTrialSummaries,
+  readBotStrengthComparison,
+  summarizeBotStrengthTrial,
+  validateBotStrengthTrial,
+} from './bot-strength-comparison';
+export type {
+  BotStrengthCampaignRun,
+  BotStrengthTrialCheckpoint,
+  BotStrengthTrialContext,
+  BotStrengthTrialExecution,
+  BotStrengthTrialResult,
+} from './bot-strength-campaign-runner';
+export { executeBotStrengthCampaign, runBotStrengthCampaign } from './bot-strength-campaign-runner';
+export type {
+  ForgeBotStrengthBackend,
+  ForgeBotStrengthCampaignOptions,
+  ForgeObservedGameRunner,
+} from './forge-bot-strength-campaign';
+export { executeForgeBotStrengthCampaign, runForgeBotStrengthCampaign } from './forge-bot-strength-campaign';
+export type {
+  NativeBotStrengthCampaignOptions,
+  NativeBotStrengthOpponent,
+  NativeGameRunner,
+} from './native-bot-strength-campaign';
+export {
+  executeNativeBotStrengthCampaign,
+  nativeBotPolicyIdentity,
+  nativeGameplayFeatureIdentity,
+  runNativeBotStrengthCampaign,
+} from './native-bot-strength-campaign';
+export type {
+  PairedPromotionInput,
+  PairedPromotionResult,
+  PromotionCompletion,
+  PromotionInterval,
+  PromotionPower,
+  PromotionSegment,
+  PromotionSegmentDimension,
+  PromotionSplit,
+  PromotionUnit,
+} from './paired-promotion';
+export { comparePairedPromotion, requiredIndependentUnitsFor } from './paired-promotion';
+export type {
+  StageStrengthArm,
+  StageStrengthCampaignPlan,
+  StageStrengthComparison,
+  StageStrengthOutcomeEvidence,
+  StageStrengthTrial,
+  StageStrengthTrialSummary,
+} from './stage-strength-comparison';
+export {
+  StageStrengthCampaignPlanSchema,
+  validateStageStrengthEpisode,
+  validateStageStrengthTrial,
+  compareStageStrengthCampaign,
+  compareStageStrengthTrialSummaries,
+  readStageStrengthComparison,
+  stageStrengthEpisodeId,
+  stageStrengthGameEpisodeId,
+  summarizeStageStrengthTrial,
+} from './stage-strength-comparison';
+export type {
+  StageStrengthCampaignOptions,
+  StageStrengthCampaignRun,
+  StageStrengthExecutionContext,
+  StageStrengthOutcomeContext,
+  StageStrengthOutcomeExecution,
+  StageStrengthOutcomeResult,
+  StageStrengthStageExecution,
+  StageStrengthStageResult,
+  StageStrengthTrialCheckpoint,
+} from './stage-strength-campaign-runner';
+export { executeStageStrengthCampaign, runStageStrengthCampaign } from './stage-strength-campaign-runner';
+export { calibrationSeed, draftCalibrationPool } from './legacy-cube-calibration/draft';
+export { buildCalibrationDeck } from './legacy-cube-calibration/deck';
 export {
   DEFAULT_SEALED_CARD_FLOOR,
   DEFAULT_SEALED_GAME_FLOOR,

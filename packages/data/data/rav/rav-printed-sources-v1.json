@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-09-29T23:49:22.219Z",
+  "sources": [
+    {
+      "code": "RAV",
+      "mtgjson": {
+        "file": "RAV-3d497fb32c6dad815e0c5c5fa4222283c357df69bc2025bf08b2cbc657c96839.mtgjson.json",
+        "url": "https://mtgjson.com/api/v5/RAV.json",
+        "sha256": "3d497fb32c6dad815e0c5c5fa4222283c357df69bc2025bf08b2cbc657c96839",
+        "meta": {
+          "date": "2026-09-29",
+          "version": "5.3.0+20260929"
+        }
+      },
+      "scryfall": {
+        "file": "RAV-d4f33715e0e4a47687ca8fc0eba2b36287deb155a9769d1bc65c1f2ee81bef72.scryfall.json",
+        "url": "https://api.scryfall.com/cards/search?q=set%3Arav+lang%3Aen&unique=prints&include_extras=true&include_variations=true&order=set",
+        "sha256": "d4f33715e0e4a47687ca8fc0eba2b36287deb155a9769d1bc65c1f2ee81bef72",
+        "cards": 306
+      }
+    }
+  ]
+}

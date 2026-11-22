@@ -22,6 +22,8 @@ import {
   counterStatBonus,
   EFFECT_KINDS,
   LEGAL_TARGETS,
+  MODEL_COUNTER_KINDS,
+  ModelCounterKindSchema,
   renderOracleText,
   validateCard,
 } from '../src/index';
@@ -78,6 +80,29 @@ describe('the counter-kind table', () => {
    */
   it('parses a retired counter-kind name as its current one', () => {
     expect(CounterKindSchema.parse('saberHorn')).toBe('horn');
+  });
+
+  it('keeps a linked marker out of the model-facing counter vocabulary', () => {
+    expect(MODEL_COUNTER_KINDS).toEqual(
+      COUNTER_KINDS.filter(
+        (kind) =>
+          kind !== 'phylactery' &&
+          kind !== 'defense' &&
+          kind !== 'pressure' &&
+          kind !== 'petrification' &&
+          kind !== 'charge' &&
+          kind !== 'filibuster',
+      ),
+    );
+    for (const kind of MODEL_COUNTER_KINDS) expect(ModelCounterKindSchema.parse(kind)).toBe(kind);
+    expect(ModelCounterKindSchema.parse('saberHorn')).toBe('horn');
+    expect(ModelCounterKindSchema.safeParse('phylactery').success).toBe(false);
+    expect(ModelCounterKindSchema.safeParse('defense').success).toBe(false);
+    expect(ModelCounterKindSchema.safeParse('pressure').success).toBe(false);
+    expect(ModelCounterKindSchema.safeParse('filibuster').success).toBe(false);
+    expect(ModelCounterKindSchema.safeParse('petrification').success).toBe(false);
+    expect(ModelCounterKindSchema.safeParse('charge').success).toBe(false);
+    expect(CounterKindSchema.parse('phylactery')).toBe('phylactery');
   });
 
   /**

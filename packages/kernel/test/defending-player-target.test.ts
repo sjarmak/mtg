@@ -20,7 +20,7 @@ import type { AbilityInput, Card } from '@mtg/dsl';
 import type { GameState, ReduceResult, Target } from '@mtg/kernel';
 import { eventsOfType, opponentOf, pendingDecision, scenario } from '@mtg/kernel';
 import { creature } from './cards';
-import { apply, oidOf } from './helpers';
+import { apply, damageOn, inGraveyard, oidOf } from './helpers';
 
 /** `Whenever CARDNAME attacks, target creature defending player controls gets -2/-2 until end of turn.` */
 const WITHERING_ATTACK: AbilityInput = {
@@ -41,6 +41,19 @@ const UNRESTRICTED_ATTACK: AbilityInput = {
   kind: 'triggered',
   condition: 'selfAttacks',
   effects: [{ kind: 'pumpUntilEndOfTurn', power: -2, toughness: -2, target: { kind: 'targetCreature' } }],
+};
+
+/** Cyclops Gladiator's optional attack trigger, expressed as CR 701.12 fight. */
+const OPTIONAL_ATTACK_FIGHT: AbilityInput = {
+  kind: 'triggered',
+  condition: 'selfAttacks',
+  optional: true,
+  effects: [
+    {
+      kind: 'fight',
+      target: { kind: 'targetCreatureDefendingPlayerControls' },
+    },
+  ],
 };
 
 function attacker(ability: AbilityInput): Card {
@@ -90,6 +103,17 @@ function permanents(state: GameState, ...names: readonly string[]): readonly Tar
   return names.map((name): Target => ({ kind: 'permanent', oid: oidOf(state, name) }));
 }
 
+/** Passes both priority windows and stops on the next actual question. */
+function passUntilQuestion(from: ReduceResult): ReduceResult {
+  let current = from;
+  for (let guard = 0; guard < 8; guard += 1) {
+    const decision = pendingDecision(current.state);
+    if (decision === null || decision.kind !== 'priority') return current;
+    current = apply(current, { type: 'passPriority', player: decision.player });
+  }
+  throw new Error('the attack-trigger question never arrived');
+}
+
 describe('an attack trigger that names the defending player', () => {
   it('offers the defending player creatures and nothing of the attacker own', () => {
     const declared = attack(board(WITHERING_ATTACK));
@@ -136,5 +160,43 @@ describe('an attack trigger that names the defending player', () => {
     const added = eventsOfType(current.events, 'continuousEffectAdded');
     expect(added.map((event) => event.targetOid)).toEqual([victim]);
     expect(added[0]?.power).toBe(-2);
+  });
+
+  it('lets Cyclops Gladiator fight the chosen defender creature or decline without damage', () => {
+    const declared = attack(board(OPTIONAL_ATTACK_FIGHT));
+    const source = oidOf(declared.state, 'Withering Reach');
+    const victim = oidOf(declared.state, 'Marsh Lurker');
+    const targetDecision = pendingDecision(declared.state);
+    if (targetDecision?.kind !== 'triggerTargets') throw new Error('the fight trigger has no target choice');
+    const target = targetDecision.options.find(
+      (option) =>
+        option.type === 'chooseTriggerTargets' &&
+        option.targets[0]?.kind === 'permanent' &&
+        option.targets[0].oid === victim,
+    );
+    if (target === undefined) throw new Error('the defending creature was not offered to fight');
+    const asked = passUntilQuestion(apply(declared, target));
+    const optional = pendingDecision(asked.state);
+    if (optional?.kind !== 'optionalTrigger') throw new Error('the optional fight was not offered');
+
+    const accepted = apply(asked, {
+      type: 'answerOptionalTrigger',
+      player: optional.player,
+      oid: optional.oid,
+      accept: true,
+    });
+    expect(inGraveyard(accepted.state, source)).toBe(true);
+    expect(inGraveyard(accepted.state, victim)).toBe(false);
+    expect(damageOn(accepted.state, victim)).toBe(2);
+
+    const declined = apply(asked, {
+      type: 'answerOptionalTrigger',
+      player: optional.player,
+      oid: optional.oid,
+      accept: false,
+    });
+    expect(inGraveyard(declined.state, source)).toBe(false);
+    expect(damageOn(declined.state, source)).toBe(0);
+    expect(damageOn(declined.state, victim)).toBe(0);
   });
 });

@@ -34,7 +34,7 @@
  *    itself. This is a fourth block on a 17rem rail that already holds the move
  *    list, the stack and two graveyards.
  *
- * # Closed is a strip, open is the history
+ * # Closed is a strip, open is the history — and open is where it starts
  *
  * `../board/ZoneBrowser.ts`'s decision, taken again for the same reasons. The
  * rail is 17rem holding the move list, the stack and two graveyards on a screen
@@ -43,6 +43,31 @@
  * closed state is one line naming the newest thing that happened, which is what
  * pays for newest-visible at all times and at one row of height, and the full
  * grouped history is one click away.
+ *
+ * **Which of the two a game opens on flipped in the 2026-08-22 interface pass,
+ * and the reason is that the paragraph above stopped being true.** Everything it
+ * names as sharing this rail left it: `mtg-rgc.4` moved the move list to the pod
+ * column and `mtg-rgc.7` moved the stack onto the seam and both graveyards under
+ * their own pods. `../styles/board/log.ts` says so outright — the log "takes the
+ * column from the disclosure and nothing else" and "there is no longer anything
+ * in here for it to take room from". So a shut log was not paying for a card any
+ * more; it was leaving the rail's whole 272px drawn around a one-line strip
+ * saying `GAME LOG 0`, which is what the capture at 1440x900 shows and what the
+ * pass named. A column that holds one thing shows that thing.
+ *
+ * **And the press is remembered** (`mtg-rgc.8`). A default is what a player who
+ * has never said anything gets; a player who shuts the log has said something,
+ * and getting it back open every game is the surface arguing with them. The
+ * answer is stored the way the two side columns store theirs, in
+ * `../routes/play/log-open.ts`, which also carries the measurement the bead
+ * asked for: narrating the whole stream from turn one costs 62ms across a
+ * 1119-event game, about 0.2ms per decision, so the flip is not paid for on
+ * screen.
+ *
+ * Shut is still one press away, the rail's own disclosure is still one press
+ * away, and both preferences the *player* sets outrank this: a narrow or short
+ * table opens with the rail collapsed entirely
+ * (`../routes/play/rail-collapse.ts`), so a phone never pays for it.
  *
  * # Where newest-visible is actually paid for, and why nothing jumps
  *
@@ -114,6 +139,17 @@ import type { LogNames } from './narrate';
 /** Nothing to draw, and the same reference every time, so the memo holds. */
 const EMPTY_LOG: readonly LogTurn[] = [];
 
+/**
+ * Which state a log opens in *for a player who has never said*, named rather
+ * than typed into a `useState` so the docblock above has something to point at
+ * and a test can assert the shipped answer without pressing anything.
+ *
+ * It is the fallback rather than the state as of `mtg-rgc.8`: a press is now
+ * remembered across games, and `../routes/play/log-open.ts` is where that is
+ * resolved. This constant is what the resolution falls back to.
+ */
+export const OPEN_BY_DEFAULT = true;
+
 /** The accessible name of the log, on the panel and on the control that opens it. */
 export const GAME_LOG_LABEL = 'Game log';
 
@@ -156,31 +192,119 @@ export interface GameLogProps {
   readonly events: readonly GameEvent[];
   /** Unredacted names; what reaches a sentence is `./visibility.ts`'s answer. */
   readonly names: LogNames;
-  /** The seat reading it, which with two people at one screen changes hands. */
+  /** The seat reading it, which on a two-human table changes hands. */
   readonly viewer: PlayerId;
+  /**
+   * The disclosure, held by the host rather than here (`mtg-rgc.8`).
+   *
+   * The state itself is trivial; where it is kept is not. A player who shuts the
+   * log means it for more than this game, and a preference that outlives a game
+   * has to be written down somewhere a remount reads — which is the same problem
+   * the two side columns already solved, in the same directory, against the same
+   * store. So `../routes/play/log-open.ts` owns the answer and this draws it,
+   * for the reason `../routes/play/rail-collapse.ts` owns the rail's and the rail draws it.
+   */
+  readonly disclosure: LogDisclosure;
+  /**
+   * Where to say which objects the reader is pointing at, or nothing.
+   *
+   * `mtg-47o`. Optional because the log is drawn on surfaces that have no board
+   * to light up, and a surface that passes nothing gets plain lines rather than
+   * controls that would answer a press with silence. The argument is the kernel
+   * object ids the pointed-at line names, in the order it names them, or `null`
+   * when the reader has stopped pointing.
+   */
+  readonly onPoint?: (objects: readonly string[] | null) => void;
 }
 
-function lineNode(line: LogLine): ReactElement {
+/** What the host has to supply for the log to have an open state at all. */
+export interface LogDisclosure {
+  readonly open: boolean;
+  readonly toggle: () => void;
+}
+
+/**
+ * What a line does when it is pointed at, and which line is currently latched.
+ *
+ * Passed down rather than read from a context, for the reason every other prop
+ * on this route is: the log is drawn on a surface that has a board to highlight
+ * and on surfaces that have none, and the one that has none passes nothing.
+ */
+interface Pointing {
+  readonly latched: string | null;
+  readonly hover: (line: LogLine) => void;
+  readonly leave: () => void;
+  readonly press: (line: LogLine) => void;
+}
+
+/**
+ * One narrated event, and a control when there is something to point at.
+ *
+ * `mtg-47o` and `mtg-exe`. A line that names an object is a toggle button whose
+ * accessible name is the sentence itself: hovering or focusing it lights the
+ * object on the board, and pressing it latches that so a finger, which cannot
+ * hover, gets the same answer. A line that names none — a step passing, a
+ * priority yield — stays the span it was, because a control that does nothing is
+ * worse than no control.
+ *
+ * The cost is real and taken deliberately: on a five-hundred-line history this
+ * puts several hundred buttons in the tab order. The alternative is a focusable
+ * `li`, which is a control with no role and no name, and the panel itself is
+ * already focusable and read in browse mode (see the file docblock), which is
+ * how anybody actually reads a log of this length. `aria-pressed` is what makes
+ * the latch legible rather than a color a screen reader cannot see.
+ */
+function lineNode(line: LogLine, pointing: Pointing | null): ReactElement {
+  const pointable = pointing !== null && line.objects.length > 0;
   return createElement(
     'li',
     { key: line.key, className: 'mtg-log__line', 'data-role': line.role },
     createElement('span', { className: 'mtg-log__num' }, String(line.index + 1)),
-    createElement('span', { className: 'mtg-log__text' }, line.text),
+    pointable && pointing !== null
+      ? createElement(
+          'button',
+          {
+            type: 'button',
+            className: 'mtg-log__text mtg-log__point',
+            'aria-pressed': pointing.latched === line.key,
+            onPointerEnter: (): void => {
+              pointing.hover(line);
+            },
+            onPointerLeave: (): void => {
+              pointing.leave();
+            },
+            onFocus: (): void => {
+              pointing.hover(line);
+            },
+            onBlur: (): void => {
+              pointing.leave();
+            },
+            onClick: (): void => {
+              pointing.press(line);
+            },
+          },
+          line.text,
+        )
+      : createElement('span', { className: 'mtg-log__text' }, line.text),
   );
 }
 
-function stepNode(step: LogStep): ReactElement {
+function stepNode(step: LogStep, pointing: Pointing | null): ReactElement {
   return createElement(
     'li',
     { key: step.key, className: 'mtg-log__step' },
     createElement('h4', { className: 'mtg-log__step-title' }, step.title),
     step.lines.length === 0
       ? createElement('p', { className: 'mtg-zone__empty' }, 'nothing happened')
-      : createElement('ol', { className: 'mtg-log__lines' }, ...step.lines.map(lineNode)),
+      : createElement(
+          'ol',
+          { className: 'mtg-log__lines' },
+          ...step.lines.map((line) => lineNode(line, pointing)),
+        ),
   );
 }
 
-function turnNode(turn: LogTurn): ReactElement {
+function turnNode(turn: LogTurn, pointing: Pointing | null): ReactElement {
   return createElement(
     'li',
     { key: turn.key, className: 'mtg-log__turn' },
@@ -190,15 +314,65 @@ function turnNode(turn: LogTurn): ReactElement {
       createElement('span', { className: 'mtg-log__turn-no' }, turn.title),
       turn.owner === null ? null : createElement('span', { className: 'mtg-log__turn-owner' }, turn.owner),
     ),
-    createElement('ol', { className: 'mtg-log__steps' }, ...turn.steps.map(stepNode)),
+    createElement(
+      'ol',
+      { className: 'mtg-log__steps' },
+      ...turn.steps.map((step) => stepNode(step, pointing)),
+    ),
   );
 }
 
+/** The latched line, kept as what pointing needs of it rather than as the line. */
+interface Latch {
+  readonly key: string;
+  readonly objects: readonly string[];
+}
+
 export function GameLog(props: GameLogProps): ReactElement {
-  const [open, setOpen] = useState(false);
+  const { open, toggle } = props.disclosure;
   const [density, setDensity] = useState<LogDensity>('story');
+  const [latched, setLatched] = useState<Latch | null>(null);
   const panelId = useId();
-  const { events, names, viewer } = props;
+  const { events, names, viewer, onPoint } = props;
+
+  /**
+   * Pointing, assembled here because the latch is this component's state and the
+   * highlight is the host's.
+   *
+   * Leaving a line does not clear the board: it falls back to the latched line,
+   * so hovering over a latched history and coming off it leaves the reader where
+   * they put themselves rather than where the mouse last was. Shutting the log
+   * and changing the level both drop the latch, because both take the latched
+   * line off the screen and a highlight nothing on screen explains is a stuck
+   * pixel as far as the reader can tell.
+   */
+  const say = (objects: readonly string[] | null): void => {
+    if (onPoint !== undefined) onPoint(objects);
+  };
+  const drop = (): void => {
+    setLatched(null);
+    say(null);
+  };
+  const pointing: Pointing | null =
+    onPoint === undefined
+      ? null
+      : {
+          latched: latched === null ? null : latched.key,
+          hover: (line): void => {
+            say(line.objects);
+          },
+          leave: (): void => {
+            say(latched === null ? null : latched.objects);
+          },
+          press: (line): void => {
+            if (latched !== null && latched.key === line.key) {
+              drop();
+              return;
+            }
+            setLatched({ key: line.key, objects: line.objects });
+            say(line.objects);
+          },
+        };
 
   // The shut strip's two facts, on every render, without narrating the stream:
   // `group.ts` carries what the tree cost when it was built here unconditionally.
@@ -234,7 +408,8 @@ export function GameLog(props: GameLogProps): ReactElement {
       'aria-controls': panelId,
       'aria-label': `${GAME_LOG_LABEL}, ${shown === 1 ? '1 entry' : `${String(shown)} entries`}`,
       onClick: (): void => {
-        setOpen(!open);
+        drop();
+        toggle();
       },
     },
     createElement('span', { className: 'mtg-zone__label' }, GAME_LOG_LABEL),
@@ -264,7 +439,11 @@ export function GameLog(props: GameLogProps): ReactElement {
             'aria-label': GAME_LOG_LABEL,
             tabIndex: 0,
           },
-          createElement('ol', { className: 'mtg-log__turns' }, ...turns.map(turnNode)),
+          createElement(
+            'ol',
+            { className: 'mtg-log__turns' },
+            ...turns.map((turn) => turnNode(turn, pointing)),
+          ),
         )
       : null,
     open
@@ -286,6 +465,7 @@ export function GameLog(props: GameLogProps): ReactElement {
                   // roving focus for a control that is three items wide.
                   'aria-pressed': density === level,
                   onClick: (): void => {
+                    drop();
                     setDensity(level);
                   },
                 },

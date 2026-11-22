@@ -13,6 +13,13 @@
  * twice in a turn is worth nothing at all, and the cases below pin both halves
  * of that: a second equip onto the same creature adds no host, and a permanent
  * that arrives a second time starts its host set empty.
+ *
+ * The outlet cross-cut (`mtg-vm54`) is the other thing that can go quietly
+ * wrong, and in the opposite direction: it is a *subset* of an arm rather than
+ * a fourth arm, so the assertions below are as much about `arms` not moving as
+ * about `outlets` counting. If a change ever makes an outlet leave the paid arm,
+ * `activationUseCount` starts being fitted over a population the scorer does not
+ * price that way.
  */
 import { describe, expect, it } from 'vitest';
 import type { AbilityInput, Card, CardInput } from '@mtg/dsl';
@@ -21,12 +28,15 @@ import type { DeckList, GameEvent, GameObject, GameState } from '@mtg/kernel';
 import { NO_COUNTERS, scenario } from '@mtg/kernel';
 import {
   activationArm,
+  activationRow,
   censusGameActivations,
   createBot,
   emptyActivationCensus,
   greedySpec,
   hostsPerInstance,
+  isSacrificeOutlet,
   mergeActivationCensus,
+  outletFactor,
   playSimGame,
   sumActivationCensus,
   tapFactor,
@@ -44,6 +54,30 @@ const TAP_PING: AbilityInput = {
   kind: 'activated',
   cost: { mana: { generic: 1 }, tapSelf: true, sacrificeSelf: false },
   effects: [{ kind: 'dealDamage', amount: 1, target: { kind: 'targetCreature' } }],
+};
+
+/** A paid ability that eats another permanent: `sacrificeOther`'s own shape. */
+const EAT_KEY: AbilityInput = {
+  kind: 'activated',
+  cost: {
+    mana: { generic: 1 },
+    tapSelf: false,
+    sacrificeSelf: false,
+    sacrificeOther: { count: 1, subtype: 'Clue' },
+  },
+  effects: [{ kind: 'drawCards', count: 1, target: { kind: 'noTarget' } }],
+};
+
+/** The other outlet spelling: a filter over the battlefield, source included. */
+const EAT_CREATURE: AbilityInput = {
+  kind: 'activated',
+  cost: {
+    mana: { generic: 1 },
+    tapSelf: true,
+    sacrificeSelf: false,
+    sacrificeMatching: { count: 1, filter: { cardTypes: ['creature'] } },
+  },
+  effects: [{ kind: 'gainLife', amount: 2, target: { kind: 'noTarget' } }],
 };
 
 const EQUIP: AbilityInput = {
@@ -70,6 +104,10 @@ function bearer(name: string, collectorNumber: number, abilities: readonly Abili
 }
 
 const PINGER = bearer('Lantern Sentry', 910, [PING]);
+const OUTLET = bearer('Clue Cracker', 915, [EAT_KEY]);
+const TAP_OUTLET = bearer('Blood Sentry', 916, [EAT_CREATURE]);
+/** One card printing both sides of the paid arm's cross-cut. */
+const MIXED = bearer('Warden Sentry', 917, [PING, EAT_KEY]);
 const TAPPER = bearer('Tolling Sentry', 911, [TAP_PING]);
 const BOTH = bearer('Twin Sentry', 912, [PING, TAP_PING]);
 
@@ -245,6 +283,92 @@ describe('the activation census', () => {
   it('sums to the empty census over no games', () => {
     expect(sumActivationCensus([])).toEqual(emptyActivationCensus());
     expect(emptyActivationCensus().games).toBe(0);
+  });
+});
+
+describe('the outlet cross-cut', () => {
+  it('reads both spellings of eating a permanent and nothing else', () => {
+    expect(isSacrificeOutlet(OUTLET.abilities[0]!)).toBe(true);
+    expect(isSacrificeOutlet(TAP_OUTLET.abilities[0]!)).toBe(true);
+    // Bounding the ability at one use is not a supply question, so neither
+    // `sacrificeSelf` nor a triggered ability is an outlet.
+    expect(isSacrificeOutlet(PINGER.abilities[0]!)).toBe(false);
+    expect(isSacrificeOutlet(WEAPON.abilities[0]!)).toBe(false);
+  });
+
+  it('leaves the arm it counts unmoved, because an outlet is a subset and not a fourth arm', () => {
+    const census = censusGameActivations(
+      [entered('o1'), activated('o1', 0), activated('o1', 1)],
+      stateWith([['o1', MIXED]]),
+    );
+    expect(census.arms.paid).toEqual({ instances: 2, activations: 2, hosts: 0, games: 1 });
+    expect(census.outlets.paid).toEqual({ instances: 1, activations: 1, hosts: 0, games: 1 });
+    // Every outlet count is also an arm count, so the complement is the difference.
+    expect(activationRow(census, 'paid', 'other')).toEqual({
+      instances: 1,
+      activations: 1,
+      hosts: 0,
+      games: 1,
+    });
+  });
+
+  it('follows the ability into whichever arm prices it, rather than into one of its own', () => {
+    const census = censusGameActivations(
+      [entered('o1'), entered('o2'), activated('o2', 0)],
+      stateWith([
+        ['o1', OUTLET],
+        ['o2', TAP_OUTLET],
+      ]),
+    );
+    expect(census.outlets.paid.instances).toBe(1);
+    expect(census.outlets.tapped).toEqual({ instances: 1, activations: 1, hosts: 0, games: 1 });
+    expect(census.outlets.equip.instances).toBe(0);
+  });
+
+  it('measures the two sides separately, which is the number mtg-vm54 asked for', () => {
+    const census = censusGameActivations(
+      [entered('o1'), activated('o1', 0), activated('o1', 0), activated('o1', 1)],
+      stateWith([['o1', MIXED]]),
+    );
+    expect(usesPerInstance(census, 'paid')).toBe(1.5);
+    expect(usesPerInstance(census, 'paid', 'other')).toBe(2);
+    expect(usesPerInstance(census, 'paid', 'outlet')).toBe(1);
+    expect(outletFactor(census, 'paid')).toBe(0.5);
+  });
+
+  it('leaves a set printing no outlet unmeasured rather than at zero', () => {
+    const census = censusGameActivations([entered('o1'), activated('o1', 0)], stateWith([['o1', PINGER]]));
+    expect(census.outlets.paid.instances).toBe(0);
+    expect(usesPerInstance(census, 'paid', 'outlet')).toBeNull();
+    expect(outletFactor(census, 'paid')).toBeNull();
+    // The complement is the whole arm when nothing was subtracted from it.
+    expect(usesPerInstance(census, 'paid', 'other')).toBe(1);
+  });
+
+  it('adds the subset alongside the arm when censuses merge', () => {
+    const first = censusGameActivations([entered('o1'), activated('o1', 0)], stateWith([['o1', OUTLET]]));
+    const second = censusGameActivations([entered('o2')], stateWith([['o2', OUTLET]]));
+    const merged = mergeActivationCensus(first, second);
+    expect(merged.outlets.paid).toEqual({ instances: 2, activations: 1, hosts: 0, games: 2 });
+    expect(merged.arms.paid).toEqual(merged.outlets.paid);
+    expect(usesPerInstance(merged, 'paid', 'outlet')).toBe(0.5);
+  });
+
+  it('sums to an empty subset over no games', () => {
+    expect(sumActivationCensus([]).outlets.paid).toEqual({
+      instances: 0,
+      activations: 0,
+      hosts: 0,
+      games: 0,
+    });
+  });
+
+  it('does not subtract games for the complement, because a game can hold both', () => {
+    const census = censusGameActivations([entered('o1')], stateWith([['o1', MIXED]]));
+    expect(census.arms.paid.games).toBe(1);
+    expect(census.outlets.paid.games).toBe(1);
+    // 1 - 1 = 0 would say this game held no plain paid ability, and it held one.
+    expect(activationRow(census, 'paid', 'other').games).toBe(1);
   });
 });
 

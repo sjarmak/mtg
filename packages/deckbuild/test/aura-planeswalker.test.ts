@@ -332,6 +332,28 @@ describe('a planeswalker is priced at one ability per turn', () => {
     expect(componentOf(walker(9, [lifeAbility(-2, 2)]), 'abilities')).toBeCloseTo(3 * gainLifeValue(2), 10);
   });
 
+  it('prices variable loyalty from the same named X assumption its effect uses', () => {
+    const ability = {
+      kind: 'activated',
+      loyaltyCost: { kind: 'removeChosenX' },
+      cost: { mana: {} },
+      effects: [
+        {
+          kind: 'dealDamage',
+          amount: { kind: 'chosenX' },
+          target: { kind: 'targetCreature' },
+        },
+      ],
+    };
+    const assumedX = WEIGHTS.computedAmountAssumption;
+    const uses = Math.min(WEIGHTS.planeswalkerActivations, Math.floor(6 / Math.max(1, assumedX)));
+    const damage = WEIGHTS.effectValue.dealDamage;
+    expect(componentOf(walker(6, [ability]), 'abilities')).toBeCloseTo(
+      uses * (damage.base + damage.perUnit * assumedX),
+      10,
+    );
+  });
+
   it('prices an ultimate the walker cannot reach at nothing, and says so', () => {
     // The conservative direction and a stated consequence rather than a hidden
     // one: a -9 on a walker that starts at 4 is worth zero to this evaluator,

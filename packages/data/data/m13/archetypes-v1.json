@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "m13",
+  "archetypes": [
+    {
+      "id": "white-blue-flyers",
+      "name": "White-Blue Flyers",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Arctic Aven",
+        "physicalId": "m13-printed-v1:0042:06f6aab1-c400-4d87-b68e-f36552e7417f"
+      },
+      "plan": "Hold the ground while evasive creatures establish an airborne clock."
+    },
+    {
+      "id": "white-black-exalted",
+      "name": "White-Black Exalted",
+      "colors": ["W", "B"],
+      "signpost": {
+        "name": "Knight of Glory",
+        "physicalId": "m13-printed-v1:0021:1646cb67-e0ac-4f2d-af21-618ff3613d69"
+      },
+      "plan": "Build a board of exalted creatures and send one protected attacker through each combat."
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Vampire Nighthawk",
+        "physicalId": "m13-printed-v1:0112:9ba96d96-8d9e-47c8-ab39-17479564aadf"
+      },
+      "plan": "Use removal and high-value defensive creatures to stabilize before winning in the air."
+    },
+    {
+      "id": "red-green-aggro",
+      "name": "Red-Green Aggro",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Flinthoof Boar",
+        "physicalId": "m13-printed-v1:0171:7e380b99-0173-4083-a4a2-222ad98b904a"
+      },
+      "plan": "Curve efficient attackers into burn and larger creatures before slower decks can stabilize."
+    },
+    {
+      "id": "red-white-tokens",
+      "name": "Red-White Tokens",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Attended Knight",
+        "physicalId": "m13-printed-v1:0005:c0f5cb3f-c27d-4b35-930f-00d806393796"
+      },
+      "plan": "Create multiple bodies per card and turn the wide board into sustained combat pressure."
+    }
+  ]
+}

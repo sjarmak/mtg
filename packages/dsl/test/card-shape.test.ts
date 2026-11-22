@@ -72,13 +72,59 @@ const EQUIPMENT: Card = parseCard({
   ],
 });
 
+const SIEGE: Card = parseCard({
+  kind: 'battle',
+  id: 'shp-siege',
+  name: 'Invasion of Shapes',
+  rarity: 'rare',
+  set: { code: 'SHP', collectorNumber: 5 },
+  manaCost: { generic: 3, R: 1 },
+  colors: ['R'],
+  subtypes: ['Siege'],
+  defense: 4,
+  backFace: {
+    kind: 'creature',
+    name: 'Shape Victor',
+    colors: ['R'],
+    subtypes: ['Warrior'],
+    power: 4,
+    toughness: 4,
+  },
+});
+
+const WALKER_SIEGE: Card = parseCard({
+  kind: 'battle',
+  id: 'shp-walker-siege',
+  name: 'Invasion of Loyalty',
+  rarity: 'mythic',
+  set: { code: 'SHP', collectorNumber: 8 },
+  manaCost: { generic: 4, W: 1 },
+  colors: ['W'],
+  subtypes: ['Siege'],
+  defense: 5,
+  backFace: {
+    kind: 'planeswalker',
+    name: 'Victor of Shapes',
+    colors: ['W'],
+    startingLoyalty: 4,
+    abilities: [
+      {
+        kind: 'activated',
+        loyaltyCost: 1,
+        cost: { mana: {} },
+        effects: [{ kind: 'gainLife', amount: 2, target: { kind: 'noTarget' } }],
+      },
+    ],
+  },
+});
+
 /** A modal spell: its own `effects` is empty and every effect sits under a mode. */
 const MODAL: Card = parseCard({
   kind: 'instant',
   id: 'shp-modal',
   name: 'Two Shapes',
   rarity: 'uncommon',
-  set: { code: 'SHP', collectorNumber: 5 },
+  set: { code: 'SHP', collectorNumber: 6 },
   manaCost: { generic: 1, U: 1 },
   colors: ['U'],
   modes: [
@@ -101,6 +147,17 @@ describe('card shapes', () => {
     expect(cardShapes(WALKER)).toStrictEqual(['planeswalker', 'activatedAbility', 'loyaltyAbility']);
     expect(cardShapes(AURA)).toStrictEqual(['aura']);
     expect(cardShapes(EQUIPMENT)).toStrictEqual(['artifact', 'equipment', 'activatedAbility']);
+    expect(cardShapes(SIEGE)).toStrictEqual(['creature', 'battle', 'doubleFaced']);
+  });
+
+  it('credits a transforming back face with its own render and kernel shapes', () => {
+    expect(cardShapes(WALKER_SIEGE)).toStrictEqual([
+      'planeswalker',
+      'battle',
+      'doubleFaced',
+      'activatedAbility',
+      'loyaltyAbility',
+    ]);
   });
 
   /**
@@ -119,7 +176,7 @@ describe('card shapes', () => {
       id: 'shp-blanket',
       name: 'Shape Everywhere',
       rarity: 'rare',
-      set: { code: 'SHP', collectorNumber: 6 },
+      set: { code: 'SHP', collectorNumber: 7 },
       manaCost: { generic: 2, R: 1 },
       colors: ['R'],
       abilities: [

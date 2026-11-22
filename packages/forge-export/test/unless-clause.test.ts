@@ -5,10 +5,10 @@
  * `UnlessCost$`/`UnlessPayer$` are ability-line parameters Forge applies ahead
  * of the effect API, verified against `res/cardsfolder` in Forge 2.0.14: 718
  * lines carry `UnlessCost$`, 27 name `UnlessPayer$ TargetedController` and 20
- * name `UnlessPayer$ Targeted`. That is why this file asserts a script and
- * `modal-spell.test.ts` asserts a rejection — the difference between the two
- * shapes is whether Forge already has the grammar, not how hard the DSL side
- * was.
+ * name `UnlessPayer$ Targeted`. Modal spells use Forge's separate, source-
+ * attested `Charm` grammar in `modal-spell.test.ts`; the DSL validator keeps a
+ * spell-wide unless clause out of that mode list because the chosen mode owns
+ * its target and payer.
  *
  * The `SpellDescription$` matters as much as the parameters. Forge prints it
  * verbatim in the card detail pane, and a description that omits the toll would

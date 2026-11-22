@@ -195,6 +195,27 @@ describe('what a mana ability may not be', () => {
     expect(codesOf(card)).toContain('MANA_ABILITY_INVALID');
   });
 
+  it('refuses every other chosen or stateful cost the frozen activation payload cannot carry', () => {
+    const costs = [
+      { mana: {}, tapSelf: true, discard: 1 },
+      {
+        mana: {},
+        tapSelf: true,
+        removeCounter: { counter: 'plusOnePlusOne', count: 1 },
+      },
+    ];
+    for (const cost of costs) {
+      const card = mystic([
+        {
+          kind: 'activated',
+          cost,
+          effects: [{ kind: 'addMana', produces: ['G'], amount: 1 }],
+        },
+      ]);
+      expect(codesOf(card), JSON.stringify(cost)).toContain('MANA_ABILITY_INVALID');
+    }
+  });
+
   it('refuses a second mana ability on the same card', () => {
     expect(codesOf(mystic([tapFor(['G']), tapFor(['W'])]))).toContain('MANA_ABILITY_INVALID');
   });

@@ -14,8 +14,8 @@
  * second thing that can disagree with the builder whose decks the balance sim
  * actually measures.
  */
-import type { AbilityKind, Color, EffectKind, Keyword } from '@mtg/dsl';
-import { COLORS } from '@mtg/dsl';
+import type { Color, EffectKind, Keyword, ModelAbilityKind } from '@mtg/dsl';
+import { COLORS, isPricedEffectKind } from '@mtg/dsl';
 import type { ColorPair } from '@mtg/deckbuild';
 import { COLOR_PAIRS, colorPairKey } from '@mtg/deckbuild';
 import type { PieLevel } from '@mtg/design-data';
@@ -67,7 +67,7 @@ export interface ArchetypePlan {
    * Empty when the pair's payoff is a keyword, when the mechanics that carry it
    * name no ability kind, and when the brief names no payoff at all.
    */
-  readonly payoffAbilityKinds: readonly AbilityKind[];
+  readonly payoffAbilityKinds: readonly ModelAbilityKind[];
   /** One line for prompts and reports. */
   readonly identity: string;
 }
@@ -137,7 +137,7 @@ export function planArchetypes(brief: SetBrief): readonly ArchetypePlan[] {
     const key = colorPairKey(pair);
     const mechanics = brief.mechanics.filter((mechanic) => appliesToPair(mechanic.colors, pair));
     const payoffEffects = onPieSubjects(
-      mechanics.flatMap((mechanic) => mechanic.effectKinds),
+      mechanics.flatMap((mechanic) => mechanic.effectKinds.filter(isPricedEffectKind)),
       pair,
     );
     const base = {

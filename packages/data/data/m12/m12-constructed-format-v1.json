@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "m12",
+  "name": "Magic 2012",
+  "sources": [
+    {
+      "code": "M12",
+      "catalogFormat": "m12-printed-v1",
+      "catalogSha256": "6f6a635a7d9795fd2dda5c6964f5cd3e13b0c549a8b2fd13cc88a0cf87dbcf95",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/M12.json",
+        "sha256": "2121b3903df81cf257c42e6ba7983b891b36c8f6d6f7df083acc68a6ca855929",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "white-blue-flyers",
+      "name": "White-Blue Flyers",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m12-printed-v1:0020:3f1a5517-e442-4fbc-b8c3-fea28e5e44d2",
+          "name": "Griffin Rider",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0008:1a791d03-bcbd-437a-8222-3de97d26f0d0",
+          "name": "Assault Griffin",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0072:98e7bf8f-dba7-4005-8cee-634c9153931d",
+          "name": "Phantasmal Image",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0031:c8d8d723-743c-45d6-b11b-7213f4872cf1",
+          "name": "Pride Guardian",
+          "count": 3
+        },
+        {
+          "physicalId": "m12-printed-v1:0044:57626fd2-d101-4e23-946f-8309c9676fe5",
+          "name": "Aven Fleetwing",
+          "count": 2
+        },
+        {
+          "physicalId": "m12-printed-v1:0033:3c31fb9d-ec0d-4555-814d-62642d52c710",
+          "name": "Serra Angel",
+          "count": 3
+        },
+        {
+          "physicalId": "m12-printed-v1:0023:650a6831-c352-4ca7-9f8f-43ea99a1cf33",
+          "name": "Honor of the Pure",
+          "count": 2
+        },
+        {
+          "physicalId": "m12-printed-v1:0028:783ccfbb-4063-4614-8135-11787227ce97",
+          "name": "Pacifism",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0063:6b123efa-8631-4a07-970d-ff4f980a0522",
+          "name": "Mana Leak",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0027:9efc5a2a-eb76-410d-98e6-1455108faa52",
+          "name": "Oblivion Ring",
+          "count": 2
+        },
+        {
+          "physicalId": "m12-printed-v1:0227:8b3601d4-4091-465e-8c18-0cd717258211",
+          "name": "Glacial Fortress",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0230:f768de9b-3d31-468d-876d-2cb7c5c601a3",
+          "name": "Plains",
+          "count": 13
+        },
+        {
+          "physicalId": "m12-printed-v1:0234:b29cf026-521f-4345-a885-da27f7981759",
+          "name": "Island",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "id": "black-red-bloodthirst",
+      "name": "Black-Red Bloodthirst",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m12-printed-v1:0139:3c11db78-f506-4af2-a7be-c7ac2c0ffcf3",
+          "name": "Goblin Fireslinger",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0114:d2699c42-99bb-4b5a-82ec-9c6424c14ec1",
+          "name": "Tormented Soul",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0097:4560ee1a-1076-4ec5-a177-55ffe12e2165",
+          "name": "Duskhunter Bat",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0156:fc9a50af-ca3e-461a-9dcb-444f56284165",
+          "name": "Stormblood Berserker",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0144:1087e015-a3c4-4207-8285-5bda6bb50e52",
+          "name": "Gorehorn Minotaurs",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0082:125c5cff-d4e9-4655-9cc5-3ce21e577569",
+          "name": "Bloodlord of Vaasgoth",
+          "count": 2
+        },
+        {
+          "physicalId": "m12-printed-v1:0154:b8fed52c-e84e-41c9-b683-d8b26fa03c5f",
+          "name": "Shock",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0146:1af92296-455a-425e-9397-a96d09937767",
+          "name": "Incinerate",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0095:077d5ca8-2a94-4d79-9314-c5ca2aa4d14b",
+          "name": "Doom Blade",
+          "count": 2
+        },
+        {
+          "physicalId": "m12-printed-v1:0225:f99375bc-7465-4f20-897c-1bc61f65de61",
+          "name": "Dragonskull Summit",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0238:c29134a2-548b-4c80-8017-7e50a44c3585",
+          "name": "Swamp",
+          "count": 12
+        },
+        {
+          "physicalId": "m12-printed-v1:0242:65d51676-2399-4db9-8c31-c8063be7b94a",
+          "name": "Mountain",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "id": "red-green-bloodthirst",
+      "name": "Red-Green Bloodthirst",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m12-printed-v1:0139:3c11db78-f506-4af2-a7be-c7ac2c0ffcf3",
+          "name": "Goblin Fireslinger",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0136:c24751fd-5e9b-4d7d-83ba-e306b439bbe1",
+          "name": "Goblin Arsonist",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0154:b8fed52c-e84e-41c9-b683-d8b26fa03c5f",
+          "name": "Shock",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0146:1af92296-455a-425e-9397-a96d09937767",
+          "name": "Incinerate",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0156:fc9a50af-ca3e-461a-9dcb-444f56284165",
+          "name": "Stormblood Berserker",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0122:b85ecba6-fc22-48c7-9f00-066cc1fce6b5",
+          "name": "Blood Ogre",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0144:1087e015-a3c4-4207-8285-5bda6bb50e52",
+          "name": "Gorehorn Minotaurs",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0126:e8371c83-d7c5-4432-8511-cb3c1dc7d59f",
+          "name": "Chandra's Phoenix",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0242:65d51676-2399-4db9-8c31-c8063be7b94a",
+          "name": "Mountain",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "id": "green-white-creatures",
+      "name": "Green-White Creatures",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "m12-printed-v1:0162:23321b80-d7e7-48fd-985d-1e9dc3adcd35",
+          "name": "Arachnus Spinner",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0182:01c6f877-6b00-4d57-8a88-36cd3b16edbc",
+          "name": "Llanowar Elves",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0175:b8d8806c-43c5-4c6c-9420-6210a17ec2b0",
+          "name": "Garruk's Companion",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0169:e156b8d8-5309-494e-9709-44f98826a69f",
+          "name": "Cudgel Troll",
+          "count": 3
+        },
+        {
+          "physicalId": "m12-printed-v1:0171:b8b4ebbf-1613-42a0-97ff-2f36dc8d984a",
+          "name": "Dungrove Elder",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0161:ae8e5876-3eff-4075-9fa2-3ab6030848e9",
+          "name": "Acidic Slime",
+          "count": 2
+        },
+        {
+          "physicalId": "m12-printed-v1:0197:3b781626-f4ce-4d00-aa7c-0e07f58f688f",
+          "name": "Stingerfling Spider",
+          "count": 2
+        },
+        {
+          "physicalId": "m12-printed-v1:0163:9e4900b0-f934-42d9-92fb-0bb16d2e8bb1",
+          "name": "Arachnus Web",
+          "count": 3
+        },
+        {
+          "physicalId": "m12-printed-v1:0186:ae0559d4-0015-44e4-8ec4-08bb1c54eec5",
+          "name": "Overrun",
+          "count": 2
+        },
+        {
+          "physicalId": "m12-printed-v1:0198:db3c8982-e1c2-48be-8094-683d00c2e52b",
+          "name": "Titanic Growth",
+          "count": 4
+        },
+        {
+          "physicalId": "m12-printed-v1:0246:f6302ae7-0947-4a8d-ace4-5e6741aea9ba",
+          "name": "Forest",
+          "count": 28
+        }
+      ]
+    }
+  ],
+  "contentSha256": "3f7ffa74d611d9aa7bfe27b812bc10642e471f480cf2d15a1b2643c0ed7ebfca"
+}

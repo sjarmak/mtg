@@ -72,7 +72,7 @@ function isHidden(zone: ZoneId): boolean {
  *
  * A seat rather than a boolean because the answer is relative: the same
  * `cardDrawn` is a card its own player may read and a card the other player may
- * not, and with two people at one screen the viewer changes every decision.
+ * not, and on a two-human table the viewer changes every decision.
  *
  * Counts are never private. `libraryShuffled` reports a library size, a hand
  * size is on the opposing status line already, and hiding a number both players
@@ -107,12 +107,16 @@ export function privateTo(event: GameEvent): PlayerId | null {
     case 'manaPaid':
     case 'spellCast':
     case 'spellCopied':
+    case 'spellTargetsChanged':
     case 'abilityActivated':
     case 'abilityTriggered':
+    case 'delayedZoneChangeScheduled':
+    case 'delayedCounterPlacementScheduled':
     case 'triggerTargetsChosen':
     case 'triggerDeclined':
     case 'triggerRemoved':
     case 'spellCountered':
+    case 'abilityCountered':
     case 'spellFizzled':
     case 'spellDeclined':
     case 'unlessPaid':
@@ -124,9 +128,17 @@ export function privateTo(event: GameEvent): PlayerId | null {
     case 'damagePrevented':
     case 'replacementApplied':
     case 'countersChanged':
+    case 'battleDefeated':
+    case 'freeCastDeclined':
+    case 'counterRemoved':
     case 'lifeChanged':
     case 'continuousEffectAdded':
+    case 'emblemCreated':
+    case 'permanentAnimated':
+    case 'controlEffectAdded':
+    case 'subtypeAdded':
     case 'keywordGranted':
+    case 'keywordAbilityRemoved':
     case 'continuousEffectsExpired':
     case 'permanentDestroyed':
     case 'permanentSacrificed':
@@ -134,9 +146,11 @@ export function privateTo(event: GameEvent): PlayerId | null {
     case 'attackersDeclared':
     case 'blockersDeclared':
     case 'blockerOrderChosen':
+    case 'attackerOrderChosen':
     case 'combatDamageStep':
     case 'cardsMilled':
     case 'cardsScried':
+    case 'coinFlipped':
     case 'cardsDiscarded':
     case 'handRevealed':
     case 'handMulliganed':
@@ -144,8 +158,10 @@ export function privateTo(event: GameEvent): PlayerId | null {
     case 'playerLost':
     case 'gameEnded':
     case 'libraryTopRevealed':
+    case 'libraryCardsRevealed':
     case 'librarySearched':
     case 'librarySearchRevealed':
+    case 'delayedSpellCopyScheduled':
       // The last three are the library block's public half. A reveal shows its
       // cards to every player (CR 701.16a), which makes it the one effect that
       // tells a seat something about its own deck, and a search event carries a

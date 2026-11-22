@@ -125,10 +125,9 @@
  * of a commitment scheme reaches it.
  *
  * A position where the arrivals and the library count disagree, which is the
- * suite abstaining rather than guessing: a card can arrive from exile, which the
- * projection does not carry at all, and a library can shrink into exile with
- * nothing to show for it. Both are legitimate, so a position that does not add
- * up is skipped.
+ * suite abstaining rather than guessing: a token can be created while a library
+ * shrinks, or a card can return from a public zone in the same transition. Both
+ * are legitimate, so a position that does not add up is skipped.
  *
  * A backend that lies about where the cards are, consistently. Put seat 0's
  * undrawn cards into seat 0's graveyard in *both* views and nothing here objects:
@@ -240,7 +239,7 @@ import type { ObjectView, TableView } from './projection';
 import type { PendingDecision } from './decision';
 import type { SeatProjection } from './seats';
 import type { SeatId } from './table';
-import { SEAT_IDS } from './table';
+import { seatIdsOf } from './table';
 
 export interface SeatAudit {
   /**
@@ -273,36 +272,41 @@ export interface SeatAudit {
  */
 export interface PositionMemo {
   /**
-   * What each seat could identify here, by object id, in seat order.
+   * What each seat could identify here, by object id, indexed by seat id.
    *
-   * Per seat and not the union of the two, which is a correction rather than a
-   * refinement: the union hands a leaking backend a way to switch the arrival
-   * test off with the leak itself. Write seat 0's undrawn cards into seat *1*'s
-   * view of seat 0's graveyard and those ids are in the union, so the card seat
-   * 0 draws next is not an arrival, the count comes up one short of what the
-   * library lost, and the position is skipped as ambiguous. A public zone used
-   * as a hiding place, escaping through the guard that was supposed to make the
-   * check honest.
+   * Per seat and not the union of all seats, which is a correction rather than
+   * a refinement: the union hands a leaking backend a way to switch the arrival
+   * test off with the leak itself. Write seat 0's undrawn cards into another
+   * seat's view of seat 0's graveyard and those ids are in the union, so the
+   * card seat 0 draws next is not an arrival, the count comes up one short of
+   * what the library lost, and the position is skipped as ambiguous. A public
+   * zone used as a hiding place, escaping through the guard that was supposed
+   * to make the check honest.
    *
    * Scoped to the owner it cannot: the question is whether the object was
-   * somewhere its own seat could already see it, and the other seat's view is
+   * somewhere its own seat could already see it, and another seat's view is
    * not evidence about that.
    */
-  readonly identified: readonly [ReadonlySet<string>, ReadonlySet<string>];
-  /** Each seat's library count, in seat order. */
-  readonly librarySize: readonly [number, number];
-  /** Each seat's whole payload as one string, in seat order. */
-  readonly wire: readonly [string, string];
+  readonly identified: readonly ReadonlySet<string>[];
+  /** Each seat's library count, indexed by seat id. */
+  readonly librarySize: readonly number[];
+  /** Each seat's whole payload as one string, indexed by seat id. */
+  readonly wire: readonly string[];
   /**
-   * Per seat, the ids from that seat's own hand its opponent has been licensed
-   * to identify by an `EngineEvent.reveals` delta, and that have stayed in the
-   * hand ever since — see "A reveal licenses specific objects, not a hand or a
-   * game" above for why the scoping is this narrow. Carried forward and re-intersected with the
-   * hand's actual contents every position, which is what ends the license the
-   * moment an object leaves: nothing here remembers that an id was ever
-   * licensed once it is no longer in that seat's concealed hand.
+   * Per seat, the ids of any object — in any other seat's hand — this seat has
+   * been licensed to identify by an `EngineEvent.reveals` delta, and that have
+   * stayed in a hand ever since — see "A reveal licenses specific objects, not
+   * a hand or a game" above for why the scoping is this narrow.
+   *
+   * Indexed by *viewer*, not by the hand's owner: a license is a fact about who
+   * may identify an object, and one object can only ever be concealed from a
+   * given viewer by one hand at a time, so a viewer's licensed ids need no
+   * further split by owner. Carried forward and re-intersected with every
+   * other seat's actual hand contents at each position, which is what ends the
+   * license the moment an object leaves a hand: nothing here remembers that an
+   * id was ever licensed once it is no longer in the hand that concealed it.
    */
-  readonly revealed: readonly [ReadonlySet<string>, ReadonlySet<string>];
+  readonly revealed: readonly ReadonlySet<string>[];
 }
 
 /** `PositionMemo.revealed`'s value before any delta has licensed anything. */
@@ -322,18 +326,29 @@ export function auditSeatPayloads(
   const add = (detail: string): void => {
     findings.push({ check: 'hidden-information', detail });
   };
-  const views: readonly [TableView, TableView] = [seats.view(0), seats.view(1)];
-  const wire: [string, string] = ['', ''];
-  const revealed: [Set<string>, Set<string>] = [new Set(), new Set()];
+  const seatIds = seatIdsOf(table.seats.length);
+  const views = seatIds.map((seat) => seats.view(seat));
+  const viewOf = (seat: SeatId): TableView => {
+    const view = views[seat];
+    // Unreachable: `views` is built from `seatIds`, so every seat named in
+    // `seatIds` has an entry at its own index.
+    if (view === undefined) throw new Error(`auditSeatPayloads: no view for seat ${String(seat)}`);
+    return view;
+  };
+  const wire: string[] = seatIds.map(() => '');
+  const revealed: Set<string>[] = seatIds.map(() => new Set());
   let searched = 0;
 
-  checkPublicAgreement(table, views, at, add);
+  checkPublicAgreement(table, views, seatIds, at, add);
   const named = nameCounts(views);
 
-  for (const viewer of SEAT_IDS) {
-    const other: SeatId = viewer === 0 ? 1 : 0;
-    const mine = views[viewer];
+  for (const viewer of seatIds) {
+    const mine = viewOf(viewer);
     const own = mine.seats[viewer];
+    if (own === undefined) {
+      add(`${at}: seat ${String(viewer)} was sent no view of its own seat`);
+      continue;
+    }
     if (own.hand === null) {
       add(`${at}: seat ${String(viewer)} was not sent its own hand, so it cannot play`);
     } else if (own.hand.length !== own.handSize) {
@@ -341,8 +356,10 @@ export function auditSeatPayloads(
         `${at}: seat ${String(viewer)} was sent ${String(own.hand.length)} of its own ${String(own.handSize)} cards`,
       );
     }
-    if (mine.seats[other].hand !== null) {
-      add(`${at}: seat ${String(viewer)} was sent seat ${String(other)}'s hand`);
+    for (const other of seatIds) {
+      if (other !== viewer && mine.seats[other]?.hand !== null && mine.seats[other]?.hand !== undefined) {
+        add(`${at}: seat ${String(viewer)} was sent seat ${String(other)}'s hand`);
+      }
     }
 
     const question = seats.decision(viewer);
@@ -356,48 +373,57 @@ export function auditSeatPayloads(
       add(`${at}: seat ${String(viewer)} was sent an enumeration it does not owe`);
     }
 
-    const concealed = views[other].seats[other].hand ?? [];
-    if (concealed.length > 0) searched += 1;
     const events = seats.events(viewer);
     const payload = JSON.stringify({ view: mine, events, decision: question });
     wire[viewer] = payload;
     if (seed !== null && seed.length > 0 && payload.includes(seed)) {
       add(`${at}: seat ${String(viewer)}'s payload carries the seed the match was dealt from`);
     }
-    // What of `other`'s hand `viewer` has already been shown, narrowed to what
-    // is still actually in it — see "A reveal licenses specific objects, not a
-    // hand or a game" at the top of the file. Recomputed every position rather
-    // than only extended, so an object that left the hand since the last check
-    // drops out here and stays out even if the same id later returns.
-    const licensedBefore = previous?.revealed[other] ?? EMPTY_OIDS;
+    // What `viewer` has already been shown of any other seat's hand, narrowed
+    // to what is still actually concealed there — see "A reveal licenses
+    // specific objects, not a hand or a game" at the top of the file.
+    // Recomputed every position rather than only extended, so an object that
+    // left the hand since the last check drops out here and stays out even if
+    // the same id later returns.
+    const licensedBefore = previous?.revealed[viewer] ?? EMPTY_OIDS;
     const revealedNow = revealedTo(events, viewer);
-    const license = new Set<string>();
-    for (const card of concealed) {
-      if (licensedBefore.has(card.oid) || revealedNow.has(card.oid)) license.add(card.oid);
+    const license = revealed[viewer];
+    // Unreachable: `revealed` is seeded above at every index `seatIds` names,
+    // and `viewer` is drawn from `seatIds`.
+    if (license === undefined) {
+      throw new Error(`auditSeatPayloads: no license set for seat ${String(viewer)}`);
     }
-    revealed[other] = license;
-    for (const card of concealed) {
-      if (license.has(card.oid)) continue;
-      if (payload.includes(JSON.stringify(card.oid))) {
-        add(
-          `${at}: object ${card.oid} is in seat ${String(other)}'s hand and in seat ${String(viewer)}'s payload`,
-        );
+
+    for (const other of seatIds) {
+      if (other === viewer) continue;
+      const concealed = viewOf(other).seats[other]?.hand ?? [];
+      if (concealed.length > 0) searched += 1;
+      for (const card of concealed) {
+        if (licensedBefore.has(card.oid) || revealedNow.has(card.oid)) license.add(card.oid);
       }
-      if (named.get(card.name) === 1 && payload.includes(JSON.stringify(card.name))) {
-        add(
-          `${at}: "${card.name}" is in seat ${String(other)}'s hand and named in seat ${String(viewer)}'s payload`,
-        );
+      for (const card of concealed) {
+        if (license.has(card.oid)) continue;
+        if (payload.includes(JSON.stringify(card.oid))) {
+          add(
+            `${at}: object ${card.oid} is in seat ${String(other)}'s hand and in seat ${String(viewer)}'s payload`,
+          );
+        }
+        if (named.get(card.name) === 1 && payload.includes(JSON.stringify(card.name))) {
+          add(
+            `${at}: "${card.name}" is in seat ${String(other)}'s hand and named in seat ${String(viewer)}'s payload`,
+          );
+        }
       }
     }
   }
 
-  if (previous !== null) checkLibraryArrivals(views, previous, at, add);
+  if (previous !== null) checkLibraryArrivals(views, seatIds, previous, at, add);
   return {
     searched,
     findings,
     memo: {
-      identified: [identifiedIn(views[0]), identifiedIn(views[1])],
-      librarySize: [views[0].seats[0].librarySize, views[1].seats[1].librarySize],
+      identified: seatIds.map((seat) => identifiedIn(viewOf(seat))),
+      librarySize: seatIds.map((seat) => viewOf(seat).seats[seat]?.librarySize ?? 0),
       wire,
       revealed,
     },
@@ -412,9 +438,9 @@ export function auditSeatPayloads(
  * objects it now holds that *its own previous view* could not identify; they are
  * treated as having come from that seat's library only when their number is
  * exactly what the library lost. One arrival and one card gone is a draw or a
- * mill. Anything else — a token minted, a card back from exile, a library
- * shrinking into a zone the projection does not carry — makes the position
- * ambiguous, and an ambiguous position is skipped rather than reported.
+ * mill. Anything else, such as a token minted while a library shrinks, makes
+ * the position ambiguous, and an ambiguous position is skipped rather than
+ * reported.
  *
  * Owner-scoped rather than union-scoped, for the reason `PositionMemo` states,
  * and the guard survives the narrowing: a token minted at this position is in
@@ -425,23 +451,32 @@ export function auditSeatPayloads(
  * up exactly as many cards as arrived. No DSL effect moves a card that way.
  */
 function checkLibraryArrivals(
-  views: readonly [TableView, TableView],
+  views: readonly TableView[],
+  seatIds: readonly SeatId[],
   previous: PositionMemo,
   at: string,
   add: Add,
 ): void {
-  for (const seat of SEAT_IDS) {
-    const other: SeatId = seat === 0 ? 1 : 0;
-    const gone = previous.librarySize[seat] - views[seat].seats[seat].librarySize;
+  for (const seat of seatIds) {
+    const librarySize = views[seat]?.seats[seat]?.librarySize ?? 0;
+    const gone = (previous.librarySize[seat] ?? 0) - librarySize;
     if (gone <= 0) continue;
-    const seen = previous.identified[seat];
+    const seen = previous.identified[seat] ?? EMPTY_OIDS;
     const arrived = heldBy(views, seat).filter((object) => !seen.has(object.oid));
     if (arrived.length !== gone) continue;
-    for (const card of arrived) {
-      if (previous.wire[other].includes(JSON.stringify(card.oid))) {
-        add(
-          `${at}: object ${card.oid} came out of seat ${String(seat)}'s library and seat ${String(other)}'s payload named it one move earlier`,
-        );
+    // Every other seat's previous payload, not only one: with more than two
+    // seats a card can have been leaked by any of them, and each is checked
+    // independently rather than only the seat that happens to sit opposite.
+    for (const other of seatIds) {
+      if (other === seat) continue;
+      const wire = previous.wire[other];
+      if (wire === undefined) continue;
+      for (const card of arrived) {
+        if (wire.includes(JSON.stringify(card.oid))) {
+          add(
+            `${at}: object ${card.oid} came out of seat ${String(seat)}'s library and seat ${String(other)}'s payload named it one move earlier`,
+          );
+        }
       }
     }
   }
@@ -476,13 +511,21 @@ function revealedTo(events: readonly EngineEvent[], viewer: SeatId): ReadonlySet
 }
 
 /** Everything one seat holds, over the view that seat is entitled to. */
-function heldBy(views: readonly [TableView, TableView], seat: SeatId): readonly ObjectView[] {
+function heldBy(views: readonly TableView[], seat: SeatId): readonly ObjectView[] {
   const view = views[seat];
+  if (view === undefined) return [];
   const own = view.seats[seat];
+  if (own === undefined) return [];
   return [
     ...(own.hand ?? []),
     ...own.graveyard,
+    ...own.exile,
     ...own.battlefield,
+    ...(own.commandZone ?? []),
+    ...(own.avatars ?? []),
+    // A revealed top card is still in the library, but both seats have already
+    // read it, so its leaving is no arrival the other seat could have leaked.
+    ...(own.libraryTop ?? []),
     ...view.stack.filter((object) => object.controller === seat),
   ];
 }
@@ -500,6 +543,7 @@ type Add = (detail: string) => void;
  * The two seat views and the table's own describe one position.
  *
  * Everything compared here is public by CR 400.2 — the board, the graveyards,
+ * the command zone and the commander damage a seat has taken,
  * the stack, life, and the counts of the hidden zones — so all three values must
  * agree about it. A per-seat projection that quietly reports a different board is
  * the failure this catches, and it is a worse one than a leak: both players would
@@ -507,13 +551,14 @@ type Add = (detail: string) => void;
  */
 function checkPublicAgreement(
   table: TableView,
-  views: readonly [TableView, TableView],
+  views: readonly TableView[],
+  seatIds: readonly SeatId[],
   at: string,
   add: Add,
 ): void {
   const shapes = [table, ...views].map(publicShape);
   const [expected] = shapes;
-  const names = ['the table view', "seat 0's view", "seat 1's view"];
+  const names = ['the table view', ...seatIds.map((seat) => `seat ${String(seat)}'s view`)];
   shapes.forEach((shape, index) => {
     if (shape !== expected) add(`${at}: ${names[index] ?? 'a view'} disagrees about the public position`);
   });
@@ -532,17 +577,33 @@ function publicShape(view: TableView): string {
       handSize: seat.handSize,
       librarySize: seat.librarySize,
       graveyard: seat.graveyard.map(publicObject),
+      exile: seat.exile.map(publicObject),
       battlefield: seat.battlefield.map(publicObject),
+      commandZone: seat.commandZone?.map(publicObject),
+      avatars: seat.avatars?.map(publicObject),
+      commanderDamage: seat.commanderDamage,
+      commanderCasts: seat.commanderCasts,
+      poison: seat.poison,
+      playerCounters: seat.playerCounters,
     })),
   });
 }
 
 function publicObject(object: ObjectView): unknown {
-  return { oid: object.oid, name: object.name, tapped: object.tapped, damage: object.damage };
+  return {
+    oid: object.oid,
+    name: object.name,
+    tapped: object.tapped,
+    attacking: object.attacking,
+    damage: object.damage,
+    characteristics: object.characteristics,
+    keywords: object.keywords,
+    pairedWith: object.pairedWith,
+  };
 }
 
-/** How many objects carry each name, over everything either seat may identify. */
-function nameCounts(views: readonly [TableView, TableView]): ReadonlyMap<string, number> {
+/** How many objects carry each name, over everything any seat may identify. */
+function nameCounts(views: readonly TableView[]): ReadonlyMap<string, number> {
   const named = new Map<string, string>();
   for (const view of views) {
     for (const object of objectsIn(view)) named.set(object.oid, object.name);
@@ -555,6 +616,14 @@ function nameCounts(views: readonly [TableView, TableView]): ReadonlyMap<string,
 function objectsIn(view: TableView): readonly ObjectView[] {
   return [
     ...view.stack,
-    ...view.seats.flatMap((seat) => [...(seat.hand ?? []), ...seat.graveyard, ...seat.battlefield]),
+    ...view.seats.flatMap((seat) => [
+      ...(seat.hand ?? []),
+      ...seat.graveyard,
+      ...seat.exile,
+      ...seat.battlefield,
+      ...(seat.commandZone ?? []),
+      ...(seat.avatars ?? []),
+      ...(seat.libraryTop ?? []),
+    ]),
   ];
 }

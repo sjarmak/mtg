@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "ktk",
+  "name": "Khans of Tarkir",
+  "sources": [
+    {
+      "code": "KTK",
+      "catalogFormat": "ktk-printed-v1",
+      "catalogSha256": "1d3991ff0440b1e55e1f63b8069fce8ff185ca08ee3276197b5df67ed3235713",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/KTK.json",
+        "sha256": "a8aeffdafc553ca6fb662bfe2c1765627f83b7d722ed5a602bdd8f9bc9bc27ba",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "abzan-outlast",
+      "name": "Abzan Outlast",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "ktk-printed-v1:0001:8f5427b1-f1c2-4bb3-8736-701667ac2256",
+          "name": "Abzan Battle Priest",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0002:21ee4f3c-dc94-4156-b0ed-60fe6310451a",
+          "name": "Abzan Falconer",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0003:22d2a844-17fc-4628-9591-684555e98f7b",
+          "name": "Ainok Bond-Kin",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0004:ad1ce529-06ed-4e85-9988-8c8b58401ed5",
+          "name": "Alabaster Kirin",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0005:ef9c2b8a-148c-4393-b691-e333ad11c44e",
+          "name": "Brave the Sands",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0006:ce43a2df-4305-4ab1-ae45-96cca597650e",
+          "name": "Dazzling Ramparts",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0007:39ec83fa-5cb4-4633-8827-36d874a2d2e7",
+          "name": "Defiant Strike",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0008:80a53ed7-a7b7-40d8-9239-cf6f205dbc59",
+          "name": "End Hostilities",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0009:d1dd0e10-2ad7-467f-8d4b-c70b95bf2e9c",
+          "name": "Erase",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0010:b6173466-30db-4b95-a556-dd69e03b731e",
+          "name": "Feat of Resistance",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0011:edb2b284-f79c-41eb-a25f-4710d4a5228f",
+          "name": "Firehoof Cavalry",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0012:e8bf6ed4-48f3-419f-bafd-d1ee4d798482",
+          "name": "Herald of Anafenza",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0013:db5f4bab-f918-4b42-b82c-cfcf5ff0c58a",
+          "name": "High Sentinels of Arashin",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0014:9007c528-0107-40fd-a97e-e5576f297eb2",
+          "name": "Jeskai Student",
+          "count": 4
+        },
+        {
+          "physicalId": "ktk-printed-v1:0015:f30d4136-78a3-4760-83af-d365cc97d118",
+          "name": "Kill Shot",
+          "count": 4
+        }
+      ]
+    }
+  ],
+  "contentSha256": "1f80cdc50e4bd106bd4fbfc5cc1180622fbc311e15081d0a15a1eb2a525f0bc9"
+}

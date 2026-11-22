@@ -169,7 +169,7 @@ function seam(): BoardProps {
     if (permanent.card.kind !== 'creature') return permanent;
     const against = attacking[index % attacking.length];
     if (against === undefined) return permanent;
-    return { ...permanent, counters: 1, stagedBlock: against.card.name, stagedBlockKey: against.key };
+    return { ...permanent, counters: 1, stagedBlock: against.card.name, stagedBlockKeys: [against.key] };
   });
   const far = props.opponent.battlefield.permanents.map((permanent) =>
     permanent.attacking === true ? { ...permanent, counters: 1 } : permanent,

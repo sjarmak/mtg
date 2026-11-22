@@ -35,7 +35,7 @@ import {
   outsideLoad,
   timedOutAtMs,
 } from '../tools/test-load/attribution';
-import { WORKER_SHARE, testWorkerCount } from '../tools/test-load/workers';
+import { WORKER_SHARE, runSharers, testWorkerCount, testWorkerOverride } from '../tools/test-load/workers';
 
 const WORKSPACE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const CORES = 16;
@@ -254,6 +254,86 @@ describe('how much of the machine a run asks for', () => {
     expect(testWorkerCount({ cores: 1 })).toBe(1);
     expect(testWorkerCount({ cores: 2 })).toBe(1);
   });
+
+  // mtg-a3ix4. Every worker slot sized its pool against the whole machine as
+  // though it were alone, so three slots each took the half and the box carried
+  // three halves. This is the case that fails when the cap stops dividing.
+  it('divides the half-machine budget among the runs sharing it', () => {
+    const budget = Math.round(CORES * WORKER_SHARE);
+    expect(testWorkerCount({ cores: CORES, sharers: 1 })).toBe(budget);
+    expect(testWorkerCount({ cores: CORES, sharers: 2 })).toBe(4);
+    expect(testWorkerCount({ cores: CORES, sharers: 3 })).toBe(2);
+    expect(testWorkerCount({ cores: CORES, sharers: 3 })).toBeLessThan(testWorkerCount({ cores: CORES }));
+  });
+
+  it('never lets the runs it sized add up to more than the budget, until each is down to one worker', () => {
+    const budget = Math.round(CORES * WORKER_SHARE);
+    for (let sharers = 1; sharers <= 12; sharers += 1) {
+      const each = testWorkerCount({ cores: CORES, sharers });
+      expect(each).toBeGreaterThanOrEqual(1);
+      expect(each * sharers).toBeLessThanOrEqual(Math.max(budget, sharers));
+    }
+  });
+
+  it('still lets an override win outright, and still refuses a sharer count that is not a count', () => {
+    expect(testWorkerCount({ cores: CORES, override: '15', sharers: 3 })).toBe(15);
+    expect(() => testWorkerCount({ cores: CORES, sharers: 0 })).toThrow(/positive integer/);
+    expect(() => testWorkerCount({ cores: CORES, sharers: 1.5 })).toThrow(/positive integer/);
+  });
+});
+
+describe('how many runs share the worker budget', () => {
+  it('is one for a run that is alone and not in a pool', () => {
+    expect(runSharers({ liveOthers: 0 })).toBe(1);
+    expect(runSharers({ slots: '', liveOthers: 0 })).toBe(1);
+  });
+
+  it('counts the runs already live, and itself', () => {
+    expect(runSharers({ liveOthers: 2 })).toBe(3);
+  });
+
+  it('takes the pool at its word about how many runs it starts, before any of them has claimed', () => {
+    expect(runSharers({ slots: '3', liveOthers: 0 })).toBe(3);
+  });
+
+  it('is argued up by claims beyond the pool, never down by fewer of them', () => {
+    expect(runSharers({ slots: '3', liveOthers: 1 })).toBe(3);
+    expect(runSharers({ slots: '3', liveOthers: 4 })).toBe(5);
+  });
+
+  it('says so when MTG_TEST_SLOTS is not a count', () => {
+    expect(() => runSharers({ slots: 'lots', liveOthers: 0 })).toThrow(
+      /MTG_TEST_SLOTS must be a positive integer/,
+    );
+    expect(() => runSharers({ slots: '0', liveOthers: 0 })).toThrow(
+      /MTG_TEST_SLOTS must be a positive integer/,
+    );
+  });
+});
+
+describe('testWorkerOverride', () => {
+  it('forces a single worker under the Forge bridge, whatever MTG_TEST_WORKERS says', () => {
+    expect(testWorkerOverride({ MTG_REQUIRE_FORGE_BRIDGE: '1', MTG_TEST_WORKERS: '15' })).toBe('1');
+    expect(testWorkerOverride({ MTG_REQUIRE_FORGE_BRIDGE: '1', MTG_TEST_WORKERS: undefined })).toBe('1');
+  });
+
+  // mtg-b9eom review item 1: the first version only recognized
+  // MTG_REQUIRE_FORGE_BRIDGE, so the other three opt-in flags ran unpinned to
+  // one worker beside a JVM they themselves started. One case per flag so
+  // none of the four can silently drop out of isForgeRequiredRun again.
+  it('forces a single worker under each of the other three Forge-required flags', () => {
+    expect(testWorkerOverride({ MTG_REQUIRE_FORGE_BOTS: '1', MTG_TEST_WORKERS: '15' })).toBe('1');
+    expect(testWorkerOverride({ MTG_REQUIRE_PRINTED_NATIVE_SMOKE: '1', MTG_TEST_WORKERS: '15' })).toBe('1');
+    expect(testWorkerOverride({ MTG_REQUIRE_PRINTED_ADMISSIONS: '1', MTG_TEST_WORKERS: '15' })).toBe('1');
+  });
+
+  it('leaves MTG_TEST_WORKERS untouched when the Forge bridge is not required', () => {
+    expect(testWorkerOverride({ MTG_REQUIRE_FORGE_BRIDGE: undefined, MTG_TEST_WORKERS: '4' })).toBe('4');
+    expect(testWorkerOverride({ MTG_REQUIRE_FORGE_BRIDGE: '0', MTG_TEST_WORKERS: '4' })).toBe('4');
+    expect(
+      testWorkerOverride({ MTG_REQUIRE_FORGE_BRIDGE: undefined, MTG_TEST_WORKERS: undefined }),
+    ).toBeUndefined();
+  });
 });
 
 describe('the wiring', () => {
@@ -261,7 +341,9 @@ describe('the wiring', () => {
 
   it('runs the reporter, so a timeout in any project says what the machine was doing', () => {
     expect(config).toContain("'./packages/slice/tools/test-load/reporter.ts'");
-    expect(config).toMatch(/reporters:\s*\['default',\s*TEST_LOAD_REPORTER,\s*RPC_TIMEOUT_REPORTER\]/);
+    expect(config).toMatch(
+      /reporters:\s*\[\s*'default',\s*TEST_LOAD_REPORTER,\s*RPC_TIMEOUT_REPORTER,\s*UNACCOUNTED_REPORTER,/,
+    );
   });
 
   // The one that decides rather than reports, so it is wired separately and
@@ -271,9 +353,40 @@ describe('the wiring', () => {
     expect(config).toContain("'./packages/slice/tools/test-load/rpc-timeout.ts'");
   });
 
+  // The one that hardens rather than excuses. Unwired, a run can mark files
+  // failed and print no sentence about any of them, which is mtg-jc05.
+  it('runs the accounting check, so a file that went missing is named', () => {
+    expect(config).toContain("'./packages/slice/tools/test-load/unaccounted.ts'");
+  });
+
   it('sizes the pool through the measured function rather than a number typed here', () => {
     expect(config).toContain("from './packages/slice/tools/test-load/workers'");
     expect(config).toMatch(/maxWorkers:\s*MAX_WORKERS/);
+  });
+
+  // mtg-a3ix4. Unwired, the cap goes back to dividing the machine as though the
+  // run were alone: the pure functions above stay green and the box carries a
+  // half per slot again. The claim is written by the setup file and read by the
+  // config, and each half is worthless without the other.
+  it('sizes the pool against the runs already live, and claims a place for this one', () => {
+    expect(config).toMatch(
+      /sharers:\s*runSharers\(\{[^}]*MTG_TEST_SLOTS[^}]*liveRunCount\(runsDirPath\(\)\)/,
+    );
+    expect(config).toContain("'./packages/slice/tools/test-load/run-claim-setup.ts'");
+    expect(config).toMatch(/globalSetup:\s*\[FORGE_LOCK_SETUP,\s*RUN_CLAIM_SETUP\]/);
+  });
+
+  // mtg-b9eom, the second clause of the playtester's lane ruling: a Forge-required
+  // run takes exactly one worker (folded into MAX_WORKERS through
+  // testWorkerOverride) and serializes against every other Forge-required run
+  // on the host (globalSetup). Unwired, either half would leave a lane free to
+  // run two JVM-backed cases at once, which is the load-81 finding the bead
+  // was filed over.
+  it('folds the Forge-run override into the pool size and wires its lock as global setup', () => {
+    expect(config).toMatch(/testWorkerOverride/);
+    expect(config).toMatch(/override:\s*testWorkerOverride\(process\.env\)/);
+    expect(config).toContain("'./packages/slice/tools/test-load/forge-lock-setup.ts'");
+    expect(config).toMatch(/globalSetup:\s*\[FORGE_LOCK_SETUP,/);
   });
 
   // The rule the whole bead rests on. `packages/ui/test/play/play.test.ts`

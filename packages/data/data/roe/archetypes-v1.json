@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "roe",
+  "archetypes": [
+    {
+      "id": "white-blue-levelers",
+      "name": "White-Blue Levelers",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Venerated Teacher",
+        "physicalId": "roe-printed-v1:0093:9ec4d902-8841-4f37-9b07-9e8d0f671071"
+      },
+      "plan": "Build around Venerated Teacher: Spend early turns leveling efficient creatures, defend the investment, and win once their upgraded abilities come online."
+    },
+    {
+      "id": "blue-black-control",
+      "name": "Blue-Black Control",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Cadaver Imp",
+        "physicalId": "roe-printed-v1:0099:1b2f83d5-9269-4297-b507-558c2bdec32b"
+      },
+      "plan": "Build around Cadaver Imp: Trade one-for-one early, defend with high-toughness creatures, and win after card advantage exhausts the opponent."
+    },
+    {
+      "id": "black-red-spawn-sacrifice",
+      "name": "Black-Red Spawn Sacrifice",
+      "colors": ["B", "R"],
+      "signpost": {
+        "name": "Pawn of Ulamog",
+        "physicalId": "roe-printed-v1:0122:85f4d77d-e0de-48fe-899b-5718cee779e2"
+      },
+      "plan": "Build around Pawn of Ulamog: Create Eldrazi Spawn for mana, then sacrifice surplus tokens for removal, damage, or a large finisher."
+    },
+    {
+      "id": "red-green-eldrazi-ramp",
+      "name": "Red-Green Eldrazi Ramp",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Kozilek's Predator",
+        "physicalId": "roe-printed-v1:0193:4ab37d0e-5542-4ae0-a48e-d0a4e6bf48e7"
+      },
+      "plan": "Build around Kozilek's Predator: Create Eldrazi Spawn, spend them to accelerate into huge threats, and use excess tokens to buy time."
+    },
+    {
+      "id": "green-white-auras",
+      "name": "Green-White Auras",
+      "colors": ["W", "G"],
+      "signpost": {
+        "name": "Aura Gnarlid",
+        "physicalId": "roe-printed-v1:0175:8f8dbb4f-4b01-4666-b62f-a2323dac7a19"
+      },
+      "plan": "Build around Aura Gnarlid: Build one or two resilient Aura carriers, protect them from removal, and force damage through with size and evasion."
+    }
+  ]
+}

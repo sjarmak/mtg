@@ -85,12 +85,14 @@ export interface CopyExcess {
 export function copyExcesses(cards: readonly Card[], limit: number | null): readonly CopyExcess[] {
   if (limit === null) return [];
   const counts = new Map<string, number>();
+  const unrestricted = new Set<string>();
   for (const card of cards) {
     if (isBasicLand(card)) continue;
     counts.set(card.name, (counts.get(card.name) ?? 0) + 1);
+    if (card.deckConstruction?.kind === 'anyNumberOfThisCard') unrestricted.add(card.name);
   }
   return [...counts]
-    .filter(([, played]) => played > limit)
+    .filter(([name, played]) => !unrestricted.has(name) && played > limit)
     .map(([name, played]) => ({ name, limit, played }));
 }
 

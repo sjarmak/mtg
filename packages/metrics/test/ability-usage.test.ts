@@ -191,7 +191,16 @@ describe('trigger usage floor', () => {
   }
 
   it('fails a pool whose triggers never fired, however healthy everything else is', () => {
-    const gate = triggerGate(distinctGames(200, { playerTurns: 16 }), pool(80, 0, 20));
+    // 600 rather than the 200 its activated twin uses, and the extra 400 are
+    // bought from `abstainWithinNoise` rather than from the gate. This arm's
+    // seed deviation is 0.0024 per card drawn against a band floor of 0.0125 on
+    // a quarter-triggered pool, and the noise model widens by the square root
+    // of the shortfall in volume: at 200 games it reads 0.0170, wider than the
+    // whole band, so the gate abstains instead of failing. It is right to —
+    // that is the model saying a 200-game sample cannot carry this gate — and
+    // it is a fact about the sample rather than about the pool, so the fix is
+    // more games. `src/seed-noise.ts` is where the constant is argued.
+    const gate = triggerGate(distinctGames(600, { playerTurns: 16 }), pool(80, 0, 20));
     expect(gate.status).toBe('fail');
     expect(gate.observed).toBe(0);
     expect(gate.detail).toContain('0 triggers');

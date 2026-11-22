@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "lrw",
+  "formatSha256": "0f3ac5264d0a3ca5d99f513e674a732713d49060045ec5987818176b232611be",
+  "sourceSha256": "d3722e012ea73716d638c131db5ce57ae1db1c484baf99b03122d623747bfcfe",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "d3722e012ea73716d638c131db5ce57ae1db1c484baf99b03122d623747bfcfe",
+    "recipe.json": "922c5f8465e9aceda4c04da8c1c394216f08563cc673001bd3dc429086757518",
+    "lrw-printed-catalog-v1.json": "3ffa87b6d640f34a91c7a74ede23554946b01459409d8dfe1dfe816cf4de3149",
+    "lrw-limited-format-v1.json": "927bd3880dca7b86a95f191191301348d92d9233d97296bb052618a066f8a6b9"
+  },
+  "catalogs": [
+    {
+      "code": "LRW",
+      "cards": 301,
+      "contentSha256": "5563a5eb1e2b24a42f12ffc836cfbe2b483f4d9e757dcdaa1e8d40ca2d791657"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 2074.928906,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 286,
+    "printings": 301
+  }
+}

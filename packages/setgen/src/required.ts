@@ -32,7 +32,7 @@
  * `activated`, which is what routes the batch to the fill schema and the prompt
  * section that carry the clause.
  */
-import type { AbilityKind } from '@mtg/dsl';
+import type { ModelAbilityKind } from '@mtg/dsl';
 import type { RequiredCard, SetBrief } from './brief';
 import { slotPoolFor } from './brief';
 import { shuffle } from './rng';
@@ -121,14 +121,14 @@ function pin(slot: Slot, card: RequiredCard): Slot {
  * arrives because the Chest was opened, and opening is what the sacrifice pays
  * for.
  */
-function abilityKindsFor(card: RequiredCard): readonly AbilityKind[] | null {
+function abilityKindsFor(card: RequiredCard): readonly ModelAbilityKind[] | null {
   if (card.equipment || card.sacrificeSubtype !== undefined) return ACTIVATED_ONLY;
   if (card.partCounter !== undefined || card.suppliesSubtype !== undefined) return TRIGGERED_ONLY;
   return null;
 }
 
-const ACTIVATED_ONLY: readonly AbilityKind[] = ['activated'];
-const TRIGGERED_ONLY: readonly AbilityKind[] = ['triggered'];
+const ACTIVATED_ONLY: readonly ModelAbilityKind[] = ['activated'];
+const TRIGGERED_ONLY: readonly ModelAbilityKind[] = ['triggered'];
 
 /**
  * Reserves one slot per required card.

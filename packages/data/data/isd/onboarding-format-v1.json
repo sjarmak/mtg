@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "isd",
+  "name": "Innistrad",
+  "sourceCodes": ["ISD"],
+  "products": [{ "id": "isd-draft", "setCode": "ISD", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["isd-draft", "isd-draft", "isd-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["isd-draft", "isd-draft", "isd-draft", "isd-draft", "isd-draft", "isd-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

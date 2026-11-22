@@ -12,7 +12,8 @@
  * what lets `LEGAL_TARGETS`, `FORGE_VALID_TARGETS` and every other table keyed
  * by kind stay the size they are instead of doubling.
  *
- * `ModelTargetSpecSchema` is the same object without that field. It is the
+ * `ModelTargetSpecSchema` is the frozen generator shape without hand-authored
+ * constraints or cardinality. It is the
  * shape `@mtg/setgen` shows the model, and it exists because a field the prompt
  * has not taught is a field the model would fill in by guessing.
  *
@@ -21,7 +22,7 @@
  * with power 3 or less", "target tapped creature", "target creature with flying"
  * — and it is a field rather than six new kinds for the reason `distinct` is:
  * every table in this repo keyed by `TargetKind` (`LEGAL_TARGETS`,
- * `FORGE_VALID_TARGETS`, `TARGET_SPACES`, the oracle's switch) would otherwise
+ * `FORGE_VALID_TARGETS`, `TARGET_KIND_TRAITS`, the oracle's switch) would otherwise
  * multiply by the number of restrictions, and each of them would have to answer
  * a question about the space that the space has already answered.
  *
@@ -45,9 +46,9 @@
  *
  * `filter` is the third constraint of the same kind, added for `mtg-6y4g`, and
  * it is where a narrowing goes when it reads a *characteristic* rather than a
- * state: card type, excluded card type, color, excluded color, and the one
- * combat status a printed card names. It is a field beside `restriction`
- * rather than seven more restriction members because the two are answered by
+ * state: card type, subtype, color, keyword, combat role, and a mana-value
+ * ceiling. It is a field beside `restriction`
+ * rather than one target kind per printed condition because the two are answered by
  * different machinery and at different depths — `satisfiesTargetRestriction`
  * reads one permanent through the layer system one question at a time, and a
  * filter compiles to a kernel `ObjectFilter` and is answered by `matchesFilter`,
@@ -98,15 +99,18 @@
  * search and not a target).
  *
  * So the field is a bounded integer now, and the bound is counted rather than
- * guessed. Across the 38,623-card store, "tap up to N target" — the one
- * template this field can reach, since `TARGET_COUNT_EFFECT_KINDS` gates it to
- * `tapPermanent` — prints N as two 47 times, three 10, four 7, five once, and
- * never higher; four more print X, which is an `Amount` and a different
- * decision. `MAX_TARGET_COUNT` is therefore five: a ceiling drawn where the
- * printed corpus stops, which is `MAX_TARGET_RESTRICTION_POWER`'s reasoning
+ * guessed. Across the 38,623-card store, "tap up to N target" — the template
+ * that established the numeric ceiling — prints N as two 47 times, three 10,
+ * four 7 and five once for that template. Chandra, the Firebrand supplies a
+ * different counted-target template at six: “up to six targets.” Four more
+ * tap effects print X, which is an `Amount` and a different decision. Ajani,
+ * Caller of the Pride adds the one-target floor: `count: 1`
+ * is the explicit "up to one" template, while an absent count remains the
+ * mandatory-one template. `MAX_TARGET_COUNT` is therefore six: a ceiling drawn
+ * where the printed corpus stops, which is `MAX_TARGET_RESTRICTION_POWER`'s reasoning
  * ("a bound nobody can reach is not a bound") rather than the pin's. The floor
- * is two because a counted slot is the *plural* template; "up to one target
- * creature" is a different printed sentence and nothing here asks for it.
+ * is one because a counted slot is the optional-target template; an absent
+ * count continues to mean exactly one mandatory target.
  *
  * Nothing downstream had to move for the widening: `countedTargetPhrase`
  * already spelled the number through `numberWord`, and the kernel already read
@@ -121,15 +125,37 @@
  * `TARGET_COUNT_EFFECT_KINDS` in `@mtg/dsl`'s `effects.ts` gates which effect
  * kinds may carry it at all, the same way `SOURCE_BODY_EFFECT_KINDS` gates
  * `fight`: a count is meaningful only where the kernel already knows how to
- * fold N objects into one effect application, and today that is
- * `tapPermanent` alone. `ModelTargetSpecSchema` carries neither `distinct` nor
- * `count` for the same reason: a field the prompt has not taught is a field
+ * fold N objects into one effect application. Today those are `tapPermanent`
+ * over a plural creature slot and `dealDamage` over a divided any-target slot.
+ *
+ * `anyNumber` is the fifth constraint, added for M11 Hunters' Feast. It is not
+ * a large `count`: the printed maximum is the number of legal targets that
+ * exist, not a numeral on the card, and Forge likewise derives it from the
+ * player count. The field therefore preserves the rule instead of baking this
+ * kernel's current two-player table into the card. Like `distinct`, it is a
+ * `literal(true)` and is mutually exclusive with both other cardinality
+ * spellings. The structural validator initially admits it only on
+ * `targetPlayer` for `gainLife`, the one exact printed template whose native
+ * resolution folds generic player targets today.
+ *
+ * `ModelTargetSpecSchema` carries neither `distinct`, `count`, nor `anyNumber`
+ * for the same reason: a field the prompt has not taught is a field
  * the model would fill in by guessing, and this one gates castability itself
  * rather than merely narrowing a space, which makes a guessed value worse than
  * an absent one.
  */
 import { z } from 'zod';
+import { MAX_FILTER_MANA_VALUE } from './card-filter';
 import { CounterKindSchema } from './counters';
+import {
+  CARD_TYPE_FILTERABLE_TARGETS,
+  REFERENT_TARGETS,
+  SOURCE_ATTACHMENT_TARGETS,
+  SOURCE_ATTACK_TARGETS,
+  SOURCE_BODY_ONLY_TARGETS,
+  TARGET_KIND_TRAITS,
+  TRIGGER_EVENT_TARGETS,
+} from './target-traits';
 import {
   CardKindSchema,
   ColorSchema,
@@ -138,6 +164,18 @@ import {
   TargetCombatRoleSchema,
   TargetKindSchema,
 } from './vocabulary';
+
+export {
+  ATTACK_TRIGGER_ONLY_TARGETS,
+  CARD_TYPE_FILTERABLE_TARGETS,
+  REFERENT_TARGETS,
+  SOURCE_ATTACHMENT_TARGETS,
+  SOURCE_ATTACK_TARGETS,
+  SOURCE_BODY_ONLY_TARGETS,
+  TARGET_KIND_TRAITS,
+  TRIGGER_EVENT_TARGETS,
+} from './target-traits';
+export type { TargetCollisionSpace, TargetKindContext, TargetKindTraits } from './target-traits';
 
 /**
  * How much power a restriction may name.
@@ -150,6 +188,7 @@ import {
  * narrower space than "any creature".
  */
 export const MAX_TARGET_RESTRICTION_POWER = 12;
+export const MAX_TARGET_RESTRICTION_TOUGHNESS = 12;
 
 export const TargetRestrictionSchema = z.discriminatedUnion('kind', [
   z.strictObject({
@@ -165,6 +204,12 @@ export const TargetRestrictionSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('withKeyword'), keyword: KeywordSchema }),
   z.strictObject({ kind: z.literal('withoutKeyword'), keyword: KeywordSchema }),
   z.strictObject({ kind: z.literal('withCounter'), counter: CounterKindSchema }),
+  z.strictObject({
+    kind: z.literal('maxToughness'),
+    toughness: z.number().int().min(0).max(MAX_TARGET_RESTRICTION_TOUGHNESS),
+  }),
+  /** Rix Maadi Guildmage's live per-turn player-state qualification. */
+  z.strictObject({ kind: z.literal('playerLostLifeThisTurn') }),
 ]);
 
 export type TargetRestriction = z.infer<typeof TargetRestrictionSchema>;
@@ -190,9 +235,10 @@ export type TargetRestrictionKind = TargetRestriction['kind'];
  * should read like every other DSL shape, and the record stays free of `null`
  * so it canonicalizes and clones the way a card does.
  *
- * Eight fields, and each one arrived with printed cards in the M11/M13
- * population (`mtg-6y4g`, `mtg-nhyv.2` for the sixth, `mtg-nhyv.56` for the
- * seventh, `mtg-nhyv.62` for the eighth):
+ * Twelve fields, and each one arrived with printed cards in the M11/M13 or
+ * RTR population (`mtg-6y4g`, `mtg-nhyv.2` for the sixth, `mtg-nhyv.56` for
+ * the seventh, `mtg-nhyv.62` for the eighth, and Ultimate Price for
+ * `monocolored`):
  *
  *   `cardTypes`         Craterize, Demolish, Acidic Slime, Erase, Smelt
  *   `allCardTypes`      Steel Overseer ("each artifact creature you control")
@@ -200,8 +246,12 @@ export type TargetRestrictionKind = TargetRestriction['kind'];
  *   `subtypes`          Arbor Elf ("untap target Forest"), Merfolk Sovereign
  *   `colors`            Celestial Purge, Deathmark, Flashfreeze
  *   `excludeColors`     Doom Blade ("destroy target nonblack creature")
+ *   `monocolored`       Ultimate Price ("target monocolored creature")
  *   `keywords`          Silklash Spider ("each creature with flying")
+ *   `excludeKeywords`   Magmaquake ("creatures without flying")
  *   `combat`            Divine Verdict, Infantry Veteran
+ *   `dealtDamageThisTurn` Avenging Arrow
+ *   `maxManaValue`      Sun Titan
  *
  * **`allCardTypes` is a second field rather than a new meaning for the first**,
  * and the two say opposite things about the same dimension because Magic asks
@@ -265,7 +315,7 @@ export type TargetRestrictionKind = TargetRestriction['kind'];
  * `basicLandType` into it (CR 205.3i), so the kernel half of this field is the
  * one line in `target-filter.ts` that hands the list across.
  *
- * `keywords` is the eighth field, and it arrived because the paragraph that
+ * The keyword fields arrived because the paragraph that
  * used to stand here was half right (`mtg-nhyv.62`). It said the narrowing was
  * already expressible, because `TargetRestriction` above carries `withKeyword`
  * and `withoutKeyword` — true of a *target slot*, which is where Plummet and
@@ -297,17 +347,23 @@ export type TargetRestrictionKind = TargetRestriction['kind'];
  * `combat.ts`) reads the same walk. A second derivation of "does this creature
  * have flying" is a second chance to disagree with the blocking rules.
  *
- * There is no `excludeKeywords` beside it, and the reason is the subset rule at
- * the top of this docblock rather than a shortage of printed cards: Magmaquake
- * (M13 140) wants one, and `ObjectFilter` — the kernel filter this one is a
- * subset of — carries `keywords` and no negative twin. Adding the negation here
- * first would give the DSL a narrowing `matchesFilter` cannot answer, which is
- * the one direction this arrangement is built to refuse. The field belongs to
- * whichever lane widens `ObjectFilter`, and it lands in both files or neither.
- *
  * `supertypes`, `oids` and `controller` are absent because no card has asked:
  * `oids` is a runtime value no printed card can name, and control is already a
  * target *kind* (`targetCreatureYouControl`).
+ *
+ * `maxManaValue` is the numeric field. Unlike the list fields, it is an inclusive
+ * ceiling. On the battlefield the kernel reads the object's current copiable
+ * mana cost; in a graveyard it reads the card's printed mana cost. Sun Titan is
+ * the cross-zone proof: its target space is permanent cards in its controller's
+ * graveyard with mana value 3 or less, chosen when the trigger is stacked and
+ * rechecked when it resolves.
+ *
+ * `dealtDamageThisTurn` is the live-history field. It pairs a permanent's oid
+ * with its current battlefield incarnation, so a creature qualifies only after
+ * nonzero combat or noncombat damage survives replacement and prevention. A
+ * zone change creates a new incarnation that does not inherit the fact, and
+ * the turn boundary clears the ledger. The validator refuses the field in
+ * graveyard and stack filters, where no live battlefield incarnation exists.
  */
 export const TargetFilterSchema = z.strictObject({
   cardTypes: z.array(CardKindSchema).min(1).optional(),
@@ -316,8 +372,19 @@ export const TargetFilterSchema = z.strictObject({
   subtypes: z.array(z.string()).min(1).optional(),
   colors: z.array(ColorSchema).min(1).optional(),
   excludeColors: z.array(ColorSchema).min(1).optional(),
+  monocolored: z
+    .literal(true, {
+      error:
+        '"monocolored" is either true or absent; false is a second spelling of an ordinary color-unrestricted filter',
+    })
+    .optional(),
   keywords: z.array(KeywordSchema).min(1).optional(),
+  excludeKeywords: z.array(KeywordSchema).min(1).optional(),
   combat: TargetCombatRoleSchema.optional(),
+  /** Live battlefield incarnation has dealt nonzero damage during the current turn. */
+  dealtDamageThisTurn: z.literal(true).optional(),
+  /** Current mana value on the battlefield; printed mana value elsewhere. */
+  maxManaValue: z.number().int().min(0).max(MAX_FILTER_MANA_VALUE).optional(),
 });
 
 export type TargetFilter = z.infer<typeof TargetFilterSchema>;
@@ -326,12 +393,19 @@ export type TargetFilter = z.infer<typeof TargetFilterSchema>;
  * The largest "up to N target" a slot may name. See `TargetSpecSchema`'s
  * docblock for the count behind the number.
  */
-export const MAX_TARGET_COUNT = 5;
+export const MAX_TARGET_COUNT = 6;
 
 export const TargetSpecSchema = z.strictObject({
   kind: TargetKindSchema,
   restriction: TargetRestrictionSchema.optional(),
   filter: TargetFilterSchema.optional(),
+  /** Exclude the ability's own source from this one-object choice. */
+  excludeSource: z
+    .literal(true, {
+      error:
+        '"excludeSource" is either true or absent; false is a second spelling of an ordinary target slot',
+    })
+    .optional(),
   distinct: z
     .literal(true, {
       error:
@@ -340,12 +414,25 @@ export const TargetSpecSchema = z.strictObject({
     .optional(),
   count: z
     .int()
-    .min(2, {
+    .min(1, {
       error:
-        '"count" makes a slot read "up to N target creatures", which is the plural template; "up to one target creature" is a different sentence and an ordinary slot with no count is the mandatory-one one',
+        '"count" makes a slot read "up to N target creatures" and must name at least one target; omit it for the mandatory-one template',
     })
     .max(MAX_TARGET_COUNT, {
       error: `"count" is bounded at ${String(MAX_TARGET_COUNT)}, the largest literal N printed Magic prints on the template this field is gated to; a bigger slot is an X, which is an Amount rather than this field`,
+    })
+    .optional(),
+  minimum: z
+    .int()
+    .min(1, {
+      error: 'a plural target minimum is positive; omit the field when choosing zero targets is legal',
+    })
+    .max(MAX_TARGET_COUNT)
+    .optional(),
+  anyNumber: z
+    .literal(true, {
+      error:
+        '"anyNumber" is either set to true or left out; false is a second spelling of leaving it out, and one card must have one encoding',
     })
     .optional(),
 });
@@ -373,19 +460,47 @@ export const TARGET_CREATURE_YOU_CONTROL: TargetSpec = { kind: 'targetCreatureYo
 export const TARGET_OPPONENT: TargetSpec = { kind: 'targetOpponent' };
 export const TRIGGERING_CREATURE: TargetSpec = { kind: 'triggeringCreature' };
 export const TARGET_ARTIFACT_OR_ENCHANTMENT: TargetSpec = { kind: 'targetArtifactOrEnchantment' };
+export const TARGET_ARTIFACT_YOU_DONT_CONTROL: TargetSpec = { kind: 'targetArtifactYouDontControl' };
 export const TARGET_CREATURE_YOU_DONT_CONTROL: TargetSpec = { kind: 'targetCreatureYouDontControl' };
 export const TARGET_PERMANENT: TargetSpec = { kind: 'targetPermanent' };
 export const TARGET_PLAYER_OR_PLANESWALKER: TargetSpec = { kind: 'targetPlayerOrPlaneswalker' };
+export const TARGET_CARD_IN_YOUR_GRAVEYARD: TargetSpec = { kind: 'targetCardInYourGraveyard' };
+export const TARGET_CARD_IN_A_GRAVEYARD: TargetSpec = { kind: 'targetCardInAGraveyard' };
 export const SELF_CREATURE: TargetSpec = { kind: 'selfCreature' };
 export const SELF_PERMANENT: TargetSpec = { kind: 'selfPermanent' };
 export const THAT_CREATURE: TargetSpec = { kind: 'thatCreature' };
 export const THAT_PLAYER: TargetSpec = { kind: 'thatPlayer' };
 export const THAT_CREATURES_CONTROLLER: TargetSpec = { kind: 'thatCreaturesController' };
+export const ENCHANTED_CREATURE: TargetSpec = { kind: 'enchantedCreature' };
+export const TARGET_CREATURE_OPPONENT_CONTROLS: TargetSpec = {
+  kind: 'targetCreatureOpponentControls',
+};
+export const EQUIPPED_CREATURE: TargetSpec = { kind: 'equippedCreature' };
+export const THAT_PLAYER_OR_PLANESWALKER_CONTROLLER: TargetSpec = {
+  kind: 'thatPlayerOrPlaneswalkerController',
+};
+export const TARGET_CARD_IN_OPPONENTS_GRAVEYARD: TargetSpec = {
+  kind: 'targetCardInOpponentsGraveyard',
+};
+export const TARGET_NONLAND_PERMANENT_OPPONENT_CONTROLS: TargetSpec = {
+  kind: 'targetNonlandPermanentOpponentControls',
+};
+export const TARGET_NONLAND_PERMANENT_YOU_DONT_CONTROL: TargetSpec = {
+  kind: 'targetNonlandPermanentYouDontControl',
+};
+export const TARGET_PERMANENT_YOU_NEITHER_OWN_NOR_CONTROL: TargetSpec = {
+  kind: 'targetPermanentYouNeitherOwnNorControl',
+};
+
+/** True when the target is a card object in a public graveyard zone. */
+export function isGraveyardCardTargetKind(kind: TargetKind): boolean {
+  return TARGET_KIND_TRAITS[kind].spaces.includes('graveyardCard');
+}
 
 /**
  * The target kinds whose printed phrase has a referent only inside the combat
- * their source is attacking in, so they are legal on a triggered ability whose
- * condition is `selfAttacks` and nowhere else.
+ * their source is attacking in, so they are legal on a `selfAttacks` trigger
+ * or an activation explicitly restricted to that same combat state.
  *
  * One member, and it is a rule the two per-effect tables cannot express:
  * `LEGAL_TARGETS` and `HAND_AUTHORED_TARGETS` are keyed by effect kind and know
@@ -394,12 +509,18 @@ export const THAT_CREATURES_CONTROLLER: TargetSpec = { kind: 'thatCreaturesContr
  * legal pairs (`@mtg/dsl-coverage`'s calibration corpus and its translation
  * prompt) read one sentence rather than four copies of a literal.
  */
-export const ATTACK_TRIGGER_ONLY_TARGETS: readonly TargetKind[] = ['targetCreatureDefendingPlayerControls'];
-
-/** True when this kind may be named only under a `selfAttacks` trigger. */
-export function isAttackTriggerOnlyTarget(kind: TargetKind): boolean {
-  return ATTACK_TRIGGER_ONLY_TARGETS.includes(kind);
+/** True when this kind may be named only while its ability's source attacks. */
+export function isSourceAttackTarget(kind: TargetKind): boolean {
+  return SOURCE_ATTACK_TARGETS.includes(kind);
 }
+
+/** True when this kind is retained from the event that fired a trigger. */
+export function isTriggerEventTarget(kind: TargetKind): boolean {
+  return TRIGGER_EVENT_TARGETS.includes(kind);
+}
+
+/** @deprecated Use `isSourceAttackTarget`; retained as a public API compatibility alias. */
+export const isAttackTriggerOnlyTarget = isSourceAttackTarget;
 
 /**
  * The target kinds whose printed phrase reads a permanent's own body, so they
@@ -413,7 +534,7 @@ export function isAttackTriggerOnlyTarget(kind: TargetKind): boolean {
  * body to name — `checkEffectTarget`'s spell-path refusal reads this list and
  * names the kind it caught, rather than testing for one of them by hand, so
  * the refusal and the list cannot drift apart. Stated here once for the same
- * reason `ATTACK_TRIGGER_ONLY_TARGETS` is: `@mtg/dsl-coverage`'s calibration
+ * reason `SOURCE_ATTACK_TARGETS` is: `@mtg/dsl-coverage`'s calibration
  * corpus and its translation prompt both enumerate legal (effect, target) pairs
  * without knowing which of the three bodies they are about to print the pair
  * on, and a pair this narrow lands as `invalidDsl` there instead of as the
@@ -422,11 +543,14 @@ export function isAttackTriggerOnlyTarget(kind: TargetKind): boolean {
  * the spell form specifically rather than out of the shared pairs list every
  * form draws from.
  */
-export const SOURCE_BODY_ONLY_TARGETS: readonly TargetKind[] = ['selfCreature', 'selfPermanent'];
-
 /** True when this target names a permanent's own body, illegal on a spell. */
 export function isSourceBodyOnlyTarget(kind: TargetKind): boolean {
   return SOURCE_BODY_ONLY_TARGETS.includes(kind);
+}
+
+/** True when this kind names the permanent attached to the ability's source. */
+export function isSourceAttachmentTarget(kind: TargetKind): boolean {
+  return SOURCE_ATTACHMENT_TARGETS.includes(kind);
 }
 
 /**
@@ -440,24 +564,16 @@ export function isSourceBodyOnlyTarget(kind: TargetKind): boolean {
  * from a chosen permanent, which Forge writes `Defined$ TargetedController`,
  * and is the one that changes space between what was chosen and what is named.
  *
- * Listed here rather than derived from an empty `TARGET_SPACES` row, even
- * though all three have one: `triggeringCreature` and the two source-body kinds
- * have empty rows too and are not these — they retain a referent from outside
- * the effect list, so nothing about a sibling slot answers them. The empty row
- * is what they have in common, not what makes them referents, and deriving from
- * it would have made every future no-choice kind a back-reference by accident.
+ * Classified as `priorTarget` rather than derived from an empty collision-space
+ * row: `triggeringCreature` and the two source-body kinds have empty rows too
+ * and retain referents from outside the effect list. The context is the fact;
+ * an empty collision space is only one consequence of it.
  *
  * Stated once for the reason `SOURCE_BODY_ONLY_TARGETS` is stated once: the
  * validator, the kernel's enumeration, its resolution recheck and the Forge
  * export all ask the same question, and four copies of a three-string literal
  * is four chances for a member added later to reach three of them.
  */
-export const REFERENT_TARGETS: readonly TargetKind[] = [
-  'thatCreature',
-  'thatPlayer',
-  'thatCreaturesController',
-];
-
 /** True when this kind names what an earlier slot of the same list chose. */
 export function isReferentTarget(kind: TargetKind): boolean {
   return REFERENT_TARGETS.includes(kind);
@@ -474,24 +590,25 @@ export function isReferentTarget(kind: TargetKind): boolean {
  * `checkReferentTargets`) test one value instead of asking twice whether the
  * kind is a referent at all.
  */
-export function referentSourceSpace(kind: TargetKind): 'creature' | 'player' | null {
-  if (kind === 'thatCreature' || kind === 'thatCreaturesController') return 'creature';
-  if (kind === 'thatPlayer') return 'player';
-  return null;
+export function referentSourceSpace(kind: TargetKind): 'creature' | 'player' | 'playerOrPlaneswalker' | null {
+  return TARGET_KIND_TRAITS[kind].referentSource;
 }
 
 /**
  * The kinds a restriction may narrow: the three that name a creature.
  *
- * Derived from `TARGET_SPACES` rather than listed, so a creature kind added
+ * Derived from `TARGET_KIND_TRAITS` rather than listed, so a creature kind added
  * later is restrictable the day it is added and a player kind never is. The
  * kinds that draw from no space at all — `noTarget`, `triggeringCreature` and
  * the two source-body kinds — fall out of this by drawing from nothing, which
  * is the right answer for all of them and for the same reason: none is a
  * choice among objects, so there is no choice to narrow.
  */
-export function restrictionFitsTargetKind(kind: TargetKind): boolean {
-  return targetKindNamesACreature(kind);
+export function restrictionFitsTargetKind(kind: TargetKind, restriction?: TargetRestriction): boolean {
+  if (restriction === undefined) return targetKindNamesACreature(kind);
+  return restriction.kind === 'playerLostLifeThisTurn'
+    ? targetKindNamesAPlayer(kind)
+    : targetKindNamesACreature(kind);
 }
 
 /** The restriction on this slot, or `null` when it names any object in its space. */
@@ -513,8 +630,12 @@ export function targetFilterIsEmpty(filter: TargetFilter): boolean {
     filter.subtypes === undefined &&
     filter.colors === undefined &&
     filter.excludeColors === undefined &&
+    filter.monocolored === undefined &&
     filter.keywords === undefined &&
-    filter.combat === undefined
+    filter.excludeKeywords === undefined &&
+    filter.combat === undefined &&
+    filter.dealtDamageThisTurn === undefined &&
+    filter.maxManaValue === undefined
   );
 }
 
@@ -522,7 +643,7 @@ export function targetFilterIsEmpty(filter: TargetFilter): boolean {
  * The kinds a filter may narrow: the ones that draw from objects and only from
  * objects.
  *
- * Derived from `TARGET_SPACES` rather than listed, the way
+ * Derived from `TARGET_KIND_TRAITS` rather than listed, the way
  * `restrictionFitsTargetKind` is. A player has no card type, no subtype and no
  * color, so every player-naming kind falls out — including the two that draw
  * from both spaces at once, `anyTarget` and `targetPlayerOrPlaneswalker`. Those
@@ -535,15 +656,15 @@ export function targetFilterIsEmpty(filter: TargetFilter): boolean {
  * there is no choice to narrow.
  */
 export function filterFitsTargetKind(kind: TargetKind): boolean {
-  const spaces = TARGET_SPACES[kind];
+  const spaces = TARGET_KIND_TRAITS[kind].spaces;
   return spaces.length > 0 && !spaces.includes('player');
 }
 
 /**
  * The kinds a *card-type* constraint may narrow.
  *
- * One member, listed rather than derived from `TARGET_SPACES` the way the two
- * predicates above are, and the reason is that `TARGET_SPACES` answers a
+ * One member, declared by a dedicated trait rather than derived from collision
+ * spaces the way the two predicates above are, because collision spaces answer a
  * different question. Its members are a collision alphabet for `distinct` and
  * deliberately over-state overlaps (see its docblock), so "how many spaces does
  * this kind draw from" is not the same question as "has this kind already fixed
@@ -556,12 +677,10 @@ export function filterFitsTargetKind(kind: TargetKind): boolean {
  * Every other object kind has already fixed its card types by being the kind it
  * is: `cardTypes: ['creature']` on `targetCreature` is a second spelling of the
  * kind, and `cardTypes: ['artifact']` on it is a card that can never be cast.
- * Only `targetPermanent` leaves the question open. `ATTACK_TRIGGER_ONLY_TARGETS`
- * above is the same shape for the same reason — a one-member rule that a table
- * keyed by kind cannot express.
+ * Only `targetPermanent` leaves the question open. The explicit trait records
+ * that semantic distinction without pretending it follows from the number of
+ * collision spaces.
  */
-export const CARD_TYPE_FILTERABLE_TARGETS: readonly TargetKind[] = ['targetPermanent'];
-
 /** True when a filter on this kind may name card types. */
 export function cardTypeFilterFitsTargetKind(kind: TargetKind): boolean {
   return CARD_TYPE_FILTERABLE_TARGETS.includes(kind);
@@ -582,106 +701,20 @@ export function targetCountOf(spec: TargetSpec): number | null {
   return spec.count ?? null;
 }
 
-/**
- * What each kind draws from, so two slots can be asked whether they can collide.
- *
- * `artifactOrEnchantment` is a third space rather than a narrower draw from the
- * creature one, and it overlaps the creature space rather than being disjoint
- * from it. That row said "disjoint" until `mtg-6y4g`, on the argument that no
- * printed card kind is both an artifact and a creature. The argument was wrong
- * about this DSL: `CreatureCardSchema` has carried an `artifact` flag since
- * artifact creatures started filling a generated set's colorless slot, and
- * `isArtifact` has always read it. What was true is that the *kernel* dropped
- * the second type — `printedCharacteristics` reported `[card.kind]` — so a
- * Disenchant could not name an artifact creature and the disjointness held by
- * accident. Smelt and Torch Fiend are the cards that made that a bug rather
- * than a simplification, and the kernel now reports both types.
- *
- * The overlap is written as `artifactOrEnchantment` *plus* `creature`, which
- * over-states it: an ordinary creature is not a legal target for "target
- * artifact or enchantment", and this table now says the two slots could collide
- * anyway. Over is the safe direction, because the one reader is
- * `checkDistinctTargets` and what it decides is whether `distinct` has anything
- * to exclude — over-stating permits an "another target" a careful card did not
- * strictly need, and under-stating refuses one a real board makes meaningful.
- * The alphabet cannot say "the artifact ones", and inventing a sixth space to
- * say it would buy a sharper answer to a question nothing else asks.
- */
-const TARGET_SPACES: Readonly<
-  Record<
-    TargetKind,
-    readonly ('creature' | 'player' | 'artifactOrEnchantment' | 'planeswalker' | 'otherPermanent')[]
-  >
-> = {
-  anyTarget: ['creature', 'player'],
-  targetCreature: ['creature'],
-  targetPlayer: ['player'],
-  noTarget: [],
-  // A narrower draw from the same space, not a space of its own: "target
-  // creature" and "target creature you control" can name one body, which is
-  // exactly the collision `distinct` is asked about.
-  targetCreatureYouControl: ['creature'],
-  // Same reasoning one row down: "target player" and "target opponent" can name
-  // one person, so a `distinct` slot after either of them has something to
-  // exclude.
-  targetOpponent: ['player'],
-  // A referent retained from the triggering event, not a CR 115 target choice.
-  triggeringCreature: [],
-  // A narrower draw from the creature space, the way `targetCreatureYouControl`
-  // is: "target creature" and "target creature defending player controls" can
-  // name one body, so a `distinct` slot after either has something to exclude.
-  targetCreatureDefendingPlayerControls: ['creature'],
-  // Two entries because an artifact creature is a legal target for this slot and
-  // for "target creature" both, so `distinct` after either has something to
-  // exclude; the docblock above says why the creature entry over-states the
-  // overlap and why over is the direction to be wrong in.
-  targetArtifactOrEnchantment: ['artifactOrEnchantment', 'creature'],
-  // The complement of `targetCreatureYouControl`, and the same space for the
-  // same reason: "target creature" and "target creature you don't control" can
-  // name one body. Sharing the creature space is also what makes a restriction
-  // legal on it, so "fights target creature you don't control with power 3 or
-  // less" is expressible the day somebody prints it.
-  targetCreatureYouDontControl: ['creature'],
-  // Every class of permanent at once, which is what makes this the one kind a
-  // card-type filter may narrow. `otherPermanent` is the land row and anything a
-  // later card type adds: the space names are a collision alphabet for
-  // `distinct`, not a type system, so a class nothing else draws from needs one
-  // member and not one member per type.
-  targetPermanent: ['creature', 'artifactOrEnchantment', 'planeswalker', 'otherPermanent'],
-  // Two spaces, the way `anyTarget` has two, and for the same consequence: a
-  // scope cannot hang off it (`targetKindNamesAPlayer` is false) and a filter
-  // cannot narrow it (`filterFitsTargetKind` is false), because either would
-  // reach half the space and say nothing about the other half.
-  targetPlayerOrPlaneswalker: ['player', 'planeswalker'],
-  // A referent retained from the ability's own source, not a CR 115 target
-  // choice — the same empty space `triggeringCreature` draws from, and for the
-  // same reason: nothing here is ever chosen, so nothing here can collide with
-  // a choice made elsewhere, take a restriction, or take a filter. CR 115.6a is
-  // the rule underneath: an object referring to itself is not targeting itself.
-  selfCreature: [],
-  // Empty for exactly the reasons above, and not because the object it names is
-  // hard to classify. It is every class of permanent at once — the source of
-  // the ability, whatever card type that card has — but the space names exist
-  // to detect collisions between two *choices*, and this kind makes none.
-  selfPermanent: [],
-  // Empty for the reason the two rows above are empty, and it is worth saying
-  // which reason, because a back-reference looks like a thing that could
-  // collide. It cannot: the collision alphabet answers `distinct`, which asks
-  // whether this slot could repeat an object some *other* slot chose, and a
-  // referent repeats an earlier slot's object on purpose. Giving it the
-  // creature space would have made `distinct` legal on it, which is a card
-  // printing "another that creature".
-  thatCreature: [],
-  // The same argument one space over: nothing is chosen here either, so there
-  // is nothing to narrow with a restriction, nothing to narrow with a filter,
-  // and nothing for `distinct` to exclude.
-  thatPlayer: [],
-  // Empty for the two reasons above *and* one of its own: the object this kind
-  // reads is a permanent and the thing it names is a player, so no single space
-  // name is even true of it. The row that answers collisions has nothing to say
-  // about a slot that makes no choice.
-  thatCreaturesController: [],
-};
+/** The least number of members one plural slot must choose, or zero when optional. */
+export function targetMinimumOf(spec: TargetSpec): number {
+  return spec.minimum ?? 0;
+}
+
+/** True when the slot chooses zero through every currently legal target. */
+export function targetsAnyNumber(spec: TargetSpec): boolean {
+  return spec.anyNumber === true;
+}
+
+/** True when one printed slot stores its choices in the plural-target side channel. */
+export function isMultipleTargetSpec(spec: TargetSpec): boolean {
+  return targetCountOf(spec) !== null || targetsAnyNumber(spec);
+}
 
 /**
  * True when every object this slot can name is a creature.
@@ -695,7 +728,7 @@ const TARGET_SPACES: Readonly<
  * fits would be reading a space this file says does not exist.
  */
 export function targetKindNamesACreature(kind: TargetKind): boolean {
-  const spaces = TARGET_SPACES[kind];
+  const spaces = TARGET_KIND_TRAITS[kind].spaces;
   return spaces.length === 1 && spaces[0] === 'creature';
 }
 
@@ -709,11 +742,17 @@ export function targetKindNamesACreature(kind: TargetKind): boolean {
  * time, which is a card that sometimes does nothing rather than a card.
  */
 export function targetKindNamesAPlayer(kind: TargetKind): boolean {
-  const spaces = TARGET_SPACES[kind];
+  const spaces = TARGET_KIND_TRAITS[kind].spaces;
   return spaces.length === 1 && spaces[0] === 'player';
+}
+
+/** True when this slot names exactly a player or a planeswalker. */
+export function targetKindNamesAPlayerOrPlaneswalker(kind: TargetKind): boolean {
+  const spaces = TARGET_KIND_TRAITS[kind].spaces;
+  return spaces.length === 2 && spaces.includes('player') && spaces.includes('planeswalker');
 }
 
 /** True when two slots could name the same object, which is what `distinct` forbids. */
 export function targetKindsCanCollide(a: TargetKind, b: TargetKind): boolean {
-  return TARGET_SPACES[a].some((space) => TARGET_SPACES[b].includes(space));
+  return TARGET_KIND_TRAITS[a].spaces.some((space) => TARGET_KIND_TRAITS[b].spaces.includes(space));
 }

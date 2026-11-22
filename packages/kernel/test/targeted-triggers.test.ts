@@ -566,7 +566,7 @@ describe('the enumeration a bot sees includes both stops', () => {
     );
     const asked = passUntilQuiet(cast);
 
-    const actions = legalActions(asked.state);
+    const actions = legalActions(asked.state).filter((action) => action.type !== 'concede');
     expect(actions.length).toBeGreaterThan(0);
     expect(actions.every((action) => action.type === 'chooseTriggerTargets')).toBe(true);
     // "Any target" reaches both players and every creature, the source included
@@ -621,7 +621,12 @@ describe('a recorded game containing both stops replays byte for byte', () => {
     for (let guard = 0; guard < 20_000; guard += 1) {
       const decision = session.pending;
       if (decision === null) return session;
-      session = choose(session, decision.kind === 'mulligan' ? 0 : decision.options.length - 1);
+      session = choose(
+        session,
+        decision.kind === 'mulligan'
+          ? 0
+          : decision.options.findLastIndex((option) => option.type !== 'concede'),
+      );
     }
     throw new Error('the session never stopped asking');
   }

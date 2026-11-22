@@ -23,6 +23,8 @@ import type { Card as DslCard } from '@mtg/dsl';
 import { Card } from '../src/card/Card';
 import type { CardSize } from '../src/card/Card';
 import { ART_REGIONS } from '../src/card/anatomy';
+import { BASIC_LAND_PRINTINGS } from '../src/card/basic-land-printings';
+import { printedCardArt, printedDisplayCard } from '../src/card/printed-card-art';
 import { SCRYFALL_SYMBOL_BASE } from '../src/card/symbols';
 import { uiStyleSheet } from '../src/styles/index';
 
@@ -62,6 +64,96 @@ describe('a land in play says which mana it makes', () => {
     }
   });
 
+  it('draws the matching symbol for every printed basic land used by an observed match', () => {
+    const expected = new Map([
+      ['Plains', 'W'],
+      ['Island', 'U'],
+      ['Swamp', 'B'],
+      ['Mountain', 'R'],
+      ['Forest', 'G'],
+    ]);
+
+    for (const printing of BASIC_LAND_PRINTINGS) {
+      const object = {
+        oid: `land-${printing.name.toLocaleLowerCase()}`,
+        name: printing.name,
+        // Forge's runtime projection deliberately carries only the coarse
+        // permanent type here; the pinned printing still owns the subtype
+        // needed to tell one basic land from another at a glance.
+        typeLine: 'Land',
+        power: null,
+        toughness: null,
+      };
+      const markup = renderToStaticMarkup(
+        h(Card, {
+          card: printedDisplayCard(printing, object),
+          art: printedCardArt(printing, object),
+          size: 'art',
+        }),
+      );
+      const color = expected.get(printing.name);
+      if (color === undefined) throw new Error(`no expected mana color for ${printing.name}`);
+      expect(markup, `${printing.name} draws no {${color}}`).toContain(`data-symbol="{${color}}"`);
+      expect(markup.match(/data-symbol="\{[WUBRG]\}"/g)).toHaveLength(1);
+    }
+  });
+
+  it('shows each basic-land type on a printed typed dual even when Forge reports only Land', () => {
+    const plains = BASIC_LAND_PRINTINGS[0];
+    if (plains === undefined) throw new Error('the pinned basic-land printings are empty');
+    const plateau = {
+      ...plains,
+      name: 'Plateau',
+      typeLine: 'Land — Mountain Plains',
+      faces: [{ ...plains.faces[0]!, name: 'Plateau', typeLine: 'Land — Mountain Plains' }],
+    };
+    const markup = renderToStaticMarkup(
+      h(Card, {
+        card: printedDisplayCard(plateau, {
+          oid: 'land-plateau',
+          name: 'Plateau',
+          typeLine: 'Land',
+          power: null,
+          toughness: null,
+        }),
+        size: 'art',
+      }),
+    );
+
+    expect(markup).toContain('data-symbol="{R}"');
+    expect(markup).toContain('data-symbol="{W}"');
+    expect(markup.match(/data-symbol="\{[WUBRG]\}"/g)).toHaveLength(2);
+  });
+
+  it('shows exact structured outputs on a printed dual with no basic-land subtype', () => {
+    const island = BASIC_LAND_PRINTINGS[1];
+    if (island === undefined) throw new Error('the pinned basic-land printings are empty');
+    const harbor = {
+      ...island,
+      name: 'Hinterland Harbor',
+      typeLine: 'Land',
+      producedMana: ['U', 'G'] as const,
+      faces: [{ ...island.faces[0]!, name: 'Hinterland Harbor', typeLine: 'Land' }],
+    };
+    const markup = renderToStaticMarkup(
+      h(Card, {
+        card: printedDisplayCard(harbor, {
+          oid: 'land-hinterland-harbor',
+          name: 'Hinterland Harbor',
+          typeLine: 'Land',
+          power: null,
+          toughness: null,
+        }),
+        size: 'art',
+      }),
+    );
+
+    expect(markup).toContain('data-symbol="{U}"');
+    expect(markup).toContain('data-symbol="{G}"');
+    expect(markup.match(/data-symbol="\{[WUBRG]\}"/g)).toHaveLength(2);
+    expect(markup).toContain('Produces blue or green mana.');
+  });
+
   it('takes the artwork from the one registry rather than drawing a second one', () => {
     // The `scryfall` set is asked for by name because it is the one whose answer
     // is a *reference* — an href this tree does not hold — so a tile that
@@ -88,6 +180,10 @@ describe('a land in play says which mana it makes', () => {
     const rule = /\.mtg-card__mana \{([^}]*)\}/.exec(SHEET)?.[1] ?? '';
     expect(rule, 'the symbol is laid out and takes the tile height').toContain('position: absolute');
     expect(rule, 'the symbol is not sized against the tile').toMatch(/font-size: clamp\(.*cqw/);
+    expect(rule, 'the symbol is not pinned to the top edge').toContain('inset-block-start: 3px');
+    expect(rule, 'the symbol is not pinned to the right edge').toContain('inset-inline-end: 3px');
+    expect(rule, 'the symbol remains in the old lower-left corner').not.toContain('inset-block-end');
+    expect(rule, 'the symbol remains in the old lower-left corner').not.toContain('inset-inline-start');
 
     // And the region list is unchanged by it, which is the point of an overlay:
     // a tile is still nothing but a picture, and the region list says so.

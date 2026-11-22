@@ -116,6 +116,82 @@ export function hypergeometricAtLeast(
 }
 
 /**
+ * P(the drawn cards yield at least `successesWanted`), where each source card
+ * yields more than one success (`mtg-x2gb`).
+ *
+ * `hypergeometricAtLeast` counts cards and successes with the same number,
+ * which is right for a mana source and wrong for a card that mints two tokens:
+ * a clause that eats two Parts is met by one draw of a card that makes two, and
+ * the plain form makes it wait for a second card.
+ *
+ * Exact rather than an approximation, by the one count that is not a closed
+ * form. `ways[k][s]` is how many `k`-card subsets of the sources yield `s`,
+ * with `s` capped at the ask because everything above it is the same answer;
+ * each source is folded in once, which is a subset count and therefore has no
+ * with-replacement error in it. The rest of the hand is the non-sources:
+ *
+ *     P = sum over k of ways[k][wanted] * C(population - sources, seen - k)
+ *                                       / C(population, seen)
+ *
+ * Yields of all ones reproduce `hypergeometricAtLeast` exactly, which is what
+ * `hypergeometric.test.ts` pins rather than asserts in prose.
+ *
+ * The subset counts are held as plain numbers while the binomials stay in log
+ * space: a count reaches at most C(60, 30), which is 1.2e17 and carries the
+ * double's full fifty-three bits of relative precision, and every term in the
+ * sum is positive so nothing cancels.
+ */
+export function hypergeometricWeightedAtLeast(
+  yields: readonly number[],
+  successesWanted: number,
+  draws: number,
+  population: number,
+): number {
+  validateAsk(successesWanted, draws, population);
+  if (yields.length > population) {
+    throw new Error(
+      `hypergeometricWeightedAtLeast: ${yields.length} sources exceeds population ${population}`,
+    );
+  }
+  for (const yielded of yields) {
+    if (!Number.isInteger(yielded) || yielded < 1) {
+      throw new Error(
+        `hypergeometricWeightedAtLeast: every yield must be a positive integer, got ${yielded}`,
+      );
+    }
+  }
+  if (successesWanted === 0) return 1;
+  const seen = Math.min(draws, population);
+  const sources = yields.length;
+  // ways[k][s], with s === successesWanted meaning "that many or more".
+  let ways: number[][] = [Array.from({ length: successesWanted + 1 }, (_, s) => (s === 0 ? 1 : 0))];
+  for (const yielded of yields) {
+    const next: number[][] = ways.map((row) => [...row]);
+    next.push(Array.from({ length: successesWanted + 1 }, () => 0));
+    for (const [drawn, row] of ways.entries()) {
+      for (const [reached, count] of row.entries()) {
+        if (count === 0) continue;
+        const grown = next[drawn + 1];
+        if (grown === undefined) continue;
+        const total = Math.min(successesWanted, reached + yielded);
+        grown[total] = (grown[total] ?? 0) + count;
+      }
+    }
+    ways = next;
+  }
+  const logPopulation = logChoose(population, seen);
+  let reached = 0;
+  for (const [drawn, row] of ways.entries()) {
+    const met = row[successesWanted] ?? 0;
+    if (met === 0) continue;
+    const logRest = logChoose(population - sources, seen - drawn);
+    if (logRest === Number.NEGATIVE_INFINITY) continue;
+    reached += met * Math.exp(logRest - logPopulation);
+  }
+  return Math.min(1, Math.max(0, reached));
+}
+
+/**
  * The fewest sources that make `hypergeometricAtLeast` reach `target`.
  *
  * This is the same question a Karsten table answers, asked the way a deck

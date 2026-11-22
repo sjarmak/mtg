@@ -91,11 +91,13 @@ import { dealMirrorGame } from '../../src/routes/play/deal';
 import {
   beatAnnouncement,
   nodeName,
+  PACE_CONTROL_LABEL,
+  PACE_MARK,
   PHASE_BAR_LABEL,
   WATCH_BEATS_LABEL,
 } from '../../src/routes/play/PhaseBar';
 import { PlayView } from '../../src/routes/play/PlayView';
-import { stepAbbreviation, stepLabel } from '../../src/routes/play/prompt';
+import { describeStep, stepAbbreviation, stepLabel } from '../../src/routes/play/prompt';
 import {
   BEAT_MARK,
   cycleStop,
@@ -321,6 +323,13 @@ describe('the bar is the kernel turn structure', () => {
    * lays nothing out — so it is asserted as the two siblings the bar sits
    * between and the band it sits in. A test that only said "not in the strip"
    * would pass with the bar anywhere on the page.
+   *
+   * Under the bar there are now two elements rather than one: `mtg-7rhk` put the
+   * hand's own divider on the hand's own edge, which is under the bar because
+   * the bar belongs to the battlefield half (`../../src/routes/play/hand-seam.ts`
+   * argues that placement). So the reading walks past the divider rather than
+   * dropping the sibling claim — the arrangement being asserted is battlefield,
+   * bar, divider, hand, and each step of it is named.
    */
   it('is in the near band, between that battlefield and that hand', () => {
     render(h(PlayRoute, { config: dealt().config }));
@@ -328,7 +337,8 @@ describe('the bar is the kernel turn structure', () => {
     expect(band, 'the bar is outside both seats').not.toBeNull();
     expect(attr(band, 'data-seat'), 'the bar is on the wrong seat').toBe('you');
     const above = sibling(bar(), 'previousElementSibling');
-    const below = sibling(bar(), 'nextElementSibling');
+    const handle = sibling(bar(), 'nextElementSibling');
+    const below = sibling(handle, 'nextElementSibling');
     // The zone rather than the spell row inside it, because the row is only
     // drawn when the seat holds something: a battlefield with nothing on it says
     // `no permanents` in the zone's own words now that it draws no placeholders
@@ -336,6 +346,7 @@ describe('the bar is the kernel turn structure', () => {
     // The claim being made is "the bar is under the battlefield", and the zone
     // is what that names.
     expect(attr(above, 'aria-label'), 'the bar is not under a battlefield').toBe('your battlefield');
+    expect(attr(handle, 'role'), 'the seam divider is not on the hand edge').toBe('separator');
     expect(attr(below, 'data-tone'), 'the bar is not over the hand').toBe('rail');
     expect(closest(bar(), '.mtg-toolbar'), 'the bar is back on the strip').toBeNull();
     expect(closest(bar(), '.mtg-board__rail'), 'the bar is in the rail').toBeNull();
@@ -397,6 +408,13 @@ describe('the turn rides at the left-hand end of the bar', () => {
    * somewhere: it goes back to game details as a plain badge carrying the whole
    * sentence. Dropping it there instead would leave a finished game saying less
    * about where it ended than it said while it ran.
+   *
+   * `mtg-qfv1` kept the fact and changed the tense. The badge printed
+   * `describeStep`, the live header sentence, so a settled session read as a
+   * game standing at combat damage waiting on the player it names. The step is
+   * what earns the badge its place: the result panel directly under it already
+   * prints the turn (`Bot wins on turn 36`), and nothing else on the surface
+   * says where in that turn play stopped.
    */
   it('goes back to game details as a badge when the game is over', () => {
     render(
@@ -413,20 +431,27 @@ describe('the turn rides at the left-hand end of the bar', () => {
     expect(screen.queryByRole('group', { name: PHASE_BAR_LABEL })).toBeNull();
     const badge = queryAll(closest(screen.getByText(/choices made/), '.mtg-play-meta'), '.mtg-badge');
     expect(badge.length, 'a finished game says nothing about where it ended').toBe(1);
-    expect(textOf(badge[0])).toMatch(/^Turn \d/);
+    // Past tense, and the step still in it: the two halves of the swap.
+    expect(textOf(badge[0])).toMatch(/^Ended on turn 3\b/);
+    expect(textOf(badge[0]), 'the badge dropped the step play stopped in').toContain(
+      stepLabel(endedSession().state.turn.step),
+    );
+    // And it is not the live header any more. `describeStep` is what it used to
+    // print, so the assertion is against that function rather than against a
+    // sentence copied out of it.
+    expect(textOf(badge[0])).not.toBe(describeStep(endedSession().state, NAMES));
   });
 
-  /**
-   * Half the panel is the two yields, so a caller with settings but no yield
-   * gets the turn as a plain badge on the bar rather than a disclosure with one
-   * dead half. `@mtg/netplay` is that caller.
-   */
-  it('is a plain badge, not a disclosure, for a caller that owns no yield', () => {
+  /** Settings remain truthful when a caller cannot implement yields: the
+   * disclosure keeps stops and full control, and omits only the yield actions. */
+  it('keeps stop settings but omits yields for a caller that owns no yield', () => {
     render(settableView({ onYield: undefined }));
     const head = (bar() as Record<string, unknown>)['firstElementChild'];
-    expect(attr(head, 'class')).toBe('mtg-badge');
+    expect(attr(head, 'class')).toBe('mtg-turnstops');
     expect(textOf(head)).toMatch(/^Turn \d/);
-    expect(screen.queryByRole('button', { name: /^Turn \d/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /^Turn \d.*auto-pass settings/ }));
+    expect(screen.getByRole('button', { name: 'Full control' })).not.toBeNull();
+    expect(screen.queryByRole('button', { name: 'Until end of turn' })).toBeNull();
   });
 });
 
@@ -438,10 +463,8 @@ describe('the four-state cycle', () => {
         stopStateOf(DEFAULT_AUTO_PASS, step),
       );
     }
-    // The two the defaults name on each side, spelled out, so the loop above
-    // cannot pass by comparing nothing to nothing.
     expect(stateOfNode('precombatMain')).toBe('yourTurn');
-    expect(stateOfNode('declareBlockers')).toBe('theirTurn');
+    expect(stateOfNode('declareBlockers')).toBe('both');
     expect(stateOfNode('upkeep')).toBe('none');
   });
 
@@ -582,6 +605,19 @@ describe('the state is legible without the shapes', () => {
     }
   });
 
+  it('shows each stop name as a native tooltip over its marks', () => {
+    render(h(PlayRoute, { config: dealt().config }));
+    for (const step of STOPPABLE_STEPS) {
+      const node = nodeFor(step);
+      expect(attr(node, 'title')).toBe(attr(node, 'aria-label'));
+    }
+    const beat = beatMarkOf('combatDamage');
+    expect(beat).not.toBeNull();
+    expect(attr(closest(beat, '.mtg-phasebar__node'), 'title')).toBe(
+      attr(nodeFor('combatDamage'), 'aria-label'),
+    );
+  });
+
   /**
    * WCAG 2.5.3: the visible label has to be in the accessible name, or a voice
    * user saying "click main 1" is talking to a control that is not called that.
@@ -693,10 +729,9 @@ describe('three kinds of mark, in three places', () => {
         expect(textOf(row)).toBe(set ? STOP_ROW_MARKS[side].set : STOP_ROW_MARKS[side].unset);
       }
     }
-    // The defaults spelled out, so the loop cannot pass by comparing nothing to
-    // nothing: the player's own main phase, and the opponent's declare blockers.
     expect(attr(rowOf('precombatMain', 'yourTurn'), 'data-set')).toBe('true');
     expect(attr(rowOf('precombatMain', 'theirTurn'), 'data-set')).toBe('false');
+    expect(attr(rowOf('declareBlockers', 'yourTurn'), 'data-set')).toBe('true');
     expect(attr(rowOf('declareBlockers', 'theirTurn'), 'data-set')).toBe('true');
   });
 
@@ -772,7 +807,33 @@ describe('the combat beats toggle', () => {
     // Two states, so `aria-pressed` is right here and wrong on a node.
     expect(attr(toggle, 'aria-pressed')).toBe('true');
     // WCAG 2.5.3: the drawn word is inside the spoken name.
-    expect(WATCH_BEATS_LABEL).toContain(textOf(toggle).trim().replace(BEAT_MARK, ''));
+    expect(WATCH_BEATS_LABEL).toContain(textOf(queryAll(toggle, '.mtg-phasebar__beats-text')[0]).trim());
+  });
+
+  it('keeps both compact controls identifiable without spending their word width', () => {
+    render(h(PlayRoute, { config: dealt().config }));
+    const beats = beatsToggle();
+    const pace = screen.getByRole('button', { name: PACE_CONTROL_LABEL });
+    expect(beats).not.toBeNull();
+    expect(attr(beats, 'title')).toBe(WATCH_BEATS_LABEL);
+    expect(attr(pace, 'title')).toContain('Table pace:');
+    expect(attr(beats, 'aria-description')).toContain('combat and death pauses');
+    expect(attr(pace, 'aria-description')).toContain('normal speed');
+
+    const paceMark = queryAll(pace, '.mtg-phasebar__pace-mark')[0];
+    expect(textOf(paceMark)).toBe(PACE_MARK);
+    expect(attr(paceMark, 'aria-hidden')).toBe('true');
+    expect(attr(queryAll(beats, '.mtg-phasebar__beats-mark')[0], 'aria-hidden')).toBe('true');
+
+    const sheet = uiStyleSheet();
+    const compact = sheet.match(/\.mtg-phasebar__beats-text,\n\.mtg-phasebar__pace-text \{([^}]*)\}/)?.[1];
+    expect(compact, 'the constrained tier does not remove the control words from layout').toContain(
+      'display: none',
+    );
+    const wide = sheet.match(
+      /@media \(min-width: \d+px\) and \(min-height: [\d.]+rem\) \{[\s\S]*?\.mtg-phasebar__beats-text,\n\s*\.mtg-phasebar__pace-text \{([^}]*)\}/,
+    )?.[1];
+    expect(wide, 'the full-size tier never restores the control words').toContain('display: inline');
   });
 
   it('takes the pause off every combat node, and puts it back', () => {
@@ -867,9 +928,20 @@ describe('the combat beats toggle', () => {
 describe('the bar takes the lane width and only its own height', () => {
   const SHEET = uiStyleSheet();
 
+  /**
+   * The declarations of the rule that names `selector`, whether it names it
+   * alone or as one of a group.
+   *
+   * The group arm was added when the pace control (`mtg-kwu`) took the beats
+   * control's appearance rather than restating it: sharing a rule is the right
+   * answer for two adjacent controls of one size, and a test that could only
+   * read a lone selector would have made "do not duplicate this block" and "keep
+   * asserting this block" mutually exclusive.
+   */
   function rule(selector: string): string {
     const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const found = new RegExp(`(?:^|\\n)${escaped} \\{([^}]*)\\}`).exec(SHEET);
+    const grouped = `(?:^|\\n)(?:[^{}\\n]+,\\n)*${escaped}(?:,\\n[^{}\\n]+)* \\{([^}]*)\\}`;
+    const found = new RegExp(grouped).exec(SHEET);
     if (found === null) throw new Error(`the sheet has no rule for ${selector}`);
     return found[1] ?? '';
   }
@@ -951,9 +1023,12 @@ describe('the bar takes the lane width and only its own height', () => {
     expect(/min-width: ([\d.]+)rem/.exec(rule('.mtg-phasebar__node'))?.[1]).toBeDefined();
   });
 
-  /** The one thing on the bar that must keep its size: a control clipped to an ellipsis is unidentifiable. */
-  it('holds the beats control at its own width while the steps give', () => {
+  /** The things on the bar that must keep their size: a control clipped to an ellipsis is unidentifiable. */
+  it('holds the bar controls at their own width while the steps give', () => {
     expect(rule('.mtg-phasebar__beats')).toContain('flex: none');
+    // The pace (`mtg-kwu`) sits beside the beats and is the same kind of thing:
+    // a setting about watching rather than about playing, and one word wide.
+    expect(rule('.mtg-phasebar__pace')).toContain('flex: none');
   });
 
   /**
@@ -1009,23 +1084,52 @@ describe('the bar takes the lane width and only its own height', () => {
   });
 
   /**
-   * And a phone states its own cap, because that is the one layout where the
-   * lanes cannot grow to pay for a wrapped line. `styles/mobile.ts` carries the
-   * sweep: up to 3.5rem the turn costs the bar nothing at 390x844, and 4rem
-   * costs a whole line, 13.9px of which comes off the opponent's battlefield.
+   * Three caps, because the head is worth three different amounts of room.
+   *
+   * A phone states its own, because that is the one layout where the lanes
+   * cannot grow to pay for a wrapped line: `styles/mobile.ts` carries the sweep,
+   * and up to 3.5rem the turn costs the bar nothing at 390x844 while 4rem costs
+   * a whole line, 13.9px of which comes off the opponent's battlefield.
+   *
+   * A desktop states its own in the other direction (`mtg-aqxi`, 2026-08-22).
+   * The base number was fitted at 1024x768, where half a rem more is a third
+   * line of steps, and holding a 1440px window to that budget drew the app's own
+   * `Turn 7: Opponent` as `Turn 7: …` on every desktop capture. `styles/
+   * views.ts` carries that sweep and the 12px that rides with it.
+   *
+   * The order is the assertion: narrowest on a phone, widest on a desktop, and
+   * the base between them, each in its own block. A tier that silently took
+   * another's number is exactly what this counts.
    */
-  it('states a second, narrower cap inside the phone block', () => {
+  it('states a cap per tier, narrowest on a phone and widest on a desktop', () => {
     const caps = [...SHEET.matchAll(/\.mtg-phasebar > \.mtg-badge \{ max-width: ([\d.]+)rem; \}/g)];
-    expect(caps, 'the sheet caps the head once, so a phone takes the desktop number').toHaveLength(2);
-    const desktop = Number(caps[0]?.[1]);
-    const phone = Number(caps[1]?.[1]);
-    expect(phone, 'the phone cap is not narrower than the desktop one').toBeLessThan(desktop);
+    expect(caps, 'the sheet no longer states one cap per tier').toHaveLength(3);
+    const base = Number(caps[0]?.[1]);
+    const desk = Number(caps[1]?.[1]);
+    const phone = Number(caps[2]?.[1]);
+    expect(phone, 'the phone cap is not narrower than the base one').toBeLessThan(base);
+    expect(desk, 'the desktop cap is not wider than the base one').toBeGreaterThan(base);
     // 3.5rem is 56px and `Turn 18:` is 43.8px in this face, so the turn and its
     // number survive the ellipsis on a phone as well.
     expect(phone * 16).toBeGreaterThanOrEqual(48);
-    const media = SHEET.indexOf(`@media (max-width: ${String(PHONE_MAX_REM)}rem)`);
-    expect(media, 'the sheet has no phone block').toBeGreaterThan(-1);
-    expect(caps[1]?.index ?? -1, 'the narrower cap is outside the phone block').toBeGreaterThan(media);
+    // 106px is `Turn 12: Opponent` in this face, measured over `tools/
+    // step-bar.ts`: the desktop cap exists to clear the app's own longest
+    // ordinary turn text rather than to be merely larger.
+    expect(desk * 16).toBeGreaterThanOrEqual(106);
+    const phoneBlock = SHEET.indexOf(`@media (max-width: ${String(PHONE_MAX_REM)}rem)`);
+    expect(phoneBlock, 'the sheet has no phone block').toBeGreaterThan(-1);
+    expect(caps[2]?.index ?? -1, 'the narrowest cap is outside the phone block').toBeGreaterThan(phoneBlock);
+    const deskBlock = /@media \(min-width: \d+px\) and \(min-height: [\d.]+rem\) \{/.exec(SHEET);
+    expect(deskBlock, 'the sheet has no desktop block').not.toBeNull();
+    const deskAt = deskBlock?.index ?? -1;
+    expect(caps[1]?.index ?? -1, 'the widest cap is outside the desktop block').toBeGreaterThan(deskAt);
+    // And the type goes up with it, in the same block, because a bar whose turn
+    // is legible and whose thirteen names are not has answered half the ask.
+    const type = SHEET.slice(deskAt).match(
+      /\.mtg-phasebar__node,\n(?:\s*\.mtg-phasebar__[a-z]+,\n)*\s*\.mtg-phasebar__beats \{ font-size: ([\d.]+)rem; \}/,
+    );
+    expect(type, 'the desktop block sets no step type').not.toBeNull();
+    expect(Number(type?.[1]) * 16).toBeGreaterThan(11);
   });
 
   /**

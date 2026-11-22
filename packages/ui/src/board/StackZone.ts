@@ -86,16 +86,36 @@ import { createElement } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { Card as DslCard } from '@mtg/dsl';
 import { formatManaCost, isCastable } from '@mtg/dsl';
+import type { CardArt } from '../card/ArtSlot';
 import { cardColorIdentity } from '../card/identity';
 import { markNode } from './Mark';
 
 export interface StackItem {
   readonly key: string;
   readonly card: DslCard;
+  /** Exact presentation attached to a mapped printed spell. */
+  readonly art?: CardArt | null;
   /** Display name of the controller, not a seat index. */
   readonly controller: string;
   /** Already-resolved description of the chosen targets, e.g. "Bear token". */
   readonly targetLabel?: string;
+  /**
+   * The chosen mode's own sentence, when the object on the stack is modal
+   * (CR 700.2).
+   *
+   * A field rather than a prefix on `targetLabel`, which is where it used to
+   * ride (`mtg-sujc`, and `mtg-7si0` before it, whose lane could not reach this
+   * type). They are two facts: the mode says *which spell this is* out of the
+   * ones the card offers, and the target says what that spell is pointed at, and
+   * a modal spell with a target was printing both as one string. Two fields let
+   * the row lay them out separately, shorten them separately, and hand a screen
+   * reader two sentences instead of a run-on.
+   *
+   * The text is `renderEffectList` over exactly the effects the chosen mode
+   * resolves, which is the renderer a card's oracle paragraph is built from, so
+   * nothing narrower is needed on the DSL side.
+   */
+  readonly modeLabel?: string;
   /**
    * At least one of those targets is a permanent on the battlefield, so the
    * board is drawing the other half of this entry's mark
@@ -138,6 +158,21 @@ export interface StackZoneProps {
    * not. A replay frame passes nothing and gets the box it always had.
    */
   readonly onResolve?: (() => void) | undefined;
+  /**
+   * The entries a spell being aimed may be attached to, and the press that
+   * attaches one (`mtg-bz2.16`).
+   *
+   * One object rather than a set beside a handler, for `../board/SeatPod.ts`'s
+   * reason: a lit entry with no press and a press with nothing lit are both
+   * states nobody wants and neither can be written. Absent — which is every
+   * moment no counterspell is being aimed, and every replay frame — leaves the
+   * strip exactly what it was.
+   *
+   * The keys are the strip's own, so nothing here converts an object id;
+   * `../routes/play/targeting.ts` does that conversion once, where the candidate
+   * list is read.
+   */
+  readonly aim?: { readonly answers: ReadonlySet<string>; readonly onAim: (key: string) => void };
 }
 
 /**
@@ -204,7 +239,21 @@ function targetMark(order: number): ReactElement {
 }
 
 /** `order` counts from the top: 1 is the object that resolves next. */
-function entryNode(entry: StackItem, order: number, onResolve: (() => void) | null): ReactElement {
+function entryNode(
+  entry: StackItem,
+  order: number,
+  onResolve: (() => void) | null,
+  aim: StackZoneProps['aim'],
+): ReactElement {
+  // A counterspell being aimed can name this object (`mtg-bz2.16`). The entry
+  // itself becomes the control rather than growing a button beside the Resolve
+  // one, because the strip spends width and never height: a second control on
+  // every legal entry is the one change that would make a stack four deep stop
+  // fitting on its row. It is `role: 'button'` on the `li` rather than a real
+  // `button` element for the same width reason — a nested button would need its
+  // own box — and it takes the tab order for as long as the slot is open, which
+  // is the only moment there is a move on this row at all.
+  const aimable = aim !== undefined && aim.answers.has(entry.key);
   const cost = isCastable(entry.card) ? formatManaCost(entry.card.manaCost) : '';
   const what = entry.ability === true ? 'ability' : cost;
   const aimed = entry.onBoard === true ? [targetMark(order)] : [];
@@ -212,8 +261,33 @@ function entryNode(entry: StackItem, order: number, onResolve: (() => void) | nu
     entry.controller,
     what,
     ...aimed,
-    entry.targetLabel ?? '',
-    order === 1 ? RESOLVES_NEXT : WAITING,
+    // What it is aimed at is the one part of this sentence whose length is a
+    // card name rather than a word this file wrote, so it is the part the strip
+    // shortens when the row runs out of room, and it says so in its class.
+    // `styles/board/stack.ts` holds every other part at its natural width; a row
+    // that shrank them all evenly reported the controller as `Oppo…` and the
+    // mana cost as `{1}…` to save a name nobody had finished reading either.
+    // The chosen mode, ahead of the target, because it says which spell this is
+    // and the target says where that spell points: read the other way round the
+    // row names a destination before it has named the thing going there. It
+    // shrinks the way the target does and for the same reason — both are card-
+    // authored text rather than a word this file wrote — which is also what it
+    // did when the two were one string.
+    entry.modeLabel === undefined
+      ? ''
+      : createElement('span', { key: 'mode', className: 'mtg-stack__mode' }, entry.modeLabel),
+    entry.targetLabel === undefined
+      ? ''
+      : createElement('span', { key: 'target', className: 'mtg-stack__target' }, entry.targetLabel),
+    // The closing word, in a class of its own so a table can drop it: on a
+    // strip with no room it is the part that says the least, because the top
+    // entry is already the one wearing the accent and the only one with a
+    // Resolve button beside it.
+    createElement(
+      'span',
+      { key: 'state', className: 'mtg-stack__state' },
+      order === 1 ? RESOLVES_NEXT : WAITING,
+    ),
   ].filter((part) => part !== '');
   return createElement(
     'li',
@@ -222,10 +296,47 @@ function entryNode(entry: StackItem, order: number, onResolve: (() => void) | nu
       className: 'mtg-stack__entry',
       'data-top': order === 1,
       'data-order': order,
+      // Pressable, so the object can be read (`mtg-mis1`). The key is the one
+      // every readable card on this table writes, and the play surface's single
+      // delegated focus handler turns a press on it into the full face in the
+      // rail's Info section (`../routes/play/inspect.ts`). Nothing is threaded
+      // through this component: the entry says which object it is and stops.
+      //
+      // `tabIndex: -1` rather than a button, which is the pattern
+      // `./CardSlot.ts` already uses for a face with no legal move: a
+      // press focuses it on either input model, and the tab order stays what it
+      // was, because the moves on this strip are the Resolve control and the ask
+      // column, and neither of them is this.
+      'data-permanent-key': entry.key,
+      tabIndex: aimable ? 0 : -1,
+      ...(aimable && aim !== undefined
+        ? {
+            role: 'button',
+            'data-aimable': true,
+            onClick: (): void => {
+              aim.onAim(entry.key);
+            },
+            // Enter and Space, because `role: 'button'` promises both and a
+            // pressable row that answers neither is worse than an unpressable
+            // one: it reads as a control to everything that inspects the tree
+            // and is one to nothing that uses it.
+            onKeyDown: (event: { key: string; preventDefault: () => void }): void => {
+              if (event.key !== 'Enter' && event.key !== ' ') return;
+              event.preventDefault();
+              aim.onAim(entry.key);
+            },
+          }
+        : {}),
     },
     createElement(
-      'span',
-      { className: 'mtg-stack__name' },
+      'button',
+      {
+        type: 'button',
+        className: 'mtg-stack__name mtg-stack__inspect',
+        'data-inspect-card': true,
+        'aria-label': `View full card for ${entry.card.name}`,
+        title: 'View full card',
+      },
       // The number is real text rather than paint. A styled `ol` loses its list
       // semantics in some engines, and the position of an object in the
       // resolution order is the one fact on this row that nothing else carries.
@@ -280,6 +391,7 @@ export function StackZone(props: StackZoneProps): ReactElement | null {
   const top = props.entries.length;
   if (top === 0) return null;
   const onResolve = props.onResolve ?? null;
+  const aim = props.aim;
   return createElement(
     'div',
     {
@@ -296,7 +408,7 @@ export function StackZone(props: StackZoneProps): ReactElement | null {
     createElement(
       'ol',
       { key: 'stack', className: 'mtg-stack' },
-      ...props.entries.map((entry, index) => entryNode(entry, top - index, onResolve)).reverse(),
+      ...props.entries.map((entry, index) => entryNode(entry, top - index, onResolve, aim)).reverse(),
     ),
   );
 }

@@ -17,12 +17,15 @@
  * use it without importing each other.
  */
 import type {
+  Ability,
+  Card,
   CardKind,
   CharacteristicPowerToughness,
   Color,
   Condition,
   Keyword,
   KeywordAbility,
+  TargetingRestriction,
   Supertype,
 } from '@mtg/dsl';
 import { assertNever, printedCardTypes } from '@mtg/dsl';
@@ -33,6 +36,8 @@ import type {
   CopyEffect,
   ObjectFilter,
   PtCount,
+  PtColorScaledModEffect,
+  PtControllerHandScaledModEffect,
   PtDefiningEffect,
   PtModEffect,
   PtScaledModEffect,
@@ -40,9 +45,10 @@ import type {
   TextChangeEffect,
   TypeChangeEffect,
 } from './continuous';
-import { counterCount } from './continuous';
+import { counterCount, objectFilter } from './continuous';
 import { opponentOf } from './ids';
 import type { ObjectId, PlayerId } from './ids';
+import { copiableCardOf } from './state';
 import type { GameObject, GameState } from './state';
 import { graveyardMembers } from './zone-members';
 
@@ -52,6 +58,12 @@ export interface Characteristics {
   readonly toughness: number;
   readonly keywords: readonly Keyword[];
   readonly keywordAbilities: readonly KeywordAbility[];
+  /** All printed non-keyword abilities after copy and layer-6 removal. */
+  readonly abilities: readonly Ability[];
+  /** A layer-6 rule that prohibits activating every ability of this permanent. */
+  readonly activatedAbilitiesProhibited: boolean;
+  /** Non-keyword static rules that constrain the source of a target choice. */
+  readonly targetingRestrictions: readonly TargetingRestriction[];
   readonly colors: readonly Color[];
   readonly cardTypes: readonly CardKind[];
   readonly subtypes: readonly string[];
@@ -62,6 +74,8 @@ export interface Characteristics {
   readonly powerToughnessDefinition: CharacteristicPowerToughness | null;
   /** Copiable printed starting loyalty; absent from nonplaneswalkers. */
   readonly startingLoyalty: number | null;
+  /** Copiable printed defense; absent from non-Battles. */
+  readonly startingDefense: number | null;
 }
 
 export type CharacteristicMap = ReadonlyMap<ObjectId, Characteristics>;
@@ -77,8 +91,8 @@ export interface LayerContext {
   readonly map: CharacteristicMap;
 }
 
-export function printedCharacteristics(object: GameObject): Characteristics {
-  const card = object.card;
+/** Printed values for a card in any zone, assigned to its current controller. */
+export function printedCardCharacteristics(card: Card, controller: PlayerId): Characteristics {
   const isCreature = card.kind === 'creature';
   return {
     name: card.name,
@@ -86,6 +100,9 @@ export function printedCharacteristics(object: GameObject): Characteristics {
     toughness: isCreature ? card.toughness : 0,
     keywords: card.keywords,
     keywordAbilities: card.keywordAbilities ?? [],
+    abilities: card.abilities,
+    activatedAbilitiesProhibited: false,
+    targetingRestrictions: card.targetingRestrictions ?? [],
     colors: card.colors,
     // Both types for an artifact creature, and the second one is a bug fix
     // rather than a widening (`mtg-6y4g`). `CreatureCardSchema` has carried an
@@ -101,13 +118,18 @@ export function printedCharacteristics(object: GameObject): Characteristics {
         ? [...card.subtypes, card.basicLandType]
         : card.subtypes,
     supertypes: card.supertypes,
-    controller: object.controller,
+    controller,
     powerToughnessDefinition:
       isCreature && card.characteristicPowerToughness !== undefined
         ? card.characteristicPowerToughness
         : null,
     startingLoyalty: card.kind === 'planeswalker' ? card.startingLoyalty : null,
+    startingDefense: card.kind === 'battle' ? card.defense : null,
   };
+}
+
+export function printedCharacteristics(object: GameObject): Characteristics {
+  return printedCardCharacteristics(copiableCardOf(object), object.controller);
 }
 
 export function isCreatureCharacteristics(current: Characteristics): boolean {
@@ -134,8 +156,13 @@ function noneOf<T>(refused: readonly T[] | null, present: readonly T[]): boolean
   return refused === null || !refused.some((value) => present.includes(value));
 }
 
-/** Does a permanent with these characteristics match the filter right now? */
-export function matchesFilter(filter: ObjectFilter, oid: ObjectId, current: Characteristics): boolean {
+/** Does an object with these derived characteristics and live token status match right now? */
+export function matchesFilter(
+  filter: ObjectFilter,
+  oid: ObjectId,
+  current: Characteristics,
+  token: boolean,
+): boolean {
   if (filter.oids !== null && !filter.oids.includes(oid)) return false;
   if (filter.excludeOids !== null && filter.excludeOids.includes(oid)) return false;
   if (!anyOf(filter.cardTypes, current.cardTypes)) return false;
@@ -143,22 +170,34 @@ export function matchesFilter(filter: ObjectFilter, oid: ObjectId, current: Char
   if (!noneOf(filter.excludeCardTypes, current.cardTypes)) return false;
   if (!anyOf(filter.subtypes, current.subtypes)) return false;
   if (!anyOf(filter.supertypes, current.supertypes)) return false;
+  if (!anyOf(filter.names, [current.name])) return false;
   if (!anyOf(filter.colors, current.colors)) return false;
   if (!noneOf(filter.excludeColors, current.colors)) return false;
   if (!allOf(filter.keywords, current.keywords)) return false;
+  if (
+    !allOf(
+      filter.keywordAbilities,
+      current.keywordAbilities.map((ability) => ability.kind),
+    )
+  )
+    return false;
+  if (!noneOf(filter.excludeKeywords, current.keywords)) return false;
+  if (filter.token !== null && filter.token !== token) return false;
   if (filter.controller !== null && filter.controller !== current.controller) return false;
   return true;
 }
 
 /** Every permanent the filter currently matches, in battlefield order. */
 export function selectMatching(
+  state: GameState,
   battlefield: readonly ObjectId[],
   map: CharacteristicMap,
   filter: ObjectFilter,
 ): readonly ObjectId[] {
   return battlefield.filter((oid) => {
     const current = map.get(oid);
-    return current !== undefined && matchesFilter(filter, oid, current);
+    const object = state.objects[oid];
+    return current !== undefined && object !== undefined && matchesFilter(filter, oid, current, object.token);
   });
 }
 
@@ -196,12 +235,18 @@ function without<T>(base: readonly T[], removed: readonly T[]): readonly T[] {
   return removed.length === 0 ? base : base.filter((value) => !removed.includes(value));
 }
 
-function applyCopy(current: Characteristics, effect: CopyEffect, state: GameState): Characteristics {
-  const source = state.objects[effect.copyOf];
+function applyCopy(current: Characteristics, effect: CopyEffect, context: LayerContext): Characteristics {
+  const object = context.state.objects[effect.copyOf];
+  const source =
+    context.map.get(effect.copyOf) ?? (object === undefined ? undefined : printedCharacteristics(object));
   if (source === undefined) return current;
   // CR 613.1a / 707.2: a copy takes the copiable (printed) values. Control is
   // not copiable, so it survives from whatever layer 2 said.
-  return { ...printedCharacteristics(source), controller: current.controller };
+  return {
+    ...source,
+    controller: current.controller,
+    activatedAbilitiesProhibited: current.activatedAbilitiesProhibited,
+  };
 }
 
 function applyTextChange(current: Characteristics, effect: TextChangeEffect): Characteristics {
@@ -258,6 +303,10 @@ function sameKeywordAbility(left: KeywordAbility, right: KeywordAbility): boolea
     case 'hexproof':
     case 'indestructible':
     case 'doubleStrike':
+    case 'shroud':
+    case 'flash':
+    case 'intimidate':
+    case 'unleash':
       return right.kind === left.kind;
     default:
       return assertNever(left, 'sameKeywordAbility');
@@ -267,7 +316,11 @@ function sameKeywordAbility(left: KeywordAbility, right: KeywordAbility): boolea
 function applyAbilityChange(current: Characteristics, effect: AbilityChangeEffect): Characteristics {
   // CR 613.1f: one effect that removes and grants does both, removal first.
   const base = effect.removeAll ? [] : without(current.keywords, effect.removeKeywords);
-  const keywordAbilities = [...(effect.removeAll ? [] : current.keywordAbilities)];
+  const keywordAbilities = effect.removeAll
+    ? []
+    : current.keywordAbilities.filter(
+        (ability) => !effect.removeKeywordAbilities.some((removed) => sameKeywordAbility(ability, removed)),
+      );
   for (const granted of effect.addKeywordAbilities) {
     if (!keywordAbilities.some((ability) => sameKeywordAbility(ability, granted))) {
       keywordAbilities.push(granted);
@@ -277,6 +330,9 @@ function applyAbilityChange(current: Characteristics, effect: AbilityChangeEffec
     ...current,
     keywords: union(base, effect.addKeywords),
     keywordAbilities,
+    abilities: [...(effect.removeAll ? [] : current.abilities), ...effect.addAbilities],
+    activatedAbilitiesProhibited: current.activatedAbilitiesProhibited || effect.prohibitActivation,
+    targetingRestrictions: effect.removeAll ? [] : current.targetingRestrictions,
     powerToughnessDefinition: effect.removeAll ? null : current.powerToughnessDefinition,
   };
 }
@@ -304,6 +360,16 @@ export function applyIntrinsicPowerToughness(
       case 'controllerLifeTotal':
         value = state.players[current.controller].life;
         break;
+      case 'controlledSubtype':
+        value = battlefield.filter((candidate) => {
+          const found = map.get(candidate);
+          return (
+            found !== undefined &&
+            found.controller === current.controller &&
+            found.subtypes.includes(definition.subtype)
+          );
+        }).length;
+        break;
     }
     next ??= new Map(map);
     next.set(oid, { ...current, power: value, toughness: value });
@@ -321,12 +387,22 @@ export function evaluateOffBattlefieldPowerToughness(
   const definition = printed.powerToughnessDefinition;
   if (definition === null) return printed;
   const player = object.zone === 'stack' ? object.controller : object.owner;
-  const value =
-    definition.kind === 'controllerLifeTotal'
-      ? state.players[player].life
-      : [...battlefield.values()].filter(
-          (current) => current.controller === player && isCreatureCharacteristics(current),
-        ).length;
+  let value: number;
+  switch (definition.kind) {
+    case 'controllerLifeTotal':
+      value = state.players[player].life;
+      break;
+    case 'creaturesYouControl':
+      value = [...battlefield.values()].filter(
+        (current) => current.controller === player && isCreatureCharacteristics(current),
+      ).length;
+      break;
+    case 'controlledSubtype':
+      value = [...battlefield.values()].filter(
+        (current) => current.controller === player && current.subtypes.includes(definition.subtype),
+      ).length;
+      break;
+  }
   return { ...printed, power: value, toughness: value };
 }
 
@@ -356,7 +432,9 @@ function ptCountValue(context: LayerContext, count: PtCount, sourceOid: ObjectId
   switch (count.kind) {
     case 'battlefield': {
       const filter = resolveFilter(context, count.filter, sourceOid);
-      return filter === null ? 0 : selectMatching(context.battlefield, context.map, filter).length;
+      return filter === null
+        ? 0
+        : selectMatching(context.state, context.battlefield, context.map, filter).length;
     }
     case 'battlefieldWithCounters': {
       // Two pieces against two sources, which is the whole reason this arm is
@@ -368,7 +446,7 @@ function ptCountValue(context: LayerContext, count: PtCount, sourceOid: ObjectId
       // `anyCreatureHasCounter` arm asks it.
       const filter = resolveFilter(context, count.filter, sourceOid);
       if (filter === null) return 0;
-      const matching = selectMatching(context.battlefield, context.map, filter);
+      const matching = selectMatching(context.state, context.battlefield, context.map, filter);
       return matching.filter((oid) => {
         const object = context.state.objects[oid];
         if (object === undefined) return false;
@@ -378,6 +456,14 @@ function ptCountValue(context: LayerContext, count: PtCount, sourceOid: ObjectId
     }
     case 'graveyardCardTypes':
       return graveyardCardTypeCount(context.state, count.whose);
+    case 'controllerGraveyardCreatures': {
+      const controller = context.map.get(sourceOid)?.controller;
+      if (controller === undefined) return 0;
+      return context.state.players[controller].graveyard.filter((oid) => {
+        const object = context.state.objects[oid];
+        return object !== undefined && printedCharacteristics(object).cardTypes.includes('creature');
+      }).length;
+    }
     default:
       return assertNever(count, 'ptCountValue');
   }
@@ -422,6 +508,28 @@ function applyPtScaledMod(
   };
 }
 
+function applyPtColorScaledMod(current: Characteristics, effect: PtColorScaledModEffect): Characteristics {
+  const count = new Set(current.colors).size;
+  return {
+    ...current,
+    power: current.power + effect.power * count,
+    toughness: current.toughness + effect.toughness * count,
+  };
+}
+
+function applyPtControllerHandScaledMod(
+  current: Characteristics,
+  effect: PtControllerHandScaledModEffect,
+  context: LayerContext,
+): Characteristics {
+  const count = context.state.players[current.controller].hand.length;
+  return {
+    ...current,
+    power: current.power + effect.power * count,
+    toughness: current.toughness + effect.toughness * count,
+  };
+}
+
 export function applyEffectTo(
   current: Characteristics,
   effect: ContinuousEffect,
@@ -429,7 +537,7 @@ export function applyEffectTo(
 ): Characteristics {
   switch (effect.kind) {
     case 'copy':
-      return applyCopy(current, effect, context.state);
+      return applyCopy(current, effect, context);
     case 'control':
       return { ...current, controller: effect.controller };
     case 'textChange':
@@ -448,6 +556,10 @@ export function applyEffectTo(
       return applyPtMod(current, effect);
     case 'ptScaledMod':
       return applyPtScaledMod(current, effect, context);
+    case 'ptColorScaledMod':
+      return applyPtColorScaledMod(current, effect);
+    case 'ptControllerHandScaledMod':
+      return applyPtControllerHandScaledMod(current, effect, context);
     case 'ptSwitch':
       return { ...current, power: current.toughness, toughness: current.power };
   }
@@ -479,24 +591,28 @@ export function applyEffectTo(
  * creatures, because card type is itself layer output (an effect earlier in
  * the walk may have turned a noncreature into one).
  *
- * Real `switch`/`assertNever` dispatch as of `mtg-jp23`: `Condition` gained a
- * second member whose fields (`counter`) do not overlap `controlsSubtype`'s
- * (`subtype`/`atLeast`), so `Condition['kind']` is now the literal union
- * `'controlsSubtype' | 'anyCreatureHasCounter'` and the standard
+ * Real `switch`/`assertNever` dispatch as of `mtg-jp23`: once `Condition`
+ * gained a second member, `Condition['kind']` became a literal union and the standard
  * `switch`/`default`/`assertNever` idiom narrows for real. `condition.ts`
  * argues why a hand-maintained tripwire type is no longer the right
  * instrument for keeping this exhaustive.
  */
-export function conditionHolds(context: LayerContext, condition: Condition, sourceOid: ObjectId): boolean {
+export function conditionHolds(
+  context: LayerContext,
+  condition: Condition,
+  sourceOid: ObjectId,
+  controllerOverride?: PlayerId,
+): boolean {
   switch (condition.kind) {
     case 'controlsSubtype': {
       const source = context.map.get(sourceOid);
-      if (source === undefined) return false;
+      const controller = controllerOverride ?? source?.controller;
+      if (controller === undefined) return false;
       let count = 0;
       for (const oid of context.battlefield) {
         const current = context.map.get(oid);
         if (current === undefined) continue;
-        if (current.controller !== source.controller) continue;
+        if (current.controller !== controller) continue;
         if (!current.subtypes.includes(condition.subtype)) continue;
         count += 1;
       }
@@ -520,27 +636,75 @@ export function conditionHolds(context: LayerContext, condition: Condition, sour
       // and needs the map only to learn whose seat is the opponent's — read
       // live, so a control-change effect moves the question with the permanent.
       const source = context.map.get(sourceOid);
-      if (source === undefined) return false;
-      return graveyardMembers(context.state, opponentOf(source.controller)).length >= condition.atLeast;
+      const controller = controllerOverride ?? source?.controller;
+      if (controller === undefined) return false;
+      return graveyardMembers(context.state, opponentOf(controller)).length >= condition.atLeast;
     }
-    case 'lifeAtLeast': {
-      // "You" is the source's current controller, read live off the map for the
-      // reason `controlsSubtype` reads it there: a control-change effect moves
-      // the question with the permanent.
+    case 'opponentUndamagedThisTurn': {
       const source = context.map.get(sourceOid);
-      if (source === undefined) return false;
-      return context.state.players[source.controller].life >= condition.atLeast;
+      const controller = controllerOverride ?? source?.controller;
+      return (
+        controller !== undefined &&
+        !context.state.turn.playersDealtDamageThisTurn.includes(opponentOf(controller))
+      );
     }
-    case 'noOpponentDealtDamageThisTurn': {
-      // The one condition in this switch that reads history rather than a
-      // census. `TurnState.damagedPlayers` is where the kernel keeps it and
-      // `damage.ts` is what writes it; the seat is read live, as the other
-      // opponent-scoped member's is. The polarity is negative because the
-      // printed clause it serves is a restriction with an "unless" in it —
-      // `condition.ts` argues that at length.
+    case 'controllerLifeAtLeast': {
       const source = context.map.get(sourceOid);
-      if (source === undefined) return false;
-      return !context.state.turn.damagedPlayers.includes(opponentOf(source.controller));
+      const controller = controllerOverride ?? source?.controller;
+      return controller !== undefined && context.state.players[controller].life >= condition.atLeast;
+    }
+    case 'controllerLifeBelow': {
+      const source = context.map.get(sourceOid);
+      const controller = controllerOverride ?? source?.controller;
+      return controller !== undefined && context.state.players[controller].life < condition.fewerThan;
+    }
+    case 'controllerLibraryAtLeast': {
+      const source = context.map.get(sourceOid);
+      const controller = controllerOverride ?? source?.controller;
+      return (
+        controller !== undefined && context.state.players[controller].library.length >= condition.atLeast
+      );
+    }
+    case 'controllerTopLibraryHasColor': {
+      const source = context.map.get(sourceOid);
+      const controller = controllerOverride ?? source?.controller;
+      if (controller === undefined) return false;
+      const top = context.state.players[controller].library[0];
+      return top !== undefined && context.state.objects[top]?.card.colors.includes(condition.color) === true;
+    }
+    case 'battlefieldCountBelow':
+      return (
+        selectMatching(
+          context.state,
+          context.battlefield,
+          context.map,
+          objectFilter({
+            cardTypes: condition.filter.cardTypes ?? null,
+            subtypes: condition.filter.subtypes ?? null,
+            names: condition.filter.names ?? null,
+          }),
+        ).length < condition.fewerThan
+      );
+    case 'controlsNoneOfSubtypes': {
+      const source = context.map.get(sourceOid);
+      const controller = controllerOverride ?? source?.controller;
+      if (controller === undefined) return false;
+      return !context.battlefield.some((oid) => {
+        const current = context.map.get(oid);
+        return (
+          current !== undefined &&
+          current.controller === controller &&
+          condition.subtypes.some((subtype) => current.subtypes.includes(subtype))
+        );
+      });
+    }
+    case 'selfCounterCountBelow': {
+      const object = context.state.objects[sourceOid];
+      return object !== undefined && counterCount(object.counters, condition.counter) < condition.fewerThan;
+    }
+    case 'selfCounterCountAtLeast': {
+      const object = context.state.objects[sourceOid];
+      return object !== undefined && counterCount(object.counters, condition.counter) >= condition.atLeast;
     }
     default:
       return assertNever(condition, 'conditionHolds');
@@ -566,12 +730,19 @@ export function conditionHolds(context: LayerContext, condition: Condition, sour
  * agreement about which permanents a card's own static currently reaches.
  */
 export function affectedByEffect(context: LayerContext, effect: ContinuousEffect): readonly ObjectId[] {
+  if (effect.activeDuringOtherTurns === true) {
+    const source = context.map.get(effect.sourceOid);
+    if (source === undefined || context.state.turn.active === source.controller) return [];
+  }
   if (effect.enabledWhile !== null && !conditionHolds(context, effect.enabledWhile, effect.sourceOid)) {
     return [];
   }
   const filter = resolveFilter(context, effect.affects, effect.sourceOid);
   if (filter === null) return [];
-  return selectMatching(context.battlefield, context.map, filter);
+  const selected = selectMatching(context.state, context.battlefield, context.map, filter);
+  return effect.requiresTapped === true
+    ? selected.filter((oid) => context.state.objects[oid]?.tapped === true)
+    : selected;
 }
 
 /** Applies one effect to every permanent it currently matches. */

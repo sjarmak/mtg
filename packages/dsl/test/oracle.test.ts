@@ -204,7 +204,7 @@ describe('static ability text', () => {
       // CR 613.4a, Tarmogoyf's own printed sentence, verbatim.
       "Skywatch Sentinel's power is equal to the number of card types among cards in all graveyards and its toughness is equal to that number plus 1.",
     ],
-    // The seven combat modifications (`static-modification-class.ts`'s
+    // The combat modifications (`static-modification-class.ts`'s
     // `'combat'` class), generalized off the Aura-only path so a plain static
     // prints the same clause an Aura would attach — CR 508/509's permissions and
     // requirements rather than CR 613's characteristic layers, dispatched
@@ -215,7 +215,7 @@ describe('static ability text', () => {
     ],
     [
       { kind: 'static', scope: 'self', subtype: null, modification: { kind: 'cantBlock' } },
-      "Skywatch Sentinel can't block.",
+      "This creature can't block.",
     ],
     [
       { kind: 'static', scope: 'self', subtype: null, modification: { kind: 'cantBeBlocked' } },
@@ -227,7 +227,7 @@ describe('static ability text', () => {
     ],
     [
       { kind: 'static', scope: 'self', subtype: null, modification: { kind: 'mustBeBlockedIfAble' } },
-      'All creatures able to block Skywatch Sentinel do so.',
+      'All creatures able to block this creature do so.',
     ],
     [
       {
@@ -308,8 +308,8 @@ describe('triggered ability text', () => {
   });
 
   it('keeps a sentence that opens with the card name capitalized', () => {
-    // `renderEffect` writes the card's name first only for `dealDamage`, which
-    // always does; every other primitive opens with a verb or with the target.
+    // Generated damage retains its historical card-name rendering. The
+    // hand-authored player sweep exercises its source pronoun separately.
     expect(
       withAbility({
         kind: 'triggered',
@@ -317,6 +317,23 @@ describe('triggered ability text', () => {
         effects: [{ kind: 'dealDamage', amount: 1, target: { kind: 'targetPlayer' } }],
       }),
     ).toBe(`Whenever ${bear.name} attacks, ${bear.name} deals 1 damage to target player.`);
+  });
+
+  it('keeps the source name when a player sweep trigger has no source antecedent', () => {
+    expect(
+      withAbility({
+        kind: 'triggered',
+        condition: 'youGainLife',
+        effects: [
+          {
+            kind: 'dealDamage',
+            amount: 1,
+            players: 'eachOpponent',
+            target: { kind: 'noTarget' },
+          },
+        ],
+      }),
+    ).toBe(`Whenever you gain life, ${bear.name} deals 1 damage to each opponent.`);
   });
 
   it('prints "you may" in front of an optional trigger (CR 603.3b)', () => {
@@ -509,7 +526,7 @@ describe('activated ability text', () => {
     ).toBe('{1}{U}, {T}: Draw a card. You gain 1 life.');
   });
 
-  it('prints all three ability kinds on one card, in card order, under the keywords', () => {
+  it('prints all three object ability kinds on one card, in card order, under the keywords', () => {
     const card = {
       ...bear,
       keywords: ['flying' as const],
@@ -527,9 +544,7 @@ describe('activated ability text', () => {
         },
       ],
     };
-    // `Card.abilities` caps at two, so the three-kind line-up is asserted on
-    // the renderer directly: `renderOracleText` prints whatever list it is
-    // handed, and the cap is a New World Order budget, not a print rule.
+    // Exercise all three ability kinds in the hand-authored Card envelope.
     const activated = {
       kind: 'activated' as const,
       cost: { mana: mana({ generic: 2 }), tapSelf: true, sacrificeSelf: false },
@@ -578,7 +593,7 @@ describe('effect rendering edge cases', () => {
     [{ kind: 'drawCards', count: 1, target: { kind: 'targetPlayer' } }, 'Target player draws a card.'],
     [{ kind: 'drawCards', count: 3, target: { kind: 'noTarget' } }, 'Draw three cards.'],
     [{ kind: 'gainLife', amount: 5, target: { kind: 'targetPlayer' } }, 'Target player gains 5 life.'],
-    [{ kind: 'millCards', count: 1, target: { kind: 'noTarget' } }, 'You mill one card.'],
+    [{ kind: 'millCards', count: 1, target: { kind: 'noTarget' } }, 'You mill a card.'],
     // The two arms of CR 701.22's sentence. `includeSelf` is the difference
     // between Elixir of Immortality and the same effect printed on a spell, and
     // it is the only field the renderer reads here.

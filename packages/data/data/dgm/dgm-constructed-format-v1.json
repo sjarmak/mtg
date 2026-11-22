@@ -1,0 +1,748 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-constructed-format",
+  "id": "dgm",
+  "name": "Dragon's Maze / Gatecrash / Return to Ravnica",
+  "sources": [
+    {
+      "code": "DGM",
+      "catalogFormat": "dgm-printed-v1",
+      "catalogSha256": "edafb6d66d5329df195c8d3c2f71fed2487c94d6dbdfb8efbd0b6244fe759063",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/DGM.json",
+        "sha256": "338193996e478ebaa72410601f15fd5194c3d4864fc2c2c48f5e2419f1508451",
+        "version": "5.3.0+20260919"
+      }
+    },
+    {
+      "code": "GTC",
+      "catalogFormat": "gtc-printed-v1",
+      "catalogSha256": "515aaffb14562be9f9fad0bb0a71686af871966f83258a0c343c028456deeccb",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/GTC.json",
+        "sha256": "18e3ebf894374a45ec047505275c24ff3406ff85ed0b481a41245925f4e9e1bd",
+        "version": "5.3.0+20260919"
+      }
+    },
+    {
+      "code": "RTR",
+      "catalogFormat": "rtr-printed-v1",
+      "catalogSha256": "b26f72507bfb6b98db9e565a8af04769d04db8b4cdc327e3b037bd294958a845",
+      "mtgjson": {
+        "url": "https://mtgjson.com/api/v5/RTR.json",
+        "sha256": "d5491d8c293bb3a2861c2f329c19fb95e3ab73a07586264a9a7fe51e182bca3a",
+        "version": "5.3.0+20260919"
+      }
+    }
+  ],
+  "rules": {
+    "variant": "standard",
+    "startingLife": 20
+  },
+  "decks": [
+    {
+      "id": "selesnya-tokens",
+      "name": "Selesnya Tokens",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dgm-printed-v1:0060:291c0ebc-d489-42c7-8d8a-9216c333412f",
+          "name": "Bronzebeak Moa",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0114:07246783-d475-4f61-99ac-e2b574072349",
+          "name": "Voice of Resurgence",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0146:c6df8f4d-a07a-4664-878d-efec8b2affb9",
+          "name": "Call of the Conclave",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0051:f40284e6-01a1-4372-a92c-940e5732607e",
+          "name": "Advent of the Wurm",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0010:3db0074c-95cf-4d15-8fe1-7282803ec757",
+          "name": "Wake the Reflections",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0019:deccfa48-b8df-4dcc-ba1b-920f8352def7",
+          "name": "Rootborn Defenses",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0010:befef095-3429-4dd7-aa01-2f7f619675d4",
+          "name": "Eyes in the Skies",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0194:a9848eab-1d3a-4ab0-adf6-c20858aa3afb",
+          "name": "Selesnya Charm",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0206:9d1d9d86-5666-4e59-9766-137657b4e040",
+          "name": "Trostani, Selesnya's Voice",
+          "count": 2
+        },
+        {
+          "physicalId": "rtr-printed-v1:0150:53c84c4d-e6d6-4eac-9d14-5b6cba914c3d",
+          "name": "Collective Blessing",
+          "count": 2
+        },
+        {
+          "physicalId": "rtr-printed-v1:0248:b821e604-f9fd-47a4-b5ff-bfb5022834c2",
+          "name": "Temple Garden",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0155:90198725-0cd3-4650-9575-c22674aa4185",
+          "name": "Selesnya Guildgate",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0240:3cf60ca0-e01f-499c-8d04-d59050f38c33",
+          "name": "Grove of the Guardian",
+          "count": 2
+        },
+        {
+          "physicalId": "rtr-printed-v1:0250:ac754820-343e-4c01-bcfa-89fa5c8c7e1d",
+          "name": "Plains",
+          "count": 9
+        },
+        {
+          "physicalId": "rtr-printed-v1:0270:f00849dd-c1ba-4171-a503-603fe77c0a43",
+          "name": "Forest",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "id": "azorius-flyers",
+      "name": "Azorius Flyers",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dgm-printed-v1:0053:b1f00799-80ce-431e-97bb-8bb4e0e8ba49",
+          "name": "Ascended Lawmage",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0218:0fc51899-3970-416b-b7de-fadbc9678955",
+          "name": "Judge's Familiar",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0179:11cbeb3b-1579-4318-a024-4a2c06896eaf",
+          "name": "Lyev Skyknight",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0196:60601296-2229-4c48-94cc-1903926750ce",
+          "name": "Skymark Roc",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0040:884afdb3-0d5f-45a1-b57e-6c3760aa0031",
+          "name": "Hover Barrier",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0015:9752644c-7c43-429e-a79c-1239b9a0bc8a",
+          "name": "Murmuring Phantasm",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0145:26adc211-d089-4102-91e5-225bbeb5f382",
+          "name": "Azorius Charm",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0155:afee5464-83b7-4d7a-b407-9ee7de21535b",
+          "name": "Detention Sphere",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0054:ba6f218f-83b0-4b68-a00f-0327cd79f32a",
+          "name": "Syncopate",
+          "count": 2
+        },
+        {
+          "physicalId": "rtr-printed-v1:0241:af7091c9-5f98-4078-a42b-c9e057346d9b",
+          "name": "Hallowed Fountain",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0146:65bbe27d-c92a-4c65-a997-b21536d7667e",
+          "name": "Azorius Guildgate",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0250:ac754820-343e-4c01-bcfa-89fa5c8c7e1d",
+          "name": "Plains",
+          "count": 10
+        },
+        {
+          "physicalId": "rtr-printed-v1:0255:78f35064-c662-48ff-a2a9-d26f594500f5",
+          "name": "Island",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "id": "simic-counters",
+      "name": "Simic Counters",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dgm-printed-v1:0054:1e2f7d7f-4097-419b-8de0-b7bf28fc3a4b",
+          "name": "Beetleform Mage",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0119:2cc1d8d0-bb43-4962-ad29-bb6478aa986b",
+          "name": "Experiment One",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0032:e2931f27-43f9-4e52-aab3-967c26739e43",
+          "name": "Cloudfin Raptor",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0193:07855a17-4e68-4257-af7f-275c9fb0a9b8",
+          "name": "Shambleshark",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0047:23b68921-0c34-4d92-83c3-21542f62c7f6",
+          "name": "Renegade Krasis",
+          "count": 3
+        },
+        {
+          "physicalId": "gtc-printed-v1:0176:1a47da7c-80f3-4b98-aaac-778c34a35cb6",
+          "name": "Master Biomancer",
+          "count": 3
+        },
+        {
+          "physicalId": "gtc-printed-v1:0209:feeaf99b-7720-42e3-8cb1-23218b646458",
+          "name": "Zameck Guildmage",
+          "count": 2
+        },
+        {
+          "physicalId": "dgm-printed-v1:0115:db0665d4-d974-4d5e-ba29-7bf40cbbe29c",
+          "name": "Vorel of the Hull Clade",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0214:6e18f7a9-2af6-467a-8f62-5f7da83a3c92",
+          "name": "Bioshift",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0195:97c27bdd-77f5-4e93-8f54-93a204fc980a",
+          "name": "Simic Charm",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0044:83557f55-f1ab-4995-9cc1-37be895a59db",
+          "name": "Rapid Hybridization",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0240:ece3bcdd-cb33-4923-b919-ba57a327d3cd",
+          "name": "Breeding Pool",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0156:fee34fcb-0158-4741-9292-513fed9684cb",
+          "name": "Simic Guildgate",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0255:78f35064-c662-48ff-a2a9-d26f594500f5",
+          "name": "Island",
+          "count": 9
+        },
+        {
+          "physicalId": "rtr-printed-v1:0270:f00849dd-c1ba-4171-a503-603fe77c0a43",
+          "name": "Forest",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "id": "boros-tokens",
+      "name": "Boros Tokens",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dgm-printed-v1:0056:5e179f0d-2965-44e4-8483-67b330a8608c",
+          "name": "Blaze Commando",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0007:a03974e6-aced-4664-8c5c-3190bb1eb233",
+          "name": "Boros Elite",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0208:423f0870-dc1c-4cd8-b92c-6d5f92abbaec",
+          "name": "Wojek Halberdiers",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0200:42d1122a-099b-49bf-9b53-52429658816a",
+          "name": "Sunhome Guildmage",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0097:b47f639e-4635-4c26-bb2a-4925f0582c21",
+          "name": "Legion Loyalist",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0012:711a5eca-531d-4b07-b7df-9b06bad491be",
+          "name": "Frontline Medic",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0148:d4ddf9cc-40a7-4b4f-bb51-b08171453c9a",
+          "name": "Boros Charm",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0116:81e474ac-54f7-43f9-8af9-2f1adf258b15",
+          "name": "Warleader's Helix",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0092:e612a032-39be-44cd-a78c-29f89dc384b0",
+          "name": "Dynacharge",
+          "count": 3
+        },
+        {
+          "physicalId": "gtc-printed-v1:0142:43675ed7-ece1-4414-965e-9ebadcbf3dfb",
+          "name": "Assemble the Legion",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0163:e244c198-efdc-492a-9c52-76aac006de9d",
+          "name": "Firemane Avenger",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0245:0a26d900-c652-4f9c-8681-a35c5f8b1937",
+          "name": "Sacred Foundry",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0147:e94cc167-a6da-4404-88aa-61eee8b4b9e8",
+          "name": "Boros Guildgate",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0250:ac754820-343e-4c01-bcfa-89fa5c8c7e1d",
+          "name": "Plains",
+          "count": 10
+        },
+        {
+          "physicalId": "rtr-printed-v1:0265:3b4a196f-de7e-4100-ad65-56cf8b0a8b23",
+          "name": "Mountain",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "id": "rakdos-aggro",
+      "name": "Rakdos Aggro",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dgm-printed-v1:0061:20bde6c1-917c-4860-a8d0-a9d7c461f8d2",
+          "name": "Carnage Gladiator",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0220:5f873c0b-e779-4f09-8e9c-94a1765eb5da",
+          "name": "Rakdos Cackler",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0106:cec50499-70d4-4dc1-9cae-abbecfc8e87d",
+          "name": "Spike Jester",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0221:06899549-5534-4d11-86c1-afd1796e18b1",
+          "name": "Rakdos Shred-Freak",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0096:56ba132f-95fc-4b99-a1dc-ebe6f622bb41",
+          "name": "Gore-House Chainwalker",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0069:6cb72a64-89e7-4b0e-a3d3-1309829071d2",
+          "name": "Exava, Rakdos Blood Witch",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0098:67ef2667-40f6-4c1c-af81-3e45d2437d5f",
+          "name": "Madcap Skills",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0157:a83945c6-4dc6-4d9a-9bc2-2d4a264e5422",
+          "name": "Dreadbore",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0144:9580a40b-b413-4f0d-9b38-13903a9d367d",
+          "name": "Auger Spree",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0238:8bd5828b-8dcd-4ce6-b834-ebe9cbaa12d1",
+          "name": "Blood Crypt",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0154:1368e7c6-2220-4dad-8129-68336f261af0",
+          "name": "Rakdos Guildgate",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0260:2d8c3f29-121e-42d1-be21-29f403f97708",
+          "name": "Swamp",
+          "count": 10
+        },
+        {
+          "physicalId": "rtr-printed-v1:0265:3b4a196f-de7e-4100-ad65-56cf8b0a8b23",
+          "name": "Mountain",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "id": "golgari-graveyard",
+      "name": "Golgari Graveyard",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dgm-printed-v1:0067:22feacda-01e0-4f0d-a3c7-a22e3d40bf4e",
+          "name": "Drown in Filth",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0165:dcb5eb2a-ae7a-4416-970c-6e9306689c88",
+          "name": "Grisly Salvage",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0222:d9327905-a254-4885-8310-69fc153ec52f",
+          "name": "Slitherhead",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0213:70496f16-c4c0-4c03-beef-454eb4824cd1",
+          "name": "Deathrite Shaman",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0177:3b628197-f26c-457a-b9a4-c1f1d3e02f3d",
+          "name": "Lotleth Troll",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0158:28d42d6a-e9a0-449e-9b31-436c09b7c1ba",
+          "name": "Dreg Mangler",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0112:4c3ae3db-c14a-4ffc-805c-a3a51da9370d",
+          "name": "Varolz, the Scar-Striped",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0174:02ef18d1-fd05-4dbc-9fa7-a383799b34e9",
+          "name": "Jarad, Golgari Lich Lord",
+          "count": 2
+        },
+        {
+          "physicalId": "rtr-printed-v1:0141:3b1e92b4-6e53-4dba-a572-c67e01965ac5",
+          "name": "Abrupt Decay",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0243:1c7d50d6-b63a-4d8c-88fa-1d78ae693a45",
+          "name": "Overgrown Tomb",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0149:0248cc88-e95c-4667-82a2-40e881acabc2",
+          "name": "Golgari Guildgate",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0260:2d8c3f29-121e-42d1-be21-29f403f97708",
+          "name": "Swamp",
+          "count": 10
+        },
+        {
+          "physicalId": "rtr-printed-v1:0270:f00849dd-c1ba-4171-a503-603fe77c0a43",
+          "name": "Forest",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "id": "dimir-control",
+      "name": "Dimir Control",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dgm-printed-v1:0076:438683f5-adfa-42ae-a6fb-c4649a8a30ab",
+          "name": "Haunter of Nightveil",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0222:e3754b8c-16d2-41e3-b41b-4b2e70833e82",
+          "name": "Nightveil Specter",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0011:9c93313b-cf43-47e9-a911-717b4d14b0b5",
+          "name": "Aetherling",
+          "count": 1
+        },
+        {
+          "physicalId": "rtr-printed-v1:0044:d4df3a38-678e-42dc-a3fd-d1d399368f07",
+          "name": "Jace, Architect of Thought",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0063:88c42ebd-114a-430d-b3a4-ff2fb3093bf5",
+          "name": "Devour Flesh",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0082:d2b4912a-83a2-4870-8fac-81fa79da2830",
+          "name": "Ultimate Price",
+          "count": 3
+        },
+        {
+          "physicalId": "dgm-printed-v1:0127:d13cdb71-a499-41db-84e6-95f84650c524",
+          "name": "Far // Away",
+          "count": 3
+        },
+        {
+          "physicalId": "gtc-printed-v1:0154:f3f4cfa7-8ee4-4a85-9e6a-65a7541f62c1",
+          "name": "Dimir Charm",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0189:0d87927c-80a6-4146-92a5-58c510ce7958",
+          "name": "Psychic Strike",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0054:ba6f218f-83b0-4b68-a00f-0327cd79f32a",
+          "name": "Syncopate",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0035:205c4689-8b02-4d40-9274-3c1fcafa8b82",
+          "name": "Cyclonic Rift",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0249:47fde349-010e-4a2e-838e-e924dbeec355",
+          "name": "Watery Grave",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0148:9627f9eb-c3fc-4517-9d65-132fdcc217d7",
+          "name": "Dimir Guildgate",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0255:78f35064-c662-48ff-a2a9-d26f594500f5",
+          "name": "Island",
+          "count": 11
+        },
+        {
+          "physicalId": "rtr-printed-v1:0260:2d8c3f29-121e-42d1-be21-29f403f97708",
+          "name": "Swamp",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "id": "orzhov-sacrifice",
+      "name": "Orzhov Sacrifice",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dgm-printed-v1:0083:cd1131c6-04da-4c4d-ab61-874ac5be7087",
+          "name": "Maw of the Obzedat",
+          "count": 3
+        },
+        {
+          "physicalId": "gtc-printed-v1:0150:25bcfbc0-1401-4e5e-8145-c8936c4ff725",
+          "name": "Cartel Aristocrat",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0109:e069aa06-35b0-4af8-89cb-af653708ed32",
+          "name": "Tithe Drinker",
+          "count": 2
+        },
+        {
+          "physicalId": "dgm-printed-v1:0103:305a3feb-df49-486c-a3b4-ff2721d60019",
+          "name": "Sin Collector",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0074:29727bd1-9415-408a-99de-dd992e26e767",
+          "name": "Ogre Slumlord",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0201:f013e6f0-85d0-4c8e-a10b-7beea572c32d",
+          "name": "Treasury Thrull",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0182:4cc198d8-1f27-482d-8f5d-21e02c59797a",
+          "name": "Obzedat, Ghost Council",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0220:88366762-4be0-422a-a0ff-ed046d30afe1",
+          "name": "Immortal Servitude",
+          "count": 3
+        },
+        {
+          "physicalId": "gtc-printed-v1:0185:8ca44265-5e1b-4fbf-9002-52b2ce9b7448",
+          "name": "Orzhov Charm",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0063:88c42ebd-114a-430d-b3a4-ff2fb3093bf5",
+          "name": "Devour Flesh",
+          "count": 3
+        },
+        {
+          "physicalId": "rtr-printed-v1:0017:5f1f6178-4071-401f-bd0d-cac0c5967661",
+          "name": "Precinct Captain",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0171:84a3ff8d-6d7e-49f0-8d30-7f8c23db568b",
+          "name": "High Priest of Penance",
+          "count": 3
+        },
+        {
+          "physicalId": "gtc-printed-v1:0242:6fd672bb-18cf-44e3-8dda-5310b1e0fffe",
+          "name": "Godless Shrine",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0153:8f4e2006-5bff-4e91-862b-aa76521a99c3",
+          "name": "Orzhov Guildgate",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0250:ac754820-343e-4c01-bcfa-89fa5c8c7e1d",
+          "name": "Plains",
+          "count": 13
+        },
+        {
+          "physicalId": "rtr-printed-v1:0260:2d8c3f29-121e-42d1-be21-29f403f97708",
+          "name": "Swamp",
+          "count": 7
+        }
+      ]
+    },
+    {
+      "id": "gruul-aggro",
+      "name": "Gruul Aggro",
+      "commanders": [],
+      "cards": [
+        {
+          "physicalId": "dgm-printed-v1:0075:df383a6a-5eb1-48e8-a5f3-f4731ddb871b",
+          "name": "Gruul War Chant",
+          "count": 3
+        },
+        {
+          "physicalId": "gtc-printed-v1:0119:2cc1d8d0-bb43-4962-ad29-bb6478aa986b",
+          "name": "Experiment One",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0216:899d5f35-3613-4c69-9176-13baf442fb50",
+          "name": "Burning-Tree Emissary",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0086:1f61b1a3-4b3b-4490-a9dc-17aac258cbda",
+          "name": "Ash Zealot",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0167:382048ec-0bf5-49a5-90d5-f80fbda08962",
+          "name": "Ghor-Clan Rampager",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0038:bc802d62-6559-45b9-ad11-de5887aece2b",
+          "name": "Rubblebelt Maaka",
+          "count": 2
+        },
+        {
+          "physicalId": "gtc-printed-v1:0098:67ef2667-40f6-4c1c-af81-3e45d2437d5f",
+          "name": "Madcap Skills",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0101:d4ded88d-2688-4f5e-a8b2-16216cf9c792",
+          "name": "Mizzium Mortars",
+          "count": 3
+        },
+        {
+          "physicalId": "gtc-printed-v1:0097:b47f639e-4635-4c26-bb2a-4925f0582c21",
+          "name": "Legion Loyalist",
+          "count": 4
+        },
+        {
+          "physicalId": "gtc-printed-v1:0247:f29f3415-971c-4a5d-aae9-3893f4bdab1e",
+          "name": "Stomping Ground",
+          "count": 4
+        },
+        {
+          "physicalId": "dgm-printed-v1:0150:24221b9a-5ff1-43f8-b409-c56967f8308d",
+          "name": "Gruul Guildgate",
+          "count": 4
+        },
+        {
+          "physicalId": "rtr-printed-v1:0265:3b4a196f-de7e-4100-ad65-56cf8b0a8b23",
+          "name": "Mountain",
+          "count": 12
+        },
+        {
+          "physicalId": "rtr-printed-v1:0270:f00849dd-c1ba-4171-a503-603fe77c0a43",
+          "name": "Forest",
+          "count": 8
+        }
+      ]
+    }
+  ],
+  "contentSha256": "438bda3e1cfb4fedff788135b6076e97270c575f8b398dff475d4a941baf55f5"
+}

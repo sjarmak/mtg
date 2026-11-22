@@ -600,6 +600,85 @@ describe('thirty pinned cards leave the census where they found it', () => {
  * the ladder seats the card with it. The flagship's own table lives beside its
  * brief; these are the properties, stated on cards this file invents.
  */
+/**
+ * `mtg-4xvs`: the design statement and the allocation ceiling are two fields.
+ *
+ * They were one, and because the second is a seat *competition*, stating a
+ * truer rarity for one card silently moved which other cards got seats. The
+ * flagship could not say the Trisigil is its mythic without pushing One-Hit
+ * Obliterator onto the common sheet and costing a re-record of a paid run, so
+ * the brief said `common` about the set's marquee relic on purpose.
+ *
+ * The cases below are the two halves of the split: a ceiling caps the seat and
+ * nothing else, and a brief that states no ceiling derives exactly what it
+ * derived before the field existed.
+ */
+describe('a seat ceiling is not a design statement', () => {
+  const MYTHIC_RELIC: RequiredCardInput = {
+    name: 'Marquee Gear',
+    color: 'colorless',
+    cardKind: 'artifact',
+    rarity: 'mythic',
+    seatCeiling: 'common',
+  };
+
+  it('carries both fields through the boundary', () => {
+    const card = parseBrief(briefFor([MYTHIC_RELIC])).requiredCards[0];
+    expect({ rarity: card?.rarity, seatCeiling: card?.seatCeiling }).toStrictEqual({
+      rarity: 'mythic',
+      seatCeiling: 'common',
+    });
+  });
+
+  it('refuses a ceiling with no design statement above it', () => {
+    expect(() => parseBrief(briefFor([{ name: 'Marquee Gear', seatCeiling: 'common' }]))).toThrow(
+      /must state the rarity it is a ceiling under/,
+    );
+  });
+
+  it('refuses a ceiling at or above the rarity it caps', () => {
+    const at = (rarity: string, ceiling: string): unknown => ({
+      ...TEST_BRIEF,
+      requiredCards: [{ name: 'Marquee Gear', rarity, seatCeiling: ceiling }],
+    });
+    expect(() => parseBrief(at('rare', 'rare'))).toThrow(/equal is the default said out loud/);
+    expect(() => parseBrief(at('common', 'rare'))).toThrow(/above it is not a ceiling/);
+  });
+
+  it('seats the card at the ceiling and never at the rarity, at a size that could hold either', () => {
+    // FLAGSHIP_SIZE has a rare tier. Without the ceiling this card takes a rare
+    // seat; with it the card is a common and the rare seat stays where it was.
+    const capped = derivePins(parseBrief(briefFor([MYTHIC_RELIC], FLAGSHIP_SIZE)));
+    expect(capped.brief.requiredCards[0]?.rarity).toBe('common');
+    const { seatCeiling: _spent, ...uncapped } = MYTHIC_RELIC;
+    expect(derivePins(parseBrief(briefFor([uncapped], FLAGSHIP_SIZE))).brief.requiredCards[0]?.rarity).toBe(
+      'rare',
+    );
+  });
+
+  it('drops the ceiling from the pinned card, because the derivation is over', () => {
+    // Everything downstream reads the pinned brief. A ceiling left on a card
+    // that is already seated is a second chance to relax it.
+    expect(
+      derivePins(parseBrief(briefFor([MYTHIC_RELIC], FLAGSHIP_SIZE))).brief.requiredCards[0]?.seatCeiling,
+    ).toBeUndefined();
+  });
+
+  it('says the brief capped it rather than that the size could not seat it', () => {
+    const notes = derivePins(parseBrief(briefFor([MYTHIC_RELIC], FLAGSHIP_SIZE))).notes;
+    expect(notes).toStrictEqual([
+      `required card "Marquee Gear": design rarity mythic, seated at common because the brief caps it there; the ${String(FLAGSHIP_SIZE)}-card skeleton was not asked for the higher tier.`,
+    ]);
+  });
+
+  it('leaves a brief that states no ceiling exactly where it was', () => {
+    const stated = parseBrief(briefFor(named(2, { rarity: 'rare', color: 'R', cardKind: 'creature' })));
+    const derived = derivePins(stated);
+    expect(derived.notes).toStrictEqual([]);
+    expect(derived.brief.requiredCards).toStrictEqual(stated.requiredCards);
+  });
+});
+
 describe('derivePins seats a stated pin where the size can hold it', () => {
   const MARQUEE: readonly RequiredCardInput[] = [
     ...named(2, { color: 'colorless', cardKind: 'artifact', rarity: 'rare' }, 'Marquee Gear'),

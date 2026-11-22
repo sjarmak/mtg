@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "bng",
+  "formatSha256": "6da213397e2ddb88bf9e980e3d075020bd2f5be99b2d05cba0a468c6871ad8ab",
+  "sourceSha256": "f1a81a99db838b6d398f6f1067a122130cf41817962d205b3cd4480e35806897",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "f1a81a99db838b6d398f6f1067a122130cf41817962d205b3cd4480e35806897",
+    "recipe.json": "95e05c3688b76cc5e98529bc6185290b016dad53c5487308efe41a6556a1673c",
+    "bng-printed-catalog-v1.json": "1b75225000297205ecd4d32ccaf54a2b387795a1545709f396d4e75ceab427a6",
+    "ths-printed-catalog-v1.json": "a17ce943f228cb73fa94915a1957d8f4e967ebcd176d17fdf9ed44aeeefaa414",
+    "bng-limited-format-v1.json": "028187e4264c33cb454b7b15b669a0ea377ef7909ad43787fdaf3043207ed786"
+  },
+  "catalogs": [
+    {
+      "code": "BNG",
+      "cards": 165,
+      "contentSha256": "fab9bfa843fc533ef7b53ebe8d002c6af11646da80509189ca2efe54f0d261eb"
+    },
+    {
+      "code": "THS",
+      "cards": 249,
+      "contentSha256": "f5c3657836d8912c232e46fc83966fd6f4559e5d6aeaed7a5922097b20776e71"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 4357.320954,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 399,
+    "printings": 414
+  }
+}

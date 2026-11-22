@@ -1,0 +1,3095 @@
+{
+  "schemaVersion": 1,
+  "kind": "printed-card-catalog",
+  "format": "mps-printed-v1",
+  "source": {
+    "provenanceArtifact": "sources.json",
+    "provenanceSha256": "def80a9bd5d50c6ead4db47e0d98a91aa5a56901a6b6f3fff0f9c542d10ef6c2",
+    "scryfallProvider": "scryfall-search-snapshot",
+    "scryfallBulkFile": "MPS-2863262f671fb9755b5bb6e1e06c01ba4bb2501aa9eefd52afef3fe7b63f7d48.scryfall.json",
+    "scryfallBulkSha256": "2863262f671fb9755b5bb6e1e06c01ba4bb2501aa9eefd52afef3fe7b63f7d48",
+    "scryfallBulkUpdatedAt": "2026-09-22T09:13:02.128Z"
+  },
+  "forgeVersion": "2.0.14",
+  "cards": [
+    {
+      "physicalId": "mps-printed-v1:0001:f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5",
+      "position": 1,
+      "sourceName": "Cataclysmic Gearhulk",
+      "correctedName": "Cataclysmic Gearhulk",
+      "name": "Cataclysmic Gearhulk",
+      "oracleId": "2e4865c5-a590-4820-81ec-926014ddb8c4",
+      "scryfallId": "f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5",
+      "forgeScript": "c/cataclysmic_gearhulk.txt",
+      "forgeScriptSha256": "4f541b21a2c097cd56cdad79cb22f26e2b294e06999a656ce29169c3e2be8731",
+      "layout": "normal",
+      "manaCost": "{3}{W}{W}",
+      "manaValue": 5,
+      "typeLine": "Artifact Creature — Construct",
+      "oracleText": "Vigilance\nWhen this creature enters, each player chooses an artifact, a creature, an enchantment, and a planeswalker from among the nonland permanents they control, then sacrifices the rest.",
+      "power": "4",
+      "toughness": "5",
+      "loyalty": null,
+      "colors": ["W"],
+      "colorIdentity": ["W"],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Cataclysmic Gearhulk",
+          "manaCost": "{3}{W}{W}",
+          "typeLine": "Artifact Creature — Construct",
+          "oracleText": "Vigilance\nWhen this creature enters, each player chooses an artifact, a creature, an enchantment, and a planeswalker from among the nonland permanents they control, then sacrifices the rest.",
+          "power": "4",
+          "toughness": "5",
+          "loyalty": null,
+          "colors": ["W"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.jpg?1783937253",
+              "normal": "https://cards.scryfall.io/normal/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.jpg?1783937253",
+              "large": "https://cards.scryfall.io/large/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.jpg?1783937253",
+              "png": "https://cards.scryfall.io/png/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.png?1783937253",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.jpg?1783937253",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.jpg?1783937253",
+              "thumb": "https://cards.scryfall.io/thumb/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.webp?1783937253",
+              "grid": "https://cards.scryfall.io/grid/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.webp?1783937253",
+              "display": "https://cards.scryfall.io/display/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.webp?1783937253",
+              "art": "https://cards.scryfall.io/art/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.webp?1783937253",
+              "crop": "https://cards.scryfall.io/crop/front/f/4/f4a32cc0-0d46-4af3-9b0c-e5384cd6aff5.webp?1783937253"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0002:7892c45c-1b17-4474-82fd-01f6d9a83181",
+      "position": 2,
+      "sourceName": "Torrential Gearhulk",
+      "correctedName": "Torrential Gearhulk",
+      "name": "Torrential Gearhulk",
+      "oracleId": "a6395447-677d-4c39-8eda-2d57e527c94e",
+      "scryfallId": "7892c45c-1b17-4474-82fd-01f6d9a83181",
+      "forgeScript": "t/torrential_gearhulk.txt",
+      "forgeScriptSha256": "e2961eeb6bde58fb9e01fb0d559bb0799011b3e6d87c84c841635abe0c7e3829",
+      "layout": "normal",
+      "manaCost": "{4}{U}{U}",
+      "manaValue": 6,
+      "typeLine": "Artifact Creature — Construct",
+      "oracleText": "Flash\nWhen this creature enters, you may cast target instant card from your graveyard without paying its mana cost. If that spell would be put into your graveyard, exile it instead.",
+      "power": "5",
+      "toughness": "6",
+      "loyalty": null,
+      "colors": ["U"],
+      "colorIdentity": ["U"],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Torrential Gearhulk",
+          "manaCost": "{4}{U}{U}",
+          "typeLine": "Artifact Creature — Construct",
+          "oracleText": "Flash\nWhen this creature enters, you may cast target instant card from your graveyard without paying its mana cost. If that spell would be put into your graveyard, exile it instead.",
+          "power": "5",
+          "toughness": "6",
+          "loyalty": null,
+          "colors": ["U"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "7892c45c-1b17-4474-82fd-01f6d9a83181",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.jpg?1783937253",
+              "normal": "https://cards.scryfall.io/normal/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.jpg?1783937253",
+              "large": "https://cards.scryfall.io/large/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.jpg?1783937253",
+              "png": "https://cards.scryfall.io/png/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.png?1783937253",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.jpg?1783937253",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.jpg?1783937253",
+              "thumb": "https://cards.scryfall.io/thumb/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.webp?1783937253",
+              "grid": "https://cards.scryfall.io/grid/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.webp?1783937253",
+              "display": "https://cards.scryfall.io/display/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.webp?1783937253",
+              "art": "https://cards.scryfall.io/art/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.webp?1783937253",
+              "crop": "https://cards.scryfall.io/crop/front/7/8/7892c45c-1b17-4474-82fd-01f6d9a83181.webp?1783937253"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0003:d3bb2c02-7153-4231-a313-f75f5a1338e3",
+      "position": 3,
+      "sourceName": "Noxious Gearhulk",
+      "correctedName": "Noxious Gearhulk",
+      "name": "Noxious Gearhulk",
+      "oracleId": "a77b5be2-f361-4135-ba25-670a74d268ac",
+      "scryfallId": "d3bb2c02-7153-4231-a313-f75f5a1338e3",
+      "forgeScript": "n/noxious_gearhulk.txt",
+      "forgeScriptSha256": "b58527e3d2b9ff0ab39b10bcd914dfca61015e73fa9432132c64684e13ba0ead",
+      "layout": "normal",
+      "manaCost": "{4}{B}{B}",
+      "manaValue": 6,
+      "typeLine": "Artifact Creature — Construct",
+      "oracleText": "Menace\nWhen this creature enters, you may destroy another target creature. If a creature is destroyed this way, you gain life equal to its toughness.",
+      "power": "5",
+      "toughness": "4",
+      "loyalty": null,
+      "colors": ["B"],
+      "colorIdentity": ["B"],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Noxious Gearhulk",
+          "manaCost": "{4}{B}{B}",
+          "typeLine": "Artifact Creature — Construct",
+          "oracleText": "Menace\nWhen this creature enters, you may destroy another target creature. If a creature is destroyed this way, you gain life equal to its toughness.",
+          "power": "5",
+          "toughness": "4",
+          "loyalty": null,
+          "colors": ["B"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "d3bb2c02-7153-4231-a313-f75f5a1338e3",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.jpg?1783937252",
+              "normal": "https://cards.scryfall.io/normal/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.jpg?1783937252",
+              "large": "https://cards.scryfall.io/large/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.jpg?1783937252",
+              "png": "https://cards.scryfall.io/png/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.png?1783937252",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.jpg?1783937252",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.jpg?1783937252",
+              "thumb": "https://cards.scryfall.io/thumb/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.webp?1783937252",
+              "grid": "https://cards.scryfall.io/grid/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.webp?1783937252",
+              "display": "https://cards.scryfall.io/display/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.webp?1783937252",
+              "art": "https://cards.scryfall.io/art/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.webp?1783937252",
+              "crop": "https://cards.scryfall.io/crop/front/d/3/d3bb2c02-7153-4231-a313-f75f5a1338e3.webp?1783937252"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0004:a861f50c-8152-4cf6-bb17-3efcfac3be9b",
+      "position": 4,
+      "sourceName": "Combustible Gearhulk",
+      "correctedName": "Combustible Gearhulk",
+      "name": "Combustible Gearhulk",
+      "oracleId": "3494a575-f68e-4e78-9f6b-142cd8a0edea",
+      "scryfallId": "a861f50c-8152-4cf6-bb17-3efcfac3be9b",
+      "forgeScript": "c/combustible_gearhulk.txt",
+      "forgeScriptSha256": "3cf18e7dd322f150752f47c22611a2380b7477ceccae0ed2972d6dd7f8b18ea8",
+      "layout": "normal",
+      "manaCost": "{4}{R}{R}",
+      "manaValue": 6,
+      "typeLine": "Artifact Creature — Construct",
+      "oracleText": "First strike\nWhen this creature enters, target opponent may have you draw three cards. If the player doesn't, you mill three cards, then this creature deals damage to that player equal to the total mana value of those cards.",
+      "power": "6",
+      "toughness": "6",
+      "loyalty": null,
+      "colors": ["R"],
+      "colorIdentity": ["R"],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Combustible Gearhulk",
+          "manaCost": "{4}{R}{R}",
+          "typeLine": "Artifact Creature — Construct",
+          "oracleText": "First strike\nWhen this creature enters, target opponent may have you draw three cards. If the player doesn't, you mill three cards, then this creature deals damage to that player equal to the total mana value of those cards.",
+          "power": "6",
+          "toughness": "6",
+          "loyalty": null,
+          "colors": ["R"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "a861f50c-8152-4cf6-bb17-3efcfac3be9b",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.jpg?1783937253",
+              "normal": "https://cards.scryfall.io/normal/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.jpg?1783937253",
+              "large": "https://cards.scryfall.io/large/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.jpg?1783937253",
+              "png": "https://cards.scryfall.io/png/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.png?1783937253",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.jpg?1783937253",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.jpg?1783937253",
+              "thumb": "https://cards.scryfall.io/thumb/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.webp?1783937253",
+              "grid": "https://cards.scryfall.io/grid/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.webp?1783937253",
+              "display": "https://cards.scryfall.io/display/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.webp?1783937253",
+              "art": "https://cards.scryfall.io/art/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.webp?1783937253",
+              "crop": "https://cards.scryfall.io/crop/front/a/8/a861f50c-8152-4cf6-bb17-3efcfac3be9b.webp?1783937253"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0005:39997212-6943-4094-a9f7-cbdfa8938090",
+      "position": 5,
+      "sourceName": "Verdurous Gearhulk",
+      "correctedName": "Verdurous Gearhulk",
+      "name": "Verdurous Gearhulk",
+      "oracleId": "3765e8bb-e70d-4503-b8dc-1e684e434c18",
+      "scryfallId": "39997212-6943-4094-a9f7-cbdfa8938090",
+      "forgeScript": "v/verdurous_gearhulk.txt",
+      "forgeScriptSha256": "65175c97350ff9f434a74be852f13fc59f94343e336d489b21cc82048182810c",
+      "layout": "normal",
+      "manaCost": "{3}{G}{G}",
+      "manaValue": 5,
+      "typeLine": "Artifact Creature — Construct",
+      "oracleText": "Trample\nWhen this creature enters, distribute four +1/+1 counters among any number of target creatures you control.",
+      "power": "4",
+      "toughness": "4",
+      "loyalty": null,
+      "colors": ["G"],
+      "colorIdentity": ["G"],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Verdurous Gearhulk",
+          "manaCost": "{3}{G}{G}",
+          "typeLine": "Artifact Creature — Construct",
+          "oracleText": "Trample\nWhen this creature enters, distribute four +1/+1 counters among any number of target creatures you control.",
+          "power": "4",
+          "toughness": "4",
+          "loyalty": null,
+          "colors": ["G"]
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "39997212-6943-4094-a9f7-cbdfa8938090",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.jpg?1783937253",
+              "normal": "https://cards.scryfall.io/normal/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.jpg?1783937253",
+              "large": "https://cards.scryfall.io/large/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.jpg?1783937253",
+              "png": "https://cards.scryfall.io/png/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.png?1783937253",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.jpg?1783937253",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.jpg?1783937253",
+              "thumb": "https://cards.scryfall.io/thumb/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.webp?1783937253",
+              "grid": "https://cards.scryfall.io/grid/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.webp?1783937253",
+              "display": "https://cards.scryfall.io/display/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.webp?1783937253",
+              "art": "https://cards.scryfall.io/art/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.webp?1783937253",
+              "crop": "https://cards.scryfall.io/crop/front/3/9/39997212-6943-4094-a9f7-cbdfa8938090.webp?1783937253"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0006:b3205343-03f8-4ffd-8bbc-6df1ae5621b4",
+      "position": 6,
+      "sourceName": "Aether Vial",
+      "correctedName": "Aether Vial",
+      "name": "Aether Vial",
+      "oracleId": "fc148e1e-dff0-448e-9f16-625341754356",
+      "scryfallId": "b3205343-03f8-4ffd-8bbc-6df1ae5621b4",
+      "forgeScript": "a/aether_vial.txt",
+      "forgeScriptSha256": "0ae7e716c293fcb9c3dd48a69cca2fa3dc46b19ab159ff6de0b8d5746ac53d3e",
+      "layout": "normal",
+      "manaCost": "{1}",
+      "manaValue": 1,
+      "typeLine": "Artifact",
+      "oracleText": "At the beginning of your upkeep, you may put a charge counter on this artifact.\n{T}: You may put a creature card with mana value equal to the number of charge counters on this artifact from your hand onto the battlefield.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Aether Vial",
+          "manaCost": "{1}",
+          "typeLine": "Artifact",
+          "oracleText": "At the beginning of your upkeep, you may put a charge counter on this artifact.\n{T}: You may put a creature card with mana value equal to the number of charge counters on this artifact from your hand onto the battlefield.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "b3205343-03f8-4ffd-8bbc-6df1ae5621b4",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.jpg?1783937252",
+              "normal": "https://cards.scryfall.io/normal/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.jpg?1783937252",
+              "large": "https://cards.scryfall.io/large/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.jpg?1783937252",
+              "png": "https://cards.scryfall.io/png/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.png?1783937252",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.jpg?1783937252",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.jpg?1783937252",
+              "thumb": "https://cards.scryfall.io/thumb/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.webp?1783937252",
+              "grid": "https://cards.scryfall.io/grid/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.webp?1783937252",
+              "display": "https://cards.scryfall.io/display/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.webp?1783937252",
+              "art": "https://cards.scryfall.io/art/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.webp?1783937252",
+              "crop": "https://cards.scryfall.io/crop/front/b/3/b3205343-03f8-4ffd-8bbc-6df1ae5621b4.webp?1783937252"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0007:7c71065f-6242-4c1b-a2d4-e940d6d4fad7",
+      "position": 7,
+      "sourceName": "Champion's Helm",
+      "correctedName": "Champion's Helm",
+      "name": "Champion's Helm",
+      "oracleId": "c01aafb8-3da5-4eb1-8731-2a223e747d63",
+      "scryfallId": "7c71065f-6242-4c1b-a2d4-e940d6d4fad7",
+      "forgeScript": "c/champions_helm.txt",
+      "forgeScriptSha256": "1f4d58c9e9d082ce45c93fc158ff75b6d369ca00dc05227f57dd4b2ad104a230",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact — Equipment",
+      "oracleText": "Equipped creature gets +2/+2.\nAs long as equipped creature is legendary, it has hexproof. (It can't be the target of spells or abilities your opponents control.)\nEquip {1}",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Champion's Helm",
+          "manaCost": "{3}",
+          "typeLine": "Artifact — Equipment",
+          "oracleText": "Equipped creature gets +2/+2.\nAs long as equipped creature is legendary, it has hexproof. (It can't be the target of spells or abilities your opponents control.)\nEquip {1}",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "7c71065f-6242-4c1b-a2d4-e940d6d4fad7",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.jpg?1783937252",
+              "normal": "https://cards.scryfall.io/normal/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.jpg?1783937252",
+              "large": "https://cards.scryfall.io/large/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.jpg?1783937252",
+              "png": "https://cards.scryfall.io/png/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.png?1783937252",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.jpg?1783937252",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.jpg?1783937252",
+              "thumb": "https://cards.scryfall.io/thumb/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.webp?1783937252",
+              "grid": "https://cards.scryfall.io/grid/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.webp?1783937252",
+              "display": "https://cards.scryfall.io/display/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.webp?1783937252",
+              "art": "https://cards.scryfall.io/art/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.webp?1783937252",
+              "crop": "https://cards.scryfall.io/crop/front/7/c/7c71065f-6242-4c1b-a2d4-e940d6d4fad7.webp?1783937252"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0008:c7970aee-494f-45c1-9842-04632ad27313",
+      "position": 8,
+      "sourceName": "Chromatic Lantern",
+      "correctedName": "Chromatic Lantern",
+      "name": "Chromatic Lantern",
+      "oracleId": "539f5396-d99a-417d-a84c-dff7930b5900",
+      "scryfallId": "c7970aee-494f-45c1-9842-04632ad27313",
+      "forgeScript": "c/chromatic_lantern.txt",
+      "forgeScriptSha256": "ccec6093ca329c37848df38b55a02b1e96eced276d25bfeacde93819a2436166",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "Lands you control have \"{T}: Add one mana of any color.\"\n{T}: Add one mana of any color.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": ["W", "U", "B", "R", "G"],
+      "faces": [
+        {
+          "name": "Chromatic Lantern",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "Lands you control have \"{T}: Add one mana of any color.\"\n{T}: Add one mana of any color.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "c7970aee-494f-45c1-9842-04632ad27313",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.jpg?1783937252",
+              "normal": "https://cards.scryfall.io/normal/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.jpg?1783937252",
+              "large": "https://cards.scryfall.io/large/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.jpg?1783937252",
+              "png": "https://cards.scryfall.io/png/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.png?1783937252",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.jpg?1783937252",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.jpg?1783937252",
+              "thumb": "https://cards.scryfall.io/thumb/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.webp?1783937252",
+              "grid": "https://cards.scryfall.io/grid/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.webp?1783937252",
+              "display": "https://cards.scryfall.io/display/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.webp?1783937252",
+              "art": "https://cards.scryfall.io/art/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.webp?1783937252",
+              "crop": "https://cards.scryfall.io/crop/front/c/7/c7970aee-494f-45c1-9842-04632ad27313.webp?1783937252"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0009:90bbc0fa-4810-490d-bda7-a8fd4aaa01c4",
+      "position": 9,
+      "sourceName": "Chrome Mox",
+      "correctedName": "Chrome Mox",
+      "name": "Chrome Mox",
+      "oracleId": "ec3d4466-547c-4e02-b1b5-a156ec4637e9",
+      "scryfallId": "90bbc0fa-4810-490d-bda7-a8fd4aaa01c4",
+      "forgeScript": "c/chrome_mox.txt",
+      "forgeScriptSha256": "d39b51859a2812badc427bf3878463bb8f2b87ff5c92109bde07dbad3eb747a9",
+      "layout": "normal",
+      "manaCost": "{0}",
+      "manaValue": 0,
+      "typeLine": "Artifact",
+      "oracleText": "Imprint — When this artifact enters, you may exile a nonartifact, nonland card from your hand.\n{T}: Add one mana of any of the exiled card's colors.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": ["W", "U", "B", "R", "G"],
+      "faces": [
+        {
+          "name": "Chrome Mox",
+          "manaCost": "{0}",
+          "typeLine": "Artifact",
+          "oracleText": "Imprint — When this artifact enters, you may exile a nonartifact, nonland card from your hand.\n{T}: Add one mana of any of the exiled card's colors.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "90bbc0fa-4810-490d-bda7-a8fd4aaa01c4",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.jpg?1783937253",
+              "normal": "https://cards.scryfall.io/normal/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.jpg?1783937253",
+              "large": "https://cards.scryfall.io/large/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.jpg?1783937253",
+              "png": "https://cards.scryfall.io/png/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.png?1783937253",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.jpg?1783937253",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.jpg?1783937253",
+              "thumb": "https://cards.scryfall.io/thumb/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.webp?1783937253",
+              "grid": "https://cards.scryfall.io/grid/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.webp?1783937253",
+              "display": "https://cards.scryfall.io/display/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.webp?1783937253",
+              "art": "https://cards.scryfall.io/art/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.webp?1783937253",
+              "crop": "https://cards.scryfall.io/crop/front/9/0/90bbc0fa-4810-490d-bda7-a8fd4aaa01c4.webp?1783937253"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0010:d581d8fd-a6af-4082-b8e3-3cf714db88c6",
+      "position": 10,
+      "sourceName": "Cloudstone Curio",
+      "correctedName": "Cloudstone Curio",
+      "name": "Cloudstone Curio",
+      "oracleId": "5cd2fd32-4da2-40eb-b003-c0b9a9ec91c1",
+      "scryfallId": "d581d8fd-a6af-4082-b8e3-3cf714db88c6",
+      "forgeScript": "c/cloudstone_curio.txt",
+      "forgeScriptSha256": "4488342da2639baa6aab5df3df0ad0516c49256b8265227bc6a98ef76b81b81b",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "Whenever a nonartifact permanent you control enters, you may return another permanent you control that shares a permanent type with it to its owner's hand.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Cloudstone Curio",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "Whenever a nonartifact permanent you control enters, you may return another permanent you control that shares a permanent type with it to its owner's hand.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "d581d8fd-a6af-4082-b8e3-3cf714db88c6",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.jpg?1783937251",
+              "normal": "https://cards.scryfall.io/normal/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.jpg?1783937251",
+              "large": "https://cards.scryfall.io/large/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.jpg?1783937251",
+              "png": "https://cards.scryfall.io/png/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.png?1783937251",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.jpg?1783937251",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.jpg?1783937251",
+              "thumb": "https://cards.scryfall.io/thumb/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.webp?1783937251",
+              "grid": "https://cards.scryfall.io/grid/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.webp?1783937251",
+              "display": "https://cards.scryfall.io/display/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.webp?1783937251",
+              "art": "https://cards.scryfall.io/art/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.webp?1783937251",
+              "crop": "https://cards.scryfall.io/crop/front/d/5/d581d8fd-a6af-4082-b8e3-3cf714db88c6.webp?1783937251"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0011:57fb8472-b7ff-4d70-998f-7628eae979bd",
+      "position": 11,
+      "sourceName": "Crucible of Worlds",
+      "correctedName": "Crucible of Worlds",
+      "name": "Crucible of Worlds",
+      "oracleId": "33c722cf-b4bf-431f-aefd-ee96241a7fbf",
+      "scryfallId": "57fb8472-b7ff-4d70-998f-7628eae979bd",
+      "forgeScript": "c/crucible_of_worlds.txt",
+      "forgeScriptSha256": "254061deda77710828b93b551e2e49ccbd872a8eb9a0e53786edec924de6862f",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "You may play lands from your graveyard.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Crucible of Worlds",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "You may play lands from your graveyard.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "57fb8472-b7ff-4d70-998f-7628eae979bd",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.jpg?1783937252",
+              "normal": "https://cards.scryfall.io/normal/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.jpg?1783937252",
+              "large": "https://cards.scryfall.io/large/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.jpg?1783937252",
+              "png": "https://cards.scryfall.io/png/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.png?1783937252",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.jpg?1783937252",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.jpg?1783937252",
+              "thumb": "https://cards.scryfall.io/thumb/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.webp?1783937252",
+              "grid": "https://cards.scryfall.io/grid/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.webp?1783937252",
+              "display": "https://cards.scryfall.io/display/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.webp?1783937252",
+              "art": "https://cards.scryfall.io/art/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.webp?1783937252",
+              "crop": "https://cards.scryfall.io/crop/front/5/7/57fb8472-b7ff-4d70-998f-7628eae979bd.webp?1783937252"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0012:5c3ac941-2af2-4652-9b3d-c62d04c8af60",
+      "position": 12,
+      "sourceName": "Gauntlet of Power",
+      "correctedName": "Gauntlet of Power",
+      "name": "Gauntlet of Power",
+      "oracleId": "1182591d-8660-4a2e-8d77-2fc544b02b66",
+      "scryfallId": "5c3ac941-2af2-4652-9b3d-c62d04c8af60",
+      "forgeScript": "g/gauntlet_of_power.txt",
+      "forgeScriptSha256": "39111e9c77c78b3ca92cafc61ea9581e1146ce837ec890a1e1aca17dc246f850",
+      "layout": "normal",
+      "manaCost": "{5}",
+      "manaValue": 5,
+      "typeLine": "Artifact",
+      "oracleText": "As this artifact enters, choose a color.\nCreatures of the chosen color get +1/+1.\nWhenever a basic land is tapped for mana of the chosen color, its controller adds an additional one mana of that color.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": ["W", "U", "B", "R", "G"],
+      "faces": [
+        {
+          "name": "Gauntlet of Power",
+          "manaCost": "{5}",
+          "typeLine": "Artifact",
+          "oracleText": "As this artifact enters, choose a color.\nCreatures of the chosen color get +1/+1.\nWhenever a basic land is tapped for mana of the chosen color, its controller adds an additional one mana of that color.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "5c3ac941-2af2-4652-9b3d-c62d04c8af60",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.jpg?1783937252",
+              "normal": "https://cards.scryfall.io/normal/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.jpg?1783937252",
+              "large": "https://cards.scryfall.io/large/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.jpg?1783937252",
+              "png": "https://cards.scryfall.io/png/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.png?1783937252",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.jpg?1783937252",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.jpg?1783937252",
+              "thumb": "https://cards.scryfall.io/thumb/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.webp?1783937252",
+              "grid": "https://cards.scryfall.io/grid/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.webp?1783937252",
+              "display": "https://cards.scryfall.io/display/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.webp?1783937252",
+              "art": "https://cards.scryfall.io/art/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.webp?1783937252",
+              "crop": "https://cards.scryfall.io/crop/front/5/c/5c3ac941-2af2-4652-9b3d-c62d04c8af60.webp?1783937252"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0013:c246b845-dfca-47a3-aa56-074d30590320",
+      "position": 13,
+      "sourceName": "Hangarback Walker",
+      "correctedName": "Hangarback Walker",
+      "name": "Hangarback Walker",
+      "oracleId": "dde55256-5259-44e7-a267-fca45a7f0d04",
+      "scryfallId": "c246b845-dfca-47a3-aa56-074d30590320",
+      "forgeScript": "h/hangarback_walker.txt",
+      "forgeScriptSha256": "447b800f1469e8a89a653fcf31a03af0ca0be1e99fee236a445f44440290fa23",
+      "layout": "normal",
+      "manaCost": "{X}{X}",
+      "manaValue": 0,
+      "typeLine": "Artifact Creature — Construct",
+      "oracleText": "This creature enters with X +1/+1 counters on it.\nWhen this creature dies, create a 1/1 colorless Thopter artifact creature token with flying for each +1/+1 counter on this creature.\n{1}, {T}: Put a +1/+1 counter on this creature.",
+      "power": "0",
+      "toughness": "0",
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Hangarback Walker",
+          "manaCost": "{X}{X}",
+          "typeLine": "Artifact Creature — Construct",
+          "oracleText": "This creature enters with X +1/+1 counters on it.\nWhen this creature dies, create a 1/1 colorless Thopter artifact creature token with flying for each +1/+1 counter on this creature.\n{1}, {T}: Put a +1/+1 counter on this creature.",
+          "power": "0",
+          "toughness": "0",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "c246b845-dfca-47a3-aa56-074d30590320",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.jpg?1783937251",
+              "normal": "https://cards.scryfall.io/normal/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.jpg?1783937251",
+              "large": "https://cards.scryfall.io/large/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.jpg?1783937251",
+              "png": "https://cards.scryfall.io/png/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.png?1783937251",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.jpg?1783937251",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.jpg?1783937251",
+              "thumb": "https://cards.scryfall.io/thumb/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.webp?1783937251",
+              "grid": "https://cards.scryfall.io/grid/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.webp?1783937251",
+              "display": "https://cards.scryfall.io/display/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.webp?1783937251",
+              "art": "https://cards.scryfall.io/art/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.webp?1783937251",
+              "crop": "https://cards.scryfall.io/crop/front/c/2/c246b845-dfca-47a3-aa56-074d30590320.webp?1783937251"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0014:ca483a44-0eaa-4a2c-abef-de1e8f3f3766",
+      "position": 14,
+      "sourceName": "Lightning Greaves",
+      "correctedName": "Lightning Greaves",
+      "name": "Lightning Greaves",
+      "oracleId": "ca204b66-8d0c-431a-8d34-282f7c2d17da",
+      "scryfallId": "ca483a44-0eaa-4a2c-abef-de1e8f3f3766",
+      "forgeScript": "l/lightning_greaves.txt",
+      "forgeScriptSha256": "d2fc44d4a141f4d70bf5301c23b79ef8291add365b231648d84a479afac2fce4",
+      "layout": "normal",
+      "manaCost": "{2}",
+      "manaValue": 2,
+      "typeLine": "Artifact — Equipment",
+      "oracleText": "Equipped creature has haste and shroud. (It can't be the target of spells or abilities.)\nEquip {0}",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Lightning Greaves",
+          "manaCost": "{2}",
+          "typeLine": "Artifact — Equipment",
+          "oracleText": "Equipped creature has haste and shroud. (It can't be the target of spells or abilities.)\nEquip {0}",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "ca483a44-0eaa-4a2c-abef-de1e8f3f3766",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.jpg?1783937251",
+              "normal": "https://cards.scryfall.io/normal/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.jpg?1783937251",
+              "large": "https://cards.scryfall.io/large/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.jpg?1783937251",
+              "png": "https://cards.scryfall.io/png/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.png?1783937251",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.jpg?1783937251",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.jpg?1783937251",
+              "thumb": "https://cards.scryfall.io/thumb/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.webp?1783937251",
+              "grid": "https://cards.scryfall.io/grid/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.webp?1783937251",
+              "display": "https://cards.scryfall.io/display/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.webp?1783937251",
+              "art": "https://cards.scryfall.io/art/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.webp?1783937251",
+              "crop": "https://cards.scryfall.io/crop/front/c/a/ca483a44-0eaa-4a2c-abef-de1e8f3f3766.webp?1783937251"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0015:b2279cb1-089f-4c41-ae96-41837ed57822",
+      "position": 15,
+      "sourceName": "Lotus Petal",
+      "correctedName": "Lotus Petal",
+      "name": "Lotus Petal",
+      "oracleId": "32e5339e-9e4f-46f8-b305-f9d6d3ba8bb5",
+      "scryfallId": "b2279cb1-089f-4c41-ae96-41837ed57822",
+      "forgeScript": "l/lotus_petal.txt",
+      "forgeScriptSha256": "7c9c88c388e9bb6b9a677c7b5d3a87387af9bbee727eff8ec4355452414fe4fc",
+      "layout": "normal",
+      "manaCost": "{0}",
+      "manaValue": 0,
+      "typeLine": "Artifact",
+      "oracleText": "{T}, Sacrifice this artifact: Add one mana of any color.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": ["W", "U", "B", "R", "G"],
+      "faces": [
+        {
+          "name": "Lotus Petal",
+          "manaCost": "{0}",
+          "typeLine": "Artifact",
+          "oracleText": "{T}, Sacrifice this artifact: Add one mana of any color.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "b2279cb1-089f-4c41-ae96-41837ed57822",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.jpg?1783937251",
+              "normal": "https://cards.scryfall.io/normal/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.jpg?1783937251",
+              "large": "https://cards.scryfall.io/large/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.jpg?1783937251",
+              "png": "https://cards.scryfall.io/png/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.png?1783937251",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.jpg?1783937251",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.jpg?1783937251",
+              "thumb": "https://cards.scryfall.io/thumb/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.webp?1783937251",
+              "grid": "https://cards.scryfall.io/grid/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.webp?1783937251",
+              "display": "https://cards.scryfall.io/display/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.webp?1783937251",
+              "art": "https://cards.scryfall.io/art/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.webp?1783937251",
+              "crop": "https://cards.scryfall.io/crop/front/b/2/b2279cb1-089f-4c41-ae96-41837ed57822.webp?1783937251"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0016:480c2b30-c2c2-4b8b-ae0f-9f03732f92a1",
+      "position": 16,
+      "sourceName": "Mana Crypt",
+      "correctedName": "Mana Crypt",
+      "name": "Mana Crypt",
+      "oracleId": "2c63e4e1-89d2-4bc6-a232-94e75c4b1c8a",
+      "scryfallId": "480c2b30-c2c2-4b8b-ae0f-9f03732f92a1",
+      "forgeScript": "m/mana_crypt.txt",
+      "forgeScriptSha256": "61746355582480a5f9128adefbaae91066f493a87125a8d35e7086d20df5947c",
+      "layout": "normal",
+      "manaCost": "{0}",
+      "manaValue": 0,
+      "typeLine": "Artifact",
+      "oracleText": "At the beginning of your upkeep, flip a coin. If you lose the flip, this artifact deals 3 damage to you.\n{T}: Add {C}{C}.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": ["C"],
+      "faces": [
+        {
+          "name": "Mana Crypt",
+          "manaCost": "{0}",
+          "typeLine": "Artifact",
+          "oracleText": "At the beginning of your upkeep, flip a coin. If you lose the flip, this artifact deals 3 damage to you.\n{T}: Add {C}{C}.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "480c2b30-c2c2-4b8b-ae0f-9f03732f92a1",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.jpg?1783937250",
+              "normal": "https://cards.scryfall.io/normal/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.jpg?1783937250",
+              "large": "https://cards.scryfall.io/large/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.jpg?1783937250",
+              "png": "https://cards.scryfall.io/png/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.png?1783937250",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.jpg?1783937250",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.jpg?1783937250",
+              "thumb": "https://cards.scryfall.io/thumb/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.webp?1783937250",
+              "grid": "https://cards.scryfall.io/grid/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.webp?1783937250",
+              "display": "https://cards.scryfall.io/display/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.webp?1783937250",
+              "art": "https://cards.scryfall.io/art/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.webp?1783937250",
+              "crop": "https://cards.scryfall.io/crop/front/4/8/480c2b30-c2c2-4b8b-ae0f-9f03732f92a1.webp?1783937250"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0017:4a77c1e6-00bf-4e04-aa54-df65710c54d3",
+      "position": 17,
+      "sourceName": "Mana Vault",
+      "correctedName": "Mana Vault",
+      "name": "Mana Vault",
+      "oracleId": "736892cb-a34b-4bb9-b56c-e26e3db207a2",
+      "scryfallId": "4a77c1e6-00bf-4e04-aa54-df65710c54d3",
+      "forgeScript": "m/mana_vault.txt",
+      "forgeScriptSha256": "c5f99613ae2e34aaa74963ff37e269d7e111730743b566f7a8b44de805b65849",
+      "layout": "normal",
+      "manaCost": "{1}",
+      "manaValue": 1,
+      "typeLine": "Artifact",
+      "oracleText": "This artifact doesn't untap during your untap step.\nAt the beginning of your upkeep, you may pay {4}. If you do, untap this artifact.\nAt the beginning of your draw step, if this artifact is tapped, it deals 1 damage to you.\n{T}: Add {C}{C}{C}.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": ["C"],
+      "faces": [
+        {
+          "name": "Mana Vault",
+          "manaCost": "{1}",
+          "typeLine": "Artifact",
+          "oracleText": "This artifact doesn't untap during your untap step.\nAt the beginning of your upkeep, you may pay {4}. If you do, untap this artifact.\nAt the beginning of your draw step, if this artifact is tapped, it deals 1 damage to you.\n{T}: Add {C}{C}{C}.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "4a77c1e6-00bf-4e04-aa54-df65710c54d3",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.jpg?1783937250",
+              "normal": "https://cards.scryfall.io/normal/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.jpg?1783937250",
+              "large": "https://cards.scryfall.io/large/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.jpg?1783937250",
+              "png": "https://cards.scryfall.io/png/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.png?1783937250",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.jpg?1783937250",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.jpg?1783937250",
+              "thumb": "https://cards.scryfall.io/thumb/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.webp?1783937250",
+              "grid": "https://cards.scryfall.io/grid/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.webp?1783937250",
+              "display": "https://cards.scryfall.io/display/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.webp?1783937250",
+              "art": "https://cards.scryfall.io/art/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.webp?1783937250",
+              "crop": "https://cards.scryfall.io/crop/front/4/a/4a77c1e6-00bf-4e04-aa54-df65710c54d3.webp?1783937250"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0018:ec739943-9a29-4b5f-8a9c-deb34831cc1e",
+      "position": 18,
+      "sourceName": "Mind's Eye",
+      "correctedName": "Mind's Eye",
+      "name": "Mind's Eye",
+      "oracleId": "63fd2a57-7a47-4e07-947c-f4e9da7ee538",
+      "scryfallId": "ec739943-9a29-4b5f-8a9c-deb34831cc1e",
+      "forgeScript": "m/minds_eye.txt",
+      "forgeScriptSha256": "5b1b99417f2da023692905633d8c158d192ccd43a9a625c1ab917a5422997d71",
+      "layout": "normal",
+      "manaCost": "{5}",
+      "manaValue": 5,
+      "typeLine": "Artifact",
+      "oracleText": "Whenever an opponent draws a card, you may pay {1}. If you do, draw a card.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Mind's Eye",
+          "manaCost": "{5}",
+          "typeLine": "Artifact",
+          "oracleText": "Whenever an opponent draws a card, you may pay {1}. If you do, draw a card.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "ec739943-9a29-4b5f-8a9c-deb34831cc1e",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.jpg?1783937249",
+              "normal": "https://cards.scryfall.io/normal/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.jpg?1783937249",
+              "large": "https://cards.scryfall.io/large/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.jpg?1783937249",
+              "png": "https://cards.scryfall.io/png/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.png?1783937249",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.jpg?1783937249",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.jpg?1783937249",
+              "thumb": "https://cards.scryfall.io/thumb/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.webp?1783937249",
+              "grid": "https://cards.scryfall.io/grid/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.webp?1783937249",
+              "display": "https://cards.scryfall.io/display/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.webp?1783937249",
+              "art": "https://cards.scryfall.io/art/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.webp?1783937249",
+              "crop": "https://cards.scryfall.io/crop/front/e/c/ec739943-9a29-4b5f-8a9c-deb34831cc1e.webp?1783937249"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0019:522b853d-cfd9-466b-a6ff-08b466be2b6f",
+      "position": 19,
+      "sourceName": "Mox Opal",
+      "correctedName": "Mox Opal",
+      "name": "Mox Opal",
+      "oracleId": "de2440de-e948-4811-903c-0bbe376ff64d",
+      "scryfallId": "522b853d-cfd9-466b-a6ff-08b466be2b6f",
+      "forgeScript": "m/mox_opal.txt",
+      "forgeScriptSha256": "e829191c53d9f620e970429143b25ab97115d4d7b61a9b54751443e6bd8ad1c9",
+      "layout": "normal",
+      "manaCost": "{0}",
+      "manaValue": 0,
+      "typeLine": "Legendary Artifact",
+      "oracleText": "Metalcraft — {T}: Add one mana of any color. Activate only if you control three or more artifacts.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": ["W", "U", "B", "R", "G"],
+      "faces": [
+        {
+          "name": "Mox Opal",
+          "manaCost": "{0}",
+          "typeLine": "Legendary Artifact",
+          "oracleText": "Metalcraft — {T}: Add one mana of any color. Activate only if you control three or more artifacts.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "522b853d-cfd9-466b-a6ff-08b466be2b6f",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.jpg?1783937249",
+              "normal": "https://cards.scryfall.io/normal/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.jpg?1783937249",
+              "large": "https://cards.scryfall.io/large/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.jpg?1783937249",
+              "png": "https://cards.scryfall.io/png/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.png?1783937249",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.jpg?1783937249",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.jpg?1783937249",
+              "thumb": "https://cards.scryfall.io/thumb/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.webp?1783937249",
+              "grid": "https://cards.scryfall.io/grid/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.webp?1783937249",
+              "display": "https://cards.scryfall.io/display/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.webp?1783937249",
+              "art": "https://cards.scryfall.io/art/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.webp?1783937249",
+              "crop": "https://cards.scryfall.io/crop/front/5/2/522b853d-cfd9-466b-a6ff-08b466be2b6f.webp?1783937249"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0020:599c303c-7040-4a96-a5d4-cfe8489baaae",
+      "position": 20,
+      "sourceName": "Painter's Servant",
+      "correctedName": "Painter's Servant",
+      "name": "Painter's Servant",
+      "oracleId": "baf93873-35e6-4bf2-bdcc-78a5206422fb",
+      "scryfallId": "599c303c-7040-4a96-a5d4-cfe8489baaae",
+      "forgeScript": "p/painters_servant.txt",
+      "forgeScriptSha256": "11b2d43aeba3109de2ac873372c2a0085368a2445187262a9da7925a29b6d1c1",
+      "layout": "normal",
+      "manaCost": "{2}",
+      "manaValue": 2,
+      "typeLine": "Artifact Creature — Scarecrow",
+      "oracleText": "As this creature enters, choose a color.\nAll cards that aren't on the battlefield, spells, and permanents are the chosen color in addition to their other colors.",
+      "power": "1",
+      "toughness": "3",
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Painter's Servant",
+          "manaCost": "{2}",
+          "typeLine": "Artifact Creature — Scarecrow",
+          "oracleText": "As this creature enters, choose a color.\nAll cards that aren't on the battlefield, spells, and permanents are the chosen color in addition to their other colors.",
+          "power": "1",
+          "toughness": "3",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "599c303c-7040-4a96-a5d4-cfe8489baaae",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.jpg?1783937249",
+              "normal": "https://cards.scryfall.io/normal/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.jpg?1783937249",
+              "large": "https://cards.scryfall.io/large/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.jpg?1783937249",
+              "png": "https://cards.scryfall.io/png/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.png?1783937249",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.jpg?1783937249",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.jpg?1783937249",
+              "thumb": "https://cards.scryfall.io/thumb/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.webp?1783937249",
+              "grid": "https://cards.scryfall.io/grid/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.webp?1783937249",
+              "display": "https://cards.scryfall.io/display/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.webp?1783937249",
+              "art": "https://cards.scryfall.io/art/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.webp?1783937249",
+              "crop": "https://cards.scryfall.io/crop/front/5/9/599c303c-7040-4a96-a5d4-cfe8489baaae.webp?1783937249"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0021:3c7c38ea-a1a4-47dd-9d73-a84872b57736",
+      "position": 21,
+      "sourceName": "Rings of Brighthearth",
+      "correctedName": "Rings of Brighthearth",
+      "name": "Rings of Brighthearth",
+      "oracleId": "bbf9494c-c4bb-4d36-98fe-8387846b342e",
+      "scryfallId": "3c7c38ea-a1a4-47dd-9d73-a84872b57736",
+      "forgeScript": "r/rings_of_brighthearth.txt",
+      "forgeScriptSha256": "c5ca32bc9e6bfe6cd91ad62cffd73dada94f5146c8f1dd4f84e9e88ca203e2fc",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "Whenever you activate an ability, if it isn't a mana ability, you may pay {2}. If you do, copy that ability. You may choose new targets for the copy.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Rings of Brighthearth",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "Whenever you activate an ability, if it isn't a mana ability, you may pay {2}. If you do, copy that ability. You may choose new targets for the copy.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "3c7c38ea-a1a4-47dd-9d73-a84872b57736",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.jpg?1783937248",
+              "normal": "https://cards.scryfall.io/normal/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.jpg?1783937248",
+              "large": "https://cards.scryfall.io/large/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.jpg?1783937248",
+              "png": "https://cards.scryfall.io/png/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.png?1783937248",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.jpg?1783937248",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.jpg?1783937248",
+              "thumb": "https://cards.scryfall.io/thumb/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.webp?1783937248",
+              "grid": "https://cards.scryfall.io/grid/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.webp?1783937248",
+              "display": "https://cards.scryfall.io/display/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.webp?1783937248",
+              "art": "https://cards.scryfall.io/art/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.webp?1783937248",
+              "crop": "https://cards.scryfall.io/crop/front/3/c/3c7c38ea-a1a4-47dd-9d73-a84872b57736.webp?1783937248"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0022:8b73f2db-0604-4d23-a9fb-cd6855eda57d",
+      "position": 22,
+      "sourceName": "Scroll Rack",
+      "correctedName": "Scroll Rack",
+      "name": "Scroll Rack",
+      "oracleId": "648bd03d-247e-4d6f-87a9-12a67688cbf5",
+      "scryfallId": "8b73f2db-0604-4d23-a9fb-cd6855eda57d",
+      "forgeScript": "s/scroll_rack.txt",
+      "forgeScriptSha256": "113c4d933544458ec0626cef3e4701db879b5f5f9681642936dd5ea7ff82910d",
+      "layout": "normal",
+      "manaCost": "{2}",
+      "manaValue": 2,
+      "typeLine": "Artifact",
+      "oracleText": "{1}, {T}: Exile any number of cards from your hand face down. Put that many cards from the top of your library into your hand. Then look at the exiled cards and put them on top of your library in any order.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Scroll Rack",
+          "manaCost": "{2}",
+          "typeLine": "Artifact",
+          "oracleText": "{1}, {T}: Exile any number of cards from your hand face down. Put that many cards from the top of your library into your hand. Then look at the exiled cards and put them on top of your library in any order.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "8b73f2db-0604-4d23-a9fb-cd6855eda57d",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.jpg?1783937248",
+              "normal": "https://cards.scryfall.io/normal/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.jpg?1783937248",
+              "large": "https://cards.scryfall.io/large/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.jpg?1783937248",
+              "png": "https://cards.scryfall.io/png/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.png?1783937248",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.jpg?1783937248",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.jpg?1783937248",
+              "thumb": "https://cards.scryfall.io/thumb/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.webp?1783937248",
+              "grid": "https://cards.scryfall.io/grid/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.webp?1783937248",
+              "display": "https://cards.scryfall.io/display/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.webp?1783937248",
+              "art": "https://cards.scryfall.io/art/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.webp?1783937248",
+              "crop": "https://cards.scryfall.io/crop/front/8/b/8b73f2db-0604-4d23-a9fb-cd6855eda57d.webp?1783937248"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0023:ebb792e6-952b-4b28-a276-7d807c155de9",
+      "position": 23,
+      "sourceName": "Sculpting Steel",
+      "correctedName": "Sculpting Steel",
+      "name": "Sculpting Steel",
+      "oracleId": "6c85271c-c711-49b0-a72e-9e576c33714d",
+      "scryfallId": "ebb792e6-952b-4b28-a276-7d807c155de9",
+      "forgeScript": "s/sculpting_steel.txt",
+      "forgeScriptSha256": "a270d34d5e81da8e4f3c32b52b1004aaa46420af11f21cc7269687511e169c57",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "You may have this artifact enter as a copy of any artifact on the battlefield.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Sculpting Steel",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "You may have this artifact enter as a copy of any artifact on the battlefield.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "ebb792e6-952b-4b28-a276-7d807c155de9",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.jpg?1783937249",
+              "normal": "https://cards.scryfall.io/normal/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.jpg?1783937249",
+              "large": "https://cards.scryfall.io/large/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.jpg?1783937249",
+              "png": "https://cards.scryfall.io/png/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.png?1783937249",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.jpg?1783937249",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.jpg?1783937249",
+              "thumb": "https://cards.scryfall.io/thumb/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.webp?1783937249",
+              "grid": "https://cards.scryfall.io/grid/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.webp?1783937249",
+              "display": "https://cards.scryfall.io/display/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.webp?1783937249",
+              "art": "https://cards.scryfall.io/art/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.webp?1783937249",
+              "crop": "https://cards.scryfall.io/crop/front/e/b/ebb792e6-952b-4b28-a276-7d807c155de9.webp?1783937249"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0024:880711b0-da06-4c4f-aa4e-1be58fc0bc67",
+      "position": 24,
+      "sourceName": "Sol Ring",
+      "correctedName": "Sol Ring",
+      "name": "Sol Ring",
+      "oracleId": "6ad8011d-3471-4369-9d68-b264cc027487",
+      "scryfallId": "880711b0-da06-4c4f-aa4e-1be58fc0bc67",
+      "forgeScript": "s/sol_ring.txt",
+      "forgeScriptSha256": "c96e86daad1367bceefc198abcbb3dd36129c893377ec0471d68041446478356",
+      "layout": "normal",
+      "manaCost": "{1}",
+      "manaValue": 1,
+      "typeLine": "Artifact",
+      "oracleText": "{T}: Add {C}{C}.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": ["C"],
+      "faces": [
+        {
+          "name": "Sol Ring",
+          "manaCost": "{1}",
+          "typeLine": "Artifact",
+          "oracleText": "{T}: Add {C}{C}.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "880711b0-da06-4c4f-aa4e-1be58fc0bc67",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.jpg?1783937248",
+              "normal": "https://cards.scryfall.io/normal/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.jpg?1783937248",
+              "large": "https://cards.scryfall.io/large/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.jpg?1783937248",
+              "png": "https://cards.scryfall.io/png/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.png?1783937248",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.jpg?1783937248",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.jpg?1783937248",
+              "thumb": "https://cards.scryfall.io/thumb/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.webp?1783937248",
+              "grid": "https://cards.scryfall.io/grid/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.webp?1783937248",
+              "display": "https://cards.scryfall.io/display/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.webp?1783937248",
+              "art": "https://cards.scryfall.io/art/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.webp?1783937248",
+              "crop": "https://cards.scryfall.io/crop/front/8/8/880711b0-da06-4c4f-aa4e-1be58fc0bc67.webp?1783937248"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0025:a2df1622-bfdc-405f-bbd9-f03fe4acd347",
+      "position": 25,
+      "sourceName": "Solemn Simulacrum",
+      "correctedName": "Solemn Simulacrum",
+      "name": "Solemn Simulacrum",
+      "oracleId": "00c0543c-2a1f-4425-8283-4062d74a1637",
+      "scryfallId": "a2df1622-bfdc-405f-bbd9-f03fe4acd347",
+      "forgeScript": "s/solemn_simulacrum.txt",
+      "forgeScriptSha256": "0b65729ba1ed11bb66e6d05a3fc1cfdca284ea8fc7305b2133ffb911ad7b0c24",
+      "layout": "normal",
+      "manaCost": "{4}",
+      "manaValue": 4,
+      "typeLine": "Artifact Creature — Golem",
+      "oracleText": "When this creature enters, you may search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.\nWhen this creature dies, you may draw a card.",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Solemn Simulacrum",
+          "manaCost": "{4}",
+          "typeLine": "Artifact Creature — Golem",
+          "oracleText": "When this creature enters, you may search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.\nWhen this creature dies, you may draw a card.",
+          "power": "2",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "a2df1622-bfdc-405f-bbd9-f03fe4acd347",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.jpg?1783937248",
+              "normal": "https://cards.scryfall.io/normal/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.jpg?1783937248",
+              "large": "https://cards.scryfall.io/large/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.jpg?1783937248",
+              "png": "https://cards.scryfall.io/png/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.png?1783937248",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.jpg?1783937248",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.jpg?1783937248",
+              "thumb": "https://cards.scryfall.io/thumb/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.webp?1783937248",
+              "grid": "https://cards.scryfall.io/grid/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.webp?1783937248",
+              "display": "https://cards.scryfall.io/display/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.webp?1783937248",
+              "art": "https://cards.scryfall.io/art/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.webp?1783937248",
+              "crop": "https://cards.scryfall.io/crop/front/a/2/a2df1622-bfdc-405f-bbd9-f03fe4acd347.webp?1783937248"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0026:5f0340dd-cd14-4c6a-8577-30066abe84fe",
+      "position": 26,
+      "sourceName": "Static Orb",
+      "correctedName": "Static Orb",
+      "name": "Static Orb",
+      "oracleId": "0004ebd0-dfd6-4276-b4a6-de0003e94237",
+      "scryfallId": "5f0340dd-cd14-4c6a-8577-30066abe84fe",
+      "forgeScript": "s/static_orb.txt",
+      "forgeScriptSha256": "f63398905a21b60028461a20980ed1c048ffd9af77516b3d88d276e7e911fa27",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "As long as this artifact is untapped, players can't untap more than two permanents during their untap steps.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Static Orb",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "As long as this artifact is untapped, players can't untap more than two permanents during their untap steps.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "5f0340dd-cd14-4c6a-8577-30066abe84fe",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.jpg?1783937247",
+              "normal": "https://cards.scryfall.io/normal/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.jpg?1783937247",
+              "large": "https://cards.scryfall.io/large/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.jpg?1783937247",
+              "png": "https://cards.scryfall.io/png/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.png?1783937247",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.jpg?1783937247",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.jpg?1783937247",
+              "thumb": "https://cards.scryfall.io/thumb/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.webp?1783937247",
+              "grid": "https://cards.scryfall.io/grid/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.webp?1783937247",
+              "display": "https://cards.scryfall.io/display/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.webp?1783937247",
+              "art": "https://cards.scryfall.io/art/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.webp?1783937247",
+              "crop": "https://cards.scryfall.io/crop/front/5/f/5f0340dd-cd14-4c6a-8577-30066abe84fe.webp?1783937247"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0027:3c0c495e-d2ac-45e4-9f75-5633e7ade26c",
+      "position": 27,
+      "sourceName": "Steel Overseer",
+      "correctedName": "Steel Overseer",
+      "name": "Steel Overseer",
+      "oracleId": "986ae327-f433-4c58-93dc-afc544b9bfcb",
+      "scryfallId": "3c0c495e-d2ac-45e4-9f75-5633e7ade26c",
+      "forgeScript": "s/steel_overseer.txt",
+      "forgeScriptSha256": "d11cf5fa32a61d9effc8576beabf58f7ec8e9ab85bd2f2f58159476ec408d070",
+      "layout": "normal",
+      "manaCost": "{2}",
+      "manaValue": 2,
+      "typeLine": "Artifact Creature — Construct",
+      "oracleText": "{T}: Put a +1/+1 counter on each artifact creature you control.",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Steel Overseer",
+          "manaCost": "{2}",
+          "typeLine": "Artifact Creature — Construct",
+          "oracleText": "{T}: Put a +1/+1 counter on each artifact creature you control.",
+          "power": "1",
+          "toughness": "1",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "3c0c495e-d2ac-45e4-9f75-5633e7ade26c",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.jpg?1783937247",
+              "normal": "https://cards.scryfall.io/normal/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.jpg?1783937247",
+              "large": "https://cards.scryfall.io/large/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.jpg?1783937247",
+              "png": "https://cards.scryfall.io/png/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.png?1783937247",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.jpg?1783937247",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.jpg?1783937247",
+              "thumb": "https://cards.scryfall.io/thumb/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.webp?1783937247",
+              "grid": "https://cards.scryfall.io/grid/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.webp?1783937247",
+              "display": "https://cards.scryfall.io/display/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.webp?1783937247",
+              "art": "https://cards.scryfall.io/art/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.webp?1783937247",
+              "crop": "https://cards.scryfall.io/crop/front/3/c/3c0c495e-d2ac-45e4-9f75-5633e7ade26c.webp?1783937247"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0028:ff6e62fc-6fca-40e7-a6d7-5e957412cea0",
+      "position": 28,
+      "sourceName": "Sword of Feast and Famine",
+      "correctedName": "Sword of Feast and Famine",
+      "name": "Sword of Feast and Famine",
+      "oracleId": "d0901053-6de0-46d0-9ee3-8d40510236c1",
+      "scryfallId": "ff6e62fc-6fca-40e7-a6d7-5e957412cea0",
+      "forgeScript": "s/sword_of_feast_and_famine.txt",
+      "forgeScriptSha256": "4e3f972e517a39e10252b13bc6b6dc1c061cd99b977914d651bcfe1a3a619173",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact — Equipment",
+      "oracleText": "Equipped creature gets +2/+2 and has protection from black and from green.\nWhenever equipped creature deals combat damage to a player, that player discards a card and you untap all lands you control.\nEquip {2}",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Sword of Feast and Famine",
+          "manaCost": "{3}",
+          "typeLine": "Artifact — Equipment",
+          "oracleText": "Equipped creature gets +2/+2 and has protection from black and from green.\nWhenever equipped creature deals combat damage to a player, that player discards a card and you untap all lands you control.\nEquip {2}",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "ff6e62fc-6fca-40e7-a6d7-5e957412cea0",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.jpg?1783937246",
+              "normal": "https://cards.scryfall.io/normal/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.jpg?1783937246",
+              "large": "https://cards.scryfall.io/large/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.jpg?1783937246",
+              "png": "https://cards.scryfall.io/png/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.png?1783937246",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.jpg?1783937246",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.jpg?1783937246",
+              "thumb": "https://cards.scryfall.io/thumb/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.webp?1783937246",
+              "grid": "https://cards.scryfall.io/grid/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.webp?1783937246",
+              "display": "https://cards.scryfall.io/display/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.webp?1783937246",
+              "art": "https://cards.scryfall.io/art/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.webp?1783937246",
+              "crop": "https://cards.scryfall.io/crop/front/f/f/ff6e62fc-6fca-40e7-a6d7-5e957412cea0.webp?1783937246"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0029:cf767c80-ba6e-4206-89a2-727307145ed5",
+      "position": 29,
+      "sourceName": "Sword of Fire and Ice",
+      "correctedName": "Sword of Fire and Ice",
+      "name": "Sword of Fire and Ice",
+      "oracleId": "2ccdc60a-49a9-44b9-a7af-0ebf18b26785",
+      "scryfallId": "cf767c80-ba6e-4206-89a2-727307145ed5",
+      "forgeScript": "s/sword_of_fire_and_ice.txt",
+      "forgeScriptSha256": "433b9b93045771f5ab717c03b7739d54e8a749bb6489fa80b35e27ccc61ef363",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact — Equipment",
+      "oracleText": "Equipped creature gets +2/+2 and has protection from red and from blue.\nWhenever equipped creature deals combat damage to a player, this Equipment deals 2 damage to any target and you draw a card.\nEquip {2}",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Sword of Fire and Ice",
+          "manaCost": "{3}",
+          "typeLine": "Artifact — Equipment",
+          "oracleText": "Equipped creature gets +2/+2 and has protection from red and from blue.\nWhenever equipped creature deals combat damage to a player, this Equipment deals 2 damage to any target and you draw a card.\nEquip {2}",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "cf767c80-ba6e-4206-89a2-727307145ed5",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.jpg?1783937247",
+              "normal": "https://cards.scryfall.io/normal/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.jpg?1783937247",
+              "large": "https://cards.scryfall.io/large/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.jpg?1783937247",
+              "png": "https://cards.scryfall.io/png/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.png?1783937247",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.jpg?1783937247",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.jpg?1783937247",
+              "thumb": "https://cards.scryfall.io/thumb/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.webp?1783937247",
+              "grid": "https://cards.scryfall.io/grid/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.webp?1783937247",
+              "display": "https://cards.scryfall.io/display/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.webp?1783937247",
+              "art": "https://cards.scryfall.io/art/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.webp?1783937247",
+              "crop": "https://cards.scryfall.io/crop/front/c/f/cf767c80-ba6e-4206-89a2-727307145ed5.webp?1783937247"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0030:45f924be-03f1-4295-8bdc-a249003ed84d",
+      "position": 30,
+      "sourceName": "Sword of Light and Shadow",
+      "correctedName": "Sword of Light and Shadow",
+      "name": "Sword of Light and Shadow",
+      "oracleId": "01c8a554-45a6-46ca-b40a-af0fd4529e40",
+      "scryfallId": "45f924be-03f1-4295-8bdc-a249003ed84d",
+      "forgeScript": "s/sword_of_light_and_shadow.txt",
+      "forgeScriptSha256": "393281c3a7602822412faf9012d9369c9964407b740cee6e28235601d330448f",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact — Equipment",
+      "oracleText": "Equipped creature gets +2/+2 and has protection from white and from black.\nWhenever equipped creature deals combat damage to a player, you gain 3 life and you may return up to one target creature card from your graveyard to your hand.\nEquip {2}",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Sword of Light and Shadow",
+          "manaCost": "{3}",
+          "typeLine": "Artifact — Equipment",
+          "oracleText": "Equipped creature gets +2/+2 and has protection from white and from black.\nWhenever equipped creature deals combat damage to a player, you gain 3 life and you may return up to one target creature card from your graveyard to your hand.\nEquip {2}",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "45f924be-03f1-4295-8bdc-a249003ed84d",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.jpg?1783937248",
+              "normal": "https://cards.scryfall.io/normal/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.jpg?1783937248",
+              "large": "https://cards.scryfall.io/large/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.jpg?1783937248",
+              "png": "https://cards.scryfall.io/png/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.png?1783937248",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.jpg?1783937248",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.jpg?1783937248",
+              "thumb": "https://cards.scryfall.io/thumb/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.webp?1783937248",
+              "grid": "https://cards.scryfall.io/grid/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.webp?1783937248",
+              "display": "https://cards.scryfall.io/display/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.webp?1783937248",
+              "art": "https://cards.scryfall.io/art/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.webp?1783937248",
+              "crop": "https://cards.scryfall.io/crop/front/4/5/45f924be-03f1-4295-8bdc-a249003ed84d.webp?1783937248"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0031:eda7bda4-51cf-4648-8489-352d28d591fb",
+      "position": 31,
+      "sourceName": "Arcbound Ravager",
+      "correctedName": "Arcbound Ravager",
+      "name": "Arcbound Ravager",
+      "oracleId": "62e7e7b1-9887-4d15-b0e5-a8ddc711bd88",
+      "scryfallId": "eda7bda4-51cf-4648-8489-352d28d591fb",
+      "forgeScript": "a/arcbound_ravager.txt",
+      "forgeScriptSha256": "993456b49c74d7802ed67226eb73c46f74d43b66dc7ae615581c17cbc7a309b5",
+      "layout": "normal",
+      "manaCost": "{2}",
+      "manaValue": 2,
+      "typeLine": "Artifact Creature — Beast",
+      "oracleText": "Sacrifice an artifact: Put a +1/+1 counter on this creature.\nModular 1 (This creature enters with a +1/+1 counter on it. When it dies, you may put its +1/+1 counters on target artifact creature.)",
+      "power": "0",
+      "toughness": "0",
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Arcbound Ravager",
+          "manaCost": "{2}",
+          "typeLine": "Artifact Creature — Beast",
+          "oracleText": "Sacrifice an artifact: Put a +1/+1 counter on this creature.\nModular 1 (This creature enters with a +1/+1 counter on it. When it dies, you may put its +1/+1 counters on target artifact creature.)",
+          "power": "0",
+          "toughness": "0",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "eda7bda4-51cf-4648-8489-352d28d591fb",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.jpg?1783937246",
+              "normal": "https://cards.scryfall.io/normal/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.jpg?1783937246",
+              "large": "https://cards.scryfall.io/large/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.jpg?1783937246",
+              "png": "https://cards.scryfall.io/png/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.png?1783937246",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.jpg?1783937246",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.jpg?1783937246",
+              "thumb": "https://cards.scryfall.io/thumb/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.webp?1783937246",
+              "grid": "https://cards.scryfall.io/grid/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.webp?1783937246",
+              "display": "https://cards.scryfall.io/display/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.webp?1783937246",
+              "art": "https://cards.scryfall.io/art/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.webp?1783937246",
+              "crop": "https://cards.scryfall.io/crop/front/e/d/eda7bda4-51cf-4648-8489-352d28d591fb.webp?1783937246"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0032:2c6b7b40-e7c5-402b-a39f-97fc236c9a89",
+      "position": 32,
+      "sourceName": "Black Vise",
+      "correctedName": "Black Vise",
+      "name": "Black Vise",
+      "oracleId": "de7839fb-7040-48ab-a6d4-d1952972943d",
+      "scryfallId": "2c6b7b40-e7c5-402b-a39f-97fc236c9a89",
+      "forgeScript": "b/black_vise.txt",
+      "forgeScriptSha256": "4bdf0802c03815973d9a4fc614109825f79d294185a77a6fda3f725cbbe169a7",
+      "layout": "normal",
+      "manaCost": "{1}",
+      "manaValue": 1,
+      "typeLine": "Artifact",
+      "oracleText": "As this artifact enters, choose an opponent.\nAt the beginning of the chosen player's upkeep, this artifact deals X damage to that player, where X is the number of cards in their hand minus 4.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Black Vise",
+          "manaCost": "{1}",
+          "typeLine": "Artifact",
+          "oracleText": "As this artifact enters, choose an opponent.\nAt the beginning of the chosen player's upkeep, this artifact deals X damage to that player, where X is the number of cards in their hand minus 4.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "2c6b7b40-e7c5-402b-a39f-97fc236c9a89",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.jpg?1783937246",
+              "normal": "https://cards.scryfall.io/normal/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.jpg?1783937246",
+              "large": "https://cards.scryfall.io/large/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.jpg?1783937246",
+              "png": "https://cards.scryfall.io/png/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.png?1783937246",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.jpg?1783937246",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.jpg?1783937246",
+              "thumb": "https://cards.scryfall.io/thumb/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.webp?1783937246",
+              "grid": "https://cards.scryfall.io/grid/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.webp?1783937246",
+              "display": "https://cards.scryfall.io/display/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.webp?1783937246",
+              "art": "https://cards.scryfall.io/art/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.webp?1783937246",
+              "crop": "https://cards.scryfall.io/crop/front/2/c/2c6b7b40-e7c5-402b-a39f-97fc236c9a89.webp?1783937246"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0033:4a894dab-1beb-4418-be64-34c6c0c54361",
+      "position": 33,
+      "sourceName": "Chalice of the Void",
+      "correctedName": "Chalice of the Void",
+      "name": "Chalice of the Void",
+      "oracleId": "74027ba4-a6ba-4696-baf1-60ef0b27ee0a",
+      "scryfallId": "4a894dab-1beb-4418-be64-34c6c0c54361",
+      "forgeScript": "c/chalice_of_the_void.txt",
+      "forgeScriptSha256": "c256042864cf8fad8c8197e0833525d3f5581b5df41e197ae58553bdf30a5883",
+      "layout": "normal",
+      "manaCost": "{X}{X}",
+      "manaValue": 0,
+      "typeLine": "Artifact",
+      "oracleText": "This artifact enters with X charge counters on it.\nWhenever a player casts a spell with mana value equal to the number of charge counters on this artifact, counter that spell.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Chalice of the Void",
+          "manaCost": "{X}{X}",
+          "typeLine": "Artifact",
+          "oracleText": "This artifact enters with X charge counters on it.\nWhenever a player casts a spell with mana value equal to the number of charge counters on this artifact, counter that spell.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "4a894dab-1beb-4418-be64-34c6c0c54361",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.jpg?1783937246",
+              "normal": "https://cards.scryfall.io/normal/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.jpg?1783937246",
+              "large": "https://cards.scryfall.io/large/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.jpg?1783937246",
+              "png": "https://cards.scryfall.io/png/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.png?1783937246",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.jpg?1783937246",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.jpg?1783937246",
+              "thumb": "https://cards.scryfall.io/thumb/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.webp?1783937246",
+              "grid": "https://cards.scryfall.io/grid/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.webp?1783937246",
+              "display": "https://cards.scryfall.io/display/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.webp?1783937246",
+              "art": "https://cards.scryfall.io/art/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.webp?1783937246",
+              "crop": "https://cards.scryfall.io/crop/front/4/a/4a894dab-1beb-4418-be64-34c6c0c54361.webp?1783937246"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0034:9c57c6ee-1e97-4005-bae0-7df86b2cdc27",
+      "position": 34,
+      "sourceName": "Defense Grid",
+      "correctedName": "Defense Grid",
+      "name": "Defense Grid",
+      "oracleId": "22ba474e-f6e6-450d-a4cf-0739f0b51079",
+      "scryfallId": "9c57c6ee-1e97-4005-bae0-7df86b2cdc27",
+      "forgeScript": "d/defense_grid.txt",
+      "forgeScriptSha256": "ca7079e6f8d1897c846a4f9dd230570fd476b5c759d7dba833e4c73d843e2981",
+      "layout": "normal",
+      "manaCost": "{2}",
+      "manaValue": 2,
+      "typeLine": "Artifact",
+      "oracleText": "Each spell costs {3} more to cast except during its controller's turn.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Defense Grid",
+          "manaCost": "{2}",
+          "typeLine": "Artifact",
+          "oracleText": "Each spell costs {3} more to cast except during its controller's turn.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "9c57c6ee-1e97-4005-bae0-7df86b2cdc27",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.jpg?1783937245",
+              "normal": "https://cards.scryfall.io/normal/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.jpg?1783937245",
+              "large": "https://cards.scryfall.io/large/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.jpg?1783937245",
+              "png": "https://cards.scryfall.io/png/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.png?1783937245",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.jpg?1783937245",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.jpg?1783937245",
+              "thumb": "https://cards.scryfall.io/thumb/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.webp?1783937245",
+              "grid": "https://cards.scryfall.io/grid/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.webp?1783937245",
+              "display": "https://cards.scryfall.io/display/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.webp?1783937245",
+              "art": "https://cards.scryfall.io/art/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.webp?1783937245",
+              "crop": "https://cards.scryfall.io/crop/front/9/c/9c57c6ee-1e97-4005-bae0-7df86b2cdc27.webp?1783937245"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0035:1a79eebd-89bf-49a2-9c22-f86af934633a",
+      "position": 35,
+      "sourceName": "Duplicant",
+      "correctedName": "Duplicant",
+      "name": "Duplicant",
+      "oracleId": "ea86abfa-6cab-4ef0-8463-34136fc25b59",
+      "scryfallId": "1a79eebd-89bf-49a2-9c22-f86af934633a",
+      "forgeScript": "d/duplicant.txt",
+      "forgeScriptSha256": "f160e62ae3982db3d42a9793bb0638a507d40ae8f515ef57d6b94c7e421ff9ed",
+      "layout": "normal",
+      "manaCost": "{6}",
+      "manaValue": 6,
+      "typeLine": "Artifact Creature — Shapeshifter",
+      "oracleText": "Imprint — When this creature enters, you may exile target nontoken creature.\nAs long as a card exiled with this creature is a creature card, this creature has the power, toughness, and creature types of the last creature card exiled with it. It's still a Shapeshifter.",
+      "power": "2",
+      "toughness": "4",
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Duplicant",
+          "manaCost": "{6}",
+          "typeLine": "Artifact Creature — Shapeshifter",
+          "oracleText": "Imprint — When this creature enters, you may exile target nontoken creature.\nAs long as a card exiled with this creature is a creature card, this creature has the power, toughness, and creature types of the last creature card exiled with it. It's still a Shapeshifter.",
+          "power": "2",
+          "toughness": "4",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "1a79eebd-89bf-49a2-9c22-f86af934633a",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.jpg?1783937246",
+              "normal": "https://cards.scryfall.io/normal/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.jpg?1783937246",
+              "large": "https://cards.scryfall.io/large/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.jpg?1783937246",
+              "png": "https://cards.scryfall.io/png/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.png?1783937246",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.jpg?1783937246",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.jpg?1783937246",
+              "thumb": "https://cards.scryfall.io/thumb/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.webp?1783937246",
+              "grid": "https://cards.scryfall.io/grid/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.webp?1783937246",
+              "display": "https://cards.scryfall.io/display/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.webp?1783937246",
+              "art": "https://cards.scryfall.io/art/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.webp?1783937246",
+              "crop": "https://cards.scryfall.io/crop/front/1/a/1a79eebd-89bf-49a2-9c22-f86af934633a.webp?1783937246"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0036:168ff6af-877a-4842-8efa-254fd27bdf7e",
+      "position": 36,
+      "sourceName": "Engineered Explosives",
+      "correctedName": "Engineered Explosives",
+      "name": "Engineered Explosives",
+      "oracleId": "95fd897e-9086-42c4-8e0d-61bb02333c5f",
+      "scryfallId": "168ff6af-877a-4842-8efa-254fd27bdf7e",
+      "forgeScript": "e/engineered_explosives.txt",
+      "forgeScriptSha256": "3b90c0bd7532fd7d38ec445eb150112f1a68182defb7aa138f5d764e1e83cdf0",
+      "layout": "normal",
+      "manaCost": "{X}",
+      "manaValue": 0,
+      "typeLine": "Artifact",
+      "oracleText": "Sunburst (This artifact enters with a charge counter on it for each color of mana spent to cast it.)\n{2}, Sacrifice this artifact: Destroy each nonland permanent with mana value equal to the number of charge counters on this artifact.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Engineered Explosives",
+          "manaCost": "{X}",
+          "typeLine": "Artifact",
+          "oracleText": "Sunburst (This artifact enters with a charge counter on it for each color of mana spent to cast it.)\n{2}, Sacrifice this artifact: Destroy each nonland permanent with mana value equal to the number of charge counters on this artifact.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "168ff6af-877a-4842-8efa-254fd27bdf7e",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.jpg?1783937245",
+              "normal": "https://cards.scryfall.io/normal/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.jpg?1783937245",
+              "large": "https://cards.scryfall.io/large/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.jpg?1783937245",
+              "png": "https://cards.scryfall.io/png/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.png?1783937245",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.jpg?1783937245",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.jpg?1783937245",
+              "thumb": "https://cards.scryfall.io/thumb/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.webp?1783937245",
+              "grid": "https://cards.scryfall.io/grid/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.webp?1783937245",
+              "display": "https://cards.scryfall.io/display/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.webp?1783937245",
+              "art": "https://cards.scryfall.io/art/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.webp?1783937245",
+              "crop": "https://cards.scryfall.io/crop/front/1/6/168ff6af-877a-4842-8efa-254fd27bdf7e.webp?1783937245"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0037:b165eb23-df92-4769-ac56-9db083f4c45c",
+      "position": 37,
+      "sourceName": "Ensnaring Bridge",
+      "correctedName": "Ensnaring Bridge",
+      "name": "Ensnaring Bridge",
+      "oracleId": "dade5835-ccaf-45e3-b9a3-46017e0384b3",
+      "scryfallId": "b165eb23-df92-4769-ac56-9db083f4c45c",
+      "forgeScript": "e/ensnaring_bridge.txt",
+      "forgeScriptSha256": "b36337da72dab3b368049a947d2ab9ffbe7f65279c7bdf0070026b0656e36ab8",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "Creatures with power greater than the number of cards in your hand can't attack.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Ensnaring Bridge",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "Creatures with power greater than the number of cards in your hand can't attack.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "b165eb23-df92-4769-ac56-9db083f4c45c",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.jpg?1783937244",
+              "normal": "https://cards.scryfall.io/normal/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.jpg?1783937244",
+              "large": "https://cards.scryfall.io/large/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.jpg?1783937244",
+              "png": "https://cards.scryfall.io/png/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.png?1783937244",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.jpg?1783937244",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.jpg?1783937244",
+              "thumb": "https://cards.scryfall.io/thumb/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.webp?1783937244",
+              "grid": "https://cards.scryfall.io/grid/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.webp?1783937244",
+              "display": "https://cards.scryfall.io/display/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.webp?1783937244",
+              "art": "https://cards.scryfall.io/art/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.webp?1783937244",
+              "crop": "https://cards.scryfall.io/crop/front/b/1/b165eb23-df92-4769-ac56-9db083f4c45c.webp?1783937244"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0038:730564dc-76a6-4168-85b8-586b10a631e5",
+      "position": 38,
+      "sourceName": "Extraplanar Lens",
+      "correctedName": "Extraplanar Lens",
+      "name": "Extraplanar Lens",
+      "oracleId": "e48f9fc7-72cf-4c3a-b3b3-d237edc01310",
+      "scryfallId": "730564dc-76a6-4168-85b8-586b10a631e5",
+      "forgeScript": "e/extraplanar_lens.txt",
+      "forgeScriptSha256": "ea16db88d808ee514b41e935ee8cf019e4c8b4a8a3d716c212084b00d33f2298",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "Imprint — When this artifact enters, you may exile target land you control.\nWhenever a land with the same name as the exiled card is tapped for mana, its controller adds one mana of any type that land produced.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": ["W", "U", "B", "R", "G"],
+      "faces": [
+        {
+          "name": "Extraplanar Lens",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "Imprint — When this artifact enters, you may exile target land you control.\nWhenever a land with the same name as the exiled card is tapped for mana, its controller adds one mana of any type that land produced.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "730564dc-76a6-4168-85b8-586b10a631e5",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.jpg?1783937244",
+              "normal": "https://cards.scryfall.io/normal/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.jpg?1783937244",
+              "large": "https://cards.scryfall.io/large/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.jpg?1783937244",
+              "png": "https://cards.scryfall.io/png/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.png?1783937244",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.jpg?1783937244",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.jpg?1783937244",
+              "thumb": "https://cards.scryfall.io/thumb/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.webp?1783937244",
+              "grid": "https://cards.scryfall.io/grid/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.webp?1783937244",
+              "display": "https://cards.scryfall.io/display/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.webp?1783937244",
+              "art": "https://cards.scryfall.io/art/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.webp?1783937244",
+              "crop": "https://cards.scryfall.io/crop/front/7/3/730564dc-76a6-4168-85b8-586b10a631e5.webp?1783937244"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0039:a94e3f4b-3c21-494b-9335-b9c258de66c0",
+      "position": 39,
+      "sourceName": "Grindstone",
+      "correctedName": "Grindstone",
+      "name": "Grindstone",
+      "oracleId": "97560adc-814e-450c-9ca7-f9364e910a0b",
+      "scryfallId": "a94e3f4b-3c21-494b-9335-b9c258de66c0",
+      "forgeScript": "g/grindstone.txt",
+      "forgeScriptSha256": "e7a6d93fb3d914b2626fc08c8818856e03d3fbe1615c5e14b770e2e5a59c804e",
+      "layout": "normal",
+      "manaCost": "{1}",
+      "manaValue": 1,
+      "typeLine": "Artifact",
+      "oracleText": "{3}, {T}: Target player mills two cards. If two cards that share a color were milled this way, repeat this process.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Grindstone",
+          "manaCost": "{1}",
+          "typeLine": "Artifact",
+          "oracleText": "{3}, {T}: Target player mills two cards. If two cards that share a color were milled this way, repeat this process.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "a94e3f4b-3c21-494b-9335-b9c258de66c0",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.jpg?1783937244",
+              "normal": "https://cards.scryfall.io/normal/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.jpg?1783937244",
+              "large": "https://cards.scryfall.io/large/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.jpg?1783937244",
+              "png": "https://cards.scryfall.io/png/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.png?1783937244",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.jpg?1783937244",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.jpg?1783937244",
+              "thumb": "https://cards.scryfall.io/thumb/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.webp?1783937244",
+              "grid": "https://cards.scryfall.io/grid/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.webp?1783937244",
+              "display": "https://cards.scryfall.io/display/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.webp?1783937244",
+              "art": "https://cards.scryfall.io/art/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.webp?1783937244",
+              "crop": "https://cards.scryfall.io/crop/front/a/9/a94e3f4b-3c21-494b-9335-b9c258de66c0.webp?1783937244"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0040:f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb",
+      "position": 40,
+      "sourceName": "Meekstone",
+      "correctedName": "Meekstone",
+      "name": "Meekstone",
+      "oracleId": "5ba73182-30a7-4bad-9cb6-c0feecc2db33",
+      "scryfallId": "f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb",
+      "forgeScript": "m/meekstone.txt",
+      "forgeScriptSha256": "cc6c6aca8134c1f60672ab73cb4092b943046085d5cff0a05740bd4384d2ec4a",
+      "layout": "normal",
+      "manaCost": "{1}",
+      "manaValue": 1,
+      "typeLine": "Artifact",
+      "oracleText": "Creatures with power 3 or greater don't untap during their controllers' untap steps.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Meekstone",
+          "manaCost": "{1}",
+          "typeLine": "Artifact",
+          "oracleText": "Creatures with power 3 or greater don't untap during their controllers' untap steps.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.jpg?1783937244",
+              "normal": "https://cards.scryfall.io/normal/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.jpg?1783937244",
+              "large": "https://cards.scryfall.io/large/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.jpg?1783937244",
+              "png": "https://cards.scryfall.io/png/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.png?1783937244",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.jpg?1783937244",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.jpg?1783937244",
+              "thumb": "https://cards.scryfall.io/thumb/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.webp?1783937244",
+              "grid": "https://cards.scryfall.io/grid/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.webp?1783937244",
+              "display": "https://cards.scryfall.io/display/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.webp?1783937244",
+              "art": "https://cards.scryfall.io/art/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.webp?1783937244",
+              "crop": "https://cards.scryfall.io/crop/front/f/7/f7da250f-8cc0-4a1e-aa90-a2e39aa64bfb.webp?1783937244"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0041:99b26da0-2ddb-4f73-bb2e-1288e349fb46",
+      "position": 41,
+      "sourceName": "Oblivion Stone",
+      "correctedName": "Oblivion Stone",
+      "name": "Oblivion Stone",
+      "oracleId": "2fd61c9f-44d2-48d7-a271-8e4208407cca",
+      "scryfallId": "99b26da0-2ddb-4f73-bb2e-1288e349fb46",
+      "forgeScript": "o/oblivion_stone.txt",
+      "forgeScriptSha256": "178d225e4041aac39868fcb966f86e90b773467c6fd246e590620d9d0b6d0fd5",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "{4}, {T}: Put a fate counter on target permanent.\n{5}, {T}, Sacrifice this artifact: Destroy each nonland permanent without a fate counter on it, then remove all fate counters from all permanents.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Oblivion Stone",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "{4}, {T}: Put a fate counter on target permanent.\n{5}, {T}, Sacrifice this artifact: Destroy each nonland permanent without a fate counter on it, then remove all fate counters from all permanents.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "99b26da0-2ddb-4f73-bb2e-1288e349fb46",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.jpg?1783937243",
+              "normal": "https://cards.scryfall.io/normal/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.jpg?1783937243",
+              "large": "https://cards.scryfall.io/large/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.jpg?1783937243",
+              "png": "https://cards.scryfall.io/png/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.png?1783937243",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.jpg?1783937243",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.jpg?1783937243",
+              "thumb": "https://cards.scryfall.io/thumb/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.webp?1783937243",
+              "grid": "https://cards.scryfall.io/grid/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.webp?1783937243",
+              "display": "https://cards.scryfall.io/display/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.webp?1783937243",
+              "art": "https://cards.scryfall.io/art/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.webp?1783937243",
+              "crop": "https://cards.scryfall.io/crop/front/9/9/99b26da0-2ddb-4f73-bb2e-1288e349fb46.webp?1783937243"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0042:01d0d061-e57a-4fe4-9e46-e4f369e564b3",
+      "position": 42,
+      "sourceName": "Ornithopter",
+      "correctedName": "Ornithopter",
+      "name": "Ornithopter",
+      "oracleId": "a3a98bc9-caa0-49b7-951c-fe4e4f54e4ba",
+      "scryfallId": "01d0d061-e57a-4fe4-9e46-e4f369e564b3",
+      "forgeScript": "o/ornithopter.txt",
+      "forgeScriptSha256": "b14947f3c2259f159a3b39038854f7f067c72a6f20c5bb9ecc4a89c2b7dd4965",
+      "layout": "normal",
+      "manaCost": "{0}",
+      "manaValue": 0,
+      "typeLine": "Artifact Creature — Thopter",
+      "oracleText": "Flying",
+      "power": "0",
+      "toughness": "2",
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Ornithopter",
+          "manaCost": "{0}",
+          "typeLine": "Artifact Creature — Thopter",
+          "oracleText": "Flying",
+          "power": "0",
+          "toughness": "2",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "01d0d061-e57a-4fe4-9e46-e4f369e564b3",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.jpg?1783937243",
+              "normal": "https://cards.scryfall.io/normal/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.jpg?1783937243",
+              "large": "https://cards.scryfall.io/large/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.jpg?1783937243",
+              "png": "https://cards.scryfall.io/png/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.png?1783937243",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.jpg?1783937243",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.jpg?1783937243",
+              "thumb": "https://cards.scryfall.io/thumb/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.webp?1783937243",
+              "grid": "https://cards.scryfall.io/grid/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.webp?1783937243",
+              "display": "https://cards.scryfall.io/display/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.webp?1783937243",
+              "art": "https://cards.scryfall.io/art/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.webp?1783937243",
+              "crop": "https://cards.scryfall.io/crop/front/0/1/01d0d061-e57a-4fe4-9e46-e4f369e564b3.webp?1783937243"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0043:9d9f95de-547f-4c1f-a14c-87dc022af398",
+      "position": 43,
+      "sourceName": "Paradox Engine",
+      "correctedName": "Paradox Engine",
+      "name": "Paradox Engine",
+      "oracleId": "d38937a6-ab1c-4de8-a278-d81a6ce0d921",
+      "scryfallId": "9d9f95de-547f-4c1f-a14c-87dc022af398",
+      "forgeScript": "p/paradox_engine.txt",
+      "forgeScriptSha256": "13c29dd65694d1430fbbfd068d95db4221034322ab7b67154ce8b1b32c549cfe",
+      "layout": "normal",
+      "manaCost": "{5}",
+      "manaValue": 5,
+      "typeLine": "Legendary Artifact",
+      "oracleText": "Whenever you cast a spell, untap all nonland permanents you control.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Paradox Engine",
+          "manaCost": "{5}",
+          "typeLine": "Legendary Artifact",
+          "oracleText": "Whenever you cast a spell, untap all nonland permanents you control.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "9d9f95de-547f-4c1f-a14c-87dc022af398",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.jpg?1783937243",
+              "normal": "https://cards.scryfall.io/normal/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.jpg?1783937243",
+              "large": "https://cards.scryfall.io/large/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.jpg?1783937243",
+              "png": "https://cards.scryfall.io/png/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.png?1783937243",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.jpg?1783937243",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.jpg?1783937243",
+              "thumb": "https://cards.scryfall.io/thumb/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.webp?1783937243",
+              "grid": "https://cards.scryfall.io/grid/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.webp?1783937243",
+              "display": "https://cards.scryfall.io/display/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.webp?1783937243",
+              "art": "https://cards.scryfall.io/art/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.webp?1783937243",
+              "crop": "https://cards.scryfall.io/crop/front/9/d/9d9f95de-547f-4c1f-a14c-87dc022af398.webp?1783937243"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0044:9cc7bed9-863a-46a4-85db-4c5608542363",
+      "position": 44,
+      "sourceName": "Pithing Needle",
+      "correctedName": "Pithing Needle",
+      "name": "Pithing Needle",
+      "oracleId": "a188fe7e-68de-4c7c-806c-bfe8fc7b44bf",
+      "scryfallId": "9cc7bed9-863a-46a4-85db-4c5608542363",
+      "forgeScript": "p/pithing_needle.txt",
+      "forgeScriptSha256": "ba7dcb11c9e8a64b4e4d2ebc1ab94cde91752d4baa170669fe7fe3bf5680153a",
+      "layout": "normal",
+      "manaCost": "{1}",
+      "manaValue": 1,
+      "typeLine": "Artifact",
+      "oracleText": "As this artifact enters, choose a card name.\nActivated abilities of sources with the chosen name can't be activated unless they're mana abilities.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Pithing Needle",
+          "manaCost": "{1}",
+          "typeLine": "Artifact",
+          "oracleText": "As this artifact enters, choose a card name.\nActivated abilities of sources with the chosen name can't be activated unless they're mana abilities.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "9cc7bed9-863a-46a4-85db-4c5608542363",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.jpg?1783937243",
+              "normal": "https://cards.scryfall.io/normal/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.jpg?1783937243",
+              "large": "https://cards.scryfall.io/large/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.jpg?1783937243",
+              "png": "https://cards.scryfall.io/png/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.png?1783937243",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.jpg?1783937243",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.jpg?1783937243",
+              "thumb": "https://cards.scryfall.io/thumb/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.webp?1783937243",
+              "grid": "https://cards.scryfall.io/grid/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.webp?1783937243",
+              "display": "https://cards.scryfall.io/display/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.webp?1783937243",
+              "art": "https://cards.scryfall.io/art/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.webp?1783937243",
+              "crop": "https://cards.scryfall.io/crop/front/9/c/9cc7bed9-863a-46a4-85db-4c5608542363.webp?1783937243"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0045:35e88348-c82a-4f64-a82e-a661e6cef536",
+      "position": 45,
+      "sourceName": "Planar Bridge",
+      "correctedName": "Planar Bridge",
+      "name": "Planar Bridge",
+      "oracleId": "853c6cc0-ed2b-4d65-add1-2449ade8cf68",
+      "scryfallId": "35e88348-c82a-4f64-a82e-a661e6cef536",
+      "forgeScript": "p/planar_bridge.txt",
+      "forgeScriptSha256": "723aa3f4cd49e07176145f514465474f2e0cafece56b7b18cd364b6f354cfc3f",
+      "layout": "normal",
+      "manaCost": "{6}",
+      "manaValue": 6,
+      "typeLine": "Legendary Artifact",
+      "oracleText": "{8}, {T}: Search your library for a permanent card, put it onto the battlefield, then shuffle.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Planar Bridge",
+          "manaCost": "{6}",
+          "typeLine": "Legendary Artifact",
+          "oracleText": "{8}, {T}: Search your library for a permanent card, put it onto the battlefield, then shuffle.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "35e88348-c82a-4f64-a82e-a661e6cef536",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.jpg?1783937243",
+              "normal": "https://cards.scryfall.io/normal/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.jpg?1783937243",
+              "large": "https://cards.scryfall.io/large/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.jpg?1783937243",
+              "png": "https://cards.scryfall.io/png/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.png?1783937243",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.jpg?1783937243",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.jpg?1783937243",
+              "thumb": "https://cards.scryfall.io/thumb/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.webp?1783937243",
+              "grid": "https://cards.scryfall.io/grid/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.webp?1783937243",
+              "display": "https://cards.scryfall.io/display/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.webp?1783937243",
+              "art": "https://cards.scryfall.io/art/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.webp?1783937243",
+              "crop": "https://cards.scryfall.io/crop/front/3/5/35e88348-c82a-4f64-a82e-a661e6cef536.webp?1783937243"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0046:2bffc898-16c6-46ab-89b7-cb218d08beea",
+      "position": 46,
+      "sourceName": "Platinum Angel",
+      "correctedName": "Platinum Angel",
+      "name": "Platinum Angel",
+      "oracleId": "b148578c-c0bf-4785-b97c-4b6f83028008",
+      "scryfallId": "2bffc898-16c6-46ab-89b7-cb218d08beea",
+      "forgeScript": "p/platinum_angel.txt",
+      "forgeScriptSha256": "aa191deaeda5eaaf9a0861e72c3d98f62ee5f916b95ed269bfe9a817e74aa93f",
+      "layout": "normal",
+      "manaCost": "{7}",
+      "manaValue": 7,
+      "typeLine": "Artifact Creature — Angel",
+      "oracleText": "Flying\nYou can't lose the game and your opponents can't win the game.",
+      "power": "4",
+      "toughness": "4",
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Platinum Angel",
+          "manaCost": "{7}",
+          "typeLine": "Artifact Creature — Angel",
+          "oracleText": "Flying\nYou can't lose the game and your opponents can't win the game.",
+          "power": "4",
+          "toughness": "4",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "2bffc898-16c6-46ab-89b7-cb218d08beea",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.jpg?1783937242",
+              "normal": "https://cards.scryfall.io/normal/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.jpg?1783937242",
+              "large": "https://cards.scryfall.io/large/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.jpg?1783937242",
+              "png": "https://cards.scryfall.io/png/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.png?1783937242",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.jpg?1783937242",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.jpg?1783937242",
+              "thumb": "https://cards.scryfall.io/thumb/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.webp?1783937242",
+              "grid": "https://cards.scryfall.io/grid/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.webp?1783937242",
+              "display": "https://cards.scryfall.io/display/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.webp?1783937242",
+              "art": "https://cards.scryfall.io/art/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.webp?1783937242",
+              "crop": "https://cards.scryfall.io/crop/front/2/b/2bffc898-16c6-46ab-89b7-cb218d08beea.webp?1783937242"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0047:c8e5546c-7f46-4eb5-a330-384d68ee75b0",
+      "position": 47,
+      "sourceName": "Sphere of Resistance",
+      "correctedName": "Sphere of Resistance",
+      "name": "Sphere of Resistance",
+      "oracleId": "09c96077-3804-4f12-a613-5bebc5e0413f",
+      "scryfallId": "c8e5546c-7f46-4eb5-a330-384d68ee75b0",
+      "forgeScript": "s/sphere_of_resistance.txt",
+      "forgeScriptSha256": "e4cdf027b35f1bbc7d6e3607db50504ec2a930befada0e5c4303286eb116f72b",
+      "layout": "normal",
+      "manaCost": "{2}",
+      "manaValue": 2,
+      "typeLine": "Artifact",
+      "oracleText": "Spells cost {1} more to cast.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Sphere of Resistance",
+          "manaCost": "{2}",
+          "typeLine": "Artifact",
+          "oracleText": "Spells cost {1} more to cast.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "c8e5546c-7f46-4eb5-a330-384d68ee75b0",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.jpg?1783937242",
+              "normal": "https://cards.scryfall.io/normal/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.jpg?1783937242",
+              "large": "https://cards.scryfall.io/large/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.jpg?1783937242",
+              "png": "https://cards.scryfall.io/png/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.png?1783937242",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.jpg?1783937242",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.jpg?1783937242",
+              "thumb": "https://cards.scryfall.io/thumb/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.webp?1783937242",
+              "grid": "https://cards.scryfall.io/grid/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.webp?1783937242",
+              "display": "https://cards.scryfall.io/display/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.webp?1783937242",
+              "art": "https://cards.scryfall.io/art/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.webp?1783937242",
+              "crop": "https://cards.scryfall.io/crop/front/c/8/c8e5546c-7f46-4eb5-a330-384d68ee75b0.webp?1783937242"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0048:696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3",
+      "position": 48,
+      "sourceName": "Staff of Domination",
+      "correctedName": "Staff of Domination",
+      "name": "Staff of Domination",
+      "oracleId": "d7888719-647d-4022-a211-822fa09f0791",
+      "scryfallId": "696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3",
+      "forgeScript": "s/staff_of_domination.txt",
+      "forgeScriptSha256": "a79e315e1fd8459fc9c2b8116f2427d73e817396cf0ff800aad7f8723289a388",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "{1}: Untap this artifact.\n{2}, {T}: You gain 1 life.\n{3}, {T}: Untap target creature.\n{4}, {T}: Tap target creature.\n{5}, {T}: Draw a card.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Staff of Domination",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "{1}: Untap this artifact.\n{2}, {T}: You gain 1 life.\n{3}, {T}: Untap target creature.\n{4}, {T}: Tap target creature.\n{5}, {T}: Draw a card.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.jpg?1783937242",
+              "normal": "https://cards.scryfall.io/normal/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.jpg?1783937242",
+              "large": "https://cards.scryfall.io/large/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.jpg?1783937242",
+              "png": "https://cards.scryfall.io/png/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.png?1783937242",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.jpg?1783937242",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.jpg?1783937242",
+              "thumb": "https://cards.scryfall.io/thumb/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.webp?1783937242",
+              "grid": "https://cards.scryfall.io/grid/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.webp?1783937242",
+              "display": "https://cards.scryfall.io/display/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.webp?1783937242",
+              "art": "https://cards.scryfall.io/art/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.webp?1783937242",
+              "crop": "https://cards.scryfall.io/crop/front/6/9/696e623c-3b6d-4a6a-9f5e-52d0d5f9fba3.webp?1783937242"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0049:dd963b5b-598c-47ee-bacb-40a408051761",
+      "position": 49,
+      "sourceName": "Sundering Titan",
+      "correctedName": "Sundering Titan",
+      "name": "Sundering Titan",
+      "oracleId": "d17d071d-dbee-4d65-8435-137f35cd89ca",
+      "scryfallId": "dd963b5b-598c-47ee-bacb-40a408051761",
+      "forgeScript": "s/sundering_titan.txt",
+      "forgeScriptSha256": "012151794bfe5344aa185386a25b53545be8cb4f304bbeefb3aebece02467408",
+      "layout": "normal",
+      "manaCost": "{8}",
+      "manaValue": 8,
+      "typeLine": "Artifact Creature — Golem",
+      "oracleText": "When this creature enters or leaves the battlefield, choose a land of each basic land type, then destroy those lands.",
+      "power": "7",
+      "toughness": "10",
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Sundering Titan",
+          "manaCost": "{8}",
+          "typeLine": "Artifact Creature — Golem",
+          "oracleText": "When this creature enters or leaves the battlefield, choose a land of each basic land type, then destroy those lands.",
+          "power": "7",
+          "toughness": "10",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "dd963b5b-598c-47ee-bacb-40a408051761",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.jpg?1783937242",
+              "normal": "https://cards.scryfall.io/normal/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.jpg?1783937242",
+              "large": "https://cards.scryfall.io/large/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.jpg?1783937242",
+              "png": "https://cards.scryfall.io/png/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.png?1783937242",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.jpg?1783937242",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.jpg?1783937242",
+              "thumb": "https://cards.scryfall.io/thumb/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.webp?1783937242",
+              "grid": "https://cards.scryfall.io/grid/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.webp?1783937242",
+              "display": "https://cards.scryfall.io/display/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.webp?1783937242",
+              "art": "https://cards.scryfall.io/art/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.webp?1783937242",
+              "crop": "https://cards.scryfall.io/crop/front/d/d/dd963b5b-598c-47ee-bacb-40a408051761.webp?1783937242"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0050:57c976cc-db75-4293-9ea4-a777d9ab426c",
+      "position": 50,
+      "sourceName": "Sword of Body and Mind",
+      "correctedName": "Sword of Body and Mind",
+      "name": "Sword of Body and Mind",
+      "oracleId": "fac42229-4f5f-4d04-85dd-5031d4e435aa",
+      "scryfallId": "57c976cc-db75-4293-9ea4-a777d9ab426c",
+      "forgeScript": "s/sword_of_body_and_mind.txt",
+      "forgeScriptSha256": "5750a2c1db8eafb61263472cf21cb482b4d35d83ce4722c65f669e89342fd9af",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact — Equipment",
+      "oracleText": "Equipped creature gets +2/+2 and has protection from green and from blue.\nWhenever equipped creature deals combat damage to a player, you create a 2/2 green Wolf creature token and that player mills ten cards.\nEquip {2}",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Sword of Body and Mind",
+          "manaCost": "{3}",
+          "typeLine": "Artifact — Equipment",
+          "oracleText": "Equipped creature gets +2/+2 and has protection from green and from blue.\nWhenever equipped creature deals combat damage to a player, you create a 2/2 green Wolf creature token and that player mills ten cards.\nEquip {2}",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "57c976cc-db75-4293-9ea4-a777d9ab426c",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.jpg?1783937242",
+              "normal": "https://cards.scryfall.io/normal/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.jpg?1783937242",
+              "large": "https://cards.scryfall.io/large/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.jpg?1783937242",
+              "png": "https://cards.scryfall.io/png/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.png?1783937242",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.jpg?1783937242",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.jpg?1783937242",
+              "thumb": "https://cards.scryfall.io/thumb/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.webp?1783937242",
+              "grid": "https://cards.scryfall.io/grid/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.webp?1783937242",
+              "display": "https://cards.scryfall.io/display/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.webp?1783937242",
+              "art": "https://cards.scryfall.io/art/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.webp?1783937242",
+              "crop": "https://cards.scryfall.io/crop/front/5/7/57c976cc-db75-4293-9ea4-a777d9ab426c.webp?1783937242"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0051:1497a9ac-c5c8-46d1-aa3a-998806d17440",
+      "position": 51,
+      "sourceName": "Sword of War and Peace",
+      "correctedName": "Sword of War and Peace",
+      "name": "Sword of War and Peace",
+      "oracleId": "b10ad415-0aae-4d70-82e6-a4055a40cbe4",
+      "scryfallId": "1497a9ac-c5c8-46d1-aa3a-998806d17440",
+      "forgeScript": "s/sword_of_war_and_peace.txt",
+      "forgeScriptSha256": "0941d93c496f2d9258f801b1b6773c5f5f3ecd17c36dbf61922b8170f648b600",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact — Equipment",
+      "oracleText": "Equipped creature gets +2/+2 and has protection from red and from white.\nWhenever equipped creature deals combat damage to a player, this Equipment deals damage to that player equal to the number of cards in their hand and you gain 1 life for each card in your hand.\nEquip {2}",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Sword of War and Peace",
+          "manaCost": "{3}",
+          "typeLine": "Artifact — Equipment",
+          "oracleText": "Equipped creature gets +2/+2 and has protection from red and from white.\nWhenever equipped creature deals combat damage to a player, this Equipment deals damage to that player equal to the number of cards in their hand and you gain 1 life for each card in your hand.\nEquip {2}",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "1497a9ac-c5c8-46d1-aa3a-998806d17440",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.jpg?1783937241",
+              "normal": "https://cards.scryfall.io/normal/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.jpg?1783937241",
+              "large": "https://cards.scryfall.io/large/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.jpg?1783937241",
+              "png": "https://cards.scryfall.io/png/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.png?1783937241",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.jpg?1783937241",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.jpg?1783937241",
+              "thumb": "https://cards.scryfall.io/thumb/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.webp?1783937241",
+              "grid": "https://cards.scryfall.io/grid/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.webp?1783937241",
+              "display": "https://cards.scryfall.io/display/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.webp?1783937241",
+              "art": "https://cards.scryfall.io/art/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.webp?1783937241",
+              "crop": "https://cards.scryfall.io/crop/front/1/4/1497a9ac-c5c8-46d1-aa3a-998806d17440.webp?1783937241"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0052:6a78299b-27bc-4730-bcb3-75fabc8f92c7",
+      "position": 52,
+      "sourceName": "Trinisphere",
+      "correctedName": "Trinisphere",
+      "name": "Trinisphere",
+      "oracleId": "69d994f2-b8f6-425f-9655-977c2144d40c",
+      "scryfallId": "6a78299b-27bc-4730-bcb3-75fabc8f92c7",
+      "forgeScript": "t/trinisphere.txt",
+      "forgeScriptSha256": "775054883670c2dc6cb93d8e489d09201c73fb923a2269b1b840ad81e14887e1",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "As long as this artifact is untapped, each spell that would cost less than three mana to cast costs three mana to cast. (Additional mana in the cost may be paid with any color of mana or colorless mana. For example, a spell that would cost {1}{B} to cast costs {2}{B} to cast instead.)",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Trinisphere",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "As long as this artifact is untapped, each spell that would cost less than three mana to cast costs three mana to cast. (Additional mana in the cost may be paid with any color of mana or colorless mana. For example, a spell that would cost {1}{B} to cast costs {2}{B} to cast instead.)",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "6a78299b-27bc-4730-bcb3-75fabc8f92c7",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.jpg?1783937241",
+              "normal": "https://cards.scryfall.io/normal/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.jpg?1783937241",
+              "large": "https://cards.scryfall.io/large/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.jpg?1783937241",
+              "png": "https://cards.scryfall.io/png/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.png?1783937241",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.jpg?1783937241",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.jpg?1783937241",
+              "thumb": "https://cards.scryfall.io/thumb/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.webp?1783937241",
+              "grid": "https://cards.scryfall.io/grid/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.webp?1783937241",
+              "display": "https://cards.scryfall.io/display/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.webp?1783937241",
+              "art": "https://cards.scryfall.io/art/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.webp?1783937241",
+              "crop": "https://cards.scryfall.io/crop/front/6/a/6a78299b-27bc-4730-bcb3-75fabc8f92c7.webp?1783937241"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0053:16697bb0-55db-4210-b71e-31c72c3a8d73",
+      "position": 53,
+      "sourceName": "Vedalken Shackles",
+      "correctedName": "Vedalken Shackles",
+      "name": "Vedalken Shackles",
+      "oracleId": "fddac567-c42c-453b-9c82-c3140b374a06",
+      "scryfallId": "16697bb0-55db-4210-b71e-31c72c3a8d73",
+      "forgeScript": "v/vedalken_shackles.txt",
+      "forgeScriptSha256": "a2aa434de251725ef54d6f8d03debe62893abea06fb5f981da4e454f5473b754",
+      "layout": "normal",
+      "manaCost": "{3}",
+      "manaValue": 3,
+      "typeLine": "Artifact",
+      "oracleText": "You may choose not to untap this artifact during your untap step.\n{2}, {T}: Gain control of target creature with power less than or equal to the number of Islands you control for as long as this artifact remains tapped.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Vedalken Shackles",
+          "manaCost": "{3}",
+          "typeLine": "Artifact",
+          "oracleText": "You may choose not to untap this artifact during your untap step.\n{2}, {T}: Gain control of target creature with power less than or equal to the number of Islands you control for as long as this artifact remains tapped.",
+          "power": null,
+          "toughness": null,
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "16697bb0-55db-4210-b71e-31c72c3a8d73",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.jpg?1783937242",
+              "normal": "https://cards.scryfall.io/normal/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.jpg?1783937242",
+              "large": "https://cards.scryfall.io/large/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.jpg?1783937242",
+              "png": "https://cards.scryfall.io/png/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.png?1783937242",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.jpg?1783937242",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.jpg?1783937242",
+              "thumb": "https://cards.scryfall.io/thumb/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.webp?1783937242",
+              "grid": "https://cards.scryfall.io/grid/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.webp?1783937242",
+              "display": "https://cards.scryfall.io/display/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.webp?1783937242",
+              "art": "https://cards.scryfall.io/art/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.webp?1783937242",
+              "crop": "https://cards.scryfall.io/crop/front/1/6/16697bb0-55db-4210-b71e-31c72c3a8d73.webp?1783937242"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "physicalId": "mps-printed-v1:0054:6927d6d4-93fe-4ded-b091-a0c671c1716b",
+      "position": 54,
+      "sourceName": "Wurmcoil Engine",
+      "correctedName": "Wurmcoil Engine",
+      "name": "Wurmcoil Engine",
+      "oracleId": "d1a60f44-7696-49ee-91fb-cab5b3102962",
+      "scryfallId": "6927d6d4-93fe-4ded-b091-a0c671c1716b",
+      "forgeScript": "w/wurmcoil_engine.txt",
+      "forgeScriptSha256": "20f59a1bf90d5e133ea097eea49922f4459061eaa75c3282c3002b85307154a2",
+      "layout": "normal",
+      "manaCost": "{6}",
+      "manaValue": 6,
+      "typeLine": "Artifact Creature — Phyrexian Wurm",
+      "oracleText": "Deathtouch, lifelink\nWhen this creature dies, create a 3/3 colorless Phyrexian Wurm artifact creature token with deathtouch and a 3/3 colorless Phyrexian Wurm artifact creature token with lifelink.",
+      "power": "6",
+      "toughness": "6",
+      "loyalty": null,
+      "colors": [],
+      "colorIdentity": [],
+      "producedMana": null,
+      "faces": [
+        {
+          "name": "Wurmcoil Engine",
+          "manaCost": "{6}",
+          "typeLine": "Artifact Creature — Phyrexian Wurm",
+          "oracleText": "Deathtouch, lifelink\nWhen this creature dies, create a 3/3 colorless Phyrexian Wurm artifact creature token with deathtouch and a 3/3 colorless Phyrexian Wurm artifact creature token with lifelink.",
+          "power": "6",
+          "toughness": "6",
+          "loyalty": null,
+          "colors": []
+        }
+      ],
+      "art": {
+        "status": "available",
+        "source": "scryfall",
+        "scryfallId": "6927d6d4-93fe-4ded-b091-a0c671c1716b",
+        "images": [
+          {
+            "face": null,
+            "uris": {
+              "small": "https://cards.scryfall.io/small/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.jpg?1783937241",
+              "normal": "https://cards.scryfall.io/normal/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.jpg?1783937241",
+              "large": "https://cards.scryfall.io/large/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.jpg?1783937241",
+              "png": "https://cards.scryfall.io/png/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.png?1783937241",
+              "art_crop": "https://cards.scryfall.io/art_crop/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.jpg?1783937241",
+              "border_crop": "https://cards.scryfall.io/border_crop/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.jpg?1783937241",
+              "thumb": "https://cards.scryfall.io/thumb/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.webp?1783937241",
+              "grid": "https://cards.scryfall.io/grid/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.webp?1783937241",
+              "display": "https://cards.scryfall.io/display/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.webp?1783937241",
+              "art": "https://cards.scryfall.io/art/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.webp?1783937241",
+              "crop": "https://cards.scryfall.io/crop/front/6/9/6927d6d4-93fe-4ded-b091-a0c671c1716b.webp?1783937241"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "contentSha256": "30478120f37b1f0bd21f9db0fcee6bf0d003dfbf6f672bb15cae2505addfbe7f"
+}

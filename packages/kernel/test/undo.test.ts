@@ -70,7 +70,8 @@ function nextChoice(decision: NonNullable<GameSession['pending']>): number {
     const keep = decision.options.findIndex((option: Action) => option.type === 'keepHand');
     return keep < 0 ? 0 : keep;
   }
-  if (decision.kind !== 'priority') return decision.options.length - 1;
+  if (decision.kind !== 'priority')
+    return decision.options.findLastIndex((option) => option.type !== 'concede');
   for (const type of PREFERRED) {
     const found = decision.options.findIndex((option: Action) => option.type === type);
     if (found >= 0) return found;
@@ -90,6 +91,7 @@ describe('the commit boundary', () => {
   const milled: GameEvent = { type: 'cardsMilled', player: 1, oids: ['o2'] };
   const discarded: GameEvent = { type: 'cardsDiscarded', player: 0, oids: ['o3'] };
   const scried: GameEvent = { type: 'cardsScried', player: 1, count: 2, bottom: 1 };
+  const flipped: GameEvent = { type: 'coinFlipped', player: 0, sourceOid: 'o4', result: 'win' };
   const kept: GameEvent = { type: 'handKept', player: 0, mulligans: 0, bottomed: [] };
 
   const uncommitted: readonly GameEvent[] = [
@@ -100,8 +102,17 @@ describe('the commit boundary', () => {
     { type: 'attackersDeclared', player: 0, attacks: [] },
   ];
 
-  it('names each of the seven events that close it', () => {
-    const boundaries: readonly GameEvent[] = [pass, drawn, shuffled, milled, discarded, scried, kept];
+  it('names each of the eight events that close it', () => {
+    const boundaries: readonly GameEvent[] = [
+      pass,
+      drawn,
+      shuffled,
+      milled,
+      discarded,
+      scried,
+      flipped,
+      kept,
+    ];
     for (const event of boundaries) {
       const reason = commitPoint([event]);
       expect(reason, `${event.type} is a boundary`).not.toBeNull();

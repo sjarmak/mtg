@@ -8,6 +8,8 @@
  */
 import type { ReplayRow, ReplayValue, SimGameLog, TurnRecord } from './schema';
 import {
+  CARD_STAT_PREFIXES,
+  cardColumn,
   eotColumn,
   ownerColumn,
   REPLAY_GAME_COLUMNS,
@@ -35,6 +37,12 @@ function writeTurn(row: Record<string, ReplayValue>, record: TurnRecord): void {
   }
 }
 
+function writeCards(row: Record<string, ReplayValue>, cards: SimGameLog['cards']): void {
+  for (const [name, stats] of Object.entries(cards)) {
+    for (const prefix of CARD_STAT_PREFIXES) row[cardColumn(prefix, name)] = stats[prefix];
+  }
+}
+
 /** Flattens one game's log into the wide replay row. */
 export function replayRow(log: SimGameLog): ReplayRow {
   const row: Record<string, ReplayValue> = {};
@@ -45,17 +53,21 @@ export function replayRow(log: SimGameLog): ReplayRow {
     }
   }
   for (const record of log.turns) writeTurn(row, record);
+  writeCards(row, log.cards);
   for (const [key, value] of Object.entries(log.extras)) row[key] = value;
   return row;
 }
 
 /**
- * Exactly the column names a row built from these turn records must carry —
- * metadata, totals, and the per-turn block for each turn that was actually
- * played. Used by the schema test to assert we never quietly drop, rename, or
- * invent a 17lands column.
+ * Exactly the column names a row built from these turn records and cards must
+ * carry — metadata, totals, the per-turn block for each turn that was actually
+ * played, and the per-card GAME-dataset block. Used by the schema test to
+ * assert we never quietly drop, rename, or invent a 17lands column.
  */
-export function expectedReplayColumns(turns: readonly TurnRecord[]): readonly string[] {
+export function expectedReplayColumns(
+  turns: readonly TurnRecord[],
+  cards: SimGameLog['cards'],
+): readonly string[] {
   const columns: string[] = [...REPLAY_GAME_COLUMNS];
   for (const side of SIDES) {
     for (const field of REPLAY_TOTAL_FIELDS) columns.push(totalColumn(side, field));
@@ -67,6 +79,9 @@ export function expectedReplayColumns(turns: readonly TurnRecord[]): readonly st
       for (const field of TURN_SIDE_FIELDS) columns.push(sideColumn(owner, record.turn, side, field));
       for (const field of TURN_SIDE_EOT_FIELDS) columns.push(eotColumn(owner, record.turn, side, field));
     }
+  }
+  for (const name of Object.keys(cards)) {
+    for (const prefix of CARD_STAT_PREFIXES) columns.push(cardColumn(prefix, name));
   }
   return columns;
 }

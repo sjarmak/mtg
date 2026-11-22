@@ -2,13 +2,14 @@
  * A backend that is not our kernel, so the contract is provably inhabitable by
  * something that is not our kernel.
  *
- * It plays a toy: two seats alternate, each may advance the clock or concede,
- * and the game ends when the clock runs out. It is not Magic and does not
- * pretend to be. Its whole job is to sit on the observed arm and be driven by
- * `checkBackend`, which is a claim about the *contract* rather than about any
- * engine: if the only implementation is the one the contract was written from,
- * the contract is a description of the kernel wearing an interface, and the
- * first foreign backend discovers that the expensive way.
+ * It plays a toy: the table's seats take turns round-robin, each may advance
+ * the clock or concede, and the game ends when the clock runs out. It is not
+ * Magic and does not pretend to be. Its whole job is to sit on the observed
+ * arm and be driven by `checkBackend`, which is a claim about the *contract*
+ * rather than about any engine: if the only implementation is the one the
+ * contract was written from, the contract is a description of the kernel
+ * wearing an interface, and the first foreign backend discovers that the
+ * expensive way.
  *
  * Four things it demonstrates that the kernel adapter cannot:
  *
@@ -25,6 +26,12 @@
  *     nothing like `visibility.ts`, and enough for `checkBackend`'s payload
  *     search to have something to find. `perSeat: false` turns it off, so both
  *     sides of the declaration have a subject.
+ *  5. **A commander table is a table.** The toy seats one: each seat starts on
+ *     the rules' life, its named commanders sit in a command zone it projects at
+ *     every position, and nothing about the clock changes. That is the least a
+ *     backend can do with the variant and it is enough for `checkBackend`'s
+ *     command-zone check to have a subject that passes it, beside the ones in
+ *     `contract.test.ts` that are rewritten to fail it.
  *
  * The clock also draws. Advancing it moves one card out of the advancing seat's
  * library and into its hand, which is the smallest thing that is a library at
@@ -42,6 +49,7 @@ import type { OpenResult, SubmitResult } from './errors';
 import type { ObservedBackend, ObservedSession, SessionStatus } from './session';
 import type { TranscriptFrame } from './determinism';
 import type { MatchResult, SeatId, SessionSpec } from './table';
+import { matchRulesRefusals, perSeat, rulesOf, seatIdsOf } from './table';
 import type { ObjectView, SeatView, TableView } from './projection';
 import type { SeatProjection } from './seats';
 import { PROJECTION_VERSION } from './projection';
@@ -95,11 +103,12 @@ export function scriptBackend(options: ScriptOptions = DEFAULT_OPTIONS): Observe
       engineSeats: true,
     },
     supports: (table: SessionSpec): Promise<readonly string[]> =>
-      Promise.resolve(
-        table.content.kind === 'printed'
+      Promise.resolve([
+        ...(table.content.kind === 'printed'
           ? []
-          : [`content kind "${table.content.kind}": this backend plays printed formats only`],
-      ),
+          : [`content kind "${table.content.kind}": this backend plays printed formats only`]),
+        ...matchRulesRefusals(table),
+      ]),
     open: (table: SessionSpec): Promise<OpenResult<ObservedSession>> => {
       const refusals = table.content.kind === 'printed' ? [] : [`content kind "${table.content.kind}"`];
       if (refusals.length > 0) {
@@ -112,6 +121,13 @@ export function scriptBackend(options: ScriptOptions = DEFAULT_OPTIONS): Observe
           },
         });
       }
+      const rules = matchRulesRefusals(table);
+      if (rules.length > 0) {
+        return Promise.resolve({
+          ok: false,
+          error: { kind: 'backend-failure', message: `the table's rules refuse it: ${rules.join('; ')}` },
+        });
+      }
       return Promise.resolve({
         ok: true,
         session: sessionFor({ table, moves: [], conceded: null }, options),
@@ -120,13 +136,13 @@ export function scriptBackend(options: ScriptOptions = DEFAULT_OPTIONS): Observe
   };
 }
 
-function activeSeat(moves: readonly MoveId[]): SeatId {
-  return moves.length % 2 === 0 ? 0 : 1;
+function activeSeat(moves: readonly MoveId[], seatCount: number): SeatId {
+  return moves.length % seatCount;
 }
 
 /** Who made the move at this position, which is the seat that was active then. */
-function moverAt(index: number): SeatId {
-  return index % 2 === 0 ? 0 : 1;
+function moverAt(index: number, seatCount: number): SeatId {
+  return index % seatCount;
 }
 
 function advances(moves: readonly MoveId[]): number {
@@ -134,14 +150,19 @@ function advances(moves: readonly MoveId[]): number {
 }
 
 /** How many cards this seat has drawn, which is how many times it advanced. */
-function drawnBy(moves: readonly MoveId[], id: SeatId): number {
-  return moves.filter((move, index) => move === ADVANCE && moverAt(index) === id).length;
+function drawnBy(moves: readonly MoveId[], id: SeatId, seatCount: number): number {
+  return moves.filter((move, index) => move === ADVANCE && moverAt(index, seatCount) === id).length;
 }
 
 function resultOf(toy: Toy, options: ScriptOptions): MatchResult | null {
   if (toy.conceded !== null) {
+    const survivors = seatIdsOf(toy.table.seats.length).filter((seat) => seat !== toy.conceded);
     return {
-      winner: toy.conceded === 0 ? 1 : 0,
+      // Two seats: conceding leaves exactly one survivor, so the toy still
+      // names a winner outright, unchanged from before this widening. More
+      // than two: one concession does not settle a toy with no combat, so
+      // there is nobody left to call the winner.
+      winner: survivors.length === 1 ? (survivors[0] ?? null) : null,
       reason: 'concession',
       endedOnTurn: advances(toy.moves) + 1,
     };
@@ -164,18 +185,67 @@ function resultOf(toy: Toy, options: ScriptOptions): MatchResult | null {
  * suite can reason about at all: the card at position `k` was in the library
  * until the `k`th draw and is in the hand afterwards.
  */
-function handOf(moves: readonly MoveId[], id: SeatId): readonly ObjectView[] {
-  return Array.from({ length: OPENING_HAND + drawnBy(moves, id) }, (_unused, at) => ({
+function handOf(moves: readonly MoveId[], id: SeatId, seatCount: number): readonly ObjectView[] {
+  return Array.from({ length: OPENING_HAND + drawnBy(moves, id, seatCount) }, (_unused, at) => ({
     oid: `hand-${String(id)}-${String(at)}`,
     name: `held-${String(id)}-${String(at)}`,
     typeLine: 'Token',
     power: null,
     toughness: null,
     tapped: false,
+    attacking: false,
     damage: 0,
     controller: id,
     counters: {},
   }));
+}
+
+/**
+ * The command zone, on a commander table: the named commanders, which the toy
+ * never casts, so they sit there for the whole game.
+ */
+function commandZoneOf(
+  table: SessionSpec,
+  id: SeatId,
+): Pick<SeatView, 'commandZone' | 'commanderDamage' | 'commanderCasts'> {
+  if (rulesOf(table).variant !== 'commander') return {};
+  const commanders = table.seats[id]?.deck.commanders ?? [];
+  return {
+    commandZone: commanders.map((slot, at) => ({
+      oid: `command-${String(id)}-${String(at)}`,
+      name: slot.name,
+      typeLine: 'Legendary Creature',
+      power: null,
+      toughness: null,
+      tapped: false,
+      attacking: false,
+      damage: 0,
+      controller: id,
+      counters: {},
+    })),
+    commanderDamage: {},
+    commanderCasts: Object.fromEntries(commanders.map((_, at) => [`command-${String(id)}-${String(at)}`, 0])),
+  };
+}
+
+function avatarsOf(table: SessionSpec, id: SeatId): Pick<SeatView, 'avatars'> {
+  if (rulesOf(table).variant !== 'momir') return {};
+  return {
+    avatars: [
+      {
+        oid: `avatar-${String(id)}`,
+        name: 'Momir Vig, Simic Visionary Avatar',
+        typeLine: 'Vanguard',
+        power: null,
+        toughness: null,
+        tapped: false,
+        attacking: false,
+        damage: 0,
+        controller: id,
+        counters: {},
+      },
+    ],
+  };
 }
 
 /**
@@ -187,52 +257,66 @@ function handOf(moves: readonly MoveId[], id: SeatId): readonly ObjectView[] {
  */
 function seatView(toy: Toy, id: SeatId, viewer: SeatId | null): SeatView {
   const spec = toy.table.seats[id];
+  // Unreachable: every call site draws `id` from
+  // `seatIdsOf(toy.table.seats.length)`.
+  if (spec === undefined) throw new Error(`seatView: table has no seat ${String(id)}`);
+  const seatCount = toy.table.seats.length;
   const mine = viewer === null ? spec.controller === 'local' : viewer === id;
-  const drawn = drawnBy(toy.moves, id);
+  const drawn = drawnBy(toy.moves, id, seatCount);
   return {
     id,
     name: spec.name,
-    life: 20,
-    hand: mine ? handOf(toy.moves, id) : null,
+    life: rulesOf(toy.table).startingLife,
+    hand: mine ? handOf(toy.moves, id, seatCount) : null,
     handSize: OPENING_HAND + drawn,
     librarySize: LIBRARY_SIZE - drawn,
     graveyard: [],
+    exile: [],
     battlefield: [],
+    ...commandZoneOf(toy.table, id),
+    ...avatarsOf(toy.table, id),
   };
 }
 
 function viewOf(toy: Toy, viewer: SeatId | null = null): TableView {
+  const seatCount = toy.table.seats.length;
   const turn = advances(toy.moves) + 1;
   return {
     version: PROJECTION_VERSION,
-    turn: { number: turn, active: activeSeat(toy.moves), phase: 'main', step: 'main' },
-    priority: activeSeat(toy.moves),
+    turn: { number: turn, active: activeSeat(toy.moves, seatCount), phase: 'main', step: 'main' },
+    priority: activeSeat(toy.moves, seatCount),
     stack: [],
-    seats: [seatView(toy, 0, viewer), seatView(toy, 1, viewer)],
+    seats: perSeat(seatIdsOf(seatCount).map((id) => seatView(toy, id, viewer))),
   };
 }
 
 function eventsOf(toy: Toy): readonly EngineEvent[] {
-  return toy.moves.map((move, seq) => ({
-    seq,
-    type: move === ADVANCE ? 'clockAdvanced' : 'conceded',
-    text: `${toy.table.seats[moverAt(seq)].name} ${move === ADVANCE ? 'advanced the clock' : 'conceded'}`,
-    detail: { move, seat: moverAt(seq) },
-    // The toy shows nobody anything. Its cards are dealt face down and stay
-    // there, and the clock is public without naming an object, so every event it
-    // emits reveals nothing — which is the answer most events give and the
-    // reason the empty array is a real answer rather than a placeholder.
-    reveals: [],
-  }));
+  const seatCount = toy.table.seats.length;
+  return toy.moves.map((move, seq) => {
+    const mover = moverAt(seq, seatCount);
+    const moverName = toy.table.seats[mover]?.name ?? `seat ${String(mover)}`;
+    return {
+      seq,
+      type: move === ADVANCE ? 'clockAdvanced' : 'conceded',
+      text: `${moverName} ${move === ADVANCE ? 'advanced the clock' : 'conceded'}`,
+      detail: { move, seat: mover },
+      // The toy shows nobody anything. Its cards are dealt face down and stay
+      // there, and the clock is public without naming an object, so every event it
+      // emits reveals nothing — which is the answer most events give and the
+      // reason the empty array is a real answer rather than a placeholder.
+      reveals: [],
+    };
+  });
 }
 
 function decisionOf(toy: Toy, result: MatchResult | null, options: ScriptOptions): PendingDecision | null {
   if (result !== null) return null;
-  const seat = activeSeat(toy.moves);
+  const seat = activeSeat(toy.moves, toy.table.seats.length);
+  const seatName = toy.table.seats[seat]?.name ?? `seat ${String(seat)}`;
   return {
     seat,
     kind: 'toy',
-    prompt: `${toy.table.seats[seat].name}, advance the clock or concede`,
+    prompt: `${seatName}, advance the clock or concede`,
     options: [
       { id: ADVANCE, text: 'Advance the clock', targets: [] },
       { id: CONCEDE, text: 'Concede', targets: [] },
@@ -242,10 +326,11 @@ function decisionOf(toy: Toy, result: MatchResult | null, options: ScriptOptions
 }
 
 function transcriptOf(toy: Toy): readonly TranscriptFrame[] {
+  const seatCount = toy.table.seats.length;
   const frames: TranscriptFrame[] = [];
   for (let taken = 0; taken <= toy.moves.length; taken += 1) {
     const moves = toy.moves.slice(0, taken);
-    const upTo: Toy = { ...toy, moves, conceded: concededIn(moves) };
+    const upTo: Toy = { ...toy, moves, conceded: concededIn(moves, seatCount) };
     frames.push({
       seq: taken,
       view: viewOf(upTo),
@@ -256,18 +341,15 @@ function transcriptOf(toy: Toy): readonly TranscriptFrame[] {
   return frames;
 }
 
-/** Which seats a person is holding, as the tuple positions they are. */
+/** Which seats a person is holding. */
 function localSeatsOf(table: SessionSpec): readonly SeatId[] {
-  const seated: SeatId[] = [];
-  if (table.seats[0].controller === 'local') seated.push(0);
-  if (table.seats[1].controller === 'local') seated.push(1);
-  return seated;
+  return seatIdsOf(table.seats.length).filter((seat) => table.seats[seat]?.controller === 'local');
 }
 
-function concededIn(moves: readonly MoveId[]): SeatId | null {
+function concededIn(moves: readonly MoveId[], seatCount: number): SeatId | null {
   const at = moves.indexOf(CONCEDE);
   if (at === -1) return null;
-  return moverAt(at);
+  return moverAt(at, seatCount);
 }
 
 /**
@@ -324,7 +406,7 @@ function sessionFor(toy: Toy, options: ScriptOptions, closed = false): ObservedS
       const moves = [...toy.moves, move];
       return Promise.resolve({
         ok: true,
-        session: sessionFor({ ...toy, moves, conceded: concededIn(moves) }, options),
+        session: sessionFor({ ...toy, moves, conceded: concededIn(moves, toy.table.seats.length) }, options),
       });
     },
     close: (): Promise<void> => Promise.resolve(),

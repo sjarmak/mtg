@@ -26,10 +26,15 @@ import { sortColors, sortKeywords } from './vocabulary';
  * changes also keeps the fingerprint it had before the field existed, so no
  * committed set re-hashes.
  */
-const ALWAYS_OMITTED = ['id', 'set', 'oracleText', 'flavorText'] as const;
+const ALWAYS_OMITTED = ['id', 'set', 'oracleText', 'flavorText', 'keywordLineGroups'] as const;
 
 function normalize(card: Card, alsoOmitted: readonly string[]): Record<string, unknown> {
-  const omit = new Set<string>([...ALWAYS_OMITTED, ...alsoOmitted, 'keywordAbilities']);
+  const omit = new Set<string>([
+    ...ALWAYS_OMITTED,
+    ...alsoOmitted,
+    'keywordAbilities',
+    'targetingRestrictions',
+  ]);
   const kept = Object.entries(card as Record<string, unknown>).filter(([key]) => !omit.has(key));
   return {
     ...Object.fromEntries(kept),
@@ -41,6 +46,15 @@ function normalize(card: Card, alsoOmitted: readonly string[]): Record<string, u
       ? {}
       : {
           keywordAbilities: [...card.keywordAbilities].sort((left, right) => {
+            const a = canonicalJson(left);
+            const b = canonicalJson(right);
+            return a < b ? -1 : a > b ? 1 : 0;
+          }),
+        }),
+    ...(card.targetingRestrictions === undefined || card.targetingRestrictions.length === 0
+      ? {}
+      : {
+          targetingRestrictions: [...card.targetingRestrictions].sort((left, right) => {
             const a = canonicalJson(left);
             const b = canonicalJson(right);
             return a < b ? -1 : a > b ? 1 : 0;

@@ -547,8 +547,13 @@ describe('a card with nothing on offer', () => {
     );
     const indices = markup.match(/tabindex="[^"]*"/g) ?? [];
     expect(indices.length).toBeGreaterThan(1);
-    expect([...new Set(indices)]).toEqual(['tabindex="-1"']);
-    expect(markup).toContain('class="mtg-play" tabindex="-1"');
+    // The one `0` in the tree is the game log's panel, which is a scroller a
+    // keyboard has to be able to reach and scroll; it opens rather than shuts
+    // since the 2026-08-22 interface pass, which is why it is in this markup at
+    // all. Everything else is `-1`, and a positive index is nowhere.
+    expect([...new Set(indices)].sort()).toEqual(['tabindex="-1"', 'tabindex="0"']);
+    expect(markup).toMatch(/class="[^"]*mtg-log__panel[^"]*"[^>]*tabindex="0"/);
+    expect(markup).toMatch(/class="mtg-play"[^>]*tabindex="-1"/);
     // And the inert faces are the reason there is more than one of them.
     expect(markup.match(/<div class="mtg-card"[^>]*tabindex="-1"/g) ?? []).not.toHaveLength(0);
   });
@@ -1052,7 +1057,9 @@ describe('where the picker opens', () => {
   it('is anchored to the end edge, and the sheet carries those numbers', () => {
     const rule = pickerRule();
     expect(rule).toContain(`width: ${String(PICKER_WIDTH_REM)}rem`);
-    expect(rule).toContain(`inset-inline-end: ${String(PICKER_INSET_REM)}rem`);
+    expect(rule).toContain(
+      `inset-inline-end: max(${String(PICKER_INSET_REM)}rem, env(safe-area-inset-right))`,
+    );
     // The start corner is the hand's corner: anchoring there is the defect.
     expect(rule).not.toContain('inset-inline-start');
   });

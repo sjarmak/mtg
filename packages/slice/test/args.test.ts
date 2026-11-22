@@ -11,6 +11,7 @@ describe('parseSliceArgs', () => {
     expect(options.metricsGate).toBe('strict');
     expect(options.skipForge).toBe(false);
     expect(options.maxUsd).toBeNull();
+    expect(options.fixtureManifestPath?.endsWith('tideglass-reach-2026-08-09T22-30-10Z.json')).toBe(true);
   });
 
   it('reads every flag the CLI advertises', () => {
@@ -31,6 +32,8 @@ describe('parseSliceArgs', () => {
       '9',
       '--skip-forge',
       '--no-critique',
+      '--run-manifest',
+      'fixtures/runs/custom.json',
     ]);
     expect(options).toMatchObject({
       runSeed: 'ci/fixed',
@@ -43,6 +46,7 @@ describe('parseSliceArgs', () => {
       skipForge: true,
       critique: false,
     });
+    expect(options.fixtureManifestPath?.endsWith('fixtures/runs/custom.json')).toBe(true);
   });
 
   it('makes every path absolute so the run does not depend on the shell cwd', () => {
@@ -53,10 +57,28 @@ describe('parseSliceArgs', () => {
       'b.json',
       '--store',
       'db.sqlite',
+      '--run-manifest',
+      'run.json',
     ]);
     expect(options.outDir.startsWith('/')).toBe(true);
     expect(options.briefPath.startsWith('/')).toBe(true);
     expect(options.storePath?.startsWith('/')).toBe(true);
+    expect(options.fixtureManifestPath?.startsWith('/')).toBe(true);
+  });
+
+  it('does not apply the default run semantics to a different brief or fixture corpus', () => {
+    expect(parseSliceArgs(['--brief', 'another.json']).options.fixtureManifestPath).toBeNull();
+    expect(parseSliceArgs(['--fixtures', 'other-fixtures']).options.fixtureManifestPath).toBeNull();
+  });
+
+  it('keeps the default run semantics when the default paths are stated explicitly', () => {
+    const options = parseSliceArgs([
+      '--brief',
+      'packages/setgen/briefs/tideglass-reach.json',
+      '--fixtures',
+      'packages/setgen/fixtures/llm',
+    ]).options;
+    expect(options.fixtureManifestPath?.endsWith('tideglass-reach-2026-08-09T22-30-10Z.json')).toBe(true);
   });
 
   it('refuses a value flag with no value rather than treating it as a boolean', () => {

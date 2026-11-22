@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { closeStore, type DataStore } from '@mtg/data';
+import { ZERO_USAGE } from '@mtg/llm';
 import { buildInformedDeck, EmptyUniverseError } from '../src/build';
+import { DeckCriteriaSchema } from '../src/criteria';
+import { storeDeckPool } from '../src/pool';
 import type { DeckProposal } from '../src/select';
 import { roundsCeiling } from '../src/select';
 import { createFakeStore, fillerSpells, SAMPLE_CARDS } from './support/fake-store';
@@ -22,6 +25,17 @@ const CRITERIA = {
   landCount: 24,
 };
 
+/**
+ * The store, as a pool. Every test here is a store build, so the criteria are
+ * parsed and handed to the same constructor the CLI uses rather than a hand-made
+ * universe: a test that built its own pool would stop noticing the day the query
+ * and the criteria disagree.
+ */
+function poolFor(criteria: Record<string, unknown>): ReturnType<typeof storeDeckPool> {
+  if (store === undefined) throw new Error('the test must create a store first');
+  return storeDeckPool(store, DeckCriteriaSchema.parse(criteria));
+}
+
 describe('buildInformedDeck', () => {
   it('builds a deck whose every inclusion cites a stated criterion', async () => {
     store = createFakeStore(SAMPLE_CARDS);
@@ -35,7 +49,12 @@ describe('buildInformedDeck', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA, maxRounds: 1 });
+    const built = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxRounds: 1,
+    });
 
     expect(built.deck.spells).toHaveLength(2);
     for (const inclusion of built.deck.spells) {
@@ -61,7 +80,12 @@ describe('buildInformedDeck', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA, maxRounds: 2 });
+    const built = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxRounds: 2,
+    });
 
     // Three rounds against a two-round budget: round two accepted four spells,
     // which buys another round (mtg-bc2.49), and round three re-proposes what is
@@ -81,7 +105,12 @@ describe('buildInformedDeck', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA, maxRounds: 2 });
+    const built = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxRounds: 2,
+    });
 
     expect(provider.prompts[1]).toContain('do not propose these again');
     expect(built.deck.spells).toHaveLength(1);
@@ -96,7 +125,12 @@ describe('buildInformedDeck', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA, maxRounds: 1 });
+    const built = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxRounds: 1,
+    });
 
     expect(built.deck.totalCards).toBe(28);
     expect(built.deck.shortfalls.some((line) => line.includes('target of 60'))).toBe(true);
@@ -108,7 +142,7 @@ describe('buildInformedDeck', () => {
 
     await expect(
       buildInformedDeck({
-        store,
+        pool: poolFor({ ...CRITERIA, budget: { maxCardUsd: 0.01 } }),
         provider,
         criteria: { ...CRITERIA, budget: { maxCardUsd: 0.01 } },
       }),
@@ -124,7 +158,12 @@ describe('buildInformedDeck', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA, maxRounds: 1 });
+    const built = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxRounds: 1,
+    });
 
     expect(built.plan).toBe('burn them out fast');
     expect(built.report).toContain('burn them out fast');
@@ -150,7 +189,7 @@ describe('nonbasic lands are the model to choose', () => {
       },
     ]);
 
-    await buildInformedDeck({ store, provider, criteria: BOROS, maxRounds: 1 });
+    await buildInformedDeck({ pool: poolFor(BOROS), provider, criteria: BOROS, maxRounds: 1 });
 
     const prompt = provider.prompts[0] ?? '';
     expect(prompt).toContain('nonbasic lands');
@@ -170,7 +209,7 @@ describe('nonbasic lands are the model to choose', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: BOROS, maxRounds: 1 });
+    const built = await buildInformedDeck({ pool: poolFor(BOROS), provider, criteria: BOROS, maxRounds: 1 });
 
     expect(built.deck.lands.map((entry) => entry.card.name)).toEqual(['Sacred Foundry']);
     expect(built.deck.manaBase.nonBasicLands).toBe(4);
@@ -194,7 +233,7 @@ describe('nonbasic lands are the model to choose', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: BOROS, maxRounds: 2 });
+    const built = await buildInformedDeck({ pool: poolFor(BOROS), provider, criteria: BOROS, maxRounds: 2 });
 
     expect(built.deck.spells.reduce((sum, entry) => sum + entry.count, 0)).toBe(4);
     expect(built.deck.totalCards).toBe(28);
@@ -217,7 +256,7 @@ describe('nonbasic lands are the model to choose', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: BOROS, maxRounds: 1 });
+    const built = await buildInformedDeck({ pool: poolFor(BOROS), provider, criteria: BOROS, maxRounds: 1 });
 
     expect(built.report).toContain('| color | pips | weighted demand | basics | nonbasic | sources |');
     expect(built.report).toContain('## Nonbasic lands');
@@ -239,7 +278,7 @@ describe('nonbasic lands are the model to choose', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: BOROS, maxRounds: 1 });
+    const built = await buildInformedDeck({ pool: poolFor(BOROS), provider, criteria: BOROS, maxRounds: 1 });
 
     const lands = built.report.split('## Nonbasic lands')[1] ?? '';
     expect(lands).toContain('- **4x Sacred Foundry**');
@@ -259,7 +298,12 @@ describe('nonbasic lands are the model to choose', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA, maxRounds: 2 });
+    const built = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxRounds: 2,
+    });
 
     expect(built.rejections.some((entry) => entry.code === 'basic-land')).toBe(true);
     expect(provider.prompts[1] ?? '').toContain('is a basic land');
@@ -280,7 +324,7 @@ describe('nonbasic lands are the model to choose', () => {
     ]);
 
     const built = await buildInformedDeck({
-      store,
+      pool: poolFor({ ...BOROS, landCount: 4 }),
       provider,
       criteria: { ...BOROS, landCount: 4 },
       maxRounds: 1,
@@ -316,7 +360,7 @@ describe('a deck that ends short says so, and by how much', () => {
       })),
     );
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA });
+    const built = await buildInformedDeck({ pool: poolFor(CRITERIA), provider, criteria: CRITERIA });
 
     expect(built.rounds).toBe(5);
     expect(built.deck.totalCards).toBe(60);
@@ -334,7 +378,7 @@ describe('a deck that ends short says so, and by how much', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA });
+    const built = await buildInformedDeck({ pool: poolFor(CRITERIA), provider, criteria: CRITERIA });
 
     expect(built.shortBy).toBe(36);
     expect(built.report).toContain('card selection ended 36 spells short of the target');
@@ -357,7 +401,7 @@ describe('a deck that ends short says so, and by how much', () => {
       },
     ]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA });
+    const built = await buildInformedDeck({ pool: poolFor(CRITERIA), provider, criteria: CRITERIA });
 
     expect(built.rejections).toEqual([]);
     expect(built.rounds).toBe(2);
@@ -373,7 +417,7 @@ describe('a deck that ends short says so, and by how much', () => {
     store = createFakeStore(fillerSpells(20));
     const provider = scriptedProvider(oneFreshCardPerRound(20));
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA });
+    const built = await buildInformedDeck({ pool: poolFor(CRITERIA), provider, criteria: CRITERIA });
 
     const ceiling = roundsCeiling(36);
     expect(built.rounds).toBe(ceiling);
@@ -398,7 +442,7 @@ describe('a deck that ends short says so, and by how much', () => {
       })),
     );
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA });
+    const built = await buildInformedDeck({ pool: poolFor(CRITERIA), provider, criteria: CRITERIA });
 
     expect(built.rejections.map((entry) => entry.code)).toEqual(['unknown-card']);
     expect(built.report).toContain(`${roundsCeiling(36)}-round ceiling`);
@@ -413,7 +457,12 @@ describe('a deck that ends short says so, and by how much', () => {
     store = createFakeStore(fillerSpells(20));
     const provider = scriptedProvider(oneFreshCardPerRound(20), { costUsd: 0.9 });
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA, maxSpendUsd: 2 });
+    const built = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxSpendUsd: 2,
+    });
 
     expect(built.rounds).toBe(3);
     expect(built.report).toContain('the $2.00 it was allowed to spend on model calls, at $2.70');
@@ -427,7 +476,12 @@ describe('a deck that ends short says so, and by how much', () => {
     const stated = roundsCeiling(36) + 2;
     const provider = scriptedProvider(oneFreshCardPerRound(20));
 
-    const built = await buildInformedDeck({ store, provider, criteria: CRITERIA, maxRounds: stated });
+    const built = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxRounds: stated,
+    });
 
     expect(built.rounds).toBe(stated);
     expect(built.report).toContain(`the stated budget of ${stated} rounds ran out`);
@@ -473,7 +527,12 @@ describe('the land count is a judgment, not a constant', () => {
     store = createFakeStore(SAMPLE_CARDS);
     const provider = scriptedProvider([BURN_PLAN, BOLTS]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: UNSTATED, maxRounds: 1 });
+    const built = await buildInformedDeck({
+      pool: poolFor(UNSTATED),
+      provider,
+      criteria: UNSTATED,
+      maxRounds: 1,
+    });
 
     expect(built.landPlan.count).toBe(19);
     expect(built.landPlan.source).toBe('model');
@@ -485,7 +544,7 @@ describe('the land count is a judgment, not a constant', () => {
     store = createFakeStore(SAMPLE_CARDS);
     const provider = scriptedProvider([BURN_PLAN, BOLTS]);
 
-    await buildInformedDeck({ store, provider, criteria: UNSTATED, maxRounds: 1 });
+    await buildInformedDeck({ pool: poolFor(UNSTATED), provider, criteria: UNSTATED, maxRounds: 1 });
 
     // Prompt 0 is the land plan; prompt 1 is the card selection that follows it.
     expect(provider.prompts[1] ?? '').toContain('Choose 41 more non-land cards');
@@ -496,7 +555,12 @@ describe('the land count is a judgment, not a constant', () => {
     store = createFakeStore(SAMPLE_CARDS);
     const provider = scriptedProvider([BURN_PLAN, BOLTS]);
 
-    const built = await buildInformedDeck({ store, provider, criteria: UNSTATED, maxRounds: 1 });
+    const built = await buildInformedDeck({
+      pool: poolFor(UNSTATED),
+      provider,
+      criteria: UNSTATED,
+      maxRounds: 1,
+    });
 
     expect(built.report).toContain(
       '19 lands, chosen for this deck: burn wants the extra spell more than the extra land',
@@ -508,7 +572,7 @@ describe('the land count is a judgment, not a constant', () => {
     const provider = scriptedProvider([BOLTS]);
 
     const built = await buildInformedDeck({
-      store,
+      pool: poolFor({ ...UNSTATED, landCount: 24 }),
       provider,
       criteria: { ...UNSTATED, landCount: 24 },
       maxRounds: 1,
@@ -519,5 +583,100 @@ describe('the land count is a judgment, not a constant', () => {
     // No land-plan call was made, so the very first prompt is the selection.
     expect(provider.prompts[0] ?? '').toContain('Choose 36 more non-land cards');
     expect(built.report).toContain('24 lands, as the player stated.');
+  });
+});
+
+describe('a finished build says what it spent', () => {
+  // `mtg-yp33.7`. The dollars were measured on every round and thrown away with
+  // the run, so a shelf could say a deck was finished and never say what it cost
+  // to finish. The build is where the whole bill is knowable: the ceiling bounds
+  // the selection loop, and the land plan is a model call made before the loop
+  // starts.
+  it('counts the land-plan call the selection ceiling never bounded', async () => {
+    store = createFakeStore(SAMPLE_CARDS);
+    const provider = scriptedProvider(
+      [
+        { landCount: 24, reason: 'a normal curve' },
+        {
+          plan: 'burn them out',
+          cards: [{ name: 'Lightning Bolt', count: 4, criteria: ['archetype'], reason: 'reach' }],
+        },
+      ],
+      { costUsd: 2 },
+    );
+    const criteria = { ...CRITERIA, landCount: undefined };
+
+    const built = await buildInformedDeck({
+      pool: poolFor(criteria),
+      provider,
+      criteria,
+      maxRounds: 1,
+    });
+
+    expect(built.landPlan.source).toBe('model');
+    // The difference between the bill and the bounded part is exactly the one
+    // call the ceiling never saw. Asserted as a difference rather than a total,
+    // because how many rounds the loop grants itself is not this test's subject.
+    expect(built.spend.spentUsd - built.spend.selectionUsd).toBe(2);
+  });
+
+  it('records the ceiling the selection loop ran under', async () => {
+    store = createFakeStore(SAMPLE_CARDS);
+    const provider = scriptedProvider(
+      [
+        {
+          plan: 'burn them out',
+          cards: [{ name: 'Lightning Bolt', count: 4, criteria: ['archetype'], reason: 'reach' }],
+        },
+      ],
+      { costUsd: 1 },
+    );
+
+    const built = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxRounds: 1,
+      maxSpendUsd: 6.5,
+    });
+
+    expect(built.spend.maxSpendUsd).toBe(6.5);
+    // The land count was stated, so nothing was spent outside the loop.
+    expect(built.spend.spentUsd).toBe(built.spend.selectionUsd);
+  });
+
+  it('measures each build from where it found the guard, not from zero', async () => {
+    // The guard belongs to the provider and counts the whole process, so a
+    // second build in it must report its own bill rather than the running total.
+    // A workbench session builds a variation, then rebuilds it with one thing
+    // changed, against one provider.
+    store = createFakeStore(SAMPLE_CARDS);
+    const provider = scriptedProvider(
+      [
+        {
+          plan: 'burn them out',
+          cards: [{ name: 'Lightning Bolt', count: 4, criteria: ['archetype'], reason: 'reach' }],
+        },
+      ],
+      { costUsd: 1 },
+    );
+    provider.budget.record({ costUsd: 40, usage: ZERO_USAGE });
+
+    const first = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxRounds: 1,
+    });
+    const second = await buildInformedDeck({
+      pool: poolFor(CRITERIA),
+      provider,
+      criteria: CRITERIA,
+      maxRounds: 1,
+    });
+
+    expect(first.spend.spentUsd).toBeGreaterThan(0);
+    expect(second.spend.spentUsd).toBe(first.spend.spentUsd);
+    expect(provider.budget.snapshot().spentUsd).toBe(40 + first.spend.spentUsd + second.spend.spentUsd);
   });
 });

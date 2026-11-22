@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "m10",
+  "formatSha256": "93ffd91aa8f11b8191fc92575db926c67df3b8b1fc16dc06ca3be2d7cc0c48c5",
+  "sourceSha256": "f351cd3f71f2560792922614d2002b69e92295a997c042d274a20f95c3d95cb9",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "f351cd3f71f2560792922614d2002b69e92295a997c042d274a20f95c3d95cb9",
+    "recipe.json": "2ec007ed8f443e5068c5610baabbf737c920cffc0292925ebb35592fd33e9ce6",
+    "m10-printed-catalog-v1.json": "343880b8329c73c8e43753d330d31aa6b2d06fcddfd909f80ac71112da4295f1",
+    "m10-limited-format-v1.json": "b98717a27291e7001f391eba11ee59efe7b35dd0e9ce132d48e4765cba9d1707"
+  },
+  "catalogs": [
+    {
+      "code": "M10",
+      "cards": 249,
+      "contentSha256": "2b44eeabb387d8671c5f9400ae677b7c2ac46414ad6329cdb840332dd704212f"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1340.640943,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 234,
+    "printings": 249
+  }
+}

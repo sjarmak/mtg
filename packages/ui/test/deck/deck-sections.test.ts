@@ -32,7 +32,18 @@ import { describe, expect, it } from 'vitest';
 import { readDeckArtifact } from '../../src/lab/deck-artifact';
 import type { DeckArtifact, DeckArtifactColor, DeckArtifactEntry } from '../../src/lab/deck-artifact';
 import { DeckRoute, SIDEBOARD_EMPTY_TEXT } from '../../src/routes/DeckRoute';
+import { deckOpenParam } from '../../src/routes/deck/open';
 import { ManaBasePanel } from '../../src/routes/deck/ManaBasePanel';
+
+/**
+ * The link that opens the staged artifact deck.
+ *
+ * Since `mtg-nuk3` the Decks tab lands on the library and an open deck takes the
+ * whole route, so a render that means to describe a deck has to say which one.
+ * A link rather than a click because these read the markup of one render: the
+ * param is exactly what a person following a link to this deck arrives with.
+ */
+const OPEN_ARTIFACT = deckOpenParam({ kind: 'artifact' });
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
 const FIXTURE = join(REPO_ROOT, 'packages', 'decklab', 'fixtures', 'decks', 'boros-aggro.deck.json');
@@ -46,7 +57,7 @@ function committedDeck(): DeckArtifact {
 const DECK = committedDeck();
 
 function deckMarkup(deck: DeckArtifact): string {
-  return renderToStaticMarkup(h(DeckRoute, { state: { status: 'ready', deck } }));
+  return renderToStaticMarkup(h(DeckRoute, { state: { status: 'ready', deck }, open: OPEN_ARTIFACT }));
 }
 
 function colorReport(color: string): DeckArtifactColor {
@@ -82,11 +93,11 @@ describe('whether the sideboard pane is drawn', () => {
 
   it('gives an empty pane no stats line, there being no counts for one to carry', () => {
     const html = deckMarkup({ ...DECK, sideboard: [] });
-    const heads = html.split('class="mtg-deck__section-head"');
+    const heads = html.split('class="mtg-deck__pane-head"');
     const sideboardHead = heads.find((chunk) => chunk.includes('>Sideboard: 0<'));
     expect(sideboardHead).toBeTruthy();
     expect(sideboardHead?.slice(0, sideboardHead.indexOf('mtg-deck__view'))).not.toContain(
-      'mtg-deck__section-note',
+      'mtg-deck__pane-note',
     );
   });
 

@@ -108,6 +108,22 @@ export type {
 export { selectCubePool, toPoolQuery } from './universe';
 export type { CubePool } from './universe';
 
+export { analysisClaimsBlock } from './analysis-block';
+export type { AnalysisClaimsBlock } from './analysis-block';
+export { formatClaims } from './claims';
+export { claimsForSet, UNTAGGED_REASON } from './set-claims';
+export type { SetClaims, SetClaimsInput } from './set-claims';
+export type {
+  Claim,
+  ClaimLimit,
+  FormatClaimsOptions,
+  ClaimLimitId,
+  ClaimLimits,
+  ClaimStatus,
+  ClaimUnit,
+  FormatClaims,
+} from './claims';
+
 export { measureCube, measuredColors, validateCube, withinArchetype } from './validate';
 export type {
   ArchetypeMeasure,

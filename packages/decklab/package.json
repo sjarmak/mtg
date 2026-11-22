@@ -1,18 +1,22 @@
 {
   "name": "@mtg/decklab",
   "version": "0.0.0",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@mtg/bot-evidence": "*",
     "@mtg/data": "*",
     "@mtg/deckbuild": "*",
     "@mtg/dsl": "*",
     "@mtg/kernel": "*",
     "@mtg/llm": "*",
+    "@mtg/metrics": "*",
+    "@mtg/printed-card": "*",
+    "@mtg/sim": "*",
     "zod": "*"
   }
 }

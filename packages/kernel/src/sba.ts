@@ -8,11 +8,13 @@
  */
 import { isAuraCard } from '@mtg/dsl';
 import { illegalAttachments, unattach } from './attach';
-import { annihilateCounters, counterCount } from './continuous';
+import { counterCount } from './continuous';
+import { removeOpposedCounters } from './counters';
 import type { ObjectId, PlayerId } from './ids';
 import { opponentOf } from './ids';
+import { canPlayerLoseGame } from './game-rules';
 import type { DestroyReason } from './events';
-import { characteristicsOf, hasCardType, hasKeywordAbility, toughnessOf } from './layers';
+import { characteristicsOf, copiableValuesOf, hasCardType, hasKeywordAbility, toughnessOf } from './layers';
 import { destroyPermanent } from './destruction';
 import type { GameEndReason, GameState, GameResult } from './state';
 import type { Trace } from './trace';
@@ -62,6 +64,19 @@ function zeroLoyaltyPlaneswalkers(state: GameState): readonly ObjectId[] {
       object !== undefined &&
       hasCardType(state, oid, 'planeswalker') &&
       counterCount(object.counters, 'loyalty') === 0
+    );
+  });
+}
+
+/** CR 704.5w: a non-Siege Battle with no defense is put into its owner's graveyard. */
+function zeroDefenseBattles(state: GameState): readonly ObjectId[] {
+  return state.battlefield.filter((oid) => {
+    const object = state.objects[oid];
+    return (
+      object !== undefined &&
+      hasCardType(state, oid, 'battle') &&
+      (!copiableValuesOf(state, oid).subtypes.includes('Siege') || object.siegeDefeatPending !== true) &&
+      counterCount(object.counters, 'defense') === 0
     );
   });
 }
@@ -248,6 +263,7 @@ function losingPlayers(state: GameState): readonly Loss[] {
   const losing: Loss[] = [];
   for (const seat of state.players) {
     if (seat.lost) continue;
+    if (!canPlayerLoseGame(state, seat.id)) continue;
     if (seat.life <= 0) {
       losing.push({ player: seat.id, reason: 'lifeZero' });
       continue;
@@ -270,18 +286,7 @@ function annihilateOpposedCounters(trace: Trace): Trace {
   for (const oid of current.state.battlefield) {
     const object = current.state.objects[oid];
     if (object === undefined) continue;
-    const reduced = annihilateCounters(object.counters);
-    if (reduced === object.counters) continue;
-    current = withState(current, {
-      ...current.state,
-      objects: { ...current.state.objects, [oid]: { ...object, counters: reduced } },
-    });
-    current = emit(current, {
-      type: 'countersChanged',
-      oid,
-      plusOnePlusOne: reduced.plusOnePlusOne,
-      minusOneMinusOne: reduced.minusOneMinusOne,
-    });
+    current = removeOpposedCounters(current, oid);
   }
   return current;
 }
@@ -375,7 +380,7 @@ export function checkStateBasedActions(trace: Trace): Trace {
     for (const oid of stranded) {
       const source = current.state.objects[oid];
       current =
-        source !== undefined && isAuraCard(source.card)
+        source !== undefined && isAuraCard(copiableValuesOf(current.state, oid))
           ? moveObject(current, oid, 'graveyard')
           : unattach(current, oid);
     }
@@ -387,7 +392,15 @@ export function checkStateBasedActions(trace: Trace): Trace {
     const emptyWalkers = zeroLoyaltyPlaneswalkers(current.state);
     for (const oid of emptyWalkers) current = moveObject(current, oid, 'graveyard');
 
-    const changed = ceased.length > 0 || stranded.length > 0 || countersChanged || emptyWalkers.length > 0;
+    const emptyBattles = zeroDefenseBattles(current.state);
+    for (const oid of emptyBattles) current = moveObject(current, oid, 'graveyard');
+
+    const changed =
+      ceased.length > 0 ||
+      stranded.length > 0 ||
+      countersChanged ||
+      emptyWalkers.length > 0 ||
+      emptyBattles.length > 0;
 
     const doomed = doomedCreatures(current.state);
     if (doomed.length === 0) {

@@ -10,11 +10,21 @@
  *
  * So this file does. `fixtures/llm-hearthglass/` holds every request/response
  * pair from one live `claude-cli` run of a brief whose mechanics are stated as
- * ability kinds; the run replays for free, and every ability it produced is
+ * ability kinds; the fill run replays for free, and every ability it produced is
  * driven through `@mtg/kernel` by the condition or cost it was printed with. A
  * static has to change what `powerOf` and `hasKeyword` report, a trigger has to
  * reach the stack when its condition happens, and an activation has to be
- * offered, paid for and resolved.
+ * offered, paid for and resolved. Critique and flavor are disabled here because
+ * neither contributes an ability and both add fixture calls after the property
+ * this test exists to prove.
+ *
+ * Two correction recordings were mechanically re-keyed when the invalid
+ * token-color-identity rule was removed. The original response had produced
+ * Palewick Warden; accepting that legal off-identity token added its name to the
+ * next prompts and satisfied the previously reported uncommon count. The two
+ * recorded responses fix independent red and white cards, do not use the newly
+ * forbidden name, and remain byte-for-byte untouched; only their requests and
+ * keys moved.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -219,11 +229,11 @@ function playStatic(card: Card, ability: StaticAbility): string {
   // `ability-shape.ts`), so a recorded fixture never carries one — but
   // `StaticAbility.modification` is typed over the engine's full
   // `StaticModification`, so this branch still has to exist for `assertNever`
-  // below to see an exhaustively narrowed `never`. The two CR 614 doublers are
+  // below to see an exhaustively narrowed `never`. The CR 614 replacements are
   // off the generator's schema for the same reason and join it here: what this
   // helper does is *play* the modification and read the board afterward, and
-  // neither doubler changes a board — it changes the next damage or life-gain
-  // event, which is a thing that has not happened yet. The seven CR 508/509
+  // none changes the board characteristics this fixture reads — each changes a
+  // later event. The seven CR 508/509
   // combat modifications join them for the same containment reason
   // (`static-modification-class.ts`'s `'combat'` class is entirely
   // hand-authored-only) — playing one is a fact about attacking and blocking,
@@ -231,8 +241,13 @@ function playStatic(card: Card, ability: StaticAbility): string {
   // `combat.ts`'s legality machinery rather than this fixture-replay harness.
   if (
     ability.modification.kind === 'definePt' ||
+    ability.modification.kind === 'grantKeywordAbilities' ||
     ability.modification.kind === 'doubleDamage' ||
     ability.modification.kind === 'doubleLifeGain' ||
+    ability.modification.kind === 'doublePlusOnePlusOneCountersOnCreaturesYouControl' ||
+    ability.modification.kind === 'damageCannotReduceControllerLifeBelow' ||
+    ability.modification.kind === 'discardedByOpponentEntersBattlefield' ||
+    ability.modification.kind === 'preventDamageToSelfAndRemoveCounters' ||
     ability.modification.kind === 'cantAttack' ||
     ability.modification.kind === 'cantBlock' ||
     ability.modification.kind === 'cantBeBlocked' ||
@@ -240,7 +255,17 @@ function playStatic(card: Card, ability: StaticAbility): string {
     ability.modification.kind === 'mustBeBlockedIfAble' ||
     ability.modification.kind === 'blockOnlyCreaturesWithKeyword' ||
     ability.modification.kind === 'cantBeBlockedBySubtype' ||
-    ability.modification.kind === 'statBonusPer'
+    ability.modification.kind === 'canBlockAnyNumber' ||
+    ability.modification.kind === 'canAttackAsThoughNoDefender' ||
+    ability.modification.kind === 'addSubtype' ||
+    ability.modification.kind === 'cantAttackWithoutAnyOf' ||
+    ability.modification.kind === 'cantAttackOrBlock' ||
+    ability.modification.kind === 'cantAttackOrBlockAlone' ||
+    ability.modification.kind === 'preventCombatDamage' ||
+    ability.modification.kind === 'grantTriggeredAbility' ||
+    ability.modification.kind === 'grantAnyColorManaAbility' ||
+    ability.modification.kind === 'statBonusPer' ||
+    ability.modification.kind === 'statBonusPerColor'
   ) {
     throw new Error(
       `${card.name}: ${ability.modification.kind} is off the generator's schema and should never reach a recorded fixture`,
@@ -339,6 +364,16 @@ function play(card: Card, ability: Ability): Played {
       return { card, ability, what: playTriggered(card, ability.condition) };
     case 'activated':
       return { card, ability, what: playActivated(card, ability) };
+    case 'staticPlayerRule':
+      throw new Error(`${card.name}: a model-generated card carried hand-authored-only ${ability.rule}`);
+    case 'staticGameRule':
+      throw new Error(`${card.name}: a model-generated card carried hand-authored-only ${ability.rule}`);
+    case 'stateTriggered':
+      throw new Error(`${card.name}: a model-generated card carried a hand-authored-only state trigger`);
+    case 'staticBundle':
+      throw new Error(`${card.name}: a model-generated card carried a hand-authored-only static bundle`);
+    case 'staticActivationRule':
+      throw new Error(`${card.name}: a model-generated card carried a hand-authored-only activation rule`);
   }
 }
 
@@ -350,7 +385,13 @@ describe('the recorded Hearthglass Vigil run', () => {
   beforeAll(async () => {
     expect(existsSync(FIXTURE_DIR), `no recorded fixtures at ${FIXTURE_DIR}`).toBe(true);
     const provider = createFixtureProvider({ dir: FIXTURE_DIR, record: false });
-    const result = await generateSet({ provider, brief: BRIEF, profile: SKELETON });
+    const result = await generateSet({
+      provider,
+      brief: BRIEF,
+      profile: SKELETON,
+      critique: false,
+      flavor: false,
+    });
     cards = result.cards;
     report = result.report;
     nwo = result.validation.nwo;

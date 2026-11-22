@@ -61,7 +61,7 @@
  * half that got replaced. `beatSentence` — the same function the panel prints,
  * not a second wording of it — is in the document in a named `role="status"`
  * region on this path too. The region is named for the reason every other one on
- * this table is (`../PhaseBar.ts`'s `PHASE_BAR_STATUS_LABEL`): unnamed regions
+ * this table is (`./PhaseBar.ts`'s `PHASE_BAR_STATUS_LABEL`): unnamed regions
  * collide into one channel. It is not on screen because the board is saying the
  * same thing in movement, and one report in two places is what this bead is
  * removing.
@@ -90,7 +90,7 @@ import { beatSentence, CONTINUE_LABEL } from './rail';
 
 /**
  * The live region's own name, so this channel is distinguishable from the four
- * the table already has. See the docblock above, and `../PhaseBar.ts` for the
+ * the table already has. See the docblock above, and `./PhaseBar.ts` for the
  * rule.
  */
 export const BEAT_MOTION_STATUS_LABEL = 'Paused on the board';

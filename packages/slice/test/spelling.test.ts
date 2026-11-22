@@ -34,11 +34,12 @@
  *      DSL violation verbatim, so `@mtg/dsl`'s validator messages are prompt text
  *      one hop away. Rewording any of it is a change to what the model is asked;
  *      it re-records fixtures and re-runs what depended on them.
- *   2. **Identifiers.** `honoursDistinctSlots`, `summariseArchetypes`,
- *      `unrecognised` and `'off-colour'` are exported API and one serialized
- *      union tag. Renaming them is a real change with its own blast radius —
- *      a serialized union tag reaches recorded eval reports — so it is a
- *      separate change and not part of this sweep.
+ *   2. **Serialized tags.** `unrecognised` and `'off-colour'` are written into
+ *      eval reports that already exist, so renaming one either invalidates that
+ *      record or needs a reader that accepts both spellings for a release.
+ *      `honoursDistinctSlots` is an ordinary identifier and the last one here;
+ *      it stays only because the kernel lane owns that file. The rest were
+ *      renamed by mtg-bc2.119, which is why this list is shorter than it was.
  *   3. **Recorded output and quoted sources.** Fixtures, generated sets and
  *      reports, and the eval transcript say what actually came back; a source
  *      URL or a paper title says what someone else published. Rewriting either
@@ -72,6 +73,50 @@ const NOT_OUR_WORDS: readonly { readonly prefix: string; readonly why: string }[
   {
     prefix: 'packages/data/data/reference-sets-v1.json',
     why: 'normalized MTGJSON card records and rules text, kept as published rather than rewritten into the repo dialect',
+  },
+  {
+    prefix: 'packages/data/data/isd/',
+    why: 'the printed Innistrad catalog and its play admission, keyed by card names as Wizards printed them (Ghoulraiser is a card); a name rewritten into the repo dialect would no longer match the Forge script it admits',
+  },
+  {
+    prefix: 'packages/data/data/dka/',
+    why: 'Dark Ascension was drafted with Innistrad, so this format rebuilds its own Innistrad catalog and play admission from the same source pin (`packages/data/data/dka/README.md`); it is keyed by the same Wizards-printed card names as `isd/`, Ghoulraiser included, for the same reason',
+  },
+  {
+    prefix: 'packages/data/data/dgm/',
+    why: "Dragon's Maze was drafted with Gatecrash and Return to Ravnica, so this format rebuilds its own Gatecrash catalog and play admission from the same source pin (`packages/data/data/dgm/README.md`); it is keyed by the same Wizards-printed card names as `gtc/`, Hellraiser Goblin included, for the same reason",
+  },
+  {
+    prefix: 'packages/data/data/gtc/',
+    why: 'the printed Gatecrash catalog and its play admission, keyed by card names as Wizards printed them (Hellraiser Goblin is a card, and `-iser` is the one ending this gate cannot tell from a British stem); a name rewritten into the repo dialect would no longer match the Forge script it admits',
+  },
+  {
+    prefix: 'packages/data/data/xln/xln-printed-catalog-v1.json',
+    why: 'the printed Ixalan catalog, keyed by card names as Wizards printed them (Emissary of Sunrise and Sunrise Seeker are cards, and `-rise` is an ending this gate cannot tell from a British stem); a name rewritten into the repo dialect would no longer match the Forge script it admits',
+  },
+  {
+    prefix: 'packages/data/data/xln/play-admission-v',
+    why: 'every version of the Ixalan play admission, which names the same Wizards-printed cards as the catalog beside it (the `sunrise` hits are card names and script paths), so a re-bind that installs the next version needs no edit here; the README next to it is our own prose and stays under the gate',
+  },
+  {
+    prefix: 'packages/data/data/lrw/lrw-printed-catalog-v1.json',
+    why: 'the printed Lorwyn catalog, keyed by card names as Wizards printed them (Sunrise Sovereign is a card, and `-rise` is an ending this gate cannot tell from a British stem); a name rewritten into the repo dialect would no longer match the Forge script it admits',
+  },
+  {
+    prefix: 'packages/data/data/lrw/play-admission-v',
+    why: 'every version of the Lorwyn play admission, which names the same Wizards-printed card as the catalog beside it, so a re-bind that installs the next version needs no edit here; the README next to it is our own prose and stays under the gate',
+  },
+  {
+    prefix: 'packages/data/data/commander-precons/',
+    why: 'the printed catalogs and source artifacts behind the Commander preconstructed decks, kept as Wizards and Forge publish them so card names and rules text still identify the same printings',
+  },
+  {
+    prefix: 'packages/data/data/scd/',
+    why: 'the printed Starter Commander Decks catalog and source artifacts, kept as Wizards and Forge publish them so card names and rules text still identify the same printings',
+  },
+  {
+    prefix: 'packages/data/data/kld-aer/play-admission-v',
+    why: "the Kaladesh / Aether Revolt play admission's generated evidence, which names Forge's own ability-API classes verbatim (DBRaiseDead is Forge's SVar name for Dark Intimations' graveyard-return clause, not ours) — no other installed format's coverage happens to reach that name, so this is the first admission to carry the string",
   },
   {
     prefix: 'packages/slice/test/spelling.test.ts',
@@ -127,7 +172,8 @@ const BRITISH: readonly RegExp[] = [
  * adjectives that merely end that way, `paradise`, `treatise`, `expertise`,
  * `concise`, `precise`, and `turquoise`, which arrived when a curation note
  * described the jewelry a card's subject should wear and the gate called a
- * color British.
+ * color British, plus `vise` (the clamping tool; British spells it `vice`),
+ * which arrived with Black Vise, printed in Kaladesh Inventions.
  */
 const AMERICAN_ISE = new Set([
   'advertise',
@@ -175,6 +221,7 @@ const AMERICAN_ISE = new Set([
   'televise',
   'treatise',
   'turquoise',
+  'vise',
 ]);
 
 /**
@@ -233,7 +280,7 @@ const EXCEPTIONS: readonly {
   },
   {
     path: 'packages/dsl/src/validate/effects.ts',
-    words: ['capitalised', 'colours', 'colour', 'colourless'],
+    words: ['capitalised'],
     why: 'violation messages, quoted into a CARD_INVALID finding and fed back to the model on retry',
   },
   {
@@ -315,8 +362,8 @@ const EXCEPTIONS: readonly {
   },
   {
     path: 'packages/decklab/src/mana-cost.ts',
-    words: ['unrecognised', 'COLOURLESS'],
-    why: 'the `unrecognised` field of ParsedManaCost, which @mtg/decklab exports, and the COLOURLESS_SYMBOLS table',
+    words: ['unrecognised'],
+    why: 'the `unrecognised` field of ParsedManaCost, which @mtg/decklab exports and eval reports serialize',
   },
   {
     path: 'packages/decklab/test/mana-cost.test.ts',
@@ -349,29 +396,14 @@ const EXCEPTIONS: readonly {
     why: 'names the exported function',
   },
   {
-    path: 'packages/setgen/src/report.ts',
-    words: ['summariseArchetypes'],
-    why: 'exported by @mtg/setgen',
-  },
-  {
-    path: 'packages/setgen/src/generate.ts',
-    words: ['summariseArchetypes'],
-    why: 'calls the exported function',
-  },
-  {
-    path: 'packages/setgen/src/index.ts',
-    words: ['summariseArchetypes'],
-    why: 're-exports the function',
-  },
-  {
-    path: 'packages/setgen/src/assemble.ts',
-    words: ['normaliseEffects', 'NormalisedEffects', 'normalised'],
-    why: 'the duplicate-effect helper, its result type, and the local holding that result',
+    path: 'packages/ui/src/routes/play/OpeningRoll.ts',
+    words: ['labelledby'],
+    why: 'the ARIA attribute aria-labelledby, a W3C spec name',
   },
   {
     path: 'AGENTS.md',
-    words: ['honoursDistinctSlots', 'summariseArchetypes', 'unrecognised', 'colour'],
-    why: "the Spelling rule names the identifiers it exempts, including the 'off-colour' kind",
+    words: ['honoursDistinctSlots', 'unrecognised', 'colour'],
+    why: "the Spelling rule names the tags it exempts, the 'off-colour' kind among them, and the one identifier left",
   },
 
   // 3. Recorded output and quoted sources.
@@ -438,14 +470,40 @@ function listPaths(args: readonly string[]): readonly string[] {
  * silence it, and what it reads is the change being made rather than the
  * machine it is being made on.
  *
- * The refusal belongs to the tracked half alone. An empty untracked listing is
- * the ordinary state of a clean checkout; an empty index is a broken read.
+ * **The deleted half is the edge that reports red for a file that is gone.** A
+ * file removed with plain `rm` stays in the index until the deletion is staged,
+ * so the listing still named a file a lane had just deleted and the scanner
+ * threw `ENOENT` opening it. Deleting through `git rm` is not the answer: the
+ * lanes keep staging with the orchestrator, so an unstaged deletion is the
+ * ordinary state of a worktree mid-change. `--deleted` names exactly those
+ * paths, and they come out.
  */
 function readTrackedFiles(): readonly string[] {
-  const tracked = listPaths([]);
+  return checkoutPaths(
+    listPaths([]),
+    listPaths(['--others', '--exclude-standard']),
+    listPaths(['--deleted']),
+  );
+}
+
+/**
+ * What the index holds plus what is about to join it, minus what the worktree
+ * has already removed. Pure over the three listings so the arithmetic is pinned
+ * below without a repository to stage.
+ *
+ * The refusal belongs to the tracked half alone. An empty untracked or deleted
+ * listing is the ordinary state of a clean checkout; an empty index is a broken
+ * read.
+ */
+function checkoutPaths(
+  tracked: readonly string[],
+  untracked: readonly string[],
+  deleted: readonly string[],
+): readonly string[] {
   if (tracked.length === 0)
     throw new Error('`git ls-files` listed nothing, so this check would pass vacuously');
-  return [...new Set([...tracked, ...listPaths(['--others', '--exclude-standard'])])].sort();
+  const gone = new Set(deleted);
+  return [...new Set([...tracked, ...untracked])].filter((path) => !gone.has(path)).sort();
 }
 
 let indexed: readonly string[] | null = null;
@@ -538,6 +596,15 @@ describe('the repo spells in one dialect', () => {
   it('writes American everywhere it writes its own words', () => {
     const hits = scannedFiles().flatMap(britishWordsIn);
     expect(format(hits), `${String(hits.length)} British spelling(s)`).toBe('');
+  });
+
+  it('drops a path the worktree deleted but the index still lists, and keeps one the index has not seen', () => {
+    expect(checkoutPaths(['b.ts', 'a.ts', 'gone.ts'], ['new.ts'], ['gone.ts'])).toEqual([
+      'a.ts',
+      'b.ts',
+      'new.ts',
+    ]);
+    expect(() => checkoutPaths([], ['new.ts'], [])).toThrow(/listed nothing/);
   });
 
   it('states the convention in AGENTS.md, so the rule is readable and not just enforced', () => {

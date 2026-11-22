@@ -23,6 +23,22 @@ const CANDIDATES: readonly SetCandidate[] = [
   { path: REAL_SET, what: 'the committed generated set' },
 ];
 
+/** The five the launcher synthesizes, in the order it appends them. */
+const BASICS = ['tgr-plains', 'tgr-island', 'tgr-swamp', 'tgr-mountain', 'tgr-forest'] as const;
+
+/**
+ * How many cards the committed flagship prints, read from the file itself.
+ *
+ * `mtg-gvb7`. Three assertions in this file said 371, and a card authored into
+ * the set moved all three while changing nothing they are about.
+ */
+function committedCardCount(): number {
+  const path = SET_CANDIDATES[SET_CANDIDATES.length - 1]?.path;
+  if (path === undefined) throw new Error('the committed set candidate is absent');
+  const document = JSON.parse(readFileSync(path, 'utf8')) as { cards: readonly unknown[] };
+  return document.cards.length;
+}
+
 function scratch(name: string, contents: string): string {
   const dir = mkdtempSync(join(tmpdir(), 'mtg-play-'));
   const path = join(dir, name);
@@ -143,25 +159,40 @@ describe('the flagship is what the lab opens', () => {
     const resolved = resolveSet([committed!], undefined);
     expect(resolved.ok).toBe(true);
     if (!resolved.ok) throw new Error(resolved.message);
-    expect(resolved.cardCount).toBe(90);
+    // Against the file rather than against 371 (`mtg-gvb7`). The claim is that
+    // the last resort resolves to the whole committed flagship, and a literal
+    // says that only for as long as somebody keeps editing it.
+    expect(resolved.cardCount).toBe(committedCardCount());
     expect(isFlagshipSet(resolved.json)).toBe(true);
   });
 });
 
 describe('the flagship surfaces the browser can paint', () => {
-  it('includes all 90 cards, 1 derived token, and 5 synthesized basics', () => {
+  /**
+   * Every card, every token its cards create, and the five basics.
+   *
+   * Counted off the file rather than off three literals (`mtg-gvb7`). What this
+   * is about is the shape of the surface list -- cards first, then a token per
+   * distinct one the effects mint, then exactly the five basics, all distinct --
+   * and a card authored into the set moved all three numbers while changing
+   * nothing about that shape. The token count stays a reading rather than a
+   * literal for the same reason: it is derived from the cards, so it is not a
+   * second fact to keep in step.
+   */
+  it('includes every card, a token per one the cards create, and 5 synthesized basics', () => {
     const path = SET_CANDIDATES[SET_CANDIDATES.length - 1]?.path;
     if (path === undefined) throw new Error('the committed set candidate is absent');
     const result = readSetDocument(path, 'the authored flagship');
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error(result.message);
     const ids = surfaceIdsOf(result);
-    expect(ids).toHaveLength(90 + 1 + 5);
-    expect(new Set(ids).size).toBe(90 + 1 + 5);
-    expect(result.cardCount).toBe(90);
-    expect(ids.slice(0, result.cardCount)).toHaveLength(90);
-    expect(ids.filter((id) => id.startsWith('token-'))).toHaveLength(1);
-    expect(ids.slice(-5)).toEqual(['tgr-plains', 'tgr-island', 'tgr-swamp', 'tgr-mountain', 'tgr-forest']);
+    const tokens = ids.filter((id) => id.startsWith('token-')).length;
+    expect(result.cardCount).toBe(committedCardCount());
+    expect(tokens).toBeGreaterThan(0);
+    expect(ids).toHaveLength(result.cardCount + tokens + BASICS.length);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids.slice(0, result.cardCount)).toHaveLength(result.cardCount);
+    expect(ids.slice(-BASICS.length)).toEqual(BASICS);
   });
 });
 

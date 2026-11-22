@@ -22,10 +22,11 @@
  * lost the game by the time the board shows it.
  */
 import { describe, expect, it } from 'vitest';
-import type { Card, Effect } from '@mtg/dsl';
+import type { AbilityInput, Card, Effect } from '@mtg/dsl';
 import type { Action, ObjectId } from '@mtg/kernel';
 import { pendingDecision, scenario, simpleAgent } from '@mtg/kernel';
-import { creature, FOREST, instant, lands } from './cards';
+import { observeState } from '@mtg/kernel';
+import { artifact, creature, FOREST, instant, lands } from './cards';
 import { oidOf } from './helpers';
 
 const MINE = 'Pasture Goat';
@@ -70,7 +71,11 @@ function aim(spell: Card): {
     .map((option) => firstPermanent(option));
   expect(new Set(offered)).toStrictEqual(new Set([mine, theirs]));
 
-  const picked = simpleAgent('bot').decide({ state, player: 0, decision });
+  const picked = simpleAgent('bot').decide({
+    state: observeState(state, 0, 'test/agent-target-sign.test.ts:73'),
+    player: 0,
+    decision,
+  });
   if (picked.type !== 'castSpell') throw new Error(`the bot did something other than cast: ${picked.type}`);
   return { picked: firstPermanent(picked), mine, theirs };
 }
@@ -101,6 +106,12 @@ const GROW: readonly Effect[] = [
 ];
 const KILL: readonly Effect[] = [{ kind: 'destroyPermanent', target: { kind: 'targetCreature' } }];
 
+const TORMOD_ABILITY = {
+  kind: 'activated',
+  cost: { mana: {}, tapSelf: true, sacrificeSelf: true },
+  effects: [{ kind: 'exileGraveyard', target: { kind: 'targetPlayer' } }],
+} satisfies AbilityInput;
+
 describe('the kernel bot aims a spell by what the spell does', () => {
   it('exiles the creature it does not control', () => {
     const { picked, theirs } = aim(instant('Sealed Away', SEALED_AWAY));
@@ -130,5 +141,27 @@ describe('the kernel bot aims a spell by what the spell does', () => {
   it('destroys the creature it does not control, which never regressed and is the control', () => {
     const { picked, theirs } = aim(instant('Claimed by the Depths', KILL));
     expect(picked).toBe(theirs);
+  });
+});
+
+describe('the kernel bot aims targeted graveyard exile as a hostile effect', () => {
+  it("sacrifices Tormod's Crypt to exile the opponent's graveyard rather than its own", () => {
+    const start = scenario({
+      battlefield: [{ card: artifact("Tormod's Crypt", {}, [TORMOD_ABILITY]), controller: 0 }],
+      graveyards: [[], [creature(THEIRS, 1, 3)]],
+    });
+    const decision = pendingDecision(start.state);
+    if (decision === null || decision.kind !== 'priority')
+      throw new Error('the bot was not offered priority');
+
+    const picked = simpleAgent('bot').decide({
+      state: observeState(start.state, 0, 'test/agent-target-sign.test.ts:152'),
+      player: 0,
+      decision,
+    });
+    expect(picked).toMatchObject({
+      type: 'activateAbility',
+      targets: [{ kind: 'player', player: 1 }],
+    });
   });
 });

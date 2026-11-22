@@ -163,11 +163,12 @@ describe('setTokens', () => {
   /**
    * The collapse this walk cannot see, pinned so the reason the uniqueness pass
    * carries `validateTokenNames` is written down beside the walk it protects.
-   * A token's identity is its name — `tokenCard` derives the id from the name
-   * alone and the art manifest, the renderer and the Forge script all join on
-   * it — so two disagreeing specs under one name reduce to one surface here and
-   * the second is dropped without a word. The walk is right to do that; the
-   * list it was handed is what is wrong, and only a set-level pass can say so.
+   * A token's default identity comes from its name — these two specs state no
+   * explicit identity, so `tokenCard` derives the same id for both and the art
+   * manifest, renderer and Forge script would all join on it. Two disagreeing
+   * specs under that pair reduce to one surface here and the second is dropped
+   * without a word. The walk is right to do that; the list it was handed is
+   * what is wrong, and only a set-level pass can say so.
    */
   it('folds two disagreeing specs under one name into one surface, silently', () => {
     const found = setTokens(cards(creature('xmp-a', 1, KEY), creature('xmp-b', 2, ARTIFACT_KEY)));

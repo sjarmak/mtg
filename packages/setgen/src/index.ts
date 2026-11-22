@@ -53,6 +53,14 @@ export { createRng, hashSeed, shuffle } from './rng';
 export type { Rng } from './rng';
 
 export {
+  CURRENT_GENERATION_SEMANTICS_VERSION,
+  generationSemanticsFor,
+  LEGACY_GENERATION_SEMANTICS_VERSION,
+  SETGEN_GENERATOR_NAME,
+} from './generation-semantics';
+export type { GenerationSemanticsVersion } from './generation-semantics';
+
+export {
   allowedEffectKinds,
   ARTIFACT_ROLES,
   colorlessEffectKinds,
@@ -99,7 +107,7 @@ export {
 } from './curve';
 
 export { allocateSlots } from './allocate';
-export type { Allocation } from './allocate';
+export type { Allocation, MechanicDecline } from './allocate';
 
 export { checkAuthoredCards, printAuthoredCards } from './authored';
 export { derivePins } from './pins';
@@ -113,19 +121,6 @@ export {
   batchWantsZoneReach,
   CARD_NAME_MAX_LENGTH,
   FillBatchSchema,
-  FillBatchWithAbilitiesAndSpellPermanentsAndZoneReachSchema,
-  FillBatchWithAbilitiesAndSpellPermanentsSchema,
-  FillBatchWithAbilitiesAndZoneReachSchema,
-  FillBatchWithAbilitiesSchema,
-  FillBatchWithEquipAndMechanicsSchema,
-  FillBatchWithEquipSchema,
-  FillBatchWithMechanicsAndSpellPermanentsAndZoneReachSchema,
-  FillBatchWithMechanicsAndSpellPermanentsSchema,
-  FillBatchWithMechanicsAndZoneReachSchema,
-  FillBatchWithMechanicsSchema,
-  FillBatchWithSpellPermanentsAndZoneReachSchema,
-  FillBatchWithSpellPermanentsSchema,
-  FillBatchWithZoneReachSchema,
   filledAbilities,
   FilledArtifactSchema,
   FilledArtifactWithAbilitiesSchema,
@@ -158,10 +153,14 @@ export {
   FilledSorcerySchema,
   FilledSorceryWithZoneReachSchema,
   fillSchemaFor,
+  fillCapabilitiesFor,
+  fillSchemaForCapabilities,
   LOYALTY_ABILITY_LIMITS,
   STARTING_LOYALTY_LIMITS,
 } from './filled';
 export type { FillBatch, FilledCard, FilledCardInput } from './filled';
+export { FILL_CAPABILITIES, PROMOTED_FILL_CAPABILITIES } from './capabilities';
+export type { FillCapability } from './capabilities';
 
 export { assembleCard, cardIdFor, slugify } from './assemble';
 export type { AssemblyResult } from './assemble';
@@ -226,7 +225,7 @@ export {
   critiqueFindings,
   formatReport,
   slotsNeedingRetry,
-  summariseArchetypes,
+  summarizeArchetypes,
   totalUsage,
 } from './report';
 export type {
@@ -259,3 +258,29 @@ export type {
   CalibrationProfileIdentity,
   SetCalibrationEvaluation,
 } from './calibration';
+
+/**
+ * The set designer's server and the three free answers behind it (`mtg-yddw`).
+ *
+ * Node-only, like the rest of this barrel: `design/vocabulary.ts` is the one
+ * piece a browser wants and it crosses to the page as JSON rather than as an
+ * import, because the schemas it is derived from read canon data off disk at
+ * module scope.
+ */
+export { designVocabulary } from './design/vocabulary';
+export type { DesignVocabulary, MechanicBounds, SizeBounds } from './design/vocabulary';
+export { validateBrief } from './design/validate';
+export type { BriefDerivation, BriefIssue, BriefValidation } from './design/validate';
+export { planSkeleton } from './design/plan';
+export type {
+  CurvePoint,
+  MechanicReach,
+  SkeletonPoolCensus,
+  SeatedCard,
+  SkeletonPlan,
+  SkeletonPlanResult,
+} from './design/plan';
+export { fixtureRunner, RECORD_COMMAND } from './design/run';
+export type { DesignRunResult, DesignRunner } from './design/run';
+export { serveDesign } from './design/server';
+export type { RunningDesignServer, ServeDesignOptions } from './design/server';

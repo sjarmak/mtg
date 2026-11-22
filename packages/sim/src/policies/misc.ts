@@ -40,6 +40,10 @@ function highestCostInHand(state: GameState, hand: readonly ObjectId[]): number 
  * discounted hard by how far out of reach it still is, so a stranded bomb goes
  * before a castable cheap card. A land is worth keeping while the hand still
  * has something we cannot pay for, and close to nothing once it does not.
+ *
+ * A spell we can cast this turn never falls below `castableSpellFloor`, because
+ * mana value stops standing in for worth at zero: a free spell scored 0 and was
+ * pitched ahead of a land the hand had already established it did not need.
  */
 function keepValue(
   state: GameState,
@@ -55,7 +59,8 @@ function keepValue(
   }
   const cost = cardManaValue(card);
   const shortfall = Math.max(0, cost - reach);
-  return cost - shortfall * config.uncastablePenalty;
+  if (shortfall > 0) return cost - shortfall * config.uncastablePenalty;
+  return Math.max(cost, config.castableSpellFloor);
 }
 
 /** The `count` least valuable cards in hand, deterministically ordered. */

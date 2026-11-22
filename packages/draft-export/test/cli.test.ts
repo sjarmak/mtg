@@ -12,7 +12,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { EXAMPLE_SET } from '@mtg/dsl';
+import { BASIC_LANDS, EXAMPLE_SET, isBasicLand } from '@mtg/dsl';
 import { main } from '../src/cli';
 
 describe('draft-export cli', () => {
@@ -44,7 +44,9 @@ describe('draft-export cli', () => {
     const text = readFileSync(outFile, 'utf8');
     expect(text).toContain('[CustomCards]');
     expect(text).toContain('[Settings]');
-    expect(out).toEqual([outFile]);
+    // The path, then which of the two arms cut it: a file that says nothing
+    // about that is a file whose reader has to open it to find out (`mtg-rbw6`).
+    expect(out).toEqual([outFile, 'cut from the set rarities, which is what a generated set offers']);
   });
 
   it('strands no sheet: the pack it writes is the set it was handed', () => {
@@ -72,6 +74,39 @@ describe('draft-export cli', () => {
     // Written anyway: the file is not the problem, the collation is, and a
     // missing file would leave nothing to look at.
     expect(readFileSync(outFile, 'utf8')).toContain('[CustomCards]');
+  });
+
+  it('says on stdout that the basic lands came out of the printing it cut', () => {
+    // A document whose booster spends one pick on a basic sheet, which is
+    // M11's shape and every reduced reference printing's (`mtg-5of3`). The file
+    // is the pack Draftmancer deals, so a run that dropped the slot silently
+    // would leave the document saying five and the pack holding four.
+    const commons = EXAMPLE_SET.filter((card) => card.rarity === 'common' && !isBasicLand(card));
+    const weights = (cards: readonly { readonly id: string }[]): Record<string, number> =>
+      Object.fromEntries(cards.map((card) => [card.id, 1]));
+    const cardsFile = join(directory, 'printing.json');
+    writeFileSync(
+      cardsFile,
+      JSON.stringify({
+        cards: EXAMPLE_SET,
+        reduction: {
+          collation: {
+            sheets: [
+              { name: 'basic', weights: weights(BASIC_LANDS) },
+              { name: 'common', weights: weights(commons) },
+            ],
+            boosters: [{ contents: { basic: 1, common: 4 }, weight: 1, packSize: 5 }],
+          },
+        },
+      }),
+      'utf8',
+    );
+    const outFile = join(directory, 'printing.txt');
+
+    expect(main([outFile, cardsFile])).toBe(0);
+    expect(out.join('\n')).toContain("cut from the printing's own collation");
+    expect(out.join('\n')).toContain('basic lands are not dealt: dropped basic');
+    expect(out.join('\n')).toContain('a pack is 4 cards where the printing collates 5');
   });
 
   it('throws on a document with no "cards" field, and writes no file at all', () => {

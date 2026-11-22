@@ -1,14 +1,11 @@
 /**
- * `anotherControlledPermanentEnters` and `anotherControlledCreatureEnters`:
- * CR 603.6e's "another permanent" trigger, and its creature-filtered sibling.
+ * Controlled-permanent entry conditions: the broad creature form plus the
+ * two source-excluding "another" forms.
  *
- * Both extend `case 'permanentEntered'`, the same event `selfEnters` already
- * reads, so the three assertions this file has to carry are the ones that
- * event alone does not settle: that the scan excludes the entering permanent
- * itself (it is "another", never the permanent that just arrived), that the
- * creature-filtered member narrows to creatures and the unfiltered one does
- * not, and that both stay scoped to the entering permanent's own controller —
- * "you control", not "enters the battlefield" unqualified.
+ * All extend `case 'permanentEntered'`, the same event `selfEnters` already
+ * reads. The probes distinguish the broad form, which sees a creature source's
+ * own arrival, from the two `another` forms, which exclude it; they also pin
+ * the creature filter and the entering permanent's controller.
  */
 import { describe, expect, it } from 'vitest';
 import type { Card } from '@mtg/dsl';
@@ -69,6 +66,11 @@ const MAKE_SELF_WATCHING_TOKEN = sorcery(
         abilities: [
           {
             kind: 'triggered',
+            condition: 'controlledCreatureEnters',
+            effects: [{ kind: 'gainLife', amount: 1, target: { kind: 'noTarget' } }],
+          },
+          {
+            kind: 'triggered',
             condition: 'anotherControlledPermanentEnters',
             effects: [{ kind: 'gainLife', amount: 1, target: { kind: 'noTarget' } }],
           },
@@ -121,9 +123,9 @@ describe('whenever another permanent you control enters the battlefield', () => 
 
     expect(conditionsFiredBy(result, permanentOid)).toEqual(['anotherControlledPermanentEnters']);
     expect(conditionsFiredBy(result, creatureOid)).toEqual(['anotherControlledCreatureEnters']);
-    // The self-exclusion check: the token prints the same unfiltered
-    // condition, and its own arrival is not "another" to itself.
-    expect(conditionsFiredBy(result, sentinel)).toEqual([]);
+    // The broad condition sees the token's own arrival; the source-excluding
+    // sibling on the same token does not.
+    expect(conditionsFiredBy(result, sentinel)).toEqual(['controlledCreatureEnters']);
   });
 
   it('fires the permanent watcher but not the creature watcher when a land enters', () => {

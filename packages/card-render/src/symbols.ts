@@ -16,7 +16,7 @@
  *    whitespace a run is trimmed of before it is emitted, so what is drawn and
  *    what was measured describe the same line;
  *  * a symbol's box is `SYMBOL_BOX_EM` and its advance `SYMBOL_ADVANCE_EM`,
- *    read from `@mtg/ui`'s registry rather than restated.
+ *    read from `@mtg/render-spec`'s registry rather than restated.
  *
  * Which drawing goes in the box is the registry's, never an import. The
  * referenced set names a file this tree does not hold; the original set is the
@@ -27,8 +27,8 @@
  * can reference `symbols/T.svg` beside itself, and a file on its way to a
  * printer cannot, because it will be opened somewhere this repository is not.
  */
-import { PRINTED_SYMBOL_SET, symbolArt, symbolLabel } from '@mtg/ui';
-import type { SymbolSet } from '@mtg/ui';
+import { PRINTED_SYMBOL_SET, symbolArt, symbolLabel } from '@mtg/render-spec';
+import type { SymbolSet } from '@mtg/render-spec';
 import { genericMarkup, glyphMarkup } from './pips';
 import { el, num, textEl } from './svg';
 import { textRun } from './text/emit';

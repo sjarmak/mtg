@@ -15,6 +15,11 @@ import { resolveCriteria, type LandPlan } from '../../src/land-plan';
 import { parseManaCost } from '../../src/mana-cost';
 import type { CandidateCard } from '../../src/candidates';
 import type { Inclusion } from '../../src/verify';
+import { constructedFormatContract } from '../../src/constructed-policy';
+import {
+  DECKLAB_MODEL_REPAIR_SELECTION_POLICY,
+  DECKLAB_VERIFIED_PARTIAL_FALLBACK_POLICY,
+} from '../../src/constructed-policy';
 import type { FakeCard } from './fake-store';
 
 export const ART = 'https://cards.example/bolt-art.jpg';
@@ -139,11 +144,33 @@ export function builtDeck(): BuiltDeck {
   return {
     criteria,
     landPlan,
+    construction: {
+      format: constructedFormatContract(
+        {
+          kind: 'store',
+          universe: { cards: [], filters: [], byName: new Map() },
+          knownNames: new Set(),
+        },
+        criteria,
+      ),
+      selection: {
+        id: DECKLAB_MODEL_REPAIR_SELECTION_POLICY,
+        provider: 'fixture',
+        model: 'fixture-model',
+        fallbackId: DECKLAB_VERIFIED_PARTIAL_FALLBACK_POLICY,
+      },
+    },
     deck,
     plan: 'burn them out by turn four',
     rejections: [],
+    adjustments: [],
+    stop: { kind: 'filled' },
     universeSize: 4_231,
     rounds: 1,
+    // A fixture, so the numbers are stated rather than measured: what the
+    // fixture is for is the deck, and a build that spent nothing is not one of
+    // the cases the callers of this helper are about.
+    spend: { spentUsd: 0, selectionUsd: 0, maxSpendUsd: 5 },
     shortBy: 0,
     report: 'unused here',
   };
@@ -172,11 +199,33 @@ export function builtColorlessDeck(): BuiltDeck {
   return {
     criteria,
     landPlan,
+    construction: {
+      format: constructedFormatContract(
+        {
+          kind: 'store',
+          universe: { cards: [], filters: [], byName: new Map() },
+          knownNames: new Set(),
+        },
+        criteria,
+      ),
+      selection: {
+        id: DECKLAB_MODEL_REPAIR_SELECTION_POLICY,
+        provider: 'fixture',
+        model: 'fixture-model',
+        fallbackId: DECKLAB_VERIFIED_PARTIAL_FALLBACK_POLICY,
+      },
+    },
     deck,
     plan: 'a pile of artifacts',
     rejections: [],
+    adjustments: [],
+    stop: { kind: 'filled' },
     universeSize: 1_204,
     rounds: 1,
+    // A fixture, so the numbers are stated rather than measured: what the
+    // fixture is for is the deck, and a build that spent nothing is not one of
+    // the cases the callers of this helper are about.
+    spend: { spentUsd: 0, selectionUsd: 0, maxSpendUsd: 5 },
     shortBy: 0,
     report: 'unused here',
   };

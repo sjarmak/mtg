@@ -303,7 +303,7 @@ describe('the stylesheet', () => {
    * it: every keyword but flying now splits its card's first block into a
    * `reminder` block once it has one, and `Card.ts`'s `mtg-card__keywords`
    * class only ever lands on a `rules` block, so a flying-only card — the one
-   * keyword this lab prints with no reminder at all, `../src/dsl/reminder.ts`
+   * keyword this lab prints with no reminder at all, `@mtg/dsl`’s `reminder.ts`
    * — kept the bold that every other keyworded card had already dropped.
    * Warden of the Sky Islands is that card. The board face keeps the bold on
    * purpose (`mtg-u69`, `../test/board-rules-text.test.ts`): a battlefield

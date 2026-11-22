@@ -44,7 +44,7 @@
  * `declareBlockers` prompt can name one blocker in dozens of assignments and a
  * menu taller than the window has options nobody can press.
  */
-import { cssNumber } from '../number';
+import { cssNumber, MICRO_LABEL } from '../number';
 import { PLAY_RAIL_REM } from './rail';
 
 /**
@@ -67,7 +67,8 @@ export const PICKER_WIDTH_REM = PLAY_RAIL_REM - 2 * PICKER_INSET_REM;
 export const PICKER_CSS = `
 .mtg-picker {
   position: fixed; z-index: 45;
-  inset-block-end: ${cssNumber(PICKER_INSET_REM)}rem; inset-inline-end: ${cssNumber(PICKER_INSET_REM)}rem;
+  inset-block-end: max(${cssNumber(PICKER_INSET_REM)}rem, env(safe-area-inset-bottom));
+  inset-inline-end: max(${cssNumber(PICKER_INSET_REM)}rem, env(safe-area-inset-right));
   display: flex; flex-direction: column; gap: var(--mtg-space-2);
   width: ${cssNumber(PICKER_WIDTH_REM)}rem; max-height: 60vh; overflow-y: auto;
   padding: var(--mtg-space-2);
@@ -75,7 +76,7 @@ export const PICKER_CSS = `
   border-radius: var(--mtg-radius-md); box-shadow: var(--mtg-shadow-table);
 }
 .mtg-picker__title {
-  font-size: var(--mtg-text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  ${MICRO_LABEL}
   color: var(--mtg-ink-faint);
 }
 .mtg-picker__list { display: flex; flex-direction: column; gap: var(--mtg-space-1); }

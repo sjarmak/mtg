@@ -42,12 +42,12 @@
  * `prefers-reduced-motion: reduce` the evidence is the opposite and just as
  * important: `animation.name` is `none` and `animation.running` is 0.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { EXAMPLE_SET, isLand, parseCards, setBasics } from '@mtg/dsl';
+import { EXAMPLE_SET, isLand, setBasics } from '@mtg/dsl';
 import type { Card as DslCard } from '@mtg/dsl';
 import type { GameSession, GameState, PlayerId } from '@mtg/kernel';
 import { DEFAULT_AUTO_PASS, humanSeat, pendingDecision, scenario } from '@mtg/kernel';
@@ -56,6 +56,7 @@ import { Shell } from '../src/app/Shell';
 import { PlayView } from '../src/routes/play/PlayView';
 import { ARRIVAL_MS } from '../src/styles/board/arrival';
 import { uiStyleSheet } from '../src/styles/index';
+import { readSetCards } from './set-file';
 
 const UI_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REPO_ROOT = resolve(UI_ROOT, '..', '..');
@@ -79,15 +80,7 @@ const setPath = process.argv[3];
  */
 function cards(): readonly DslCard[] {
   if (setPath === undefined) return EXAMPLE_SET;
-  const document: unknown = JSON.parse(readFileSync(setPath, 'utf8'));
-  const listed =
-    typeof document === 'object' && document !== null && 'cards' in document
-      ? (document as { readonly cards: unknown }).cards
-      : null;
-  if (!Array.isArray(listed)) {
-    throw new Error(`${setPath} has no "cards" array, so it is not a set document`);
-  }
-  return parseCards(listed);
+  return readSetCards(setPath);
 }
 
 const CARDS = cards();

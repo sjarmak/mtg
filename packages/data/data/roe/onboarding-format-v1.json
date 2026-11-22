@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "roe",
+  "name": "Rise of the Eldrazi",
+  "sourceCodes": ["ROE"],
+  "products": [{ "id": "roe-draft", "setCode": "ROE", "boosterKey": "draft" }],
+  "draft": {
+    "seats": 8,
+    "rounds": ["roe-draft", "roe-draft", "roe-draft"],
+    "botPolicy": "printed-limited-v1"
+  },
+  "sealed": {
+    "boosters": ["roe-draft", "roe-draft", "roe-draft", "roe-draft", "roe-draft", "roe-draft"]
+  },
+  "basicLandPolicy": "remove"
+}

@@ -26,9 +26,16 @@
  * works from `file://`, because these pages get opened straight out of an
  * `out/` run directory, and a download started from that origin is one a
  * browser is entitled to refuse. A headless run refuses it by default, and so
- * does a window with downloads switched off. Which browsers refuse it here has
- * not been measured, and nothing below depends on the answer: the point is that
- * the page cannot find out.
+ * does a window with downloads switched off. Nothing below depends on which
+ * browsers refuse it: the point is that the page cannot find out, and
+ * `mtg-l191` measured exactly that. `../../../test/deck/download.browser.test.ts`
+ * opens this sequence from `file://` in headless Chrome under both download
+ * behaviors: allowed, the file lands; denied, the download begins and is
+ * canceled and nothing lands; and in both cases the click returns `undefined`
+ * and this function returns `true`. Only the browser's own CDP events tell the
+ * two apart. Chrome's untouched default from `file://` is still unmeasured,
+ * because asking CDP for download events is itself a download-behavior
+ * setting.
  *
  * So `saveTextFile` returns whether the browser was **asked**, which is the most
  * any code here can know, and its caller must never say "saved". The

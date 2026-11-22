@@ -7,7 +7,7 @@
  * `layers.ts` / `dependency.ts` resolve these records exactly as they resolve a
  * pump, which is the whole reason this slice is small.
  *
- * ## Why the effects are registered rather than derived
+ * ## Why most effects are registered, and the layer-4 exception
  *
  * `computeAll` (`layers.ts`) could read `state.battlefield` and derive a lord's
  * effect on every walk, which would make appearance and disappearance automatic.
@@ -17,6 +17,10 @@
  * continuous effect from walking the board thousands of times per turn.
  * Derivation would replace an array-length test with a battlefield scan at every
  * one of those calls, and CR 613.7 timestamps would still need somewhere to live.
+ * Type-changing statics are the deliberate exception: layer 1 can copy the
+ * ability onto another permanent, so layer 4 derives those records from the
+ * characteristic map and uses each source's persisted battlefield timestamp.
+ * The fast path scans only for that exceptional ability class.
  *
  * ## Control changes, and why the filter carries no baked-in `PlayerId`
  *
@@ -40,39 +44,73 @@ import type {
   Card,
   Condition,
   LayeredStaticModification,
-  PermanentTally,
   StaticAbility,
+  StaticBundleAbility,
 } from '@mtg/dsl';
-import { assertNever, isGrantableKeywordAbilityKind, isLayeredStaticModification } from '@mtg/dsl';
+import {
+  assertNever,
+  isGrantableKeywordAbilityKind,
+  isLayeredStaticModification,
+  ZERO_MANA_COST,
+} from '@mtg/dsl';
 import type {
   AbilityChangeEffect,
   ContinuousEffect,
   ObjectFilter,
   PtCount,
+  PtColorScaledModEffect,
   PtDefiningEffect,
   PtModEffect,
   PtScaledModEffect,
+  TypeChangeEffect,
 } from './continuous';
 import { objectFilter, onlyObject } from './continuous';
-import type { ObjectId } from './ids';
+import type { ObjectId, PlayerId } from './ids';
 import { continuousEffectId } from './ids';
-import type { GameState } from './state';
+import { copiableCardOf, lastKnownCopiableCardOf } from './state';
+import type { GameState, StackEntry } from './state';
+import { targetObjectFilter } from './target-filter';
+import type { CharacteristicMap } from './characteristics';
 
 /** Which permanents a scope reaches, as the filter the layer walk evaluates. */
 function staticFilterFor(ability: StaticAbility, source: ObjectId): ObjectFilter {
   const subtypes = ability.subtype === null ? null : [ability.subtype];
+  const characteristics =
+    ability.filter === undefined
+      ? objectFilter({})
+      : targetObjectFilter({
+          ...(ability.filter.colors === undefined ? {} : { colors: ability.filter.colors }),
+          ...(ability.filter.excludeColors === undefined
+            ? {}
+            : { excludeColors: ability.filter.excludeColors }),
+        });
+  const token = ability.filter?.token ?? null;
   switch (ability.scope) {
     case 'self':
       return onlyObject(source);
     case 'creaturesYouControl':
-      return objectFilter({ cardTypes: ['creature'], controllerIsSource: true, subtypes });
+      return objectFilter({
+        ...characteristics,
+        cardTypes: ['creature'],
+        controllerIsSource: true,
+        subtypes,
+        token,
+      });
     case 'otherCreaturesYouControl':
       return objectFilter({
+        ...characteristics,
         cardTypes: ['creature'],
         controllerIsSource: true,
         subtypes,
         excludeOids: [source],
+        token,
       });
+    case 'landsYouControl':
+      return objectFilter({ ...characteristics, cardTypes: ['land'], controllerIsSource: true });
+    case 'allLands':
+      return objectFilter({ ...characteristics, cardTypes: ['land'] });
+    case 'allCreatures':
+      return objectFilter({ ...characteristics, cardTypes: ['creature'] });
     default:
       return assertNever(ability.scope, 'staticFilterFor');
   }
@@ -94,6 +132,8 @@ export interface RegisteredEffectCommon {
   readonly affects: ObjectFilter;
   /** CR 611.2c: `null` unless the printed ability carries `enabledWhile`. */
   readonly enabledWhile: Condition | null;
+  readonly requiresTapped?: true;
+  readonly activeDuringOtherTurns?: true;
 }
 
 /**
@@ -131,15 +171,23 @@ export interface RegisteredEffectCommon {
  * shape puts that difference where the layer walk can see it instead of
  * flattening it into a filter field `matchesFilter` would ignore.
  */
-function tallyCount(tally: PermanentTally): PtCount {
+function tallyCount(
+  tally: Extract<LayeredStaticModification, { readonly kind: 'statBonusPer' }>['each'],
+  source: ObjectId,
+): PtCount {
   switch (tally.kind) {
     case 'countMatching':
+      if ('zone' in tally && tally.zone === 'controllerGraveyard') {
+        return { kind: 'controllerGraveyardCreatures' };
+      }
       return {
         kind: 'battlefield',
         filter: objectFilter({
           cardTypes: tally.filter.cardTypes ?? null,
           subtypes: tally.filter.subtypes ?? null,
-          controllerIsSource: true,
+          names: tally.filter.names ?? null,
+          controllerIsSource: tally.whose !== 'each',
+          excludeOids: tally.excludeSource === true ? [source] : null,
         }),
       };
     case 'countWithCounter':
@@ -152,6 +200,7 @@ function tallyCount(tally: PermanentTally): PtCount {
         filter: objectFilter({
           cardTypes: tally.filter.cardTypes ?? null,
           subtypes: tally.filter.subtypes ?? null,
+          names: tally.filter.names ?? null,
           controllerIsSource: true,
         }),
         counters: tally.counters,
@@ -186,26 +235,66 @@ export function effectForModification(
       };
       return effect;
     }
-    case 'grantKeyword': {
+    case 'grantKeyword':
+    case 'grantKeywordAbilities': {
       // CR 613.1f, layer 6: an ability added. The modification names one thing
       // and `Characteristics` keeps two lists, so the split is decided here
       // rather than by the card — `keywords` is the flat evergreen nine,
-      // `keywordAbilities` is the six whose rules consequences are wider, and
+      // `keywordAbilities` is the seven whose rules consequences are wider, and
       // only the second is what the CR 704 destruction sweep reads. Both halves
       // are one record in one layer, because "have flying" and "have
       // indestructible" are the same CR 613.1f grant.
-      const keyword = modification.keyword;
-      const layerSix = {
+      const grants =
+        modification.kind === 'grantKeyword'
+          ? ([{ kind: 'keyword', keyword: modification.keyword }] as const)
+          : modification.grants;
+      const addKeywords: AbilityChangeEffect['addKeywords'][number][] = [];
+      const addKeywordAbilities: AbilityChangeEffect['addKeywordAbilities'][number][] = [];
+      for (const grant of grants) {
+        if (grant.kind === 'landwalk') {
+          addKeywordAbilities.push({ kind: 'landwalk', landType: grant.landType });
+        } else if (grant.kind === 'protection') {
+          addKeywordAbilities.push({ kind: 'protection', quality: grant.quality });
+        } else if (isGrantableKeywordAbilityKind(grant.keyword)) {
+          addKeywordAbilities.push({ kind: grant.keyword });
+        } else {
+          addKeywords.push(grant.keyword);
+        }
+      }
+      return {
         ...common,
         kind: 'abilityChange',
         layer: '6',
+        addKeywords,
         removeKeywords: [],
+        addKeywordAbilities,
+        removeKeywordAbilities: [],
+        addAbilities: [],
+        prohibitActivation: false,
         removeAll: false,
-      } as const;
-      const effect: AbilityChangeEffect = isGrantableKeywordAbilityKind(keyword)
-        ? { ...layerSix, addKeywords: [], addKeywordAbilities: [{ kind: keyword }] }
-        : { ...layerSix, addKeywords: [keyword], addKeywordAbilities: [] };
-      return effect;
+      };
+    }
+    case 'grantTriggeredAbility':
+    case 'grantAnyColorManaAbility': {
+      const anyColorManaAbility: ActivatedAbility = {
+        kind: 'activated',
+        cost: { mana: ZERO_MANA_COST, tapSelf: true, sacrificeSelf: false },
+        effects: [{ kind: 'addMana', produces: ['W', 'U', 'B', 'R', 'G'], amount: 1 }],
+      };
+      const addAbilities: readonly Ability[] =
+        modification.kind === 'grantTriggeredAbility' ? [modification.ability] : [anyColorManaAbility];
+      return {
+        ...common,
+        kind: 'abilityChange',
+        layer: '6',
+        addKeywords: [],
+        removeKeywords: [],
+        addKeywordAbilities: [],
+        removeKeywordAbilities: [],
+        addAbilities,
+        prohibitActivation: false,
+        removeAll: false,
+      };
     }
     case 'statBonusPer': {
       // CR 613.4c, layer 7c, with the count left live: the filter carries
@@ -219,7 +308,17 @@ export function effectForModification(
         layer: '7c',
         power: modification.power,
         toughness: modification.toughness,
-        countOf: tallyCount(modification.each),
+        countOf: tallyCount(modification.each, common.sourceOid),
+      };
+      return effect;
+    }
+    case 'statBonusPerColor': {
+      const effect: PtColorScaledModEffect = {
+        ...common,
+        kind: 'ptColorScaledMod',
+        layer: '7c',
+        power: modification.power,
+        toughness: modification.toughness,
       };
       return effect;
     }
@@ -237,6 +336,18 @@ export function effectForModification(
       };
       return effect;
     }
+    case 'addSubtype': {
+      const effect: TypeChangeEffect = {
+        ...common,
+        kind: 'typeChange',
+        layer: '4',
+        addTypes: [],
+        removeTypes: [],
+        addSubtypes: [modification.subtype],
+        removeAllSubtypes: false,
+      };
+      return effect;
+    }
     default:
       return assertNever(modification, 'effectForModification');
   }
@@ -251,19 +362,123 @@ export function effectForModification(
 function staticEffectFor(ability: StaticAbility, common: RegisteredEffectCommon): ContinuousEffect | null {
   const modification = ability.modification;
   if (!isLayeredStaticModification(modification)) return null;
+  // A layer-4 static must be derived during the walk from the abilities that
+  // exist after layer 1. Registering the printed record here would miss copy
+  // effects and would survive a copy effect that replaces the source's text.
+  if (
+    modification.kind === 'addSubtype' ||
+    modification.kind === 'grantTriggeredAbility' ||
+    modification.kind === 'grantAnyColorManaAbility'
+  ) {
+    return null;
+  }
   return effectForModification(modification, common);
+}
+
+type DerivedStaticLayerAbility = StaticAbility & {
+  readonly modification: Extract<
+    LayeredStaticModification,
+    { readonly kind: 'addSubtype' | 'grantTriggeredAbility' | 'grantAnyColorManaAbility' }
+  >;
+};
+
+function staticBundleFilters(ability: StaticBundleAbility, source: ObjectId): readonly ObjectFilter[] {
+  const group = objectFilter({
+    cardTypes: ['creature'],
+    controllerIsSource: true,
+    subtypes: ability.subtype === undefined ? null : [ability.subtype],
+    excludeOids: [source],
+  });
+  return ability.includeSelf === true ? [onlyObject(source), group] : [group];
+}
+
+/** The static ability class the layer walk derives instead of registering. */
+export function isDerivedStaticLayerAbility(ability: Ability): ability is DerivedStaticLayerAbility {
+  return (
+    ability.kind === 'static' &&
+    (ability.modification.kind === 'addSubtype' ||
+      ability.modification.kind === 'grantTriggeredAbility' ||
+      ability.modification.kind === 'grantAnyColorManaAbility')
+  );
+}
+
+/**
+ * Layer effects supplied by abilities that exist at the current point in the
+ * walk rather than by the source's printed card.
+ *
+ * CR 613.6 applies a static type-changing ability in layer 4 even if a later
+ * layer removes that ability. Reading `map` here, after layers 1–3 and before
+ * layer 4, also makes a copy carry the ability without registering a second
+ * stateful record. These effects are derived data: deterministic identifiers
+ * make replay inspection stable, while none is written into `GameState`.
+ */
+export function derivedStaticEffectsForLayer(
+  state: GameState,
+  map: CharacteristicMap,
+  layer: ContinuousEffect['layer'],
+): readonly ContinuousEffect[] {
+  if (layer !== '4' && layer !== '6' && layer !== '7c') return [];
+  const effects: ContinuousEffect[] = [];
+  for (const source of state.battlefield) {
+    const current = map.get(source);
+    if (current === undefined) continue;
+    const object = state.objects[source];
+    if (object?.battlefieldTimestamp === undefined) {
+      throw new Error(`${source} is on the battlefield without a CR 613.7 timestamp`);
+    }
+    for (const [abilityIndex, ability] of current.abilities.entries()) {
+      if (ability.kind === 'staticBundle') {
+        for (const [modificationIndex, modification] of ability.modifications.entries()) {
+          for (const [subjectIndex, affects] of staticBundleFilters(ability, source).entries()) {
+            const effect = effectForModification(modification, {
+              id: `derived-static-bundle:${source}:${String(object.incarnation ?? 0)}:${String(abilityIndex)}:${String(modificationIndex)}:${String(subjectIndex)}`,
+              timestamp: object.battlefieldTimestamp,
+              sourceOid: source,
+              duration: 'whileOnBattlefield',
+              affects,
+              enabledWhile: ability.enabledWhile,
+            });
+            if (effect.layer === layer) effects.push(effect);
+          }
+        }
+        continue;
+      }
+      if (layer === '7c') continue;
+      if (!isDerivedStaticLayerAbility(ability)) continue;
+      if (
+        (layer === '4' && ability.modification.kind !== 'addSubtype') ||
+        (layer === '6' &&
+          ability.modification.kind !== 'grantTriggeredAbility' &&
+          ability.modification.kind !== 'grantAnyColorManaAbility')
+      ) {
+        continue;
+      }
+      const incarnation = object.incarnation ?? 0;
+      effects.push(
+        effectForModification(ability.modification, {
+          id: `derived-static:${source}:${incarnation}:${abilityIndex}`,
+          timestamp: object.battlefieldTimestamp,
+          sourceOid: source,
+          duration: 'whileOnBattlefield',
+          affects: staticFilterFor(ability, source),
+          enabledWhile: ability.enabledWhile ?? null,
+          ...(ability.filter?.tapped === true ? { requiresTapped: true } : {}),
+          ...(ability.activeDuring === 'turnsOtherThanYours' ? { activeDuringOtherTurns: true } : {}),
+        }),
+      );
+    }
+  }
+  return effects;
 }
 
 /**
  * The continuous effect one printed ability registers on entry, or `null` for
  * an ability that registers none.
  *
- * Two of the three kinds are the `null`, for the same reason. Neither a
- * triggered nor an activated ability is a continuous effect, and neither holds
- * state between uses: each is read off the printed card at the moment it is
- * used — when its condition is met (`triggers.ts`), or when a player pays for
- * it (`reduce.ts`) — so there is nothing to register on entry and nothing to
- * expire on the way out.
+ * Every non-static kind returns `null` here. Triggered, state-triggered, and
+ * activated abilities are read when they fire or are paid for, while static
+ * player and game rules register through their dedicated rule seams. None is a
+ * layer-system continuous effect to register here or expire on departure.
  */
 function continuousEffectsFor(ability: Ability, source: ObjectId, counter: number): ContinuousEffect | null {
   switch (ability.kind) {
@@ -281,9 +496,16 @@ function continuousEffectsFor(ability: Ability, source: ObjectId, counter: numbe
         // does, so this is the one place that normalizes it before it reaches a
         // `ContinuousEffect`, where the field is required.
         enabledWhile: ability.enabledWhile ?? null,
+        ...(ability.filter?.tapped === true ? { requiresTapped: true } : {}),
+        ...(ability.activeDuring === 'turnsOtherThanYours' ? { activeDuringOtherTurns: true } : {}),
       });
     case 'triggered':
     case 'activated':
+    case 'staticPlayerRule':
+    case 'staticGameRule':
+    case 'stateTriggered':
+    case 'staticBundle':
+    case 'staticActivationRule':
       return null;
     default:
       return assertNever(ability, 'continuousEffectsFor');
@@ -325,7 +547,9 @@ export function effectsRegisteredBy(
   return effects.filter(
     (effect) =>
       effect.sourceOid === source &&
-      (effect.duration === 'whileOnBattlefield' || effect.duration === 'whileAttached'),
+      (effect.duration === 'whileOnBattlefield' ||
+        effect.duration === 'whileAttached' ||
+        effect.duration === 'whileSourceAndSubjectRemain'),
   );
 }
 
@@ -344,7 +568,7 @@ export function effectsRegisteredBy(
 export function registerStatics(state: GameState, oid: ObjectId): GameState {
   const object = state.objects[oid];
   if (object === undefined) return state;
-  const registration = staticEffectsFor(object.card, oid, state.nextId);
+  const registration = staticEffectsFor(copiableCardOf(object), oid, state.nextId);
   if (registration.effects.length === 0) return state;
   return {
     ...state,
@@ -365,7 +589,29 @@ export function registerStatics(state: GameState, oid: ObjectId): GameState {
 export function abilityAt(state: GameState, oid: ObjectId, index: number): Ability | undefined {
   const object = state.objects[oid];
   if (object === undefined) return undefined;
-  return object.card.abilities[index];
+  return lastKnownCopiableCardOf(object).abilities[index];
+}
+
+/** The immutable ability incarnation retained by a stack entry. */
+export function stackedAbilityAt(state: GameState, entry: StackEntry): Ability | undefined {
+  const reference = entry.ability;
+  if (reference === null) return undefined;
+  return entry.sourceCard === undefined
+    ? abilityAt(state, reference.sourceOid, reference.index)
+    : entry.sourceCard.abilities[reference.index];
+}
+
+/** The player whose perspective governs a stack entry's target restrictions. */
+export function stackEntryTargetingController(state: GameState, entry: StackEntry): PlayerId {
+  const ability = stackedAbilityAt(state, entry);
+  if (ability?.kind !== 'triggered' || ability.targetChooser !== 'triggeringPlayer') {
+    return entry.controller;
+  }
+  const context = entry.triggerContext;
+  if (context === null || !('triggeringPlayer' in context)) {
+    throw new Error('a triggering-player target chooser has no retained player');
+  }
+  return context.triggeringPlayer;
 }
 
 /** The same lookup narrowed to the one kind a player can pay for (CR 602). */

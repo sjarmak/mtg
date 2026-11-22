@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "catalog-only-not-play-admitted",
+  "formatId": "ths",
+  "formatSha256": "97708a951338fa9d65f805a061a6b103a092e47085e9bdd1e9e16bb98f55443d",
+  "sourceSha256": "9816ef0c20eb23a3bae177154a818400599ff12a8aed2e046faa2a63c0af0149",
+  "archiveSha256": "5264d718bb87c209cb6367c492378fde070e499824bad009251c0a2d783e0173",
+  "forgeVersion": "2.0.14",
+  "artifactSha256": {
+    "sources.json": "9816ef0c20eb23a3bae177154a818400599ff12a8aed2e046faa2a63c0af0149",
+    "recipe.json": "5c4604acb6b0a07956093aae1aa05f3c93fc717a7e45d7ad842b3fd37201b565",
+    "ths-printed-catalog-v1.json": "86d544a6d49ff18d8368c4a16dbb481373c758ed73530316358fbaa5f61a50cc",
+    "ths-limited-format-v1.json": "1fbe1d6f9da204752c755903d86b8f2e438e22d49d17c4f049931d38c8816f6c"
+  },
+  "catalogs": [
+    {
+      "code": "THS",
+      "cards": 249,
+      "contentSha256": "0b5518a3ac6050318d7efb96cf6c13d907f9ed6d0c08674505cc0054af09a82d"
+    }
+  ],
+  "metrics": {
+    "elapsedMs": 1429.556843,
+    "modelCalls": 0,
+    "networkRequests": 0,
+    "scriptReads": 234,
+    "printings": 249
+  }
+}

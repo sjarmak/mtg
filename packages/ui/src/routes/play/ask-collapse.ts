@@ -49,7 +49,7 @@ export function useAskCollapse(): AskCollapse {
   return useCollapsePreference(STORE_KEY, SHORT_VIEWPORT_QUERY);
 }
 
-export function askToggle(state: AskCollapse): ReactElement {
+export function askToggle(state: Pick<AskCollapse, 'collapsed' | 'toggle'>): ReactElement {
   return createElement(
     'div',
     { className: 'mtg-ask__head' },

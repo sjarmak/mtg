@@ -51,7 +51,7 @@ function surface(runId: string): string {
         ],
       },
       games: { status: 'absent' },
-      route: { mode: 'analysis', params: { run: runId } },
+      route: { mode: 'analysis', sub: 'explorer', params: { run: runId } },
       onSetParams: () => undefined,
     }),
   );

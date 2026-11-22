@@ -2,9 +2,11 @@
 
 Measured 2026-08-21 (`mtg-9mxv`), against this worktree at `d93924dc` (`lane/w45-damage`, based on
 `main`). Every count below came from a run of `packages/setgen/tools/removal-census.ts` over the
-committed flagship set fixture (371 cards) and a freshly emitted `npm run reference:reduced` pair
+committed flagship set fixture (372 cards) and a freshly emitted `npm run reference:reduced` pair
 (Magic 2011 reduced to 162 positions, Magic 2013 reduced to 145). Nothing is estimated and nothing
 is carried over from another report.
+
+Five of the figures below were measured against the original private corpus. This public report retains those measurements; the fixture and its regeneration test are not part of this tree.
 
 **Verdict: real over-supply, but roughly a third the size the row count implies, and concentrated
 in a mechanism the row count cannot distinguish from a burn spell.** The census's own headline —
@@ -25,7 +27,7 @@ damage                                            38                       5    
 ```
 
 Unchanged from the census `mtg-9mxv` quotes. Confirmed against today's committed
-`flagship-set-253` fixture (371 cards, 208 creatures) and today's freshly generated reduced
+`flagship-set-253` fixture (372 cards, 208 creatures) and today's freshly generated reduced
 M11 (162 cards, 77 creatures) and M13 (145 cards, 60 creatures).
 
 The first thing the row count hides: the pools are not the same size. Row density (damage rows per
@@ -72,7 +74,7 @@ repeatable/one-shot split correctly.
 Read directly off `removalCensus`'s per-row output, one line per damage row targeting a creature
 (single-target and sweep together, matching the existing bucket-count convention).
 
-**The flagship (371 cards, 208 creatures):**
+**The flagship (372 cards, 208 creatures):**
 
 | amount  | rows | rarity split         | mana values               | kills ≤ this much of the flagship's own creatures |
 | ------- | ---- | -------------------- | ------------------------- | ------------------------------------------------- |
@@ -163,7 +165,7 @@ This lane measured; it changed no card. If the reading above is acted on, three 
 findings would drive three separate fixes, and they should not be collapsed into one:
 
 1. **One-shot creature-damage spell density is 2.3–3.1x the reduced core sets' even alone**
-   (16/371 vs 3/162 and 2/145). If the format wants to match that ratio, the fix is fewer
+   (16/372 vs 3/162 and 2/145). If the format wants to match that ratio, the fix is fewer
    creature-damage-dealing instants and sorceries — a spell-slot cut, independent of anything
    below.
 2. **The reach-weighted total (spells and triggers combined) is 2.6–3.5x.** If the format wants

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "workspace": "../../..",
+  "format": "packages/data/data/akh-hou/akh-hou-limited-format-v1.json",
+  "catalogs": [
+    "packages/data/data/akh-hou/akh-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/hou-printed-catalog-v1.json",
+    "packages/data/data/akh-hou/mp2-printed-catalog-v1.json"
+  ],
+  "probes": [
+    {
+      "id": "binding-mummy-negative-local-v1",
+      "scope": "card",
+      "controller": "local",
+      "cardIds": ["akh-printed-v1:0006:fae54072-ae27-4aae-a2b7-71f4551934f6"],
+      "decisionFamilies": ["binding-mummy-entry-trigger-exclusions"],
+      "assertions": [
+        "Binding Mummy does not trigger for itself",
+        "Binding Mummy does not trigger for own non-Zombie",
+        "Binding Mummy does not trigger for opposing Zombie"
+      ],
+      "testFile": "packages/forge-export/test/observed-akh-binding-mummy-negative.integration.test.ts"
+    }
+  ]
+}

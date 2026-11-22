@@ -119,7 +119,11 @@ function reachedDeclaration(): Position {
         second: { blocker: second.blocker, attacker: secondAttacker },
       };
     }
-    live.apply(owed, { kind: 'choose', index: pending.options.length - 1, at: owing.decisions });
+    live.apply(owed, {
+      kind: 'choose',
+      index: pending.options.findLastIndex((option) => option.type !== 'concede'),
+      at: owing.decisions,
+    });
   }
   throw new Error('the driven game never reached a declaration with two blockers in it');
 }

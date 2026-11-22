@@ -9,8 +9,9 @@
  */
 import { describe, expect, it } from 'vitest';
 import { exampleCard, parseCard } from '@mtg/dsl';
-import type { AgentView } from '@mtg/kernel';
-import { scenario } from '@mtg/kernel';
+import type { AgentView, GameState } from '@mtg/kernel';
+import { copiableValuesOf, scenario } from '@mtg/kernel';
+import { observeState } from '@mtg/kernel';
 import { frameDecision, REFEREE_SYSTEM, renderFrame } from '@mtg/referee';
 import { blockingView, cappedTargetingPosition, viewFor } from './positions';
 
@@ -23,7 +24,73 @@ const VERDICT = exampleCard('slc-mortal-verdict');
 const DRAKE = exampleCard('slc-windrider-drake');
 const STALKER = exampleCard('slc-graveblade-stalker');
 
+const CAPTIVATING_VAMPIRE = parseCard({
+  kind: 'creature',
+  id: 'referee-captivating-vampire',
+  name: 'Captivating Vampire',
+  rarity: 'rare',
+  set: { code: 'M11', collectorNumber: 87 },
+  manaCost: { generic: 1, B: 2 },
+  colors: ['B'],
+  subtypes: ['Vampire'],
+  power: 2,
+  toughness: 2,
+  abilities: [
+    {
+      kind: 'activated',
+      cost: { mana: {}, tapMatching: { count: 5, filter: { subtypes: ['Vampire'] } } },
+      effects: [
+        { kind: 'gainControl', target: { kind: 'targetCreature' } },
+        { kind: 'addSubtype', subtype: 'Vampire', target: { kind: 'thatCreature' } },
+      ],
+    },
+  ],
+});
+
+function cohortCreature(name: string, collectorNumber: number, subtype: string) {
+  return parseCard({
+    kind: 'creature',
+    id: `referee-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+    name,
+    rarity: 'common',
+    set: { code: 'REF', collectorNumber },
+    manaCost: { generic: 1 },
+    colors: [],
+    subtypes: [subtype],
+    power: 1,
+    toughness: 1,
+  });
+}
+
+const COPY_SHELL = cohortCreature('Cohort Copy Shell', 81, 'Shapeshifter');
+const COHORT_TARGET = cohortCreature('Cohort Target', 82, 'Bear');
+const COHORT_KIN = Array.from({ length: 5 }, (_, index) =>
+  cohortCreature(`Cohort Kin ${String(index + 1)}`, 83 + index, 'Vampire'),
+);
+
 describe('a framed decision', () => {
+  it('frames Populate as a mandatory creature-token copy choice', () => {
+    const state = scenario({ battlefield: [{ card: GOLEM, controller: 0, token: true }] }).state;
+    const token = state.battlefield[0];
+    if (token === undefined) throw new Error('Populate frame board is incomplete');
+    const frame = frameDecision({
+      state: observeState(state, 0, 'test/frame.test.ts:76'),
+      player: 0,
+      decision: {
+        kind: 'populate',
+        player: 0,
+        tokens: [token],
+        options: [{ type: 'choosePopulateToken', player: 0, token }],
+        complete: true,
+      },
+    });
+
+    expect(frame.question).toContain('Which do you choose?');
+    expect(frame.options).toEqual([
+      expect.objectContaining({ index: 0, summary: expect.stringContaining('copy of Ironclad Golem') }),
+    ]);
+  });
+
   it('numbers every option the kernel enumerated and carries its completeness', () => {
     const view = blockingView();
     const frame = frameDecision(view);
@@ -45,6 +112,85 @@ describe('a framed decision', () => {
     expect(capped.decision.complete).toBe(false);
     expect(frameDecision(capped).enumerationComplete).toBe(false);
     expect(renderFrame(frameDecision(capped))).toContain('this list is a subset');
+  });
+
+  it('distinguishes a copied ability by every named cohort tap payment', () => {
+    const opened = scenario({
+      battlefield: [
+        { card: COPY_SHELL, controller: 0 },
+        ...COHORT_KIN.map((card) => ({ card, controller: 0 as const })),
+        { card: COHORT_TARGET, controller: 1 },
+      ],
+      step: 'precombatMain',
+    }).state;
+    const source = opened.battlefield[0];
+    const target = opened.battlefield[opened.battlefield.length - 1];
+    if (source === undefined || target === undefined) throw new Error('cohort position lost an object');
+    const sourceObject = opened.objects[source];
+    if (sourceObject === undefined) throw new Error('cohort position lost its source');
+    const copied: GameState = {
+      ...opened,
+      objects: {
+        ...opened.objects,
+        [source]: { ...sourceObject, copiableCard: CAPTIVATING_VAMPIRE },
+      },
+    };
+    const view = viewFor(copied);
+    const frame = frameDecision(view, { maxOptions: 128 });
+    const payments = frame.options.flatMap((option) => {
+      const action = view.decision.options[option.index];
+      return action?.type === 'activateAbility' &&
+        action.oid === source &&
+        action.targets[0]?.kind === 'permanent' &&
+        action.targets[0].oid === target
+        ? [{ action, summary: option.summary }]
+        : [];
+    });
+
+    expect(payments).toHaveLength(6);
+    expect(new Set(payments.map(({ summary }) => summary)).size).toBe(6);
+    for (const { action, summary } of payments) {
+      expect(summary).toContain('Tap five untapped Vampires you control');
+      expect(action.taps).toHaveLength(5);
+      for (const oid of action.taps ?? []) {
+        expect(summary).toContain(`${copiableValuesOf(copied, oid).name} [${oid}]`);
+      }
+    }
+  });
+
+  it('shows divided allocations beside the exact plural targets they belong to', () => {
+    const start = scenario({
+      battlefield: [{ card: GUARDIAN, controller: 1 }],
+      hands: [[LASH], []],
+      step: 'precombatMain',
+    });
+    const spell = start.state.players[0].hand[0];
+    const target = start.state.battlefield[0];
+    if (spell === undefined || target === undefined)
+      throw new Error('referee divided-damage board is incomplete');
+    const action = {
+      type: 'castSpell',
+      player: 0,
+      oid: spell,
+      targets: [null],
+      multiTargets: {
+        0: [
+          { kind: 'player', player: 1 },
+          { kind: 'permanent', oid: target },
+        ],
+      },
+      damageAllocations: { 0: [2, 1] },
+    } as const;
+    const view: AgentView = {
+      state: observeState(start.state, 0, 'test/frame.test.ts:184'),
+      player: 0,
+      decision: { kind: 'priority', player: 0, options: [action], complete: true },
+    };
+    const summary = frameDecision(view).options[0]?.summary;
+
+    expect(summary).toContain('effect 1 → player 1 for 2');
+    expect(summary).toContain('effect 1 → Thornhide Guardian');
+    expect(summary).toContain('for 1)');
   });
 
   it('never names a card in either library or in the opponent hand', () => {

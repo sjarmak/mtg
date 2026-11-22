@@ -92,6 +92,17 @@ describe('a printed cost reduction', () => {
     expect(renderOracleText(card)).toBe('Creature spells you cast cost {2} less to cast.');
   });
 
+  it('scopes one reduction to an exact finite set of spell types', () => {
+    const card = parseCard(testPermanent({ amount: 1, cardTypes: ['instant', 'sorcery'] }));
+    expect(card.costReduction).toEqual({ amount: 1, cardTypes: ['instant', 'sorcery'] });
+    expect(renderOracleText(card)).toBe('Instant and sorcery spells you cast cost {1} less to cast.');
+  });
+
+  it('rejects duplicate or singular plural-form spell filters', () => {
+    expect(() => parseCard(testPermanent({ amount: 1, cardTypes: ['instant'] }))).toThrow();
+    expect(() => parseCard(testPermanent({ amount: 1, cardTypes: ['instant', 'instant'] }))).toThrow();
+  });
+
   it('is absent by default and prints nothing extra', () => {
     const card = parseCard(testPermanent(null));
     expect(card.costReduction).toBeNull();
@@ -117,6 +128,12 @@ describe('a printed cost reduction', () => {
   it('describeCostReduction is the exact line renderOracleText prints', () => {
     expect(describeCostReduction({ amount: 3, cardType: 'artifact' })).toBe(
       'Artifact spells you cast cost {3} less to cast.',
+    );
+  });
+
+  it('describes a multi-type reduction without broadening it to all spells', () => {
+    expect(describeCostReduction({ amount: 1, cardTypes: ['instant', 'sorcery'] })).toBe(
+      'Instant and sorcery spells you cast cost {1} less to cast.',
     );
   });
 });

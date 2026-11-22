@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "formatId": "som",
+  "archetypes": [
+    {
+      "id": "white-blue-metalcraft",
+      "name": "White-Blue Metalcraft",
+      "colors": ["W", "U"],
+      "signpost": {
+        "name": "Chrome Steed",
+        "physicalId": "som-printed-v1:0142:ce881675-690f-4d4c-a951-ab8302e904ab"
+      },
+      "plan": "Build around Chrome Steed: Assemble three artifacts while controlling combat, then exploit metalcraft bonuses on evasive or defensive creatures."
+    },
+    {
+      "id": "blue-black-proliferate",
+      "name": "Blue-Black Proliferate",
+      "colors": ["U", "B"],
+      "signpost": {
+        "name": "Thrummingbird",
+        "physicalId": "som-printed-v1:0047:dc2dd336-e457-49a1-88ae-c35f0c846e99"
+      },
+      "plan": "Build around Thrummingbird: Seed poison or charge counters early, then proliferate repeatedly while removal slows opposing pressure."
+    },
+    {
+      "id": "black-green-infect",
+      "name": "Black-Green Infect",
+      "colors": ["B", "G"],
+      "signpost": {
+        "name": "Cystbearer",
+        "physicalId": "som-printed-v1:0117:b6c10302-f0b3-4076-ae5c-a8c8c09a7d41"
+      },
+      "plan": "Build around Cystbearer: Apply poison with efficient infect creatures and use removal or combat tricks to force the last counters through."
+    },
+    {
+      "id": "red-white-metalcraft",
+      "name": "Red-White Metalcraft",
+      "colors": ["W", "R"],
+      "signpost": {
+        "name": "Myrsmith",
+        "physicalId": "som-printed-v1:0016:13429b63-085c-4c78-9ce3-247db5841b9d"
+      },
+      "plan": "Build around Myrsmith: Reach three artifacts quickly, switch on metalcraft bonuses, and leverage equipment or tokens in aggressive combat."
+    },
+    {
+      "id": "red-green-dinosaurs",
+      "name": "Red-Green Dinosaurs",
+      "colors": ["R", "G"],
+      "signpost": {
+        "name": "Molder Beast",
+        "physicalId": "som-printed-v1:0125:d1340a63-f549-440b-aad3-14247113896a"
+      },
+      "plan": "Build around Molder Beast: Accelerate with mana Myr, sacrifice expendable artifacts to enlarge the Beast, and use trample to force damage through."
+    }
+  ]
+}

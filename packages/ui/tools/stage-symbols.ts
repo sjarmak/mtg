@@ -11,12 +11,12 @@
  *
  * So the symbols go through the same path: `@mtg/image-cache` fetches each one
  * once into `data/images/`, keyed by its URL, and the served copy is written
- * into `public/symbols/`. Twenty-nine files, none of them in git, none of them
+ * into `public/symbols/`. Every registered file stays out of git and is never
  * traced or redrawn — `../src/card/symbols.ts` carries the licensing argument
  * for why referencing is the whole of what this tree may do with them.
  *
- * **All of them or none of them.** A run that stages twenty-eight and misses
- * one would draw twenty-eight symbols and one empty box, which is the bug this
+ * **All of them or none of them.** A run that stages all but one would draw
+ * almost every symbol and one empty box, which is the bug this
  * replaces rather than a smaller version of it. So a single failure gives back
  * `original` — the lab's own drawing, which is always complete and needs no
  * network — and the launcher says so where a person can read it. The files that
@@ -29,7 +29,7 @@ import { copyFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { cacheImage, DEFAULT_IMAGE_CACHE_DIR } from '@mtg/image-cache';
 import type { CacheImageOptions } from '@mtg/image-cache';
-import { SCRYFALL_SYMBOL_BASE, SYMBOL_TOKENS } from '../src/card/symbols';
+import { SCRYFALL_SYMBOL_BASE, SYMBOL_TOKENS, symbolAssetName } from '../src/card/symbols';
 import type { SymbolSet } from '../src/card/symbols';
 
 export interface StagedSymbols {
@@ -72,8 +72,8 @@ function publishFile(from: string, to: string): void {
 /**
  * Caches every rules-text symbol and returns the set the page can paint with.
  *
- * One request at a time, for the reason `stage-art.ts` gives: twenty-nine small
- * files are a second of wall clock, and a burst at somebody else's CDN to save
+ * One request at a time, for the reason `stage-art.ts` gives: these small files
+ * are cheap, and a burst at somebody else's CDN to save
  * that second is not a trade worth making.
  */
 export async function stageSymbols(options: StageSymbolsOptions): Promise<StagedSymbols> {
@@ -86,10 +86,11 @@ export async function stageSymbols(options: StageSymbolsOptions): Promise<Staged
   let reused = 0;
 
   for (const token of SYMBOL_TOKENS) {
-    const url = `${SCRYFALL_SYMBOL_BASE}${token}.svg`;
+    const assetName = symbolAssetName(token);
+    const url = `${SCRYFALL_SYMBOL_BASE}${assetName}.svg`;
     try {
       const image = await cache(url, { dir: options.cacheDir });
-      staged.push({ from: image.path, to: join(options.publicDir, `${token}.svg`) });
+      staged.push({ from: image.path, to: join(options.publicDir, `${assetName}.svg`) });
       if (image.fetched) fetched += 1;
       else reused += 1;
     } catch (cause: unknown) {
@@ -113,7 +114,7 @@ export async function stageSymbols(options: StageSymbolsOptions): Promise<Staged
  *
  * Shared by both launchers rather than written twice, because the sentence a
  * person needs is the same one whichever tab they asked for. The fallback names
- * the first failure only: twenty-nine copies of one DNS error is noise, and the
+ * the first failure only: one copy per symbol of the same DNS error is noise, and the
  * one that matters is that the drawings are the lab's own.
  */
 export function describeSymbols(staged: StagedSymbols): string {

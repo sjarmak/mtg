@@ -54,6 +54,7 @@ function burn(sourceOid: string, player: PlayerId, amount: number): DamageInstan
     amount,
     deathtouch: false,
     lifelink: false,
+    preventable: true,
     combat: false,
   };
 }
