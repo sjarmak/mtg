@@ -6,7 +6,7 @@ Play Magic: The Gathering against bots in your browser, and design your own sets
 > Things change often and some parts are rough. The "Known gaps" section below
 > lists what doesn't work yet.
 
-![Replaying a recorded Tideglass Reach game](docs/screenshots/replay.gif)
+![A Legacy Cube game against the Forge bot](docs/screenshots/cube-game.gif)
 
 ## Quick start
 
@@ -44,15 +44,30 @@ npm run play
 **This doesn't work in the public repo yet.** Each printed format is only
 allowed to play against the exact Forge adapter it was tested with, and this
 tree's adapter doesn't match that evidence yet. Until the fix lands, starting a
-printed match says "runtime mismatch". The Commander screenshot below comes
-from the private development copy.
+printed match says "runtime mismatch". The game screenshots on this page
+(Legacy Cube, Commander, Momir) come from the private development copy.
 
 ## What it looks like
 
-![Commander precon picker with measured win rates](docs/screenshots/commander.png)
+![Drafting the MTGO Legacy Cube](docs/screenshots/cube-draft.png)
 
-_Commander: pick a precon and an opponent, with win rates from human games and
-the lab's own bot-vs-bot results._
+_Legacy Cube draft: eight seats, bots on the other seven, with pick advice
+on the right._
+
+![A Legacy Cube game](docs/screenshots/cube-game.png)
+
+_The deck you drafted, played against Forge's AI._
+
+![A Commander game](docs/screenshots/commander-game.png)
+
+_Commander with the official precons. The picker shows each deck's win rate
+from human games and from the lab's own bot-vs-bot runs, so you can pick a
+fair matchup._
+
+![A Momir Basic game](docs/screenshots/momir-game.png)
+
+_Momir Basic: decks are all basic lands, and you discard a card and pay X to
+make a random creature with mana value X._
 
 ![The set designer checking the Tideglass Reach brief](docs/screenshots/set-design.png)
 
